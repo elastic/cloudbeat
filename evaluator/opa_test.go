@@ -32,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -129,7 +130,7 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 			for i := 0; i < tt.evals; i++ {
 				_, err = e.Eval(ctx, fetching.ResourceInfo{
 					Resource:      &DummyResource{},
-					CycleMetadata: fetching.CycleMetadata{},
+					CycleMetadata: cycle.Metadata{},
 				})
 				s.Require().NoError(err)
 			}

@@ -1,0 +1,210 @@
+name: Test Upgrade Environment
+run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
+
+on:
+  # Ability to execute on demand
+  workflow_dispatch:
+    inputs:
+      deployment_name:
+        type: string
+        description: |
+          Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
+        required: true
+      target-elk-stack-version:
+        required: true
+        description: "Target version of the ELK stack: For BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        default: "8.11.0"
+        type: string
+      docker-image-override:
+        required: false
+        description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: "eu-west-1"
+  WORKING_DIR: deploy/test-environments
+  FLEET_API_DIR: fleet_api/src
+  TF_VAR_stack_version: ${{ inputs.target-elk-stack-version }}
+  TF_VAR_ess_region: gcp-us-west2
+  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  DOCKER_IMAGE: ${{ inputs.docker-image-override }}
+
+jobs:
+  init:
+    runs-on: ubuntu-20.04
+    outputs:
+      stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
+      ess-region: ${{ env.TF_VAR_ess_region }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set Previous Version
+        id: set-previous-version
+        run: |
+          VERSION="${{ inputs.target-elk-stack-version }}"
+          PREVIOUS_VERSION=$(./.ci/scripts/get-previous-version.sh "$VERSION")
+          echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+  deploy:
+    uses: ./.github/workflows/test-environment.yml
+    needs: init
+    # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    with:
+      deployment_name: ${{ inputs.deployment_name }}
+      elk-stack-version: ${{ needs.init.outputs.stack-version }}
+      ess-region: ${{ needs.init.outputs.ess-region }}
+      run-sanity-tests: false # Set to true once the issue at https://github.com/elastic/kibana/pull/171200 is resolved.
+      serverless_mode: false
+    secrets: inherit
+  upgrade:
+    runs-on: ubuntu-20.04
+    needs: [init, deploy]
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+        working-directory: ./
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
+
+      - name: Install Fleet API dependencies
+        id: fleet-api-deps
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry install
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::704479110758:role/Developer_eks
+          role-session-name: github-ci
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download tf state data
+        env:
+          S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
+        run: |
+          aws s3 cp "${{ env.S3_BUCKET }}/terraform.tfstate" "./terraform.tfstate"
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Update ELK stack version
+        id: apply
+        if: success()
+        run: |
+          terraform apply --auto-approve -var="deployment_name=${{ inputs.deployment_name }}" -var="region=${{ env.AWS_REGION }}"
+
+      - name: Set Environment Output
+        id: env-output
+        run: |
+          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
+          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
+          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
+
+          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
+          echo "::add-mask::$ES_PASSWORD"
+          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+
+          export EC2_CSPM=$(terraform output -raw ec2_cspm_ssh_cmd)
+          echo "::add-mask::$EC2_CSPM"
+          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
+
+          export EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
+          echo "::add-mask::$EC2_KSPM"
+          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
+
+          export EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
+          echo "::add-mask::$EC2_CSPM_KEY"
+          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
+
+          export EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
+          echo "::add-mask::$EC2_KSPM_KEY"
+          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
+
+          export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
+          echo "::add-mask::$KSPM_PUBLIC_IP"
+          echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
+
+          export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
+          echo "::add-mask::$CSPM_PUBLIC_IP"
+          echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+
+      - name: Run Sanity checks
+        if: success()
+        working-directory: ./tests
+        env:
+          USE_K8S: false
+          STACK_VERSION: ${{ needs.init.outputs.stack-version }}
+        run: |
+          poetry install
+          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+      - name: Set Docker Image version
+        if: ${{ ! inputs.docker-image-override }}
+        env:
+          VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.target-elk-stack-version }}'
+        run: |
+          echo "DOCKER_IMAGE=${{ env.VERSION }}" >> $GITHUB_ENV
+
+      - name: Download Integrations data
+        env:
+          S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
+        run: |
+          aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
+          aws s3 cp "${{ env.S3_BUCKET }}/state_data.json" "${{ env.FLEET_API_DIR }}/state_data.json"
+
+      - name: Upgrade KSPM Unmanaged agent
+        run: |
+          chmod 600 ${{ env.EC2_KSPM_KEY }}
+          # Update image
+          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}"
+
+      - name: Upgrade KSPM EKS agent
+        run: |
+          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
+              --name $(terraform output -raw deployment_name) --alias eks-config
+          kubectl config use-context eks-config
+          kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
+
+      - name: Upgrade Linux agents
+        working-directory: ${{ env.WORKING_DIR }}/${{ env.FLEET_API_DIR }}
+        env:
+          CNVM_STACK_NAME: ${{ needs.deploy.outputs.cnvm-stack-name }}
+          STACK_VERSION: ${{ inputs.target-elk-stack-version }}
+        run: |
+          poetry run python upgrade_agents.py
+
+      - name: Run Upgrade Sanity checks
+        if: success()
+        working-directory: ./tests
+        env:
+          STACK_VERSION: ${{ inputs.target-elk-stack-version }}
+          USE_K8S: false
+        run: |
+          poetry install
+          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4

@@ -25,6 +25,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
@@ -57,7 +58,7 @@ func NewMonitoringFetcher(log *logp.Logger, provider monitoring.Client, security
 	}
 }
 
-func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
@@ -66,7 +67,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 	if out != nil {
 		m.resourceCh <- fetching.ResourceInfo{
 			Resource:      MonitoringResource{*out, m.cloudIdentity},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 	hubs, err := m.securityhub.Describe(ctx)
@@ -80,7 +81,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 			Resource: SecurityHubResource{
 				SecurityHub: hub,
 			},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

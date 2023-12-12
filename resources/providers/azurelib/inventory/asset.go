@@ -17,12 +17,18 @@
 
 package inventory
 
+import (
+	"github.com/elastic/cloudbeat/resources/utils/strings"
+)
+
 const (
+	// Resources group
 	ActivityLogAlertAssetType          = "microsoft.insights/activitylogalerts"
 	ApplicationInsights                = "microsoft.insights/components"
 	BastionAssetType                   = "microsoft.network/bastionhosts"
 	ClassicStorageAccountAssetType     = "microsoft.classicstorage/storageaccounts"
 	ClassicVirtualMachineAssetType     = "microsoft.classiccompute/virtualmachines"
+	DiagnosticSettingsAssetType        = "microsoft.insights/diagnosticSettings"
 	DiskAssetType                      = "microsoft.compute/disks"
 	DocumentDBDatabaseAccountAssetType = "microsoft.documentdb/databaseaccounts"
 	MySQLDBAssetType                   = "microsoft.dbformysql/servers"
@@ -34,4 +40,43 @@ const (
 	VaultAssetType                     = "microsoft.keyvault/vaults"
 	VirtualMachineAssetType            = "microsoft.compute/virtualmachines"
 	WebsitesAssetType                  = "microsoft.web/sites"
+
+	// Authorizationresources group
+	RoleDefinitionsType = "microsoft.authorization/roledefinitions"
+
+	// Azure Resource Graph table groups
+	AssetGroupResources              = "resources"
+	AssetGroupAuthorizationResources = "authorizationresources"
 )
+
+type AzureAsset struct {
+	Id             string         `json:"id,omitempty"`
+	Name           string         `json:"name,omitempty"`
+	DisplayName    string         `json:"display_name,omitempty"`
+	Location       string         `json:"location,omitempty"`
+	Properties     map[string]any `json:"properties,omitempty"`
+	Extension      map[string]any `json:"extension,omitempty"`
+	ResourceGroup  string         `json:"resource_group,omitempty"`
+	SubscriptionId string         `json:"subscription_id,omitempty"`
+	TenantId       string         `json:"tenant_id,omitempty"`
+	Type           string         `json:"type,omitempty"`
+	Sku            string         `json:"sku,omitempty"`
+}
+
+func getAssetFromData(data map[string]any) AzureAsset {
+	subId := strings.FromMap(data, "subscriptionId")
+	properties, _ := data["properties"].(map[string]any)
+
+	return AzureAsset{
+		Id:             strings.FromMap(data, "id"),
+		Name:           strings.FromMap(data, "name"),
+		DisplayName:    strings.FromMap(data, "displayName"),
+		Location:       strings.FromMap(data, "location"),
+		Properties:     properties,
+		ResourceGroup:  strings.FromMap(data, "resourceGroup"),
+		SubscriptionId: subId,
+		TenantId:       strings.FromMap(data, "tenantId"),
+		Sku:            strings.FromMap(data, "sku"),
+		Type:           strings.FromMap(data, "type"),
+	}
+}

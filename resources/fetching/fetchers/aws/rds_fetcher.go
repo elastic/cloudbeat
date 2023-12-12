@@ -23,6 +23,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
 )
@@ -49,7 +50,7 @@ func NewRdsFetcher(log *logp.Logger, provider rds.Rds, ch chan fetching.Resource
 	}
 }
 
-func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *RdsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting RdsFetcher.Fetch")
 	dbInstances, err := f.provider.DescribeDBInstances(ctx)
 	if err != nil {
@@ -61,7 +62,7 @@ func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 		f.log.Debugf("Fetched DB instance: %s", dbInstance.GetResourceName())
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      resource,
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

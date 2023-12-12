@@ -4,9 +4,10 @@ import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import data.compliance.policy.gcp.iam.ensure_no_public_access as audit
+import future.keywords.if
 
 # Ensure That BigQuery Datasets Are Not Anonymously or Publicly Accessible.
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_bigquery_dataset
 

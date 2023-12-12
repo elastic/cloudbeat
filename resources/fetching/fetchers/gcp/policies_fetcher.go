@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
@@ -49,7 +50,7 @@ func NewGcpPoliciesFetcher(_ context.Context, log *logp.Logger, ch chan fetching
 	}
 }
 
-func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpPoliciesFetcher.Fetch")
 
 	projectsAssets, err := f.provider.ListProjectsAncestorsPolicies(ctx)
@@ -63,7 +64,7 @@ func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 			f.log.Infof("GcpPoliciesFetcher context err: %s", ctx.Err().Error())
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 			Resource: &GcpPoliciesAsset{
 				Type:    fetching.ProjectManagement,
 				subType: fetching.GcpPolicies,

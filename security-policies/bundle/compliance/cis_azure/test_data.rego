@@ -50,6 +50,11 @@ generate_storage_account_with_property(key, value) = {
 	"resource": {"properties": {key: value}},
 }
 
+generate_storage_account_with_extensions(properties, extension) = {
+	"subType": "azure-storage-account",
+	"resource": {"properties": properties, "extension": extension},
+}
+
 generate_azure_asset(type, properties) = {
 	"subType": type,
 	"resource": {"properties": properties},
@@ -251,5 +256,47 @@ generate_insights_component(resource_group, name) = {
 		"publicNetworkAccessForIngestion": "Enabled",
 		"publicNetworkAccessForQuery": "Enabled",
 		"Ver": "v2",
+	},
+}
+
+generate_diagnostic_settings_empty = {
+	"subType": "azure-diagnostic-settings",
+	"resource": [],
+}
+
+generate_diagnostic_settings(rules) = {
+	"subType": "azure-diagnostic-settings",
+	"resource": rules,
+}
+
+generate_diagnostic_setting_element(sub_id, resource_group, name, logs) = {
+	"id": sprintf("/subscriptions/%s/providers/microsoft.insights/diagnosticSettings/%s", [sub_id, name]),
+	"name": name,
+	"properties": {
+		"logs": logs,
+		"metrics": [],
+		"workspaceId": sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.OperationalInsights/workspaces/%s-workspace", [sub_id, resource_group, name]),
+		"logAnalyticsDestinationType": null,
+	},
+}
+
+generate_diagnostic_setting_element_logs(flags) = [
+	generate_diagnostic_setting_element_log("Administrative", flags.Administrative),
+	generate_diagnostic_setting_element_log("Security", flags.Security),
+	generate_diagnostic_setting_element_log("Policy", flags.Policy),
+	generate_diagnostic_setting_element_log("Alert", flags.Alert),
+	generate_diagnostic_setting_element_log("ServiceHealth", false),
+	generate_diagnostic_setting_element_log("Recommendation", false),
+	generate_diagnostic_setting_element_log("Autoscale", false),
+	generate_diagnostic_setting_element_log("ResourceHealth", false),
+]
+
+generate_diagnostic_setting_element_log(category, enabled) = {
+	"category": category,
+	"categoryGroup": null,
+	"enabled": enabled,
+	"retentionPolicy": {
+		"days": 0,
+		"enabled": false,
 	},
 }

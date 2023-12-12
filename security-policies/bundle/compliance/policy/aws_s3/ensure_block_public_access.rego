@@ -3,9 +3,10 @@ package compliance.policy.aws_s3.ensure_block_public_access
 import data.compliance.lib.assert
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.aws_s3.data_adapter
+import future.keywords.if
 import future.keywords.in
 
-public_access_block_config_is_blocked(config) {
+public_access_block_config_is_blocked(config) if {
 	config.BlockPublicAcls == true
 	config.BlockPublicPolicy == true
 	config.IgnorePublicAcls == true
@@ -15,7 +16,7 @@ public_access_block_config_is_blocked(config) {
 default rule_evaluation = false
 
 # If we got public access block config for both account and bucket
-rule_evaluation {
+rule_evaluation if {
 	not data_adapter.public_access_block_configuration == null
 	not data_adapter.account_public_access_block_configuration == null
 	assert.some_true([data_adapter.public_access_block_configuration.BlockPublicAcls, data_adapter.account_public_access_block_configuration.BlockPublicAcls])
@@ -25,20 +26,20 @@ rule_evaluation {
 }
 
 # If we got only account-level public access block config
-rule_evaluation {
+rule_evaluation if {
 	not data_adapter.account_public_access_block_configuration == null
 	data_adapter.public_access_block_configuration == null
 	public_access_block_config_is_blocked(data_adapter.account_public_access_block_configuration)
 }
 
 # If we got only bucket-level public access block config
-rule_evaluation {
+rule_evaluation if {
 	not data_adapter.public_access_block_configuration == null
 	data_adapter.account_public_access_block_configuration == null
 	public_access_block_config_is_blocked(data_adapter.public_access_block_configuration)
 }
 
-finding = result {
+finding = result if {
 	data_adapter.is_s3
 
 	result := lib_common.generate_result_without_expected(

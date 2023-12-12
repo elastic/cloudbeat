@@ -24,8 +24,8 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
 func TestAzure_Initialize(t *testing.T) {
@@ -37,7 +37,7 @@ func TestAzure_Initialize(t *testing.T) {
 	tests := []struct {
 		name                 string
 		configProvider       auth.ConfigProviderAPI
-		inventoryInitializer inventory.ProviderInitializerAPI
+		inventoryInitializer azurelib.ProviderInitializerAPI
 		cfg                  config.Config
 		want                 []string
 		wantErr              string
@@ -64,6 +64,7 @@ func TestAzure_Initialize(t *testing.T) {
 			want: []string{
 				"azure_cloud_assets_fetcher",
 				"azure_cloud_batch_asset_fetcher",
+				"azure_cloud_insights_batch_asset_fetcher",
 			},
 		},
 		{
@@ -87,8 +88,8 @@ func TestAzure_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &Azure{
-				CfgProvider:          tt.configProvider,
-				inventoryInitializer: tt.inventoryInitializer,
+				cfgProvider:         tt.configProvider,
+				providerInitializer: tt.inventoryInitializer,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -98,25 +99,19 @@ func mockAzureCfgProvider(cfg config.AzureConfig, err error) auth.ConfigProvider
 	cfgProvider := &auth.MockConfigProviderAPI{}
 	on := cfgProvider.EXPECT().GetAzureClientConfig(cfg)
 	if err == nil {
-		on.Return(
-			&auth.AzureFactoryConfig{},
-			nil,
-		)
+		on.Return(&auth.AzureFactoryConfig{}, nil)
 	} else {
 		on.Return(nil, err)
 	}
 	return cfgProvider
 }
 
-func mockAzureInventoryInitializerService(err error) inventory.ProviderInitializerAPI {
-	initializer := &inventory.MockProviderInitializerAPI{}
-	inventoryService := &inventory.MockServiceAPI{}
-	initializerMock := initializer.EXPECT().Init(mock.Anything, mock.Anything, mock.Anything)
+func mockAzureInventoryInitializerService(err error) azurelib.ProviderInitializerAPI {
+	initializer := &azurelib.MockProviderInitializerAPI{}
+	provider := &azurelib.MockProviderAPI{}
+	initializerMock := initializer.EXPECT().Init(mock.Anything, mock.Anything)
 	if err == nil {
-		initializerMock.Return(
-			inventoryService,
-			nil,
-		)
+		initializerMock.Return(provider, nil)
 	} else {
 		initializerMock.Return(nil, err)
 	}

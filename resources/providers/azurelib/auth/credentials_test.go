@@ -18,6 +18,7 @@
 package auth
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -49,6 +50,18 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 			config: config.AzureConfig{
 				Credentials: config.AzureClientOpt{
 					ClientCredentialsType: config.AzureClientCredentialsTypeManagedIdentity,
+				},
+			},
+			authProviderInitFn: initDefaultCredentialsMock(nil),
+			want: &AzureFactoryConfig{
+				Credentials: &azidentity.DefaultAzureCredential{},
+			},
+		},
+		{
+			name: "Should return a DefaultAzureCredential using manual type",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					ClientCredentialsType: config.AzureClientCredentialsTypeManual,
 				},
 			},
 			authProviderInitFn: initDefaultCredentialsMock(nil),
@@ -174,6 +187,17 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Should return an error on credentials error",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					ClientCredentialsType: config.AzureClientCredentialsTypeManagedIdentity,
+				},
+			},
+			authProviderInitFn: initDefaultCredentialsMock(errMockAzure),
+			want:               nil,
+			wantErr:            true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -209,3 +233,5 @@ func initDefaultCredentialsMock(err error) func(*MockAzureAuthProviderAPI) {
 		}
 	}
 }
+
+var errMockAzure = errors.New("mock azure error")

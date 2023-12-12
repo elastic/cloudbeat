@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -26,14 +27,16 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
 type AzureBatchAssetFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	provider   inventory.ServiceAPI
+	provider   azurelib.ProviderAPI
 }
 
 var AzureBatchAssets = map[string]typePair{
@@ -42,7 +45,11 @@ var AzureBatchAssets = map[string]typePair{
 	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
 }
 
-func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
+// In order to simplify the mappings, we are trying to query all AzureBatchAssets on every asset group
+// Because this is done with an "|"" this means that we won't get irrelevant data
+var AzureBatchAssetGroups = []string{inventory.AssetGroupResources}
+
+func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureBatchAssetFetcher {
 	return &AzureBatchAssetFetcher{
 		log:        log,
 		resourceCh: ch,
@@ -50,58 +57,67 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 	}
 }
 
-func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
-
-	allAssets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureBatchAssets))
+	subscriptions, err := f.provider.GetSubscriptions(ctx, cycleMetadata)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to fetch governance info: %w", err)
 	}
 
-	subscriptionGroups := lo.GroupBy(allAssets, func(item inventory.AzureAsset) string {
+	var errAgg error
+	assets := []inventory.AzureAsset{}
+	for _, assetGroup := range AzureBatchAssetGroups {
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssets))
+		if err != nil {
+			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
+			errAgg = errors.Join(errAgg, err)
+			continue
+		}
+		assets = append(assets, r...)
+	}
+
+	subscriptionGroups := lo.GroupBy(assets, func(item inventory.AzureAsset) string {
 		return item.SubscriptionId
 	})
 
-	for subId, subName := range f.provider.GetSubscriptions() {
-		assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
+	for _, sub := range subscriptions {
+		assetGroups := lo.GroupBy(subscriptionGroups[sub.ID], func(item inventory.AzureAsset) string {
 			return item.Type
 		})
 		for assetType, pair := range AzureBatchAssets {
-			assets := assetGroups[assetType]
-			if assets == nil {
-				assets = []inventory.AzureAsset{} // Use empty array instead of nil
+			batchAssets := assetGroups[assetType]
+			if batchAssets == nil {
+				batchAssets = []inventory.AzureAsset{} // Use empty array instead of nil
 			}
 
 			select {
 			case <-ctx.Done():
-				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-				return nil
+				err := ctx.Err()
+				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", err.Error())
+				errAgg = errors.Join(errAgg, err)
+				return errAgg
 			case f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cMetadata,
+				CycleMetadata: cycleMetadata,
 				Resource: &AzureBatchResource{
 					// Every asset in the list has the same type and subtype
-					Type:    pair.Type,
-					SubType: pair.SubType,
-					SubId:   subId,
-					SubName: subName,
-					Assets:  assets,
+					typePair:     pair,
+					Subscription: sub,
+					Assets:       batchAssets,
 				},
 			}:
 			}
 		}
 	}
 
-	return nil
+	return errAgg
 }
 
 func (f *AzureBatchAssetFetcher) Stop() {}
 
 type AzureBatchResource struct {
-	Type    string
-	SubType string
-	SubId   string
-	SubName string
-	Assets  []inventory.AzureAsset `json:"assets,omitempty"`
+	typePair
+	Subscription governance.Subscription
+	Assets       []inventory.AzureAsset `json:"assets,omitempty"`
 }
 
 func (r *AzureBatchResource) GetData() any {
@@ -110,26 +126,18 @@ func (r *AzureBatchResource) GetData() any {
 
 func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	// Assuming all batch in not empty includes assets of the same subscription
-	id := fmt.Sprintf("%s-%s", r.SubType, r.SubId)
+	id := fmt.Sprintf("%s-%s", r.SubType, r.Subscription.ID)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    r.Type,
 		SubType: r.SubType,
 		Name:    id,
 		// TODO: Make sure ActivityLogAlerts are not location scoped (benchmarks do not check location)
-		Region: azurelib.GlobalRegion,
+		Region:               azurelib.GlobalRegion,
+		CloudAccountMetadata: r.Subscription.GetCloudAccountMetadata(),
 	}, nil
 }
 
 func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
-		"cloud": map[string]any{
-			"provider": "azure",
-			"account": map[string]any{
-				"id":   r.SubId,
-				"name": r.SubName,
-			},
-			// TODO: Organization fields
-		},
-	}, nil
+	return nil, nil
 }

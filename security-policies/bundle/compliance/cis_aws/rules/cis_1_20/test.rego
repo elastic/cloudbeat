@@ -2,6 +2,7 @@ package compliance.cis_aws.rules.cis_1_20
 
 import data.compliance.cis_aws.data_adapter
 import data.lib.test
+import future.keywords.if
 
 generate_input(analyzers, regions) = {
 	"type": "identity-management",
@@ -22,7 +23,7 @@ analyzer(arn, status, region) = {
 	"Region": region,
 }
 
-test_violation {
+test_violation if {
 	eval_fail with input as generate_input([], ["region-1"])
 	eval_fail with input as generate_input([analyzer("some-arn", null, "region-1")], ["region-1"])
 	eval_fail with input as generate_input([analyzer("some-arn", "FOO", "region-1")], ["region-1"])
@@ -36,7 +37,7 @@ test_violation {
 	)
 }
 
-test_pass {
+test_pass if {
 	# no regions, no problems
 	eval_pass with input as generate_input(null, [])
 	eval_pass with input as generate_input([], [])
@@ -47,19 +48,19 @@ test_pass {
 	)
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not_eval with input as {}
 	not_eval with input as {"resource": {"Analyzers": []}} # No subType
 }
 
-eval_fail {
+eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-eval_pass {
+eval_pass if {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-not_eval {
+not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }

@@ -87,6 +87,8 @@ type GcpClientOpt struct {
 
 type AzureConfig struct {
 	Credentials AzureClientOpt `config:"credentials"`
+	// SingleAccount or OrganizationAccount
+	AccountType string `config:"account_type"`
 }
 
 type AzureClientOpt struct {
@@ -103,6 +105,7 @@ type AzureClientOpt struct {
 const (
 	AzureClientCredentialsTypeARMTemplate      = "arm_template"
 	AzureClientCredentialsTypeManagedIdentity  = "managed_identity"
+	AzureClientCredentialsTypeManual           = "manual"
 	AzureClientCredentialsTypeSecret           = "service_principal_with_client_secret"
 	AzureClientCredentialsTypeCertificate      = "service_principal_with_client_certificate"
 	AzureClientCredentialsTypeUsernamePassword = "service_principal_with_client_username_and_password"
@@ -137,6 +140,17 @@ func New(cfg *config.C) (*Config, error) {
 		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
 			"aws.account_type '%s' is not supported",
 			c.CloudConfig.Aws.AccountType,
+		))
+	}
+
+	switch c.CloudConfig.Azure.AccountType {
+	case "":
+	case SingleAccount:
+	case OrganizationAccount:
+	default:
+		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
+			"azure.account_type '%s' is not supported",
+			c.CloudConfig.Azure.AccountType,
 		))
 	}
 

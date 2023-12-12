@@ -2,8 +2,9 @@ package compliance.cis_azure.rules.cis_4_1_2
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -14,6 +15,6 @@ finding = result {
 	)
 }
 
-is_public_access_disabled {
+is_public_access_disabled if {
 	data_adapter.properties.publicNetworkAccess == "Disabled"
 } else = false

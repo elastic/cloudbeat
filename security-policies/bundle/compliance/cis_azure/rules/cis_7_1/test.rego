@@ -2,6 +2,7 @@ package compliance.cis_azure.rules.cis_7_1
 
 import data.compliance.policy.azure.data_adapter
 import data.lib.test
+import future.keywords.if
 
 valid_bastion = {
 	"extendedLocation": null,
@@ -55,29 +56,29 @@ generate_bastions(assets) = {
 	"resource": assets,
 }
 
-test_violation {
+test_violation if {
 	eval_fail with input as generate_bastions([])
 	eval_fail with input as generate_bastions([{}])
 }
 
-test_pass {
+test_pass if {
 	eval_pass with input as generate_bastions([valid_bastion])
 	eval_pass with input as generate_bastions([valid_bastion, valid_bastion])
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not_eval with input as {}
 	not_eval with input as {"subType": "other-type", "resource": {"assets": {}}}
 }
 
-eval_fail {
+eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-eval_pass {
+eval_pass if {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-not_eval {
+not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }

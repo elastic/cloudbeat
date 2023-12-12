@@ -18,10 +18,10 @@
 package transformer
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 )
 
 type ResourceTypeMetadata struct {
-	fetching.CycleMetadata
+	cycle.Metadata
 	Type string
 }

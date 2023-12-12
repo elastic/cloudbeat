@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "ResourceGroupName": {
@@ -9,13 +9,11 @@
                 "description": "The resource group name where the virtual machine with the Elastic Agent is running on"
             }
         },
-        "Location": {
+        "SubscriptionId": {
             "type": "string",
-            "minLength": 6,
             "metadata": {
-                "description": "The location to deploy the resource group with the virtual machine on"
-            },
-            "defaultValue": "[deployment().location]"
+                "description": "The id of the subscription where the virtual machine with the Elastic Agent is running on"
+            }
         },
         "ElasticArtifactServer": {
             "type": "string",
@@ -29,7 +27,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "8.11.0"
+            "defaultValue": "8.13.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -44,19 +42,17 @@
             }
         }
     },
+    "variables": {
+        "resourceGroupDeployment": "[concat('resource-group-deployment-', deployment().location)]",
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]"
+    },
     "resources": [
-        {
-            "type": "Microsoft.Resources/resourceGroups",
-            "apiVersion": "2022-09-01",
-            "name": "[parameters('ResourceGroupName')]",
-            "location": "[parameters('Location')]"
-        },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "role-assignment-deployment",
+            "name": "[variables('resourceGroupDeployment')]",
             "location": "[deployment().location]",
-            "subscriptionId": "[subscription().subscriptionId]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -65,6 +61,9 @@
                 "parameters": {
                     "ResourceGroupName": {
                         "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "Location": {
+                        "value": "[deployment().location]"
                     }
                 },
                 "template": {
@@ -73,16 +72,59 @@
                     "parameters": {
                         "ResourceGroupName": {
                             "type": "string"
+                        },
+                        "Location": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Resources/resourceGroups",
+                            "apiVersion": "2022-09-01",
+                            "name": "[parameters('ResourceGroupName')]",
+                            "location": "[parameters('Location')]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('roleAssignmentDeployment')]",
+            "location": "[deployment().location]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "SubscriptionId": {
+                        "value": "[parameters('SubscriptionId')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "SubscriptionId": {
+                            "type": "string"
                         }
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
-                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name)]",
+                            "name": "[guid(managementGroup().id, parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name)]",
                             "properties": {
-                                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
+                                "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                                "principalId": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
                         }
@@ -90,7 +132,7 @@
                 }
             },
             "dependsOn": [
-                "[parameters('ResourceGroupName')]",
+                "[variables('resourceGroupDeployment')]",
                 "cloudbeat-vm-deployment"
             ]
         },
@@ -99,6 +141,7 @@
             "apiVersion": "2022-09-01",
             "name": "cloudbeat-vm-deployment",
             "resourceGroup": "[parameters('ResourceGroupName')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -238,7 +281,7 @@
                 }
             },
             "dependsOn": [
-                "[parameters('ResourceGroupName')]"
+                "[variables('resourceGroupDeployment')]"
             ]
         },
         {
@@ -246,6 +289,7 @@
             "apiVersion": "2022-09-01",
             "name": "elastic-agent-deployment",
             "resourceGroup": "[parameters('ResourceGroupName')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -305,7 +349,7 @@
             },
             "dependsOn": [
                 "cloudbeat-vm-deployment",
-                "role-assignment-deployment"
+                "[variables('roleAssignmentDeployment')]"
             ]
         }
     ]

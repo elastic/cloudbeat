@@ -19,24 +19,32 @@ package fetchers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AzureAssetsFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	provider   inventory.ServiceAPI
+	provider   azurelib.ProviderAPI
 }
 
 type AzureResource struct {
-	Type    string
-	SubType string
-	Asset   inventory.AzureAsset `json:"asset,omitempty"`
+	Type         string
+	SubType      string
+	Asset        inventory.AzureAsset `json:"asset,omitempty"`
+	Subscription governance.Subscription
 }
 
 type typePair struct {
@@ -65,9 +73,14 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.VirtualMachineAssetType:            newPair(fetching.AzureVMType, fetching.CloudCompute),
 	inventory.WebsitesAssetType:                  newPair(fetching.AzureWebSiteType, fetching.CloudCompute),
 	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
+	inventory.RoleDefinitionsType:                newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 }
 
-func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
+// In order to simplify the mappings, we are trying to query all AzureAssetTypeToTypePair on every asset group
+// Because this is done with an "|"" this means that we won't get irrelevant data
+var AzureAssetGroups = []string{inventory.AssetGroupResources, inventory.AssetGroupAuthorizationResources}
+
+func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureAssetsFetcher {
 	return &AzureAssetsFetcher{
 		log:        log,
 		resourceCh: ch,
@@ -75,34 +88,98 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 	}
 }
 
-func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
+	var errAgg error
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
-	assets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureAssetTypeToTypePair))
+	var assets []inventory.AzureAsset
+	for _, assetGroup := range AzureAssetGroups {
+		// Fetching all types even if non-existent in asset group for simplicity
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureAssetTypeToTypePair))
+		if err != nil {
+			f.log.Errorf("AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
+			errAgg = errors.Join(errAgg, err)
+			continue
+		}
+		assets = append(assets, r...)
+	}
+
+	subscriptions, err := f.provider.GetSubscriptions(ctx, cycleMetadata)
 	if err != nil {
-		return err
+		f.log.Errorf("Error fetching subscription information: %v", err)
+	}
+
+	if err := f.enrichStorageAccountAssets(ctx, cycleMetadata, subscriptions, assets); err != nil {
+		errAgg = errors.Join(errAgg, fmt.Errorf("error while enriching assets: %w", err))
 	}
 
 	for _, asset := range assets {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
-			return nil
-		case f.resourceCh <- resourceFromAsset(asset, cMetadata):
+			err := ctx.Err()
+			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", err.Error())
+			errAgg = errors.Join(errAgg, err)
+			return errAgg
+		case f.resourceCh <- resourceFromAsset(asset, cycleMetadata, subscriptions):
 		}
 	}
+
+	return errAgg
+}
+
+func (f *AzureAssetsFetcher) enrichStorageAccountAssets(ctx context.Context, cycleMetadata cycle.Metadata, subscriptions map[string]governance.Subscription, assets []inventory.AzureAsset) error {
+	diagSettings, err := f.provider.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, lo.Keys(subscriptions))
+	if err != nil {
+		return err
+	}
+
+	addUsedForActivityLogsFlag(assets, diagSettings)
 
 	return nil
 }
 
-func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata) fetching.ResourceInfo {
+func addUsedForActivityLogsFlag(assets []inventory.AzureAsset, diagSettings []inventory.AzureAsset) {
+	usedStorageAccountIDs := map[string]struct{}{}
+	for _, d := range diagSettings {
+		storageAccountID := strings.FromMap(d.Properties, "storageAccountId")
+		if storageAccountID == "" {
+			continue
+		}
+		usedStorageAccountIDs[storageAccountID] = struct{}{}
+	}
+
+	for i, a := range assets {
+		if a.Type != inventory.StorageAccountAssetType {
+			continue
+		}
+
+		if _, exists := usedStorageAccountIDs[a.Id]; !exists {
+			continue
+		}
+
+		if a.Extension == nil {
+			a.Extension = make(map[string]any)
+		}
+		a.Extension["usedForActivityLogs"] = true
+		assets[i] = a
+	}
+}
+
+func resourceFromAsset(asset inventory.AzureAsset, cycleMetadata cycle.Metadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {
 	pair := AzureAssetTypeToTypePair[asset.Type]
+	subscription, ok := subscriptions[asset.SubscriptionId]
+	if !ok {
+		subscription = governance.Subscription{
+			ID: asset.SubscriptionId,
+		}
+	}
 	return fetching.ResourceInfo{
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 		Resource: &AzureResource{
-			Type:    pair.Type,
-			SubType: pair.SubType,
-			Asset:   asset,
+			Type:         pair.Type,
+			SubType:      pair.SubType,
+			Asset:        asset,
+			Subscription: subscription,
 		},
 	}
 }
@@ -115,23 +192,15 @@ func (r *AzureResource) GetData() any {
 
 func (r *AzureResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:      r.Asset.Id,
-		Type:    r.Type,
-		SubType: r.SubType,
-		Name:    r.Asset.Name,
-		Region:  r.Asset.Location,
+		ID:                   r.Asset.Id,
+		Type:                 r.Type,
+		SubType:              r.SubType,
+		Name:                 r.Asset.Name,
+		Region:               r.Asset.Location,
+		CloudAccountMetadata: r.Subscription.GetCloudAccountMetadata(),
 	}, nil
 }
 
 func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
-		"cloud": map[string]any{
-			"provider": "azure",
-			"account": map[string]any{
-				"id":   r.Asset.SubscriptionId,
-				"name": r.Asset.SubscriptionName,
-			},
-			// TODO: Organization fields
-		},
-	}, nil
+	return nil, nil
 }

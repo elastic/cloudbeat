@@ -9,6 +9,11 @@ locals {
     team     = "${var.team}"
     project  = "${var.project}"
   }
+  ec_url = "https://cloud.elastic.co"
+  ec_headers = {
+    Content-type  = "application/json"
+    Authorization = "ApiKey ${var.ec_api_key}"
+  }
 }
 
 # EC2 + kind deployment
@@ -40,8 +45,16 @@ provider "ec" {
   apikey = var.ec_api_key
 }
 
+provider "restapi" {
+  alias                = "ec"
+  uri                  = local.ec_url
+  write_returns_object = true
+  headers              = local.ec_headers
+}
+
 # Elastic Cloud (EC) deployment
 module "ec_deployment" {
+  count  = var.serverless_mode ? 0 : 1
   source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
 
   region        = var.ess_region
@@ -61,6 +74,18 @@ module "ec_deployment" {
     "kibana" : "",
     "apm" : ""
   }
+}
+
+module "ec_project" {
+  providers = {
+    restapi.elastic_cloud = restapi.ec
+  }
+  count        = var.serverless_mode ? 1 : 0
+  source       = "../cloud/modules/serverless"
+  ec_apikey    = var.ec_api_key
+  ec_url       = local.ec_url
+  project_name = "${var.deployment_name}-${random_string.suffix.result}"
+  region_id    = "aws-us-east-1" # TODO: replace with var.ess_region when more regions are supported
 }
 
 module "eks" {

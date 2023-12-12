@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDereference(t *testing.T) {
@@ -91,6 +92,48 @@ func TestFirstNonEmpty(t *testing.T) {
 			if got := FirstNonEmpty(tt.args...); got != tt.want {
 				t.Errorf("FirstNonEmpty() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestFromMap(t *testing.T) {
+	tests := map[string]struct {
+		input    map[string]any
+		inputKey string
+		expected string
+	}{
+		"nil map": {
+			input:    nil,
+			inputKey: "test",
+			expected: "",
+		},
+		"non existing key": {
+			input:    map[string]any{"test": "value"},
+			inputKey: "foo",
+			expected: "",
+		},
+		"existing key with nil value": {
+			input:    map[string]any{"test": nil},
+			inputKey: "test",
+			expected: "",
+		},
+		"non string value": {
+			input:    map[string]any{"test": 1},
+			inputKey: "test",
+			expected: "",
+		},
+		"string value": {
+			input:    map[string]any{"test": "value"},
+			inputKey: "test",
+			expected: "value",
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			got := FromMap(tc.input, tc.inputKey)
+			require.Equal(t, tc.expected, got)
 		})
 	}
 }

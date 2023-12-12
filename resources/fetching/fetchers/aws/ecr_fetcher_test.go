@@ -34,6 +34,7 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -245,7 +246,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		}
 
 		ctx := context.Background()
-		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		err = ecrFetcher.Fetch(ctx, cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(len(test.expectedRepositoriesNames), len(results))
@@ -328,7 +329,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		}
 
 		ctx := context.Background()
-		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		err = ecrFetcher.Fetch(ctx, cycle.Metadata{})
 		s.Require().NoError(err)
 		results := testhelper.CollectResources(s.resourceCh)
 		s.Empty(results)
