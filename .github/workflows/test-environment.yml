@@ -413,10 +413,8 @@ jobs:
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 
-      - name: Publish to Slack channel
+      - uses: ./.github/actions/slack-notification
         if: always()
-        working-directory: ./
-        uses: ./.github/actions/slack-notification
         with:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
