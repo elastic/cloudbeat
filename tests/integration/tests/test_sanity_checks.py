@@ -41,9 +41,9 @@ tests_data = {
         "project-management",
         # Exclude "data-processing" due to lack of Dataproc assets in the test account.
     ],
-    # "cis_azure": [
-    #     "configuration",
-    # ],  # Azure environment is not static, so we can't guarantee findings of all types.
+    "cis_azure": [
+        "configuration",
+    ],  # Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": [
         "process",
@@ -207,27 +207,27 @@ def test_cspm_gcp_findings(cspm_client, match_type):
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
 
-# @pytest.mark.sanity
-# @pytest.mark.parametrize("match_type", tests_data["cis_azure"])
-# def test_cspm_azure_findings(cspm_client, match_type):
-#     """
-#     Test case to check for Azure findings in CSPM.
+@pytest.mark.sanity
+@pytest.mark.parametrize("match_type", tests_data["cis_azure"])
+def test_cspm_azure_findings(cspm_client, match_type):
+    """
+    Test case to check for Azure findings in CSPM.
 
-#     Args:
-#         cspm_client: The elastic client object.
-#         match_type (str): The resource type to match.
+    Args:
+        cspm_client: The elastic client object.
+        match_type (str): The resource type to match.
 
-#     Returns:
-#         None
+    Returns:
+        None
 
-#     Raises:
-#         AssertionError: If the resource type is missing.
-#     """
-#     query_list = build_query_list(benchmark_id="cis_azure", version=STACK_VERSION)
-#     query, sort = cspm_client.build_es_must_match_query(
-#         must_query_list=query_list,
-#         time_range="now-24h",
-#     )
+    Raises:
+        AssertionError: If the resource type is missing.
+    """
+    query_list = build_query_list(benchmark_id="cis_azure", version=STACK_VERSION)
+    query, sort = cspm_client.build_es_must_match_query(
+        must_query_list=query_list,
+        time_range="now-24h",
+    )
 
-#     results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-#     assert len(results) > 0, f"The resource type '{match_type}' is missing"
+    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+    assert len(results) > 0, f"The resource type '{match_type}' is missing"

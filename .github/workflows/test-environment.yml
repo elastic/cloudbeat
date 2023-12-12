@@ -296,23 +296,28 @@ jobs:
         run: |
           . ./set_env.sh && ./deploy.sh
 
-      # - name: Install CSPM Azure integration
-      #   id: cspm-azure-integration
-      #   working-directory: ${{ env.WORKING_DIR }}/fleet_api
-      #   run: |
-      #     poetry run python src/install_cspm_azure_integration.py
+      - name: Install CSPM Azure integration
+        id: cspm-azure-integration
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_cspm_azure_integration.py
 
-      # - id: azure-auth
-      #   name: Azure login
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - id: azure-auth
+        name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # - name: Deploy CSPM Azure agent
-      #   id: cspm-azure-agent
-      #   working-directory: deploy/azure
-      #   run: |
-      #     az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+      - name: Deploy CSPM Azure agent
+        id: cspm-azure-agent
+        working-directory: deploy/azure
+        run: |
+          if [[ "${{ env.STACK_VERSION }}" == *"8.11"* ]]; then
+            az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+          else
+            az group create --location EastUS --name "${{ env.DEPLOYMENT_NAME }}"
+            az deployment group create --resource-group "${{ env.DEPLOYMENT_NAME }}" --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+          fi
 
       - name: Install D4C integration
         id: kspm-d4c
