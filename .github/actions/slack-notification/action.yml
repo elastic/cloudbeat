@@ -39,7 +39,7 @@ runs:
         secretId: ${{ inputs.vault-secret-id }}
         method: approle
         secrets: |
-          secret/csp-team/ci/cloud-security-test-envs-webhook slack-webhook | SLACK_WEBHOOK_URL
+          secret/csp-team/ci/slack-bot-token integration_token | SLACK_BOT_TOKEN
 
     - name: Prepare Slack data
       id: prepare-slack-data
@@ -56,10 +56,7 @@ runs:
       id: send-slack-notification
       uses: slackapi/slack-github-action@v1.24.0
       env:
-        # Replace webhook with bot token after Slack app approval
-        # SLACK_BOT_TOKEN: ${{ env.SLACK_BOT_TOKEN }}
-        SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        SLACK_BOT_TOKEN: ${{ env.SLACK_BOT_TOKEN }}
       with:
         channel-id: ${{ inputs.slack-channel }}
         payload: |

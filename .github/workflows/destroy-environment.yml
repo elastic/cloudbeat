@@ -85,6 +85,12 @@ jobs:
           vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
           slack-payload: |
             {
+              "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`",
+            	"blocks": [
+                {
+                  "type": "divider"
+                }
+              ],
               "attachments": [
                 {
                   "color": "${{ env.JOB_STATUS_COLOR }}",

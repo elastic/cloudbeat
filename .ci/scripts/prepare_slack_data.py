@@ -100,6 +100,12 @@ def run():
         message = f"*ESS Type:* `{ess_type}`\n*Stack Version: *`{stack_version}`\n*Docker Override:* `{docker_image}`"
         docs_url = "https://github.com/elastic/cloudbeat/blob/main/dev-docs/Cloud-Env-Testing.md"
         slack_payload = {
+            "text": f"{workflow} job `{deployment_name}` triggered by `{github_actor}`",
+            "blocks": [
+                {
+                    "type": "divider",
+                },
+            ],
             "attachments": [
                 {
                     "color": color,
