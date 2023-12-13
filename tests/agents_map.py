@@ -2,6 +2,7 @@
 Generate agent parameterization for pytest.
 """
 import os
+from loguru import logger
 from commonlib.fleet_api import get_agents
 from configuration import elasticsearch
 
