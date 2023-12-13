@@ -40,7 +40,9 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 			options: []Option{
 				WithLogger(testhelper.NewLogger(t)),
 			},
-			want: map[string]interface{}{},
+			want: map[string]interface{}{
+				orchestratorType: "kubernetes",
+			},
 		}, {
 			name: "should return cluster version",
 			options: []Option{
@@ -49,6 +51,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 			},
 			want: map[string]interface{}{
 				clusterVersionField: "test_version",
+				orchestratorType:    "kubernetes",
 			},
 		}, {
 			name: "should return cluster name",
@@ -58,6 +61,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 			},
 			want: map[string]interface{}{
 				clusterNameField: "test_cluster",
+				orchestratorType: "kubernetes",
 			},
 		}, {
 			name: "should return cluster id",
@@ -66,7 +70,8 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 				WithClusterID("test_id"),
 			},
 			want: map[string]interface{}{
-				clusterIdField: "test_id",
+				clusterIdField:   "test_id",
+				orchestratorType: "kubernetes",
 			},
 		}, {
 			name: "should return all fields",
@@ -80,6 +85,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 				clusterIdField:      "test_id",
 				clusterNameField:    "test_cluster",
 				clusterVersionField: "test_version",
+				orchestratorType:    "kubernetes",
 			},
 		},
 	}

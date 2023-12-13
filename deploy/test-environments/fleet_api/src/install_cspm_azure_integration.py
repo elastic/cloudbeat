@@ -10,6 +10,7 @@ import sys
 import json
 from pathlib import Path
 from munch import Munch
+from packaging import version
 import configuration_fleet as cnfg
 from api.agent_policy_api import create_agent_policy
 from api.package_policy_api import create_cspm_integration
@@ -127,13 +128,14 @@ if __name__ == "__main__":
         "value": cnfg.elk_config.stack_version,
     }
 
-    azure_arm_parameters["parameters"]["ResourceGroupName"] = {
-        "value": cnfg.azure_arm_parameters.deployment_name,
-    }
+    if version.parse(package_version) < version.parse("1.7"):
+        azure_arm_parameters["parameters"]["ResourceGroupName"] = {
+            "value": cnfg.azure_arm_parameters.deployment_name,
+        }
 
-    azure_arm_parameters["parameters"]["Location"] = {
-        "value": cnfg.azure_arm_parameters.location,
-    }
+        azure_arm_parameters["parameters"]["Location"] = {
+            "value": cnfg.azure_arm_parameters.location,
+        }
 
     with open(cspm_azure_arm_parameters, "w") as file:
         json.dump(azure_arm_parameters, file)

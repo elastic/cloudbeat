@@ -158,7 +158,7 @@ jobs:
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
@@ -312,7 +312,12 @@ jobs:
         id: cspm-azure-agent
         working-directory: deploy/azure
         run: |
-          az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+          if [[ "${{ env.STACK_VERSION }}" == *"8.11"* ]]; then
+            az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+          else
+            az group create --location EastUS --name "${{ env.DEPLOYMENT_NAME }}"
+            az deployment group create --resource-group "${{ env.DEPLOYMENT_NAME }}" --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+          fi
 
       - name: Install D4C integration
         id: kspm-d4c
