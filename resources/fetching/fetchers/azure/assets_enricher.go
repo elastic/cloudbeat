@@ -29,12 +29,12 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
-type AssetsEnricherAPI interface {
+type AssetsEnricher interface {
 	Enrich(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset) error
 }
 
-func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricherAPI {
-	var enrichers []AssetsEnricherAPI
+func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
+	var enrichers []AssetsEnricher
 
 	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
 

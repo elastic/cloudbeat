@@ -36,7 +36,7 @@ type AzureAssetsFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   azurelib.ProviderAPI
-	enrichers  []AssetsEnricherAPI
+	enrichers  []AssetsEnricher
 }
 
 type AzureResource struct {
