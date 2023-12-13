@@ -10,7 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 from configuration import elasticsearch
 from loguru import logger
-from agent_param import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
+from agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
@@ -189,7 +189,6 @@ def test_cnvm_findings(cnvm_client, match_type):
 
 
 @pytest.mark.sanity
-@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_gcp"])
 def test_cspm_gcp_findings(cspm_client, match_type):
     """
@@ -217,7 +216,6 @@ def test_cspm_gcp_findings(cspm_client, match_type):
 
 
 @pytest.mark.sanity
-@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_azure"])
 def test_cspm_azure_findings(cspm_client, match_type):
     """
@@ -233,10 +231,7 @@ def test_cspm_azure_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(
-        benchmark_id="cis_azure",
-        version=STACK_VERSION,
-    )
+    query_list = build_query_list(benchmark_id="cis_azure", version=STACK_VERSION)
     query, sort = cspm_client.build_es_must_match_query(
         must_query_list=query_list,
         time_range="now-24h",

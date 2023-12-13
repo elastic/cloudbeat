@@ -14,7 +14,6 @@ from commonlib.docker_wrapper import DockerWrapper
 from commonlib.io_utils import FsClient
 from _pytest.logging import LogCaptureFixture
 from loguru import logger
-from agent_param import AgentComponentMapping
 
 
 class InterceptHandler(logging.Handler):
@@ -279,10 +278,3 @@ def create_es_client(index: str) -> ElasticWrapper:
     )
     logger.info(f"client with ElasticSearch url: {configuration.elasticsearch.url}")
     return es_client
-
-
-@pytest.fixture
-def agent_component_mapping():
-    helper = AgentComponentMapping()
-    helper.load_map()
-    return helper
