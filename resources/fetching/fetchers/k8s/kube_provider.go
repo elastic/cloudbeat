@@ -37,6 +37,10 @@ const (
 	k8sObjMetadataField  = "ObjectMeta"
 	k8sTypeMetadataField = "TypeMeta"
 	K8sObjType           = "k8s_object"
+
+	ecsResourceTypeField = "orchestrator.resource.type"
+	ecsResourceIdField   = "orchestrator.resource.id"
+	ecsResourceNameField = "orchestrator.resource.name"
 )
 
 func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
@@ -82,7 +86,20 @@ func (r K8sResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r K8sResource) GetElasticCommonData() (map[string]any, error) { return nil, nil }
+func (r K8sResource) GetElasticCommonData() (map[string]any, error) {
+	metadata, err := r.GetMetadata()
+	if err != nil {
+		return nil, err
+	}
+
+	fields := map[string]any{
+		ecsResourceTypeField: metadata.SubType,
+		ecsResourceNameField: metadata.Name,
+		ecsResourceIdField:   metadata.ID,
+	}
+
+	return fields, nil
+}
 
 func getK8sObjectMeta(log *logp.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
