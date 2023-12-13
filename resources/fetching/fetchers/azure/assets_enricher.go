@@ -19,14 +19,10 @@ package fetchers
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
-	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AssetsEnricher interface {
@@ -39,50 +35,4 @@ func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
 	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
 
 	return enrichers
-}
-
-type storageAccountEnricher struct {
-	provider azurelib.ProviderAPI
-}
-
-func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset) error {
-	subscriptions, err := e.provider.GetSubscriptions(ctx, cycleMetadata)
-	if err != nil {
-		return fmt.Errorf("storageAccountEnricher: error while getting subscription: %w", err)
-	}
-
-	diagSettings, err := e.provider.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, lo.Keys(subscriptions))
-	if err != nil {
-		return fmt.Errorf("storageAccountEnricher: error while getting diagnostic settings: %w", err)
-	}
-	e.addUsedForActivityLogsFlag(assets, diagSettings)
-
-	return nil
-}
-
-func (*storageAccountEnricher) addUsedForActivityLogsFlag(assets []inventory.AzureAsset, diagSettings []inventory.AzureAsset) {
-	usedStorageAccountIDs := map[string]struct{}{}
-	for _, d := range diagSettings {
-		storageAccountID := strings.FromMap(d.Properties, "storageAccountId")
-		if storageAccountID == "" {
-			continue
-		}
-		usedStorageAccountIDs[storageAccountID] = struct{}{}
-	}
-
-	for i, a := range assets {
-		if a.Type != inventory.StorageAccountAssetType {
-			continue
-		}
-
-		if _, exists := usedStorageAccountIDs[a.Id]; !exists {
-			continue
-		}
-
-		if a.Extension == nil {
-			a.Extension = make(map[string]any)
-		}
-		a.Extension["usedForActivityLogs"] = true
-		assets[i] = a
-	}
 }

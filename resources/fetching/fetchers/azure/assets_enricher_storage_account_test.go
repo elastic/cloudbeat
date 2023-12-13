@@ -31,7 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-func TestAddUsedForActivityLogsFlag(t *testing.T) {
+func TestStorageAccountEnricher(t *testing.T) {
 	tests := map[string]struct {
 		inputAssets       []inventory.AzureAsset
 		inputDiagSettings []inventory.AzureAsset
