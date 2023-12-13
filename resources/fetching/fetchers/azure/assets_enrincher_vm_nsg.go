@@ -18,11 +18,17 @@
 package fetchers
 
 import (
+	"context"
 	"errors"
+
 	"github.com/mitchellh/mapstructure"
 
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
+
+type vmNetworkSecurityGroupEnricher struct {
+}
 
 type networkProfile struct {
 	NetworkInterfaces []networkInterface `mapstructure:"networkInterfaces"`
@@ -46,7 +52,7 @@ type networkSecurityRules struct {
 	Properties extensionNetworkSecurityRules `mapstructure:"properties"`
 }
 
-func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsset) error {
+func (e vmNetworkSecurityGroupEnricher) Enrich(_ context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
 	// VMs are connected to NSGs via Network Interfaces (https://learn.microsoft.com/en-us/azure/virtual-network/network-overview)
 	// Therefore, aggregate security rules by Network Interface to easy access later on
 	securityRulesByNetworkInterface := make(map[string][]extensionNetworkSecurityRules)
@@ -54,7 +60,7 @@ func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsse
 
 	for _, asset := range assets {
 		var err error
-		securityRulesByNetworkInterface, err = extractNetworkSecurityGroupRules(asset, securityRulesByNetworkInterface)
+		securityRulesByNetworkInterface, err = e.extractNetworkSecurityGroupRules(asset, securityRulesByNetworkInterface)
 		if err != nil {
 			errAgg = errors.Join(errAgg, err)
 		}
@@ -65,7 +71,7 @@ func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsse
 			continue
 		}
 
-		if err := addNetworkRulesToAssetExtensions(&asset, securityRulesByNetworkInterface); err != nil {
+		if err := e.addNetworkRulesToAssetExtensions(&asset, securityRulesByNetworkInterface); err != nil {
 			errAgg = errors.Join(errAgg, err)
 		}
 
@@ -75,7 +81,7 @@ func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsse
 	return errAgg
 }
 
-func extractNetworkSecurityGroupRules(asset inventory.AzureAsset, securityRulesByNetworkInterface map[string][]extensionNetworkSecurityRules) (map[string][]extensionNetworkSecurityRules, error) {
+func (e vmNetworkSecurityGroupEnricher) extractNetworkSecurityGroupRules(asset inventory.AzureAsset, securityRulesByNetworkInterface map[string][]extensionNetworkSecurityRules) (map[string][]extensionNetworkSecurityRules, error) {
 	if asset.Type != inventory.NetworkSecurityGroup {
 		return securityRulesByNetworkInterface, nil
 	}
@@ -107,7 +113,7 @@ func extractNetworkSecurityGroupRules(asset inventory.AzureAsset, securityRulesB
 	return securityRulesByNetworkInterface, nil
 }
 
-func addNetworkRulesToAssetExtensions(vm *inventory.AzureAsset, securityRuleByNetworkInterface map[string][]extensionNetworkSecurityRules) error {
+func (e vmNetworkSecurityGroupEnricher) addNetworkRulesToAssetExtensions(vm *inventory.AzureAsset, securityRuleByNetworkInterface map[string][]extensionNetworkSecurityRules) error {
 	var profile networkProfile
 	if err := mapstructure.Decode(vm.Properties["networkProfile"], &profile); err != nil {
 		return err

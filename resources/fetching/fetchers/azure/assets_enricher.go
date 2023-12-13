@@ -33,6 +33,7 @@ func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
 	var enrichers []AssetsEnricher
 
 	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
+	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})
 
 	return enrichers
 }

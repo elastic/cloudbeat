@@ -18,6 +18,7 @@
 package fetchers
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,8 @@ import (
 )
 
 func TestEnrichVirtualMachinesWithNetworkSecurityGroup(t *testing.T) {
+	enricher := vmNetworkSecurityGroupEnricher{}
+
 	tests := map[string]struct {
 		input  []inventory.AzureAsset
 		output []inventory.AzureAsset
@@ -130,7 +133,7 @@ func TestEnrichVirtualMachinesWithNetworkSecurityGroup(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := enrichVirtualMachinesWithNetworkSecurityGroups(tc.input)
+			err := enricher.Enrich(context.Background(), newCycle(1), tc.input)
 			if err != nil {
 				assert.Fail(t, err.Error())
 			}

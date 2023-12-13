@@ -118,10 +118,6 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 		}
 	}
 
-	if err := enrichVirtualMachinesWithNetworkSecurityGroups(assets); err != nil {
-		errAgg = errors.Join(errAgg, fmt.Errorf("error while enriching assets: %w", err))
-	}
-
 	for _, asset := range assets {
 		select {
 		case <-ctx.Done():
