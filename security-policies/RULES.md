@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 40/151 implemented rules (26%)
+### 41/151 implemented rules (27%)
 
-#### Automated rules: 40/77 (52%)
+#### Automated rules: 41/77 (53%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -518,7 +518,7 @@
 |  [5.3.1](bundle/compliance/cis_azure/rules/cis_5_3_1)  | Configuring Application Insights        | Ensure Application Insights are Configured                                                                                                             | :white_check_mark: | Automated |
 |                          5.4                           | Logging and Monitoring                  | Ensure that Azure Monitor Resource Logging is Enabled for All Services that Support it                                                                 |        :x:         |  Manual   |
 |    [5.5](bundle/compliance/cis_azure/rules/cis_5_5)    | Logging and Monitoring                  | Ensure that SKU Basic/Consumption is not used on artifacts that need to be monitored (Particularly for Production Workloads)                           | :white_check_mark: | Automated |
-|                          6.1                           | Networking                              | Ensure that RDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
+|    [6.1](bundle/compliance/cis_azure/rules/cis_6_1)    | Networking                              | Ensure that RDP access from the Internet is evaluated and restricted                                                                                   | :white_check_mark: | Automated |
 |                          6.2                           | Networking                              | Ensure that SSH access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
 |                          6.3                           | Networking                              | Ensure that UDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
 |                          6.4                           | Networking                              | Ensure that HTTP(S) access from the Internet is evaluated and restricted                                                                               |        :x:         | Automated |
