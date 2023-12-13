@@ -8,6 +8,12 @@ import os
 import json
 
 
+color_by_job_status = {
+    "success": "#36a64f",
+    "failure": "#D40E0D",
+}
+
+
 def check_env_var(env_var: str) -> str:
     """
     Retrieve the value of the specified environment variable.
@@ -19,8 +25,12 @@ def check_env_var(env_var: str) -> str:
         str: The value of the specified environment variable.
     """
     value = os.environ.get(env_var)
-    if value is None or value == "":
+    if not value:
+        if env_var == "DOCKER_IMAGE_OVERRIDE":
+            return "N/A"
         raise ValueError(f"The env var '{env_var}' isn't defined.")
+    if env_var == "ESS_TYPE":
+        return "Project" if bool(value == "true") else "Deployment"
     return value
 
 
@@ -46,24 +56,6 @@ def set_failed(message: str):
     print(f"::set-failed::{message}")
 
 
-def color_by_job_status(status: str) -> str:
-    """
-    Determine the Slack color based on the GitHub Actions job status.
-
-    Parameters:
-        status (str): The GitHub Actions job status, e.g., "success", "failure", etc.
-
-    Returns:
-        str: The Slack color corresponding to the GitHub Actions job status.
-             Possible values: "good" for success, "danger" for failure, or an empty string.
-    """
-    if status == "success":
-        return "#36a64f"
-    if status == "failure":
-        return "#D40E0D"
-    return ""
-
-
 class BuildSlackException(Exception):
     """
     Custom exception class for errors related to building Slack notifications.
@@ -87,16 +79,10 @@ def run():
         s3_bucket = check_env_var("S3_BUCKET")
         deployment_name = check_env_var("DEPLOYMENT_NAME")
         stack_version = check_env_var("STACK_VERSION")
-        docker_image = os.getenv("DOCKER_IMAGE_OVERRIDE", "N/A")
-        if docker_image == "":
-            docker_image = "N/A"
+        docker_image = check_env_var("DOCKER_IMAGE_OVERRIDE")
+        ess_type = check_env_var("ESS_TYPE")
 
-        is_project = bool(os.getenv("ESS_TYPE", "true") == "true")
-        ess_type = "Deployment"
-        if is_project:
-            ess_type = "Project"
-
-        color = color_by_job_status(job_status)
+        color = color_by_job_status.get(job_status, "#439FE0")  # Default to blue
         message = f"*ESS Type:* `{ess_type}`\n*Stack Version: *`{stack_version}`\n*Docker Override:* `{docker_image}`"
         docs_url = "https://github.com/elastic/cloudbeat/blob/main/dev-docs/Cloud-Env-Testing.md"
         slack_payload = {

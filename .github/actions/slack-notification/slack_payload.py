@@ -78,10 +78,11 @@ def process_message_env():
           }
     """
     message = os.environ.get("MESSAGE", "No message")
-    message = replace_user_mentions(message, load_users_from_env())
-    if os.environ["URL_ENCODED"] == "true":
-        message = unquote(message)
-    message = "\n".join(line.strip() for line in message.splitlines())
+    if message != "No message":
+        message = replace_user_mentions(message, load_users_from_env())
+        if os.environ["URL_ENCODED"] == "true":
+            message = unquote(message)
+        message = "\n".join(line.strip() for line in message.splitlines())
     return {
         "text": message,
         "blocks": [create_message_block(message)],
@@ -108,7 +109,7 @@ def load_users_from_env():
     dict: A dict of users.
     """
     users = os.environ.get("USERS")
-    if users is None or users == "":
+    if not users:
         return {}
     try:
         return json.loads(users)
