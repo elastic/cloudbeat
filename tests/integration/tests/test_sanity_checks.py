@@ -10,7 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 from configuration import elasticsearch
 from loguru import logger
-from agent_param import AgentComponentHelper
+from agent_param import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
@@ -138,7 +138,7 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
 @pytest.mark.sanity
 @pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_aws"])
-def test_cspm_aws_findings(cspm_client, match_type, cis_aws_agent):
+def test_cspm_aws_findings(cspm_client, match_type):
     """
     Test case to check for AWS findings in CSPM.
 
@@ -152,16 +152,18 @@ def test_cspm_aws_findings(cspm_client, match_type, cis_aws_agent):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(
-        benchmark_id="cis_aws",
-        match_type=match_type,
-        version=STACK_VERSION,
-        agent=cis_aws_agent,
-    )
-    query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
+    aws_agents = get_component_agents(CIS_AWS_COMPONENT)
+    for agent in aws_agents:
+        query_list = build_query_list(
+            benchmark_id="cis_aws",
+            match_type=match_type,
+            version=STACK_VERSION,
+            agent=agent,
+        )
+        query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
-    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-    assert len(results) > 0, f"The resource type '{match_type}' is missing"
+        results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+        assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
 
 @pytest.mark.sanity
@@ -189,7 +191,7 @@ def test_cnvm_findings(cnvm_client, match_type):
 @pytest.mark.sanity
 @pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_gcp"])
-def test_cspm_gcp_findings(cspm_client, match_type, cis_gcp_agent):
+def test_cspm_gcp_findings(cspm_client, match_type):
     """
     Test case to check for GCP findings in CSPM.
 
@@ -207,7 +209,6 @@ def test_cspm_gcp_findings(cspm_client, match_type, cis_gcp_agent):
         benchmark_id="cis_gcp",
         match_type=match_type,
         version=STACK_VERSION,
-        agent=cis_gcp_agent,
     )
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
@@ -218,7 +219,7 @@ def test_cspm_gcp_findings(cspm_client, match_type, cis_gcp_agent):
 @pytest.mark.sanity
 @pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_azure"])
-def test_cspm_azure_findings(cspm_client, match_type, cis_azure_agent):
+def test_cspm_azure_findings(cspm_client, match_type):
     """
     Test case to check for Azure findings in CSPM.
 
@@ -235,7 +236,6 @@ def test_cspm_azure_findings(cspm_client, match_type, cis_azure_agent):
     query_list = build_query_list(
         benchmark_id="cis_azure",
         version=STACK_VERSION,
-        agent=cis_azure_agent,
     )
     query, sort = cspm_client.build_es_must_match_query(
         must_query_list=query_list,
@@ -245,22 +245,21 @@ def test_cspm_azure_findings(cspm_client, match_type, cis_azure_agent):
     results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
-
-@pytest.mark.sanity
-@pytest.mark.agentless
-def test_agent_components_mapping():
+def get_component_agents(component: str):
     """
-    Test case to check that the expected number of agents are running each component.
+    Get the list of agents running the specified component.
 
     Args:
-        None
+        component (str): The component to match.
 
     Returns:
-        None
-
-    Raises:
-        AssertionError: If the expected number of agents are not running each component.
+        list: The list of agents running the specified component.
     """
-    helper = AgentComponentHelper()
-    helper.load_map()
-    helper.assert_agents()
+    expected = AgentExpectedMapping()
+    actual = AgentComponentMapping()
+    actual.load_map()
+
+    assert expected.expected_map[component] == len(actual.component_map[component]), \
+        f"Expected {expected.expected_map[component]} agents running {component}, but got {len(actual.component_map[component])}"
+    
+    return actual.component_map[component]
