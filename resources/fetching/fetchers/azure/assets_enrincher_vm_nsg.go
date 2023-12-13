@@ -59,6 +59,10 @@ func (e vmNetworkSecurityGroupEnricher) Enrich(_ context.Context, _ cycle.Metada
 	var errAgg error
 
 	for _, asset := range assets {
+		if asset.Type != inventory.NetworkSecurityGroup {
+			continue
+		}
+
 		var err error
 		securityRulesByNetworkInterface, err = e.extractNetworkSecurityGroupRules(asset, securityRulesByNetworkInterface)
 		if err != nil {
@@ -82,10 +86,6 @@ func (e vmNetworkSecurityGroupEnricher) Enrich(_ context.Context, _ cycle.Metada
 }
 
 func (e vmNetworkSecurityGroupEnricher) extractNetworkSecurityGroupRules(asset inventory.AzureAsset, securityRulesByNetworkInterface map[string][]extensionNetworkSecurityRules) (map[string][]extensionNetworkSecurityRules, error) {
-	if asset.Type != inventory.NetworkSecurityGroup {
-		return securityRulesByNetworkInterface, nil
-	}
-
 	var nics []networkInterface
 	if err := mapstructure.Decode(asset.Properties["networkInterfaces"], &nics); err != nil {
 		return securityRulesByNetworkInterface, err
