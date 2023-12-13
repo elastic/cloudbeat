@@ -97,10 +97,11 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 				},
 			},
 		}, nil,
-	).Once()
+	).Twice()
 	mockProvider.EXPECT().
 		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{"subId"}).
-		Return(nil, nil)
+		Return(nil, nil).
+		Once()
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)
@@ -151,10 +152,10 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch_Errors() {
 			}
 			return nil, errors.New("some list asset error")
 		})
-	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(nil, errors.New("some get subscription error")).Once()
 	mockProvider.EXPECT().
-		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{}).
-		Return(nil, nil)
+		GetSubscriptions(mock.Anything, mock.Anything).
+		Return(nil, errors.New("some get subscription error")).
+		Twice()
 
 	results, err := s.fetch(mockProvider, 1)
 	s.Require().ErrorContains(err, "some list asset error")
