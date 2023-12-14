@@ -136,7 +136,7 @@ func resourceFromAsset(asset inventory.AzureAsset, cycleMetadata cycle.Metadata,
 	subscription, ok := subscriptions[asset.SubscriptionId]
 	if !ok {
 		subscription = governance.Subscription{
-			ID: asset.SubscriptionId,
+			FullyQualifiedID: asset.SubscriptionId,
 		}
 	}
 	return fetching.ResourceInfo{

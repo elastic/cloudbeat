@@ -81,7 +81,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cycleMetadata cycle.
 	})
 
 	for _, sub := range subscriptions {
-		assetGroups := lo.GroupBy(subscriptionGroups[sub.ID], func(item inventory.AzureAsset) string {
+		assetGroups := lo.GroupBy(subscriptionGroups[sub.ShortID], func(item inventory.AzureAsset) string {
 			return item.Type
 		})
 		for assetType, pair := range AzureBatchAssets {
@@ -126,7 +126,7 @@ func (r *AzureBatchResource) GetData() any {
 
 func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	// Assuming all batch in not empty includes assets of the same subscription
-	id := fmt.Sprintf("%s-%s", r.SubType, r.Subscription.ID)
+	id := fmt.Sprintf("%s-%s", r.SubType, r.Subscription.ShortID)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    r.Type,
