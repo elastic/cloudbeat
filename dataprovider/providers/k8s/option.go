@@ -17,17 +17,7 @@
 
 package k8s
 
-import (
-	"github.com/elastic/elastic-agent-libs/logp"
-)
-
 type Option func(*DataProvider)
-
-func WithLogger(log *logp.Logger) Option {
-	return func(dp *DataProvider) {
-		dp.log = log
-	}
-}
 
 func WithClusterVersion(version string) Option {
 	return func(dp *DataProvider) {

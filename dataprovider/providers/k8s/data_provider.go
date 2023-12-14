@@ -21,7 +21,6 @@ import (
 	"errors"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -30,10 +29,11 @@ const (
 	clusterNameField    = "orchestrator.cluster.name"
 	clusterVersionField = "orchestrator.cluster.version"
 	clusterIdField      = "orchestrator.cluster.id"
+	orchestratorType    = "orchestrator.type"
+	orchestratorName    = "kubernetes"
 )
 
 type DataProvider struct {
-	log            *logp.Logger
 	cluster        string
 	clusterID      string
 	clusterVersion string
@@ -52,6 +52,7 @@ func (k DataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata
 		insertIfNotEmpty(clusterNameField, k.cluster, event),
 		insertIfNotEmpty(clusterIdField, k.clusterID, event),
 		insertIfNotEmpty(clusterVersionField, k.clusterVersion, event),
+		insertIfNotEmpty(orchestratorType, orchestratorName, event),
 	)
 }
 

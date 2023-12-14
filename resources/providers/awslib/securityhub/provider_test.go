@@ -28,7 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type (
@@ -120,7 +119,6 @@ func TestProvider_Describe(t *testing.T) {
 				clients[r] = c
 			}
 			p := &Provider{
-				log:       testhelper.NewLogger(t),
 				accountId: accountId,
 				clients:   clients,
 			}
@@ -131,7 +129,7 @@ func TestProvider_Describe(t *testing.T) {
 			}
 			require.NoError(t, err)
 			assert.ElementsMatch(t, tt.want, got)
-			names := []string{}
+			var names []string
 			for _, r := range tt.regions {
 				names = append(names, fmt.Sprintf("securityhub-%s-%s", r, p.accountId))
 			}

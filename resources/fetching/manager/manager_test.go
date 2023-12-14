@@ -19,7 +19,6 @@ package manager
 
 import (
 	"context"
-	"sync"
 	"testing"
 	"time"
 
@@ -27,7 +26,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -35,10 +33,8 @@ import (
 
 type ManagerTestSuite struct {
 	suite.Suite
-	registry   *registry.MockRegistry
-	opts       goleak.Option
-	resourceCh chan fetching.ResourceInfo
-	wg         *sync.WaitGroup
+	registry *registry.MockRegistry
+	opts     goleak.Option
 }
 
 const timeout = 2 * time.Second
@@ -51,9 +47,7 @@ func TestManagerTestSuite(t *testing.T) {
 
 func (s *ManagerTestSuite) SetupTest() {
 	s.opts = goleak.IgnoreCurrent()
-	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.registry = &registry.MockRegistry{}
-	s.wg = &sync.WaitGroup{}
 }
 
 func (s *ManagerTestSuite) TearDownTest() {

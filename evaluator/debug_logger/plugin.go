@@ -35,7 +35,6 @@ type config struct {
 type plugin struct {
 	manager *plugins.Manager
 	mtx     sync.Mutex
-	config  config
 }
 
 func (p *plugin) Start(_ context.Context) error {
@@ -47,10 +46,9 @@ func (p *plugin) Stop(_ context.Context) {
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 }
 
-func (p *plugin) Reconfigure(_ context.Context, conf interface{}) {
+func (p *plugin) Reconfigure(_ context.Context, _ interface{}) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
-	p.config = conf.(config)
 }
 
 // Log is called by the decision logger when a record (event) should be emitted. The logs.EventV1 fields

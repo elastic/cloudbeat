@@ -38,7 +38,6 @@ import (
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -78,34 +77,24 @@ func (s *LeaderElectionTestSuite) TearDownTest() {
 }
 
 func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
-	type args struct {
-		cfg       *config.Config
-		k8sClient k8s.Interface
-	}
 	tests := []struct {
-		name string
-		args args
-		want Manager
+		name      string
+		k8sClient k8s.Interface
+		want      Manager
 	}{
 		{
-			name: "Should receive the leader election manager",
-			args: args{
-				cfg:       &config.Config{},
-				k8sClient: s.kubeClient,
-			},
-			want: &LeaderelectionManager{},
+			name:      "Should receive the leader election manager",
+			k8sClient: s.kubeClient,
+			want:      &LeaderelectionManager{},
 		},
 		{
-			name: "k8s client couldn't established - should receive the default unique manager",
-			args: args{
-				cfg:       &config.Config{},
-				k8sClient: nil,
-			},
-			want: &DefaultUniqueManager{},
+			name:      "k8s client couldn't established - should receive the default unique manager",
+			k8sClient: nil,
+			want:      &DefaultUniqueManager{},
 		},
 	}
 	for _, tt := range tests {
-		got := NewLeaderElector(testhelper.NewLogger(s.T()), tt.args.k8sClient)
+		got := NewLeaderElector(testhelper.NewLogger(s.T()), tt.k8sClient)
 		s.Equalf(reflect.TypeOf(got), reflect.TypeOf(tt.want), "NewLeaderElector() = %v, want %v", got, tt.want)
 	}
 }

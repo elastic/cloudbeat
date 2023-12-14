@@ -34,6 +34,7 @@ const (
 	MySQLDBAssetType                   = "microsoft.dbformysql/servers"
 	NetworkWatchersAssetType           = "microsoft.network/networkwatchers"
 	NetworkWatchersFlowLogAssetType    = "microsoft.network/networkwatchers/flowlogs"
+	NetworkSecurityGroup               = "microsoft.network/networksecuritygroups"
 	PostgreSQLDBAssetType              = "microsoft.dbforpostgresql/servers"
 	SQLServersAssetType                = "microsoft.sql/servers"
 	StorageAccountAssetType            = "microsoft.storage/storageaccounts"

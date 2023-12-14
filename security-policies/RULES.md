@@ -1,5 +1,13 @@
 # Rules Status
 
+## Table of Contents
+
+- [Kubernetes CIS Benchmark](#k8s-cis-benchmark)
+- [Amazon EKS CIS Benchmark](#eks-cis-benchmark)
+- [Amazon AWS CIS Benchmark](#aws-cis-benchmark)
+- [Google Cloud CIS Benchmark](#gcp-cis-benchmark)
+- [Microsoft Azure CIS Benchmark](#azure-cis-benchmark)
+
 ## K8S CIS Benchmark
 
 ### 92/125 implemented rules (74%)
@@ -7,6 +15,8 @@
 #### Automated rules: 73/74 (99%)
 
 #### Manual rules: 19/51 (37%)
+
+<details><summary><h3>Full Table 📋</h3></summary>
 
 |                     Rule Number                      | Section                                | Description                                                                                              |       Status       |   Type    |
 |:----------------------------------------------------:|:---------------------------------------|:---------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -135,6 +145,7 @@
 |                        5.7.2                         | General Policies                       | Ensure that the seccomp profile is set to docker/default in your pod definitions                         |        :x:         |  Manual   |
 |                        5.7.3                         | General Policies                       | Apply Security Context to Your Pods and Containers                                                       |        :x:         |  Manual   |
 |                        5.7.4                         | General Policies                       | The default namespace should not be used                                                                 |        :x:         |  Manual   |
+</details>
 
 ## EKS CIS Benchmark
 
@@ -143,6 +154,8 @@
 #### Automated rules: 14/16 (88%)
 
 #### Manual rules: 17/36 (47%)
+
+<details><summary><h3>Full Table 📋</h3></summary>
 
 |                     Rule Number                      | Section                              | Description                                                                                              |       Status       |   Type    |
 |:----------------------------------------------------:|:-------------------------------------|:---------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -198,6 +211,7 @@
 |  [5.4.5](bundle/compliance/cis_eks/rules/cis_5_4_5)  | Cluster Networking                   | Encrypt traffic to HTTPS load balancers with TLS certificates                                            | :white_check_mark: |  Manual   |
 |                        5.5.1                         | Authentication and Authorization     | Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes                                   |        :x:         |  Manual   |
 |                        5.6.1                         | Other Cluster Configurations         | Consider Fargate for running untrusted workloads                                                         |        :x:         |  Manual   |
+</details>
 
 ## AWS CIS Benchmark
 
@@ -206,6 +220,8 @@
 #### Automated rules: 55/55 (100%)
 
 #### Manual rules: 0/8 (0%)
+
+<details><summary><h3>Full Table 📋</h3></summary>
 
 |                    Rule Number                     | Section                           | Description                                                                                                        |       Status       |   Type    |
 |:--------------------------------------------------:|:----------------------------------|:-------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -272,6 +288,7 @@
 |   [5.3](bundle/compliance/cis_aws/rules/cis_5_3)   | Networking                        | Ensure no security groups allow ingress from ::/0 to remote server administration ports                            | :white_check_mark: | Automated |
 |   [5.4](bundle/compliance/cis_aws/rules/cis_5_4)   | Networking                        | Ensure the default security group of every VPC restricts all traffic                                               | :white_check_mark: | Automated |
 |                        5.5                         | Networking                        | Ensure routing tables for VPC peering are "least access"                                                           |        :x:         |  Manual   |
+</details>
 
 ## GCP CIS Benchmark
 
@@ -280,6 +297,8 @@
 #### Automated rules: 71/73 (97%)
 
 #### Manual rules: 0/11 (0%)
+
+<details><summary><h3>Full Table 📋</h3></summary>
 
 |                    Rule Number                     | Section                        | Description                                                                                                                       |       Status       |   Type    |
 |:--------------------------------------------------:|:-------------------------------|:----------------------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -367,14 +386,17 @@
 |   [7.1](bundle/compliance/cis_gcp/rules/cis_7_1)   | BigQuery                       | Ensure That BigQuery Datasets Are Not Anonymously or Publicly Accessible                                                          | :white_check_mark: | Automated |
 |   [7.2](bundle/compliance/cis_gcp/rules/cis_7_2)   | BigQuery                       | Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption Key (CMEK)                                         | :white_check_mark: | Automated |
 |   [7.3](bundle/compliance/cis_gcp/rules/cis_7_3)   | BigQuery                       | Ensure That a Default Customer-Managed Encryption Key (CMEK) Is Specified for All BigQuery Data Sets                              | :white_check_mark: | Automated |
+</details>
 
 ## AZURE CIS Benchmark
 
-### 40/151 implemented rules (26%)
+### 41/151 implemented rules (27%)
 
-#### Automated rules: 40/77 (52%)
+#### Automated rules: 41/77 (53%)
 
 #### Manual rules: 0/74 (0%)
+
+<details><summary><h3>Full Table 📋</h3></summary>
 
 |                      Rule Number                       | Section                                 | Description                                                                                                                                            |       Status       |   Type    |
 |:------------------------------------------------------:|:----------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -496,7 +518,7 @@
 |  [5.3.1](bundle/compliance/cis_azure/rules/cis_5_3_1)  | Configuring Application Insights        | Ensure Application Insights are Configured                                                                                                             | :white_check_mark: | Automated |
 |                          5.4                           | Logging and Monitoring                  | Ensure that Azure Monitor Resource Logging is Enabled for All Services that Support it                                                                 |        :x:         |  Manual   |
 |    [5.5](bundle/compliance/cis_azure/rules/cis_5_5)    | Logging and Monitoring                  | Ensure that SKU Basic/Consumption is not used on artifacts that need to be monitored (Particularly for Production Workloads)                           | :white_check_mark: | Automated |
-|                          6.1                           | Networking                              | Ensure that RDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
+|    [6.1](bundle/compliance/cis_azure/rules/cis_6_1)    | Networking                              | Ensure that RDP access from the Internet is evaluated and restricted                                                                                   | :white_check_mark: | Automated |
 |                          6.2                           | Networking                              | Ensure that SSH access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
 |                          6.3                           | Networking                              | Ensure that UDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
 |                          6.4                           | Networking                              | Ensure that HTTP(S) access from the Internet is evaluated and restricted                                                                               |        :x:         | Automated |
@@ -529,3 +551,4 @@
 |                          9.7                           | AppService                              | Ensure that 'Python version' is the Latest Stable Version, if Used to Run the Web App                                                                  |        :x:         |  Manual   |
 |                          9.8                           | AppService                              | Ensure that 'Java version' is the latest, if used to run the Web App                                                                                   |        :x:         |  Manual   |
 |    [9.9](bundle/compliance/cis_azure/rules/cis_9_9)    | AppService                              | Ensure that 'HTTP Version' is the Latest, if Used to Run the Web App                                                                                   | :white_check_mark: | Automated |
+</details>
