@@ -138,7 +138,12 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
 @pytest.mark.sanity
 @pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_aws"])
-def test_cspm_aws_findings(cspm_client, match_type):
+def test_cspm_aws_findings(
+    cspm_client,
+    match_type,
+    agents_actual_components: AgentComponentMapping,
+    agents_expected_components: AgentExpectedMapping,
+):
     """
     Test case to check for AWS findings in CSPM.
 
@@ -152,7 +157,7 @@ def test_cspm_aws_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    aws_agents = get_component_agents(CIS_AWS_COMPONENT)
+    aws_agents = get_component_agents(agents_actual_components, agents_expected_components, CIS_AWS_COMPONENT)
     for agent in aws_agents:
         query_list = build_query_list(
             benchmark_id="cis_aws",
@@ -240,7 +245,8 @@ def test_cspm_azure_findings(cspm_client, match_type):
     results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
-def get_component_agents(component: str):
+
+def get_component_agents(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str):
     """
     Get the list of agents running the specified component.
 
@@ -250,11 +256,10 @@ def get_component_agents(component: str):
     Returns:
         list: The list of agents running the specified component.
     """
-    expected = AgentExpectedMapping()
-    actual = AgentComponentMapping()
-    actual.load_map()
 
-    assert expected.expected_map[component] == len(actual.component_map[component]), \
-        f"Expected {expected.expected_map[component]} agents running {component}, but got {len(actual.component_map[component])}"
-    
+    assert expected.expected_map[component] == len(
+        actual.component_map[component],
+    ), f"Expected {expected.expected_map[component]} agents running \
+ {component}, but got {len(actual.component_map[component])}"
+
     return actual.component_map[component]

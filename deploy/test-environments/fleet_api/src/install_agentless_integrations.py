@@ -21,8 +21,11 @@ AGENT_POLICY_ID = "agentless"
 
 
 def generate_aws_integration_data():
-    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
-    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+    """
+    Generate data for creating CSPM AWS integration
+    """
+    access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "")
+    secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "")
     return {
         "name": "cspm_aws",
         "input_name": "cis_aws",
@@ -31,34 +34,35 @@ def generate_aws_integration_data():
         "vars": {
             "aws.account_type": "single-account",
             "aws.credentials.type": "direct_access_keys",
-            "access_key_id": AWS_ACCESS_KEY_ID,
-            "secret_access_key": AWS_SECRET_ACCESS_KEY,
-        }
+            "access_key_id": access_key_id,
+            "secret_access_key": secret_access_key,
+        },
     }
 
 
 def generate_azure_integration_data():
+    """
+    Generate data for creating CSPM Azure integration
+    """
     return {
         "name": "cspm_azure",
         "input_name": "cis_azure",
         "posture": "cspm",
         "deployment": "azure",
         "vars": {
-            "azure.account_type": {
-                "value": "single-account",
-            },
-            "azure.credentials.type": {
-                "value": "manual",
-            },
-        }
+            "azure.account_type": "single-account",
+            "azure.credentials.type": "manual",
+        },
     }
 
 
 def generate_gcp_integration_data():
-    GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
-    creadentials_json_file = open(GOOGLE_APPLICATION_CREDENTIALS, "r")
-    creadentials_json = creadentials_json_file.read()
-    creadentials_json_file.close()
+    """
+    Generate data for creating CSPM GCP integration
+    """
+    application_credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+    with open(application_credentials, "r") as creadentials_json_file:
+        creadentials_json = creadentials_json_file.read()
     return {
         "name": "cspm_gcp",
         "input_name": "cis_gcp",
@@ -69,22 +73,18 @@ def generate_gcp_integration_data():
             "gcp.account_type": "single-account",
             "gcp.credentials.type": "credentials-json",
             "gcp.credentials.json": creadentials_json,
-        }
+        },
     }
-
-
 
 
 if __name__ == "__main__":
     integrations = [
         generate_aws_integration_data(),
-        # generate_azure_integration_data(),
-        # generate_gcp_integration_data(),
     ]
     cspm_template = generate_policy_template(cfg=cnfg.elk_config)
     for integration_data in integrations:
-        integration_name = integration_data["name"]
-        logger.info(f"Create {integration_name} integration for policy {AGENT_POLICY_ID}")
+        NAME = integration_data["name"]
+        logger.info(f"Create {NAME} integration for policy {AGENT_POLICY_ID}")
         package_policy = generate_package_policy(cspm_template, integration_data)
 
         logger.info(f"Created {package_policy}")
@@ -95,4 +95,4 @@ if __name__ == "__main__":
             agent_policy_id=AGENT_POLICY_ID,
             cspm_data={},
         )
-        logger.info(f"Installation of {integration_name} integration is done")
+        logger.info(f"Installation of {NAME} integration is done")

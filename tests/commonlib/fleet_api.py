@@ -1,5 +1,10 @@
+"""
+Aggregates API calls to the Kibana Fleet API.
+"""
+
 from commonlib.base_call_api import APICallException, perform_api_call
 from munch import Munch, munchify
+from loguru import logger
 
 
 def get_agents(cfg: Munch) -> list:
@@ -30,4 +35,3 @@ def get_agents(cfg: Munch) -> list:
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         return []
-

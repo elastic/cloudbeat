@@ -11,9 +11,14 @@ CIS_AWS_COMPONENT = "cloudbeat/cis_aws"
 CIS_GCP_COMPONENT = "cloudbeat/cis_gcp"
 CIS_AZURE_COMPONENT = "cloudbeat/cis_azure"
 
+
 class AgentExpectedMapping:
+    """
+    This class is used to map expected number of agents that are running each component.
+    """
+
     def __init__(self):
-        agentless = os.getenv("TEST_AGENTLESS", False)
+        agentless = os.getenv("TEST_AGENTLESS", "false") == "true"
         self.expected_map = {
             CIS_AWS_COMPONENT: 1,
             CIS_GCP_COMPONENT: 1,
@@ -27,6 +32,7 @@ class AgentComponentMapping:
     """
     This class is used to map agent IDs that are running each component.
     """
+
     def __init__(self):
         self.component_map = {
             CIS_AWS_COMPONENT: [],
@@ -35,9 +41,12 @@ class AgentComponentMapping:
         }
 
     def load_map(self):
+        """
+        Load the components map with the agent IDs.
+        """
         agents = get_agents(elasticsearch)
         logger.info(f"found {len(agents)} agents")
-        for integration in self.component_map:
+        for integration in self.component_map.copy():
             for agent in agents:
                 for component in agent.components:
                     if integration in component.id:
