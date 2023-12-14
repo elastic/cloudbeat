@@ -23,13 +23,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Provider struct {
-	log     *logp.Logger
 	clients map[string]Client
 }
 
@@ -41,7 +39,7 @@ func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, region *string,
 	input := sns.ListSubscriptionsByTopicInput{
 		TopicArn: aws.String(topic),
 	}
-	all := []types.Subscription{}
+	var all []types.Subscription
 	client, err := awslib.GetClient(region, p.clients)
 	if err != nil {
 		return nil, err

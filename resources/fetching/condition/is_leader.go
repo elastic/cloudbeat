@@ -18,20 +18,16 @@
 package condition
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
 type IsLeader struct {
-	log      *logp.Logger
 	provider uniqueness.Manager
 }
 
-func NewIsLeader(log *logp.Logger, le uniqueness.Manager) fetching.Condition {
+func NewIsLeader(le uniqueness.Manager) fetching.Condition {
 	return &IsLeader{
-		log:      log,
 		provider: le,
 	}
 }

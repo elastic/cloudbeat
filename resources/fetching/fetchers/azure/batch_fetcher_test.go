@@ -57,7 +57,6 @@ func (s *AzureBatchAssetFetcherTestSuite) TearDownTest() {
 
 func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	mockAssetGroups := make(map[string][]inventory.AzureAsset)
-	totalMockAssets := 0
 	var flatMockAssets []inventory.AzureAsset
 	for _, assetGroup := range AzureBatchAssetGroups {
 		var mockAssets []inventory.AzureAsset
@@ -77,7 +76,6 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 				},
 			)
 		}
-		totalMockAssets += len(mockAssets)
 		mockAssetGroups[assetGroup] = mockAssets
 		flatMockAssets = append(flatMockAssets, mockAssets...)
 	}
@@ -150,7 +148,6 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 
 func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 	mockAssetGroups := make(map[string][]inventory.AzureAsset)
-	totalMockAssets := 0
 
 	subMap := make(map[string]governance.Subscription)
 	for subId := 1; subId <= 4; subId++ {
@@ -185,7 +182,6 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 				)
 			}
 		}
-		totalMockAssets += len(mockAssets)
 		mockAssetGroups[assetGroup] = mockAssets
 	}
 

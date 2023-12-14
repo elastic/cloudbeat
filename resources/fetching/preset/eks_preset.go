@@ -63,12 +63,12 @@ func NewCisEksFetchers(log *logp.Logger, awsConfig aws.Config, ch chan fetching.
 		}
 
 		ecrFetcher := awsfetchers.NewEcrFetcher(log, ch, k8sClient, ecrPodDescriber)
-		m[fetching.EcrType] = registry.RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+		m[fetching.EcrType] = registry.RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
 
 		elbProvider := elb.NewElbProvider(awsConfig)
 		loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
 		elbFetcher := awsfetchers.NewElbFetcher(log, ch, k8sClient, elbProvider, identity, loadBalancerRegex)
-		m[fetching.ElbType] = registry.RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+		m[fetching.ElbType] = registry.RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
 	}
 
 	fsFetcher := k8sfetchers.NewFsFetcher(log, ch, eksFsPatterns)
@@ -78,6 +78,6 @@ func NewCisEksFetchers(log *logp.Logger, awsConfig aws.Config, ch chan fetching.
 	m[fetching.ProcessType] = registry.RegisteredFetcher{Fetcher: procFetcher}
 
 	kubeFetcher := k8sfetchers.NewKubeFetcher(log, ch, k8sClient)
-	m[fetching.KubeAPIType] = registry.RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+	m[fetching.KubeAPIType] = registry.RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
 	return m
 }
