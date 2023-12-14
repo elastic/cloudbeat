@@ -45,6 +45,12 @@ is_port_included(p, targetPort) if {
 	is_in_range(portRanges[i], targetPort)
 }
 
+# Definition of port range:
+#   - A single port, such as 80;
+#   - A port range, such as 1024-65535;
+#   - A comma-separated list of single ports and/or port ranges, such as 80,1024-65535.
+#   - An asterisk (*) to allow traffic on any port.
+
 # Check if it's a single port or range explicitly mentions targetPort
 is_in_range(portRange, targetPort) if {
 	contains(portRange, targetPort)
