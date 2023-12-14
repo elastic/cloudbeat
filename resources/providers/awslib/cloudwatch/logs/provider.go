@@ -23,13 +23,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Provider struct {
-	log     *logp.Logger
 	clients map[string]Client
 }
 
@@ -38,7 +36,7 @@ type Client interface {
 }
 
 func (p *Provider) DescribeMetricFilters(ctx context.Context, region *string, logGroup string) ([]types.MetricFilter, error) {
-	all := []types.MetricFilter{}
+	var all []types.MetricFilter
 	input := cloudwatchlogs.DescribeMetricFiltersInput{
 		LogGroupName: aws.String(logGroup),
 	}

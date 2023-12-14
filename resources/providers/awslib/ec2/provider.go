@@ -330,7 +330,6 @@ func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance
 			result = append(result, &Volume{
 				VolumeId:   *vol.VolumeId,
 				Size:       int(*vol.Size),
-				awsAccount: p.awsAccountID,
 				Region:     region,
 				Encrypted:  *vol.Encrypted,
 				InstanceId: *vol.Attachments[0].InstanceId,
