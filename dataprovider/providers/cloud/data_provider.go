@@ -21,7 +21,6 @@ import (
 	"errors"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
@@ -46,7 +45,6 @@ type Identity struct {
 }
 
 type DataProvider struct {
-	log          *logp.Logger
 	accountId    string
 	accountName  string
 	providerName string

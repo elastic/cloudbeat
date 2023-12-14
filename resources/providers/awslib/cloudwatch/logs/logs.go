@@ -38,7 +38,6 @@ func NewCloudwatchLogsProvider(log *logp.Logger, cfg aws.Config, factory awslib.
 	}
 	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
-		log:     log,
 		clients: m.GetMultiRegionsClientMap(),
 	}
 }

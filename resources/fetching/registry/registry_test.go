@@ -177,13 +177,11 @@ func (s *registryTestSuite) TestShouldRun() {
 
 type numberFetcher struct {
 	num        int
-	stopCalled bool
 	resourceCh chan fetching.ResourceInfo
 	wg         *sync.WaitGroup
 }
 type syncNumberFetcher struct {
 	num        int
-	stopCalled bool
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -197,11 +195,10 @@ func (f *syncNumberFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadat
 }
 
 func (f *syncNumberFetcher) Stop() {
-	f.stopCalled = true
 }
 
 func newSyncNumberFetcher(num int, ch chan fetching.ResourceInfo) fetching.Fetcher {
-	return &syncNumberFetcher{num, false, ch}
+	return &syncNumberFetcher{num: num, resourceCh: ch}
 }
 
 type numberResource struct {
@@ -226,7 +223,7 @@ func (res numberResource) GetElasticCommonData() (map[string]any, error) {
 }
 
 func newNumberFetcher(num int, wg *sync.WaitGroup) fetching.Fetcher {
-	return &numberFetcher{num, false, nil, wg}
+	return &numberFetcher{num: num, wg: wg}
 }
 
 func (f *numberFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
@@ -241,7 +238,6 @@ func (f *numberFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) e
 }
 
 func (f *numberFetcher) Stop() {
-	f.stopCalled = true
 }
 
 type boolFetcherCondition struct {

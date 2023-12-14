@@ -21,7 +21,6 @@ type Volume struct {
 	VolumeId   string
 	InstanceId string
 	Region     string
-	awsAccount string
 	Size       int
 	Encrypted  bool
 	Device     string

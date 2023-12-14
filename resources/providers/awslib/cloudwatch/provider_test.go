@@ -27,8 +27,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type (
@@ -75,7 +73,6 @@ func TestProvider_DescribeAlarms(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
-				log:     testhelper.NewLogger(t),
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.DescribeAlarms(context.Background(), &regions[0], tt.filters)
@@ -90,7 +87,7 @@ func TestProvider_DescribeAlarms(t *testing.T) {
 }
 
 func createMockClients(c Client, regions []string) map[string]Client {
-	m := make(map[string]Client, 0)
+	m := make(map[string]Client)
 	for _, clientRegion := range regions {
 		m[clientRegion] = c
 	}
