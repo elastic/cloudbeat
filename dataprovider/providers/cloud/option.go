@@ -17,17 +17,7 @@
 
 package cloud
 
-import (
-	"github.com/elastic/elastic-agent-libs/logp"
-)
-
 type Option func(*DataProvider)
-
-func WithLogger(log *logp.Logger) Option {
-	return func(dp *DataProvider) {
-		dp.log = log
-	}
-}
 
 func WithAccount(identity Identity) Option {
 	return func(dp *DataProvider) {

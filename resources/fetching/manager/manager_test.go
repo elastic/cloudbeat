@@ -19,7 +19,6 @@ package manager
 
 import (
 	"context"
-	"sync"
 	"testing"
 	"time"
 
@@ -38,7 +37,6 @@ type ManagerTestSuite struct {
 	registry   *registry.MockRegistry
 	opts       goleak.Option
 	resourceCh chan fetching.ResourceInfo
-	wg         *sync.WaitGroup
 }
 
 const timeout = 2 * time.Second
@@ -53,7 +51,6 @@ func (s *ManagerTestSuite) SetupTest() {
 	s.opts = goleak.IgnoreCurrent()
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.registry = &registry.MockRegistry{}
-	s.wg = &sync.WaitGroup{}
 }
 
 func (s *ManagerTestSuite) TearDownTest() {

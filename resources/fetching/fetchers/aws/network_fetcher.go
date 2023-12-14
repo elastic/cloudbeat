@@ -42,7 +42,6 @@ type ACLFetcherConfig struct {
 
 type NetworkResource struct {
 	awslib.AwsResource
-	identity *cloud.Identity
 }
 
 func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo, identity *cloud.Identity) *NetworkFetcher {
@@ -63,7 +62,6 @@ func (f NetworkFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata)
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource: NetworkResource{
 				AwsResource: resource,
-				identity:    f.cloudIdentity,
 			},
 			CycleMetadata: cycleMetadata,
 		}

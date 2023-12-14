@@ -154,7 +154,6 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 func TestACLResource_GetMetadata(t *testing.T) {
 	r := NetworkResource{
 		AwsResource: ec2.NACLInfo{},
-		identity:    &cloud.Identity{},
 	}
 	meta, err := r.GetMetadata()
 	require.NoError(t, err)
