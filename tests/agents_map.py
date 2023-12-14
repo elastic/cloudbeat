@@ -2,8 +2,11 @@
 Generate agent parameterization for pytest.
 """
 import os
+import sys
 from loguru import logger
-from commonlib.fleet_api import get_agents
+from munch import Munch
+sys.path.append(os.path.relpath("../deploy/test-environments/fleet_api/src"))
+from api.agent_policy_api import get_agents
 from configuration import elasticsearch
 
 
@@ -44,7 +47,11 @@ class AgentComponentMapping:
         """
         Load the components map with the agent IDs.
         """
-        agents = get_agents(elasticsearch)
+        cfg = Munch()
+        cfg.auth = elasticsearch.basic_auth
+        cfg.kibana_url = elasticsearch.kibana_url
+
+        agents = get_agents(cfg)
         logger.info(f"found {len(agents)} agents")
         for integration in self.component_map.copy():
             for agent in agents:
