@@ -27,7 +27,6 @@ const (
 	ApplicationInsights                = "microsoft.insights/components"
 	BastionAssetType                   = "microsoft.network/bastionhosts"
 	ClassicStorageAccountAssetType     = "microsoft.classicstorage/storageaccounts"
-	ClassicVirtualMachineAssetType     = "microsoft.classiccompute/virtualmachines"
 	DiagnosticSettingsAssetType        = "microsoft.insights/diagnosticSettings"
 	DiskAssetType                      = "microsoft.compute/disks"
 	DocumentDBDatabaseAccountAssetType = "microsoft.documentdb/databaseaccounts"

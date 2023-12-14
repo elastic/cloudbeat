@@ -60,7 +60,6 @@ func newPair(subType string, tpe string) typePair {
 
 var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
-	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
 	inventory.DocumentDBDatabaseAccountAssetType: newPair(fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase),
 	inventory.MySQLDBAssetType:                   newPair(fetching.AzureMySQLDBType, fetching.CloudDatabase),
