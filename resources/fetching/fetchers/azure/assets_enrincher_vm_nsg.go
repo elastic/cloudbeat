@@ -63,9 +63,7 @@ func (e vmNetworkSecurityGroupEnricher) Enrich(_ context.Context, _ cycle.Metada
 			continue
 		}
 
-		var err error
-		securityRulesByNetworkInterface, err = e.extractNetworkSecurityGroupRules(asset, securityRulesByNetworkInterface)
-		if err != nil {
+		if err := e.extractNetworkSecurityGroupRules(asset, securityRulesByNetworkInterface); err != nil {
 			errAgg = errors.Join(errAgg, err)
 		}
 	}
@@ -85,15 +83,15 @@ func (e vmNetworkSecurityGroupEnricher) Enrich(_ context.Context, _ cycle.Metada
 	return errAgg
 }
 
-func (e vmNetworkSecurityGroupEnricher) extractNetworkSecurityGroupRules(asset inventory.AzureAsset, securityRulesByNetworkInterface map[string][]extensionNetworkSecurityRules) (map[string][]extensionNetworkSecurityRules, error) {
+func (e vmNetworkSecurityGroupEnricher) extractNetworkSecurityGroupRules(asset inventory.AzureAsset, securityRulesByNetworkInterface map[string][]extensionNetworkSecurityRules) error {
 	var nics []networkInterface
 	if err := mapstructure.Decode(asset.Properties["networkInterfaces"], &nics); err != nil {
-		return securityRulesByNetworkInterface, err
+		return err
 	}
 
 	var rawSecurityRules []networkSecurityRules
 	if err := mapstructure.Decode(asset.Properties["securityRules"], &rawSecurityRules); err != nil {
-		return securityRulesByNetworkInterface, err
+		return err
 	}
 
 	securityRules := make([]extensionNetworkSecurityRules, 0, len(rawSecurityRules))
@@ -110,7 +108,7 @@ func (e vmNetworkSecurityGroupEnricher) extractNetworkSecurityGroupRules(asset i
 		securityRulesByNetworkInterface[nic.Id] = append(interfaceRules, securityRules...)
 	}
 
-	return securityRulesByNetworkInterface, nil
+	return nil
 }
 
 func (e vmNetworkSecurityGroupEnricher) addNetworkRulesToAssetExtensions(vm *inventory.AzureAsset, securityRuleByNetworkInterface map[string][]extensionNetworkSecurityRules) error {
