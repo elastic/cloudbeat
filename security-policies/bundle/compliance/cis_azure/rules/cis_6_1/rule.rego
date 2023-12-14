@@ -4,6 +4,10 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
+targetPort := "3389"
+
+targetPortInt := to_number(targetPort)
+
 finding = result if {
 	# filter
 	data_adapter.is_vm
@@ -52,17 +56,17 @@ is_rdp_port(p) if {
 	is_in_range(portRanges[i])
 }
 
-# Check if it's a single port or range explicitly mentions 3389
+# Check if it's a single port or range explicitly mentions targetPort
 is_in_range(portRange) if {
-	contains(portRange, "3389")
+	contains(portRange, targetPort)
 }
 
-# Check if the range contains port 3389
+# Check if the range contains port targetPort
 is_in_range(portRange) if {
 	contains(portRange, "-")
 	boundaries := split(portRange, "-")
-	to_number(boundaries[0]) <= 3389
-	to_number(boundaries[1]) >= 3389
+	to_number(boundaries[0]) <= targetPortInt
+	to_number(boundaries[1]) >= targetPortInt
 }
 
 is_destination_range_rdp if {
