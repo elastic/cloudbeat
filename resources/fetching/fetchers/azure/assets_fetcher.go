@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/samber/lo"
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -31,13 +30,13 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
-	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AzureAssetsFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   azurelib.ProviderAPI
+	enrichers  []AssetsEnricher
 }
 
 type AzureResource struct {
@@ -61,7 +60,6 @@ func newPair(subType string, tpe string) typePair {
 
 var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
-	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
 	inventory.DocumentDBDatabaseAccountAssetType: newPair(fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase),
 	inventory.MySQLDBAssetType:                   newPair(fetching.AzureMySQLDBType, fetching.CloudDatabase),
@@ -74,6 +72,9 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.WebsitesAssetType:                  newPair(fetching.AzureWebSiteType, fetching.CloudCompute),
 	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
 	inventory.RoleDefinitionsType:                newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
+
+	// This asset type is used only for enrichment purposes, but is sent to OPA layer, producing no findings.
+	inventory.NetworkSecurityGroup: newPair(fetching.AzureNetworkSecurityGroupType, fetching.MonitoringIdentity),
 }
 
 // In order to simplify the mappings, we are trying to query all AzureAssetTypeToTypePair on every asset group
@@ -85,6 +86,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 		log:        log,
 		resourceCh: ch,
 		provider:   provider,
+		enrichers:  initEnrichers(provider),
 	}
 }
 
@@ -109,8 +111,10 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 		f.log.Errorf("Error fetching subscription information: %v", err)
 	}
 
-	if err := f.enrichStorageAccountAssets(ctx, cycleMetadata, subscriptions, assets); err != nil {
-		errAgg = errors.Join(errAgg, fmt.Errorf("error while enriching assets: %w", err))
+	for _, e := range f.enrichers {
+		if err := e.Enrich(ctx, cycleMetadata, assets); err != nil {
+			errAgg = errors.Join(errAgg, fmt.Errorf("error while enriching assets: %w", err))
+		}
 	}
 
 	for _, asset := range assets {
@@ -125,44 +129,6 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	}
 
 	return errAgg
-}
-
-func (f *AzureAssetsFetcher) enrichStorageAccountAssets(ctx context.Context, cycleMetadata cycle.Metadata, subscriptions map[string]governance.Subscription, assets []inventory.AzureAsset) error {
-	diagSettings, err := f.provider.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, lo.Keys(subscriptions))
-	if err != nil {
-		return err
-	}
-
-	addUsedForActivityLogsFlag(assets, diagSettings)
-
-	return nil
-}
-
-func addUsedForActivityLogsFlag(assets []inventory.AzureAsset, diagSettings []inventory.AzureAsset) {
-	usedStorageAccountIDs := map[string]struct{}{}
-	for _, d := range diagSettings {
-		storageAccountID := strings.FromMap(d.Properties, "storageAccountId")
-		if storageAccountID == "" {
-			continue
-		}
-		usedStorageAccountIDs[storageAccountID] = struct{}{}
-	}
-
-	for i, a := range assets {
-		if a.Type != inventory.StorageAccountAssetType {
-			continue
-		}
-
-		if _, exists := usedStorageAccountIDs[a.Id]; !exists {
-			continue
-		}
-
-		if a.Extension == nil {
-			a.Extension = make(map[string]any)
-		}
-		a.Extension["usedForActivityLogs"] = true
-		assets[i] = a
-	}
 }
 
 func resourceFromAsset(asset inventory.AzureAsset, cycleMetadata cycle.Metadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {

@@ -15,13 +15,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ec2
+package fetchers
 
-type Volume struct {
-	VolumeId   string
-	InstanceId string
-	Region     string
-	Size       int
-	Encrypted  bool
-	Device     string
+import (
+	"context"
+
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+)
+
+type AssetsEnricher interface {
+	Enrich(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset) error
+}
+
+func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
+	var enrichers []AssetsEnricher
+
+	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
+	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})
+
+	return enrichers
 }

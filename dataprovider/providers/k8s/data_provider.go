@@ -21,7 +21,6 @@ import (
 	"errors"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -35,7 +34,6 @@ const (
 )
 
 type DataProvider struct {
-	log            *logp.Logger
 	cluster        string
 	clusterID      string
 	clusterVersion string

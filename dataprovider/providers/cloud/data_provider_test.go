@@ -26,7 +26,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 var (
@@ -138,7 +137,7 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := NewDataProvider(WithLogger(testhelper.NewLogger(t)), WithAccount(tt.identity))
+			p := NewDataProvider(WithAccount(tt.identity))
 			e := &beat.Event{
 				Fields: mapstr.M{},
 			}

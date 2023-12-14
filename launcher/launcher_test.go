@@ -135,7 +135,6 @@ type LauncherTestSuite struct {
 
 type launcherMocks struct {
 	reloader  *reloaderMock
-	beat      *beat.Beat
 	validator Validator
 }
 
@@ -505,7 +504,6 @@ func (s *LauncherTestSuite) initMocks() *launcherMocks {
 	mocks.validator = &validatorMock{
 		expected: config.MustNewConfigFrom(mapstr.M{"a": 1}),
 	}
-	mocks.beat = &beat.Beat{}
 	return &mocks
 }
 

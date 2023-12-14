@@ -136,8 +136,12 @@ valid_managed_disk = {
 	"storageAccountType": "Standard_LRS",
 }
 
+generate_vm(managed_disk) = generate_vm_full(managed_disk, {})
+
+generate_vm_with_extension(extension) = generate_vm_full({}, extension)
+
 # regal ignore:rule-length
-generate_vm(managed_disk) = {
+generate_vm_full(managed_disk, extension) = {
 	"subType": "azure-vm",
 	"resource": {
 		"extendedLocation": null,
@@ -152,6 +156,7 @@ generate_vm(managed_disk) = {
 		"managedBy": "",
 		"name": "cloudbeatVM",
 		"plan": null,
+		"extension": extension,
 		"properties": {
 			"extended": {"instanceView": {
 				"computerName": "cloudbeatVM",

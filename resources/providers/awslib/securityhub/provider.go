@@ -34,9 +34,7 @@ type (
 	}
 
 	Provider struct {
-		log       *logp.Logger
 		clients   map[string]Client
-		region    string
 		accountId string
 	}
 )
@@ -47,8 +45,6 @@ func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFac
 	}
 	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
-		log:       log,
-		region:    cfg.Region,
 		accountId: accountId,
 		clients:   m.GetMultiRegionsClientMap(),
 	}

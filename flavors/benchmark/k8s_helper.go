@@ -62,7 +62,6 @@ func (h *k8sBenchmarkHelper) GetK8sDataProvider(ctx context.Context, clusterName
 	}
 
 	options := []k8s.Option{
-		k8s.WithLogger(h.log),
 		k8s.WithClusterName(clusterName),
 		k8s.WithClusterID(clusterId),
 		k8s.WithClusterVersion(serverVersion.String()),
