@@ -23,7 +23,7 @@ import (
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	client_gokubernetes "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/config"

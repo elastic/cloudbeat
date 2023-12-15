@@ -108,8 +108,6 @@ linters-settings:
         disabled: true
       - name: max-public-structs
         disabled: true
-      - name: redundant-import-alias
-        disabled: true
       - name: unchecked-type-assertion
         disabled: true
       - name: unexported-naming
