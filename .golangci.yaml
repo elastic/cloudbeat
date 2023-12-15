@@ -112,10 +112,6 @@ linters-settings:
         disabled: true
       - name: unchecked-type-assertion
         disabled: true
-      - name: unexported-naming
-        disabled: true
-      - name: unexported-return
-        disabled: true
       - name: unhandled-error
         disabled: true
       - name: unused-receiver
