@@ -133,8 +133,8 @@ type CredentialReport struct {
 
 type Policy struct {
 	types.Policy
-	Document map[string]interface{} `json:"document,omitempty"`
-	Roles    []types.PolicyRole     `json:"roles"`
+	Document map[string]any     `json:"document,omitempty"`
+	Roles    []types.PolicyRole `json:"roles"`
 }
 
 type ServerCertificatesInfo struct {

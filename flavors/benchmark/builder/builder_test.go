@@ -41,7 +41,7 @@ func TestBase_Build_Success(t *testing.T) {
 	tests := []struct {
 		name      string
 		opts      []Option
-		benchType interface{}
+		benchType any
 	}{
 		{
 			name:      "by default create base benchmark",
@@ -88,7 +88,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 	tests := []struct {
 		name      string
 		opts      []Option
-		benchType interface{}
+		benchType any
 	}{
 		{
 			name:      "by default create k8s benchmark",

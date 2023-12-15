@@ -235,7 +235,7 @@ func mockResource() *fetching.MockResource {
 			AccountName: "some-alias",
 		},
 	}, nil).Once()
-	m.EXPECT().GetElasticCommonData().Return(map[string]interface{}{}, nil).Once()
+	m.EXPECT().GetElasticCommonData().Return(map[string]any{}, nil).Once()
 	return &m
 }
 

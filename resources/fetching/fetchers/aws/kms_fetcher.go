@@ -70,7 +70,7 @@ func (f *KmsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 
 func (f *KmsFetcher) Stop() {}
 
-func (r KmsResource) GetData() interface{} {
+func (r KmsResource) GetData() any {
 	return r.key
 }
 
@@ -85,7 +85,7 @@ func (r KmsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r KmsResource) GetElasticCommonData() (map[string]any, error) {
-	m := map[string]interface{}{
+	m := map[string]any{
 		"cloud.service.name": "KMS",
 	}
 
