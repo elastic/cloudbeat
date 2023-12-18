@@ -142,7 +142,11 @@ func TestPublisher_HandleEvents(t *testing.T) {
 		// that cpu context switches won't interfere a few milliseconds here and there.
 		// Therefore, to avoid complex solutions retry was implemented. The likelihood of
 		// events being mis-published due to cpu switches is very small in 3 retries.
+		attempt := 1
 		retry.RunWith(&retry.Counter{Count: 3, Wait: 50 * time.Millisecond}, t, func(r *retry.R) {
+			r.Logf("Test %s - %s (attempt %d)", t.Name(), tc.name, attempt)
+			attempt++
+
 			log := testhelper.NewLogger(t)
 			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
