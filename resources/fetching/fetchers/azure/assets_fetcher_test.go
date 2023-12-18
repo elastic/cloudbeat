@@ -90,6 +90,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		map[string]governance.Subscription{
 			"subId": {
 				FullyQualifiedID: "subId",
+				ShortID:          "subId",
 				DisplayName:      "subName",
 				ManagementGroup: governance.ManagementGroup{
 					FullyQualifiedID: "mgId",
