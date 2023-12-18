@@ -5,7 +5,7 @@ import os
 import sys
 from loguru import logger
 from munch import Munch
-from configuration import elasticsearch
+from configuration import elasticsearch, agent
 
 sys.path.append(os.path.relpath("../deploy/test-environments/fleet_api/src"))
 from api.agent_policy_api import get_agents  # pylint: disable=wrong-import-position # noqa: E402
@@ -21,13 +21,12 @@ class AgentExpectedMapping:
     """
 
     def __init__(self):
-        agentless = os.getenv("TEST_AGENTLESS", "false") == "true"
         self.expected_map = {
             CIS_AWS_COMPONENT: 1,
             CIS_GCP_COMPONENT: 1,
             CIS_AZURE_COMPONENT: 1,
         }
-        if agentless:
+        if agent.agentless:
             self.expected_map[CIS_AWS_COMPONENT] += 1
 
 
