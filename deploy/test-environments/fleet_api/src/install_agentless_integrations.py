@@ -14,6 +14,7 @@ from api.package_policy_api import create_cspm_integration
 from package_policy import (
     generate_package_policy,
     generate_policy_template,
+    generate_random_name,
 )
 from loguru import logger
 
@@ -25,7 +26,7 @@ def generate_aws_integration_data():
     Generate data for creating CSPM AWS integration
     """
     return {
-        "name": "cspm_aws",
+        "name": generate_random_name("agentless-pkg-cspm-aws"),
         "input_name": "cis_aws",
         "posture": "cspm",
         "deployment": "aws",
@@ -43,7 +44,7 @@ def generate_azure_integration_data():
     Generate data for creating CSPM Azure integration
     """
     return {
-        "name": "cspm_azure",
+        "name": generate_random_name("agentless-pkg-cspm-azure"),
         "input_name": "cis_azure",
         "posture": "cspm",
         "deployment": "azure",
@@ -64,7 +65,7 @@ def generate_gcp_integration_data():
     with open(cnfg.gcp_dm_config.credentials_file, "r") as creadentials_json_file:
         creadentials_json = creadentials_json_file.read()
     return {
-        "name": "cspm_gcp",
+        "name": generate_random_name("agentless-pkg-cspm-gcp"),
         "input_name": "cis_gcp",
         "posture": "cspm",
         "deployment": "gcp",
