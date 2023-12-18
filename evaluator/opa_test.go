@@ -55,6 +55,8 @@ type OpaTestSuite struct {
 }
 
 func TestOpaTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(OpaTestSuite)
 	s.log = testhelper.NewLogger(t)
 
@@ -112,6 +114,8 @@ func (s *OpaTestSuite) TestOpaEvaluator_decode() {
 }
 
 func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
+	testhelper.SkipLong(s.T())
+
 	ctx := context.Background()
 	tests := []struct {
 		evals    int
