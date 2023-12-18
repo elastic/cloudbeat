@@ -16,11 +16,11 @@ CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
 
-STACK_VERSION = elasticsearch.stack_version
+AGENT_VERSION = elasticsearch.agent_version
 
-# Check if STACK_VERSION is provided
-if not STACK_VERSION:
-    logger.warning("STACK_VERSION is not provided. Please set the STACK_VERSION in the configuration.")
+# Check if AGENT_VERSION is provided
+if not AGENT_VERSION:
+    logger.warning("AGENT_VERSION is not provided. Please set the AGENT_VERSION in the configuration.")
 
 tests_data = {
     "cis_aws": [
@@ -101,7 +101,7 @@ def test_kspm_unmanaged_findings(kspm_client, match_type):
     query_list = build_query_list(
         benchmark_id="cis_k8s",
         match_type=match_type,
-        version=STACK_VERSION,
+        version=AGENT_VERSION,
     )
     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
     result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
@@ -127,7 +127,7 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
     query_list = build_query_list(
         benchmark_id="cis_eks",
         match_type=match_type,
-        version=STACK_VERSION,
+        version=AGENT_VERSION,
     )
     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
 
@@ -161,7 +161,7 @@ def test_cspm_aws_findings(
         query_list = build_query_list(
             benchmark_id="cis_aws",
             match_type=match_type,
-            version=STACK_VERSION,
+            version=AGENT_VERSION,
             agent=agent,
         )
         query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
@@ -186,7 +186,7 @@ def test_cnvm_findings(cnvm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(version=STACK_VERSION)
+    query_list = build_query_list(version=AGENT_VERSION)
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
@@ -211,7 +211,7 @@ def test_cspm_gcp_findings(cspm_client, match_type):
     query_list = build_query_list(
         benchmark_id="cis_gcp",
         match_type=match_type,
-        version=STACK_VERSION,
+        version=AGENT_VERSION,
     )
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
@@ -235,7 +235,7 @@ def test_cspm_azure_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(benchmark_id="cis_azure", version=STACK_VERSION)
+    query_list = build_query_list(benchmark_id="cis_azure", version=AGENT_VERSION)
     query, sort = cspm_client.build_es_must_match_query(
         must_query_list=query_list,
         time_range="now-24h",
