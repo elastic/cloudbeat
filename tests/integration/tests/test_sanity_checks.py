@@ -258,7 +258,7 @@ def get_component_agents(actual: AgentComponentMapping, expected: AgentExpectedM
 
     assert expected.expected_map[component] == len(
         actual.component_map[component],
-    ), f"Expected {expected.expected_map[component]} agents running \
+    ), f"Expected {expected.expected_map[component]} agents running\
  {component}, but got {len(actual.component_map[component])}"
 
     return actual.component_map[component]
