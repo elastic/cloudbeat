@@ -42,6 +42,8 @@ type KubeFetcherTestSuite struct {
 }
 
 func TestKubeFetcherTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(KubeFetcherTestSuite)
 
 	suite.Run(t, s)
