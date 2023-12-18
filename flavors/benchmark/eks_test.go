@@ -28,9 +28,12 @@ import (
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestEKS_Initialize(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	t.Setenv("NODE_NAME", "node-name")
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{

@@ -60,7 +60,6 @@ func newPair(subType string, tpe string) typePair {
 
 var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
-	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
 	inventory.DocumentDBDatabaseAccountAssetType: newPair(fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase),
 	inventory.MySQLDBAssetType:                   newPair(fetching.AzureMySQLDBType, fetching.CloudDatabase),
@@ -137,7 +136,13 @@ func resourceFromAsset(asset inventory.AzureAsset, cycleMetadata cycle.Metadata,
 	subscription, ok := subscriptions[asset.SubscriptionId]
 	if !ok {
 		subscription = governance.Subscription{
-			ID: asset.SubscriptionId,
+			FullyQualifiedID: asset.SubscriptionId,
+			ShortID:          "",
+			DisplayName:      "",
+			ManagementGroup: governance.ManagementGroup{
+				FullyQualifiedID: "",
+				DisplayName:      "",
+			},
 		}
 	}
 	return fetching.ResourceInfo{

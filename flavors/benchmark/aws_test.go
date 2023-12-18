@@ -24,9 +24,12 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestAWS_Initialize(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	tests := []struct {
 		name             string
 		identityProvider awslib.IdentityProviderGetter

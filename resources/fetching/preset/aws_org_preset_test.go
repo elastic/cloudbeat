@@ -38,6 +38,8 @@ import (
 )
 
 func TestNewCisAwsOrganizationFetchers_Leak(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	t.Run("drain", func(t *testing.T) {
 		subtest(t, true)
 	})

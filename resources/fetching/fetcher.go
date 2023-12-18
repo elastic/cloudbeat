@@ -65,7 +65,6 @@ const (
 	AzureActivityLogAlertType          = "azure-activity-log-alert"
 	AzureBastionType                   = "azure-bastion"
 	AzureClassicStorageAccountType     = "azure-classic-storage-account"
-	AzureClassicVMType                 = "azure-classic-vm"
 	AzureDiagnosticSettingsType        = "azure-diagnostic-settings"
 	AzureDiskType                      = "azure-disk"
 	AzureDocumentDBDatabaseAccountType = "azure-document-db-database-account"
