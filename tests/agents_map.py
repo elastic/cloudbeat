@@ -8,7 +8,7 @@ from munch import Munch
 from configuration import elasticsearch
 
 sys.path.append(os.path.relpath("../deploy/test-environments/fleet_api/src"))
-from api.agent_policy_api import get_agents # pylint: disable=wrong-import-position
+from api.agent_policy_api import get_agents  # pylint: disable=wrong-import-position
 
 CIS_AWS_COMPONENT = "cloudbeat/cis_aws"
 CIS_GCP_COMPONENT = "cloudbeat/cis_gcp"
