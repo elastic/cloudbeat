@@ -11,8 +11,6 @@ resource = input.resource
 # METADATA
 # entrypoint: true
 findings = f if {
-	input.benchmark
-
 	# iterate over activated benchmark rules
 	benchmark := input.benchmark
 

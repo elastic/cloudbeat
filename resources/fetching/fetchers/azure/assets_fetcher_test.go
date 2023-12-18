@@ -89,11 +89,12 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
 		map[string]governance.Subscription{
 			"subId": {
-				ID:          "subId",
-				DisplayName: "subName",
+				FullyQualifiedID: "subId",
+				ShortID:          "subId",
+				DisplayName:      "subName",
 				ManagementGroup: governance.ManagementGroup{
-					ID:          "mgId",
-					DisplayName: "mgName",
+					FullyQualifiedID: "mgId",
+					DisplayName:      "mgName",
 				},
 			},
 		}, nil,
