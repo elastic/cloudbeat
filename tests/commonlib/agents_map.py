@@ -50,10 +50,10 @@ class AgentComponentMapping:
         cfg.auth = elasticsearch.basic_auth
         cfg.kibana_url = elasticsearch.kibana_url
 
-        agents = get_agents(cfg)
-        logger.info(f"found {len(agents)} agents")
+        active_agents = get_agents(cfg)
+        logger.info(f"found {len(active_agents)} agents")
         for integration in self.component_map.copy():
-            for agent in agents:
-                for component in agent.components:
+            for active in active_agents:
+                for component in active.components:
                     if integration in component.id:
-                        self.component_map[integration].append(agent.id)
+                        self.component_map[integration].append(active.id)

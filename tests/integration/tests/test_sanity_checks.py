@@ -7,9 +7,9 @@ The goal of this suite is to perform basic sanity checks by querying Elasticsear
 verifying that there are findings of 'resource.type' for each feature.
 """
 import pytest
-from commonlib.utils import get_findings
-from configuration import elasticsearch
 from loguru import logger
+from configuration import elasticsearch
+from commonlib.utils import get_findings
 from commonlib.agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
 
 CONFIG_TIMEOUT = 120
