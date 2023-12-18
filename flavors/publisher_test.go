@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/hashicorp/consul/sdk/testutil/retry"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/goleak"
 
@@ -115,14 +116,14 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			eventCount:        4,
 			expectedEventSize: []int{6},
 		},
-		//{
-		//	name:              "Publish events on interval reached 2 times",
-		//	interval:          45 * time.Millisecond,
-		//	threshold:         100,
-		//	ctxTimeout:        200 * time.Millisecond,
-		//	eventCount:        10,
-		//	expectedEventSize: []int{10, 26, 9},
-		// },
+		{
+			name:              "Publish events on interval reached 2 times",
+			interval:          45 * time.Millisecond,
+			threshold:         100,
+			ctxTimeout:        200 * time.Millisecond,
+			eventCount:        10,
+			expectedEventSize: []int{10, 26, 9},
+		},
 		{
 			name:              "Publish events on closed channel",
 			interval:          time.Minute,
@@ -135,13 +136,19 @@ func TestPublisher_HandleEvents(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
+		// This test uses retry because of its timed async nature.
+		// The objective is to assert that the correct amount of events
+		// is produced in a timeframe (tick). It works fine in most runs, but we can't assure
+		// that cpu context switches won't interfere a few milliseconds here and there.
+		// Therefore, to avoid complex solutions retry was implemented. The likelihood of
+		// events being mis-published due to cpu switches is very small in 3 retries.
+		retry.RunWith(&retry.Counter{Count: 3, Wait: 50 * time.Millisecond}, t, func(r *retry.R) {
 			log := testhelper.NewLogger(t)
 			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
 			defer cancel()
 
-			client := newMockClient(t)
+			client := newMockClient(r)
 			for _, size := range tc.expectedEventSize {
 				client.EXPECT().PublishAll(mock.MatchedBy(lengthMatcher(size)))
 			}

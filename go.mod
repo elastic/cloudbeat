@@ -49,6 +49,7 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.12.0
+	github.com/hashicorp/consul/sdk v0.15.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/huandu/xstrings v1.4.0
 	github.com/magefile/mage v1.15.0
