@@ -26,6 +26,8 @@ import (
 )
 
 func TestCollectResources(t *testing.T) {
+	SkipLong(t)
+
 	t.Run("empty channel", func(t *testing.T) {
 		ch := make(chan struct{})
 		assert.Empty(t, CollectResources(ch))
@@ -84,6 +86,8 @@ func TestCollectResourcesBlocking(t *testing.T) {
 }
 
 func TestCollectResourcesWithTimeout(t *testing.T) {
+	SkipLong(t)
+
 	t.Run("blocks on empty channel", func(t *testing.T) {
 		ch := make(chan struct{})
 

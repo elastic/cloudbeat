@@ -29,6 +29,8 @@ import (
 )
 
 func TestRepeater_Run(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	testCases := []struct {
 		name           string
 		interval       time.Duration

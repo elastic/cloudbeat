@@ -36,6 +36,8 @@ import (
 )
 
 func TestBase_Build_Success(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	tests := []struct {
 		name      string
 		opts      []Option
@@ -81,6 +83,8 @@ func TestBase_Build_Success(t *testing.T) {
 }
 
 func TestBase_BuildK8s_Success(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	tests := []struct {
 		name      string
 		opts      []Option
