@@ -104,6 +104,8 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 	})
 
 	t.Run("lock", func(t *testing.T) {
+		testhelper.SkipLong(t)
+
 		firstRun := atomic.NewBool(false)
 		m := inventory.NewMockProviderAPI(t)
 		m.EXPECT().

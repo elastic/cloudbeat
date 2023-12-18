@@ -40,6 +40,8 @@ type ManagerTestSuite struct {
 const timeout = 2 * time.Second
 
 func TestManagerTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(ManagerTestSuite)
 
 	suite.Run(t, s)

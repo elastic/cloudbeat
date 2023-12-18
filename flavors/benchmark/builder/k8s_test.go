@@ -35,6 +35,8 @@ import (
 )
 
 func TestK8sRun_ReturnEvents(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	tests := []struct {
 		name           string
 		manager        func(*MockManager) *MockManager

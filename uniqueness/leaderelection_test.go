@@ -50,6 +50,8 @@ type LeaderElectionTestSuite struct {
 }
 
 func TestLeaderElectionTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(LeaderElectionTestSuite)
 	suite.Run(t, s)
 }
