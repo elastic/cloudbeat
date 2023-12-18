@@ -30,6 +30,8 @@ import (
 )
 
 func TestPublisher_HandleEvents(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	type testCase struct {
 		name              string
 		interval          time.Duration

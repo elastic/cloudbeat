@@ -27,6 +27,8 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type CachedRegionSelectorTestSuite struct {
@@ -34,6 +36,8 @@ type CachedRegionSelectorTestSuite struct {
 }
 
 func TestCachedRegionSelectorTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(CachedRegionSelectorTestSuite)
 
 	suite.Run(t, s)
