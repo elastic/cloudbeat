@@ -1,5 +1,7 @@
 rules:
   idiomatic:
+    boolean-assignment:
+      level: ignore
     use-some-for-output-vars:
       level: ignore
   imports:
