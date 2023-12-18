@@ -24,8 +24,6 @@ def generate_aws_integration_data():
     """
     Generate data for creating CSPM AWS integration
     """
-    access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "")
-    secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "")
     return {
         "name": "cspm_aws",
         "input_name": "cis_aws",
@@ -34,8 +32,8 @@ def generate_aws_integration_data():
         "vars": {
             "aws.account_type": "single-account",
             "aws.credentials.type": "direct_access_keys",
-            "access_key_id": access_key_id,
-            "secret_access_key": secret_access_key,
+            "access_key_id": cnfg.aws_config.access_key_id,
+            "secret_access_key": cnfg.aws_config.secret_access_key,
         },
     }
 
@@ -51,7 +49,10 @@ def generate_azure_integration_data():
         "deployment": "azure",
         "vars": {
             "azure.account_type": "single-account",
-            "azure.credentials.type": "manual",
+            "azure.credentials.type": "service_principal_with_client_secret",
+            "azure.credentials.client_id": "",
+            "azure.credentials.tenant_id": "",
+            "azure.credentials.client_secret": "",
         },
     }
 
@@ -60,8 +61,7 @@ def generate_gcp_integration_data():
     """
     Generate data for creating CSPM GCP integration
     """
-    application_credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
-    with open(application_credentials, "r") as creadentials_json_file:
+    with open(cnfg.gcp_dm_config.credentials_file, "r") as creadentials_json_file:
         creadentials_json = creadentials_json_file.read()
     return {
         "name": "cspm_gcp",
