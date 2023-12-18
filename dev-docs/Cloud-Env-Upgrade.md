@@ -25,7 +25,7 @@ Follow these steps to run the workflow:
       For BC, enter only the version without additions/commit sha, e.g. `8.11.0`.
       For SNAPSHOT, enter the full version, e.g. `8.12.0-SNAPSHOT`.
 
-   ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/3e363d00-313e-4660-a575-6c688de3d1f1)
+   ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/9475f553-70c9-4dd7-8330-260bbd704df8)
 
 4. Optionally, modify other parameters if required:
     - **`release-elk-stack-version`** (**optional**): Use this if you're planning to upgrade from a specific released version.
@@ -38,7 +38,7 @@ Follow these steps to run the workflow:
       e.g. `elastic / unified-release - staging # 8.11 - 10 - 8.9.0-cb971279`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.11.0-cb971279`.
 
-   ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/5b7f15bd-6f56-4eb0-b7d6-fc6a7656ffb0)
+   ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/e852adb1-d9f9-47d0-b364-ec5486263b95)
 
 ## Tracking Workflow Execution
 
