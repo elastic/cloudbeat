@@ -8,7 +8,7 @@ import time
 
 import pytest
 import configuration
-from agents_map import AgentExpectedMapping, AgentComponentMapping
+from commonlib.agents_map import AgentExpectedMapping, AgentComponentMapping
 from commonlib.kubernetes import KubernetesHelper
 from commonlib.elastic_wrapper import ElasticWrapper
 from commonlib.docker_wrapper import DockerWrapper

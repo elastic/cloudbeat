@@ -10,7 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 from configuration import elasticsearch
 from loguru import logger
-from agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
+from commonlib.agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600

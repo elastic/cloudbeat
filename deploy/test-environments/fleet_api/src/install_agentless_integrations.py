@@ -8,7 +8,6 @@ The following steps are performed:
 3. Create a CSPM GCP integration.
 """
 
-import os
 import configuration_fleet as cnfg
 from api.package_policy_api import create_cspm_integration
 from package_policy import (
