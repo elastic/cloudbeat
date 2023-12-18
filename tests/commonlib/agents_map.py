@@ -36,6 +36,12 @@ class AgentComponentMapping:
     """
 
     def __init__(self):
+        self.reset_map()
+
+    def reset_map(self):
+        """
+        Reset the components map.
+        """
         self.component_map = {
             CIS_AWS_COMPONENT: [],
             CIS_GCP_COMPONENT: [],
@@ -46,6 +52,7 @@ class AgentComponentMapping:
         """
         Load the components map with the agent IDs.
         """
+        self.reset_map()
         cfg = Munch()
         cfg.auth = elasticsearch.basic_auth
         cfg.kibana_url = elasticsearch.kibana_url

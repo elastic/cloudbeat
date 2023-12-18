@@ -7,6 +7,7 @@ The goal of this suite is to perform basic sanity checks by querying Elasticsear
 verifying that there are findings of 'resource.type' for each feature.
 """
 import pytest
+import time
 from loguru import logger
 from configuration import elasticsearch
 from commonlib.utils import get_findings
@@ -15,6 +16,8 @@ from commonlib.agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentC
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
+COMPONENTS_BACKOFF = 10
+COMPONENTS_TIMEOUT = 60
 
 AGENT_VERSION = elasticsearch.agent_version
 
@@ -156,7 +159,7 @@ def test_cspm_aws_findings(
     Raises:
         AssertionError: If the resource type is missing.
     """
-    aws_agents = get_component_agents(agents_actual_components, agents_expected_components, CIS_AWS_COMPONENT)
+    aws_agents = wait_components_list(agents_actual_components, agents_expected_components, CIS_AWS_COMPONENT)
     for agent in aws_agents:
         query_list = build_query_list(
             benchmark_id="cis_aws",
@@ -245,9 +248,9 @@ def test_cspm_azure_findings(cspm_client, match_type):
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
 
-def get_component_agents(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str):
+def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str):
     """
-    Get the list of agents running the specified component.
+    Wait for the list of agents running the specified component.
 
     Args:
         component (str): The component to match.
@@ -255,6 +258,14 @@ def get_component_agents(actual: AgentComponentMapping, expected: AgentExpectedM
     Returns:
         list: The list of agents running the specified component.
     """
+
+    start_time = time.time()
+    while time.time() - start_time < COMPONENTS_TIMEOUT:
+        if len(actual.component_map[component]) == expected.expected_map[component]:
+            break
+
+        time.sleep(COMPONENTS_BACKOFF)
+        actual.load_map()
 
     assert expected.expected_map[component] == len(
         actual.component_map[component],
