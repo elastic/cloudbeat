@@ -70,12 +70,9 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	}
 
 	return registry.NewRegistry(
-			log,
-			registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
-		), cloud.NewDataProvider(
-			cloud.WithLogger(log),
-			cloud.WithAccount(*awsIdentity),
-		), nil, nil
+		log,
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
+	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 
 func (a *AWS) checkDependencies() error {

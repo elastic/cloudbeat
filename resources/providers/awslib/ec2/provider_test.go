@@ -398,7 +398,6 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 		},
 	}
 	expectedVolume := &Volume{
-		awsAccount: "aws-account",
 		VolumeId:   "vol-123456789",
 		InstanceId: "i-123456789",
 		Device:     "/dev/sda1",

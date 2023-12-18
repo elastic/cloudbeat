@@ -90,10 +90,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 			return m, nil
 		}))
 
-	return reg, cloud.NewDataProvider(
-		cloud.WithLogger(log),
-		cloud.WithAccount(*awsIdentity),
-	), nil, nil
+	return reg, cloud.NewDataProvider(), nil, nil
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {

@@ -26,13 +26,12 @@ import (
 
 type Factory struct{}
 
-func (Factory) New(m *plugins.Manager, conf interface{}) plugins.Plugin {
+func (Factory) New(m *plugins.Manager, _ interface{}) plugins.Plugin {
 	m.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 
 	return &plugin{
 		manager: m,
 		mtx:     sync.Mutex{},
-		config:  conf.(config),
 	}
 }
 

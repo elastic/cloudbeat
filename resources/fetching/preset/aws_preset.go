@@ -72,7 +72,7 @@ func NewCisAwsFetchers(log *logp.Logger, cfg aws.Config, ch chan fetching.Resour
 	m[fetching.AwsMonitoringType] = registry.RegisteredFetcher{Fetcher: monitoringFetcher}
 
 	ec2Provider := ec2.NewEC2Provider(log, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
-	networkFetcher := fetchers.NewNetworkFetcher(log, ec2Provider, ch, identity)
+	networkFetcher := fetchers.NewNetworkFetcher(log, ec2Provider, ch)
 	m[fetching.EC2NetworkingType] = registry.RegisteredFetcher{Fetcher: networkFetcher}
 
 	rdsProvider := rds.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)

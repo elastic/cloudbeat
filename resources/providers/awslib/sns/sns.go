@@ -38,7 +38,6 @@ func NewSNSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegion
 	}
 	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
-		log:     log,
 		clients: m.GetMultiRegionsClientMap(),
 	}
 }
