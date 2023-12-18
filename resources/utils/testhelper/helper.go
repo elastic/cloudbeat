@@ -97,3 +97,9 @@ func NewLogger(t *testing.T) *logp.Logger {
 
 	return logp.NewLogger(t.Name())
 }
+
+func SkipLong(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+}

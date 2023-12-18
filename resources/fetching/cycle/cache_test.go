@@ -151,6 +151,8 @@ func TestCache(t *testing.T) {
 }
 
 func TestCache_Lock(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	ctx := context.Background()
 	count := 0
 	ch := make(chan struct{})
