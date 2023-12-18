@@ -15,13 +15,12 @@ linters:
     - misspell
     - nolintlint
     - reassign
+    - revive
     - testifylint
     - unconvert
     - unparam
     - unused
     - whitespace
-# TODO: These are good but need some work to fix everything
-#    - revive
 
 linters-settings:
   gocritic:
@@ -70,6 +69,60 @@ linters-settings:
       - '.*cloudbeat.*fetching.fetchers.k8s.ProcCommonData'
       - '.*cloudbeat.*fetching.fetchers.*<anonymous>'
       - '.*cloudbeat.*flavors.benchmark.*<anonymous>'
+  revive:
+    enable-all-rules: true
+    rules:
+      - name: add-constant
+        disabled: true
+      - name: bare-return
+        disabled: true
+      - name: blank-imports
+        disabled: true
+      - name: cognitive-complexity
+        disabled: true
+      - name: confusing-naming
+        disabled: true
+      - name: confusing-results
+        disabled: true
+      - name: cyclomatic
+        disabled: true
+      - name: early-return
+        disabled: true
+      - name: exported
+        disabled: true
+      - name: function-length
+        disabled: true
+      - name: function-result-limit
+        disabled: true
+      - name: get-return
+        disabled: true
+      - name: import-alias-naming
+        disabled: true
+      - name: import-shadowing
+        disabled: true
+      - name: indent-error-flow
+        disabled: true
+      - name: line-length-limit
+        disabled: true
+        arguments: [160]
+      - name: max-public-structs
+        disabled: true
+      - name: redundant-import-alias
+        disabled: true
+      - name: unchecked-type-assertion
+        disabled: true
+      - name: unexported-naming
+        disabled: true
+      - name: unexported-return
+        disabled: true
+      - name: unhandled-error
+        disabled: true
+      - name: unused-receiver
+        disabled: true
+      - name: use-any
+        disabled: true
+      - name: var-naming
+        disabled: true
   unused:
     # Mark all struct fields that have been written to as used.
     field-writes-are-uses: false

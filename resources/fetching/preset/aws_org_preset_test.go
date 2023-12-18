@@ -46,7 +46,7 @@ func TestNewCisAwsOrganizationFetchers_Leak(t *testing.T) {
 	})
 }
 
-func subtest(t *testing.T, drain bool) {
+func subtest(t *testing.T, drain bool) { //nolint:revive // flag-parameter
 	const (
 		nAccounts           = 5
 		nFetchers           = 33
