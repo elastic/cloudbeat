@@ -148,16 +148,17 @@ func mockClient(t *testing.T, assets []inventory.AzureAsset, err error) *invento
 
 func generateManagementGroup(id int) ManagementGroup {
 	return ManagementGroup{
-		ID:          fmtField("mg-id", id),
-		DisplayName: fmtField("mg-display-name", id),
+		FullyQualifiedID: fmtField("mg-id", id),
+		DisplayName:      fmtField("mg-display-name", id),
 	}
 }
 
 func generateSubscription(id int, parentId int) Subscription {
 	return Subscription{
-		ID:              fmtField("sub-id", id),
-		DisplayName:     fmtField("sub-display-name", id),
-		ManagementGroup: generateManagementGroup(parentId),
+		FullyQualifiedID: fmtField("/subscriptions/sub-id", id),
+		ShortID:          fmtField("sub-id", id),
+		DisplayName:      fmtField("sub-display-name", id),
+		ManagementGroup:  generateManagementGroup(parentId),
 	}
 }
 
@@ -174,9 +175,8 @@ func generateManagementGroupAsset(id int) inventory.AzureAsset {
 }
 
 func generateSubscriptionAsset(id int, parentId int) inventory.AzureAsset {
-	subId := fmtField("sub-id", id)
 	return inventory.AzureAsset{
-		Id:       subId,
+		Id:       fmtField("/subscriptions/sub-id", id),
 		Name:     fmtField("sub-display-name", id),
 		Location: "location",
 		Properties: map[string]any{
@@ -187,7 +187,7 @@ func generateSubscriptionAsset(id int, parentId int) inventory.AzureAsset {
 				},
 			},
 		},
-		SubscriptionId: subId,
+		SubscriptionId: fmtField("sub-id", id),
 		TenantId:       "tenant-id",
 		Type:           "microsoft.resources/subscriptions",
 	}
