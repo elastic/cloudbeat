@@ -170,7 +170,13 @@ func resourceFromAsset(asset inventory.AzureAsset, cycleMetadata cycle.Metadata,
 	subscription, ok := subscriptions[asset.SubscriptionId]
 	if !ok {
 		subscription = governance.Subscription{
-			ID: asset.SubscriptionId,
+			FullyQualifiedID: asset.SubscriptionId,
+			ShortID:          "",
+			DisplayName:      "",
+			ManagementGroup: governance.ManagementGroup{
+				FullyQualifiedID: "",
+				DisplayName:      "",
+			},
 		}
 	}
 	return fetching.ResourceInfo{
