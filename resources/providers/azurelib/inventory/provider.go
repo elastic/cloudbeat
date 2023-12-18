@@ -20,28 +20,33 @@ package inventory
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/resources/utils/maps"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type azureClientWrapper struct {
 	AssetQuery              func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error)
 	AssetDiagnosticSettings func(ctx context.Context, subID string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error)
+	AssetBlobServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error)
 }
 
 type ProviderAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
 	ListAllAssetTypesByName(ctx context.Context, assetsGroup string, assets []string) ([]AzureAsset, error)
 	ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]AzureAsset, error)
+	ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 }
 
 type provider struct {
@@ -50,7 +55,7 @@ type provider struct {
 	diagnosticSettingsCache *cycle.Cache[[]AzureAsset]
 }
 
-func NewProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient) ProviderAPI {
+func NewProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient, credentials azcore.TokenCredential) ProviderAPI {
 	// We wrap the client, so we can mock it in tests
 	wrapper := &azureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
@@ -60,9 +65,20 @@ func NewProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client,
 			pager := diagnosticSettingsClient.NewListPager(fmt.Sprintf("/subscriptions/%s/", subID), options)
 			return readPager(ctx, pager)
 		},
+		AssetBlobServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
+			cl, err := armstorage.NewBlobServicesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListPager(resourceGroupName, storageAccountName, options))
+		},
 	}
 
-	return &provider{log: log, client: wrapper, diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log)}
+	return &provider{
+		log:                     log,
+		client:                  wrapper,
+		diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+	}
 }
 
 func (p *provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]AzureAsset, error) {
@@ -163,7 +179,7 @@ func transformDiagnosticSettingsClientListResponses(response []armmonitor.Diagno
 }
 
 func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResource, subID string) (AzureAsset, error) {
-	properties, err := transformDiagnosticSettings(v.Properties)
+	properties, err := maps.AsMapStringAny(v.Properties)
 	if err != nil {
 		return AzureAsset{}, err
 	}
@@ -178,25 +194,6 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 		TenantId:       "",
 		Type:           strings.Dereference(v.Type),
 	}, nil
-}
-
-func transformDiagnosticSettings(d *armmonitor.DiagnosticSettings) (map[string]any, error) {
-	if d == nil {
-		return nil, nil
-	}
-
-	js, err := d.MarshalJSON()
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal json: %w", err)
-	}
-
-	m := map[string]any{}
-	err = json.Unmarshal(js, &m)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal json: %w", err)
-	}
-
-	return m, nil
 }
 
 func readPager[T any](ctx context.Context, pager *runtime.Pager[T]) ([]T, error) {
