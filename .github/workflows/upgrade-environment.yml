@@ -1,5 +1,5 @@
 name: Test Serverless Environment
-run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
+run-name: Creating Serverless Environment by @${{ github.actor }}
 
 on:
     workflow_dispatch: # TODO: remove
