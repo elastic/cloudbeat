@@ -383,6 +383,7 @@ jobs:
 
       - name: Install Agentless integrations
         id: agentless
+        if: env.TEST_AGENTLESS
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
           poetry run python src/install_agentless_integrations.py
