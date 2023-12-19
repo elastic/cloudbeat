@@ -15,7 +15,7 @@ jobs:
       - name: Set deployment name
         id: set_deployment_name
         run: |
-          echo "::set-output name=date-name::weekly-env-$(date +'%d-%m')"
+          echo "::set-output name=date-name::weekly-env-$(date +'%d-%b')"
 
   deploy:
     needs: naming
