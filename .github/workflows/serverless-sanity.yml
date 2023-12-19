@@ -7,13 +7,24 @@ on:
       - cron: '0 0 * * 1' # every Monday at 00:00
 
 jobs:
+  naming:
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_name: ${{ steps.set_deployment_name.outputs.date-name }}
+    steps:
+      - name: Set deployment name
+        id: set_deployment_name
+        run: |
+          echo "::set-output name=date-name::weekly-env-$(date +'%d-%m')"
+
   deploy:
+    needs: naming
     uses: ./.github/workflows/test-environment.yml
+    secrets: inherit
     with:
-      deployment_name: "weekly-environment"
+      deployment_name: ${{ needs.naming.outputs.deployment_name }}
       ess-region: "region-1"
       elk-stack-version: 8.12.0
       serverless_mode: true
       run-sanity-tests: true
       cleanup-env: true
-    secrets: inherit
