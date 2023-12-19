@@ -1,4 +1,4 @@
-package compliance.cis_azure.rules.cis_6_1
+package compliance.cis_azure.rules.cis_6_2
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
@@ -9,7 +9,7 @@ finding = result if {
 	# filter
 	data_adapter.is_vm
 
-	portProperConfigured := audit.vm_has_closed_port(data_adapter, "3389", "TCP")
+	portProperConfigured := audit.vm_has_closed_port(data_adapter, "22", "TCP")
 
 	# set result
 	result := common.generate_result_without_expected(
