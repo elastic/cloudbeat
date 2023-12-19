@@ -30,7 +30,7 @@ def check_env_var(env_var: str) -> str:
             return "N/A"
         raise ValueError(f"The env var '{env_var}' isn't defined.")
     if env_var == "ESS_TYPE":
-        return "Project" if bool(value == "true") else "Deployment"
+        return "Project" if value == "true" else "Deployment"
     return value
 
 
