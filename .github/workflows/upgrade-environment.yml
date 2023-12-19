@@ -159,7 +159,7 @@ jobs:
         working-directory: ./tests
         env:
           USE_K8S: false
-          STACK_VERSION: ${{ needs.init.outputs.stack-version }}
+          AGENT_VERSION: ${{ needs.init.outputs.stack-version }}
         run: |
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
@@ -203,7 +203,7 @@ jobs:
         if: success()
         working-directory: ./tests
         env:
-          STACK_VERSION: ${{ inputs.target-elk-stack-version }}
+          AGENT_VERSION: ${{ inputs.target-elk-stack-version }}
           USE_K8S: false
         run: |
           poetry install

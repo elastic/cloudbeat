@@ -108,6 +108,7 @@ jobs:
       TF_VAR_ess_region: ${{ inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
       TF_VAR_serverless_mode: ${{ inputs.serverless_mode }}
+      TEST_AGENTLESS: ${{ inputs.serverless_mode }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       STACK_VERSION: ${{ inputs.elk-stack-version }}
@@ -379,6 +380,13 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
           aws s3 cp "${{ env.FLEET_API_DIR}}/state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
+
+      - name: Install Agentless integrations
+        id: agentless
+        if: env.TEST_AGENTLESS == 'true'
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_agentless_integrations.py
 
       - name: Wait for agents to enroll
         id: wait-for-agents
