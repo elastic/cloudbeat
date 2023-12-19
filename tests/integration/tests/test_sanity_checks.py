@@ -16,8 +16,10 @@ from commonlib.agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentC
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
-COMPONENTS_BACKOFF = 10
+
+# The timeout and backoff for waiting all agents are running the specified component.
 COMPONENTS_TIMEOUT = 180
+COMPONENTS_BACKOFF = 10
 
 AGENT_VERSION = elasticsearch.agent_version
 
