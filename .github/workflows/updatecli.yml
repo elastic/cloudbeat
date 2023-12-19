@@ -33,7 +33,7 @@ name: Update Dependencies with Updatecli
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 13 * * 1'
+    - cron: '0 7 * * 1'
 
 permissions:
   contents: read
