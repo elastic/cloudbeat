@@ -6,8 +6,8 @@ have been created.
 The goal of this suite is to perform basic sanity checks by querying Elasticsearch (ES) and
 verifying that there are findings of 'resource.type' for each feature.
 """
-import pytest
 import time
+import pytest
 from loguru import logger
 from configuration import elasticsearch
 from commonlib.utils import get_findings
