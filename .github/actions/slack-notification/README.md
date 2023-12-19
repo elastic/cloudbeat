@@ -2,6 +2,17 @@
 
 The "Send Slack Notification" GitHub Action facilitates communication between GitHub workflows and Slack channels.
 This action is designed to retrieve Vault credentials, compose Slack messages, and deliver notifications.
+Working with Vault requires logging in using a GitHub token, which can be created following [these docs](https://github.com/elastic/infra/tree/master/docs/vault).
+
+
+Cloudbeat secrets are stored under `secret/csp-team/ci/`. This action uses `slack-bot-token` and `slack-users` secrets.
+
+
+To add a new Slack user ID, make sure that [infra-vault-tools](https://github.com/elastic/infra/blob/master/flavortown/infra-vault-tools/README.md) are installed. Add the user using the following command:
+
+```bash
+vault-append secret/csp-team/ci/slack-users <replace_by_github_user> <replace_by_slack_user_id>
+```
 ___
 
 - [About](#about)

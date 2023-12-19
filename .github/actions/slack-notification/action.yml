@@ -33,6 +33,7 @@ runs:
   steps:
     - name: Get Vault credentials
       uses: hashicorp/vault-action@v2.7.4
+      continue-on-error: true
       with:
         url: ${{ inputs.vault-url }}
         roleId: ${{ inputs.vault-role-id }}
@@ -40,7 +41,7 @@ runs:
         method: approle
         secrets: |
           secret/csp-team/ci/slack-bot-token integration_token | SLACK_BOT_TOKEN ;
-          secret/csp-team/ci/slack-users users | USERS
+          secret/csp-team/ci/slack-users ${{ github.actor }} | SLACK_USER
 
     - name: Prepare Slack data
       id: prepare-slack-data
