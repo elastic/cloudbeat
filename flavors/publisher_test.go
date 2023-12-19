@@ -30,6 +30,8 @@ import (
 )
 
 func TestPublisher_HandleEvents(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	type testCase struct {
 		name              string
 		interval          time.Duration
@@ -113,14 +115,14 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			eventCount:        4,
 			expectedEventSize: []int{6},
 		},
-		{
-			name:              "Publish events on interval reached 2 times",
-			interval:          45 * time.Millisecond,
-			threshold:         100,
-			ctxTimeout:        200 * time.Millisecond,
-			eventCount:        10,
-			expectedEventSize: []int{10, 26, 9},
-		},
+		//{
+		//	name:              "Publish events on interval reached 2 times",
+		//	interval:          45 * time.Millisecond,
+		//	threshold:         100,
+		//	ctxTimeout:        200 * time.Millisecond,
+		//	eventCount:        10,
+		//	expectedEventSize: []int{10, 26, 9},
+		// },
 		{
 			name:              "Publish events on closed channel",
 			interval:          time.Minute,

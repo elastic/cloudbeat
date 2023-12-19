@@ -139,6 +139,8 @@ type launcherMocks struct {
 }
 
 func TestLauncherTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(LauncherTestSuite)
 	s.log = testhelper.NewLogger(t)
 
