@@ -113,7 +113,7 @@ def replace_user_mentions(message):
     """
     github_user = os.environ.get("GITHUB_ACTOR")
     if not github_user:
-        print(f"::warning::Invalid value for GITHUB_ACTOR: {github_user}")
+        print(f"::warning::GitHub user information is missing. Falling back to the original message")
         return message
     slack_user_id = os.environ.get("SLACK_USER")
     if not slack_user_id:
