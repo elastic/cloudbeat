@@ -1,10 +1,10 @@
-name: Test Upgrade Environment
+name: Test Serverless Environment
 run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
 
 on:
     workflow_dispatch: # TODO: remove
-    schedule:
-      - cron: '0 0 * * 1' # every Monday at 00:00
+    # schedule:
+    #   - cron: '0 0 * * 1' # every Monday at 00:00
 
 jobs:
   naming:
@@ -21,6 +21,10 @@ jobs:
     needs: naming
     uses: ./.github/workflows/test-environment.yml
     secrets: inherit
+    # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     with:
       deployment_name: ${{ needs.naming.outputs.deployment_name }}
       ess-region: "region-1"
