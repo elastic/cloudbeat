@@ -7,19 +7,8 @@ on:
       - cron: '0 0 * * 1' # every Monday at 00:00
 
 jobs:
-  init:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
   deploy:
     uses: ./.github/workflows/test-environment.yml
-    needs: init
-    # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     with:
       deployment_name: "Weekly serverless environment testing"
       ess-region: "region-1"
