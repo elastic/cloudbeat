@@ -10,7 +10,7 @@ jobs:
   deploy:
     uses: ./.github/workflows/test-environment.yml
     with:
-      deployment_name: "Weekly serverless environment testing"
+      deployment_name: "Weekly environment"
       ess-region: "region-1"
       elk-stack-version: 8.12.0
       serverless_mode: true
