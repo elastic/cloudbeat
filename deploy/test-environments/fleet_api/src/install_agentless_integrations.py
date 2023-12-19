@@ -61,8 +61,8 @@ def generate_gcp_integration_data():
     """
     Generate data for creating CSPM GCP integration
     """
-    with open(cnfg.gcp_dm_config.credentials_file, "r") as creadentials_json_file:
-        creadentials_json = creadentials_json_file.read()
+    with open(cnfg.gcp_dm_config.credentials_file, "r") as credentials_json_file:
+        creadentials_json = credentials_json_file.read()
     return {
         "name": generate_random_name("agentless-pkg-cspm-gcp"),
         "input_name": "cis_gcp",
