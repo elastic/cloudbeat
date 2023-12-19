@@ -117,7 +117,7 @@ def replace_user_mentions(message):
         return message
     slack_user_id = os.environ.get("SLACK_USER")
     if not slack_user_id:
-        print(f"::warning::Invalid value for SLACK_USER: {slack_user_id}")
+        print(f"::warning::Slack user ID is missing. Falling back to the original message")
         return message
     return message.replace(f"{github_user}", f"<@{slack_user_id}>")
 
