@@ -7,7 +7,7 @@ function update_deps() {
     # Check if anything changed
     git diff --exit-code &>/dev/null && return 1
     # Build and test
-    go build && go test -failfast || return 1
+    go build && go test -failfast ./... || return 1
     # Add changes to git
     git add .
     return 0
