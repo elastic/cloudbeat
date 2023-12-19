@@ -1,0 +1,35 @@
+name: Rerun Flaky Workflows
+
+on:
+  workflow_run:
+    workflows: ["K8s-CI"]
+    types: [completed]
+
+jobs:
+  rerun-on-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure'}}
+    steps:
+      - name: Display Workflow Run Information
+        run: |
+          echo "Workflow Run ID: ${{ github.event.workflow_run.id }}"
+          echo "Job ID: ${{ github.job }}"
+          echo "Current run: ${{ github.run_attempt }}"
+          echo "Author: ${{ github.event.workflow_run.head_commit.author.name }}"
+          echo "Actor: ${{ github.actor }}"
+      - name: Rerun failed jobs in the current workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          MAX_RUNS=3
+          CURRENT_RUN=${{ github.event.workflow_run.run_attempt }}
+          echo "NOTIFICATION_SLACK=0" >> $GITHUB_ENV
+          if [ $CURRENT_RUN -lt $MAX_RUNS ]; then
+            gh run rerun ${{ github.event.workflow_run.id }} --repo ${{ github.repository }} --failed
+          else
+            echo "Max runs reached, not rerunning"
+            echo "NOTIFICATION_SLACK=1" >> $GITHUB_ENV
+          fi
+      - name: Notify Slack
+        if: ${{ env.NOTIFICATION_SLACK == '1' }}
+        run: echo "Execute slack notification action"
