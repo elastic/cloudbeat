@@ -1,4 +1,4 @@
-name: Test Upgrade Environment
+name: Test Serverless Environment
 run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
 
 on:
