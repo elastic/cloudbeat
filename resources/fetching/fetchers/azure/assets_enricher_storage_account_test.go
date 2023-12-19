@@ -89,7 +89,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			cmd := cycle.Metadata{}
 
 			provider := azurelib.NewMockProviderAPI(t)
-			provider.EXPECT().GetSubscriptions(mock.Anything, cmd).Return(map[string]governance.Subscription{"sub1": {}}, nil).Once()
+			provider.EXPECT().GetSubscriptions(mock.Anything, cmd).Return(map[string]governance.Subscription{"sub1": {}}, nil).Once() //nolint:exhaustruct
 			provider.EXPECT().ListDiagnosticSettingsAssetTypes(mock.Anything, cmd, []string{"sub1"}).Return(tc.inputDiagSettings, nil)
 
 			e := storageAccountEnricher{provider: provider}

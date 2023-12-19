@@ -43,13 +43,23 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 	log := testhelper.NewLogger(t)
 
 	subscriptionOne := governance.Subscription{
-		ID:          "sub1",
-		DisplayName: "subName1",
+		FullyQualifiedID: "sub1",
+		ShortID:          "sub1",
+		DisplayName:      "subName1",
+		ManagementGroup: governance.ManagementGroup{
+			FullyQualifiedID: "",
+			DisplayName:      "",
+		},
 	}
 
 	subscriptionTwo := governance.Subscription{
-		ID:          "sub2",
-		DisplayName: "subName2",
+		FullyQualifiedID: "sub2",
+		ShortID:          "sub2",
+		DisplayName:      "subName2",
+		ManagementGroup: governance.ManagementGroup{
+			FullyQualifiedID: "",
+			DisplayName:      "",
+		},
 	}
 
 	expectedPair := typePair{
@@ -180,7 +190,7 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 
 			subscriptions := map[string]governance.Subscription{}
 			for _, s := range tc.mockSubscriptions {
-				subscriptions[s.ID] = s
+				subscriptions[s.FullyQualifiedID] = s
 			}
 
 			m.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(subscriptions, nil).Once()
