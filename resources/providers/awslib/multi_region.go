@@ -110,7 +110,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 // shouldDrop checks the target type and return true if
 // the type is pointer -> the pointer is nil
 // and false otherwise
-func shouldDrop(t interface{}) bool {
+func shouldDrop(t any) bool {
 	v := reflect.ValueOf(t)
 	kind := v.Kind()
 	if kind == reflect.Ptr && v.IsNil() {

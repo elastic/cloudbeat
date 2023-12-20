@@ -154,12 +154,12 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal("etcd", secEvalResource.Owner)
 	s.Equal("etcd", secEvalResource.Group)
 
-	SecResMetadata, err := secFSResource.GetMetadata()
+	secResMetadata, err := secFSResource.GetMetadata()
 	s.Require().NoError(err)
-	s.NotNil(SecResMetadata.ID)
-	s.Equal(paths[1], SecResMetadata.Name)
-	s.Equal(FileSubType, SecResMetadata.SubType)
-	s.Equal(FSResourceType, SecResMetadata.Type)
+	s.NotNil(secResMetadata.ID)
+	s.Equal(paths[1], secResMetadata.Name)
+	s.Equal(FileSubType, secResMetadata.SubType)
+	s.Equal(FSResourceType, secResMetadata.Type)
 }
 
 func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {

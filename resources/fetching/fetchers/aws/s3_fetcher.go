@@ -68,7 +68,7 @@ func (f *S3Fetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 
 func (f *S3Fetcher) Stop() {}
 
-func (r S3Resource) GetData() interface{} {
+func (r S3Resource) GetData() any {
 	return r.bucket
 }
 
@@ -83,7 +83,7 @@ func (r S3Resource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r S3Resource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]interface{}{
+	return map[string]any{
 		"cloud.service.name": "S3",
 	}, nil
 }

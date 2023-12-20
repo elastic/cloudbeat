@@ -78,7 +78,7 @@ func parseConfig() (*config, error) {
 	return &cfg, nil
 }
 
-func bindEnvs(iface interface{}, parts ...string) error {
+func bindEnvs(iface any, parts ...string) error {
 	ifv := reflect.ValueOf(iface)
 	ift := reflect.TypeOf(iface)
 	for i := 0; i < ift.NumField(); i++ {
