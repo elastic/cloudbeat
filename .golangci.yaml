@@ -113,7 +113,8 @@ linters-settings:
       - name: unchecked-type-assertion
         disabled: true
       - name: unhandled-error
-        disabled: true
+        arguments:
+          - "bytes.Buffer.WriteString"
       - name: unused-receiver
         disabled: true
       - name: use-any
