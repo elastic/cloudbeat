@@ -16,5 +16,5 @@ finding = result if {
 }
 
 is_https_only if {
-	data_adapter.site_config.httpsOnly == true
+	data_adapter.properties.httpsOnly == true
 } else = false
