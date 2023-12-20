@@ -103,11 +103,10 @@ func (s *ProviderTestSuite) SetupTest() {
 				return armresourcegraph.ClientResourcesResponse{
 					QueryResponse: nonTruncatedResponse,
 				}, nil
-			} else {
-				return armresourcegraph.ClientResourcesResponse{
-					QueryResponse: truncatedResponse,
-				}, nil
 			}
+			return armresourcegraph.ClientResourcesResponse{
+				QueryResponse: truncatedResponse,
+			}, nil
 		},
 	}
 }
