@@ -115,7 +115,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			eventCount:        4,
 			expectedEventSize: []int{6},
 		},
-		//{
+		// {
 		//	name:              "Publish events on interval reached 2 times",
 		//	interval:          45 * time.Millisecond,
 		//	threshold:         100,

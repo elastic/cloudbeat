@@ -30,8 +30,8 @@ import (
 
 var (
 	ristrettoCache        *ristretto.Cache
-	allRegionCacheTTL                   = 720 * time.Hour
-	currentRegionCacheTTL time.Duration = 0
+	allRegionCacheTTL     = 720 * time.Hour
+	currentRegionCacheTTL time.Duration
 )
 
 func init() {
