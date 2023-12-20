@@ -12,16 +12,14 @@ import future.keywords.if
 # differinitating between the two based on the member email is not possible
 # and this CIS rule only applies to user managed service accounts
 # so a google managed SA may produce a failed finding, even though it is not applicable
-service_accounts := filtered_roles if {
-	filtered_roles := [{"members": filtered_members, "role": v.role} |
-		v := data_adapter.iam_policy.bindings[_]
-		filtered_members := [m |
-			m = v.members[_]
-			startswith(m, "serviceAccount:")
-		]
-		count(filtered_members) > 0
+service_accounts := [{"members": filtered_members, "role": v.role} |
+	v := data_adapter.iam_policy.bindings[_]
+	filtered_members := [m |
+		m = v.members[_]
+		startswith(m, "serviceAccount:")
 	]
-}
+	count(filtered_members) > 0
+]
 
 finding = result if {
 	data_adapter.is_cloud_resource_manager_project
@@ -35,5 +33,5 @@ finding = result if {
 }
 
 evidence = admin_roles if {
-	admin_roles := {v | v := service_accounts[_]; regex.match("(.*Admin|.*admin|roles/(editor|owner))", v.role)}
+	admin_roles := {v | v := service_accounts[_]; regex.match(`(.*Admin|.*admin|roles/(editor|owner))`, v.role)}
 } else = data_adapter.iam_policy
