@@ -68,7 +68,7 @@ jobs:
         run: go install github.com/mattn/goveralls@latest
 
       - name: Download coverage artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage-file
 
