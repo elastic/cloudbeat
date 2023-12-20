@@ -8,6 +8,7 @@ The following steps are performed:
 3. Create a CSPM GCP integration.
 """
 
+import json
 import configuration_fleet as cnfg
 from api.package_policy_api import create_cspm_integration
 from package_policy import (
@@ -42,6 +43,7 @@ def generate_azure_integration_data():
     """
     Generate data for creating CSPM Azure integration
     """
+    creds = json.loads(cnfg.azure_arm_parameters.credentials)
     return {
         "name": generate_random_name("agentless-pkg-cspm-azure"),
         "input_name": "cis_azure",
@@ -50,9 +52,9 @@ def generate_azure_integration_data():
         "vars": {
             "azure.account_type": "single-account",
             "azure.credentials.type": "service_principal_with_client_secret",
-            "azure.credentials.client_id": "",
-            "azure.credentials.tenant_id": "",
-            "azure.credentials.client_secret": "",
+            "azure.credentials.client_id": creds["clientId"],
+            "azure.credentials.tenant_id": creds["tenantId"],
+            "azure.credentials.client_secret": creds["clientSecret"],
         },
     }
 
