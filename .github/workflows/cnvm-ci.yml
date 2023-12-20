@@ -1,11 +1,10 @@
 name: CNVM-CI
 
 on:
-  pull_request_target:
+  push:
     branches:
       - main
       - "[0-9]+.[0-9]+"
-    types: [opened, synchronize, reopened]
 
 jobs:
   Run-CNVM-Tests:
