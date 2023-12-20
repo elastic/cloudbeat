@@ -71,7 +71,7 @@ func (f *RdsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 
 func (f *RdsFetcher) Stop() {}
 
-func (r RdsResource) GetData() interface{} {
+func (r RdsResource) GetData() any {
 	return r.dbInstance
 }
 
@@ -86,7 +86,7 @@ func (r RdsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r RdsResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]interface{}{
+	return map[string]any{
 		"cloud.service.name": "RDS",
 	}, nil
 }

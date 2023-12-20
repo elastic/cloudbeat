@@ -43,23 +43,23 @@ var zapToOpaLevelsMap = map[zapcore.Level]logging.Level{
 	zap.DebugLevel: logging.Debug,
 }
 
-func (l *logger) Debug(fmt string, a ...interface{}) {
+func (l *logger) Debug(fmt string, a ...any) {
 	l.log.Debugf(fmt, a...)
 }
 
-func (l *logger) Info(fmt string, a ...interface{}) {
+func (l *logger) Info(fmt string, a ...any) {
 	l.log.Infof(fmt, a...)
 }
 
-func (l *logger) Error(fmt string, a ...interface{}) {
+func (l *logger) Error(fmt string, a ...any) {
 	l.log.Errorf(fmt, a...)
 }
 
-func (l *logger) Warn(fmt string, a ...interface{}) {
+func (l *logger) Warn(fmt string, a ...any) {
 	l.log.Warnf(fmt, a...)
 }
 
-func (l *logger) WithFields(m map[string]interface{}) logging.Logger {
+func (l *logger) WithFields(m map[string]any) logging.Logger {
 	return &logger{
 		log: l.log.With(mapToArray(m)...),
 	}
@@ -73,8 +73,8 @@ func (l *logger) SetLevel(level logging.Level) {
 	l.lvl.SetLevel(toZapLevel(level))
 }
 
-func mapToArray(m map[string]interface{}) []interface{} {
-	var ret []interface{}
+func mapToArray(m map[string]any) []any {
+	var ret []any
 	for k, v := range m {
 		ret = append(ret, k, v)
 	}

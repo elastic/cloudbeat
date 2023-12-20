@@ -63,7 +63,7 @@ func clean(fetcher fetching.Fetcher) func() {
 	}
 }
 
-func MapItems(resources runtime.Object) []interface{} {
+func MapItems(resources runtime.Object) []any {
 	r := reflect.ValueOf(resources)
 	f := reflect.Indirect(r).FieldByName("Items")
 	items := f.Interface()
@@ -78,16 +78,16 @@ func MapItems(resources runtime.Object) []interface{} {
 	}
 }
 
-func PtrMap[In any](items []In) []interface{} {
-	vsm := make([]interface{}, len(items))
+func PtrMap[In any](items []In) []any {
+	vsm := make([]any, len(items))
 	for i := range items {
 		vsm[i] = &items[i]
 	}
 	return vsm
 }
 
-func Map[In fetching.Resource](resources []In) []interface{} {
-	vsm := make([]interface{}, len(resources))
+func Map[In fetching.Resource](resources []In) []any {
+	vsm := make([]any, len(resources))
 	for i, v := range resources {
 		vsm[i] = v.GetData()
 	}
