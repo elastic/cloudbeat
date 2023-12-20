@@ -131,7 +131,7 @@ func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r IAMResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]interface{}{
+	return map[string]any{
 		"cloud.service.name": "IAM",
 	}, nil
 }

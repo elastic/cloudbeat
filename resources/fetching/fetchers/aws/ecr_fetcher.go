@@ -122,7 +122,7 @@ func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string
 	return reposByRegion
 }
 
-func (res EcrResource) GetData() interface{} {
+func (res EcrResource) GetData() any {
 	return res
 }
 
@@ -140,7 +140,7 @@ func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (res EcrResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]interface{}{
+	return map[string]any{
 		"cloud.service.name": "ECR",
 	}, nil
 }

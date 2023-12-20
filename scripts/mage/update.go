@@ -26,7 +26,7 @@ import (
 type Update mg.Namespace
 
 // Aliases stores aliases for the targets.
-var Aliases = map[string]interface{}{
+var Aliases = map[string]any{
 	"update": Update.All,
 }
 

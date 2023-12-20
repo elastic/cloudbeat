@@ -46,7 +46,7 @@ func (p *plugin) Stop(_ context.Context) {
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 }
 
-func (p *plugin) Reconfigure(_ context.Context, _ interface{}) {
+func (p *plugin) Reconfigure(_ context.Context, _ any) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 }
@@ -62,7 +62,7 @@ func (p *plugin) Log(_ context.Context, event logs.EventV1) error {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return nil
 	}
-	fields := map[string]interface{}{}
+	fields := map[string]any{}
 	err = util.UnmarshalJSON(eventBuf, &fields)
 	if err != nil {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
@@ -75,14 +75,14 @@ func (p *plugin) Log(_ context.Context, event logs.EventV1) error {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return nil
 	}
-	p.manager.ConsoleLogger().WithFields(fields).WithFields(map[string]interface{}{
+	p.manager.ConsoleLogger().WithFields(fields).WithFields(map[string]any{
 		"type": "openpolicyagent.org/decision_logs",
 	}).Debug(string(messageBytes))
 	return nil
 }
 
-func createMessage(event logs.EventV1) map[string]interface{} {
-	return map[string]interface{}{
+func createMessage(event logs.EventV1) map[string]any {
+	return map[string]any{
 		"decision_id": event.DecisionID,
 		"message":     "Decision Log",
 		"input":       event.Input,

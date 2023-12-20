@@ -124,7 +124,7 @@ func (p Provider) getSupportPolicy(ctx context.Context) (awslib.AwsResource, err
 	return awsSupportAccessPolicy, nil
 }
 
-func (p Provider) getPolicyDocument(ctx context.Context, policy types.Policy) (map[string]interface{}, error) {
+func (p Provider) getPolicyDocument(ctx context.Context, policy types.Policy) (map[string]any, error) {
 	if policy.Arn == nil || policy.DefaultVersionId == nil {
 		return nil, fmt.Errorf("invalid policy: %v", policy)
 	}
@@ -141,7 +141,7 @@ func (p Provider) getPolicyDocument(ctx context.Context, policy types.Policy) (m
 	return doc, nil
 }
 
-func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]interface{}, error) {
+func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]any, error) {
 	if policyVersion == nil || policyVersion.Document == nil {
 		return nil, fmt.Errorf("invalid policy version: %v", policyVersion)
 	}
@@ -152,7 +152,7 @@ func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]interf
 		return nil, fmt.Errorf("failed to unescape policy document: %w", err)
 	}
 
-	var doc map[string]interface{}
+	var doc map[string]any
 	err = json.Unmarshal([]byte(docString), &doc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal policy document: %w", err)
