@@ -66,7 +66,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 					Id:             "id",
 					Name:           "name",
 					Location:       "location",
-					Properties:     map[string]interface{}{"key": "value"},
+					Properties:     map[string]any{"key": "value"},
 					ResourceGroup:  "rg",
 					SubscriptionId: "subId",
 					TenantId:       "tenantId",

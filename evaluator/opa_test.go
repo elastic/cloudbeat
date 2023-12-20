@@ -70,7 +70,7 @@ func (s *OpaTestSuite) SetupSuite() {
 
 func (s *OpaTestSuite) TestOpaEvaluator_decode() {
 	type args struct {
-		result interface{}
+		result any
 		now    func() time.Time
 	}
 	tests := []struct {
