@@ -54,7 +54,7 @@ func Test_k8sIdProvider_GetIdInCluster(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := NewIdProvider("cluster_id", "node_id")
+			p := NewIdProvider("cluster_id", "node_id").(*idProvider)
 			data := p.getIdInCluster(tt.resource, tt.id)
 			assert.Equal(t, tt.want, data)
 		})
