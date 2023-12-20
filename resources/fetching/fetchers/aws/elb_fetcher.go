@@ -121,7 +121,7 @@ func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res ElbResource) GetElasticCommonData() (map[string]any, error) {
+func (ElbResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]interface{}{
 		"cloud.service.name": "ELB",
 	}, nil

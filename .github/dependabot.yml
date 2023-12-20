@@ -50,3 +50,8 @@ updates:
       - "backport-skip"
       - "dependency"
       - "github_actions"
+    groups:
+      artifact:
+        patterns:
+        - "actions/download-artifact"
+        - "actions/upload-artifact"
