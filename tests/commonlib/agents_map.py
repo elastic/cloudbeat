@@ -28,6 +28,7 @@ class AgentExpectedMapping:
         }
         if agent.agentless:
             self.expected_map[CIS_AWS_COMPONENT] += 1
+            self.expected_map[CIS_AZURE_COMPONENT] += 1
 
 
 class AgentComponentMapping:
