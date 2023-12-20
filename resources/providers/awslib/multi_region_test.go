@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +47,7 @@ var successfulOutput = []string{
 func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 	type args struct {
 		selector func() RegionsSelector
-		cfg      awssdk.Config
+		cfg      aws.Config
 		log      *logp.Logger
 	}
 	tests := []struct {
@@ -64,7 +63,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					m.On("Regions", mock.Anything, mock.Anything).Return(nil, errors.New("fail to query endpoint"))
 					return m
 				},
-				cfg: awssdk.Config{
+				cfg: aws.Config{
 					Region: afRegion,
 				},
 				log: testhelper.NewLogger(t),
@@ -79,7 +78,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					m.On("Regions", mock.Anything, mock.Anything).Return(successfulOutput, nil)
 					return m
 				},
-				cfg: awssdk.Config{},
+				cfg: aws.Config{},
 				log: testhelper.NewLogger(t),
 			},
 			want: map[string]string{DefaultRegion: DefaultRegion, euRegion: euRegion},
@@ -88,7 +87,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 
 	wrapper := MultiRegionClientFactory[string]{}
 	for _, tt := range tests {
-		factory := func(cfg awssdk.Config) string {
+		factory := func(cfg aws.Config) string {
 			return cfg.Region
 		}
 

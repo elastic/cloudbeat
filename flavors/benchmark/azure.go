@@ -40,8 +40,6 @@ type Azure struct {
 	providerInitializer azurelib.ProviderInitializerAPI
 }
 
-func (a *Azure) Run(context.Context) error { return nil }
-
 func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
