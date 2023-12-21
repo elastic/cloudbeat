@@ -55,6 +55,18 @@ def process_message_env():
     If 'URL_ENCODED' is set to 'true', the message is URL-decoded.
     The message is then formatted as a Slack message containing a single text block.
 
+    Multiline Messages:
+        GITHUB_OUTPUT is utilized for output messages for Slack notification.
+        The challenge arises when the message is a multiline string.
+        When attempting to write to GITHUB_OUTPUT, GitHub Actions notifies about formatting problems with the string.
+        There are several solutions to work around this issue.
+        One approach is to use delimiters between lines, as suggested by Github Workflows.
+        https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+        THe GitHub solution warns that the delimiter chosen should not occur on a line of its own within the value,
+        and this can be problematic for arbitrary multiline messages.
+        To avoid this, another solution involves encoding the string.
+        This function supports handling of the string encoding.
+
     Returns:
     dict: A dictionary representing the Slack message with the processed 'MESSAGE'.
           The dictionary has the following format:
@@ -75,6 +87,7 @@ def process_message_env():
     if message:
         message = replace_user_mentions(message)
         if os.environ["URL_ENCODED"] == "true":
+            # URL decode if necessary (used as a handler for multiline messages stored in GITHUB_OUTPUT)
             message = unquote(message)
         message = "\n".join(line.strip() for line in message.splitlines())
     return {
