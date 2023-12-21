@@ -19,7 +19,6 @@ package inventory
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -386,15 +385,22 @@ func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *logp.Logger, f T
 			continue
 		}
 
-		projectName, organizationId, organizationName, err := getProjectAssetsMetadata(projectAssets)
-		if err != nil {
-			log.Error(err)
+		if len(projectAssets) == 0 {
+			log.Errorf("no assets were listed for project: %s", projectId)
 			continue
 		}
 
+		ecs := projectAssets[0].Ecs
+
 		// add folder and org level log sinks for each project
 		projectAssets = append(projectAssets, assetsByProject[""]...)
-		enrichedAssets = append(enrichedAssets, f(projectAssets, projectId, projectName, organizationId, organizationName))
+		enrichedAssets = append(enrichedAssets, f(
+			projectAssets,
+			projectId,
+			ecs.ProjectName,
+			ecs.OrganizationId,
+			ecs.OrganizationName,
+		))
 	}
 	return enrichedAssets
 }
@@ -556,16 +562,4 @@ func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*Ext
 	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {
 		return asset.AssetType == assetType
 	})
-}
-
-func getProjectAssetsMetadata(projectAssets []*ExtendedGcpAsset) (string, string, string, error) {
-	if len(projectAssets) == 0 {
-		return "", "", "", errors.New("failed to get project/organization name")
-	}
-	// We grouped the assets by project id, so we can get the project metadata from the first asset
-	asset := projectAssets[0]
-	return asset.Ecs.ProjectName,
-		asset.Ecs.OrganizationId,
-		asset.Ecs.OrganizationName,
-		nil
 }
