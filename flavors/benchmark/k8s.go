@@ -54,6 +54,7 @@ func (k *K8S) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 	).BuildK8s(ctx, log, cfg, resourceCh, reg, k.leaderElector)
 }
 
+//revive:disable-next-line:function-result-limit
 func (k *K8S) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := k.checkDependencies(); err != nil {
 		return nil, nil, nil, err
