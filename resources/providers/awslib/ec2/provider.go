@@ -30,9 +30,11 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-var subnetAssociationIdFilterName = "association.subnet-id"
-var subnetVpcIdFilterName = "vpc-id"
-var subnetMainAssociationFilterName = "association.main"
+var (
+	subnetAssociationIdFilterName   = "association.subnet-id"
+	subnetVpcIdFilterName           = "vpc-id"
+	subnetMainAssociationFilterName = "association.main"
+)
 
 type Provider struct {
 	log          *logp.Logger
@@ -219,7 +221,7 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins *Ec2Instance) ([]EBS
 		return nil, err
 	}
 
-	var result []EBSSnapshot
+	result := make([]EBSSnapshot, 0, len(res.Snapshots))
 	for _, snap := range res.Snapshots {
 		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID, *ins))
 	}
@@ -241,7 +243,7 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 		return nil, err
 	}
 
-	var result []EBSSnapshot
+	result := make([]EBSSnapshot, 0, len(res.Snapshots))
 	for _, snap := range res.Snapshots {
 		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID, snapshot.Instance))
 	}
@@ -268,10 +270,11 @@ func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, su
 	}
 
 	// Fetching route tables explicitly attached to the subnet
-	routeTables, err := client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{Filters: []types.Filter{
-		{Name: &subnetAssociationIdFilterName, Values: []string{subnetId}}},
+	routeTables, err := client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{
+		Filters: []types.Filter{
+			{Name: &subnetAssociationIdFilterName, Values: []string{subnetId}},
+		},
 	})
-
 	if err != nil {
 		return types.RouteTable{}, err
 	}

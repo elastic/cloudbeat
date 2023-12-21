@@ -112,7 +112,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 		return nil, err
 	}
 
-	var accounts []preset.AwsAccount
+	accounts := make([]preset.AwsAccount, 0, len(accountIdentities))
 	for _, identity := range accountIdentities {
 		var memberCfg awssdk.Config
 		if identity.Account == rootIdentity.Account {
