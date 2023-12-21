@@ -20,12 +20,11 @@ package user
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // The util implementation is based on Go "os/user" native pkg
@@ -119,6 +118,8 @@ func lookupUserId(uid string, filepath string) (*User, error) {
 //
 // readCols is the minimum number of colon-separated fields that will be passed
 // to fn; in a long line additional fields may be silently discarded.
+//
+//revive:disable-next-line:cognitive-complexity,cyclomatic
 func readColonFile(r io.Reader, fn lineFunc, readCols int) (v any, err error) {
 	rd := bufio.NewReader(r)
 
