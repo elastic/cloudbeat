@@ -221,6 +221,7 @@ func (p Provider) getUserKeys(username string, report map[string]*CredentialRepo
 	}
 }
 
+//revive:disable-next-line:cognitive-complexity,cyclomatic
 func (p Provider) getCredentialReport(ctx context.Context) (map[string]*CredentialReport, error) {
 	report, err := p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 	if err != nil {
