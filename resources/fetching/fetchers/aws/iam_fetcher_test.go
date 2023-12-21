@@ -93,8 +93,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 			AttachmentCount: aws.Int32(1),
 			IsAttachable:    true,
 		},
-		Document: map[string]interface{}{
-			"Statements": []map[string]interface{}{
+		Document: map[string]any{
+			"Statements": []map[string]any{
 				{
 					"Resource": "*",
 					"Action":   "*",
@@ -296,8 +296,8 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 					AttachmentCount: aws.Int32(1),
 					IsAttachable:    true,
 				},
-				Document: map[string]interface{}{
-					"Statements": []map[string]interface{}{
+				Document: map[string]any{
+					"Statements": []map[string]any{
 						{
 							"Resource": "*",
 							"Action":   "*",

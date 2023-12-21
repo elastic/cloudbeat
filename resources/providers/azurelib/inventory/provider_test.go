@@ -103,11 +103,10 @@ func (s *ProviderTestSuite) SetupTest() {
 				return armresourcegraph.ClientResourcesResponse{
 					QueryResponse: nonTruncatedResponse,
 				}, nil
-			} else {
-				return armresourcegraph.ClientResourcesResponse{
-					QueryResponse: truncatedResponse,
-				}, nil
 			}
+			return armresourcegraph.ClientResourcesResponse{
+				QueryResponse: truncatedResponse,
+			}, nil
 		},
 	}
 }
@@ -269,13 +268,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id1",
 					Name:     "name1",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  true,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  false,
 							},
@@ -362,13 +361,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id2",
 					Name:     "name2",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  false,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},
@@ -385,13 +384,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id3",
 					Name:     "name3",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  true,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},
@@ -482,13 +481,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id2",
 					Name:     "name2",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  false,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},
@@ -505,13 +504,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id3",
 					Name:     "name3",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  true,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},

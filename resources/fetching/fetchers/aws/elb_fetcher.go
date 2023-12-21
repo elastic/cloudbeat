@@ -103,7 +103,7 @@ func (f *ElbFetcher) GetLoadBalancers(ctx context.Context) ([]string, error) {
 func (f *ElbFetcher) Stop() {
 }
 
-func (r ElbResource) GetData() interface{} {
+func (r ElbResource) GetData() any {
 	return r.lb
 }
 
@@ -121,8 +121,8 @@ func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res ElbResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]interface{}{
+func (ElbResource) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
 		"cloud.service.name": "ELB",
 	}, nil
 }

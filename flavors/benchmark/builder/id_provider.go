@@ -19,6 +19,6 @@ package builder
 
 type idProvider struct{}
 
-func (p *idProvider) GetId(resourceType string, resourceId string) string {
+func (p *idProvider) GetId(_ string, resourceId string) string {
 	return resourceId
 }
