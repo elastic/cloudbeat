@@ -42,8 +42,9 @@ jobs:
 
       - name: Pre-commit Hooks
         env:
-          # Skipping golangci-lint as it's tested by golangci/golangci-lint-action
-          SKIP: golangci-lint
+          # Skipping golangci-lint as it's tested by golangci/golangci-lint-action.
+          # Skipping go-test as it's tested by UnitTests workflow.
+          SKIP: golangci-lint,go-test
         run: |
           pre-commit run --all-files
         shell: bash
