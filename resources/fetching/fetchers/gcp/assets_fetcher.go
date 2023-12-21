@@ -126,7 +126,7 @@ func (f *GcpAssetsFetcher) Stop() {
 	f.provider.Close()
 }
 
-func (r *GcpAsset) GetData() interface{} {
+func (r *GcpAsset) GetData() any {
 	return r.ExtendedAsset.Asset
 }
 

@@ -58,7 +58,7 @@ func (s *LoggerTestSuite) TestLogFormat() {
 func (s *LoggerTestSuite) TestLogFields() {
 	logger := newLogger()
 	logger.SetLevel(logging.Debug)
-	logger = logger.WithFields(map[string]interface{}{
+	logger = logger.WithFields(map[string]any{
 		"key": "val",
 	})
 
@@ -74,11 +74,11 @@ func (s *LoggerTestSuite) TestLogFields() {
 func (s *LoggerTestSuite) TestLogMultipleFields() {
 	logger := newLogger()
 	logger.SetLevel(logging.Debug)
-	logger = logger.WithFields(map[string]interface{}{
+	logger = logger.WithFields(map[string]any{
 		"key1": "val1",
 	})
 
-	logger = logger.WithFields(map[string]interface{}{
+	logger = logger.WithFields(map[string]any{
 		"key2": "val2",
 	})
 

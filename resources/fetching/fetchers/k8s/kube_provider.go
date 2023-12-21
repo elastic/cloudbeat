@@ -30,7 +30,7 @@ import (
 
 type K8sResource struct {
 	log  *logp.Logger
-	Data interface{}
+	Data any
 }
 
 const (
@@ -68,7 +68,7 @@ func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fet
 	}
 }
 
-func (r K8sResource) GetData() interface{} {
+func (r K8sResource) GetData() any {
 	return r.Data
 }
 
@@ -123,7 +123,7 @@ func getK8sSubType(log *logp.Logger, k8sObj reflect.Value) string {
 
 // nullifyManagedFields ManagedFields field contains fields with dot that prevent from elasticsearch to index
 // the events.
-func nullifyManagedFields(resource interface{}) {
+func nullifyManagedFields(resource any) {
 	switch val := resource.(type) {
 	case *kubernetes.Pod:
 		val.ManagedFields = nil

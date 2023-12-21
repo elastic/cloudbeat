@@ -141,7 +141,7 @@ func (o *OpaEvaluator) Stop(ctx context.Context) {
 	o.opa.Stop(ctx)
 }
 
-func (o *OpaEvaluator) decision(ctx context.Context, input OpaInput) (interface{}, error) {
+func (o *OpaEvaluator) decision(ctx context.Context, input OpaInput) (any, error) {
 	// get the named policy decision for the specified input
 	result, err := o.opa.Decision(ctx, sdk.DecisionOptions{
 		Path:  "main",
@@ -154,7 +154,7 @@ func (o *OpaEvaluator) decision(ctx context.Context, input OpaInput) (interface{
 	return result.Result, nil
 }
 
-func (o *OpaEvaluator) decode(result interface{}) (RuleResult, error) {
+func (o *OpaEvaluator) decode(result any) (RuleResult, error) {
 	var opaResult RuleResult
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &opaResult})
 	if err != nil {
