@@ -92,15 +92,11 @@ linters-settings:
         arguments: [30]
       - name: confusing-naming
         disabled: true
-      - name: confusing-results
-        disabled: true
       - name: cyclomatic
         arguments: [15]
       - name: exported
         disabled: true
       - name: function-length
-        disabled: true
-      - name: function-result-limit
         disabled: true
       - name: get-return
         disabled: true
