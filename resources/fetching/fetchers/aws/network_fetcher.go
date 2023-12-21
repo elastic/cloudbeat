@@ -85,7 +85,7 @@ func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r NetworkResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]interface{}{
+	return map[string]any{
 		"cloud.service.name": "EC2",
 	}, nil
 }

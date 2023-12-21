@@ -32,12 +32,12 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 	tests := []struct {
 		name    string
 		options []Option
-		want    map[string]interface{}
+		want    map[string]any
 	}{
 		{
 			name:    "should return empty map",
 			options: []Option{},
-			want: map[string]interface{}{
+			want: map[string]any{
 				orchestratorType: "kubernetes",
 			},
 		}, {
@@ -45,7 +45,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 			options: []Option{
 				WithClusterVersion("test_version"),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				clusterVersionField: "test_version",
 				orchestratorType:    "kubernetes",
 			},
@@ -54,7 +54,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 			options: []Option{
 				WithClusterName("test_cluster"),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				clusterNameField: "test_cluster",
 				orchestratorType: "kubernetes",
 			},
@@ -63,7 +63,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 			options: []Option{
 				WithClusterID("test_id"),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				clusterIdField:   "test_id",
 				orchestratorType: "kubernetes",
 			},
@@ -74,7 +74,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 				WithClusterName("test_cluster"),
 				WithClusterVersion("test_version"),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				clusterIdField:      "test_id",
 				clusterNameField:    "test_cluster",
 				clusterVersionField: "test_version",

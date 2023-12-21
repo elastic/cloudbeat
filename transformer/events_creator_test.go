@@ -124,7 +124,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			cdpp: func() dataprovider.ElasticCommonDataProvider {
 				dataProviderMock := dataprovider.NewMockElasticCommonDataProvider(s.T())
-				ret := map[string]interface{}{
+				ret := map[string]any{
 					"cloudbeat": versionInfo,
 				}
 				dataProviderMock.EXPECT().GetElasticCommonData().Return(ret, nil)

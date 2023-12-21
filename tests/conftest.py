@@ -8,6 +8,7 @@ import time
 
 import pytest
 import configuration
+from commonlib.agents_map import AgentExpectedMapping, AgentComponentMapping
 from commonlib.kubernetes import KubernetesHelper
 from commonlib.elastic_wrapper import ElasticWrapper
 from commonlib.docker_wrapper import DockerWrapper
@@ -278,3 +279,23 @@ def create_es_client(index: str) -> ElasticWrapper:
     )
     logger.info(f"client with ElasticSearch url: {configuration.elasticsearch.url}")
     return es_client
+
+
+@pytest.fixture(scope="session")
+def agents_expected_components() -> AgentExpectedMapping:
+    """
+    This function (fixture) instantiate an AgentExpectedMapping.
+    @return: an mapping of the agent components.
+    """
+    return AgentExpectedMapping()
+
+
+@pytest.fixture(scope="session")
+def agents_actual_components() -> AgentComponentMapping:
+    """
+    This function (fixture) instantiate an AgentComponentMapping.
+    @return: an mapping of the agent components.
+    """
+    mapping = AgentComponentMapping()
+    mapping.load_map()
+    return mapping

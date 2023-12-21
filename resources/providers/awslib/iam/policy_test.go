@@ -345,7 +345,7 @@ func Test_decodePolicyDocument(t *testing.T) {
 	tests := []struct {
 		name          string
 		policyVersion *types.PolicyVersion
-		want          map[string]interface{}
+		want          map[string]any
 		wantErr       string
 	}{
 		{
@@ -411,8 +411,8 @@ func validGetPolicyVersionOutput() *iamsdk.GetPolicyVersionOutput {
 	}
 }
 
-func validGetPolicyVersionOutputDecoded() map[string]interface{} {
-	return map[string]interface{}{"hello": "world"}
+func validGetPolicyVersionOutputDecoded() map[string]any {
+	return map[string]any{"hello": "world"}
 }
 
 func validPolicyRoles() []types.PolicyRole {
