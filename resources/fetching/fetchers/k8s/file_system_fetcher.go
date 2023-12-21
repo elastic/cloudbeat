@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -28,7 +29,6 @@ import (
 
 	"github.com/djherbis/times"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
@@ -139,7 +139,7 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (*FSReso
 
 	stat, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
-		return nil, errors.New("Not a syscall.Stat_t")
+		return nil, errors.New("not of type syscall.Stat_t")
 	}
 
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
