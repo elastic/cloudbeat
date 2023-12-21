@@ -12,6 +12,7 @@ linters:
     - gocritic
     - gocyclo
     - gofmt
+    - gomodguard
     - misspell
     - nolintlint
     - reassign
@@ -27,6 +28,13 @@ linters-settings:
     settings:
       ifElseChain:
         minThreshold: 3
+  gomodguard:
+    blocked:
+      modules:
+        - github.com/pkg/errors:
+            recommendations:
+              - errors
+            reason: "Package is deprecated"
   gci:
     # Section configuration to compare against.
     # Section names are case-insensitive and may contain parameters in ().
