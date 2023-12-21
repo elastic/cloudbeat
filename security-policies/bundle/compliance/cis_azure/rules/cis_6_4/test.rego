@@ -1,4 +1,4 @@
-package compliance.cis_azure.rules.cis_6_2
+package compliance.cis_azure.rules.cis_6_4
 
 import data.cis_azure.test_data
 import data.compliance.policy.azure.data_adapter
@@ -24,10 +24,10 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid block 22
+	# Valid block 80
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Block",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -35,10 +35,10 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid block 22 UDP
+	# Valid block 80 UDP
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "UDP",
@@ -46,10 +46,10 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 22 for specific ip
+	# Valid allow 80 for specific ip
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -60,7 +60,7 @@ test_pass if {
 	# Valid range
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "23-80",
+		"destinationPortRange": "23-79",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -68,10 +68,10 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 22 Outbound
+	# Valid allow 80 Outbound
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Outbound",
 		"protocol": "TCP",
@@ -79,7 +79,7 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 22 not in ranges
+	# Valid allow 80 not in ranges
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "",
@@ -90,10 +90,10 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 22 without bad source
+	# Valid allow 80 without bad source
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -114,7 +114,7 @@ test_pass if {
 		},
 		{
 			"access": "Block",
-			"destinationPortRange": "22",
+			"destinationPortRange": "80",
 			"destinationPortRanges": [],
 			"direction": "Outbound",
 			"protocol": "TCP",
@@ -126,10 +126,10 @@ test_pass if {
 
 # regal ignore:rule-length
 test_fail if {
-	# Fail with port 22
+	# Fail with port 80
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -137,10 +137,10 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 and range
+	# Fail with port 80 and range
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22,76-80",
+		"destinationPortRange": "80,76-80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -148,10 +148,10 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 as lower range boundary
+	# Fail with port 80 as lower range boundary
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22-30",
+		"destinationPortRange": "80-110",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -159,10 +159,10 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 as upper range boundary
+	# Fail with port 80 as upper range boundary
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "10-22",
+		"destinationPortRange": "10-80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -170,10 +170,10 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 is in range
+	# Fail with port 80 is in range
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "10-30",
+		"destinationPortRange": "10-90",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -181,21 +181,21 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 is in ranges
+	# Fail with port 80 is in ranges
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "",
-		"destinationPortRanges": ["80", "22-37", "3300-3400"],
+		"destinationPortRanges": ["7", "70-90", "3300-3400"],
 		"direction": "Inbound",
 		"protocol": "TCP",
 		"sourceAddressPrefix": "internet",
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 and source address any in prefixes
+	# Fail with port 80 and source address any in prefixes
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -203,10 +203,10 @@ test_fail if {
 		"sourceAddressPrefixes": ["197.198.158.2", "any"],
 	}]}})
 
-	# Fail with port 22 and source address any
+	# Fail with port 80 and source address any
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -214,10 +214,10 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 and source address <nw>/0
+	# Fail with port 80 and source address <nw>/0
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -225,10 +225,10 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 and source address 0.0.0.0
+	# Fail with port 80 and source address 0.0.0.0
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",
@@ -236,10 +236,10 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 22 and source address *
+	# Fail with port 80 and source address *
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
-		"destinationPortRange": "22",
+		"destinationPortRange": "80",
 		"destinationPortRanges": [],
 		"direction": "Inbound",
 		"protocol": "TCP",

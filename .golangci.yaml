@@ -110,8 +110,6 @@ linters-settings:
         disabled: true
       - name: import-shadowing
         disabled: true
-      - name: indent-error-flow
-        disabled: true
       - name: line-length-limit
         disabled: true
       - name: max-public-structs
