@@ -33,13 +33,15 @@ def test_telemetry_indices(cloud_security_telemetry_data):
         "findings",
         "latest_findings",
         "vulnerabilities",
-        "latest_vulnerabilities",
+        # "latest_vulnerabilities", # https://github.com/elastic/security-team/issues/8252
         "score",
     ]
 
     # indices stats
     for index in indices:
-        assert indices_stats[index].doc_count > 0, f"Expected {index} index to contain data"
+        assert (
+            indices_stats[index].doc_count > 0
+        ), f"Expected {index} index to contain data"
 
 
 @pytest.mark.sanity
@@ -53,13 +55,20 @@ def test_telemetry_cloud_account_stats(cloud_security_telemetry_data):
     # account stats
     cloud_account_stats = cloud_security_telemetry_data.cloud_account_stats
     for account in cloud_account_stats:
-        assert len(account.account_id) > 0, f"Telemetry data missing account_id for cloud_account_stats {account}"
-        assert len(account.product) > 0, f"Telemetry data missing product for cloud_account_stats {account}"
+        assert (
+            len(account.account_id) > 0
+        ), f"Telemetry data missing account_id for cloud_account_stats {account}"
+        assert (
+            len(account.product) > 0
+        ), f"Telemetry data missing product for cloud_account_stats {account}"
         # assert ( uncomment once bug is solved https://github.com/elastic/security-team/issues/8149
         #     len(account.package_policy_id) > 0
         # ), f"Telemetry data missing package_policy_id for cloud_account_stats {account}"
 
-        if not (account.product == "kspm" and "CIS Kubernetes" in account.posture_management_stats.benchmark_name):
+        if not (
+            account.product == "kspm"
+            and "CIS Kubernetes" in account.posture_management_stats.benchmark_name
+        ):
             assert (
                 len(account.cloud_provider) > 0
             ), f"Telemetry data missing cloud_provider for cloud_account_stats {account}"
@@ -83,9 +92,15 @@ def test_telemetry_installation_stats(cloud_security_telemetry_data):
     # installation stats
     installation_stats = cloud_security_telemetry_data.installation_stats
     for installation in installation_stats:
-        assert len(installation.package_policy_id) > 0, "Telemetry data missing package_policy_id in installation stats"
-        assert len(installation.feature) > 0, f"Telemetry data missing feature in installation_stats for {installation}"
-        assert installation.agent_count > 0, f"Telemetry data missing agent in installation_stats for {installation}"
+        assert (
+            len(installation.package_policy_id) > 0
+        ), "Telemetry data missing package_policy_id in installation stats"
+        assert (
+            len(installation.feature) > 0
+        ), f"Telemetry data missing feature in installation_stats for {installation}"
+        assert (
+            installation.agent_count > 0
+        ), f"Telemetry data missing agent in installation_stats for {installation}"
         assert (
             len(installation.package_version) > 0
         ), f"Telemetry data missing package_version in installation_stats for {installation}"
