@@ -95,7 +95,7 @@ linters-settings:
       - name: confusing-results
         disabled: true
       - name: cyclomatic
-        disabled: true
+        arguments: [15]
       - name: early-return
         disabled: true
       - name: exported
