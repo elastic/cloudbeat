@@ -22,12 +22,6 @@ import os
 from urllib.parse import unquote
 
 
-class SlackException(Exception):
-    """
-    Custom exception class for errors related to Slack notifications.
-    """
-
-
 def create_message_block(message):
     """
     Creates a message block for Slack with the given text.
@@ -77,8 +71,8 @@ def process_message_env():
               ]
           }
     """
-    message = os.environ.get("MESSAGE", "No message")
-    if message != "No message":
+    message = os.environ.get("MESSAGE")
+    if message:
         message = replace_user_mentions(message)
         if os.environ["URL_ENCODED"] == "true":
             message = unquote(message)
@@ -113,11 +107,11 @@ def replace_user_mentions(message):
     """
     github_user = os.environ.get("GITHUB_ACTOR")
     if not github_user:
-        print(f"::warning::GitHub user information is missing. Falling back to the original message")
+        print("::warning::GitHub user information is missing. Falling back to the original message")
         return message
     slack_user_id = os.environ.get("SLACK_USER")
     if not slack_user_id:
-        print(f"::warning::Slack user ID is missing. Falling back to the original message")
+        print("::warning::Slack user ID is missing. Falling back to the original message")
         return message
     return message.replace(f"{github_user}", f"<@{slack_user_id}>")
 
@@ -126,18 +120,25 @@ def main():
     """
     Main function to process environment variables and generate a Slack-compatible message.
     """
-    if os.environ.get("MESSAGE"):
-        json_data = process_message_env()
-    elif os.environ.get("PAYLOAD"):
-        payload = replace_user_mentions(os.environ["PAYLOAD"])
-        json_data = json.loads(payload)
-    else:
-        raise SlackException("Either message or payload must be set.")
+    try:
+        if os.environ.get("MESSAGE"):
+            json_data = process_message_env()
+        elif os.environ.get("PAYLOAD"):
+            payload = replace_user_mentions(os.environ["PAYLOAD"])
+            json_data = json.loads(payload)
+        else:
+            raise ValueError("Either message or payload must be set.")
 
-    set_output("payload", json.dumps(json_data))
+        set_output("payload", json.dumps(json_data))
 
-    if os.environ.get("MASK") == "true":
-        print(f"::add-mask::{json.dumps(json_data)}")
+        if os.environ.get("MASK") == "true":
+            print(f"::add-mask::{json.dumps(json_data)}")
+    except TypeError as err:
+        print(f"::set-failed::Failed to serialize to JSON: {str(err)}")
+    except json.JSONDecodeError as err:
+        print(f"::set-failed::Failed to deserialize: {str(err)}")
+    except ValueError as err:
+        print(f"::set-failed::{str(err)}")
 
 
 if __name__ == "__main__":

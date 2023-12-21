@@ -6,6 +6,25 @@ constructs a Slack payload based on the workflow status.
 """
 import os
 import json
+from dataclasses import dataclass, field
+
+
+@dataclass
+class EnvironmentVariables:
+    """
+    Dataclass for storing environment variables.
+    """
+
+    workflow: str = field(default_factory=lambda: check_env_var("WORKFLOW"))
+    github_actor: str = field(default_factory=lambda: check_env_var("GITHUB_ACTOR"))
+    github_run_url: str = field(default_factory=lambda: check_env_var("RUN_URL"))
+    job_status: str = field(default_factory=lambda: check_env_var("JOB_STATUS"))
+    kibana_url: str = field(default_factory=lambda: check_env_var("KIBANA_URL"))
+    s3_bucket: str = field(default_factory=lambda: check_env_var("S3_BUCKET"))
+    deployment_name: str = field(default_factory=lambda: check_env_var("DEPLOYMENT_NAME"))
+    stack_version: str = field(default_factory=lambda: check_env_var("STACK_VERSION"))
+    docker_image: str = field(default_factory=lambda: check_env_var("DOCKER_IMAGE_OVERRIDE"))
+    ess_type: str = field(default_factory=lambda: check_env_var("ESS_TYPE"))
 
 
 color_by_job_status = {
@@ -56,10 +75,108 @@ def set_failed(message: str):
     print(f"::set-failed::{message}")
 
 
-class BuildSlackException(Exception):
+def generate_slack_payload(env_vars: EnvironmentVariables) -> dict:
     """
-    Custom exception class for errors related to building Slack notifications.
+    Generate a Slack payload based on the provided environment variables.
+
+    Args:
+        env_vars (EnvironmentVariables): An instance of the EnvironmentVariables class containing
+            the necessary environment variables.
+
+    Returns:
+        dict: A dictionary representing the Slack payload.
+
+    Example:
+        payload = generate_slack_payload(EnvironmentVariables())
     """
+    color = color_by_job_status.get(env_vars.job_status, "#439FE0")
+    ess_type_msg = f"*ESS Type:* `{env_vars.ess_type}`"
+    stack_version_msg = f"*Stack Version: *`{env_vars.stack_version}`"
+    docker_image_msg = f"*Docker Override:* `{env_vars.docker_image}`"
+    message = f"{ess_type_msg}\n{stack_version_msg}\n{docker_image_msg}"
+    title_text = f"{env_vars.workflow} job `{env_vars.deployment_name}` triggered by `{env_vars.github_actor}`"
+    docs_url = "https://github.com/elastic/cloudbeat/blob/main/dev-docs/Cloud-Env-Testing.md"
+    slack_payload = {
+        "text": title_text,
+        "blocks": [
+            {
+                "type": "divider",
+            },
+        ],
+        "attachments": [
+            {
+                "color": color,
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": title_text,
+                        },
+                    },
+                    {
+                        "type": "divider",
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": message,
+                        },
+                    },
+                    {
+                        "type": "divider",
+                    },
+                    {
+                        "type": "actions",
+                        "elements": [
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "kibana link",
+                                },
+                                "style": "primary",
+                                "url": f"{env_vars.kibana_url}",
+                                "action_id": "kibana-instance-button",
+                            },
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "state bucket",
+                                },
+                                "style": "primary",
+                                "url": f"{env_vars.s3_bucket}",
+                                "action_id": "s3-bucket-button",
+                            },
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "action run",
+                                },
+                                "style": "primary",
+                                "url": f"{env_vars.github_run_url}",
+                                "action_id": "action-run-button",
+                            },
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "docs",
+                                },
+                                "style": "primary",
+                                "url": docs_url,
+                                "action_id": "docs-button",
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    }
+    return slack_payload
 
 
 def run():
@@ -70,105 +187,15 @@ def run():
     setting GitHub Action outputs, and handling exceptions related to building Slack notifications.
     """
     try:
-        # Validate env vars
-        workflow = check_env_var("WORKFLOW")
-        github_actor = check_env_var("GITHUB_ACTOR")
-        github_run_url = check_env_var("RUN_URL")
-        job_status = check_env_var("JOB_STATUS")
-        kibana_url = check_env_var("KIBANA_URL")
-        s3_bucket = check_env_var("S3_BUCKET")
-        deployment_name = check_env_var("DEPLOYMENT_NAME")
-        stack_version = check_env_var("STACK_VERSION")
-        docker_image = check_env_var("DOCKER_IMAGE_OVERRIDE")
-        ess_type = check_env_var("ESS_TYPE")
-
-        color = color_by_job_status.get(job_status, "#439FE0")  # Default to blue
-        message = f"*ESS Type:* `{ess_type}`\n*Stack Version: *`{stack_version}`\n*Docker Override:* `{docker_image}`"
-        docs_url = "https://github.com/elastic/cloudbeat/blob/main/dev-docs/Cloud-Env-Testing.md"
-        slack_payload = {
-            "text": f"{workflow} job `{deployment_name}` triggered by `{github_actor}`",
-            "blocks": [
-                {
-                    "type": "divider",
-                },
-            ],
-            "attachments": [
-                {
-                    "color": color,
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": f"{workflow} job `{deployment_name}` triggered by `{github_actor}`",
-                            },
-                        },
-                        {
-                            "type": "divider",
-                        },
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": message,
-                            },
-                        },
-                        {
-                            "type": "divider",
-                        },
-                        {
-                            "type": "actions",
-                            "elements": [
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "kibana link",
-                                    },
-                                    "style": "primary",
-                                    "url": f"{kibana_url}",
-                                    "action_id": "kibana-instance-button",
-                                },
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "state bucket",
-                                    },
-                                    "style": "primary",
-                                    "url": f"{s3_bucket}",
-                                    "action_id": "s3-bucket-button",
-                                },
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "action run",
-                                    },
-                                    "style": "primary",
-                                    "url": f"{github_run_url}",
-                                    "action_id": "action-run-button",
-                                },
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "docs",
-                                    },
-                                    "style": "primary",
-                                    "url": docs_url,
-                                    "action_id": "docs-button",
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        }
+        env_vars = EnvironmentVariables()
+        slack_payload = generate_slack_payload(env_vars)
         set_output("payload", json.dumps(slack_payload))
-
-    except BuildSlackException as err:
+    except ValueError as err:
         set_failed(str(err))
+    except TypeError as err:
+        set_failed(f"Failed to serialize to JSON: {str(err)}")
+    except (KeyError, FileNotFoundError, PermissionError) as err:
+        set_failed(f"Failed to store GITHUB_OUTPUT: {str(err)}")
 
 
 if __name__ == "__main__":
