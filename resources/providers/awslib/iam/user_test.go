@@ -19,6 +19,7 @@ package iam
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -27,7 +28,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/smithy-go"
 	"github.com/aws/smithy-go/middleware"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -195,27 +195,29 @@ func Test_GetUsers(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		p := createProviderFromMockValues(t, test.mocksReturnVals)
+		t.Run(test.name, func(t *testing.T) {
+			p := createProviderFromMockValues(t, test.mocksReturnVals)
 
-		users, err := p.GetUsers(context.TODO())
+			users, err := p.GetUsers(context.TODO())
 
-		if !test.wantErr {
-			require.NoError(t, err)
-		} else {
-			require.Error(t, err)
-		}
-
-		assert.Len(t, users, test.expectedUsers)
-		for i, user := range users {
-			assert.Equal(t, test.expected[i].Arn, user.(User).Arn)
-			assert.Equal(t, test.expected[i].HasUsed, user.(User).AccessKeys[0].HasUsed)
-			assert.Equal(t, test.expected[i].MfaActive, user.(User).MfaActive)
-			assert.Equal(t, test.expected[i].hasAttachedPolicy, len(user.(User).AttachedPolicies)+len(user.(User).InlinePolicies) > 0)
-
-			if test.expected[i].MfaActive {
-				assert.Equal(t, test.expected[i].IsVirtualMFA, user.(User).MFADevices[0].IsVirtual)
+			if !test.wantErr {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
 			}
-		}
+
+			assert.Len(t, users, test.expectedUsers)
+			for i, user := range users {
+				assert.Equal(t, test.expected[i].Arn, user.(User).Arn)
+				assert.Equal(t, test.expected[i].HasUsed, user.(User).AccessKeys[0].HasUsed)
+				assert.Equal(t, test.expected[i].MfaActive, user.(User).MfaActive)
+				assert.Equal(t, test.expected[i].hasAttachedPolicy, len(user.(User).AttachedPolicies)+len(user.(User).InlinePolicies) > 0)
+
+				if test.expected[i].MfaActive {
+					assert.Equal(t, test.expected[i].IsVirtualMFA, user.(User).MFADevices[0].IsVirtual)
+				}
+			}
+		})
 	}
 }
 

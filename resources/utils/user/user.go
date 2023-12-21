@@ -20,12 +20,11 @@ package user
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // The util implementation is based on Go "os/user" native pkg
