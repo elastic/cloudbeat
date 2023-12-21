@@ -119,7 +119,7 @@ func lookupUserId(uid string, filepath string) (*User, error) {
 // readCols is the minimum number of colon-separated fields that will be passed
 // to fn; in a long line additional fields may be silently discarded.
 //
-//revive:disable:cognitive-complexity
+//revive:disable-next-line:cognitive-complexity
 func readColonFile(r io.Reader, fn lineFunc, readCols int) (v any, err error) {
 	rd := bufio.NewReader(r)
 
