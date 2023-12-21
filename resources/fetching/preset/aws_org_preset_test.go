@@ -48,7 +48,7 @@ func TestNewCisAwsOrganizationFetchers_Leak(t *testing.T) {
 	})
 }
 
-func subtest(t *testing.T, drain bool) {
+func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 	const (
 		nAccounts           = 5
 		nFetchers           = 33
@@ -235,7 +235,7 @@ func mockResource() *fetching.MockResource {
 			AccountName: "some-alias",
 		},
 	}, nil).Once()
-	m.EXPECT().GetElasticCommonData().Return(map[string]interface{}{}, nil).Once()
+	m.EXPECT().GetElasticCommonData().Return(map[string]any{}, nil).Once()
 	return &m
 }
 

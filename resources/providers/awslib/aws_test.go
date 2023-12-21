@@ -28,12 +28,12 @@ import (
 func TestGetClient(t *testing.T) {
 	type args struct {
 		region *string
-		list   map[string]interface{}
+		list   map[string]any
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    interface{}
+		want    any
 		wantErr bool
 	}{
 		{
@@ -41,14 +41,14 @@ func TestGetClient(t *testing.T) {
 			wantErr: true,
 			args: args{
 				region: aws.String("eu-east-1"),
-				list:   map[string]interface{}{},
+				list:   map[string]any{},
 			},
 		},
 		{
 			name: "Client found",
 			args: args{
 				region: aws.String("eu-east-1"),
-				list: map[string]interface{}{
+				list: map[string]any{
 					"eu-east-1": struct{}{},
 				},
 			},

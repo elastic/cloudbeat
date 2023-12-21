@@ -89,9 +89,9 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
 		ecs, err := r.Resource.GetElasticCommonData()
 		s.Require().NoError(err)
-		cloud := ecs["cloud"].(map[string]interface{})
-		account := cloud["account"].(map[string]interface{})
-		org := cloud["Organization"].(map[string]interface{})
+		cloud := ecs["cloud"].(map[string]any)
+		account := cloud["account"].(map[string]any)
+		org := cloud["Organization"].(map[string]any)
 
 		s.Equal("prjName", account["name"])
 		s.Equal("prjId", account["id"])

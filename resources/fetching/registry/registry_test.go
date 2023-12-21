@@ -205,7 +205,7 @@ type numberResource struct {
 	Num int
 }
 
-func (res numberResource) GetData() interface{} {
+func (res numberResource) GetData() any {
 	return res.Num
 }
 

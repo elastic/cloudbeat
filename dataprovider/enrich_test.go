@@ -28,12 +28,12 @@ import (
 func TestEnrichSuccess(t *testing.T) {
 	tests := []struct {
 		name     string
-		data     map[string]interface{}
+		data     map[string]any
 		expected map[string]string
 	}{
 		{
 			name: "single value",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"a-field": "a-value",
 			},
 			expected: map[string]string{
@@ -42,7 +42,7 @@ func TestEnrichSuccess(t *testing.T) {
 		},
 		{
 			name: "multiple values",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"some-field":  "some-value",
 				"other-field": "other-value",
 			},
@@ -53,9 +53,9 @@ func TestEnrichSuccess(t *testing.T) {
 		},
 		{
 			name: "internal object",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"some-field": "some-value",
-				"more-fields": map[string]interface{}{
+				"more-fields": map[string]any{
 					"internal-field": "internal-value",
 				},
 			},
@@ -72,7 +72,7 @@ func TestEnrichSuccess(t *testing.T) {
 			dp.EXPECT().GetElasticCommonData().Return(tt.data, nil)
 
 			ev := &beat.Event{
-				Fields: map[string]interface{}{},
+				Fields: map[string]any{},
 			}
 			err := NewEnricher(dp).EnrichEvent(ev)
 			require.NoError(t, err)
@@ -91,7 +91,7 @@ func TestEnrichError(t *testing.T) {
 	dp.EXPECT().GetElasticCommonData().Return(nil, assert.AnError)
 
 	ev := &beat.Event{
-		Fields: map[string]interface{}{},
+		Fields: map[string]any{},
 	}
 	err := NewEnricher(dp).EnrichEvent(ev)
 	require.Error(t, err)
