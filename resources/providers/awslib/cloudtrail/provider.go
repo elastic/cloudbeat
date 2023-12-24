@@ -45,7 +45,7 @@ func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 		return nil, err
 	}
 
-	var result []TrailInfo
+	result := make([]TrailInfo, 0, len(output.TrailList))
 	for _, trail := range output.TrailList {
 		if trail.Name == nil {
 			continue

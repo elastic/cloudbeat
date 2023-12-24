@@ -74,7 +74,7 @@ func (l *logger) SetLevel(level logging.Level) {
 }
 
 func mapToArray(m map[string]any) []any {
-	var ret []any
+	ret := make([]any, 0, len(m))
 	for k, v := range m {
 		ret = append(ret, k, v)
 	}

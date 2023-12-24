@@ -43,7 +43,6 @@ const (
 )
 
 func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
-	var users []awslib.AwsResource
 	apiUsers, err := p.listUsers(ctx)
 	if err != nil {
 		p.log.Errorf("fail to list users, error: %v", err)
@@ -60,6 +59,7 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		apiUsers = append(apiUsers, *rootUser)
 	}
 
+	users := make([]awslib.AwsResource, 0, len(apiUsers))
 	var userAccount *CredentialReport
 	for _, apiUser := range apiUsers {
 		var username string
@@ -182,7 +182,7 @@ func (p Provider) listMFADevices(ctx context.Context, user types.User) ([]AuthDe
 		input.Marker = output.Marker
 	}
 
-	var devices []AuthDevice
+	devices := make([]AuthDevice, 0, len(apiDevices))
 	for _, apiDevice := range apiDevices {
 		isVirtual := true
 		if !strings.HasPrefix(*apiDevice.SerialNumber, "arn:") {
@@ -243,7 +243,7 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 		}
 
 		// loop until max retries or till the report is ready
-		var countRetries = 0
+		countRetries := 0
 		report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 		if errors.As(err, &apiErr) {
 			for apiErr.ErrorCode() == "NoSuchEntity" || apiErr.ErrorCode() == "ReportInProgress" {

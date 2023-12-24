@@ -33,7 +33,7 @@ def test_telemetry_indices(cloud_security_telemetry_data):
         "findings",
         "latest_findings",
         "vulnerabilities",
-        "latest_vulnerabilities",
+        # "latest_vulnerabilities",  # https://github.com/elastic/security-team/issues/8252
         "score",
     ]
 

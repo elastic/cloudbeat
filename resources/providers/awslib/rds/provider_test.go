@@ -38,8 +38,10 @@ type ProviderTestSuite struct {
 	suite.Suite
 }
 
-type rdsClientMockReturnVals map[string]map[string][]any
-type ec2GetRouteTableForSubnetVals [][]any
+type (
+	rdsClientMockReturnVals       map[string]map[string][]any
+	ec2GetRouteTableForSubnetVals [][]any
+)
 
 var (
 	identifier           = "identifier"
@@ -115,7 +117,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 					StorageEncrypted:        false,
 					AutoMinorVersionUpgrade: false,
 					PubliclyAccessible:      false,
-					Subnets:                 []Subnet(nil),
+					Subnets:                 []Subnet{},
 					region:                  awslib.DefaultRegion,
 				},
 				DBInstance{
@@ -128,8 +130,10 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 						{ID: identifier2, RouteTable: &RouteTable{
 							ID:     identifier,
 							Routes: []Route{{DestinationCidrBlock: &destinationCidrBlock, GatewayId: &gatewayId}},
-						}}},
-					region: awslib.DefaultRegion},
+						}},
+					},
+					region: awslib.DefaultRegion,
+				},
 			},
 		},
 	}
