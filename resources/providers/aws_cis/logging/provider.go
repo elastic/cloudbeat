@@ -45,7 +45,7 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 		return nil, trailsErr
 	}
 
-	var enrichedTrails []awslib.AwsResource
+	enrichedTrails := make([]awslib.AwsResource, 0, len(trails))
 	for _, info := range trails {
 		if info.Trail.S3BucketName == nil {
 			continue

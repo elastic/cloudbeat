@@ -133,13 +133,11 @@ func (p *provider) runPaginatedQuery(ctx context.Context, query armresourcegraph
 			resourceAssets = append(resourceAssets, structuredAsset)
 		}
 
-		if *response.ResultTruncated == *to.Ptr(armresourcegraph.ResultTruncatedTrue) &&
-			response.SkipToken != nil &&
-			*response.SkipToken != "" {
-			query.Options.SkipToken = response.SkipToken
-		} else {
+		if *response.ResultTruncated == armresourcegraph.ResultTruncatedFalse ||
+			strings.Dereference(response.SkipToken) == "" {
 			break
 		}
+		query.Options.SkipToken = response.SkipToken
 	}
 
 	return resourceAssets, nil

@@ -35,7 +35,7 @@ func (r NACLInfo) GetResourceArn() string {
 	if r.NetworkAclId == nil {
 		return ""
 	}
-	//arn:aws:ec2:region:account-id:network-acl/network-acl-id
+	// arn:aws:ec2:region:account-id:network-acl/network-acl-id
 	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-acl/%s", r.region, r.awsAccount, *r.NetworkAclId)
 }
 

@@ -85,20 +85,18 @@ func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.Gc
 
 	var opts []option.ClientOption
 	if cfg.CredentialsFilePath != "" {
-		if err := validateJSONFromFile(cfg.CredentialsFilePath); err == nil {
-			log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
-			opts = append(opts, option.WithCredentialsFile(cfg.CredentialsFilePath))
-		} else {
+		if err := validateJSONFromFile(cfg.CredentialsFilePath); err != nil {
 			return nil, err
 		}
+		log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
+		opts = append(opts, option.WithCredentialsFile(cfg.CredentialsFilePath))
 	}
 	if cfg.CredentialsJSON != "" {
-		if json.Valid([]byte(cfg.CredentialsJSON)) {
-			log.Info("Appending credentials JSON to client options")
-			opts = append(opts, option.WithCredentialsJSON([]byte(cfg.CredentialsJSON)))
-		} else {
+		if !json.Valid([]byte(cfg.CredentialsJSON)) {
 			return nil, ErrInvalidCredentialsJSON
 		}
+		log.Info("Appending credentials JSON to client options")
+		opts = append(opts, option.WithCredentialsJSON([]byte(cfg.CredentialsJSON)))
 	}
 
 	return p.getGcpFactoryConfig(ctx, cfg, opts)

@@ -24,7 +24,7 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid block 3389
+	# Valid block 22
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Block",
 		"destinationPortRange": "22",
@@ -35,7 +35,7 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid block 3389 UDP
+	# Valid block 22 UDP
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -46,7 +46,7 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 3389 for specific ip
+	# Valid allow 22 for specific ip
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -68,7 +68,7 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 3389 Outbound
+	# Valid allow 22 Outbound
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -79,7 +79,7 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 3389 not in ranges
+	# Valid allow 22 not in ranges
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "",
@@ -90,7 +90,7 @@ test_pass if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Valid allow 3389 without bad source
+	# Valid allow 22 without bad source
 	eval_pass with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -114,7 +114,7 @@ test_pass if {
 		},
 		{
 			"access": "Block",
-			"destinationPortRange": "3389",
+			"destinationPortRange": "22",
 			"destinationPortRanges": [],
 			"direction": "Outbound",
 			"protocol": "TCP",
@@ -126,7 +126,7 @@ test_pass if {
 
 # regal ignore:rule-length
 test_fail if {
-	# Fail with port 3389
+	# Fail with port 22
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -137,7 +137,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 and range
+	# Fail with port 22 and range
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22,76-80",
@@ -148,7 +148,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 as lower range boundary
+	# Fail with port 22 as lower range boundary
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22-30",
@@ -159,7 +159,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 as upper range boundary
+	# Fail with port 22 as upper range boundary
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "10-22",
@@ -170,7 +170,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 is in range
+	# Fail with port 22 is in range
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "10-30",
@@ -181,7 +181,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 is in ranges
+	# Fail with port 22 is in ranges
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "",
@@ -192,7 +192,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 and source address any in prefixes
+	# Fail with port 22 and source address any in prefixes
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -203,7 +203,7 @@ test_fail if {
 		"sourceAddressPrefixes": ["197.198.158.2", "any"],
 	}]}})
 
-	# Fail with port 3389 and source address any
+	# Fail with port 22 and source address any
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -214,7 +214,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 and source address <nw>/0
+	# Fail with port 22 and source address <nw>/0
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -225,7 +225,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 and source address 0.0.0.0
+	# Fail with port 22 and source address 0.0.0.0
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",
@@ -236,7 +236,7 @@ test_fail if {
 		"sourceAddressPrefixes": [],
 	}]}})
 
-	# Fail with port 3389 and source address *
+	# Fail with port 22 and source address *
 	eval_fail with input as test_data.generate_vm_with_extension({"network": {"securityRules": [{
 		"access": "Allow",
 		"destinationPortRange": "22",

@@ -33,13 +33,14 @@ func TestPublisher_HandleEvents(t *testing.T) {
 	testhelper.SkipLong(t)
 
 	type testCase struct {
-		name              string
-		interval          time.Duration
-		threshold         int
-		ctxTimeout        time.Duration
-		eventCount        int
-		expectedEventSize []int
-		closeChannel      bool
+		name                  string
+		interval              time.Duration
+		threshold             int
+		ctxTimeout            time.Duration
+		eventCount            int
+		expectedEventSize     []int
+		closeChannel          bool
+		expectedEventsInCycle int
 	}
 	testCases := []testCase{
 		{
@@ -115,14 +116,6 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			eventCount:        4,
 			expectedEventSize: []int{6},
 		},
-		//{
-		//	name:              "Publish events on interval reached 2 times",
-		//	interval:          45 * time.Millisecond,
-		//	threshold:         100,
-		//	ctxTimeout:        200 * time.Millisecond,
-		//	eventCount:        10,
-		//	expectedEventSize: []int{10, 26, 9},
-		// },
 		{
 			name:              "Publish events on closed channel",
 			interval:          time.Minute,
@@ -131,6 +124,15 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			eventCount:        4,
 			expectedEventSize: []int{6},
 			closeChannel:      true,
+		},
+		{
+			name:                  "Publish events on interval reached 2 times",
+			interval:              55 * time.Millisecond,
+			threshold:             100,
+			ctxTimeout:            250 * time.Millisecond,
+			eventCount:            10,
+			expectedEventSize:     []int{10, 26, 9},
+			expectedEventsInCycle: 4,
 		},
 	}
 
@@ -150,12 +152,13 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			eventsChannel := make(chan []beat.Event)
 
 			go func(tc testCase) {
+				start := time.Now()
 				for i := 0; i < tc.eventCount; i++ {
 					select {
 					case <-ctx.Done():
 						return
 					// Simulate events being sent to the channel
-					case eventsChannel <- generateEvents(i):
+					case eventsChannel <- generateEvents(t, i, tc.expectedEventsInCycle, tc.interval, start):
 					}
 					time.Sleep(10 * time.Millisecond)
 				}
@@ -175,10 +178,26 @@ func lengthMatcher(length int) func(events []beat.Event) bool {
 	}
 }
 
-func generateEvents(size int) []beat.Event {
+func generateEvents(t *testing.T, size int, expectedEventsInCycle int, interval time.Duration, start time.Time) []beat.Event {
+	sleepOnCycleEnd(t, size, expectedEventsInCycle, interval, start)
+	t.Logf(" %d events at %dms", size, time.Since(start).Milliseconds())
 	results := make([]beat.Event, size)
 	for i := 0; i < size; i++ {
 		results[i] = beat.Event{}
 	}
 	return results
+}
+
+const gracePeriod = 10 * time.Millisecond
+
+// sleepOnCycleEnd once the expected amount of events to be published is reached,
+// wait the rest of the interval + grace period. The grace periods exists to avoid delays on the tick
+func sleepOnCycleEnd(t *testing.T, size int, eventCount int, interval time.Duration, start time.Time) {
+	if eventCount > 0 && size > 1 && size%eventCount == 1 {
+		cycle := size / eventCount
+		cycleInterval := interval * time.Duration(cycle)
+		waitPeriod := cycleInterval - time.Since(start) + gracePeriod
+		t.Logf("--- Waiting %s (cycle %d interval %s)", waitPeriod.String(), cycle, cycleInterval.String())
+		time.Sleep(waitPeriod)
+	}
 }

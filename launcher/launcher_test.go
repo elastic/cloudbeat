@@ -289,6 +289,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 	}
 
 	for _, tt := range testcases {
+		tt := tt
 		s.Run(tt.name, func() {
 			mocks := s.initMocks()
 			sut := s.newLauncher(mocks, beaterMockCreator)
@@ -489,9 +490,10 @@ func (s *LauncherTestSuite) TestLauncherStopTimeout() {
 
 	sut.wg.Add(1) // keep waiting for graceful period
 	go func() {
+		defer sut.wg.Done()
+
 		sut.Stop()
-		time.Sleep(shutdownGracePeriod + 10*time.Millisecond)
-		sut.wg.Done()
+		time.Sleep(shutdownGracePeriod + 100*time.Millisecond)
 	}()
 
 	err := sut.run()

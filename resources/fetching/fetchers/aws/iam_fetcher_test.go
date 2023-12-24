@@ -19,13 +19,13 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
@@ -93,8 +93,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 			AttachmentCount: aws.Int32(1),
 			IsAttachable:    true,
 		},
-		Document: map[string]interface{}{
-			"Statements": []map[string]interface{}{
+		Document: map[string]any{
+			"Statements": []map[string]any{
 				{
 					"Resource": "*",
 					"Action":   "*",
@@ -296,8 +296,8 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 					AttachmentCount: aws.Int32(1),
 					IsAttachable:    true,
 				},
-				Document: map[string]interface{}{
-					"Statements": []map[string]interface{}{
+				Document: map[string]any{
+					"Statements": []map[string]any{
 						{
 							"Resource": "*",
 							"Action":   "*",

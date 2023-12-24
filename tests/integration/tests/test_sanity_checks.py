@@ -29,13 +29,12 @@ if not AGENT_VERSION:
 
 tests_data = {
     "cis_aws": [
-        "cloud-compute",
         "identity-management",
         "monitoring",
         "cloud-audit",
         "cloud-database",
         "cloud-config",
-    ],  # Exclude "cloud-storage" due to lack of fetcher control and potential delays.
+    ],  # Exclude "cloud-compute", "cloud-storage" due to lack of fetcher control and potential delays.
     "cis_gcp": [
         "cloud-compute",
         "cloud-database",
