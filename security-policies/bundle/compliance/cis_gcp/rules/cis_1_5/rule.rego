@@ -33,5 +33,15 @@ finding = result if {
 }
 
 evidence = admin_roles if {
-	admin_roles := {v | v := service_accounts[_]; regex.match(`(.*Admin|.*admin|roles/(editor|owner))`, v.role)}
-} else = data_adapter.iam_policy
+	admin_roles := {role: members |
+		entry := service_accounts[_]
+		role := entry.role
+		members := entry.members
+		regex.match(`(.*Admin|.*admin|roles/(editor|owner))`, role)
+	}
+	count(admin_roles) > 0
+} else = {role: members |
+	entry := service_accounts[_]
+	role := entry.role
+	members := entry.members
+}
