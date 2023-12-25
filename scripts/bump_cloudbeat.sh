@@ -9,6 +9,10 @@ echo "NEXT_MINOR_VERSION: $NEXT_MINOR_VERSION"
 echo "CURRENT_CLOUDBEAT_VERSION: $CURRENT_CLOUDBEAT_VERSION"
 echo "CURRENT_MINOR_VERSION: $CURRENT_MINOR_VERSION"
 
+# TODO use obtained service account user
+git config --global user.email "elasticmachine@users.noreply.github.com"
+git config --global user.name "Elastic Machine"
+
 create_release_branch() {
     if git show-ref --quiet refs/heads/$CURRENT_MINOR_VERSION; then
       echo "release branch '$CURRENT_MINOR_VERSION' already exists"
@@ -44,6 +48,9 @@ update_version_arm_template() {
     local organization_account_file="deploy/azure/ARM-for-organization-account.json"
     jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"$NEXT_CLOUDBEAT_VERSION\"" $single_account_file > tmp.json && mv tmp.json $single_account_file
     jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"$NEXT_CLOUDBEAT_VERSION\"" $organization_account_file > tmp.json && mv tmp.json $organization_account_file
+
+    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$NEXT_MINOR_VERSION/g" $single_account_file
+    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$NEXT_MINOR_VERSION/g" $organization_account_file
 }
 
 update_version_beat() {
@@ -51,22 +58,14 @@ update_version_beat() {
     sed -i'' -E "s/const defaultBeatVersion = .*/const defaultBeatVersion = \"$NEXT_CLOUDBEAT_VERSION\"/g" version/version.go
 }
 
-create_cloudbeat_pr() {
-    echo "Add changes"
+create_cloudbeat_versions_pr() {
     local BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
-
-    # TODO use obtained service account user
-    git config --global user.email "elasticmachine@users.noreply.github.com"
-    git config --global user.name "Elastic Machine"
-
     git checkout -b "$BRANCH" main
     git add .
     git commit -m "Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
     git push origin "$BRANCH"
-
-    echo "Create PR to bump cloudbeat version"
     gh pr create --title "Bump cloudbeat version" \
-             --body "Automated PR" \
+             --body "Bump cloudbeat to new version - $NEXT_CLOUDBEAT_VERSION (Automated PR)" \
              --base "main" \
              --head "$BRANCH"
 }
@@ -75,10 +74,25 @@ bump_cloudbeat() {
     update_version_mergify
     update_version_arm_template
     update_version_beat
+    create_cloudbeat_versions_pr
+}
+
+bump_hermit() {
+  local BRANCH="bump-hermit-to-$NEXT_CLOUDBEAT_VERSION"
+  git checkout -b "$BRANCH" main
+  sed -i'' -E "s/\"CLOUDBEAT_VERSION\": .*/\"CLOUDBEAT_VERSION\": \"$NEXT_CLOUDBEAT_VERSION\",/g" bin/hermit.hcl
+  git add bin/hermit.hcl
+  git commit -m "Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
+  git push origin "$BRANCH"
+  gh pr create --title "Bump hermit cloudbeat version" \
+             --body "to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available. (Automated PR)" \
+             --base "main" \
+             --head "$BRANCH"
 }
 
 create_release_branch
-git checkout main 
 bump_cloudbeat
-create_cloudbeat_pr
+bump_hermit
+
+
 
