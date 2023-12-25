@@ -20,12 +20,11 @@ package user
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // The util implementation is based on Go "os/user" native pkg
@@ -64,7 +63,7 @@ type Group struct {
 }
 
 // lineFunc returns a value, an error, or (nil, nil) to skip the row.
-type lineFunc func(line []byte) (v interface{}, err error)
+type lineFunc func(line []byte) (v any, err error)
 
 type OSUser interface {
 	GetUserNameFromID(uid string, userFilePath string) (string, error)
@@ -119,7 +118,9 @@ func lookupUserId(uid string, filepath string) (*User, error) {
 //
 // readCols is the minimum number of colon-separated fields that will be passed
 // to fn; in a long line additional fields may be silently discarded.
-func readColonFile(r io.Reader, fn lineFunc, readCols int) (v interface{}, err error) {
+//
+//revive:disable-next-line:cognitive-complexity,cyclomatic
+func readColonFile(r io.Reader, fn lineFunc, readCols int) (v any, err error) {
 	rd := bufio.NewReader(r)
 
 	// Read the file line-by-line.
@@ -190,7 +191,7 @@ func matchGroupIndexValue(value string, idx int) lineFunc {
 		leadColon = ":"
 	}
 	substr := []byte(leadColon + value + ":")
-	return func(line []byte) (v interface{}, err error) {
+	return func(line []byte) (v any, err error) {
 		if !bytes.Contains(line, substr) || bytes.Count(line, []byte(":")) < 3 {
 			return
 		}
@@ -228,7 +229,7 @@ func matchUserIndexValue(value string, idx int) lineFunc {
 		leadColon = ":"
 	}
 	substr := []byte(leadColon + value + ":")
-	return func(line []byte) (v interface{}, err error) {
+	return func(line []byte) (v any, err error) {
 		if !bytes.Contains(line, substr) || bytes.Count(line, []byte(":")) < 6 {
 			return
 		}

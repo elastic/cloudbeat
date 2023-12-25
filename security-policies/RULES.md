@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 41/151 implemented rules (27%)
+### 44/151 implemented rules (29%)
 
-#### Automated rules: 41/77 (53%)
+#### Automated rules: 44/77 (57%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -519,9 +519,9 @@
 |                          5.4                           | Logging and Monitoring                  | Ensure that Azure Monitor Resource Logging is Enabled for All Services that Support it                                                                 |        :x:         |  Manual   |
 |    [5.5](bundle/compliance/cis_azure/rules/cis_5_5)    | Logging and Monitoring                  | Ensure that SKU Basic/Consumption is not used on artifacts that need to be monitored (Particularly for Production Workloads)                           | :white_check_mark: | Automated |
 |    [6.1](bundle/compliance/cis_azure/rules/cis_6_1)    | Networking                              | Ensure that RDP access from the Internet is evaluated and restricted                                                                                   | :white_check_mark: | Automated |
-|                          6.2                           | Networking                              | Ensure that SSH access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
-|                          6.3                           | Networking                              | Ensure that UDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
-|                          6.4                           | Networking                              | Ensure that HTTP(S) access from the Internet is evaluated and restricted                                                                               |        :x:         | Automated |
+|    [6.2](bundle/compliance/cis_azure/rules/cis_6_2)    | Networking                              | Ensure that SSH access from the Internet is evaluated and restricted                                                                                   | :white_check_mark: | Automated |
+|    [6.3](bundle/compliance/cis_azure/rules/cis_6_3)    | Networking                              | Ensure that UDP access from the Internet is evaluated and restricted                                                                                   | :white_check_mark: | Automated |
+|    [6.4](bundle/compliance/cis_azure/rules/cis_6_4)    | Networking                              | Ensure that HTTP(S) access from the Internet is evaluated and restricted                                                                               | :white_check_mark: | Automated |
 |    [6.5](bundle/compliance/cis_azure/rules/cis_6_5)    | Networking                              | Ensure that Network Security Group Flow Log retention period is 'greater than 90 days'                                                                 | :white_check_mark: | Automated |
 |    [6.6](bundle/compliance/cis_azure/rules/cis_6_6)    | Networking                              | Ensure that Network Watcher is 'Enabled'                                                                                                               | :white_check_mark: | Automated |
 |                          6.7                           | Networking                              | Ensure that Public IP addresses are Evaluated on a Periodic Basis                                                                                      |        :x:         |  Manual   |

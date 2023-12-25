@@ -37,7 +37,7 @@ repos:
         files: ^(tests|deploy/test-environments/fleet_api)/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.0.1
+    rev: v3.0.3
     hooks:
       - id: pylint
         args: [
@@ -48,10 +48,9 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 23.12.0
     hooks:
       - id: black
-        args: [--line-length=120, --check, --diff]
 
   - repo: local
     hooks:
@@ -66,7 +65,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.83.3
+    rev: v0.83.6
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -154,7 +153,7 @@ repos:
         files: (\.rego)$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.37.0
+    rev: v0.38.0
     hooks:
       - id: markdownlint
         args: [ '--disable',
@@ -167,7 +166,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.13.0
+    rev: v0.14.0
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]

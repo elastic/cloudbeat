@@ -19,7 +19,6 @@ package inventory
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -380,21 +379,28 @@ func decodeDnsPolicies(dnsPolicyAssets []*assetpb.Asset) []*dnsPolicyFields {
 // getAssetsByProject groups assets by project, extracts metadata for each project, and adds folder and organization-level resources for each group.
 func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *logp.Logger, f TypeGenerator[T]) []*T {
 	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectId })
-	var enrichedAssets []*T
+	enrichedAssets := make([]*T, 0, len(assetsByProject))
 	for projectId, projectAssets := range assetsByProject {
 		if projectId == "" {
 			continue
 		}
 
-		projectName, organizationId, organizationName, err := getProjectAssetsMetadata(projectAssets)
-		if err != nil {
-			log.Error(err)
+		if len(projectAssets) == 0 {
+			log.Errorf("no assets were listed for project: %s", projectId)
 			continue
 		}
 
+		ecs := projectAssets[0].Ecs
+
 		// add folder and org level log sinks for each project
 		projectAssets = append(projectAssets, assetsByProject[""]...)
-		enrichedAssets = append(enrichedAssets, f(projectAssets, projectId, projectName, organizationId, organizationName))
+		enrichedAssets = append(enrichedAssets, f(
+			projectAssets,
+			projectId,
+			ecs.ProjectName,
+			ecs.OrganizationId,
+			ecs.OrganizationName,
+		))
 	}
 	return enrichedAssets
 }
@@ -433,7 +439,7 @@ func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
 			item.IamPolicy = asset.IamPolicy
 		}
 	}
-	var results []*assetpb.Asset
+	results := make([]*assetpb.Asset, 0, len(resultsMap))
 	for _, asset := range resultsMap {
 		results = append(results, asset)
 	}
@@ -442,7 +448,7 @@ func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
 
 // extends the assets with the project and organization display name
 func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[string]*fetching.EcsGcp, assets []*assetpb.Asset) []*ExtendedGcpAsset {
-	var extendedAssets []*ExtendedGcpAsset
+	extendedAssets := make([]*ExtendedGcpAsset, 0, len(assets))
 	for _, asset := range assets {
 		keys := getAssetIds(asset)
 		cacheKey := fmt.Sprintf("%s/%s", keys.parentProject, keys.parentOrg)
@@ -556,16 +562,4 @@ func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*Ext
 	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {
 		return asset.AssetType == assetType
 	})
-}
-
-func getProjectAssetsMetadata(projectAssets []*ExtendedGcpAsset) (string, string, string, error) {
-	if len(projectAssets) == 0 {
-		return "", "", "", errors.New("failed to get project/organization name")
-	}
-	// We grouped the assets by project id, so we can get the project metadata from the first asset
-	asset := projectAssets[0]
-	return asset.Ecs.ProjectName,
-		asset.Ecs.OrganizationId,
-		asset.Ecs.OrganizationName,
-		nil
 }
