@@ -1,7 +1,7 @@
 # Cloud Environment Upgrade Testing
 
 The [`Test Upgrade Environment`](https://github.com/elastic/cloudbeat/actions/workflows/upgrade-environment.yml) GitHub action automates the process of deploying a fully-featured cloud environment, pre-configured with all integrations (KSPM, CSPM, and D4C).
-It also facilitates the upgrade of the environment to a new version of the ELK stack and all installed agents, while also performing checks for findings retrieval. For example, if the target ELK version is 8.12.0 and the released version was not selected, the workflow will automatically calculate the previous released version (e.g., 8.11.3), install that version, and then proceed to upgrade to the specified target version (8.12.0). Essentially, this workflow is designed to test the upgrade feature on upcoming versions that are currently in development or will be release candidates (BC).
+It also facilitates the upgrade of the environment to a new version of the ELK stack and all installed agents, while also performing checks for findings retrieval. For example, if the target ELK version is 8.12.0 and the base version was not selected, the workflow will automatically calculate the previously released version (e.g., 8.11.3), install that version, and then proceed to upgrade to the specified target version (8.12.0). Essentially, this workflow is designed to test the upgrade feature on upcoming versions that are currently in development or will be release candidates (BC).
 
 
 ## How to Run the Workflow
