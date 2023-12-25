@@ -1,0 +1,65 @@
+name: Send Slack Notification
+description: Get Vault credentials and send a Slack notification
+inputs:
+  vault-url:
+    description: 'Vault URL'
+    required: true
+  vault-role-id:
+    description: 'Vault role ID'
+    required: true
+  vault-secret-id:
+    description: 'Vault secret ID'
+    required: true
+  slack-channel:
+    description: 'Slack channel'
+    required: false
+    default: '#csp-qa-alerts'
+  slack-message:
+    description: 'Slack message: For multiple lines, provide a URL-encoded message and set url-encoded to true'
+    required: false
+  slack-payload:
+    description: 'Slack payload'
+    required: false
+  mask-secrets:
+    description: 'True if the secrets are masked in logs'
+    required: false
+    default: 'true'
+  url-encoded:
+    description: 'True if the message is URL encoded'
+    required: false
+    default: 'true'
+runs:
+  using: "composite"
+  steps:
+    - name: Get Vault credentials
+      uses: hashicorp/vault-action@v2.7.4
+      continue-on-error: true
+      with:
+        url: ${{ inputs.vault-url }}
+        roleId: ${{ inputs.vault-role-id }}
+        secretId: ${{ inputs.vault-secret-id }}
+        method: approle
+        secrets: |
+          secret/csp-team/ci/slack-bot-token integration_token | SLACK_BOT_TOKEN ;
+          secret/csp-team/ci/slack-users ${{ github.actor }} | SLACK_USER
+
+    - name: Prepare Slack data
+      id: prepare-slack-data
+      shell: bash
+      env:
+        MESSAGE: ${{ inputs.slack-message }}
+        PAYLOAD: ${{ inputs.slack-payload }}
+        MASK: ${{ inputs.mask-secrets }}
+        URL_ENCODED: ${{ inputs.url-encoded }}
+      run: |
+        python3 ${{ github.action_path }}/slack_payload.py
+
+    - name: Send Slack notification
+      id: send-slack-notification
+      uses: slackapi/slack-github-action@v1.24.0
+      env:
+        SLACK_BOT_TOKEN: ${{ env.SLACK_BOT_TOKEN }}
+      with:
+        channel-id: ${{ inputs.slack-channel }}
+        payload: |
+          ${{ steps.prepare-slack-data.outputs.payload }}
