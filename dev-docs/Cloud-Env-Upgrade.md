@@ -28,7 +28,7 @@ Follow these steps to run the workflow:
    ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/9475f553-70c9-4dd7-8330-260bbd704df8)
 
 4. Optionally, modify other parameters if required:
-    - **`release-elk-stack-version`** (**optional**): Use this if you're planning to upgrade from a specific released version.
+    - **`base-elk-stack-version`** (**optional**): Use this if you're planning to upgrade from a specific released version.
     - **`docker-image-override`** (**optional**): Use this to replace the default Docker image for build candidate (BC) or
       SNAPSHOT versions.
       Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
