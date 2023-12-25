@@ -15,7 +15,7 @@ on:
         description: "Target version of the ELK stack: For BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.11.0"
         type: string
-      release-elk-stack-version:
+      base-elk-stack-version:
         type: string
         description: "Release version of the ELK stack"
         required: false
