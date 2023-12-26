@@ -14,6 +14,7 @@ locals {
     Content-type  = "application/json"
     Authorization = "ApiKey ${var.ec_api_key}"
   }
+  cleaned_version = length(regexall("(-[0-9a-z]{4})", var.stack_version)) > 0 ? split("-", var.stack_version)[0] : var.stack_version
 }
 
 # EC2 + kind deployment
@@ -55,24 +56,25 @@ provider "restapi" {
 # Elastic Cloud (EC) deployment
 module "ec_deployment" {
   count  = var.serverless_mode ? 0 : 1
-  source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
-
+  # source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
+  source = "../cloud/modules/ec"
+  ec_api_key = var.ec_api_key
   region        = var.ess_region
-  stack_version = var.stack_version
+  stack_version = local.cleaned_version
 
   deployment_template    = var.deployment_template
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
 
-  integrations_server = true
+  # integrations_server = true
 
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
 
   docker_image = var.docker_image_override
   docker_image_tag_override = {
-    "elasticsearch" : "",
-    "kibana" : "",
-    "apm" : ""
+    "elasticsearch" : "${var.stack_version}",
+    "kibana" : "${var.stack_version}",
+    "apm" : "${var.stack_version}"
   }
 }
 
