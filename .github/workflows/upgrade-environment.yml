@@ -15,6 +15,10 @@ on:
         description: "Target version of the ELK stack: For BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.11.0"
         type: string
+      base-elk-stack-version:
+        type: string
+        description: "Release version of the ELK stack"
+        required: false
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
@@ -43,9 +47,13 @@ jobs:
       - name: Set Previous Version
         id: set-previous-version
         run: |
-          VERSION="${{ inputs.target-elk-stack-version }}"
-          PREVIOUS_VERSION=$(./.ci/scripts/get-previous-version.sh "$VERSION")
-          echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+          if [[ "${{ inputs.base-elk-stack-version }}" == "" ]]; then
+            VERSION="${{ inputs.target-elk-stack-version }}"
+            PREVIOUS_VERSION=$(./.ci/scripts/get-previous-version.sh "$VERSION")
+            echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "PREVIOUS_VERSION=${{ inputs.base-elk-stack-version }}" >> $GITHUB_ENV
+          fi
   deploy:
     uses: ./.github/workflows/test-environment.yml
     needs: init
