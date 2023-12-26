@@ -12,6 +12,7 @@ checkout_integration_repo() {
     gh auth setup-git
     gh repo clone $INTEGRATION_REPO
     cd integrations
+    # TODO: use obtained service account user
     git config --global user.email "elasticmachine@users.noreply.github.com"
     git config --global user.name "Elastic Machine"
     git checkout -b "$BRANCH" main
@@ -36,8 +37,8 @@ update_manifest_version_vars() {
 create_integrations_pr() {
   echo 'Creating a PR to update integration'
 
-  export PR_URL="$(gh pr create --title "[Cloud Security] Update integration manifest" \
-  --body "Automated PR" \
+  export PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
+  --body "Bumps integration to new version (Automated PR)" \
   --base "main" \
   --head "$BRANCH" \
   --repo "$INTEGRATION_REPO")"
