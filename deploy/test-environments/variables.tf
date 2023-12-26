@@ -59,7 +59,7 @@ variable "elasticsearch_size" {
 }
 
 variable "elasticsearch_zone_count" {
-  default     = 1
+  default     = 2
   type        = number
   description = "Optional Elasticsearch zone count"
 }

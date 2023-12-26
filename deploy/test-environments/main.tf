@@ -61,20 +61,21 @@ module "ec_deployment" {
   ec_api_key    = var.ec_api_key
   region        = var.ess_region
   stack_version = local.cleaned_version
+  # stack_version = var.stack_version
 
   deployment_template    = var.deployment_template
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
 
   # integrations_server = true
-
+  elasticsearch_autoscale  = true
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
 
   docker_image = var.docker_image_override
   docker_image_tag_override = {
-    "elasticsearch" : "${var.stack_version}",
-    "kibana" : "${var.stack_version}",
-    "apm" : "${var.stack_version}"
+    "elasticsearch" = "${var.stack_version}",
+    "kibana"        = "${var.stack_version}",
+    "apm"           = "${var.stack_version}"
   }
 }
 

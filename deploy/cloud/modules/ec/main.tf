@@ -30,12 +30,25 @@ resource "ec_deployment" "deployment" {
       docker_image = local.es_docker_image_tag_override != "" ? "${local.es_docker_image}:${local.es_docker_image_tag_override}" : null
     }
 
+    cold = {
+      autoscaling = {}
+    }
+
+    frozen = {
+      autoscaling = {}
+    }
+
     hot = {
       autoscaling = {
-        max_size = "128g"
+        max_size          = "128g"
+        max_size_resource = "memory"
       }
       size       = var.elasticsearch_size
       zone_count = var.elasticsearch_zone_count
+    }
+
+    warm = {
+      autoscaling = {}
     }
   }
 
