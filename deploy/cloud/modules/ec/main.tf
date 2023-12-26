@@ -1,5 +1,5 @@
 locals {
-  version = var.stack_version
+  version                          = var.stack_version
   region                           = var.region
   name_prefix                      = var.deployment_name_prefix
   deployment_template              = var.deployment_template
