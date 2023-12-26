@@ -66,9 +66,9 @@ variable "elasticsearch_zone_count" {
 
 variable "docker_image_tag_override" {
   default = {
-    "elasticsearch" : "",
-    "kibana" : "",
-    "apm" : "",
+    "elasticsearch" = "",
+    "kibana" = "",
+    "apm" = "",
   }
   description = "Optional docker image tag override"
   type        = map(string)
@@ -76,9 +76,9 @@ variable "docker_image_tag_override" {
 
 variable "docker_image_override" {
   default = {
-    "elasticsearch" : "docker.elastic.co/cloud-release/elasticsearch-cloud-ess",
-    "kibana" : "docker.elastic.co/cloud-release/kibana-cloud",
-    "apm" : "docker.elastic.co/cloud-release/elastic-agent-cloud",
+    "elasticsearch" = "docker.elastic.co/cloud-release/elasticsearch-cloud-ess",
+    "kibana" = "docker.elastic.co/cloud-release/kibana-cloud",
+    "apm" = "docker.elastic.co/cloud-release/elastic-agent-cloud",
   }
   type = map(string)
 }
