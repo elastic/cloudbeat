@@ -32,6 +32,8 @@ finding = result if {
 	)
 }
 
+# maps the service accounts array to an object with keys as roles and values as members
+# this makes it easier to see which service accounts has which role
 evidence = admin_roles if {
 	admin_roles := {role: members |
 		entry := service_accounts[_]
