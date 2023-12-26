@@ -55,10 +55,10 @@ provider "restapi" {
 
 # Elastic Cloud (EC) deployment
 module "ec_deployment" {
-  count  = var.serverless_mode ? 0 : 1
+  count = var.serverless_mode ? 0 : 1
   # source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
-  source = "../cloud/modules/ec"
-  ec_api_key = var.ec_api_key
+  source        = "../cloud/modules/ec"
+  ec_api_key    = var.ec_api_key
   region        = var.ess_region
   stack_version = local.cleaned_version
 
