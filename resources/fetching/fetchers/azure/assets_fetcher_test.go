@@ -71,7 +71,8 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 					SubscriptionId: "subId",
 					TenantId:       "tenantId",
 					Type:           assetType,
-					Sku:            "",
+					Sku:            map[string]any{"key": "value"},
+					Identity:       map[string]any{"key": "value"},
 				},
 			)
 		}
