@@ -198,7 +198,8 @@ jobs:
           terraform apply --auto-approve \
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
-            -var="project=${{ github.actor }}"
+            -var="project=${{ github.actor }}" \
+            -var="owner=${{ github.actor }}"
 
       - name: Set Environment Output
         id: env-output

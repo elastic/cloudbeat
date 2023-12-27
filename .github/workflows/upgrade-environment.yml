@@ -22,10 +22,6 @@ on:
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
-      ec-api-key:
-        type: string
-        description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
-        required: false
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -45,18 +41,9 @@ jobs:
       base-stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
       ess-region: ${{ env.TF_VAR_ess_region }}
       target-agent-version: ${{ steps.clean-version.outputs.AGENT_VERSION }}
-      ec-api-key: ${{ steps.set-ec-api-key.outputs.EC_KEY }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
-
-      - name: Mask Sensitive Data
-        if: inputs.ec-api-key != ''
-        id: set-ec-api-key
-        run: |
-          ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
-          echo "::add-mask::$ec_api_key"
-          echo "EC_KEY=$ec_api_key" >> $GITHUB_OUTPUT
 
       - name: Set Previous Version
         id: set-previous-version
@@ -94,7 +81,6 @@ jobs:
       ess-region: ${{ needs.init.outputs.ess-region }}
       run-sanity-tests: false # Set to true once the issue at https://github.com/elastic/kibana/pull/171200 is resolved.
       serverless_mode: false
-      ec-api-key: ${{ needs.init.outputs.ec-api-key }}
     secrets: inherit
   upgrade:
     runs-on: ubuntu-20.04
@@ -153,7 +139,11 @@ jobs:
         id: apply
         if: success()
         run: |
-          terraform apply --auto-approve -var="deployment_name=${{ inputs.deployment_name }}" -var="region=${{ env.AWS_REGION }}"
+          terraform apply --auto-approve \
+            -var="deployment_name=${{ inputs.deployment_name }}" \
+            -var="region=${{ env.AWS_REGION }}" \
+            -var="project=${{ github.actor }}" \
+            -var="owner=${{ github.actor }}"
 
       - name: Set Environment Output
         id: env-output
@@ -226,6 +216,7 @@ jobs:
               --name $(terraform output -raw deployment_name) --alias eks-config
           kubectl config use-context eks-config
           kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
+          kubectl rollout restart daemonset/elastic-agent -n kube-system
 
       - name: Upgrade Linux agents
         working-directory: ${{ env.WORKING_DIR }}/${{ env.FLEET_API_DIR }}

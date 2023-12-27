@@ -57,7 +57,7 @@ provider "restapi" {
 # Elastic Cloud (EC) deployment
 module "ec_deployment" {
   count = var.serverless_mode ? 0 : 1
-  # source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
+
   source        = "../cloud/modules/ec"
   ec_api_key    = var.ec_api_key
   region        = var.ess_region
@@ -67,7 +67,6 @@ module "ec_deployment" {
   deployment_template    = var.deployment_template
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
 
-  # integrations_server = true
   elasticsearch_autoscale  = true
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
