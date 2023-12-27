@@ -130,10 +130,10 @@ not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
 
-generate_blob_service(delete_retention_policy, container_delete_retention_policy) = {"blobService": {
+generate_blob_service(delete_retention_policy, container_delete_retention_policy) = {"blobService": {"properties": {
 	"deleteRetentionPolicy": delete_retention_policy,
 	"containerDeleteRetentionPolicy": container_delete_retention_policy,
-}}
+}}}
 
 generate_delete_retention_policy(enabled, days) = {
 	"enabled": enabled,

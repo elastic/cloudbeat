@@ -19,8 +19,8 @@ finding = result if {
 default soft_delete_is_enabled = false
 
 soft_delete_is_enabled if {
-	is_policy_valid(data_adapter.resource.extension.blobService.deleteRetentionPolicy)
-	is_policy_valid(data_adapter.resource.extension.blobService.containerDeleteRetentionPolicy)
+	is_policy_valid(data_adapter.resource.extension.blobService.properties.deleteRetentionPolicy)
+	is_policy_valid(data_adapter.resource.extension.blobService.properties.containerDeleteRetentionPolicy)
 }
 
 is_policy_valid(policy) if {
