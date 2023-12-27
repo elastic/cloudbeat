@@ -423,6 +423,7 @@ jobs:
 
       - uses: ./.github/actions/slack-notification
         if: always()
+        continue-on-error: true
         with:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}

@@ -107,4 +107,9 @@ variable "project" {
   description = "Optional project resource tag"
 }
 
+variable "owner" {
+  default     = "cloudbeat"
+  type        = string
+  description = "Optional owner tag"
+}
 # ============================================

@@ -8,6 +8,7 @@ locals {
     org      = "${var.org}"
     team     = "${var.team}"
     project  = "${var.project}"
+    owner    = "${var.owner}"
   }
   ec_url = "https://cloud.elastic.co"
   ec_headers = {
@@ -61,7 +62,7 @@ module "ec_deployment" {
   ec_api_key    = var.ec_api_key
   region        = var.ess_region
   stack_version = local.cleaned_version
-  # stack_version = var.stack_version
+  tags          = local.common_tags
 
   deployment_template    = var.deployment_template
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
