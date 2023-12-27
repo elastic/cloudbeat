@@ -37,7 +37,6 @@ env:
   TF_VAR_ess_region: gcp-us-west2
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   DOCKER_IMAGE: ${{ inputs.docker-image-override }}
-  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
   init:
