@@ -25,6 +25,5 @@ soft_delete_is_enabled if {
 
 is_policy_valid(policy) if {
 	policy.enabled == true
-	policy.days >= 7
-	policy.days <= 365
+	policy.days > 0
 } else = false

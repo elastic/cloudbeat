@@ -17,14 +17,7 @@ test_violation_container_delete_retention_only if {
 		{},
 		generate_blob_service(
 			generate_delete_retention_policy(true, 14),
-			generate_container_delete_retention_policy(true, 6),
-		),
-	)
-	eval_fail with input as test_data.generate_storage_account_with_extensions(
-		{},
-		generate_blob_service(
-			generate_delete_retention_policy(true, 14),
-			generate_container_delete_retention_policy(true, 367),
+			generate_container_delete_retention_policy(true, 0),
 		),
 	)
 	eval_fail with input as test_data.generate_storage_account_with_extensions(
@@ -47,14 +40,7 @@ test_violation_delete_retention_only if {
 	eval_fail with input as test_data.generate_storage_account_with_extensions(
 		{},
 		generate_blob_service(
-			generate_delete_retention_policy(true, 6),
-			generate_container_delete_retention_policy(true, 7),
-		),
-	)
-	eval_fail with input as test_data.generate_storage_account_with_extensions(
-		{},
-		generate_blob_service(
-			generate_delete_retention_policy(true, 367),
+			generate_delete_retention_policy(true, 0),
 			generate_container_delete_retention_policy(true, 7),
 		),
 	)
@@ -62,13 +48,6 @@ test_violation_delete_retention_only if {
 		{},
 		generate_blob_service(
 			generate_delete_retention_policy(false, 7),
-			generate_container_delete_retention_policy(true, 7),
-		),
-	)
-	eval_fail with input as test_data.generate_storage_account_with_extensions(
-		{},
-		generate_blob_service(
-			generate_delete_retention_policy(false, 6),
 			generate_container_delete_retention_policy(true, 7),
 		),
 	)
@@ -100,7 +79,7 @@ test_violation_mixed if {
 		{},
 		generate_blob_service(
 			generate_delete_retention_policy(true, 5),
-			generate_container_delete_retention_policy(true, 367),
+			generate_container_delete_retention_policy(true, 0),
 		),
 	)
 	eval_fail with input as test_data.generate_storage_account_with_extensions(
