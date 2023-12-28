@@ -155,7 +155,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 		getProjectDisplayName: func(ctx context.Context, parent string) string {
 			prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
 			if err != nil {
-				log.Errorf("error fetching GCP Project: %s", err)
+				log.Errorf("error fetching GCP Project: %s, error: %s", parent, err)
 				return ""
 			}
 			return prj.DisplayName
@@ -163,7 +163,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 		getOrganizationDisplayName: func(ctx context.Context, parent string) string {
 			org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
 			if err != nil {
-				log.Errorf("error fetching GCP Org: %s", err)
+				log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
 				return ""
 			}
 			return org.DisplayName
