@@ -57,7 +57,7 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		return nil, fmt.Errorf("failed to init monitor client: %w", err)
 	}
 
-	inventoryProvider := inventory.NewProvider(log, resourceGraphClientFactory, diagnosticSettingsClient)
+	inventoryProvider := inventory.NewProvider(log, resourceGraphClientFactory, diagnosticSettingsClient, azureConfig.Credentials)
 	return &provider{
 		inventory:  inventoryProvider,
 		governance: governance.NewProvider(log, inventoryProvider),
@@ -75,6 +75,10 @@ func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string
 
 func (p provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
 	return p.inventory.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
+}
+
+func (p provider) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	return p.inventory.ListStorageAccountBlobServices(ctx, storageAccounts)
 }
 
 func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {
