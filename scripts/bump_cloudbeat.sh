@@ -90,9 +90,14 @@ bump_hermit() {
              --head "$BRANCH"
 }
 
+upload_cloud_formation_templates() {
+  aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+  aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  aws configure set region us-east-2
+  scripts/publish_cft.sh
+} 
+
 create_release_branch
 bump_cloudbeat
 bump_hermit
-
-
-
+upload_cloud_formation_templates
