@@ -6,31 +6,24 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
-	eval_fail with input as test_data.generate_azure_asset(
+	eval_fail with input as test_data.generate_azure_asset_resource(
 		"azure-web-site",
-		{"siteConfig": {}},
+		{"identity": {"principalId": null}},
 	)
-	eval_fail with input as test_data.generate_azure_asset(
+	eval_fail with input as test_data.generate_azure_asset_resource(
 		"azure-web-site",
 		{},
+	)
+	eval_fail with input as test_data.generate_azure_asset_resource(
+		"azure-web-site",
+		{"identity": {}},
 	)
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset(
+	eval_pass with input as test_data.generate_azure_asset_resource(
 		"azure-web-site",
-		{"siteConfig": {
-			"xManagedServiceIdentityId": "id",
-			"managedServiceIdentityId": "id",
-		}},
-	)
-	eval_pass with input as test_data.generate_azure_asset(
-		"azure-web-site",
-		{"siteConfig": {"managedServiceIdentityId": "id"}},
-	)
-	eval_pass with input as test_data.generate_azure_asset(
-		"azure-web-site",
-		{"siteConfig": {"xManagedServiceIdentityId": "id"}},
+		{"identity": {"principalId": "id"}},
 	)
 }
 

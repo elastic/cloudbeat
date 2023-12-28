@@ -60,13 +60,21 @@ type AzureAsset struct {
 	SubscriptionId string         `json:"subscription_id,omitempty"`
 	TenantId       string         `json:"tenant_id,omitempty"`
 	Type           string         `json:"type,omitempty"`
-	Sku            string         `json:"sku,omitempty"`
+	Sku            map[string]any `json:"sku,omitempty"`
+	Identity       map[string]any `json:"identity,omitempty"`
 }
 
 func getAssetFromData(data map[string]any) AzureAsset {
 	subId := strings.FromMap(data, "subscriptionId")
 	properties, _ := data["properties"].(map[string]any)
-
+	identity, ok := data["identity"].(map[string]any)
+	if !ok {
+		identity = nil
+	}
+	sku, ok := data["sku"].(map[string]any)
+	if !ok {
+		sku = nil
+	}
 	return AzureAsset{
 		Id:             strings.FromMap(data, "id"),
 		Name:           strings.FromMap(data, "name"),
@@ -76,7 +84,8 @@ func getAssetFromData(data map[string]any) AzureAsset {
 		ResourceGroup:  strings.FromMap(data, "resourceGroup"),
 		SubscriptionId: subId,
 		TenantId:       strings.FromMap(data, "tenantId"),
-		Sku:            strings.FromMap(data, "sku"),
+		Sku:            sku,
+		Identity:       identity,
 		Type:           strings.FromMap(data, "type"),
 	}
 }
