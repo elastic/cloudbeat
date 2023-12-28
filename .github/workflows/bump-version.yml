@@ -14,6 +14,8 @@ env:
   GH_TOKEN: ${{ secrets.CLOUDSEC_CLIENT_TOKEN }}
   NEXT_CLOUDBEAT_VERSION: ${{ inputs.cloudbeat_version }}
   NEXT_INTEGRATION_VERSION: ${{ inputs.integration_version }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
 
 jobs:
   bump_version:
