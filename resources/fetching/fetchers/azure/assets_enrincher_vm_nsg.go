@@ -27,8 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type vmNetworkSecurityGroupEnricher struct {
-}
+type vmNetworkSecurityGroupEnricher struct{}
 
 type networkProfile struct {
 	NetworkInterfaces []networkInterface `mapstructure:"networkInterfaces"`
@@ -136,13 +135,9 @@ func (e vmNetworkSecurityGroupEnricher) addNetworkRulesToAssetExtensions(vm *inv
 		return nil
 	}
 
-	if vm.Extension == nil {
-		vm.Extension = make(map[string]any)
-	}
-
-	vm.Extension["network"] = map[string]any{
+	vm.AddExtension(inventory.ExtensionNetwork, map[string]any{
 		"securityRules": rules,
-	}
+	})
 
 	return nil
 }

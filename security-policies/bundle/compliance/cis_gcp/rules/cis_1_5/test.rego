@@ -6,17 +6,84 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
-	eval_fail with input as test_data.generate_iam_policy(["user:foo@foo.com"], "roles/editor")
-	eval_fail with input as test_data.generate_iam_policy(["user:foo@foo.com"], "roles/owner")
+	eval_fail with input as test_data.generate_gcp_asset(
+		"key-management",
+		"gcp-cloudresourcemanager-project",
+		{},
+		{"bindings": [
+			{
+				"role": "roles/iam.workloadIdentityUser", # pass
+				"members": ["serviceAccount:some-service@foo.iam.gserviceaccount.com"],
+			},
+			{
+				"role": "roles/editor", # fail
+				"members": ["serviceAccount:some-service@foo.iam.gserviceaccount.com"],
+			},
+		]},
+	)
+
+	eval_fail with input as test_data.generate_gcp_asset(
+		"key-management",
+		"gcp-cloudresourcemanager-project",
+		{},
+		{"bindings": [
+			{
+				"role": "roles/iam.workloadIdentityUser", # pass
+				"members": ["serviceAccount:some-service@foo.iam.gserviceaccount.com"],
+			},
+			{
+				"role": "roles/owner", # fail
+				"members": ["serviceAccount:some-service@foo.iam.gserviceaccount.com"],
+			},
+		]},
+	)
+	eval_fail with input as test_data.generate_gcp_asset(
+		"key-management",
+		"gcp-cloudresourcemanager-project",
+		{},
+		{"bindings": [
+			{
+				"role": "roles/iam.workloadIdentityUser", # pass
+				"members": ["serviceAccount:some-service@foo.iam.gserviceaccount.com"],
+			},
+			{
+				"role": "roles/resourcemanager.projectIamAdmin", # fail
+				"members": ["serviceAccount:some-service@foo.iam.gserviceaccount.com"],
+			},
+		]},
+	)
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_iam_policy(["user:foo@foo.com"], "some_other_role")
+	eval_pass with input as test_data.generate_gcp_asset(
+		"key-management",
+		"gcp-cloudresourcemanager-project",
+		{},
+		{"bindings": [{
+			"role": "roles/iam.workloadIdentityUser", # pass
+			"members": ["serviceAccount:some-service@foo.iam.gserviceaccount.com"],
+		}]},
+	)
 }
 
 test_not_evaluated if {
 	not_eval with input as test_data.not_eval_resource
 	not_eval with input as test_data.no_policy_resource
+	not_eval with input as test_data.generate_gcp_asset(
+		"key-management",
+		"gcp-cloudresourcemanager-project",
+		{},
+		{"bindings": [
+			{
+				"role": "roles/iam.workloadIdentityUser",
+				"members": ["user:some_user@foo.com"],
+			},
+			{
+				"role": "roles/iam.workloadIdentityUser",
+				"members": ["group:some_grouo@foo.com"],
+			},
+		]},
+	)
 }
 
 eval_fail if {

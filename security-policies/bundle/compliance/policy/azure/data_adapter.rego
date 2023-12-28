@@ -6,6 +6,8 @@ resource = input.resource
 
 properties = resource.properties
 
+identity = resource.identity
+
 is_bastion if {
 	input.subType == "azure-bastion"
 }
