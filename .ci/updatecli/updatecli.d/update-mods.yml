@@ -1,0 +1,44 @@
+---
+name: Update Golang Mod Dependencies
+pipelineid: 'updatecli-mods-{{ requiredEnv "GIT_BRANCH" }}'
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: '{{ requiredEnv "GIT_USER" }}'
+      email: '{{ requiredEnv "GIT_EMAIL" }}'
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      username: '{{ requiredEnv "GIT_USER" }}'
+      branch: '{{ requiredEnv "GIT_BRANCH" }}'
+
+actions:
+  default:
+    title: '[updatecli] Update golang mod dependencies'
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      automerge: false
+      labels:
+        - automation
+        - backport-skip
+        - dependency
+        - go
+      description: |-
+        ### What
+        Run `go get -u ${module}` for each module in `go.mod`.
+
+        Generated automatically with {{ requiredEnv "JOB_URL" }}
+
+targets:
+  mods:
+    name: 'Update golang mod dependencies'
+    scmid: default
+    kind: shell
+    spec:
+      command: .ci/updatecli/scripts/update-mods.sh
+      environments:
+        - name: PATH
+        - name: HOME

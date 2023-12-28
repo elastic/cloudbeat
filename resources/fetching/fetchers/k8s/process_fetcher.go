@@ -216,8 +216,8 @@ func (f *ProcessesFetcher) createProcCommonData(stat proc.ProcStat, cmd string, 
 // getProcessConfigurationFile - reads the configuration file associated with a process.
 // As an input this function receives a ProcessInputConfiguration that contains ConfigFileArguments, a string array that represents some process flags
 // The function extracts the configuration file associated with each flag and returns it.
-func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
-	configMap := make(map[string]interface{})
+func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]any {
+	configMap := make(map[string]any)
 	for _, argument := range processConfig.ConfigFileArguments {
 		// The regex extracts the cmd line flag(argument) value
 		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
@@ -250,9 +250,9 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 	return configMap
 }
 
-func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (interface{}, error) {
+func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (any, error) {
 	ext := filepath.Ext(path)
-	var output interface{}
+	var output any
 
 	switch ext {
 	case ".json":
@@ -272,7 +272,7 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 func (f *ProcessesFetcher) Stop() {
 }
 
-func (res ProcResource) GetData() interface{} {
+func (res ProcResource) GetData() any {
 	return res.EvalResource
 }
 
@@ -286,7 +286,7 @@ func (res ProcResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (res ProcResource) GetElasticCommonData() (map[string]any, error) {
-	m := map[string]interface{}{}
+	m := map[string]any{}
 	m["process.parent.pid"] = res.ElasticCommon.Parent.PID
 	m["process.pid"] = res.ElasticCommon.PID
 	m["process.name"] = res.ElasticCommon.Name

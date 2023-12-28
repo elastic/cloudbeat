@@ -100,6 +100,7 @@ func (provider EKSClusterNameProvider) getClusterNameFromInstanceTags(ctx contex
 	return "", nil
 }
 
+//revive:disable-next-line:cognitive-complexity
 func (provider EKSClusterNameProvider) getClusterNameFromAutoscalingGroup(ctx context.Context, cfg aws.Config, instanceId string) (string, error) {
 	svc := autoscaling.NewFromConfig(cfg)
 	input := &autoscaling.DescribeAutoScalingGroupsInput{}

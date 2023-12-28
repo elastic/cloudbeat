@@ -54,7 +54,8 @@ var nonTruncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "3",
 			"tenantId":       "3",
 			"type":           "3",
-			"sku":            "3",
+			"sku":            map[string]any{"test": "test"},
+			"identity":       map[string]any{"test": "test"},
 		},
 	},
 	ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedFalse),
@@ -72,7 +73,8 @@ var truncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "1",
 			"tenantId":       "1",
 			"type":           "1",
-			"sku":            "1",
+			"sku":            map[string]any{"test": "test"},
+			"identity":       map[string]any{"test": "test"},
 		},
 		map[string]any{
 			"id":             "2",
@@ -83,7 +85,8 @@ var truncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "2",
 			"tenantId":       "2",
 			"type":           "2",
-			"sku":            "2",
+			"sku":            map[string]any{"test": "test"},
+			"identity":       map[string]any{"test": "test"},
 		},
 	},
 	ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedTrue),
@@ -103,11 +106,10 @@ func (s *ProviderTestSuite) SetupTest() {
 				return armresourcegraph.ClientResourcesResponse{
 					QueryResponse: nonTruncatedResponse,
 				}, nil
-			} else {
-				return armresourcegraph.ClientResourcesResponse{
-					QueryResponse: truncatedResponse,
-				}, nil
 			}
+			return armresourcegraph.ClientResourcesResponse{
+				QueryResponse: truncatedResponse,
+			}, nil
 		},
 	}
 }
@@ -169,7 +171,8 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 			SubscriptionId: strIndex,
 			TenantId:       strIndex,
 			Type:           strIndex,
-			Sku:            strIndex,
+			Sku:            map[string]any{"test": "test"},
+			Identity:       map[string]any{"test": "test"},
 		}, r)
 	})
 }
@@ -269,13 +272,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id1",
 					Name:     "name1",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  true,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  false,
 							},
@@ -286,7 +289,6 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					SubscriptionId: "sub1",
 					TenantId:       "",
 					Type:           "Microsoft.Insights/diagnosticSettings",
-					Sku:            "",
 				},
 			},
 			expecterError: false,
@@ -362,13 +364,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id2",
 					Name:     "name2",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  false,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},
@@ -379,19 +381,18 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					SubscriptionId: "sub1",
 					TenantId:       "",
 					Type:           "Microsoft.Insights/diagnosticSettings",
-					Sku:            "",
 				},
 				{
 					Id:       "id3",
 					Name:     "name3",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  true,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},
@@ -402,7 +403,6 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					SubscriptionId: "sub1",
 					TenantId:       "",
 					Type:           "Microsoft.Insights/diagnosticSettings",
-					Sku:            "",
 				},
 			},
 			expecterError: false,
@@ -482,13 +482,13 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Id:       "id2",
 					Name:     "name2",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  false,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},
@@ -499,19 +499,18 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					SubscriptionId: "sub1",
 					TenantId:       "",
 					Type:           "Microsoft.Insights/diagnosticSettings",
-					Sku:            "",
 				},
 				{
 					Id:       "id3",
 					Name:     "name3",
 					Location: "global",
-					Properties: map[string]interface{}{
-						"logs": []interface{}{
-							map[string]interface{}{
+					Properties: map[string]any{
+						"logs": []any{
+							map[string]any{
 								"category": "Administrative",
 								"enabled":  true,
 							},
-							map[string]interface{}{
+							map[string]any{
 								"category": "Security",
 								"enabled":  true,
 							},
@@ -522,7 +521,6 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					SubscriptionId: "sub2",
 					TenantId:       "",
 					Type:           "Microsoft.Insights/diagnosticSettings",
-					Sku:            "",
 				},
 			},
 			expecterError: false,

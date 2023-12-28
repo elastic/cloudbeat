@@ -67,12 +67,13 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 					Id:             mockId,
 					Name:           mockId,
 					Location:       "location",
-					Properties:     map[string]interface{}{"key": "value"},
+					Properties:     map[string]any{"key": "value"},
 					ResourceGroup:  "rg",
 					SubscriptionId: "subId1",
 					TenantId:       "tenantId",
 					Type:           assetType,
-					Sku:            "",
+					Sku:            map[string]any{"key": "value"},
+					Identity:       map[string]any{"key": "value"},
 				},
 			)
 		}
@@ -174,12 +175,13 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 						Id:             mockId,
 						Name:           mockId,
 						Location:       "location",
-						Properties:     map[string]interface{}{"key": "value"},
+						Properties:     map[string]any{"key": "value"},
 						ResourceGroup:  "rg",
 						SubscriptionId: subKey,
 						TenantId:       "tenantId",
 						Type:           assetType,
-						Sku:            "",
+						Sku:            map[string]any{"key": "value"},
+						Identity:       map[string]any{"key": "value"},
 					},
 				)
 			}

@@ -25,4 +25,4 @@ import (
 
 type dataProvider struct{}
 
-func (d dataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata) error { return nil }
+func (d dataProvider) EnrichEvent(_ *beat.Event, _ fetching.ResourceMetadata) error { return nil }

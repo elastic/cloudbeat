@@ -22,6 +22,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/maps"
@@ -66,12 +67,13 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 					Id:             "id",
 					Name:           "name",
 					Location:       "location",
-					Properties:     map[string]interface{}{"key": "value"},
+					Properties:     map[string]any{"key": "value"},
 					ResourceGroup:  "rg",
 					SubscriptionId: "subId",
 					TenantId:       "tenantId",
 					Type:           assetType,
-					Sku:            "",
+					Sku:            map[string]any{"key": "value"},
+					Identity:       map[string]any{"key": "value"},
 				},
 			)
 		}
@@ -99,10 +101,18 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			},
 		}, nil,
 	).Twice()
+
+	// since we have storage account asset those the storage account enricher will be called and so these two provider functions.
 	mockProvider.EXPECT().
 		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{"subId"}).
 		Return(nil, nil).
 		Once()
+	storageAccounts := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.StorageAccountAssetType
+	})
+	mockProvider.EXPECT().
+		ListStorageAccountBlobServices(mock.Anything, storageAccounts).
+		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)

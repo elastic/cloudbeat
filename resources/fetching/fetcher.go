@@ -133,7 +133,7 @@ type Resource interface {
 
 type ResourceFields struct {
 	ResourceMetadata
-	Raw interface{} `json:"raw"`
+	Raw any `json:"raw"`
 }
 
 type ResourceMetadata struct {
@@ -154,9 +154,9 @@ type CloudAccountMetadata struct {
 }
 
 type Result struct {
-	Type     string      `json:"type"`
-	SubType  string      `json:"subType"`
-	Resource interface{} `json:"resource"`
+	Type     string `json:"type"`
+	SubType  string `json:"subType"`
+	Resource any    `json:"resource"`
 }
 
 type ResourceMap map[string][]Resource

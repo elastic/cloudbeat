@@ -12,22 +12,37 @@ linters:
     - gocritic
     - gocyclo
     - gofmt
+    - gomodguard
     - misspell
     - nolintlint
     - reassign
+    - revive
     - testifylint
     - unconvert
     - unparam
     - unused
     - whitespace
-# TODO: These are good but need some work to fix everything
-#    - revive
+    - prealloc
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters: [prealloc]
+    - path: resources/utils/testhelper/*.go
+      linters: [prealloc]
 
 linters-settings:
   gocritic:
     settings:
       ifElseChain:
         minThreshold: 3
+  gomodguard:
+    blocked:
+      modules:
+        - github.com/pkg/errors:
+            recommendations:
+              - errors
+            reason: "Package is deprecated"
   gci:
     # Section configuration to compare against.
     # Section names are case-insensitive and may contain parameters in ().
@@ -72,6 +87,47 @@ linters-settings:
       - '.*cloudbeat.*fetching.fetchers.k8s.ProcCommonData'
       - '.*cloudbeat.*fetching.fetchers.*<anonymous>'
       - '.*cloudbeat.*flavors.benchmark.*<anonymous>'
+  revive:
+    enable-all-rules: true
+    rules:
+      # Configuration for enabled rules
+      - name: cognitive-complexity
+        arguments: [30]
+      - name: cyclomatic
+        arguments: [15]
+      - name: unhandled-error
+        arguments:
+          - "bytes.Buffer.WriteString" # Always returns nil error
+      # TODO: work on these
+      - name: blank-imports
+        disabled: true
+      - name: confusing-naming
+        disabled: true
+      - name: exported
+        disabled: true
+      - name: function-length
+        disabled: true
+      - name: get-return
+        disabled: true
+      - name: import-alias-naming
+        disabled: true
+      - name: import-shadowing
+        disabled: true
+      - name: unchecked-type-assertion
+        disabled: true
+      - name: var-naming
+        disabled: true
+      # No plan to enable these
+      - name: add-constant
+        disabled: true # Very restrictive rule that requires exporting everything to a constant
+      - name: bare-return
+        disabled: true # Are bare returns really that bad?
+      - name: line-length-limit
+        disabled: true # Annoying to enforce
+      - name: max-public-structs
+        disabled: true
+      - name: unused-receiver
+        disabled: true # Too many results
   unused:
     # Mark all struct fields that have been written to as used.
     field-writes-are-uses: false
@@ -81,3 +137,8 @@ linters-settings:
     local-variables-are-used: false
   tenv:
     all: true
+
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: false

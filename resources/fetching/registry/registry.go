@@ -67,7 +67,7 @@ func NewRegistry(log *logp.Logger, options ...Option) Registry {
 }
 
 func (r *registry) Keys() []string {
-	var keys []string
+	keys := make([]string, 0, len(r.reg))
 	for k := range r.reg {
 		keys = append(keys, k)
 	}
