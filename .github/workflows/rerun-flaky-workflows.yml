@@ -12,24 +12,102 @@ jobs:
     steps:
       - name: Display Workflow Run Information
         run: |
-          echo "Workflow Run ID: ${{ github.event.workflow_run.id }}"
-          echo "Job ID: ${{ github.job }}"
-          echo "Current run: ${{ github.run_attempt }}"
-          echo "Author: ${{ github.event.workflow_run.head_commit.author.name }}"
-          echo "Actor: ${{ github.actor }}"
+          echo "The Workflow Run ${{ github.event.workflow_run.name }} has failed! " >> $GITHUB_STEP_SUMMARY
+          echo "View the failed run attempt (#${{ github.event.workflow_run.run_attempt }}) here: ${{ github.event.workflow_run.html_url }}" >> $GITHUB_STEP_SUMMARY
+          # echo "Workflow Run ID: ${{ github.event.workflow_run.id }}"
+          # echo "Job ID: ${{ github.job }}"
+          # echo "Current run: ${{ github.run_attempt }}"
+          # echo "Author: ${{ github.event.workflow_run.head_commit.author.name }}"
+          # echo "Actor: ${{ github.actor }}"
       - name: Rerun failed jobs in the current workflow
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          MAX_RUNS=3
+          MAX_RUNS=2
           CURRENT_RUN=${{ github.event.workflow_run.run_attempt }}
-          echo "NOTIFICATION_SLACK=0" >> $GITHUB_ENV
           if [ $CURRENT_RUN -lt $MAX_RUNS ]; then
             gh run rerun ${{ github.event.workflow_run.id }} --repo ${{ github.repository }} --failed
           else
-            echo "Max runs reached, not rerunning"
-            echo "NOTIFICATION_SLACK=1" >> $GITHUB_ENV
+            exit 1
           fi
-      - name: Notify Slack
-        if: ${{ env.NOTIFICATION_SLACK == '1' }}
-        run: echo "Execute slack notification action"
+      - name: Check out the repo
+        if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
+        uses: actions/checkout@v4
+
+      - name: Update env vars
+        if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
+        run: |
+          commit_short=$(git rev-parse --short ${{ github.event.workflow_run.head_sha }})
+          echo "BREAKING_COMMIT_SHORT=$commit_short" >> $GITHUB_ENV
+          # Get the author's username from the email address
+          email="${{ github.event.workflow_run.head_commit.author.email }}"
+          username=$(echo "$email" | cut -d'@' -f1 | awk -F'+' '{print $2}')
+          echo "PR_AUTHOR=$username" >> $GITHUB_ENV
+
+      - name: Slack Notification
+        uses: ./.github/actions/slack-notification
+        if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
+        env:
+          BREAKING_COMMIT: "${{ github.event.workflow_run.head_sha }}"
+          RUN_URL: "${{ github.event.workflow_run.html_url }}"
+          RUN_NAME: "${{ github.event.workflow_run.name }}"
+          BRANCH: "${{ github.event.workflow_run.head_branch }}"
+          REPO: "${{ github.repository }}"
+        with:
+          vault-url: ${{ secrets.VAULT_ADDR }}
+          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          slack-payload: |
+            {
+              "text": ":alert: CI ${{ github.event.workflow.name }} is failing on ${{ github.event.workflow_run.head_branch }} :alert:",
+            	"blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":alert: CI ${{ github.event.workflow.name }} is failing on ${{ github.event.workflow_run.head_branch }} :alert:",
+                    "emoji": true
+                  }
+                }
+              ],
+              "attachments": [
+                {
+                  "color": "#D40E0D",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Commit <https://github.com/elastic/cloudbeat/commit/${{env.BREAKING_COMMIT}}|${{env.BREAKING_COMMIT_SHORT}}> by ${{env.PR_AUTHOR}} has failing tests on the `${{env.BRANCH}}` branch."
+                      }
+                    },
+                    {
+                      "type": "divider"
+                    },
+                    {
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "Failing Commit",
+                            "emoji": true
+                          },
+                          "url": "https://github.com/elastic/cloudbeat/commit/${{env.BREAKING_COMMIT}}"
+                        },
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "Failed CI Run",
+                            "emoji": true
+                          },
+                          "url": "${{env.RUN_URL}}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
