@@ -151,6 +151,61 @@ func (_c *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call) RunAndReturn(ru
 	return _c
 }
 
+// ListStorageAccountBlobServices provides a mock function with given fields: ctx, storageAccounts
+func (_m *MockProviderAPI) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, storageAccounts)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []AzureAsset) ([]AzureAsset, error)); ok {
+		return rf(ctx, storageAccounts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []AzureAsset) []AzureAsset); ok {
+		r0 = rf(ctx, storageAccounts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []AzureAsset) error); ok {
+		r1 = rf(ctx, storageAccounts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListStorageAccountBlobServices_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListStorageAccountBlobServices'
+type MockProviderAPI_ListStorageAccountBlobServices_Call struct {
+	*mock.Call
+}
+
+// ListStorageAccountBlobServices is a helper method to define mock.On call
+//   - ctx context.Context
+//   - storageAccounts []AzureAsset
+func (_e *MockProviderAPI_Expecter) ListStorageAccountBlobServices(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountBlobServices_Call {
+	return &MockProviderAPI_ListStorageAccountBlobServices_Call{Call: _e.mock.On("ListStorageAccountBlobServices", ctx, storageAccounts)}
+}
+
+func (_c *MockProviderAPI_ListStorageAccountBlobServices_Call) Run(run func(ctx context.Context, storageAccounts []AzureAsset)) *MockProviderAPI_ListStorageAccountBlobServices_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountBlobServices_Call) Return(_a0 []AzureAsset, _a1 error) *MockProviderAPI_ListStorageAccountBlobServices_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountBlobServices_Call) RunAndReturn(run func(context.Context, []AzureAsset) ([]AzureAsset, error)) *MockProviderAPI_ListStorageAccountBlobServices_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockProviderAPI creates a new instance of MockProviderAPI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockProviderAPI(t interface {

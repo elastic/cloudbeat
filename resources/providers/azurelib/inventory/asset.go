@@ -26,6 +26,7 @@ const (
 	ActivityLogAlertAssetType          = "microsoft.insights/activitylogalerts"
 	ApplicationInsights                = "microsoft.insights/components"
 	BastionAssetType                   = "microsoft.network/bastionhosts"
+	BlobServiceAssetType               = "microsoft.storage/storageaccounts/blobservices"
 	ClassicStorageAccountAssetType     = "microsoft.classicstorage/storageaccounts"
 	DiagnosticSettingsAssetType        = "microsoft.insights/diagnosticSettings"
 	DiskAssetType                      = "microsoft.compute/disks"
@@ -47,6 +48,13 @@ const (
 	// Azure Resource Graph table groups
 	AssetGroupResources              = "resources"
 	AssetGroupAuthorizationResources = "authorizationresources"
+
+	// Extension keys
+	ExtensionBlobService         = "blobService"
+	ExtensionNetwork             = "network"
+	ExtensionUsedForActivityLogs = "usedForActivityLogs"
+	ExtensionStorageAccountID    = "storageAccountId"
+	ExtensionStorageAccountName  = "storageAccountName"
 )
 
 type AzureAsset struct {
@@ -62,6 +70,13 @@ type AzureAsset struct {
 	Type           string         `json:"type,omitempty"`
 	Sku            map[string]any `json:"sku,omitempty"`
 	Identity       map[string]any `json:"identity,omitempty"`
+}
+
+func (a *AzureAsset) AddExtension(key string, value any) {
+	if a.Extension == nil {
+		a.Extension = map[string]any{}
+	}
+	a.Extension[key] = value
 }
 
 func getAssetFromData(data map[string]any) AzureAsset {

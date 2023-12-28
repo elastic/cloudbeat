@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/samber/lo"
@@ -26,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/resources/utils/maps"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
@@ -45,10 +47,14 @@ func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.
 	}
 	e.addUsedForActivityLogsFlag(assets, diagSettings)
 
+	if err := e.addStorageAccountBlobServices(ctx, assets); err != nil {
+		return fmt.Errorf("storageAccountEnricher: error while getting data protection settings: %w", err)
+	}
+
 	return nil
 }
 
-func (*storageAccountEnricher) addUsedForActivityLogsFlag(assets []inventory.AzureAsset, diagSettings []inventory.AzureAsset) {
+func (storageAccountEnricher) addUsedForActivityLogsFlag(assets []inventory.AzureAsset, diagSettings []inventory.AzureAsset) {
 	usedStorageAccountIDs := map[string]struct{}{}
 	for _, d := range diagSettings {
 		storageAccountID := strings.FromMap(d.Properties, "storageAccountId")
@@ -67,10 +73,54 @@ func (*storageAccountEnricher) addUsedForActivityLogsFlag(assets []inventory.Azu
 			continue
 		}
 
-		if a.Extension == nil {
-			a.Extension = make(map[string]any)
-		}
-		a.Extension["usedForActivityLogs"] = true
+		a.AddExtension(inventory.ExtensionUsedForActivityLogs, true)
+
 		assets[i] = a
 	}
+}
+
+func (e storageAccountEnricher) addStorageAccountBlobServices(ctx context.Context, assets []inventory.AzureAsset) error {
+	storageAccounts := lo.Filter(assets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.StorageAccountAssetType
+	})
+	if len(storageAccounts) == 0 {
+		return nil
+	}
+
+	dataProtection, err := e.provider.ListStorageAccountBlobServices(ctx, storageAccounts)
+	if err != nil {
+		return err
+	}
+
+	if len(dataProtection) == 0 {
+		return nil
+	}
+
+	perStorageAccountID := map[string]inventory.AzureAsset{}
+	for _, d := range dataProtection {
+		perStorageAccountID[strings.FromMap(d.Extension, inventory.ExtensionStorageAccountID)] = d
+	}
+
+	var errAgg error
+	for i, a := range assets {
+		if a.Type != inventory.StorageAccountAssetType {
+			continue
+		}
+
+		dataProtectionSettings, exist := perStorageAccountID[a.Id]
+		if !exist {
+			continue
+		}
+
+		blobService, err := maps.AsMapStringAny(dataProtectionSettings)
+		if err != nil {
+			errAgg = errors.Join(errAgg, err)
+		}
+
+		a.AddExtension(inventory.ExtensionBlobService, blobService)
+
+		assets[i] = a
+	}
+
+	return errAgg
 }
