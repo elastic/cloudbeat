@@ -21,6 +21,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -32,53 +33,172 @@ import (
 )
 
 func TestStorageAccountEnricher(t *testing.T) {
+	storageAccount := func(storageAccountID string) inventory.AzureAsset {
+		return inventory.AzureAsset{Id: storageAccountID, Type: inventory.StorageAccountAssetType}
+	}
+
+	diagSettings := func(storageAccountID string) inventory.AzureAsset {
+		return inventory.AzureAsset{Type: inventory.DiagnosticSettingsAssetType, Properties: map[string]any{"storageAccountId": storageAccountID}}
+	}
+
+	blobService := func(storageAccountID string) inventory.AzureAsset {
+		return inventory.AzureAsset{
+			Type:      inventory.BlobServiceAssetType,
+			Extension: map[string]any{"storageAccountId": storageAccountID},
+		}
+	}
+
+	blobServiceAsMap := func(storageAccountID string) map[string]any {
+		return map[string]any{"type": inventory.BlobServiceAssetType, "extension": map[string]any{"storageAccountId": storageAccountID}}
+	}
+
+	otherAsset := func(id string, assetType string) inventory.AzureAsset {
+		return inventory.AzureAsset{Id: id, Type: assetType}
+	}
+
 	tests := map[string]struct {
 		inputAssets       []inventory.AzureAsset
 		inputDiagSettings []inventory.AzureAsset
+		inputBlobServices []inventory.AzureAsset
 		expected          []inventory.AzureAsset
 	}{
 		"no storage account asset": {
 			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{}}},
+			inputDiagSettings: []inventory.AzureAsset{},
+			inputBlobServices: []inventory.AzureAsset{},
 			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
 		},
 		"storage account asset not used for activity log": {
-			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
+			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
+			inputDiagSettings: []inventory.AzureAsset{},
+			inputBlobServices: []inventory.AzureAsset{},
+			expected:          []inventory.AzureAsset{storageAccount("id_1")},
+		},
+		"storage account asset with blob service": {
+			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
 			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{}}},
-			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
+			inputBlobServices: []inventory.AzureAsset{blobService("id_1")},
+			expected: []inventory.AzureAsset{
+				{
+					Id:        "id_1",
+					Type:      inventory.StorageAccountAssetType,
+					Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_1")},
+				},
+			},
 		},
 		"storage account asset used for activity log": {
-			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{"storageAccountId": "id_1"}}},
-			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}}},
+			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
+			inputDiagSettings: []inventory.AzureAsset{diagSettings("id_1")},
+			inputBlobServices: []inventory.AzureAsset{},
+			expected: []inventory.AzureAsset{
+				{
+					Id:        "id_1",
+					Type:      inventory.StorageAccountAssetType,
+					Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true},
+				},
+			},
+		},
+		"storage account asset with blob service and used for activity log": {
+			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
+			inputDiagSettings: []inventory.AzureAsset{diagSettings("id_1")},
+			inputBlobServices: []inventory.AzureAsset{blobService("id_1")},
+			expected: []inventory.AzureAsset{
+				{
+					Id:   "id_1",
+					Type: inventory.StorageAccountAssetType,
+					Extension: map[string]any{
+						inventory.ExtensionUsedForActivityLogs: true,
+						inventory.ExtensionBlobService:         blobServiceAsMap("id_1"),
+					},
+				},
+			},
 		},
 		"multiple storage account asset, one used for activity log": {
 			inputAssets: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType},
+				storageAccount("id_1"),
+				storageAccount("id_2"),
+				storageAccount("id_3"),
 			},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{"storageAccountId": "id_2"}}},
+			inputDiagSettings: []inventory.AzureAsset{
+				diagSettings("id_2"),
+			},
+			inputBlobServices: []inventory.AzureAsset{},
 			expected: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType},
+				storageAccount("id_1"),
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
+				storageAccount("id_3"),
+			},
+		},
+		"multiple storage account asset, one with blob services": {
+			inputAssets: []inventory.AzureAsset{
+				storageAccount("id_1"),
+				storageAccount("id_2"),
+				storageAccount("id_3"),
+			},
+			inputDiagSettings: []inventory.AzureAsset{},
+			inputBlobServices: []inventory.AzureAsset{
+				blobService("id_2"),
+			},
+			expected: []inventory.AzureAsset{
+				storageAccount("id_1"),
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
+				storageAccount("id_3"),
 			},
 		},
 		"multiple storage account asset, two used for activity log": {
 			inputAssets: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType},
+				storageAccount("id_1"),
+				storageAccount("id_2"),
+				storageAccount("id_3"),
 			},
 			inputDiagSettings: []inventory.AzureAsset{
-				{Properties: map[string]any{"storageAccountId": "id_2"}},
-				{Properties: map[string]any{"storageAccountId": "id_3"}},
+				diagSettings("id_2"),
+				diagSettings("id_3"),
+			},
+			inputBlobServices: []inventory.AzureAsset{},
+			expected: []inventory.AzureAsset{
+				storageAccount("id_1"),
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
+				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
+			},
+		},
+		"multiple storage account asset, two with blob service": {
+			inputAssets: []inventory.AzureAsset{
+				storageAccount("id_1"),
+				storageAccount("id_2"),
+				storageAccount("id_3"),
+			},
+			inputDiagSettings: []inventory.AzureAsset{},
+			inputBlobServices: []inventory.AzureAsset{
+				blobService("id_2"),
+				blobService("id_3"),
 			},
 			expected: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
+				storageAccount("id_1"),
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
+				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_3")}},
+			},
+		},
+		"multiple storage account asset, mixed": {
+			inputAssets: []inventory.AzureAsset{
+				storageAccount("id_1"),
+				storageAccount("id_2"),
+				otherAsset("oid_1", inventory.SQLServersAssetType),
+				storageAccount("id_3"),
+			},
+			inputDiagSettings: []inventory.AzureAsset{
+				diagSettings("id_1"),
+				diagSettings("id_2"),
+			},
+			inputBlobServices: []inventory.AzureAsset{
+				blobService("id_2"),
+				blobService("id_3"),
+			},
+			expected: []inventory.AzureAsset{
+				{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true, inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
+				otherAsset("oid_1", inventory.SQLServersAssetType),
+				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_3")}},
 			},
 		},
 	}
@@ -91,6 +211,26 @@ func TestStorageAccountEnricher(t *testing.T) {
 			provider := azurelib.NewMockProviderAPI(t)
 			provider.EXPECT().GetSubscriptions(mock.Anything, cmd).Return(map[string]governance.Subscription{"sub1": {}}, nil).Once() //nolint:exhaustruct
 			provider.EXPECT().ListDiagnosticSettingsAssetTypes(mock.Anything, cmd, []string{"sub1"}).Return(tc.inputDiagSettings, nil)
+
+			var storageAccounts []inventory.AzureAsset
+			for _, a := range tc.inputAssets {
+				if a.Type == inventory.StorageAccountAssetType {
+					storageAccounts = append(storageAccounts, a)
+				}
+			}
+
+			if len(storageAccounts) > 0 {
+				provider.EXPECT().
+					ListStorageAccountBlobServices(
+						mock.Anything,
+						mock.MatchedBy(func(sa []inventory.AzureAsset) bool {
+							// loose comparing using only ids.
+							expectedIDs := lo.Map(storageAccounts, func(item inventory.AzureAsset, _ int) string { return item.Id })
+							gotIDs := lo.Map(sa, func(item inventory.AzureAsset, _ int) string { return item.Id })
+							return assert.Equal(t, expectedIDs, gotIDs)
+						})).
+					Return(tc.inputBlobServices, nil)
+			}
 
 			e := storageAccountEnricher{provider: provider}
 			err := e.Enrich(context.Background(), cmd, tc.inputAssets)

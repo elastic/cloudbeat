@@ -60,6 +60,11 @@ generate_azure_asset(type, properties) = {
 	"resource": {"properties": properties},
 }
 
+generate_azure_asset_resource(type, properties) = {
+	"subType": type,
+	"resource": properties,
+}
+
 generate_azure_sku_asset_with_properties(type, properties) = {
 	"subType": type,
 	"resource": {
