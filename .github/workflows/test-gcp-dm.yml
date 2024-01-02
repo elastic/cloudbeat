@@ -1,7 +1,7 @@
 name: CIS GCP deployment manager test
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
       - "[0-9]+.[0-9]+"
@@ -102,5 +102,5 @@ jobs:
         if: always()
         working-directory: ${{ env.WORKING_DIR }}
         run: |
-          terraform destroy --auto-aprove
+          terraform destroy --auto-approve
           # todo: delete gcp deployment
