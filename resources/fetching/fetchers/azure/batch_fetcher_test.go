@@ -73,7 +73,8 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 					SubscriptionId: "subId1",
 					TenantId:       "tenantId",
 					Type:           assetType,
-					Sku:            "",
+					Sku:            map[string]any{"key": "value"},
+					Identity:       map[string]any{"key": "value"},
 				},
 			)
 		}
@@ -182,7 +183,8 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 						SubscriptionId: subKey,
 						TenantId:       "tenantId",
 						Type:           assetType,
-						Sku:            "",
+						Sku:            map[string]any{"key": "value"},
+						Identity:       map[string]any{"key": "value"},
 					},
 				)
 			}

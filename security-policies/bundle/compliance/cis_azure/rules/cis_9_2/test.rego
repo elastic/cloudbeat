@@ -8,7 +8,11 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as test_data.generate_azure_asset(
 		"azure-web-site",
-		{"siteConfig": {"httpsOnly": false}},
+		{"httpsOnly": false},
+	)
+	eval_fail with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"httpsOnly": null},
 	)
 	eval_fail with input as test_data.generate_azure_asset(
 		"azure-web-site",
@@ -23,7 +27,7 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_azure_asset(
 		"azure-web-site",
-		{"siteConfig": {"httpsOnly": true}},
+		{"httpsOnly": true},
 	)
 }
 
