@@ -152,13 +152,9 @@ func withSecRules(rules ...map[string]any) mockAssetOption {
 
 func withExtendedSecRules(rules ...map[string]any) mockAssetOption {
 	return func(asset *inventory.AzureAsset) {
-		if asset.Extension == nil {
-			asset.Extension = map[string]any{}
-		}
-
-		asset.Extension["network"] = map[string]any{
+		asset.AddExtension(inventory.ExtensionNetwork, map[string]any{
 			"securityRules": rules,
-		}
+		})
 	}
 }
 
@@ -170,7 +166,8 @@ func mockVMs(id string, nics []string, opts ...mockAssetOption) inventory.AzureA
 			"networkProfile": map[string]any{
 				"networkInterfaces": mapNics(nics),
 			},
-		}}
+		},
+	}
 
 	for _, opt := range opts {
 		opt(&asset)
@@ -185,7 +182,8 @@ func mockNSGs(id string, nics []string, opts ...mockAssetOption) inventory.Azure
 		Type: inventory.NetworkSecurityGroup,
 		Properties: map[string]any{
 			"networkInterfaces": mapNics(nics),
-		}}
+		},
+	}
 
 	for _, opt := range opts {
 		opt(&asset)
