@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       cloudbeat_version:
-        description: "The new cloudbeat version number to bump to"
+        description: "New cloudbeat version number to bump to (e.g. 1.2.3)"
         required: true
       integration_version:
-        description: "The new integration version number to bump to"
+        description: "New integration version number to bump to (e.g. 1.2.3)"
         required: true
 
 env:
