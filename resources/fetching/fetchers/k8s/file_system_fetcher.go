@@ -245,7 +245,7 @@ func (f *FileSystemFetcher) createFileCommonData(stat *syscall.Stat_t, data Eval
 
 	t, err := times.Stat(path)
 	if err != nil {
-		f.log.Error("failed to get file time data, error - %w", err)
+		f.log.Errorf("failed to get file time data (file %s), error - %s", path, err.Error())
 	} else {
 		cd.Accessed = t.AccessTime()
 		cd.Mtime = t.ModTime()

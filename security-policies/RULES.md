@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 42/151 implemented rules (28%)
+### 43/151 implemented rules (28%)
 
-#### Automated rules: 42/77 (55%)
+#### Automated rules: 43/77 (56%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -459,7 +459,7 @@
 |                         2.2.1                          | Microsoft Defender for IoT              | Ensure That Microsoft Defender for IoT Hub Is Set To 'On'                                                                                              |        :x:         |  Manual   |
 |    [3.1](bundle/compliance/cis_azure/rules/cis_3_1)    | Storage Accounts                        | Ensure that 'Secure transfer required' is set to 'Enabled'                                                                                             | :white_check_mark: | Automated |
 |   [3.10](bundle/compliance/cis_azure/rules/cis_3_10)   | Storage Accounts                        | Ensure Private Endpoints are used to access Storage Accounts                                                                                           | :white_check_mark: | Automated |
-|                          3.11                          | Storage Accounts                        | Ensure Soft Delete is Enabled for Azure Containers and Blob Storage                                                                                    |        :x:         | Automated |
+|   [3.11](bundle/compliance/cis_azure/rules/cis_3_11)   | Storage Accounts                        | Ensure Soft Delete is Enabled for Azure Containers and Blob Storage                                                                                    | :white_check_mark: | Automated |
 |                          3.12                          | Storage Accounts                        | Ensure Storage for Critical Data are Encrypted with Customer Managed Keys                                                                              |        :x:         |  Manual   |
 |                          3.13                          | Storage Accounts                        | Ensure Storage logging is Enabled for Blob Service for 'Read', 'Write', and 'Delete' requests                                                          |        :x:         | Automated |
 |                          3.14                          | Storage Accounts                        | Ensure Storage Logging is Enabled for Table Service for 'Read', 'Write', and 'Delete' Requests                                                         |        :x:         | Automated |
