@@ -60,6 +60,7 @@ func convertEncryptionProtector(ep *armsql.EncryptionProtector, resourceGroup st
 		Name:     deref(ep.Name),
 		Location: deref(ep.Location),
 		Properties: map[string]any{
+			"kind":                deref(ep.Kind),
 			"serverKeyType":       string(deref(ep.Properties.ServerKeyType)),
 			"autoRotationEnabled": deref(ep.Properties.AutoRotationEnabled),
 			"serverKeyName":       deref(ep.Properties.ServerKeyName),

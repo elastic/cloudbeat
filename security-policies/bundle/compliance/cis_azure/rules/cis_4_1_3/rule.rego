@@ -23,5 +23,7 @@ is_encryption_protector_key_vault if {
 
 	every p in data_adapter.resource.extension.encryptionProtectors {
 		p.serverKeyType == "AzureKeyVault"
+		p.kind == "azurekeyvault"
+		count(trim_space(p.uri)) > 0
 	}
 }

@@ -51,6 +51,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			expected: []inventory.AzureAsset{
 				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", []map[string]any{
 					{
+						"kind":                "azurekeyvault",
 						"serverKeyType":       "AzureKeyVault",
 						"autoRotationEnabled": true,
 						"serverKeyName":       "serverKey1",
@@ -66,6 +67,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": { //nolint:exhaustruct
 					assets: []inventory.AzureAsset{
 						mockEncryptionProtector("ep1", map[string]any{
+							"kind":                "azurekeyvault",
 							"serverKeyType":       "AzureKeyVault",
 							"autoRotationEnabled": true,
 							"serverKeyName":       "serverKey1",
@@ -85,6 +87,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			expected: []inventory.AzureAsset{
 				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", []map[string]any{
 					{
+						"kind":                "azurekeyvault",
 						"serverKeyType":       "AzureKeyVault",
 						"autoRotationEnabled": true,
 						"serverKeyName":       "serverKey1",
@@ -106,6 +109,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": { //nolint:exhaustruct
 					assets: []inventory.AzureAsset{
 						mockEncryptionProtector("ep1", map[string]any{
+							"kind":                "azurekeyvault",
 							"serverKeyType":       "AzureKeyVault",
 							"autoRotationEnabled": true,
 							"serverKeyName":       "serverKey1",
@@ -135,6 +139,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id1", "serverName1"),
 				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", []map[string]any{
 					{
+						"kind":                "azurekeyvault",
 						"serverKeyType":       "AzureKeyVault",
 						"autoRotationEnabled": true,
 						"serverKeyName":       "serverKey1",
@@ -151,6 +156,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName2": { //nolint:exhaustruct
 					assets: []inventory.AzureAsset{
 						mockEncryptionProtector("ep1", map[string]any{
+							"kind":                "azurekeyvault",
 							"serverKeyType":       "AzureKeyVault",
 							"autoRotationEnabled": true,
 							"serverKeyName":       "serverKey1",

@@ -70,7 +70,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 								{
 									Name:     ref("Encryption Protector"),
 									ID:       ref("id1"),
-									Kind:     ref("kind1"),
+									Kind:     ref("azurekeyvault"),
 									Location: ref("eu-west"),
 									Type:     ref("encryptionProtector"),
 									Properties: &armsql.EncryptionProtectorProperties{
@@ -83,7 +83,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 								{
 									Name:     ref("Encryption Protector"),
 									ID:       ref("id2"),
-									Kind:     ref("kind2"),
+									Kind:     ref("azurekeyvault"),
 									Location: ref("eu-west"),
 									Type:     ref("encryptionProtector"),
 									Properties: &armsql.EncryptionProtectorProperties{
@@ -102,7 +102,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 								{
 									Name:     ref("Encryption Protector"),
 									ID:       ref("id3"),
-									Kind:     ref("kind3"),
+									Kind:     ref("azurekeyvault"),
 									Location: ref("eu-west"),
 									Type:     ref("encryptionProtector"),
 									Properties: &armsql.EncryptionProtectorProperties{
@@ -131,6 +131,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 					Sku:            nil,
 					Identity:       nil,
 					Properties: map[string]any{
+						"kind":                "azurekeyvault",
 						"serverKeyType":       "AzureKeyVault",
 						"autoRotationEnabled": true,
 						"serverKeyName":       "serverKeyName1",
@@ -152,6 +153,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 					Sku:            nil,
 					Identity:       nil,
 					Properties: map[string]any{
+						"kind":                "azurekeyvault",
 						"serverKeyType":       "AzureKeyVault",
 						"autoRotationEnabled": true,
 						"serverKeyName":       "serverKeyName2",
@@ -173,6 +175,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 					Sku:            nil,
 					Identity:       nil,
 					Properties: map[string]any{
+						"kind":                "azurekeyvault",
 						"serverKeyType":       "ServiceManaged",
 						"autoRotationEnabled": true,
 						"serverKeyName":       "serverKeyName3",
