@@ -178,7 +178,6 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 		ResourceGroup:  "",
 		SubscriptionId: subID,
 		TenantId:       "",
-		Sku:            "",
 		Type:           strings.Dereference(v.Type),
 	}, nil
 }

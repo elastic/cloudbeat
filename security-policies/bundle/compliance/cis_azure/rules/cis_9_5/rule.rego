@@ -18,9 +18,5 @@ finding = result if {
 }
 
 rule_evaluation if {
-	data_adapter.site_config.xManagedServiceIdentityId
-}
-
-rule_evaluation if {
-	data_adapter.site_config.managedServiceIdentityId
+	data_adapter.identity.principalId != null
 }
