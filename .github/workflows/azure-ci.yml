@@ -1,4 +1,4 @@
-name: CIS-Azure-CI
+name: CIS-AZURE-CI
 
 on:
   pull_request_target:
@@ -8,8 +8,8 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  Run-CSPM-Azure-Tests:
-    name: CIS Azure Integration Test
+  Run-CSPM-AZURE-Tests:
+    name: CIS AZURE integration test
     # if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
