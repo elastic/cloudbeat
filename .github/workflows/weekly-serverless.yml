@@ -15,7 +15,7 @@ jobs:
       - name: Set deployment name
         id: set_deployment_name
         run: |
-          date_name="weekly-env-$(date +'%d-%b')"
+          date_name=$(echo "weekly-env-$(date +'%d-%b')" | tr '[:upper:]' '[:lower:]')
           echo "date-name=$date_name" >> $GITHUB_OUTPUT
 
   deploy:
