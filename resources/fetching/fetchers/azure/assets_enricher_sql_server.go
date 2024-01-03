@@ -46,7 +46,7 @@ func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets 
 			continue
 		}
 
-		a.AddExtension(inventory.ExtensionEncryptionProtectors, props)
+		a.AddExtension(inventory.ExtensionEncryptionProtector, props)
 		assets[i] = a
 	}
 
