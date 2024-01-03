@@ -1,6 +1,8 @@
 name: CIS-AZURE-CI
 
 on:
+  workflow_dispatch:
+    inputs:
   pull_request_target:
     branches:
       - main
