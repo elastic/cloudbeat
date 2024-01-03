@@ -10,12 +10,12 @@ on:
 jobs:
   Run-CSPM-AZURE-Tests:
     name: CIS AZURE integration test
-    if: false
+    # if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install Poetry
         run: |
