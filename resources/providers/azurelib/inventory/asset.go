@@ -53,6 +53,7 @@ const (
 	ExtensionBlobService         = "blobService"
 	ExtensionNetwork             = "network"
 	ExtensionUsedForActivityLogs = "usedForActivityLogs"
+	ExtensionEncryptionProtector = "encryptionProtector"
 	ExtensionStorageAccountID    = "storageAccountId"
 	ExtensionStorageAccountName  = "storageAccountName"
 )

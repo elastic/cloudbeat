@@ -19,22 +19,49 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type AssetsEnricher interface {
-	Enrich(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset) error
+type sqlServerEnricher struct {
+	provider azurelib.ProviderAPI
 }
 
-func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
-	var enrichers []AssetsEnricher
+func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
+	var errs error
+	for i, a := range assets {
+		if a.Type != inventory.SQLServersAssetType {
+			continue
+		}
 
-	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
-	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})
-	enrichers = append(enrichers, sqlServerEnricher{provider: provider})
+		props, err := s.fetchEncryptionProtectorProps(ctx, a)
+		if err != nil {
+			errs = errors.Join(errs, err)
+		}
 
-	return enrichers
+		if len(props) == 0 {
+			continue
+		}
+
+		a.AddExtension(inventory.ExtensionEncryptionProtector, props)
+		assets[i] = a
+	}
+
+	return errs
+}
+
+func (s sqlServerEnricher) fetchEncryptionProtectorProps(ctx context.Context, a inventory.AzureAsset) ([]map[string]any, error) {
+	encryptProtectors, err := s.provider.ListSQLEncryptionProtector(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	protectorsProps := make([]map[string]any, 0, len(encryptProtectors))
+	for _, ep := range encryptProtectors {
+		protectorsProps = append(protectorsProps, ep.Properties)
+	}
+	return protectorsProps, nil
 }

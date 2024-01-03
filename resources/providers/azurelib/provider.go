@@ -81,6 +81,10 @@ func (p provider) ListStorageAccountBlobServices(ctx context.Context, storageAcc
 	return p.inventory.ListStorageAccountBlobServices(ctx, storageAccounts)
 }
 
+func (p provider) ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
+	return p.inventory.ListSQLEncryptionProtector(ctx, subID, resourceGroup, sqlServerName)
+}
+
 func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {
 	return p.governance.GetSubscriptions(ctx, cycleMetadata)
 }
