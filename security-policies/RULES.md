@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 43/151 implemented rules (28%)
+### 44/151 implemented rules (29%)
 
-#### Automated rules: 43/77 (56%)
+#### Automated rules: 44/77 (57%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -474,7 +474,7 @@
 |    [3.9](bundle/compliance/cis_azure/rules/cis_3_9)    | Storage Accounts                        | Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access                        | :white_check_mark: | Automated |
 |                         4.1.1                          | SQL Server - Auditing                   | Ensure that 'Auditing' is set to 'On'                                                                                                                  |        :x:         | Automated |
 |  [4.1.2](bundle/compliance/cis_azure/rules/cis_4_1_2)  | SQL Server - Auditing                   | Ensure no Azure SQL Databases allow ingress from 0.0.0.0/0 (ANY IP)                                                                                    | :white_check_mark: | Automated |
-|                         4.1.3                          | SQL Server - Auditing                   | Ensure SQL server's Transparent Data Encryption (TDE) protector is encrypted with Customer-managed key                                                 |        :x:         | Automated |
+|  [4.1.3](bundle/compliance/cis_azure/rules/cis_4_1_3)  | SQL Server - Auditing                   | Ensure SQL server's Transparent Data Encryption (TDE) protector is encrypted with Customer-managed key                                                 | :white_check_mark: | Automated |
 |  [4.1.4](bundle/compliance/cis_azure/rules/cis_4_1_4)  | SQL Server - Auditing                   | Ensure that Azure Active Directory Admin is Configured for SQL Servers                                                                                 | :white_check_mark: | Automated |
 |                         4.1.5                          | SQL Server - Auditing                   | Ensure that 'Data encryption' is set to 'On' on a SQL Database                                                                                         |        :x:         | Automated |
 |                         4.1.6                          | SQL Server - Auditing                   | Ensure that 'Auditing' Retention is 'greater than 90 days'                                                                                             |        :x:         | Automated |

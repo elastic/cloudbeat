@@ -189,7 +189,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 
 func mockSQLServerWithEncryptionProtectorExtension(id, name string, p []map[string]any) inventory.AzureAsset {
 	m := mockSQLServer(id, name)
-	m.AddExtension(inventory.ExtensionEncryptionProtector, p)
+	m.AddExtension(inventory.ExtensionEncryptionProtectors, p)
 	return m
 }
 
