@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 44/151 implemented rules (29%)
+### 47/151 implemented rules (31%)
 
-#### Automated rules: 44/77 (57%)
+#### Automated rules: 47/77 (61%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -461,13 +461,13 @@
 |   [3.10](bundle/compliance/cis_azure/rules/cis_3_10)   | Storage Accounts                        | Ensure Private Endpoints are used to access Storage Accounts                                                                                           | :white_check_mark: | Automated |
 |   [3.11](bundle/compliance/cis_azure/rules/cis_3_11)   | Storage Accounts                        | Ensure Soft Delete is Enabled for Azure Containers and Blob Storage                                                                                    | :white_check_mark: | Automated |
 |                          3.12                          | Storage Accounts                        | Ensure Storage for Critical Data are Encrypted with Customer Managed Keys                                                                              |        :x:         |  Manual   |
-|                          3.13                          | Storage Accounts                        | Ensure Storage logging is Enabled for Blob Service for 'Read', 'Write', and 'Delete' requests                                                          |        :x:         | Automated |
-|                          3.14                          | Storage Accounts                        | Ensure Storage Logging is Enabled for Table Service for 'Read', 'Write', and 'Delete' Requests                                                         |        :x:         | Automated |
+|   [3.13](bundle/compliance/cis_azure/rules/cis_3_13)   | Storage Accounts                        | Ensure Storage logging is Enabled for Blob Service for 'Read', 'Write', and 'Delete' requests                                                          | :white_check_mark: | Automated |
+|   [3.14](bundle/compliance/cis_azure/rules/cis_3_14)   | Storage Accounts                        | Ensure Storage Logging is Enabled for Table Service for 'Read', 'Write', and 'Delete' Requests                                                         | :white_check_mark: | Automated |
 |   [3.15](bundle/compliance/cis_azure/rules/cis_3_15)   | Storage Accounts                        | Ensure the "Minimum TLS version" for storage accounts is set to "Version 1.2"                                                                          | :white_check_mark: | Automated |
 |    [3.2](bundle/compliance/cis_azure/rules/cis_3_2)    | Storage Accounts                        | Ensure that ‘Enable Infrastructure Encryption’ for Each Storage Account in Azure Storage is Set to ‘enabled’                                           | :white_check_mark: | Automated |
 |                          3.3                           | Storage Accounts                        | Ensure that 'Enable key rotation reminders' is enabled for each Storage Account                                                                        |        :x:         |  Manual   |
 |                          3.4                           | Storage Accounts                        | Ensure that Storage Account Access Keys are Periodically Regenerated                                                                                   |        :x:         |  Manual   |
-|                          3.5                           | Storage Accounts                        | Ensure Storage Logging is Enabled for Queue Service for 'Read', 'Write', and 'Delete' requests                                                         |        :x:         | Automated |
+|    [3.5](bundle/compliance/cis_azure/rules/cis_3_5)    | Storage Accounts                        | Ensure Storage Logging is Enabled for Queue Service for 'Read', 'Write', and 'Delete' requests                                                         | :white_check_mark: | Automated |
 |                          3.6                           | Storage Accounts                        | Ensure that Shared Access Signature Tokens Expire Within an Hour                                                                                       |        :x:         |  Manual   |
 |    [3.7](bundle/compliance/cis_azure/rules/cis_3_7)    | Storage Accounts                        | Ensure that 'Public access level' is disabled for storage accounts with blob containers                                                                | :white_check_mark: | Automated |
 |    [3.8](bundle/compliance/cis_azure/rules/cis_3_8)    | Storage Accounts                        | Ensure Default Network Access Rule for Storage Accounts is Set to Deny                                                                                 | :white_check_mark: | Automated |

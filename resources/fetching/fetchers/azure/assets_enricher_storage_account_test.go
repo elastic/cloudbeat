@@ -41,6 +41,13 @@ func TestStorageAccountEnricher(t *testing.T) {
 		return inventory.AzureAsset{Type: inventory.DiagnosticSettingsAssetType, Properties: map[string]any{"storageAccountId": storageAccountID}}
 	}
 
+	serviceDiagSettings := func(storageAccountID string) inventory.AzureAsset {
+		return inventory.AzureAsset{Type: inventory.DiagnosticSettingsAssetType, Extension: map[string]any{inventory.ExtensionStorageAccountID: storageAccountID}}
+	}
+	serviceDiagSettingsAsMap := func(storageAccountID string) map[string]any {
+		return map[string]any{"type": inventory.DiagnosticSettingsAssetType, "extension": map[string]any{inventory.ExtensionStorageAccountID: storageAccountID}}
+	}
+
 	blobService := func(storageAccountID string) inventory.AzureAsset {
 		return inventory.AzureAsset{
 			Type:      inventory.BlobServiceAssetType,
@@ -57,10 +64,13 @@ func TestStorageAccountEnricher(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		inputAssets       []inventory.AzureAsset
-		inputDiagSettings []inventory.AzureAsset
-		inputBlobServices []inventory.AzureAsset
-		expected          []inventory.AzureAsset
+		inputAssets                          []inventory.AzureAsset
+		inputDiagSettings                    []inventory.AzureAsset
+		inputBlobServices                    []inventory.AzureAsset
+		inputBlobServicesDiagnosticSettings  []inventory.AzureAsset
+		inputTableServicesDiagnosticSettings []inventory.AzureAsset
+		inputQueueServicesDiagnosticSettings []inventory.AzureAsset
+		expected                             []inventory.AzureAsset
 	}{
 		"no storage account asset": {
 			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
@@ -201,6 +211,45 @@ func TestStorageAccountEnricher(t *testing.T) {
 				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_3")}},
 			},
 		},
+		"storage account asset with blob diagnostic settings": {
+			inputAssets:                         []inventory.AzureAsset{storageAccount("id_1")},
+			inputDiagSettings:                   []inventory.AzureAsset{},
+			inputBlobServices:                   []inventory.AzureAsset{},
+			inputBlobServicesDiagnosticSettings: []inventory.AzureAsset{serviceDiagSettings("id_1")},
+			expected: []inventory.AzureAsset{
+				{
+					Id:        "id_1",
+					Type:      inventory.StorageAccountAssetType,
+					Extension: map[string]any{inventory.ExtensionBlobDiagnosticSettings: serviceDiagSettingsAsMap("id_1")},
+				},
+			},
+		},
+		"storage account asset with table diagnostic settings": {
+			inputAssets:                          []inventory.AzureAsset{storageAccount("id_1")},
+			inputDiagSettings:                    []inventory.AzureAsset{},
+			inputBlobServices:                    []inventory.AzureAsset{},
+			inputTableServicesDiagnosticSettings: []inventory.AzureAsset{serviceDiagSettings("id_1")},
+			expected: []inventory.AzureAsset{
+				{
+					Id:        "id_1",
+					Type:      inventory.StorageAccountAssetType,
+					Extension: map[string]any{inventory.ExtensionTableDiagnosticSettings: serviceDiagSettingsAsMap("id_1")},
+				},
+			},
+		},
+		"storage account asset with queue diagnostic settings": {
+			inputAssets:                          []inventory.AzureAsset{storageAccount("id_1")},
+			inputDiagSettings:                    []inventory.AzureAsset{},
+			inputBlobServices:                    []inventory.AzureAsset{},
+			inputQueueServicesDiagnosticSettings: []inventory.AzureAsset{serviceDiagSettings("id_1")},
+			expected: []inventory.AzureAsset{
+				{
+					Id:        "id_1",
+					Type:      inventory.StorageAccountAssetType,
+					Extension: map[string]any{inventory.ExtensionQueueDiagnosticSettings: serviceDiagSettingsAsMap("id_1")},
+				},
+			},
+		},
 	}
 
 	for name, tc := range tests {
@@ -220,16 +269,20 @@ func TestStorageAccountEnricher(t *testing.T) {
 			}
 
 			if len(storageAccounts) > 0 {
+				storageAccountsCompare := func(sa []inventory.AzureAsset) bool {
+					// loose comparing using only ids because of enricher mutation.
+					expectedIDs := lo.Map(storageAccounts, func(item inventory.AzureAsset, _ int) string { return item.Id })
+					gotIDs := lo.Map(sa, func(item inventory.AzureAsset, _ int) string { return item.Id })
+					return assert.ElementsMatch(t, expectedIDs, gotIDs)
+				}
 				provider.EXPECT().
 					ListStorageAccountBlobServices(
 						mock.Anything,
-						mock.MatchedBy(func(sa []inventory.AzureAsset) bool {
-							// loose comparing using only ids.
-							expectedIDs := lo.Map(storageAccounts, func(item inventory.AzureAsset, _ int) string { return item.Id })
-							gotIDs := lo.Map(sa, func(item inventory.AzureAsset, _ int) string { return item.Id })
-							return assert.Equal(t, expectedIDs, gotIDs)
-						})).
+						mock.MatchedBy(storageAccountsCompare)).
 					Return(tc.inputBlobServices, nil)
+				provider.EXPECT().ListStorageAccountsBlobDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).Return(tc.inputBlobServicesDiagnosticSettings, nil)
+				provider.EXPECT().ListStorageAccountsTableDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).Return(tc.inputTableServicesDiagnosticSettings, nil)
+				provider.EXPECT().ListStorageAccountsQueueDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).Return(tc.inputQueueServicesDiagnosticSettings, nil)
 			}
 
 			e := storageAccountEnricher{provider: provider}

@@ -74,3 +74,46 @@ func transformBlobServices(servicesPages []armstorage.BlobServicesClientListResp
 		})
 	}), errs
 }
+
+func (p *provider) ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	return p.serviceDiagnosticSettings(ctx, "blobServices/default", storageAccounts)
+}
+
+func (p *provider) ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	return p.serviceDiagnosticSettings(ctx, "tableServices/default", storageAccounts)
+}
+
+func (p *provider) ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	return p.serviceDiagnosticSettings(ctx, "queueServices/default", storageAccounts)
+}
+
+func (p *provider) serviceDiagnosticSettings(ctx context.Context, serviceIDPostfix string, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+
+	for _, sa := range storageAccounts {
+		queueDiagSettings, err := p.storageAccountServiceDiagnosticSettings(ctx, serviceIDPostfix, sa)
+		if err != nil {
+			return nil, err
+		}
+		assets = append(assets, queueDiagSettings...)
+	}
+
+	return assets, nil
+}
+
+func (p *provider) storageAccountServiceDiagnosticSettings(ctx context.Context, idPostfix string, storageAccount AzureAsset) ([]AzureAsset, error) {
+	res, err := p.client.AssetDiagnosticSettings(ctx, fmt.Sprintf("%s/%s", storageAccount.Id, idPostfix), nil)
+	if err != nil {
+		return nil, fmt.Errorf("error while fetching storage account service %s diagnostic settings: %w", idPostfix, err)
+	}
+	assets, err := transformDiagnosticSettingsClientListResponses(res, storageAccount.SubscriptionId)
+	if err != nil {
+		return nil, fmt.Errorf("error while transforming storage account service %s diagnostic settings: %w", idPostfix, err)
+	}
+
+	for i := range assets {
+		(&assets[i]).AddExtension(ExtensionStorageAccountID, storageAccount.Id)
+	}
+
+	return assets, nil
+}

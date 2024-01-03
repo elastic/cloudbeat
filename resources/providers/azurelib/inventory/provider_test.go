@@ -233,7 +233,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 		"one element one subscription": {
 			subscriptions: map[string]string{"sub1": "subName1"},
 			responsesPerSubscription: map[string][]armmonitor.DiagnosticSettingsClientListResponse{
-				"sub1": {
+				"/subscriptions/sub1/": {
 					response([]*armmonitor.DiagnosticSettingsResource{
 						{
 							ID:   to.Ptr("id1"),
@@ -296,7 +296,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 		"two elements one subscription": {
 			subscriptions: map[string]string{"sub1": "subName1"},
 			responsesPerSubscription: map[string][]armmonitor.DiagnosticSettingsClientListResponse{
-				"sub1": {
+				"/subscriptions/sub1/": {
 					response([]*armmonitor.DiagnosticSettingsResource{
 						{
 							ID:   to.Ptr("id2"),
@@ -410,7 +410,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 		"two elements two subscriptions": {
 			subscriptions: map[string]string{"sub1": "subName1", "sub2": "subName2"},
 			responsesPerSubscription: map[string][]armmonitor.DiagnosticSettingsClientListResponse{
-				"sub1": {
+				"/subscriptions/sub1/": {
 					response([]*armmonitor.DiagnosticSettingsResource{
 						{
 							ID:   to.Ptr("id2"),
@@ -443,7 +443,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 						},
 					}),
 				},
-				"sub2": {
+				"/subscriptions/sub2/": {
 					response([]*armmonitor.DiagnosticSettingsResource{
 						{
 							ID:   to.Ptr("id3"),
@@ -534,8 +534,8 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 			provider := &provider{
 				log: log,
 				client: &azureClientWrapper{
-					AssetDiagnosticSettings: func(_ context.Context, subID string, _ *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
-						response := tc.responsesPerSubscription[subID]
+					AssetDiagnosticSettings: func(_ context.Context, resourceID string, _ *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
+						response := tc.responsesPerSubscription[resourceID]
 						return response, nil
 					},
 				},

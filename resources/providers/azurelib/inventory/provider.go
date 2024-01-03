@@ -50,6 +50,9 @@ type ProviderAPI interface {
 	ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]AzureAsset, error)
 	ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error)
+	ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 }
 
 type provider struct {
@@ -64,8 +67,8 @@ func NewProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client,
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			return resourceGraphClient.Resources(ctx, query, options)
 		},
-		AssetDiagnosticSettings: func(ctx context.Context, subID string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
-			pager := diagnosticSettingsClient.NewListPager(fmt.Sprintf("/subscriptions/%s/", subID), options)
+		AssetDiagnosticSettings: func(ctx context.Context, resourceURI string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
+			pager := diagnosticSettingsClient.NewListPager(resourceURI, options)
 			return readPager(ctx, pager)
 		},
 		AssetBlobServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
@@ -117,7 +120,7 @@ func (p *provider) getDiagnosticSettings(ctx context.Context, subscriptionIDs []
 	var assets []AzureAsset
 
 	for _, subID := range subscriptionIDs {
-		responses, err := p.client.AssetDiagnosticSettings(ctx, subID, nil)
+		responses, err := p.client.AssetDiagnosticSettings(ctx, fmt.Sprintf("/subscriptions/%s/", subID), nil)
 		if err != nil {
 			return nil, err
 		}
