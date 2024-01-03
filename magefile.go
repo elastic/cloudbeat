@@ -33,8 +33,6 @@ import (
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
 	"github.com/elastic/e2e-testing/pkg/downloads"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
@@ -120,7 +118,6 @@ func GoTestUnit(ctx context.Context) error {
 // Use PLATFORMS to control the target platforms.
 // Use VERSION_QUALIFIER to control the version qualifier.
 func Package() {
-
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
@@ -338,12 +335,6 @@ func PythonEnv() error {
 
 func getMajorMinorVersion(version string) string {
 	return strings.Join(strings.Split(version, ".")[:2], ".")
-}
-
-func checkoutBranch(wt *git.Worktree, branch string) error {
-	return wt.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branch)),
-	})
 }
 
 func BuildOpaBundle() error {

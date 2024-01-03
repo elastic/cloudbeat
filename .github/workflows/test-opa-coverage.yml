@@ -20,7 +20,7 @@ jobs:
 
       - name: OPA test coverage
         run: |
-          coverage=$( ./opa test ./bundle -c | jq '.coverage' )
+          coverage=$(opa test ./bundle -c | jq '.coverage' )
           echo "COVERAGE=$coverage" >> "$GITHUB_ENV"
 
       - name: Create Coverage Badge
