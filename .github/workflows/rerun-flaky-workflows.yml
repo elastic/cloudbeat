@@ -2,7 +2,7 @@ name: Rerun Flaky Workflows
 
 on:
   workflow_run:
-    workflows: ["K8s-CI"]
+    workflows: ["K8s-CI", "CNVM-CI"]
     types: [completed]
 
 jobs:
@@ -14,11 +14,11 @@ jobs:
         run: |
           echo "The Workflow Run ${{ github.event.workflow_run.name }} has failed! " >> $GITHUB_STEP_SUMMARY
           echo "View the failed run attempt (#${{ github.event.workflow_run.run_attempt }}) here: ${{ github.event.workflow_run.html_url }}" >> $GITHUB_STEP_SUMMARY
-          # echo "Workflow Run ID: ${{ github.event.workflow_run.id }}"
-          # echo "Job ID: ${{ github.job }}"
-          # echo "Current run: ${{ github.run_attempt }}"
-          # echo "Author: ${{ github.event.workflow_run.head_commit.author.name }}"
-          # echo "Actor: ${{ github.actor }}"
+          echo "Workflow Run ID: ${{ github.event.workflow_run.id }}"
+          echo "Job ID: ${{ github.job }}"
+          echo "Current run: ${{ github.run_attempt }}"
+          echo "Author: ${{ github.event.workflow_run.head_commit.author.name }}"
+          echo "Actor: ${{ github.actor }}"
       - name: Rerun failed jobs in the current workflow
         env:
           GH_TOKEN: ${{ github.token }}
