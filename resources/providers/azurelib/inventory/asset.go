@@ -50,11 +50,12 @@ const (
 	AssetGroupAuthorizationResources = "authorizationresources"
 
 	// Extension keys
-	ExtensionBlobService         = "blobService"
-	ExtensionNetwork             = "network"
-	ExtensionUsedForActivityLogs = "usedForActivityLogs"
-	ExtensionStorageAccountID    = "storageAccountId"
-	ExtensionStorageAccountName  = "storageAccountName"
+	ExtensionBlobService          = "blobService"
+	ExtensionNetwork              = "network"
+	ExtensionUsedForActivityLogs  = "usedForActivityLogs"
+	ExtensionEncryptionProtectors = "encryptionProtectors"
+	ExtensionStorageAccountID     = "storageAccountId"
+	ExtensionStorageAccountName   = "storageAccountName"
 )
 
 type AzureAsset struct {
