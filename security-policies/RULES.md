@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 47/151 implemented rules (31%)
+### 48/151 implemented rules (32%)
 
-#### Automated rules: 47/77 (61%)
+#### Automated rules: 48/77 (62%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -472,7 +472,7 @@
 |    [3.7](bundle/compliance/cis_azure/rules/cis_3_7)    | Storage Accounts                        | Ensure that 'Public access level' is disabled for storage accounts with blob containers                                                                | :white_check_mark: | Automated |
 |    [3.8](bundle/compliance/cis_azure/rules/cis_3_8)    | Storage Accounts                        | Ensure Default Network Access Rule for Storage Accounts is Set to Deny                                                                                 | :white_check_mark: | Automated |
 |    [3.9](bundle/compliance/cis_azure/rules/cis_3_9)    | Storage Accounts                        | Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access                        | :white_check_mark: | Automated |
-|                         4.1.1                          | SQL Server - Auditing                   | Ensure that 'Auditing' is set to 'On'                                                                                                                  |        :x:         | Automated |
+|  [4.1.1](bundle/compliance/cis_azure/rules/cis_4_1_1)  | SQL Server - Auditing                   | Ensure that 'Auditing' is set to 'On'                                                                                                                  | :white_check_mark: | Automated |
 |  [4.1.2](bundle/compliance/cis_azure/rules/cis_4_1_2)  | SQL Server - Auditing                   | Ensure no Azure SQL Databases allow ingress from 0.0.0.0/0 (ANY IP)                                                                                    | :white_check_mark: | Automated |
 |  [4.1.3](bundle/compliance/cis_azure/rules/cis_4_1_3)  | SQL Server - Auditing                   | Ensure SQL server's Transparent Data Encryption (TDE) protector is encrypted with Customer-managed key                                                 | :white_check_mark: | Automated |
 |  [4.1.4](bundle/compliance/cis_azure/rules/cis_4_1_4)  | SQL Server - Auditing                   | Ensure that Azure Active Directory Admin is Configured for SQL Servers                                                                                 | :white_check_mark: | Automated |
