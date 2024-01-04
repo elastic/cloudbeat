@@ -39,8 +39,7 @@ func (p *provider) ListSQLEncryptionProtector(ctx context.Context, subID, resour
 		return nil, nil
 	}
 
-	var assets = make([]AzureAsset, 0, capacity)
-
+	assets := make([]AzureAsset, 0, capacity)
 	for _, epWrapper := range encryptProtectors {
 		for _, ep := range epWrapper.Value {
 			if ep == nil {
