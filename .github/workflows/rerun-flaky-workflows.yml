@@ -9,6 +9,10 @@ jobs:
   rerun-on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure'}}
+    permissions:
+      # permission required to rerun a workflow https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps?apiVersion=2022-11-28#repository-permissions-for-actions
+      # gh run rerun --failed requires write permission
+      actions: write
     steps:
       - name: Display Workflow Run Information
         run: |
