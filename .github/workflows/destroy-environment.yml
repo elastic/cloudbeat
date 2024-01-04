@@ -74,7 +74,6 @@ jobs:
 
       - uses: ./.github/actions/slack-notification
         if: always()
-        continue-on-error: true
         env:
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           JOB_STATUS_COLOR: "${{ job.status == 'success' && '#36a64f' || '#D40E0D' }}"

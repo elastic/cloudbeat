@@ -95,7 +95,6 @@ env:
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
-  CLEANUP_ENV: ${{ inputs.cleanup-env }}
 
 jobs:
   Deploy:
@@ -417,7 +416,7 @@ jobs:
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Cleanup Environment
-        if: ${{ '!cancelled()' && env.CLEANUP_ENV == 'true' }}
+        if: ${{ inputs.cleanup-env == true }}
         run: |
           just delete-cloud-env ${{ env.DEPLOYMENT_NAME }} '' "false"
 
@@ -437,7 +436,6 @@ jobs:
 
       - uses: ./.github/actions/slack-notification
         if: always()
-        continue-on-error: true
         with:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
