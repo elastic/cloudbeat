@@ -32,36 +32,59 @@ type sqlServerEnricher struct {
 
 func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
 	var errs error
+
+	enrichFn := []func(context.Context, *inventory.AzureAsset) error{
+		s.enrichSQLEncryptionProtector,
+		s.enrichSQLBlobAuditPolicy,
+	}
+
 	for i, a := range assets {
 		if a.Type != inventory.SQLServersAssetType {
 			continue
 		}
 
-		props, err := s.fetchEncryptionProtectorProps(ctx, a)
-		if err != nil {
-			errs = errors.Join(errs, err)
+		for _, fn := range enrichFn {
+			if err := fn(ctx, &a); err != nil {
+				errs = errors.Join(errs, err)
+			}
 		}
 
-		if len(props) == 0 {
-			continue
-		}
-
-		a.AddExtension(inventory.ExtensionEncryptionProtectors, props)
 		assets[i] = a
 	}
 
 	return errs
 }
 
-func (s sqlServerEnricher) fetchEncryptionProtectorProps(ctx context.Context, a inventory.AzureAsset) ([]map[string]any, error) {
+func (s sqlServerEnricher) enrichSQLEncryptionProtector(ctx context.Context, a *inventory.AzureAsset) error {
 	encryptProtectors, err := s.provider.ListSQLEncryptionProtector(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	protectorsProps := make([]map[string]any, 0, len(encryptProtectors))
-	for _, ep := range encryptProtectors {
-		protectorsProps = append(protectorsProps, ep.Properties)
+	if len(encryptProtectors) == 0 {
+		return nil
 	}
-	return protectorsProps, nil
+
+	props := make([]map[string]any, 0, len(encryptProtectors))
+	for _, ep := range encryptProtectors {
+		props = append(props, ep.Properties)
+	}
+
+	a.AddExtension(inventory.ExtensionSQLEncryptionProtectors, props)
+	return nil
+}
+
+func (s sqlServerEnricher) enrichSQLBlobAuditPolicy(ctx context.Context, a *inventory.AzureAsset) error {
+	policy, err := s.provider.GetSQLBlobAuditingPolicies(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return err
+	}
+
+	if len(policy) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0].Properties)
+
+	return nil
 }
