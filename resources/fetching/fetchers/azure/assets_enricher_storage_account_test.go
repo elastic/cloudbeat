@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/samber/lo"
@@ -63,31 +64,51 @@ func TestStorageAccountEnricher(t *testing.T) {
 		return inventory.AzureAsset{Id: id, Type: assetType}
 	}
 
+	type mockProviderResponse struct {
+		err    error
+		assets []inventory.AzureAsset
+	}
+	mockEmpty := func() mockProviderResponse { return mockProviderResponse{assets: nil, err: nil} }
+	mockSuccess := func(a []inventory.AzureAsset) mockProviderResponse { return mockProviderResponse{assets: a, err: nil} }
+	mockFail := func(e error) mockProviderResponse { return mockProviderResponse{assets: nil, err: e} }
+
 	tests := map[string]struct {
-		inputAssets                          []inventory.AzureAsset
-		inputDiagSettings                    []inventory.AzureAsset
-		inputBlobServices                    []inventory.AzureAsset
-		inputBlobServicesDiagnosticSettings  []inventory.AzureAsset
-		inputTableServicesDiagnosticSettings []inventory.AzureAsset
-		inputQueueServicesDiagnosticSettings []inventory.AzureAsset
-		expected                             []inventory.AzureAsset
+		inputAssets                              []inventory.AzureAsset
+		inputMockDiagSettings                    mockProviderResponse
+		inputMockBlobServices                    mockProviderResponse
+		inputMockBlobServicesDiagnosticSettings  mockProviderResponse
+		inputMockTableServicesDiagnosticSettings mockProviderResponse
+		inputMockQueueServicesDiagnosticSettings mockProviderResponse
+		expected                                 []inventory.AzureAsset
+		expectError                              bool
 	}{
 		"no storage account asset": {
-			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
-			inputDiagSettings: []inventory.AzureAsset{},
-			inputBlobServices: []inventory.AzureAsset{},
-			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
+			inputAssets:                              []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			expected:                                 []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
+			expectError:                              false,
 		},
 		"storage account asset not used for activity log": {
-			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
-			inputDiagSettings: []inventory.AzureAsset{},
-			inputBlobServices: []inventory.AzureAsset{},
-			expected:          []inventory.AzureAsset{storageAccount("id_1")},
+			inputAssets:                              []inventory.AzureAsset{storageAccount("id_1")},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			expected:                                 []inventory.AzureAsset{storageAccount("id_1")},
+			expectError:                              false,
 		},
 		"storage account asset with blob service": {
-			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{}}},
-			inputBlobServices: []inventory.AzureAsset{blobService("id_1")},
+			inputAssets:                              []inventory.AzureAsset{storageAccount("id_1")},
+			inputMockDiagSettings:                    mockSuccess([]inventory.AzureAsset{{Properties: map[string]any{}}}),
+			inputMockBlobServices:                    mockSuccess([]inventory.AzureAsset{blobService("id_1")}),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -95,11 +116,15 @@ func TestStorageAccountEnricher(t *testing.T) {
 					Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_1")},
 				},
 			},
+			expectError: false,
 		},
 		"storage account asset used for activity log": {
-			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
-			inputDiagSettings: []inventory.AzureAsset{diagSettings("id_1")},
-			inputBlobServices: []inventory.AzureAsset{},
+			inputAssets:                              []inventory.AzureAsset{storageAccount("id_1")},
+			inputMockDiagSettings:                    mockSuccess([]inventory.AzureAsset{diagSettings("id_1")}),
+			inputMockBlobServices:                    mockSuccess([]inventory.AzureAsset{}),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -107,11 +132,15 @@ func TestStorageAccountEnricher(t *testing.T) {
 					Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true},
 				},
 			},
+			expectError: false,
 		},
 		"storage account asset with blob service and used for activity log": {
-			inputAssets:       []inventory.AzureAsset{storageAccount("id_1")},
-			inputDiagSettings: []inventory.AzureAsset{diagSettings("id_1")},
-			inputBlobServices: []inventory.AzureAsset{blobService("id_1")},
+			inputAssets:                              []inventory.AzureAsset{storageAccount("id_1")},
+			inputMockDiagSettings:                    mockSuccess([]inventory.AzureAsset{diagSettings("id_1")}),
+			inputMockBlobServices:                    mockSuccess([]inventory.AzureAsset{blobService("id_1")}),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:   "id_1",
@@ -122,6 +151,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 					},
 				},
 			},
+			expectError: false,
 		},
 		"multiple storage account asset, one used for activity log": {
 			inputAssets: []inventory.AzureAsset{
@@ -129,15 +159,17 @@ func TestStorageAccountEnricher(t *testing.T) {
 				storageAccount("id_2"),
 				storageAccount("id_3"),
 			},
-			inputDiagSettings: []inventory.AzureAsset{
-				diagSettings("id_2"),
-			},
-			inputBlobServices: []inventory.AzureAsset{},
+			inputMockDiagSettings:                    mockSuccess([]inventory.AzureAsset{diagSettings("id_2")}),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
 				storageAccount("id_3"),
 			},
+			expectError: false,
 		},
 		"multiple storage account asset, one with blob services": {
 			inputAssets: []inventory.AzureAsset{
@@ -145,15 +177,17 @@ func TestStorageAccountEnricher(t *testing.T) {
 				storageAccount("id_2"),
 				storageAccount("id_3"),
 			},
-			inputDiagSettings: []inventory.AzureAsset{},
-			inputBlobServices: []inventory.AzureAsset{
-				blobService("id_2"),
-			},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockSuccess([]inventory.AzureAsset{blobService("id_2")}),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
 				storageAccount("id_3"),
 			},
+			expectError: false,
 		},
 		"multiple storage account asset, two used for activity log": {
 			inputAssets: []inventory.AzureAsset{
@@ -161,16 +195,20 @@ func TestStorageAccountEnricher(t *testing.T) {
 				storageAccount("id_2"),
 				storageAccount("id_3"),
 			},
-			inputDiagSettings: []inventory.AzureAsset{
+			inputMockDiagSettings: mockSuccess([]inventory.AzureAsset{
 				diagSettings("id_2"),
 				diagSettings("id_3"),
-			},
-			inputBlobServices: []inventory.AzureAsset{},
+			}),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
 				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
 			},
+			expectError: false,
 		},
 		"multiple storage account asset, two with blob service": {
 			inputAssets: []inventory.AzureAsset{
@@ -178,16 +216,17 @@ func TestStorageAccountEnricher(t *testing.T) {
 				storageAccount("id_2"),
 				storageAccount("id_3"),
 			},
-			inputDiagSettings: []inventory.AzureAsset{},
-			inputBlobServices: []inventory.AzureAsset{
-				blobService("id_2"),
-				blobService("id_3"),
-			},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockSuccess([]inventory.AzureAsset{blobService("id_2"), blobService("id_3")}),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
 				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_3")}},
 			},
+			expectError: false,
 		},
 		"multiple storage account asset, mixed": {
 			inputAssets: []inventory.AzureAsset{
@@ -196,26 +235,26 @@ func TestStorageAccountEnricher(t *testing.T) {
 				otherAsset("oid_1", inventory.SQLServersAssetType),
 				storageAccount("id_3"),
 			},
-			inputDiagSettings: []inventory.AzureAsset{
-				diagSettings("id_1"),
-				diagSettings("id_2"),
-			},
-			inputBlobServices: []inventory.AzureAsset{
-				blobService("id_2"),
-				blobService("id_3"),
-			},
+			inputMockDiagSettings:                    mockSuccess([]inventory.AzureAsset{diagSettings("id_1"), diagSettings("id_2")}),
+			inputMockBlobServices:                    mockSuccess([]inventory.AzureAsset{blobService("id_2"), blobService("id_3")}),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true, inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
 				otherAsset("oid_1", inventory.SQLServersAssetType),
 				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_3")}},
 			},
+			expectError: false,
 		},
 		"storage account asset with blob diagnostic settings": {
-			inputAssets:                         []inventory.AzureAsset{storageAccount("id_1")},
-			inputDiagSettings:                   []inventory.AzureAsset{},
-			inputBlobServices:                   []inventory.AzureAsset{},
-			inputBlobServicesDiagnosticSettings: []inventory.AzureAsset{serviceDiagSettings("id_1")},
+			inputAssets:                              []inventory.AzureAsset{storageAccount("id_1")},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -223,12 +262,15 @@ func TestStorageAccountEnricher(t *testing.T) {
 					Extension: map[string]any{inventory.ExtensionBlobDiagnosticSettings: serviceDiagSettingsAsMap("id_1")},
 				},
 			},
+			expectError: false,
 		},
 		"storage account asset with table diagnostic settings": {
-			inputAssets:                          []inventory.AzureAsset{storageAccount("id_1")},
-			inputDiagSettings:                    []inventory.AzureAsset{},
-			inputBlobServices:                    []inventory.AzureAsset{},
-			inputTableServicesDiagnosticSettings: []inventory.AzureAsset{serviceDiagSettings("id_1")},
+			inputAssets:                              []inventory.AzureAsset{storageAccount("id_1")},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -236,12 +278,15 @@ func TestStorageAccountEnricher(t *testing.T) {
 					Extension: map[string]any{inventory.ExtensionTableDiagnosticSettings: serviceDiagSettingsAsMap("id_1")},
 				},
 			},
+			expectError: false,
 		},
 		"storage account asset with queue diagnostic settings": {
-			inputAssets:                          []inventory.AzureAsset{storageAccount("id_1")},
-			inputDiagSettings:                    []inventory.AzureAsset{},
-			inputBlobServices:                    []inventory.AzureAsset{},
-			inputQueueServicesDiagnosticSettings: []inventory.AzureAsset{serviceDiagSettings("id_1")},
+			inputAssets:                              []inventory.AzureAsset{storageAccount("id_1")},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -249,6 +294,35 @@ func TestStorageAccountEnricher(t *testing.T) {
 					Extension: map[string]any{inventory.ExtensionQueueDiagnosticSettings: serviceDiagSettingsAsMap("id_1")},
 				},
 			},
+			expectError: false,
+		},
+		"multiple storage account asset, mixed with errors": {
+			inputAssets: []inventory.AzureAsset{
+				storageAccount("id_1"),
+				storageAccount("id_2"),
+				otherAsset("oid_1", inventory.SQLServersAssetType),
+				storageAccount("id_3"),
+			},
+			inputMockDiagSettings:                    mockSuccess([]inventory.AzureAsset{diagSettings("id_1"), diagSettings("id_2")}),
+			inputMockBlobServices:                    mockSuccess([]inventory.AzureAsset{blobService("id_2"), blobService("id_3")}),
+			inputMockBlobServicesDiagnosticSettings:  mockFail(errors.New("mock error")),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
+			expected: []inventory.AzureAsset{
+				{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{
+					inventory.ExtensionUsedForActivityLogs:     true,
+					inventory.ExtensionQueueDiagnosticSettings: serviceDiagSettingsAsMap("id_1"),
+				}},
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{
+					inventory.ExtensionUsedForActivityLogs: true,
+					inventory.ExtensionBlobService:         blobServiceAsMap("id_2"),
+				}},
+				otherAsset("oid_1", inventory.SQLServersAssetType),
+				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{
+					inventory.ExtensionBlobService: blobServiceAsMap("id_3"),
+				}},
+			},
+			expectError: true,
 		},
 	}
 
@@ -259,7 +333,9 @@ func TestStorageAccountEnricher(t *testing.T) {
 
 			provider := azurelib.NewMockProviderAPI(t)
 			provider.EXPECT().GetSubscriptions(mock.Anything, cmd).Return(map[string]governance.Subscription{"sub1": {}}, nil).Once() //nolint:exhaustruct
-			provider.EXPECT().ListDiagnosticSettingsAssetTypes(mock.Anything, cmd, []string{"sub1"}).Return(tc.inputDiagSettings, nil)
+			provider.EXPECT().
+				ListDiagnosticSettingsAssetTypes(mock.Anything, cmd, []string{"sub1"}).
+				Return(tc.inputMockDiagSettings.assets, tc.inputMockDiagSettings.err)
 
 			var storageAccounts []inventory.AzureAsset
 			for _, a := range tc.inputAssets {
@@ -276,18 +352,27 @@ func TestStorageAccountEnricher(t *testing.T) {
 					return assert.ElementsMatch(t, expectedIDs, gotIDs)
 				}
 				provider.EXPECT().
-					ListStorageAccountBlobServices(
-						mock.Anything,
-						mock.MatchedBy(storageAccountsCompare)).
-					Return(tc.inputBlobServices, nil)
-				provider.EXPECT().ListStorageAccountsBlobDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).Return(tc.inputBlobServicesDiagnosticSettings, nil)
-				provider.EXPECT().ListStorageAccountsTableDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).Return(tc.inputTableServicesDiagnosticSettings, nil)
-				provider.EXPECT().ListStorageAccountsQueueDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).Return(tc.inputQueueServicesDiagnosticSettings, nil)
+					ListStorageAccountBlobServices(mock.Anything, mock.MatchedBy(storageAccountsCompare)).
+					Return(tc.inputMockBlobServices.assets, tc.inputMockBlobServices.err)
+				provider.EXPECT().
+					ListStorageAccountsBlobDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).
+					Return(tc.inputMockBlobServicesDiagnosticSettings.assets, tc.inputMockBlobServicesDiagnosticSettings.err)
+				provider.EXPECT().
+					ListStorageAccountsTableDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).
+					Return(tc.inputMockTableServicesDiagnosticSettings.assets, tc.inputMockTableServicesDiagnosticSettings.err)
+				provider.EXPECT().
+					ListStorageAccountsQueueDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).
+					Return(tc.inputMockQueueServicesDiagnosticSettings.assets, tc.inputMockQueueServicesDiagnosticSettings.err)
 			}
 
 			e := storageAccountEnricher{provider: provider}
 			err := e.Enrich(context.Background(), cmd, tc.inputAssets)
-			require.NoError(t, err)
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
 
 			assert.Equal(t, tc.expected, tc.inputAssets)
 		})
