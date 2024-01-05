@@ -42,7 +42,7 @@ func (p *provider) ListSQLEncryptionProtector(ctx context.Context, subID, resour
 	assets := make([]AzureAsset, 0, capacity)
 	for _, epWrapper := range encryptProtectors {
 		for _, ep := range epWrapper.Value {
-			if ep == nil {
+			if ep == nil || ep.Properties == nil {
 				continue
 			}
 
@@ -51,6 +51,45 @@ func (p *provider) ListSQLEncryptionProtector(ctx context.Context, subID, resour
 	}
 
 	return assets, nil
+}
+
+func (p *provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
+	policy, err := p.client.AssetSQLBlobAuditingPolicies(ctx, subID, resourceGroup, sqlServerName, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("problem on getting sql blob auditing policies (%w)", err)
+	}
+
+	if policy.Properties == nil {
+		return nil, nil
+	}
+
+	return []AzureAsset{
+		{
+			Id:       deref(policy.ID),
+			Name:     deref(policy.Name),
+			Location: "global",
+			Properties: map[string]any{
+				"state":                        string(deref(policy.Properties.State)),
+				"isAzureMonitorTargetEnabled":  deref(policy.Properties.IsAzureMonitorTargetEnabled),
+				"isDevopsAuditEnabled":         deref(policy.Properties.IsDevopsAuditEnabled),
+				"isManagedIdentityInUse":       deref(policy.Properties.IsManagedIdentityInUse),
+				"isStorageSecondaryKeyInUse":   deref(policy.Properties.IsStorageSecondaryKeyInUse),
+				"queueDelayMs":                 deref(policy.Properties.QueueDelayMs),
+				"retentionDays":                deref(policy.Properties.RetentionDays),
+				"storageAccountAccessKey":      deref(policy.Properties.StorageAccountAccessKey),
+				"storageAccountSubscriptionID": deref(policy.Properties.StorageAccountSubscriptionID),
+				"storageEndpoint":              deref(policy.Properties.StorageEndpoint),
+
+				"auditActionsAndGroups": lo.Map(policy.Properties.AuditActionsAndGroups, func(s *string, _ int) string {
+					return deref(s)
+				}),
+			},
+			ResourceGroup:  resourceGroup,
+			SubscriptionId: subID,
+			TenantId:       "",
+			Type:           deref(policy.Type),
+		},
+	}, nil
 }
 
 func convertEncryptionProtector(ep *armsql.EncryptionProtector, resourceGroup string, subID string) AzureAsset {
