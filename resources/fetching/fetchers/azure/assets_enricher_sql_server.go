@@ -36,6 +36,7 @@ func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets 
 	enrichFn := []func(context.Context, *inventory.AzureAsset) error{
 		s.enrichSQLEncryptionProtector,
 		s.enrichSQLBlobAuditPolicy,
+		s.enrichTransparentDataEncryption,
 	}
 
 	for i, a := range assets {
@@ -86,5 +87,24 @@ func (s sqlServerEnricher) enrichSQLBlobAuditPolicy(ctx context.Context, a *inve
 
 	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0].Properties)
 
+	return nil
+}
+
+func (s sqlServerEnricher) enrichTransparentDataEncryption(ctx context.Context, a *inventory.AzureAsset) error {
+	tdes, err := s.provider.ListSQLTransparentDataEncryptions(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return err
+	}
+
+	if len(tdes) == 0 {
+		return nil
+	}
+
+	props := make([]map[string]any, 0, len(tdes))
+	for _, tde := range tdes {
+		props = append(props, tde.Properties)
+	}
+
+	a.AddExtension(inventory.ExtensionSQLTransparentDataEncryptions, props)
 	return nil
 }
