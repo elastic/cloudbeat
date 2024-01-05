@@ -138,20 +138,21 @@ func (p *provider) listTransparentDataEncryptionsByDB(ctx context.Context, subID
 				continue
 			}
 
-			assets = append(assets, convertTransparentDataEncryption(tde, subID, resourceGroup))
+			assets = append(assets, convertTransparentDataEncryption(tde, dbName, subID, resourceGroup))
 		}
 	}
 
 	return assets, nil
 }
 
-func convertTransparentDataEncryption(tde *armsql.LogicalDatabaseTransparentDataEncryption, subID, resourceGroup string) AzureAsset {
+func convertTransparentDataEncryption(tde *armsql.LogicalDatabaseTransparentDataEncryption, dbName, subID, resourceGroup string) AzureAsset {
 	return AzureAsset{
 		Id:       deref(tde.ID),
 		Name:     deref(tde.Name),
 		Location: "global",
 		Properties: map[string]any{
-			"state": string(deref(tde.Properties.State)),
+			"databaseName": dbName,
+			"state":        string(deref(tde.Properties.State)),
 		},
 		ResourceGroup:  resourceGroup,
 		SubscriptionId: subID,

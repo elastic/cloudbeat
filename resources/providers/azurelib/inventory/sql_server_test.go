@@ -249,8 +249,8 @@ func TestListSqlTransparentDataEncryptions(t *testing.T) {
 			},
 			expectError: true,
 			expectedAssets: []AzureAsset{
-				tdeAsset("db1-tde1", "Enabled"),
-				tdeAsset("db3-tde1", "Enabled"),
+				tdeAsset("db1-tde1", "db1", "Enabled"),
+				tdeAsset("db3-tde1", "db3", "Enabled"),
 			},
 		},
 		"Response of 3 dbs with multiple tdes (in different pages)": {
@@ -273,10 +273,10 @@ func TestListSqlTransparentDataEncryptions(t *testing.T) {
 			},
 			expectError: false,
 			expectedAssets: []AzureAsset{
-				tdeAsset("db1-tde1", "Enabled"),
-				tdeAsset("db1-tde2", "Disabled"),
-				tdeAsset("db2-tde1", "Enabled"),
-				tdeAsset("db3-tde1", "Enabled"),
+				tdeAsset("db1-tde1", "db1", "Enabled"),
+				tdeAsset("db1-tde2", "db1", "Disabled"),
+				tdeAsset("db2-tde1", "db2", "Enabled"),
+				tdeAsset("db3-tde1", "db3", "Enabled"),
 			},
 		},
 	}
@@ -393,7 +393,7 @@ func tdeAzure(id string, state armsql.TransparentDataEncryptionState) *armsql.Lo
 	}
 }
 
-func tdeAsset(id, state string) AzureAsset {
+func tdeAsset(id, dbName, state string) AzureAsset {
 	return AzureAsset{
 		Id:             id,
 		Name:           "name-" + id,
@@ -406,7 +406,8 @@ func tdeAsset(id, state string) AzureAsset {
 		Sku:            nil,
 		Identity:       nil,
 		Properties: map[string]any{
-			"state": state,
+			"databaseName": dbName,
+			"state":        state,
 		},
 		Extension: nil,
 	}
