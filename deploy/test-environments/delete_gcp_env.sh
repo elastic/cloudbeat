@@ -17,7 +17,7 @@ echo "Project Name: $PROJECT_NAME"
 echo "Project Number: $PROJECT_NUMBER"
 echo "GCP Deployments: ${GCP_DEPLOYMENTS[*]}"
 
-for DEPLOYMENT in $GCP_DEPLOYMENTS; do
+for DEPLOYMENT in "${GCP_DEPLOYMENTS[@]}"; do
     # Add the needed roles to delete the templates to the project using the deployment manager
     gcloud projects add-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
     gcloud projects add-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
