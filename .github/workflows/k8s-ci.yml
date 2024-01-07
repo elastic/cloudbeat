@@ -9,10 +9,11 @@ on:
   #     - "[0-9]+.[0-9]+"
   #   types: [ opened, synchronize, reopened ]
 
-  push:
-    branches:
-      - main
-      - "[0-9]+.[0-9]+"
+# Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
+#  push:
+#    branches:
+#      - main
+#      - "[0-9]+.[0-9]+"
 
 env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
