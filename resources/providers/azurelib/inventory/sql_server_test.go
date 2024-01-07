@@ -41,6 +41,19 @@ func mockAssetSQLEncryptionProtector(f func() ([]armsql.EncryptionProtectorsClie
 	}
 }
 
+func mockAssetSQLBlobAuditingPolicies(f func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)) ProviderAPI {
+	wrapper := &azureClientWrapper{
+		AssetSQLBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
+			return f()
+		},
+	}
+
+	return &provider{
+		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		client: wrapper,
+	}
+}
+
 func TestListSQLEncryptionProtector(t *testing.T) {
 	tcs := map[string]struct {
 		apiMockCall    func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
@@ -193,6 +206,90 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetSQLEncryptionProtector(tc.apiMockCall)
 			got, err := p.ListSQLEncryptionProtector(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expectedAssets, got)
+		})
+	}
+}
+
+func TestGetSQLBlobAuditingPolicies(t *testing.T) {
+	tcs := map[string]struct {
+		apiMockCall    func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
+		expectError    bool
+		expectedAssets []AzureAsset
+	}{
+		"Error on calling api": {
+			apiMockCall: func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
+				return armsql.ServerBlobAuditingPoliciesClientGetResponse{}, errors.New("error")
+			},
+			expectError:    true,
+			expectedAssets: nil,
+		},
+		"Response with encryption protectors in different pages": {
+			apiMockCall: func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
+				return armsql.ServerBlobAuditingPoliciesClientGetResponse{
+					ServerBlobAuditingPolicy: armsql.ServerBlobAuditingPolicy{
+						ID:   ref("id1"),
+						Name: ref("policy"),
+						Type: ref("audit-policy"),
+						Properties: &armsql.ServerBlobAuditingPolicyProperties{
+							State:                        ref(armsql.BlobAuditingPolicyStateEnabled),
+							IsAzureMonitorTargetEnabled:  ref(true),
+							IsDevopsAuditEnabled:         ref(false),
+							IsManagedIdentityInUse:       ref(true),
+							IsStorageSecondaryKeyInUse:   ref(true),
+							QueueDelayMs:                 ref(int32(100)),
+							RetentionDays:                ref(int32(90)),
+							StorageAccountAccessKey:      ref("access-key"),
+							StorageAccountSubscriptionID: ref("sub-id"),
+							StorageEndpoint:              nil,
+							AuditActionsAndGroups:        []*string{ref("a"), ref("b")},
+						},
+					},
+				}, nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				{
+					Id:             "id1",
+					Name:           "policy",
+					DisplayName:    "",
+					Location:       "global",
+					ResourceGroup:  "resourceGroup",
+					SubscriptionId: "subId",
+					Type:           "audit-policy",
+					TenantId:       "",
+					Sku:            nil,
+					Identity:       nil,
+					Properties: map[string]any{
+						"state":                        "Enabled",
+						"isAzureMonitorTargetEnabled":  true,
+						"isDevopsAuditEnabled":         false,
+						"isManagedIdentityInUse":       true,
+						"isStorageSecondaryKeyInUse":   true,
+						"queueDelayMs":                 int32(100),
+						"retentionDays":                int32(90),
+						"storageAccountAccessKey":      "access-key",
+						"storageAccountSubscriptionID": "sub-id",
+						"storageEndpoint":              "",
+						"auditActionsAndGroups":        []string{"a", "b"},
+					},
+					Extension: nil,
+				},
+			},
+		},
+	}
+
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			p := mockAssetSQLBlobAuditingPolicies(tc.apiMockCall)
+			got, err := p.GetSQLBlobAuditingPolicies(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
