@@ -51,6 +51,7 @@ jobs:
       - name: Slack Notification
         uses: ./.github/actions/slack-notification
         if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
+        continue-on-error: true
         env:
           BREAKING_COMMIT: "${{ github.event.workflow_run.head_sha }}"
           RUN_URL: "${{ github.event.workflow_run.html_url }}"
