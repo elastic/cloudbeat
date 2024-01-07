@@ -81,6 +81,26 @@ func (p provider) ListStorageAccountBlobServices(ctx context.Context, storageAcc
 	return p.inventory.ListStorageAccountBlobServices(ctx, storageAccounts)
 }
 
+func (p provider) ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
+	return p.inventory.ListSQLEncryptionProtector(ctx, subID, resourceGroup, sqlServerName)
+}
+
+func (p provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
+	return p.inventory.GetSQLBlobAuditingPolicies(ctx, subID, resourceGroup, sqlServerName)
+}
+
+func (p provider) ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	return p.inventory.ListStorageAccountsBlobDiagnosticSettings(ctx, storageAccounts)
+}
+
+func (p provider) ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	return p.inventory.ListStorageAccountsTableDiagnosticSettings(ctx, storageAccounts)
+}
+
+func (p provider) ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	return p.inventory.ListStorageAccountsQueueDiagnosticSettings(ctx, storageAccounts)
+}
+
 func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {
 	return p.governance.GetSubscriptions(ctx, cycleMetadata)
 }
