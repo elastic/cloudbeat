@@ -33,7 +33,7 @@
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm}
 ALLOW_SSH=${ALLOW_SSH:-false}
 ZONE=${ZONE:-us-central1-a}
-ROLE="roles/resourcemanager.projectIamAdmin"
+ROLE="roles/resourcemanager.projectFooIamAdmin"
 
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER%/} # Remove trailing slash if present
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
