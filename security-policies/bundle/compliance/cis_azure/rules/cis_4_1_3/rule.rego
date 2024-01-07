@@ -19,9 +19,9 @@ finding = result if {
 default is_encryption_protector_key_vault = false
 
 is_encryption_protector_key_vault if {
-	count(data_adapter.resource.extension.encryptionProtectors) > 0
+	count(data_adapter.resource.extension.sqlEncryptionProtectors) > 0
 
-	every p in data_adapter.resource.extension.encryptionProtectors {
+	every p in data_adapter.resource.extension.sqlEncryptionProtectors {
 		p.serverKeyType == "AzureKeyVault"
 		p.kind == "azurekeyvault"
 		count(trim_space(p.uri)) > 0

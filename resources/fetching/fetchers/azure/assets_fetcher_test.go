@@ -127,6 +127,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().
 		ListSQLEncryptionProtector(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
+	mockProvider.EXPECT().
+		GetSQLBlobAuditingPolicies(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)
