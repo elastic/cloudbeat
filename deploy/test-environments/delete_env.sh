@@ -160,40 +160,10 @@ printf "%s\n" "${DELETED_STACKS[@]}"
 echo "Failed to delete CloudFormation stacks (${#FAILED_STACKS[@]}):"
 printf "%s\n" "${FAILED_STACKS[@]}"
 
-DELETED_DEPLOYMENTS=()
-FAILED_DEPLOYMENTS=()
-
+# Delete GCP deployments
 PROJECT_NAME=$(gcloud config get-value core/project)
 PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
-export PROJECT_NAME
-export PROJECT_NUMBER
-
-# Delete GCP Deployments
-for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
-    # Add the needed roles to delete the templates to the project using the deployment manager
-    gcloud projects add-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
-    gcloud projects add-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
-
-    if gcloud deployment-manager deployments delete "$DEPLOYMENT" -q; then
-        echo "Successfully deleted GCP deployment: $DEPLOYMENT"
-        DELETED_DEPLOYMENTS+=("$DEPLOYMENT")
-    else
-        echo "Failed to delete GCP deployment: $DEPLOYMENT"
-        FAILED_DEPLOYMENTS+=("$DEPLOYMENT")
-    fi
-
-    # Remove the roles required to deploy the DM templates
-    gcloud projects remove-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
-    gcloud projects remove-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
-
-done
-
-# Print summary of gcp deployments deletions
-echo "Successfully deleted GCP deployments (${#DELETED_DEPLOYMENTS[@]}):"
-printf "%s\n" "${DELETED_DEPLOYMENTS[@]}"
-
-echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
-printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
+./delete_gcp_env.sh "$PROJECT_NAME" "$PROJECT_NUMBER" "$ALL_GCP_DEPLOYMENTS"
 
 # Delete Azure groups
 FAILED_AZURE_GROUPS=()
