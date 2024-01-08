@@ -43,14 +43,11 @@ jobs:
         run: |
           commit_short=$(git rev-parse --short ${{ github.event.workflow_run.head_sha }})
           echo "BREAKING_COMMIT_SHORT=$commit_short" >> $GITHUB_ENV
-          # Get the author's username from the email address
-          email="${{ github.event.workflow_run.head_commit.author.email }}"
-          username=$(echo "$email" | cut -d'@' -f1 | awk -F'+' '{print $2}')
-          echo "PR_AUTHOR=$username" >> $GITHUB_ENV
 
       - name: Slack Notification
         uses: ./.github/actions/slack-notification
         if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
+        continue-on-error: true
         env:
           BREAKING_COMMIT: "${{ github.event.workflow_run.head_sha }}"
           RUN_URL: "${{ github.event.workflow_run.html_url }}"
@@ -82,7 +79,7 @@ jobs:
                       "type": "section",
                       "text": {
                         "type": "mrkdwn",
-                        "text": "Commit <https://github.com/elastic/cloudbeat/commit/${{env.BREAKING_COMMIT}}|${{env.BREAKING_COMMIT_SHORT}}> by ${{env.PR_AUTHOR}} has failing tests on the `${{env.BRANCH}}` branch."
+                        "text": "Commit <https://github.com/elastic/cloudbeat/commit/${{env.BREAKING_COMMIT}}|${{env.BREAKING_COMMIT_SHORT}}> by ${{github.actor}} has failing tests on the `${{env.BRANCH}}` branch."
                       }
                     },
                     {
