@@ -30,7 +30,7 @@ import (
 )
 
 type ProviderAPI interface {
-	inventory.AssetsARGProviderAPI
+	inventory.ResourceGraphProviderAPI
 	inventory.SQLProviderAPI
 	inventory.StorageAccountProviderAPI
 	governance.ProviderAPI
@@ -57,17 +57,17 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		return nil, fmt.Errorf("failed to init monitor client: %w", err)
 	}
 
-	inventoryProvider := inventory.NewAssetsARGProvider(log, resourceGraphClientFactory)
+	resourceGraphProvider := inventory.NewResourceGraphProvider(log, resourceGraphClientFactory)
 	return &provider{
-		AssetsARGProviderAPI:      inventoryProvider,
+		ResourceGraphProviderAPI:  resourceGraphProvider,
 		SQLProviderAPI:            inventory.NewSQLProvider(log, azureConfig.Credentials),
 		StorageAccountProviderAPI: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
-		ProviderAPI:               governance.NewProvider(log, inventoryProvider),
+		ProviderAPI:               governance.NewProvider(log, resourceGraphProvider),
 	}, nil
 }
 
 type provider struct {
-	inventory.AssetsARGProviderAPI
+	inventory.ResourceGraphProviderAPI
 	inventory.SQLProviderAPI
 	inventory.StorageAccountProviderAPI
 	governance.ProviderAPI

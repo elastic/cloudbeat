@@ -37,7 +37,7 @@ import (
 
 type ProviderTestSuite struct {
 	suite.Suite
-	mockedClient *assetsARGAzureClientWrapper
+	mockedClient *ResourceGraphAzureClientWrapper
 }
 
 var nonTruncatedResponse = armresourcegraph.QueryResponse{
@@ -98,7 +98,7 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.mockedClient = &assetsARGAzureClientWrapper{
+	s.mockedClient = &ResourceGraphAzureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			if query.Options.SkipToken != nil && *query.Options.SkipToken != "" {
 				return armresourcegraph.ClientResourcesResponse{
@@ -150,7 +150,7 @@ func (s *ProviderTestSuite) TestGetString() {
 }
 
 func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
-	provider := &assetsARGProvider{
+	provider := &ResourceGraphProvider{
 		log:    testhelper.NewLogger(s.T()),
 		client: s.mockedClient,
 	}

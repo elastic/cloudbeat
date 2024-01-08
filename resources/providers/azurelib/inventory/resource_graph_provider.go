@@ -29,35 +29,35 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
-type assetsARGAzureClientWrapper struct {
+type ResourceGraphAzureClientWrapper struct {
 	AssetQuery func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error)
 }
 
-type AssetsARGProviderAPI interface {
+type ResourceGraphProviderAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
 	ListAllAssetTypesByName(ctx context.Context, assetsGroup string, assets []string) ([]AzureAsset, error)
 }
 
-type assetsARGProvider struct {
-	client *assetsARGAzureClientWrapper
+type ResourceGraphProvider struct {
+	client *ResourceGraphAzureClientWrapper
 	log    *logp.Logger
 }
 
-func NewAssetsARGProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client) AssetsARGProviderAPI {
+func NewResourceGraphProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client) ResourceGraphProviderAPI {
 	// We wrap the client, so we can mock it in tests
-	wrapper := &assetsARGAzureClientWrapper{
+	wrapper := &ResourceGraphAzureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			return resourceGraphClient.Resources(ctx, query, options)
 		},
 	}
 
-	return &assetsARGProvider{
+	return &ResourceGraphProvider{
 		log:    log,
 		client: wrapper,
 	}
 }
 
-func (p *assetsARGProvider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]AzureAsset, error) {
+func (p *ResourceGraphProvider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]AzureAsset, error) {
 	p.log.Infof("Listing Azure assets: %v", assets)
 
 	query := armresourcegraph.QueryRequest{
@@ -85,7 +85,7 @@ func generateQuery(assetGroup string, assets []string) string {
 	return query.String()
 }
 
-func (p *assetsARGProvider) runPaginatedQuery(ctx context.Context, query armresourcegraph.QueryRequest) ([]AzureAsset, error) {
+func (p *ResourceGraphProvider) runPaginatedQuery(ctx context.Context, query armresourcegraph.QueryRequest) ([]AzureAsset, error) {
 	var resourceAssets []AzureAsset
 
 	for {

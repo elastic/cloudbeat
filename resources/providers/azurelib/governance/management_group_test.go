@@ -107,7 +107,7 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 		testhelper.SkipLong(t)
 
 		firstRun := atomic.NewBool(false)
-		m := inventory.NewMockProviderAPI(t)
+		m := inventory.NewMockResourceGraphProviderAPI(t)
 		m.EXPECT().
 			ListAllAssetTypesByName(mock.Anything, mock.Anything, mock.Anything).
 			RunAndReturn(func(ctx context.Context, s string, strings []string) ([]inventory.AzureAsset, error) {
@@ -136,9 +136,9 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 	})
 }
 
-func mockClient(t *testing.T, assets []inventory.AzureAsset, err error) *inventory.MockProviderAPI {
+func mockClient(t *testing.T, assets []inventory.AzureAsset, err error) inventory.ResourceGraphProviderAPI {
 	t.Helper()
-	client := inventory.NewMockProviderAPI(t)
+	client := inventory.NewMockResourceGraphProviderAPI(t)
 	client.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.Anything, mock.Anything).
 		Return(assets, err).
