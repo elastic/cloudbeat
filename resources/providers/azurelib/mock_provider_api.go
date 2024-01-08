@@ -324,6 +324,63 @@ func (_c *MockProviderAPI_ListSQLEncryptionProtector_Call) RunAndReturn(run func
 	return _c
 }
 
+// ListSQLTransparentDataEncryptions provides a mock function with given fields: ctx, subID, resourceGroup, sqlServerName
+func (_m *MockProviderAPI) ListSQLTransparentDataEncryptions(ctx context.Context, subID string, resourceGroup string, sqlServerName string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, sqlServerName)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, sqlServerName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, sqlServerName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, sqlServerName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListSQLTransparentDataEncryptions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListSQLTransparentDataEncryptions'
+type MockProviderAPI_ListSQLTransparentDataEncryptions_Call struct {
+	*mock.Call
+}
+
+// ListSQLTransparentDataEncryptions is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - sqlServerName string
+func (_e *MockProviderAPI_Expecter) ListSQLTransparentDataEncryptions(ctx interface{}, subID interface{}, resourceGroup interface{}, sqlServerName interface{}) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
+	return &MockProviderAPI_ListSQLTransparentDataEncryptions_Call{Call: _e.mock.On("ListSQLTransparentDataEncryptions", ctx, subID, resourceGroup, sqlServerName)}
+}
+
+func (_c *MockProviderAPI_ListSQLTransparentDataEncryptions_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, sqlServerName string)) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListSQLTransparentDataEncryptions_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListSQLTransparentDataEncryptions_Call) RunAndReturn(run func(context.Context, string, string, string) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListStorageAccountBlobServices provides a mock function with given fields: ctx, storageAccounts
 func (_m *MockProviderAPI) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, storageAccounts)

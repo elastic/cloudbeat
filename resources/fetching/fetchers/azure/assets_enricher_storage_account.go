@@ -41,28 +41,37 @@ func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.
 		return fmt.Errorf("storageAccountEnricher: error while getting subscription: %w", err)
 	}
 
-	diagSettings, err := e.provider.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, lo.Keys(subscriptions))
-	if err != nil {
-		return fmt.Errorf("storageAccountEnricher: error while getting diagnostic settings: %w", err)
+	var errs []error
+
+	if err := e.addUsedForActivityLogsFlag(ctx, cycleMetadata, assets, lo.Keys(subscriptions)); err != nil {
+		errs = append(errs, err)
 	}
-	e.addUsedForActivityLogsFlag(assets, diagSettings)
 
 	storageAccounts := lo.Filter(assets, func(item inventory.AzureAsset, index int) bool {
 		return item.Type == inventory.StorageAccountAssetType
 	})
 
 	if err := e.addStorageAccountBlobServices(ctx, storageAccounts, assets); err != nil {
-		return fmt.Errorf("storageAccountEnricher: error while getting data protection settings: %w", err)
+		errs = append(errs, fmt.Errorf("storageAccountEnricher: error while getting data protection settings: %w", err))
 	}
 
 	if err := e.addStorageAccountServicesDiagnosticSettings(ctx, storageAccounts, assets); err != nil {
-		return fmt.Errorf("storageAccountEnricher: error while getting services diagnostic settings: %w", err)
+		errs = append(errs, fmt.Errorf("storageAccountEnricher: error while getting services diagnostic settings: %w", err))
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
 	}
 
 	return nil
 }
 
-func (storageAccountEnricher) addUsedForActivityLogsFlag(assets []inventory.AzureAsset, diagSettings []inventory.AzureAsset) {
+func (e storageAccountEnricher) addUsedForActivityLogsFlag(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset, subscriptionIDs []string) error {
+	diagSettings, err := e.provider.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
+	if err != nil {
+		return fmt.Errorf("storageAccountEnricher: error while getting diagnostic settings: %w", err)
+	}
+
 	usedStorageAccountIDs := map[string]struct{}{}
 	for _, d := range diagSettings {
 		storageAccountID := strings.FromMap(d.Properties, "storageAccountId")
@@ -85,6 +94,8 @@ func (storageAccountEnricher) addUsedForActivityLogsFlag(assets []inventory.Azur
 
 		assets[i] = a
 	}
+
+	return nil
 }
 
 func (e storageAccountEnricher) addStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset, assets []inventory.AzureAsset) error {
@@ -105,14 +116,19 @@ func (e storageAccountEnricher) addStorageAccountServicesDiagnosticSettings(ctx 
 		return nil
 	}
 
+	var errs []error
+
 	if err := e.addBlobDiagnosticSettings(ctx, storageAccounts, assets); err != nil {
-		return err
+		errs = append(errs, err)
 	}
 	if err := e.addTableDiagnosticSettings(ctx, storageAccounts, assets); err != nil {
-		return err
+		errs = append(errs, err)
+	}
+	if err := e.addQueueDiagnosticSettings(ctx, storageAccounts, assets); err != nil {
+		errs = append(errs, err)
 	}
 
-	return e.addQueueDiagnosticSettings(ctx, storageAccounts, assets)
+	return errors.Join(errs...)
 }
 
 func (e storageAccountEnricher) addBlobDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset, assets []inventory.AzureAsset) error {
@@ -150,7 +166,7 @@ func (e storageAccountEnricher) appendExtensionAssets(extensionField string, ext
 		perStorageAccountID[strings.FromMap(d.Extension, inventory.ExtensionStorageAccountID)] = d
 	}
 
-	var errAgg error
+	var errs []error
 	for i, a := range assets {
 		if a.Type != inventory.StorageAccountAssetType {
 			continue
@@ -163,7 +179,7 @@ func (e storageAccountEnricher) appendExtensionAssets(extensionField string, ext
 
 		extMap, err := maps.AsMapStringAny(ext)
 		if err != nil {
-			errAgg = errors.Join(errAgg, err)
+			errs = append(errs, err)
 		}
 
 		a.AddExtension(extensionField, extMap)
@@ -171,5 +187,9 @@ func (e storageAccountEnricher) appendExtensionAssets(extensionField string, ext
 		assets[i] = a
 	}
 
-	return errAgg
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+
+	return nil
 }

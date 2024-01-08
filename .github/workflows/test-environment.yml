@@ -416,7 +416,7 @@ jobs:
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Cleanup Environment
-        if: ${{ inputs.cleanup-env == true }}
+        if: ${{ !cancelled() && inputs.cleanup-env == true }}
         run: |
           just delete-cloud-env ${{ env.DEPLOYMENT_NAME }} '' "false"
 
@@ -434,8 +434,10 @@ jobs:
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 
-      - uses: ./.github/actions/slack-notification
+      - name: Send Slack Notification
+        uses: ./.github/actions/slack-notification
         if: always()
+        continue-on-error: true
         with:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
