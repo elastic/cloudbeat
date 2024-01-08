@@ -19,6 +19,7 @@ package inventory
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
@@ -90,6 +91,74 @@ func (p *provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resour
 			Type:           deref(policy.Type),
 		},
 	}, nil
+}
+
+func (p *provider) ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
+	pagedDbs, err := p.client.AssetSQLDatabases(ctx, subID, resourceGroup, sqlServerName, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("problem on listing sql databases for sql server %s (%w)", sqlServerName, err)
+	}
+
+	dbs := lo.FlatMap(pagedDbs, func(db armsql.DatabasesClientListByServerResponse, _ int) []*armsql.Database {
+		return db.Value
+	})
+
+	var errs error
+	assets := make([]AzureAsset, 0)
+	for _, db := range dbs {
+		if db == nil {
+			continue
+		}
+
+		assetsByDb, err := p.listTransparentDataEncryptionsByDB(ctx, subID, resourceGroup, sqlServerName, deref(db.Name))
+		if err != nil {
+			errs = errors.Join(errs, err)
+		}
+
+		assets = append(assets, assetsByDb...)
+	}
+
+	return assets, errs
+}
+
+func (p *provider) listTransparentDataEncryptionsByDB(ctx context.Context, subID, resourceGroup, sqlServerName, dbName string) ([]AzureAsset, error) {
+	pagedTdes, err := p.client.AssetSQLTransparentDataEncryptions(ctx, subID, resourceGroup, sqlServerName, dbName, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	capacity := lo.Reduce(pagedTdes, func(acc int, i armsql.TransparentDataEncryptionsClientListByDatabaseResponse, _ int) int {
+		return acc + len(i.Value)
+	}, 0)
+
+	assets := make([]AzureAsset, 0, capacity)
+	for _, tdes := range pagedTdes {
+		for _, tde := range tdes.Value {
+			if tde == nil || tde.Properties == nil {
+				continue
+			}
+
+			assets = append(assets, convertTransparentDataEncryption(tde, dbName, subID, resourceGroup))
+		}
+	}
+
+	return assets, nil
+}
+
+func convertTransparentDataEncryption(tde *armsql.LogicalDatabaseTransparentDataEncryption, dbName, subID, resourceGroup string) AzureAsset {
+	return AzureAsset{
+		Id:       deref(tde.ID),
+		Name:     deref(tde.Name),
+		Location: "global",
+		Properties: map[string]any{
+			"databaseName": dbName,
+			"state":        string(deref(tde.Properties.State)),
+		},
+		ResourceGroup:  resourceGroup,
+		SubscriptionId: subID,
+		TenantId:       "",
+		Type:           deref(tde.Type),
+	}
 }
 
 func convertEncryptionProtector(ep *armsql.EncryptionProtector, resourceGroup string, subID string) AzureAsset {

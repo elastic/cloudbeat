@@ -23,12 +23,19 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 )
 
-func mockAssetSQLEncryptionProtector(f func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)) ProviderAPI {
+type encryptionProtectorFn func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
+type auditingPoliciesFn func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
+type transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
+type databaseFn func() ([]armsql.DatabasesClientListByServerResponse, error)
+
+func mockAssetSQLEncryptionProtector(f encryptionProtectorFn) ProviderAPI {
 	wrapper := &azureClientWrapper{
 		AssetSQLEncryptionProtector: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
 			return f()
@@ -41,10 +48,26 @@ func mockAssetSQLEncryptionProtector(f func() ([]armsql.EncryptionProtectorsClie
 	}
 }
 
-func mockAssetSQLBlobAuditingPolicies(f func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)) ProviderAPI {
+func mockAssetSQLBlobAuditingPolicies(f auditingPoliciesFn) ProviderAPI {
 	wrapper := &azureClientWrapper{
 		AssetSQLBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
 			return f()
+		},
+	}
+
+	return &provider{
+		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		client: wrapper,
+	}
+}
+
+func mockAssetSQLTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsFn databaseFn) ProviderAPI {
+	wrapper := &azureClientWrapper{
+		AssetSQLDatabases: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error) {
+			return dbsFn()
+		},
+		AssetSQLTransparentDataEncryptions: func(_ context.Context, _, _, _, dbName string, _ *arm.ClientOptions, _ *armsql.TransparentDataEncryptionsClientListByDatabaseOptions) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error) {
+			return tdesFn(dbName)
 		},
 	}
 
@@ -76,128 +99,21 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 		},
 		"Response with encryption protectors in different pages": {
 			apiMockCall: func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
-				return []armsql.EncryptionProtectorsClientListByServerResponse{
-					{
-						EncryptionProtectorListResult: armsql.EncryptionProtectorListResult{
-							Value: []*armsql.EncryptionProtector{
-								{
-									Name:     ref("Encryption Protector"),
-									ID:       ref("id1"),
-									Kind:     ref("azurekeyvault"),
-									Location: ref("eu-west"),
-									Type:     ref("encryptionProtector"),
-									Properties: &armsql.EncryptionProtectorProperties{
-										ServerKeyType:       ref(armsql.ServerKeyTypeAzureKeyVault),
-										AutoRotationEnabled: ref(true),
-										ServerKeyName:       ref("serverKeyName1"),
-										Subregion:           ref("eu-west-1"),
-									},
-								},
-								{
-									Name:     ref("Encryption Protector"),
-									ID:       ref("id2"),
-									Kind:     ref("azurekeyvault"),
-									Location: ref("eu-west"),
-									Type:     ref("encryptionProtector"),
-									Properties: &armsql.EncryptionProtectorProperties{
-										ServerKeyType:       ref(armsql.ServerKeyTypeAzureKeyVault),
-										AutoRotationEnabled: ref(true),
-										ServerKeyName:       ref("serverKeyName2"),
-										Subregion:           ref("eu-west-1"),
-									},
-								},
-							},
-						},
-					},
-					{
-						EncryptionProtectorListResult: armsql.EncryptionProtectorListResult{
-							Value: []*armsql.EncryptionProtector{
-								{
-									Name:     ref("Encryption Protector"),
-									ID:       ref("id3"),
-									Kind:     ref("azurekeyvault"),
-									Location: ref("eu-west"),
-									Type:     ref("encryptionProtector"),
-									Properties: &armsql.EncryptionProtectorProperties{
-										ServerKeyType:       ref(armsql.ServerKeyTypeServiceManaged),
-										AutoRotationEnabled: ref(true),
-										ServerKeyName:       ref("serverKeyName3"),
-										Subregion:           ref("eu-west-1"),
-									},
-								},
-							},
-						},
-					},
-				}, nil
+				return wrapEpResponse(
+					wrapEpResult(
+						epAzure("id1", armsql.ServerKeyTypeAzureKeyVault),
+						epAzure("id2", armsql.ServerKeyTypeAzureKeyVault),
+					),
+					wrapEpResult(
+						epAzure("id3", armsql.ServerKeyTypeServiceManaged),
+					),
+				), nil
 			},
 			expectError: false,
 			expectedAssets: []AzureAsset{
-				{
-					Id:             "id1",
-					Name:           "Encryption Protector",
-					DisplayName:    "",
-					Location:       "eu-west",
-					ResourceGroup:  "resourceGroup",
-					SubscriptionId: "subId",
-					Type:           "encryptionProtector",
-					TenantId:       "",
-					Sku:            nil,
-					Identity:       nil,
-					Properties: map[string]any{
-						"kind":                "azurekeyvault",
-						"serverKeyType":       "AzureKeyVault",
-						"autoRotationEnabled": true,
-						"serverKeyName":       "serverKeyName1",
-						"subregion":           "eu-west-1",
-						"thumbprint":          "",
-						"uri":                 "",
-					},
-					Extension: nil,
-				},
-				{
-					Id:             "id2",
-					Name:           "Encryption Protector",
-					DisplayName:    "",
-					Location:       "eu-west",
-					ResourceGroup:  "resourceGroup",
-					SubscriptionId: "subId",
-					Type:           "encryptionProtector",
-					TenantId:       "",
-					Sku:            nil,
-					Identity:       nil,
-					Properties: map[string]any{
-						"kind":                "azurekeyvault",
-						"serverKeyType":       "AzureKeyVault",
-						"autoRotationEnabled": true,
-						"serverKeyName":       "serverKeyName2",
-						"subregion":           "eu-west-1",
-						"thumbprint":          "",
-						"uri":                 "",
-					},
-					Extension: nil,
-				},
-				{
-					Id:             "id3",
-					Name:           "Encryption Protector",
-					DisplayName:    "",
-					Location:       "eu-west",
-					ResourceGroup:  "resourceGroup",
-					SubscriptionId: "subId",
-					Type:           "encryptionProtector",
-					TenantId:       "",
-					Sku:            nil,
-					Identity:       nil,
-					Properties: map[string]any{
-						"kind":                "azurekeyvault",
-						"serverKeyType":       "ServiceManaged",
-						"autoRotationEnabled": true,
-						"serverKeyName":       "serverKeyName3",
-						"subregion":           "eu-west-1",
-						"thumbprint":          "",
-						"uri":                 "",
-					},
-					Extension: nil,
-				},
+				epAsset("id1", "AzureKeyVault"),
+				epAsset("id2", "AzureKeyVault"),
+				epAsset("id3", "ServiceManaged"),
 			},
 		},
 	}
@@ -231,25 +147,25 @@ func TestGetSQLBlobAuditingPolicies(t *testing.T) {
 			expectError:    true,
 			expectedAssets: nil,
 		},
-		"Response with encryption protectors in different pages": {
+		"Response with blob auditing policy": {
 			apiMockCall: func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
 				return armsql.ServerBlobAuditingPoliciesClientGetResponse{
 					ServerBlobAuditingPolicy: armsql.ServerBlobAuditingPolicy{
-						ID:   ref("id1"),
-						Name: ref("policy"),
-						Type: ref("audit-policy"),
+						ID:   to.Ptr("id1"),
+						Name: to.Ptr("policy"),
+						Type: to.Ptr("audit-policy"),
 						Properties: &armsql.ServerBlobAuditingPolicyProperties{
-							State:                        ref(armsql.BlobAuditingPolicyStateEnabled),
-							IsAzureMonitorTargetEnabled:  ref(true),
-							IsDevopsAuditEnabled:         ref(false),
-							IsManagedIdentityInUse:       ref(true),
-							IsStorageSecondaryKeyInUse:   ref(true),
-							QueueDelayMs:                 ref(int32(100)),
-							RetentionDays:                ref(int32(90)),
-							StorageAccountAccessKey:      ref("access-key"),
-							StorageAccountSubscriptionID: ref("sub-id"),
+							State:                        to.Ptr(armsql.BlobAuditingPolicyStateEnabled),
+							IsAzureMonitorTargetEnabled:  to.Ptr(true),
+							IsDevopsAuditEnabled:         to.Ptr(false),
+							IsManagedIdentityInUse:       to.Ptr(true),
+							IsStorageSecondaryKeyInUse:   to.Ptr(true),
+							QueueDelayMs:                 to.Ptr(int32(100)),
+							RetentionDays:                to.Ptr(int32(90)),
+							StorageAccountAccessKey:      to.Ptr("access-key"),
+							StorageAccountSubscriptionID: to.Ptr("sub-id"),
 							StorageEndpoint:              nil,
-							AuditActionsAndGroups:        []*string{ref("a"), ref("b")},
+							AuditActionsAndGroups:        []*string{to.Ptr("a"), to.Ptr("b")},
 						},
 					},
 				}, nil
@@ -302,6 +218,197 @@ func TestGetSQLBlobAuditingPolicies(t *testing.T) {
 	}
 }
 
-func ref[T any](v T) *T {
-	return &v
+func TestListSqlTransparentDataEncryptions(t *testing.T) {
+	tcs := map[string]struct {
+		tdeFn          transparentDataEncryptionFn
+		dbFn           databaseFn
+		expectError    bool
+		expectedAssets []AzureAsset
+	}{
+		"Error on fetching databases": {
+			dbFn: func() ([]armsql.DatabasesClientListByServerResponse, error) {
+				return nil, errors.New("error")
+			},
+			expectError:    true,
+			expectedAssets: nil,
+		},
+		"Error on fetching 1 transparent data encryption (out of 3)": {
+			dbFn: func() ([]armsql.DatabasesClientListByServerResponse, error) {
+				return wrapDBResponse(
+					[]string{"db1"},
+					[]string{"db2", "db3"},
+				), nil
+			},
+			tdeFn: func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error) {
+				if dbName == "db2" {
+					return nil, errors.New("error")
+				}
+				return wrapTdeResponse(
+					wrapTdeResult(tdeAzure(dbName+"-tde1", armsql.TransparentDataEncryptionStateEnabled)),
+				), nil
+			},
+			expectError: true,
+			expectedAssets: []AzureAsset{
+				tdeAsset("db1-tde1", "db1", "Enabled"),
+				tdeAsset("db3-tde1", "db3", "Enabled"),
+			},
+		},
+		"Response of 3 dbs with multiple tdes (in different pages)": {
+			dbFn: func() ([]armsql.DatabasesClientListByServerResponse, error) {
+				return wrapDBResponse(
+					[]string{"db1"},
+					[]string{"db2", "db3"},
+				), nil
+			},
+			tdeFn: func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error) {
+				if dbName == "db1" {
+					return wrapTdeResponse(
+						wrapTdeResult(tdeAzure(dbName+"-tde1", armsql.TransparentDataEncryptionStateEnabled)),
+						wrapTdeResult(tdeAzure(dbName+"-tde2", armsql.TransparentDataEncryptionStateDisabled)),
+					), nil
+				}
+				return wrapTdeResponse(
+					wrapTdeResult(tdeAzure(dbName+"-tde1", armsql.TransparentDataEncryptionStateEnabled)),
+				), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				tdeAsset("db1-tde1", "db1", "Enabled"),
+				tdeAsset("db1-tde2", "db1", "Disabled"),
+				tdeAsset("db2-tde1", "db2", "Enabled"),
+				tdeAsset("db3-tde1", "db3", "Enabled"),
+			},
+		},
+	}
+
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			p := mockAssetSQLTransparentDataEncryption(tc.tdeFn, tc.dbFn)
+			got, err := p.ListSQLTransparentDataEncryptions(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expectedAssets, got)
+		})
+	}
+}
+
+func wrapEpResult(eps ...*armsql.EncryptionProtector) armsql.EncryptionProtectorListResult {
+	return armsql.EncryptionProtectorListResult{
+		Value: eps,
+	}
+}
+
+func wrapEpResponse(results ...armsql.EncryptionProtectorListResult) []armsql.EncryptionProtectorsClientListByServerResponse {
+	return lo.Map(results, func(r armsql.EncryptionProtectorListResult, index int) armsql.EncryptionProtectorsClientListByServerResponse {
+		return armsql.EncryptionProtectorsClientListByServerResponse{
+			EncryptionProtectorListResult: r,
+		}
+	})
+}
+
+func epAzure(id string, keyType armsql.ServerKeyType) *armsql.EncryptionProtector {
+	return &armsql.EncryptionProtector{
+		ID:       to.Ptr(id),
+		Name:     to.Ptr("Name " + id),
+		Kind:     to.Ptr("azurekeyvault"),
+		Location: to.Ptr("eu-west"),
+		Type:     to.Ptr("encryptionProtector"),
+		Properties: &armsql.EncryptionProtectorProperties{
+			ServerKeyType:       to.Ptr(keyType),
+			AutoRotationEnabled: to.Ptr(true),
+			ServerKeyName:       to.Ptr("key-" + id),
+			Subregion:           to.Ptr("eu-west-1"),
+		},
+	}
+}
+
+func epAsset(id, keyType string) AzureAsset {
+	return AzureAsset{
+		Id:             id,
+		Name:           "Name " + id,
+		DisplayName:    "",
+		Location:       "eu-west",
+		ResourceGroup:  "resourceGroup",
+		SubscriptionId: "subId",
+		Type:           "encryptionProtector",
+		TenantId:       "",
+		Sku:            nil,
+		Identity:       nil,
+		Properties: map[string]any{
+			"kind":                "azurekeyvault",
+			"serverKeyType":       keyType,
+			"autoRotationEnabled": true,
+			"serverKeyName":       "key-" + id,
+			"subregion":           "eu-west-1",
+			"thumbprint":          "",
+			"uri":                 "",
+		},
+		Extension: nil,
+	}
+}
+
+func wrapDBResponse(ids ...[]string) []armsql.DatabasesClientListByServerResponse {
+	return lo.Map(ids, func(ids []string, _ int) armsql.DatabasesClientListByServerResponse {
+		values := lo.Map(ids, func(id string, _ int) *armsql.Database {
+			return &armsql.Database{
+				Name: to.Ptr(id),
+			}
+		})
+
+		return armsql.DatabasesClientListByServerResponse{
+			DatabaseListResult: armsql.DatabaseListResult{
+				Value: values,
+			},
+		}
+	})
+}
+
+func wrapTdeResponse(results ...armsql.LogicalDatabaseTransparentDataEncryptionListResult) []armsql.TransparentDataEncryptionsClientListByDatabaseResponse {
+	return lo.Map(results, func(r armsql.LogicalDatabaseTransparentDataEncryptionListResult, _ int) armsql.TransparentDataEncryptionsClientListByDatabaseResponse {
+		return armsql.TransparentDataEncryptionsClientListByDatabaseResponse{
+			LogicalDatabaseTransparentDataEncryptionListResult: r,
+		}
+	})
+}
+
+func wrapTdeResult(tdes ...*armsql.LogicalDatabaseTransparentDataEncryption) armsql.LogicalDatabaseTransparentDataEncryptionListResult {
+	return armsql.LogicalDatabaseTransparentDataEncryptionListResult{
+		Value: tdes,
+	}
+}
+
+func tdeAzure(id string, state armsql.TransparentDataEncryptionState) *armsql.LogicalDatabaseTransparentDataEncryption {
+	return &armsql.LogicalDatabaseTransparentDataEncryption{
+		ID:   to.Ptr(id),
+		Name: to.Ptr("name-" + id),
+		Type: to.Ptr("transparentDataEncryption"),
+		Properties: &armsql.TransparentDataEncryptionProperties{
+			State: to.Ptr(state),
+		},
+	}
+}
+
+func tdeAsset(id, dbName, state string) AzureAsset {
+	return AzureAsset{
+		Id:             id,
+		Name:           "name-" + id,
+		DisplayName:    "",
+		Location:       "global",
+		ResourceGroup:  "resourceGroup",
+		SubscriptionId: "subId",
+		Type:           "transparentDataEncryption",
+		TenantId:       "",
+		Sku:            nil,
+		Identity:       nil,
+		Properties: map[string]any{
+			"databaseName": dbName,
+			"state":        state,
+		},
+		Extension: nil,
+	}
 }
