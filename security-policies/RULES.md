@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 43/151 implemented rules (28%)
+### 48/151 implemented rules (32%)
 
-#### Automated rules: 43/77 (56%)
+#### Automated rules: 48/77 (62%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -461,20 +461,20 @@
 |   [3.10](bundle/compliance/cis_azure/rules/cis_3_10)   | Storage Accounts                        | Ensure Private Endpoints are used to access Storage Accounts                                                                                           | :white_check_mark: | Automated |
 |   [3.11](bundle/compliance/cis_azure/rules/cis_3_11)   | Storage Accounts                        | Ensure Soft Delete is Enabled for Azure Containers and Blob Storage                                                                                    | :white_check_mark: | Automated |
 |                          3.12                          | Storage Accounts                        | Ensure Storage for Critical Data are Encrypted with Customer Managed Keys                                                                              |        :x:         |  Manual   |
-|                          3.13                          | Storage Accounts                        | Ensure Storage logging is Enabled for Blob Service for 'Read', 'Write', and 'Delete' requests                                                          |        :x:         | Automated |
-|                          3.14                          | Storage Accounts                        | Ensure Storage Logging is Enabled for Table Service for 'Read', 'Write', and 'Delete' Requests                                                         |        :x:         | Automated |
+|   [3.13](bundle/compliance/cis_azure/rules/cis_3_13)   | Storage Accounts                        | Ensure Storage logging is Enabled for Blob Service for 'Read', 'Write', and 'Delete' requests                                                          | :white_check_mark: | Automated |
+|   [3.14](bundle/compliance/cis_azure/rules/cis_3_14)   | Storage Accounts                        | Ensure Storage Logging is Enabled for Table Service for 'Read', 'Write', and 'Delete' Requests                                                         | :white_check_mark: | Automated |
 |   [3.15](bundle/compliance/cis_azure/rules/cis_3_15)   | Storage Accounts                        | Ensure the "Minimum TLS version" for storage accounts is set to "Version 1.2"                                                                          | :white_check_mark: | Automated |
 |    [3.2](bundle/compliance/cis_azure/rules/cis_3_2)    | Storage Accounts                        | Ensure that ‘Enable Infrastructure Encryption’ for Each Storage Account in Azure Storage is Set to ‘enabled’                                           | :white_check_mark: | Automated |
 |                          3.3                           | Storage Accounts                        | Ensure that 'Enable key rotation reminders' is enabled for each Storage Account                                                                        |        :x:         |  Manual   |
 |                          3.4                           | Storage Accounts                        | Ensure that Storage Account Access Keys are Periodically Regenerated                                                                                   |        :x:         |  Manual   |
-|                          3.5                           | Storage Accounts                        | Ensure Storage Logging is Enabled for Queue Service for 'Read', 'Write', and 'Delete' requests                                                         |        :x:         | Automated |
+|    [3.5](bundle/compliance/cis_azure/rules/cis_3_5)    | Storage Accounts                        | Ensure Storage Logging is Enabled for Queue Service for 'Read', 'Write', and 'Delete' requests                                                         | :white_check_mark: | Automated |
 |                          3.6                           | Storage Accounts                        | Ensure that Shared Access Signature Tokens Expire Within an Hour                                                                                       |        :x:         |  Manual   |
 |    [3.7](bundle/compliance/cis_azure/rules/cis_3_7)    | Storage Accounts                        | Ensure that 'Public access level' is disabled for storage accounts with blob containers                                                                | :white_check_mark: | Automated |
 |    [3.8](bundle/compliance/cis_azure/rules/cis_3_8)    | Storage Accounts                        | Ensure Default Network Access Rule for Storage Accounts is Set to Deny                                                                                 | :white_check_mark: | Automated |
 |    [3.9](bundle/compliance/cis_azure/rules/cis_3_9)    | Storage Accounts                        | Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access                        | :white_check_mark: | Automated |
-|                         4.1.1                          | SQL Server - Auditing                   | Ensure that 'Auditing' is set to 'On'                                                                                                                  |        :x:         | Automated |
+|  [4.1.1](bundle/compliance/cis_azure/rules/cis_4_1_1)  | SQL Server - Auditing                   | Ensure that 'Auditing' is set to 'On'                                                                                                                  | :white_check_mark: | Automated |
 |  [4.1.2](bundle/compliance/cis_azure/rules/cis_4_1_2)  | SQL Server - Auditing                   | Ensure no Azure SQL Databases allow ingress from 0.0.0.0/0 (ANY IP)                                                                                    | :white_check_mark: | Automated |
-|                         4.1.3                          | SQL Server - Auditing                   | Ensure SQL server's Transparent Data Encryption (TDE) protector is encrypted with Customer-managed key                                                 |        :x:         | Automated |
+|  [4.1.3](bundle/compliance/cis_azure/rules/cis_4_1_3)  | SQL Server - Auditing                   | Ensure SQL server's Transparent Data Encryption (TDE) protector is encrypted with Customer-managed key                                                 | :white_check_mark: | Automated |
 |  [4.1.4](bundle/compliance/cis_azure/rules/cis_4_1_4)  | SQL Server - Auditing                   | Ensure that Azure Active Directory Admin is Configured for SQL Servers                                                                                 | :white_check_mark: | Automated |
 |                         4.1.5                          | SQL Server - Auditing                   | Ensure that 'Data encryption' is set to 'On' on a SQL Database                                                                                         |        :x:         | Automated |
 |                         4.1.6                          | SQL Server - Auditing                   | Ensure that 'Auditing' Retention is 'greater than 90 days'                                                                                             |        :x:         | Automated |

@@ -50,11 +50,16 @@ const (
 	AssetGroupAuthorizationResources = "authorizationresources"
 
 	// Extension keys
-	ExtensionBlobService         = "blobService"
-	ExtensionNetwork             = "network"
-	ExtensionUsedForActivityLogs = "usedForActivityLogs"
-	ExtensionStorageAccountID    = "storageAccountId"
-	ExtensionStorageAccountName  = "storageAccountName"
+	ExtensionBlobService             = "blobService"
+	ExtensionNetwork                 = "network"
+	ExtensionUsedForActivityLogs     = "usedForActivityLogs"
+	ExtensionSQLEncryptionProtectors = "sqlEncryptionProtectors"
+	ExtensionSQLBlobAuditPolicy      = "sqlBlobAuditPolicy"
+	ExtensionStorageAccountID        = "storageAccountId"
+	ExtensionStorageAccountName      = "storageAccountName"
+	ExtensionBlobDiagnosticSettings  = "blobDiagnosticSettings"
+	ExtensionTableDiagnosticSettings = "tableDiagnosticSettings"
+	ExtensionQueueDiagnosticSettings = "queueDiagnosticSettings"
 )
 
 type AzureAsset struct {

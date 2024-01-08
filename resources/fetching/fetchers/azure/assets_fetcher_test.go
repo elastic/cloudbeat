@@ -113,6 +113,23 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().
 		ListStorageAccountBlobServices(mock.Anything, storageAccounts).
 		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListStorageAccountsBlobDiagnosticSettings(mock.Anything, storageAccounts).
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListStorageAccountsTableDiagnosticSettings(mock.Anything, storageAccounts).
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListStorageAccountsQueueDiagnosticSettings(mock.Anything, storageAccounts).
+		Return(nil, nil)
+
+	// since we have sql server asset we need to mock the enricher
+	mockProvider.EXPECT().
+		ListSQLEncryptionProtector(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		GetSQLBlobAuditingPolicies(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)

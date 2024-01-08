@@ -47,8 +47,16 @@ func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.
 	}
 	e.addUsedForActivityLogsFlag(assets, diagSettings)
 
-	if err := e.addStorageAccountBlobServices(ctx, assets); err != nil {
+	storageAccounts := lo.Filter(assets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.StorageAccountAssetType
+	})
+
+	if err := e.addStorageAccountBlobServices(ctx, storageAccounts, assets); err != nil {
 		return fmt.Errorf("storageAccountEnricher: error while getting data protection settings: %w", err)
+	}
+
+	if err := e.addStorageAccountServicesDiagnosticSettings(ctx, storageAccounts, assets); err != nil {
+		return fmt.Errorf("storageAccountEnricher: error while getting services diagnostic settings: %w", err)
 	}
 
 	return nil
@@ -79,10 +87,7 @@ func (storageAccountEnricher) addUsedForActivityLogsFlag(assets []inventory.Azur
 	}
 }
 
-func (e storageAccountEnricher) addStorageAccountBlobServices(ctx context.Context, assets []inventory.AzureAsset) error {
-	storageAccounts := lo.Filter(assets, func(item inventory.AzureAsset, index int) bool {
-		return item.Type == inventory.StorageAccountAssetType
-	})
+func (e storageAccountEnricher) addStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset, assets []inventory.AzureAsset) error {
 	if len(storageAccounts) == 0 {
 		return nil
 	}
@@ -92,12 +97,56 @@ func (e storageAccountEnricher) addStorageAccountBlobServices(ctx context.Contex
 		return err
 	}
 
-	if len(dataProtection) == 0 {
+	return e.appendExtensionAssets(inventory.ExtensionBlobService, dataProtection, assets)
+}
+
+func (e storageAccountEnricher) addStorageAccountServicesDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset, assets []inventory.AzureAsset) error {
+	if len(storageAccounts) == 0 {
 		return nil
 	}
 
+	if err := e.addBlobDiagnosticSettings(ctx, storageAccounts, assets); err != nil {
+		return err
+	}
+	if err := e.addTableDiagnosticSettings(ctx, storageAccounts, assets); err != nil {
+		return err
+	}
+
+	return e.addQueueDiagnosticSettings(ctx, storageAccounts, assets)
+}
+
+func (e storageAccountEnricher) addBlobDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset, assets []inventory.AzureAsset) error {
+	diagSettings, err := e.provider.ListStorageAccountsBlobDiagnosticSettings(ctx, storageAccounts)
+	if err != nil {
+		return err
+	}
+	return e.appendExtensionAssets(inventory.ExtensionBlobDiagnosticSettings, diagSettings, assets)
+}
+
+func (e storageAccountEnricher) addTableDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset, assets []inventory.AzureAsset) error {
+	diagSettings, err := e.provider.ListStorageAccountsTableDiagnosticSettings(ctx, storageAccounts)
+	if err != nil {
+		return err
+	}
+	return e.appendExtensionAssets(inventory.ExtensionTableDiagnosticSettings, diagSettings, assets)
+}
+
+func (e storageAccountEnricher) addQueueDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset, assets []inventory.AzureAsset) error {
+	diagSettings, err := e.provider.ListStorageAccountsQueueDiagnosticSettings(ctx, storageAccounts)
+	if err != nil {
+		return err
+	}
+	return e.appendExtensionAssets(inventory.ExtensionQueueDiagnosticSettings, diagSettings, assets)
+}
+
+func (e storageAccountEnricher) appendExtensionAssets(extensionField string, extensions []inventory.AzureAsset, assets []inventory.AzureAsset) error {
+	if len(extensions) == 0 {
+		return nil
+	}
+
+	// map per storage account id
 	perStorageAccountID := map[string]inventory.AzureAsset{}
-	for _, d := range dataProtection {
+	for _, d := range extensions {
 		perStorageAccountID[strings.FromMap(d.Extension, inventory.ExtensionStorageAccountID)] = d
 	}
 
@@ -107,17 +156,17 @@ func (e storageAccountEnricher) addStorageAccountBlobServices(ctx context.Contex
 			continue
 		}
 
-		dataProtectionSettings, exist := perStorageAccountID[a.Id]
+		ext, exist := perStorageAccountID[a.Id]
 		if !exist {
 			continue
 		}
 
-		blobService, err := maps.AsMapStringAny(dataProtectionSettings)
+		extMap, err := maps.AsMapStringAny(ext)
 		if err != nil {
 			errAgg = errors.Join(errAgg, err)
 		}
 
-		a.AddExtension(inventory.ExtensionBlobService, blobService)
+		a.AddExtension(extensionField, extMap)
 
 		assets[i] = a
 	}
