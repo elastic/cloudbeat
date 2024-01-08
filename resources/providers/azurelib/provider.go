@@ -32,7 +32,9 @@ import (
 )
 
 type ProviderAPI interface {
-	inventory.ProviderAPI
+	inventory.AssetsARGProviderAPI
+	inventory.SQLProviderAPI
+	inventory.StorageAccountProviderAPI
 	governance.ProviderAPI
 }
 
@@ -57,16 +59,20 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		return nil, fmt.Errorf("failed to init monitor client: %w", err)
 	}
 
-	inventoryProvider := inventory.NewProvider(log, resourceGraphClientFactory, diagnosticSettingsClient, azureConfig.Credentials)
+	inventoryProvider := inventory.NewAssetsARGProvider(log, resourceGraphClientFactory)
 	return &provider{
-		inventory:  inventoryProvider,
-		governance: governance.NewProvider(log, inventoryProvider),
+		inventory:        inventoryProvider,
+		sqlInventory:     inventory.NewSQLProvider(log, azureConfig.Credentials),
+		storageInventory: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		governance:       governance.NewProvider(log, inventoryProvider),
 	}, nil
 }
 
 type provider struct {
-	inventory  inventory.ProviderAPI
-	governance governance.ProviderAPI
+	inventory        inventory.AssetsARGProviderAPI
+	sqlInventory     inventory.SQLProviderAPI
+	storageInventory inventory.StorageAccountProviderAPI
+	governance       governance.ProviderAPI
 }
 
 func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]inventory.AzureAsset, error) {
@@ -74,35 +80,35 @@ func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string
 }
 
 func (p provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
+	return p.storageInventory.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
 }
 
 func (p provider) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountBlobServices(ctx, storageAccounts)
+	return p.storageInventory.ListStorageAccountBlobServices(ctx, storageAccounts)
 }
 
 func (p provider) ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListSQLEncryptionProtector(ctx, subID, resourceGroup, sqlServerName)
+	return p.sqlInventory.ListSQLEncryptionProtector(ctx, subID, resourceGroup, sqlServerName)
 }
 
 func (p provider) ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListSQLTransparentDataEncryptions(ctx, subID, resourceGroup, sqlServerName)
+	return p.sqlInventory.ListSQLTransparentDataEncryptions(ctx, subID, resourceGroup, sqlServerName)
 }
 
 func (p provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.inventory.GetSQLBlobAuditingPolicies(ctx, subID, resourceGroup, sqlServerName)
+	return p.sqlInventory.GetSQLBlobAuditingPolicies(ctx, subID, resourceGroup, sqlServerName)
 }
 
 func (p provider) ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountsBlobDiagnosticSettings(ctx, storageAccounts)
+	return p.storageInventory.ListStorageAccountsBlobDiagnosticSettings(ctx, storageAccounts)
 }
 
 func (p provider) ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountsTableDiagnosticSettings(ctx, storageAccounts)
+	return p.storageInventory.ListStorageAccountsTableDiagnosticSettings(ctx, storageAccounts)
 }
 
 func (p provider) ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountsQueueDiagnosticSettings(ctx, storageAccounts)
+	return p.storageInventory.ListStorageAccountsQueueDiagnosticSettings(ctx, storageAccounts)
 }
 
 func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {

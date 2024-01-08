@@ -63,10 +63,10 @@ type ProviderAPI interface {
 
 type provider struct {
 	cache  *cycle.Cache[map[string]Subscription]
-	client inventory.ProviderAPI
+	client inventory.AssetsARGProviderAPI
 }
 
-func NewProvider(log *logp.Logger, client inventory.ProviderAPI) ProviderAPI {
+func NewProvider(log *logp.Logger, client inventory.AssetsARGProviderAPI) ProviderAPI {
 	p := provider{
 		client: client,
 	}
