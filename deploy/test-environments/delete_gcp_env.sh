@@ -40,5 +40,9 @@ done
 echo "Successfully deleted GCP deployments (${#DELETED_DEPLOYMENTS[@]}):"
 printf "%s\n" "${DELETED_DEPLOYMENTS[@]}"
 
-echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
-printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
+if [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ]; then
+  echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
+  printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
+  exit 1 
+fi
+
