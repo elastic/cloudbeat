@@ -5,8 +5,6 @@ updates:
   # Maintain dependencies for go.mod
   - package-ecosystem: "gomod"
     directory: "/"
-    schedule:
-      interval: "daily"
     groups:
       azure:
         patterns:
