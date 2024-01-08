@@ -18,14 +18,12 @@
 package azurelib
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -61,56 +59,16 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 
 	inventoryProvider := inventory.NewAssetsARGProvider(log, resourceGraphClientFactory)
 	return &provider{
-		inventory:        inventoryProvider,
-		sqlInventory:     inventory.NewSQLProvider(log, azureConfig.Credentials),
-		storageInventory: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
-		governance:       governance.NewProvider(log, inventoryProvider),
+		AssetsARGProviderAPI:      inventoryProvider,
+		SQLProviderAPI:            inventory.NewSQLProvider(log, azureConfig.Credentials),
+		StorageAccountProviderAPI: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		ProviderAPI:               governance.NewProvider(log, inventoryProvider),
 	}, nil
 }
 
 type provider struct {
-	inventory        inventory.AssetsARGProviderAPI
-	sqlInventory     inventory.SQLProviderAPI
-	storageInventory inventory.StorageAccountProviderAPI
-	governance       governance.ProviderAPI
-}
-
-func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListAllAssetTypesByName(ctx, assetGroup, assets)
-}
-
-func (p provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
-	return p.storageInventory.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
-}
-
-func (p provider) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.storageInventory.ListStorageAccountBlobServices(ctx, storageAccounts)
-}
-
-func (p provider) ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.sqlInventory.ListSQLEncryptionProtector(ctx, subID, resourceGroup, sqlServerName)
-}
-
-func (p provider) ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.sqlInventory.ListSQLTransparentDataEncryptions(ctx, subID, resourceGroup, sqlServerName)
-}
-
-func (p provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.sqlInventory.GetSQLBlobAuditingPolicies(ctx, subID, resourceGroup, sqlServerName)
-}
-
-func (p provider) ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.storageInventory.ListStorageAccountsBlobDiagnosticSettings(ctx, storageAccounts)
-}
-
-func (p provider) ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.storageInventory.ListStorageAccountsTableDiagnosticSettings(ctx, storageAccounts)
-}
-
-func (p provider) ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.storageInventory.ListStorageAccountsQueueDiagnosticSettings(ctx, storageAccounts)
-}
-
-func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {
-	return p.governance.GetSubscriptions(ctx, cycleMetadata)
+	inventory.AssetsARGProviderAPI
+	inventory.SQLProviderAPI
+	inventory.StorageAccountProviderAPI
+	governance.ProviderAPI
 }
