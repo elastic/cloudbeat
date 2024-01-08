@@ -14,10 +14,8 @@ on:
 
 env:
   WORKING_DIR: deploy/test-environments
-  GCP_DEPLOYMENT_NAME: ea-cspm-ci-dm-test
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
-  TF_VAR_deployment_name: gcp-dm-ci-test
 
 jobs:
   Test-GCP-DM:
@@ -31,8 +29,8 @@ jobs:
       - name: Set up unique deployment names
         run: |
           suffix="$(date +%s | tail -c 3)"
-          echo "TF_VAR_deployment_name=$TF_VAR_deployment_name-$suffix" >> $GITHUB_ENV
-          echo "GCP_DEPLOYMENT_NAME=$GCP_DEPLOYMENT_NAME-$suffix" >> $GITHUB_ENV
+          echo "TF_VAR_deployment_name=gcp-dm-ci-test-$suffix" >> $GITHUB_ENV
+          echo "GCP_DEPLOYMENT_NAME=ea-cspm-ci-dm-test-$suffix" >> $GITHUB_ENV
 
       - name: Check out the repo
         uses: actions/checkout@v4
