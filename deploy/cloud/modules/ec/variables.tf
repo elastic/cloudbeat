@@ -55,6 +55,10 @@ variable "elasticsearch_autoscale" {
 
 # Docker image overrides
 
+# Docker image tag override is used to override the default docker image tag
+# for BC reasons. This is used to test new versions of the cloud deployment
+# This option allow to pin the docker image tag to a specific version to prevent
+# unexpected changes in the deployment.
 variable "docker_image_tag_override" {
   default = {
     "elasticsearch" = "",

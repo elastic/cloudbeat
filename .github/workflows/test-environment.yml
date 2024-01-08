@@ -17,7 +17,7 @@ on:
         default: false
       elk-stack-version:
         required: true
-        description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.11.0"
         type: string
       ess-region:
@@ -54,7 +54,7 @@ on:
         default: false
       elk-stack-version:
         required: true
-        description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.10.0"
         type: string
       ess-region:
