@@ -1,0 +1,88 @@
+metadata:
+  id: 27896f4b-0405-5388-bacd-182e77556711
+  name: Ensure that 'Auditing' Retention is 'greater than 90 days'
+  profile_applicability: '* Level 1'
+  description: SQL Server Audit Retention should be configured to be greater than
+    90 days.
+  rationale: |-
+    Audit Logs can be used to check for anomalies and give insight into suspected breaches or misuse of information and access.
+  audit: |-
+    **From Azure Portal**
+
+    1. Go to `SQL servers`
+    2. For each server instance
+    3. Click on `Auditing`
+    4. If storage is selected, expand `Advanced properties`
+    5. Ensure `Retention (days)` setting is greater than `90` days or `0` for unlimited retention.
+
+    **From PowerShell**
+
+    Get the list of all SQL Servers 
+    ```
+    Get-AzSqlServer
+    ```
+    For each Server
+    ```
+    Get-AzSqlServerAudit -ResourceGroupName <resource group name> -ServerName <server name>
+    ```
+    Ensure that `RetentionInDays` is set to `more than 90`
+
+    **Note:** If the SQL server is set with `LogAnalyticsTargetState` setting set to `Enabled`, run the following additional command.
+
+    ```
+    Get-AzOperationalInsightsWorkspace | Where-Object {$_.ResourceId -eq <SQL Server WorkSpaceResourceId>}
+    ```
+
+    Ensure that `RetentionInDays` is set to `more than 90`
+  remediation: |-
+    **From Azure Portal**
+
+    1. Go to `SQL servers`
+    2. For each server instance
+    3. Click on `Auditing`
+    4. If storage is selected, expand `Advanced properties`
+    5. Set the `Retention (days)` setting greater than `90` days or `0` for unlimited retention.
+    6. Select `Save`
+
+    **From PowerShell**
+    For each Server, set retention policy to more than 90 days
+
+    **Log Analytics Example**
+    ```
+    Set-AzSqlServerAudit -ResourceGroupName <resource group name> -ServerName <SQL Server name> -RetentionInDays <Number of Days to retain the audit logs, should be more than 90 days> -LogAnalyticsTargetState Enabled -WorkspaceResourceId "/subscriptions/<subscription ID>/resourceGroups/insights-integration/providers/Microsoft.OperationalInsights/workspaces/<workspace name>
+    ```
+
+    **Event Hub Example**
+
+    ```
+    Set-AzSqlServerAudit -ResourceGroupName "<resource group name>" -ServerName "<SQL Server name>" -EventHubTargetState Enabled -EventHubName 
+     "<Event Hub name>" -EventHubAuthorizationRuleResourceId "<Event Hub Authorization Rule Resource ID>"
+    ```
+
+    **Blob Storage Example***
+
+    ```
+    Set-AzSqlServerAudit -ResourceGroupName "<resource group name>" -ServerName "<SQL Server name>" -BlobStorageTargetState Enabled 
+     -StorageAccountResourceId "/subscriptions/<subscription_ID>/resourceGroups/<Resource_Group>/providers/Microsoft.Stora
+     ge/storageAccounts/<Storage Account name>"
+    ```
+  impact: ''
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/sql-database/sql-database-auditing
+    2. https://docs.microsoft.com/en-us/powershell/module/azurerm.sql/get-azurermsqlserverauditing?view=azurermps-5.2.0
+    3. https://docs.microsoft.com/en-us/powershell/module/azurerm.sql/set-azurermsqlserverauditing?view=azurermps-5.2.0
+    4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-logging-threat-detection#lt-6-configure-log-storage-retention
+  section: SQL Server - Auditing
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 4.1.6
+  - SQL Server - Auditing
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 4.1.6
+    posture_type: cspm
