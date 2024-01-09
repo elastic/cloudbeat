@@ -10,14 +10,14 @@ finding = result if {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(config_enabled),
+		common.calculate_result(log_retention_long_enough),
 		{"Resource": data_adapter.resource},
 	)
 }
 
-default config_enabled = false
+default log_retention_long_enough = false
 
-config_enabled if {
+log_retention_long_enough if {
 	some i
 	data_adapter.resource.extension.psqlConfigurations[i].name == "log_retention_days"
 	to_number(data_adapter.resource.extension.psqlConfigurations[i].value) > 3
