@@ -74,7 +74,7 @@ module "ec_deployment" {
     "elasticsearch" = "${var.pin_version}",
     "kibana"        = "${var.pin_version}",
     "apm"           = "${var.pin_version}"
-  } : {
+    } : {
     "elasticsearch" = "",
     "kibana"        = "",
     "apm"           = ""
