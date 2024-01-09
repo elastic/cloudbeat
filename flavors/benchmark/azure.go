@@ -52,6 +52,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
+//revive:disable-next-line:function-result-limit
 func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err

@@ -22,6 +22,14 @@ linters:
     - unparam
     - unused
     - whitespace
+    - prealloc
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters: [prealloc]
+    - path: resources/utils/testhelper/*.go
+      linters: [prealloc]
 
 linters-settings:
   gocritic:
@@ -82,25 +90,22 @@ linters-settings:
   revive:
     enable-all-rules: true
     rules:
-      - name: add-constant
-        disabled: true
-      - name: bare-return
-        disabled: true
-      - name: blank-imports
-        disabled: true
+      # Configuration for enabled rules
       - name: cognitive-complexity
         arguments: [30]
-      - name: confusing-naming
-        disabled: true
-      - name: confusing-results
-        disabled: true
       - name: cyclomatic
         arguments: [15]
+      - name: unhandled-error
+        arguments:
+          - "bytes.Buffer.WriteString" # Always returns nil error
+      # TODO: work on these
+      - name: blank-imports
+        disabled: true
+      - name: confusing-naming
+        disabled: true
       - name: exported
         disabled: true
       - name: function-length
-        disabled: true
-      - name: function-result-limit
         disabled: true
       - name: get-return
         disabled: true
@@ -108,19 +113,21 @@ linters-settings:
         disabled: true
       - name: import-shadowing
         disabled: true
-      - name: line-length-limit
-        disabled: true
-      - name: max-public-structs
-        disabled: true
       - name: unchecked-type-assertion
-        disabled: true
-      - name: unhandled-error
-        arguments:
-          - "bytes.Buffer.WriteString"
-      - name: unused-receiver
         disabled: true
       - name: var-naming
         disabled: true
+      # No plan to enable these
+      - name: add-constant
+        disabled: true # Very restrictive rule that requires exporting everything to a constant
+      - name: bare-return
+        disabled: true # Are bare returns really that bad?
+      - name: line-length-limit
+        disabled: true # Annoying to enforce
+      - name: max-public-structs
+        disabled: true
+      - name: unused-receiver
+        disabled: true # Too many results
   unused:
     # Mark all struct fields that have been written to as used.
     field-writes-are-uses: false
@@ -130,3 +137,8 @@ linters-settings:
     local-variables-are-used: false
   tenv:
     all: true
+
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: false

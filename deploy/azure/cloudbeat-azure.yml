@@ -2,6 +2,13 @@ cloudbeat:
   config:
     v1:
       benchmark: cis_azure
+      azure:
+        account_type: ${AZURE_ACCOUNT_TYPE:""}
+        credentials:
+          type: ${AZURE_CREDENTIALS_TYPE:""}
+          client_id: ${AZURE_CLIENT_ID:""}
+          tenant_id: ${AZURE_TENANT_ID:""}
+          client_secret: ${AZURE_CLIENT_SECRET:""}
   type: cloudbeat/cis_azure
   # Defines how often an event is sent to the output
   period: 30s

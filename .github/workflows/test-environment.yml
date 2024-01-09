@@ -110,6 +110,7 @@ jobs:
       TF_VAR_serverless_mode: ${{ inputs.serverless_mode }}
       TEST_AGENTLESS: ${{ inputs.serverless_mode }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
+      S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       STACK_VERSION: ${{ inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
@@ -138,9 +139,9 @@ jobs:
             exit 1
           fi
 
-          # Check pattern required for CNVM deployment
-          if ! [[ $deployment_name =~ ^[a-zA-Z][-a-zA-Z0-9]*$ ]]; then
-            echo "error: Deployment name doesn't match the required pattern [a-zA-Z][-a-zA-Z0-9]*"
+          # Check pattern required for cloud deployment
+          if ! [[ $deployment_name =~ ^[a-z][-a-z0-9]*$ ]]; then
+            echo "error: Deployment name doesn't match the required pattern [a-z][-a-z0-9]*"
             exit 1
           fi
 
@@ -402,6 +403,30 @@ jobs:
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Cleanup Environment
-        if: inputs.cleanup-env == 'true'
+        if: ${{ !cancelled() && inputs.cleanup-env == true }}
         run: |
           just delete-cloud-env ${{ env.DEPLOYMENT_NAME }} '' "false"
+
+      - name: Create Slack Payload
+        if: always()
+        id: prepare-data
+        working-directory: ./
+        env:
+          WORKFLOW: "${{ github.workflow }}"
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          GITHUB_ACTOR: "${{ github.actor }}"
+          ESS_TYPE: ${{ inputs.serverless_mode }}
+          JOB_STATUS: "${{ job.status }}"
+          S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
+        run: |
+          python3 ./.ci/scripts/prepare_slack_data.py
+
+      - name: Send Slack Notification
+        uses: ./.github/actions/slack-notification
+        if: always()
+        continue-on-error: true
+        with:
+          vault-url: ${{ secrets.VAULT_ADDR }}
+          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          slack-payload: ${{ steps.prepare-data.outputs.payload }}

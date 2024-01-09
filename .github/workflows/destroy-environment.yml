@@ -1,5 +1,5 @@
 name: Destroy Environment
-run-name: Destroying ${{ github.event.inputs.prefix }}* by @${{ github.actor }}
+run-name: Destroying ${{ inputs.prefix }}* by @${{ github.actor }}
 
 on:
   # Ability to execute on demand
@@ -21,8 +21,8 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
-  ENV_PREFIX: ${{ github.event.inputs.prefix }}
-  ENV_IGNORE_PREFIX: ${{ github.event.inputs.ignore-prefix }}
+  ENV_PREFIX: ${{ inputs.prefix }}
+  ENV_IGNORE_PREFIX: ${{ inputs.ignore-prefix }}
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
         working-directory: ./
 
       - name: Mask API Key
-        if: ${{ github.event.inputs.ec-api-key != '' }}
+        if: ${{ inputs.ec-api-key != '' }}
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
@@ -71,3 +71,38 @@ jobs:
       - name: Destroy Environment
         run: |
           just delete-cloud-env ${{ env.ENV_PREFIX }} '${{ env.ENV_IGNORE_PREFIX }}' "false"
+
+      - name: Send Slack Notification
+        uses: ./.github/actions/slack-notification
+        if: always()
+        continue-on-error: true
+        env:
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          JOB_STATUS_COLOR: "${{ job.status == 'success' && '#36a64f' || '#D40E0D' }}"
+        with:
+          vault-url: ${{ secrets.VAULT_ADDR }}
+          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          slack-payload: |
+            {
+              "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`",
+            	"blocks": [
+                {
+                  "type": "divider"
+                }
+              ],
+              "attachments": [
+                {
+                  "color": "${{ env.JOB_STATUS_COLOR }}",
+                  "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`"
+                        }
+                    }
+                  ]
+                }
+              ]
+            }

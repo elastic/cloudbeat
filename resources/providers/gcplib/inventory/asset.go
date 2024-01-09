@@ -39,7 +39,7 @@ const (
 	LogBucketAssetType             = "logging.googleapis.com/LogBucket"
 	LogSinkAssetType               = "logging.googleapis.com/LogSink"
 	DataprocClusterAssetType       = "dataproc.googleapis.com/Cluster"
-	MonitoringLogMetricAssetType   = "monitoring.googleapis.com/LogMetric"
+	MonitoringLogMetricAssetType   = "logging.googleapis.com/LogMetric"
 	MonitoringAlertPolicyAssetType = "monitoring.googleapis.com/AlertPolicy"
 	DnsPolicyAssetType             = "dns.googleapis.com/Policy"
 	ServiceUsageAssetType          = "serviceusage.googleapis.com/Service"

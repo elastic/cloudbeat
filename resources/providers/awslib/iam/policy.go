@@ -216,13 +216,12 @@ func (p Provider) listInlinePolicies(ctx context.Context, identity *string) ([]P
 		input.Marker = output.Marker
 	}
 
-	var policies []PolicyDocument
+	policies := make([]PolicyDocument, 0, len(policyNames))
 	for i := range policyNames {
 		inlinePolicy, err := p.client.GetUserPolicy(ctx, &iamsdk.GetUserPolicyInput{
 			PolicyName: &policyNames[i],
 			UserName:   identity,
 		})
-
 		if err != nil {
 			p.log.Errorf("fail to get inline policy for user: %s, policy name: %s", *identity, policyNames[i])
 			policies = append(policies, PolicyDocument{PolicyName: policyNames[i]})
