@@ -22,11 +22,71 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 )
 
-func (p *provider) ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
+type sqlAzureClientWrapper struct {
+	AssetSQLEncryptionProtector        func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
+	AssetSQLBlobAuditingPolicies       func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
+	AssetSQLTransparentDataEncryptions func(ctx context.Context, subID, resourceGroup, sqlServerName, dbName string, clientOptions *arm.ClientOptions, options *armsql.TransparentDataEncryptionsClientListByDatabaseOptions) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
+	AssetSQLDatabases                  func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error)
+}
+
+type SQLProviderAPI interface {
+	ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error)
+	ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error)
+	GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error)
+}
+
+type sqlProvider struct {
+	client *sqlAzureClientWrapper
+	log    *logp.Logger //nolint:unused
+}
+
+func NewSQLProvider(log *logp.Logger, credentials azcore.TokenCredential) SQLProviderAPI {
+	// We wrap the client, so we can mock it in tests
+	wrapper := &sqlAzureClientWrapper{
+		AssetSQLEncryptionProtector: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
+			cl, err := armsql.NewEncryptionProtectorsClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListByServerPager(resourceGroup, sqlServerName, options))
+		},
+		AssetSQLBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
+			cl, err := armsql.NewServerBlobAuditingPoliciesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return armsql.ServerBlobAuditingPoliciesClientGetResponse{}, err
+			}
+			return cl.Get(ctx, resourceGroup, sqlServerName, options)
+		},
+		AssetSQLTransparentDataEncryptions: func(ctx context.Context, subID, resourceGroup, sqlServerName, dbName string, clientOptions *arm.ClientOptions, options *armsql.TransparentDataEncryptionsClientListByDatabaseOptions) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error) {
+			cl, err := armsql.NewTransparentDataEncryptionsClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListByDatabasePager(resourceGroup, sqlServerName, dbName, options))
+		},
+		AssetSQLDatabases: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error) {
+			cl, err := armsql.NewDatabasesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListByServerPager(resourceGroup, sqlServerName, options))
+		},
+	}
+
+	return &sqlProvider{
+		log:    log,
+		client: wrapper,
+	}
+}
+
+func (p *sqlProvider) ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
 	encryptProtectors, err := p.client.AssetSQLEncryptionProtector(ctx, subID, resourceGroup, sqlServerName, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("problem on listing sql encryption protectors (%w)", err)
@@ -54,7 +114,7 @@ func (p *provider) ListSQLEncryptionProtector(ctx context.Context, subID, resour
 	return assets, nil
 }
 
-func (p *provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
+func (p *sqlProvider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
 	policy, err := p.client.AssetSQLBlobAuditingPolicies(ctx, subID, resourceGroup, sqlServerName, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("problem on getting sql blob auditing policies (%w)", err)
@@ -93,7 +153,7 @@ func (p *provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resour
 	}, nil
 }
 
-func (p *provider) ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
+func (p *sqlProvider) ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]AzureAsset, error) {
 	pagedDbs, err := p.client.AssetSQLDatabases(ctx, subID, resourceGroup, sqlServerName, nil, nil)
 	if err != nil {
 		return nil, fmt.Errorf("problem on listing sql databases for sql server %s (%w)", sqlServerName, err)
@@ -121,7 +181,7 @@ func (p *provider) ListSQLTransparentDataEncryptions(ctx context.Context, subID,
 	return assets, errs
 }
 
-func (p *provider) listTransparentDataEncryptionsByDB(ctx context.Context, subID, resourceGroup, sqlServerName, dbName string) ([]AzureAsset, error) {
+func (p *sqlProvider) listTransparentDataEncryptionsByDB(ctx context.Context, subID, resourceGroup, sqlServerName, dbName string) ([]AzureAsset, error) {
 	pagedTdes, err := p.client.AssetSQLTransparentDataEncryptions(ctx, subID, resourceGroup, sqlServerName, dbName, nil, nil)
 	if err != nil {
 		return nil, err
