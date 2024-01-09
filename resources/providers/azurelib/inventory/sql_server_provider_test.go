@@ -35,34 +35,34 @@ type auditingPoliciesFn func() (armsql.ServerBlobAuditingPoliciesClientGetRespon
 type transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
 type databaseFn func() ([]armsql.DatabasesClientListByServerResponse, error)
 
-func mockAssetSQLEncryptionProtector(f encryptionProtectorFn) ProviderAPI {
-	wrapper := &azureClientWrapper{
+func mockAssetSQLEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
+	wrapper := &sqlAzureClientWrapper{
 		AssetSQLEncryptionProtector: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
 			return f()
 		},
 	}
 
-	return &provider{
+	return &sqlProvider{
 		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
 		client: wrapper,
 	}
 }
 
-func mockAssetSQLBlobAuditingPolicies(f auditingPoliciesFn) ProviderAPI {
-	wrapper := &azureClientWrapper{
+func mockAssetSQLBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
+	wrapper := &sqlAzureClientWrapper{
 		AssetSQLBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
 			return f()
 		},
 	}
 
-	return &provider{
+	return &sqlProvider{
 		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
 		client: wrapper,
 	}
 }
 
-func mockAssetSQLTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsFn databaseFn) ProviderAPI {
-	wrapper := &azureClientWrapper{
+func mockAssetSQLTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsFn databaseFn) SQLProviderAPI {
+	wrapper := &sqlAzureClientWrapper{
 		AssetSQLDatabases: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error) {
 			return dbsFn()
 		},
@@ -71,7 +71,7 @@ func mockAssetSQLTransparentDataEncryption(tdesFn transparentDataEncryptionFn, d
 		},
 	}
 
-	return &provider{
+	return &sqlProvider{
 		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
 		client: wrapper,
 	}
