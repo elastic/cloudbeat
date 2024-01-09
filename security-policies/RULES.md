@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 50/151 implemented rules (33%)
+### 55/151 implemented rules (36%)
 
-#### Automated rules: 50/77 (65%)
+#### Automated rules: 55/77 (71%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -484,11 +484,11 @@
 |                         4.2.4                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Send scan reports to' is configured for a SQL server                                                |        :x:         | Automated |
 |                         4.2.5                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Also send email notifications to admins and subscription owners' is set for each SQL Server         |        :x:         | Automated |
 |  [4.3.1](bundle/compliance/cis_azure/rules/cis_4_3_1)  | PostgreSQL Database Server              | Ensure 'Enforce SSL connection' is set to 'ENABLED' for PostgreSQL Database Server                                                                     | :white_check_mark: | Automated |
-|                         4.3.2                          | PostgreSQL Database Server              | Ensure Server Parameter 'log_checkpoints' is set to 'ON' for PostgreSQL Database Server                                                                |        :x:         | Automated |
-|                         4.3.3                          | PostgreSQL Database Server              | Ensure server parameter 'log_connections' is set to 'ON' for PostgreSQL Database Server                                                                |        :x:         | Automated |
-|                         4.3.4                          | PostgreSQL Database Server              | Ensure server parameter 'log_disconnections' is set to 'ON' for PostgreSQL Database Server                                                             |        :x:         | Automated |
-|                         4.3.5                          | PostgreSQL Database Server              | Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server                                                          |        :x:         | Automated |
-|                         4.3.6                          | PostgreSQL Database Server              | Ensure Server Parameter 'log_retention_days' is greater than 3 days for PostgreSQL Database Server                                                     |        :x:         | Automated |
+|  [4.3.2](bundle/compliance/cis_azure/rules/cis_4_3_2)  | PostgreSQL Database Server              | Ensure Server Parameter 'log_checkpoints' is set to 'ON' for PostgreSQL Database Server                                                                | :white_check_mark: | Automated |
+|  [4.3.3](bundle/compliance/cis_azure/rules/cis_4_3_3)  | PostgreSQL Database Server              | Ensure server parameter 'log_connections' is set to 'ON' for PostgreSQL Database Server                                                                | :white_check_mark: | Automated |
+|  [4.3.4](bundle/compliance/cis_azure/rules/cis_4_3_4)  | PostgreSQL Database Server              | Ensure server parameter 'log_disconnections' is set to 'ON' for PostgreSQL Database Server                                                             | :white_check_mark: | Automated |
+|  [4.3.5](bundle/compliance/cis_azure/rules/cis_4_3_5)  | PostgreSQL Database Server              | Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server                                                          | :white_check_mark: | Automated |
+|  [4.3.6](bundle/compliance/cis_azure/rules/cis_4_3_6)  | PostgreSQL Database Server              | Ensure Server Parameter 'log_retention_days' is greater than 3 days for PostgreSQL Database Server                                                     | :white_check_mark: | Automated |
 |                         4.3.7                          | PostgreSQL Database Server              | Ensure 'Allow access to Azure services' for PostgreSQL Database Server is disabled                                                                     |        :x:         | Automated |
 |                         4.3.8                          | PostgreSQL Database Server              | Ensure 'Infrastructure double encryption' for PostgreSQL Database Server is 'Enabled'                                                                  |        :x:         | Automated |
 |  [4.4.1](bundle/compliance/cis_azure/rules/cis_4_4_1)  | MySQL Database                          | Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server                                                                 | :white_check_mark: | Automated |
