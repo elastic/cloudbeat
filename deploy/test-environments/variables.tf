@@ -35,6 +35,12 @@ variable "stack_version" {
   type        = string
 }
 
+variable "pin_version" {
+  default     = ""
+  description = "Optional pinned stack version for BC reasons"
+  type        = string
+}
+
 variable "serverless_mode" {
   default     = false
   description = "Set to true to create a serverless security project instead of an ESS deployment"
@@ -72,15 +78,6 @@ variable "docker_image_tag_override" {
   }
   description = "Optional docker image tag override"
   type        = map(string)
-}
-
-variable "docker_image_override" {
-  default = {
-    "elasticsearch" = "docker.elastic.co/cloud-release/elasticsearch-cloud-ess",
-    "kibana"        = "docker.elastic.co/cloud-release/kibana-cloud",
-    "apm"           = "docker.elastic.co/cloud-release/elastic-agent-cloud",
-  }
-  type = map(string)
 }
 
 variable "division" {

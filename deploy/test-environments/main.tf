@@ -15,7 +15,6 @@ locals {
     Content-type  = "application/json"
     Authorization = "ApiKey ${var.ec_api_key}"
   }
-  cleaned_version = length(regexall("(-[0-9a-z]{4})", var.stack_version)) > 0 ? split("-", var.stack_version)[0] : var.stack_version
 }
 
 # EC2 + kind deployment
@@ -61,7 +60,7 @@ module "ec_deployment" {
   source        = "../cloud/modules/ec"
   ec_api_key    = var.ec_api_key
   region        = var.ess_region
-  stack_version = local.cleaned_version
+  stack_version = var.stack_version
   tags          = local.common_tags
 
   deployment_template    = var.deployment_template
@@ -71,11 +70,14 @@ module "ec_deployment" {
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
 
-  docker_image = var.docker_image_override
-  docker_image_tag_override = {
-    "elasticsearch" = "${var.stack_version}",
-    "kibana"        = "${var.stack_version}",
-    "apm"           = "${var.stack_version}"
+  docker_image_tag_override = var.pin_version != "" ? {
+    "elasticsearch" = "${var.pin_version}",
+    "kibana"        = "${var.pin_version}",
+    "apm"           = "${var.pin_version}"
+  } : {
+    "elasticsearch" = "",
+    "kibana"        = "",
+    "apm"           = ""
   }
 }
 

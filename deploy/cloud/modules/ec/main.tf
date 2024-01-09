@@ -26,9 +26,9 @@ resource "ec_deployment" "deployment" {
   elasticsearch = {
     autoscale = var.elasticsearch_autoscale
     strategy  = "rolling_all"
-    config = {
-      docker_image = local.es_docker_image_tag_override != "" ? "${local.es_docker_image}:${local.es_docker_image_tag_override}" : null
-    }
+    config = local.es_docker_image_tag_override != "" ? {
+      docker_image = "${local.es_docker_image}:${local.es_docker_image_tag_override}"
+    } : null
 
     cold = {
       autoscaling = {}
@@ -53,15 +53,15 @@ resource "ec_deployment" "deployment" {
   }
 
   kibana = {
-    config = {
-      docker_image = local.kibana_docker_image_tag_override != "" ? "${local.kibana_docker_image}:${local.kibana_docker_image_tag_override}" : null
-    }
+    config = local.kibana_docker_image_tag_override != "" ? {
+      docker_image = "${local.kibana_docker_image}:${local.kibana_docker_image_tag_override}"
+    } : null
   }
 
   integrations_server = {
-    config = {
-      docker_image = local.apm_docker_image_tag_override != "" ? "${local.apm_docker_image}:${local.apm_docker_image_tag_override}" : null
-    }
+    config = local.apm_docker_image_tag_override != "" ? {
+      docker_image = "${local.apm_docker_image}:${local.apm_docker_image_tag_override}"
+    } : null
   }
 
 }
