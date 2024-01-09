@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 58/151 implemented rules (38%)
+### 59/151 implemented rules (39%)
 
-#### Automated rules: 58/77 (75%)
+#### Automated rules: 59/77 (77%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -532,7 +532,7 @@
 |                          7.5                           | Virtual Machines                        | Ensure that Only Approved Extensions Are Installed                                                                                                     |        :x:         |  Manual   |
 |                          7.6                           | Virtual Machines                        | Ensure that Endpoint Protection for all Virtual Machines is installed                                                                                  |        :x:         |  Manual   |
 |                          7.7                           | Virtual Machines                        | [Legacy] Ensure that VHDs are Encrypted                                                                                                                |        :x:         |  Manual   |
-|                          8.1                           | Key Vault                               | Ensure that the Expiration Date is set for all Keys in RBAC Key Vaults                                                                                 |        :x:         | Automated |
+|    [8.1](bundle/compliance/cis_azure/rules/cis_8_1)    | Key Vault                               | Ensure that the Expiration Date is set for all Keys in RBAC Key Vaults                                                                                 | :white_check_mark: | Automated |
 |                          8.2                           | Key Vault                               | Ensure that the Expiration Date is set for all Keys in Non-RBAC Key Vaults.                                                                            |        :x:         | Automated |
 |                          8.3                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in RBAC Key Vaults                                                                              |        :x:         | Automated |
 |                          8.4                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in Non-RBAC Key Vaults                                                                          |        :x:         | Automated |

@@ -34,6 +34,7 @@ type ProviderAPI interface {
 	inventory.SQLProviderAPI
 	inventory.StorageAccountProviderAPI
 	inventory.PostgresqlProviderAPI
+	inventory.KeyVaultProviderAPI
 	governance.ProviderAPI
 }
 
@@ -64,6 +65,7 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		SQLProviderAPI:            inventory.NewSQLProvider(log, azureConfig.Credentials),
 		PostgresqlProviderAPI:     inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
 		StorageAccountProviderAPI: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		KeyVaultProviderAPI:       inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
 		ProviderAPI:               governance.NewProvider(log, resourceGraphProvider),
 	}, nil
 }
@@ -73,5 +75,6 @@ type provider struct {
 	inventory.SQLProviderAPI
 	inventory.StorageAccountProviderAPI
 	inventory.PostgresqlProviderAPI
+	inventory.KeyVaultProviderAPI
 	governance.ProviderAPI
 }

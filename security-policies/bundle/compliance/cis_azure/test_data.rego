@@ -325,3 +325,13 @@ generate_diagnostic_setting_element_log(category, enabled) = {
 		"enabled": false,
 	},
 }
+
+generate_key_vault_extension_key(attributes) = {"properties": {"attributes": attributes}}
+
+generate_key_vault_rbac(extension) = {
+	"subType": "azure-vault",
+	"resource": {
+		"properties": {"enableRbacAuthorization": true},
+		"extension": extension,
+	},
+}
