@@ -204,7 +204,7 @@ func (p *sqlProvider) ListSQLAdvancedThreatProtectionSettings(ctx context.Contex
 
 	assets := make([]AzureAsset, 0, len(settings))
 	for _, s := range settings {
-		if s == nil {
+		if s == nil || s.Properties == nil {
 			continue
 		}
 
