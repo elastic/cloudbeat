@@ -19,36 +19,41 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type AssetsEnricher interface {
-	Enrich(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset) error
+type postgresqlEnricher struct {
+	provider azurelib.ProviderAPI
 }
 
-func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
-	var enrichers []AssetsEnricher
+func (p postgresqlEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
+	var errs error
 
-	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
-	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})
-	enrichers = append(enrichers, sqlServerEnricher{provider: provider})
-	enrichers = append(enrichers, postgresqlEnricher{provider: provider})
+	for i, a := range assets {
+		if a.Type != inventory.PostgreSQLDBAssetType {
+			continue
+		}
 
-	return enrichers
+		if err := p.enrichConfigurations(ctx, &a); err != nil {
+			errs = errors.Join(errs, err)
+		}
+
+		assets[i] = a
+	}
+
+	return errs
 }
 
-func enrichExtension(a *inventory.AzureAsset, key string, assets []inventory.AzureAsset) {
-	if len(assets) == 0 {
-		return
+func (p postgresqlEnricher) enrichConfigurations(ctx context.Context, a *inventory.AzureAsset) error {
+	configs, err := p.provider.ListPostgresConfigurations(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return err
 	}
 
-	props := make([]map[string]any, 0, len(assets))
-	for _, asset := range assets {
-		props = append(props, asset.Properties)
-	}
-
-	a.AddExtension(key, props)
+	enrichExtension(a, inventory.ExtensionPostgresqlConfigurations, configs)
+	return nil
 }

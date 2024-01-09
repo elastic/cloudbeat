@@ -56,11 +56,15 @@ const (
 	ExtensionSQLEncryptionProtectors       = "sqlEncryptionProtectors"
 	ExtensionSQLBlobAuditPolicy            = "sqlBlobAuditPolicy"
 	ExtensionSQLTransparentDataEncryptions = "sqlTransparentDataEncryptions"
+	ExtensionPostgresqlConfigurations      = "psqlConfigutations"
 	ExtensionStorageAccountID              = "storageAccountId"
 	ExtensionStorageAccountName            = "storageAccountName"
 	ExtensionBlobDiagnosticSettings        = "blobDiagnosticSettings"
 	ExtensionTableDiagnosticSettings       = "tableDiagnosticSettings"
 	ExtensionQueueDiagnosticSettings       = "queueDiagnosticSettings"
+
+	// AssetLocation
+	assetLocationGlobal = "global"
 )
 
 type AzureAsset struct {
