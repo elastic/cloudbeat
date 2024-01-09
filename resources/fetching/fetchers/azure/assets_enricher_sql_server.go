@@ -37,6 +37,7 @@ func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets 
 		s.enrichSQLEncryptionProtector,
 		s.enrichSQLBlobAuditPolicy,
 		s.enrichTransparentDataEncryption,
+		s.enrichAdvancedThreatProtectionSettings,
 	}
 
 	for i, a := range assets {
@@ -87,5 +88,15 @@ func (s sqlServerEnricher) enrichTransparentDataEncryption(ctx context.Context, 
 	}
 
 	enrichExtension(a, inventory.ExtensionSQLTransparentDataEncryptions, tdes)
+	return nil
+}
+
+func (s sqlServerEnricher) enrichAdvancedThreatProtectionSettings(ctx context.Context, a *inventory.AzureAsset) error {
+	settings, err := s.provider.ListSQLAdvancedThreatProtectionSettings(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return err
+	}
+
+	enrichExtension(a, inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
 	return nil
 }

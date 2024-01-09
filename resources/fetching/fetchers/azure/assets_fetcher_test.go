@@ -133,6 +133,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().
 		ListSQLTransparentDataEncryptions(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSQLAdvancedThreatProtectionSettings(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
 
 	// since we have postgresql asset we need to mock the enricher
 	mockProvider.EXPECT().

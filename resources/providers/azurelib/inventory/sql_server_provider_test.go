@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -34,10 +35,23 @@ type encryptionProtectorFn func() ([]armsql.EncryptionProtectorsClientListByServ
 type auditingPoliciesFn func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
 type transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
 type databaseFn func() ([]armsql.DatabasesClientListByServerResponse, error)
+type threatProtectionFn func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
 
-func mockAssetSQLEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
+func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
-		AssetSQLEncryptionProtector: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
+		AssetEncryptionProtector: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
+			return f()
+		},
+	}
+
+	return &sqlProvider{
+		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		client: wrapper,
+	}
+}
+func mockAssetBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
+	wrapper := &sqlAzureClientWrapper{
+		AssetBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
 			return f()
 		},
 	}
@@ -48,25 +62,12 @@ func mockAssetSQLEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 	}
 }
 
-func mockAssetSQLBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
+func mockAssetTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsFn databaseFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
-		AssetSQLBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
-			return f()
-		},
-	}
-
-	return &sqlProvider{
-		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
-		client: wrapper,
-	}
-}
-
-func mockAssetSQLTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsFn databaseFn) SQLProviderAPI {
-	wrapper := &sqlAzureClientWrapper{
-		AssetSQLDatabases: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error) {
+		AssetDatabases: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error) {
 			return dbsFn()
 		},
-		AssetSQLTransparentDataEncryptions: func(_ context.Context, _, _, _, dbName string, _ *arm.ClientOptions, _ *armsql.TransparentDataEncryptionsClientListByDatabaseOptions) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error) {
+		AssetTransparentDataEncryptions: func(_ context.Context, _, _, _, dbName string, _ *arm.ClientOptions, _ *armsql.TransparentDataEncryptionsClientListByDatabaseOptions) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error) {
 			return tdesFn(dbName)
 		},
 	}
@@ -77,9 +78,22 @@ func mockAssetSQLTransparentDataEncryption(tdesFn transparentDataEncryptionFn, d
 	}
 }
 
+func mockAssetThreatProtection(f threatProtectionFn) SQLProviderAPI {
+	wrapper := &sqlAzureClientWrapper{
+		AssetServerAdvancedThreatProtectionSettings: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
+			return f()
+		},
+	}
+
+	return &sqlProvider{
+		log:    logp.NewLogger("mock_asset_sql_advanced_threat_protection"),
+		client: wrapper,
+	}
+}
+
 func TestListSQLEncryptionProtector(t *testing.T) {
 	tcs := map[string]struct {
-		apiMockCall    func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
+		apiMockCall    encryptionProtectorFn
 		expectError    bool
 		expectedAssets []AzureAsset
 	}{
@@ -120,7 +134,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetSQLEncryptionProtector(tc.apiMockCall)
+			p := mockAssetEncryptionProtector(tc.apiMockCall)
 			got, err := p.ListSQLEncryptionProtector(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
@@ -136,7 +150,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 
 func TestGetSQLBlobAuditingPolicies(t *testing.T) {
 	tcs := map[string]struct {
-		apiMockCall    func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
+		apiMockCall    auditingPoliciesFn
 		expectError    bool
 		expectedAssets []AzureAsset
 	}{
@@ -204,7 +218,7 @@ func TestGetSQLBlobAuditingPolicies(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetSQLBlobAuditingPolicies(tc.apiMockCall)
+			p := mockAssetBlobAuditingPolicies(tc.apiMockCall)
 			got, err := p.GetSQLBlobAuditingPolicies(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
@@ -283,8 +297,65 @@ func TestListSqlTransparentDataEncryptions(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetSQLTransparentDataEncryption(tc.tdeFn, tc.dbFn)
+			p := mockAssetTransparentDataEncryption(tc.tdeFn, tc.dbFn)
 			got, err := p.ListSQLTransparentDataEncryptions(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expectedAssets, got)
+		})
+	}
+}
+
+func TestListSQLAdvancedThreatProtectionSettings(t *testing.T) {
+	tcs := map[string]struct {
+		apiMockCall    threatProtectionFn
+		expectError    bool
+		expectedAssets []AzureAsset
+	}{
+		"Error on calling api": {
+			apiMockCall: func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
+				return nil, errors.New("error")
+			},
+			expectError:    true,
+			expectedAssets: nil,
+		},
+		"No threat protection settings": {
+			apiMockCall: func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
+				return nil, nil
+			},
+			expectError:    false,
+			expectedAssets: nil,
+		},
+		"Response with threat protection in different pages": {
+			apiMockCall: func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
+				return wrapThreatProtectionResponse(
+					wrapThreatProtectionResult(
+						threatProtectionAzure("id1", armsql.AdvancedThreatProtectionStateEnabled),
+						threatProtectionAzure("id2", armsql.AdvancedThreatProtectionStateDisabled),
+					),
+					wrapThreatProtectionResult(
+						threatProtectionAzure("id3", armsql.AdvancedThreatProtectionStateEnabled),
+					),
+				), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				threatProtectionAsset("id1", "Enabled"),
+				threatProtectionAsset("id2", "Disabled"),
+				threatProtectionAsset("id3", "Enabled"),
+			},
+		},
+	}
+
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			p := mockAssetThreatProtection(tc.apiMockCall)
+			got, err := p.ListSQLAdvancedThreatProtectionSettings(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -408,6 +479,54 @@ func tdeAsset(id, dbName, state string) AzureAsset {
 		Properties: map[string]any{
 			"databaseName": dbName,
 			"state":        state,
+		},
+		Extension: nil,
+	}
+}
+
+func wrapThreatProtectionResponse(results ...armsql.LogicalServerAdvancedThreatProtectionListResult) []armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
+	return lo.Map(results, func(r armsql.LogicalServerAdvancedThreatProtectionListResult, index int) armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
+		return armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse{
+			LogicalServerAdvancedThreatProtectionListResult: r,
+		}
+	})
+}
+
+func wrapThreatProtectionResult(tps ...*armsql.ServerAdvancedThreatProtection) armsql.LogicalServerAdvancedThreatProtectionListResult {
+	return armsql.LogicalServerAdvancedThreatProtectionListResult{
+		Value: tps,
+	}
+}
+
+func threatProtectionAzure(id string, state armsql.AdvancedThreatProtectionState) *armsql.ServerAdvancedThreatProtection {
+	creationTime, _ := time.Parse("2006-01-02", "2023-01-01")
+	return &armsql.ServerAdvancedThreatProtection{
+		ID:   to.Ptr(id),
+		Name: to.Ptr("name-" + id),
+		Type: to.Ptr("serverAdvancedThreatProtection"),
+		Properties: &armsql.AdvancedThreatProtectionProperties{
+			State:        to.Ptr(state),
+			CreationTime: to.Ptr(creationTime),
+		},
+	}
+}
+
+func threatProtectionAsset(id, state string) AzureAsset {
+	creationTime, _ := time.Parse("2006-01-02", "2023-01-01")
+	return AzureAsset{
+		Id:             id,
+		Name:           "name-" + id,
+		DisplayName:    "",
+		Location:       "global",
+		ResourceGroup:  "resourceGroup",
+		SubscriptionId: "subId",
+		Type:           "serverAdvancedThreatProtection",
+		TenantId:       "",
+		Sku:            nil,
+		Identity:       nil,
+		Properties: map[string]any{
+			"state":        state,
+			"creationTime": creationTime,
 		},
 		Extension: nil,
 	}
