@@ -26,7 +26,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/utils/ptrs"
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
 type ResourceGraphAzureClientWrapper struct {
@@ -100,7 +100,7 @@ func (p *ResourceGraphProvider) runPaginatedQuery(ctx context.Context, query arm
 		}
 
 		if *response.ResultTruncated == armresourcegraph.ResultTruncatedFalse ||
-			ptrs.Deref(response.SkipToken) == "" {
+			pointers.Deref(response.SkipToken) == "" {
 			break
 		}
 		query.Options.SkipToken = response.SkipToken

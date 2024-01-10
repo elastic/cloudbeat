@@ -15,41 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ptrs
+package pointers
 
-import (
-	"testing"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
-)
-
-func TestDeref(t *testing.T) {
-	tests := []struct {
-		name string
-		s    *string
-		want string
-	}{
-		{
-			name: "nil",
-			s:    nil,
-			want: "",
-		},
-		{
-			name: "empty",
-			s:    aws.String(""),
-			want: "",
-		},
-		{
-			name: "something",
-			s:    aws.String("something"),
-			want: "something",
-		},
+func Deref[T any](v *T) T {
+	if v == nil {
+		var zero T
+		return zero
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := Deref(tt.s); got != tt.want {
-				t.Errorf("Deref() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
+	return *v
 }

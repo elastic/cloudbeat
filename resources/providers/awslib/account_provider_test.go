@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/resources/utils/ptrs"
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -249,7 +249,7 @@ func mockFromResultMap(
 	m := mockOrganizationsAPI{}
 	m.EXPECT().ListAccounts(mock.Anything, mock.Anything).RunAndReturn(
 		func(_ context.Context, input *organizations.ListAccountsInput, _ ...func(*organizations.Options)) (*organizations.ListAccountsOutput, error) {
-			token := ptrs.Deref(input.NextToken)
+			token := pointers.Deref(input.NextToken)
 			result, ok := listAccountsResults[token]
 			err := result.err
 			if !ok {
@@ -287,7 +287,7 @@ func mockFromResultMap(
 	).Maybe()
 	m.EXPECT().ListParents(mock.Anything, mock.Anything).RunAndReturn(
 		func(_ context.Context, input *organizations.ListParentsInput, _ ...func(*organizations.Options)) (*organizations.ListParentsOutput, error) {
-			id := ptrs.Deref(input.ChildId)
+			id := pointers.Deref(input.ChildId)
 			result, ok := listParentsResults[id]
 			err := result.err
 			if !ok {

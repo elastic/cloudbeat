@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
-	"github.com/elastic/cloudbeat/resources/utils/ptrs"
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
 type psqlAzureClientWrapper struct {
@@ -88,20 +88,20 @@ func (p *psqlProvider) ListPostgresConfigurations(ctx context.Context, subID, re
 		}
 
 		assets = append(assets, AzureAsset{
-			Id:       ptrs.Deref(c.ID),
-			Name:     ptrs.Deref(c.Name),
+			Id:       pointers.Deref(c.ID),
+			Name:     pointers.Deref(c.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":         ptrs.Deref(c.Name),
-				"source":       ptrs.Deref(c.Properties.Source),
-				"value":        strings.ToLower(ptrs.Deref(c.Properties.Value)),
-				"dataType":     ptrs.Deref(c.Properties.DataType),
-				"defaultValue": ptrs.Deref(c.Properties.DefaultValue),
+				"name":         pointers.Deref(c.Name),
+				"source":       pointers.Deref(c.Properties.Source),
+				"value":        strings.ToLower(pointers.Deref(c.Properties.Value)),
+				"dataType":     pointers.Deref(c.Properties.DataType),
+				"defaultValue": pointers.Deref(c.Properties.DefaultValue),
 			},
 			ResourceGroup:  resourceGroup,
 			SubscriptionId: subID,
 			TenantId:       "",
-			Type:           ptrs.Deref(c.Type),
+			Type:           pointers.Deref(c.Type),
 		})
 	}
 
@@ -125,20 +125,20 @@ func (p *psqlProvider) ListFlexiblePostgresConfigurations(ctx context.Context, s
 		}
 
 		assets = append(assets, AzureAsset{
-			Id:       ptrs.Deref(c.ID),
-			Name:     ptrs.Deref(c.Name),
+			Id:       pointers.Deref(c.ID),
+			Name:     pointers.Deref(c.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":         ptrs.Deref(c.Name),
-				"source":       ptrs.Deref(c.Properties.Source),
-				"value":        strings.ToLower(ptrs.Deref(c.Properties.Value)),
-				"dataType":     string(ptrs.Deref(c.Properties.DataType)),
-				"defaultValue": ptrs.Deref(c.Properties.DefaultValue),
+				"name":         pointers.Deref(c.Name),
+				"source":       pointers.Deref(c.Properties.Source),
+				"value":        strings.ToLower(pointers.Deref(c.Properties.Value)),
+				"dataType":     string(pointers.Deref(c.Properties.DataType)),
+				"defaultValue": pointers.Deref(c.Properties.DefaultValue),
 			},
 			ResourceGroup:  resourceGroup,
 			SubscriptionId: subID,
 			TenantId:       "",
-			Type:           ptrs.Deref(c.Type),
+			Type:           pointers.Deref(c.Type),
 		})
 	}
 

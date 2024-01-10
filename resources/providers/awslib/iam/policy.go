@@ -29,7 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/utils/ptrs"
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
 const awsSupportAccessArn = "arn:aws:iam::aws:policy/AWSSupportAccess"
@@ -57,7 +57,7 @@ func (p Provider) getPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 		}
 
 		for _, policy := range listPoliciesOutput.Policies {
-			if ptrs.Deref(policy.Arn) == awsSupportAccessArn {
+			if pointers.Deref(policy.Arn) == awsSupportAccessArn {
 				// Fetch this one explicitly with getSupportPolicy().
 				// The reasoning is that we want to attach roles to the AWS support access policy. If we don't skip it
 				// here, we will produce it another time in getSupportPolicy(), leading to duplicated resources. We
@@ -162,11 +162,11 @@ func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]any, e
 }
 
 func (p Policy) GetResourceArn() string {
-	return ptrs.Deref(p.Arn)
+	return pointers.Deref(p.Arn)
 }
 
 func (p Policy) GetResourceName() string {
-	return ptrs.Deref(p.PolicyName)
+	return pointers.Deref(p.PolicyName)
 }
 
 func (p Policy) GetResourceType() string {
