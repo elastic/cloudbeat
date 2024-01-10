@@ -8,6 +8,7 @@ locals {
     org      = "${var.org}"
     team     = "${var.team}"
     project  = "${var.project}"
+    owner    = "${var.owner}"
   }
   ec_url = "https://cloud.elastic.co"
   ec_headers = {
@@ -54,25 +55,29 @@ provider "restapi" {
 
 # Elastic Cloud (EC) deployment
 module "ec_deployment" {
-  count  = var.serverless_mode ? 0 : 1
-  source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
+  count = var.serverless_mode ? 0 : 1
 
+  source        = "../cloud/modules/ec"
+  ec_api_key    = var.ec_api_key
   region        = var.ess_region
   stack_version = var.stack_version
+  tags          = local.common_tags
 
   deployment_template    = var.deployment_template
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
 
-  integrations_server = true
-
+  elasticsearch_autoscale  = true
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
 
-  docker_image = var.docker_image_override
-  docker_image_tag_override = {
-    "elasticsearch" : "",
-    "kibana" : "",
-    "apm" : ""
+  docker_image_tag_override = var.pin_version != "" ? {
+    "elasticsearch" = "${var.pin_version}",
+    "kibana"        = "${var.pin_version}",
+    "apm"           = "${var.pin_version}"
+    } : {
+    "elasticsearch" = "",
+    "kibana"        = "",
+    "apm"           = ""
   }
 }
 
