@@ -86,6 +86,19 @@ func TestListPostgresConfigurations(t *testing.T) {
 				psqlConfigAsset("id4", "connection_throttling", "off"),
 			},
 		},
+		"Lower case values": {
+			apiMockCall: func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
+				return wrapPsqlConfigResponse(
+					wrapPsqlConfigResult(
+						psqlConfigAzure("id1", "log_checkpoints", "ON"),
+					),
+				), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				psqlConfigAsset("id1", "log_checkpoints", "on"),
+			},
+		},
 	}
 
 	for name, tc := range tcs {

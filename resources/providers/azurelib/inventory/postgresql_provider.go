@@ -19,6 +19,7 @@ package inventory
 
 import (
 	"context"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -83,7 +84,7 @@ func (p *psqlProvider) ListPostgresConfigurations(ctx context.Context, subID, re
 			Properties: map[string]any{
 				"name":         ptrs.Deref(c.Name),
 				"source":       ptrs.Deref(c.Properties.Source),
-				"value":        ptrs.Deref(c.Properties.Value),
+				"value":        strings.ToLower(ptrs.Deref(c.Properties.Value)),
 				"dataType":     ptrs.Deref(c.Properties.DataType),
 				"defaultValue": ptrs.Deref(c.Properties.DefaultValue),
 			},
