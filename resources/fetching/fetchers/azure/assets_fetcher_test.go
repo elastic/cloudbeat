@@ -138,6 +138,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().
 		ListPostgresConfigurations(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListFlexiblePostgresConfigurations(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)

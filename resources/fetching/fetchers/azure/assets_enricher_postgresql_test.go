@@ -30,12 +30,24 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
+type psqlServerType string
+
+const (
+	psqlServerTypeSingle   psqlServerType = "single"
+	psqlServerTypeFlexible psqlServerType = "flexible"
+)
+
+type psqlEnricherResponse struct {
+	enricherResponse
+	serverType psqlServerType
+}
+
 func TestPostgresqlEnricher_Enrich(t *testing.T) {
 	tcs := map[string]struct {
 		input       []inventory.AzureAsset
 		expected    []inventory.AzureAsset
 		expectError bool
-		configRes   map[string]enricherResponse
+		configRes   map[string]psqlEnricherResponse
 	}{
 		"Error on enriching configs": {
 			expectError: true,
@@ -54,12 +66,14 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 				mockOther("id2"),
 				mockPostgresAsset("id3", "psql-b"),
 			},
-			configRes: map[string]enricherResponse{
-				"psql-a": assetRes(
+			configRes: map[string]psqlEnricherResponse{
+				"psql-a": {assetRes(
 					mockPostgresConfigAsset("conf1", psqlConfigProps("log_checkpoints", "on")),
 					mockPostgresConfigAsset("conf2", psqlConfigProps("log_connections", "off")),
-				),
-				"psql-b": errorRes(errors.New("error")),
+				), psqlServerTypeSingle},
+				"psql-b": {
+					errorRes(errors.New("error")), psqlServerTypeSingle,
+				},
 			},
 		},
 		"Enrich configs": {
@@ -68,6 +82,7 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 				mockPostgresAsset("id1", "psql-a"),
 				mockOther("id2"),
 				mockPostgresAsset("id3", "psql-b"),
+				mockFlexiblePostgresAsset("id4", "flex-psql-a"),
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockPostgresAsset("id1", "psql-a"), map[string]any{
@@ -83,16 +98,30 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						psqlConfigProps("connection_throttling", "off"),
 					},
 				}),
+				addExtension(mockFlexiblePostgresAsset("id4", "flex-psql-a"), map[string]any{
+					inventory.ExtensionPostgresqlConfigurations: []map[string]any{
+						psqlConfigProps("log_disconnections", "on"),
+					},
+				}),
 			},
-			configRes: map[string]enricherResponse{
-				"psql-a": assetRes(
-					mockPostgresConfigAsset("conf1", psqlConfigProps("log_checkpoints", "on")),
-					mockPostgresConfigAsset("conf2", psqlConfigProps("log_connections", "off")),
-				),
-				"psql-b": assetRes(
-					mockPostgresConfigAsset("conf1", psqlConfigProps("log_disconnections", "on")),
-					mockPostgresConfigAsset("conf2", psqlConfigProps("connection_throttling", "off")),
-				),
+			configRes: map[string]psqlEnricherResponse{
+				"psql-a": {
+					assetRes(
+						mockPostgresConfigAsset("conf1", psqlConfigProps("log_checkpoints", "on")),
+						mockPostgresConfigAsset("conf2", psqlConfigProps("log_connections", "off"))),
+					psqlServerTypeSingle,
+				},
+				"psql-b": {
+					assetRes(
+						mockPostgresConfigAsset("conf1", psqlConfigProps("log_disconnections", "on")),
+						mockPostgresConfigAsset("conf2", psqlConfigProps("connection_throttling", "off")),
+					), psqlServerTypeSingle,
+				},
+				"flex-psql-a": {
+					assetRes(
+						mockPostgresConfigAsset("conf1", psqlConfigProps("log_disconnections", "on"))),
+					psqlServerTypeFlexible,
+				},
 			},
 		},
 	}
@@ -103,7 +132,11 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 
 			provider := azurelib.NewMockProviderAPI(t)
 			for serverName, r := range tc.configRes {
-				provider.EXPECT().ListPostgresConfigurations(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+				if r.serverType == psqlServerTypeSingle {
+					provider.EXPECT().ListPostgresConfigurations(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+				} else {
+					provider.EXPECT().ListFlexiblePostgresConfigurations(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+				}
 			}
 
 			e := postgresqlEnricher{provider: provider}
@@ -127,6 +160,16 @@ func mockPostgresAsset(id, name string) inventory.AzureAsset {
 		ResourceGroup:  "group",
 		Name:           name,
 		Type:           inventory.PostgreSQLDBAssetType,
+	}
+}
+
+func mockFlexiblePostgresAsset(id, name string) inventory.AzureAsset {
+	return inventory.AzureAsset{
+		Id:             id,
+		SubscriptionId: "subId",
+		ResourceGroup:  "group",
+		Name:           name,
+		Type:           inventory.FlexiblePostgreSQLDBAssetType,
 	}
 }
 

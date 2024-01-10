@@ -38,6 +38,63 @@ func (_m *MockPostgresqlProviderAPI) EXPECT() *MockPostgresqlProviderAPI_Expecte
 	return &MockPostgresqlProviderAPI_Expecter{mock: &_m.Mock}
 }
 
+// ListFlexiblePostgresConfigurations provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockPostgresqlProviderAPI) ListFlexiblePostgresConfigurations(ctx context.Context, subID string, resourceGroup string, serverName string) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, serverName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListFlexiblePostgresConfigurations'
+type MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call struct {
+	*mock.Call
+}
+
+// ListFlexiblePostgresConfigurations is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - serverName string
+func (_e *MockPostgresqlProviderAPI_Expecter) ListFlexiblePostgresConfigurations(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call {
+	return &MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call{Call: _e.mock.On("ListFlexiblePostgresConfigurations", ctx, subID, resourceGroup, serverName)}
+}
+
+func (_c *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call) Return(_a0 []AzureAsset, _a1 error) *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call) RunAndReturn(run func(context.Context, string, string, string) ([]AzureAsset, error)) *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListPostgresConfigurations provides a mock function with given fields: ctx, subID, resourceGroup, serverName
 func (_m *MockPostgresqlProviderAPI) ListPostgresConfigurations(ctx context.Context, subID string, resourceGroup string, serverName string) ([]AzureAsset, error) {
 	ret := _m.Called(ctx, subID, resourceGroup, serverName)

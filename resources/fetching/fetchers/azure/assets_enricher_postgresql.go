@@ -34,7 +34,8 @@ func (p postgresqlEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets
 	var errs error
 
 	for i, a := range assets {
-		if a.Type != inventory.PostgreSQLDBAssetType {
+		if a.Type != inventory.PostgreSQLDBAssetType &&
+			a.Type != inventory.FlexiblePostgreSQLDBAssetType {
 			continue
 		}
 
@@ -49,11 +50,19 @@ func (p postgresqlEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets
 }
 
 func (p postgresqlEnricher) enrichConfigurations(ctx context.Context, a *inventory.AzureAsset) error {
-	configs, err := p.provider.ListPostgresConfigurations(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	configs, err := p.listConfigurations(ctx, a)
 	if err != nil {
 		return err
 	}
 
 	enrichExtension(a, inventory.ExtensionPostgresqlConfigurations, configs)
 	return nil
+}
+
+func (p postgresqlEnricher) listConfigurations(ctx context.Context, a *inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	if a.Type == inventory.PostgreSQLDBAssetType {
+		return p.provider.ListPostgresConfigurations(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	}
+
+	return p.provider.ListFlexiblePostgresConfigurations(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
 }

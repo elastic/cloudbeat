@@ -65,6 +65,7 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.MySQLDBAssetType:                   newPair(fetching.AzureMySQLDBType, fetching.CloudDatabase),
 	inventory.NetworkWatchersAssetType:           newPair(fetching.AzureNetworkWatchersType, fetching.MonitoringIdentity),
 	inventory.NetworkWatchersFlowLogAssetType:    newPair(fetching.AzureNetworkWatchersFlowLogType, fetching.MonitoringIdentity),
+	inventory.FlexiblePostgreSQLDBAssetType:      newPair(fetching.AzureFlexiblePostgreSQLDBType, fetching.CloudDatabase),
 	inventory.PostgreSQLDBAssetType:              newPair(fetching.AzurePostgreSQLDBType, fetching.CloudDatabase),
 	inventory.SQLServersAssetType:                newPair(fetching.AzureSQLServerType, fetching.CloudDatabase),
 	inventory.StorageAccountAssetType:            newPair(fetching.AzureStorageAccountType, fetching.CloudStorage),
