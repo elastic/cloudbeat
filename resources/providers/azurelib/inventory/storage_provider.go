@@ -32,7 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/utils/maps"
-	cloudbeat_strings "github.com/elastic/cloudbeat/resources/utils/strings"
+	"github.com/elastic/cloudbeat/resources/utils/ptrs"
 )
 
 type storageAccountAzureClientWrapper struct {
@@ -106,9 +106,9 @@ func transformBlobServices(servicesPages []armstorage.BlobServicesClientListResp
 			}
 
 			return AzureAsset{
-				Id:             cloudbeat_strings.Dereference(item.ID),
-				Name:           cloudbeat_strings.Dereference(item.Name),
-				Type:           strings.ToLower(cloudbeat_strings.Dereference(item.Type)),
+				Id:             ptrs.Deref(item.ID),
+				Name:           ptrs.Deref(item.Name),
+				Type:           strings.ToLower(ptrs.Deref(item.Type)),
 				ResourceGroup:  storageAccount.ResourceGroup,
 				SubscriptionId: storageAccount.SubscriptionId,
 				TenantId:       storageAccount.TenantId,
@@ -217,13 +217,13 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 	}
 
 	return AzureAsset{
-		Id:             cloudbeat_strings.Dereference(v.ID),
-		Name:           cloudbeat_strings.Dereference(v.Name),
+		Id:             ptrs.Deref(v.ID),
+		Name:           ptrs.Deref(v.Name),
 		Location:       "global",
 		Properties:     properties,
 		ResourceGroup:  "",
 		SubscriptionId: subID,
 		TenantId:       "",
-		Type:           cloudbeat_strings.Dereference(v.Type),
+		Type:           ptrs.Deref(v.Type),
 	}, nil
 }
