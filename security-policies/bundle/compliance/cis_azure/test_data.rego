@@ -103,6 +103,11 @@ generate_postgresql_server_with_extension(ext) = {
 	"resource": {"extension": ext},
 }
 
+generate_postgresql_server_with_infrastructure_encryption(enabled) = {
+	"subType": "azure-postgresql-server-db",
+	"resource": {"properties": {"infrastructureEncryption": enabled}},
+}
+
 generate_mysql_server_with_ssl_enforcement(enabled) = {
 	"subType": "azure-mysql-server-db",
 	"resource": {"properties": {"sslEnforcement": enabled}},
