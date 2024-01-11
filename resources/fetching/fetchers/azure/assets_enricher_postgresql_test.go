@@ -91,7 +91,7 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 			expected: []inventory.AzureAsset{
 				addExtension(mockPostgresAsset("id1", "psql-a"), map[string]any{
 					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"),
+						psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256"),
 					},
 				}),
 				mockOther("id2"),
@@ -102,7 +102,7 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 				"psql-b": {serverType: psqlServerTypeSingle}, //nolint:exhaustruct
 			},
 			firewallRulesRes: map[string]psqlEnricherResponse{
-				"psql-a": {assetRes(mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"))), psqlServerTypeSingle},
+				"psql-a": {assetRes(mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256"))), psqlServerTypeSingle},
 				"psql-b": {errorRes(errors.New("error")), psqlServerTypeSingle},
 			},
 		},
@@ -121,7 +121,7 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						psqlConfigProps("log_connections", "off"),
 					},
 					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"),
+						psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256"),
 					},
 				}),
 				mockOther("id2"),
@@ -131,7 +131,7 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						psqlConfigProps("connection_throttling", "off"),
 					},
 					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("0.0.0.1", "196.198.198.255"),
+						psqlFirewallRuleProps("name-fr2", "0.0.0.1", "196.198.198.255"),
 					},
 				}),
 				addExtension(mockFlexiblePostgresAsset("id4", "flex-psql-a"), map[string]any{
@@ -139,7 +139,7 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						psqlConfigProps("log_disconnections", "on"),
 					},
 					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("0.0.0.2", "196.198.198.254"),
+						psqlFirewallRuleProps("name-fr3", "0.0.0.2", "196.198.198.254"),
 					},
 				}),
 			},
@@ -163,9 +163,9 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 				},
 			},
 			firewallRulesRes: map[string]psqlEnricherResponse{
-				"psql-a":      {assetRes(mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"))), psqlServerTypeSingle},
-				"psql-b":      {assetRes(mockPostgresFirewallRuleAsset("fr2", psqlFirewallRuleProps("0.0.0.1", "196.198.198.255"))), psqlServerTypeSingle},
-				"flex-psql-a": {assetRes(mockPostgresFirewallRuleAsset("fr3", psqlFirewallRuleProps("0.0.0.2", "196.198.198.254"))), psqlServerTypeFlexible},
+				"psql-a":      {assetRes(mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256"))), psqlServerTypeSingle},
+				"psql-b":      {assetRes(mockPostgresFirewallRuleAsset("fr2", psqlFirewallRuleProps("name-fr2", "0.0.0.1", "196.198.198.255"))), psqlServerTypeSingle},
+				"flex-psql-a": {assetRes(mockPostgresFirewallRuleAsset("fr3", psqlFirewallRuleProps("name-fr3", "0.0.0.2", "196.198.198.254"))), psqlServerTypeFlexible},
 			},
 		},
 	}
@@ -245,8 +245,9 @@ func psqlConfigProps(name, value string) map[string]any {
 	}
 }
 
-func psqlFirewallRuleProps(startIpAddr, endIpAddr string) map[string]any {
+func psqlFirewallRuleProps(name, startIpAddr, endIpAddr string) map[string]any {
 	return map[string]any{
+		"name":           name,
 		"startIPAddress": startIpAddr,
 		"endIPAddress":   endIpAddr,
 	}
