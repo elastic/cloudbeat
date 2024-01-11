@@ -45,7 +45,6 @@ require (
 	github.com/elastic/elastic-agent-libs v0.7.3
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
-	github.com/go-git/go-git/v5 v5.10.0
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.12.0
@@ -83,6 +82,7 @@ require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/bitfield/gotestdox v0.2.1 // indirect
 	github.com/containerd/log v0.1.0 // indirect
+	github.com/go-git/go-git/v5 v5.10.0 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
