@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 56/151 implemented rules (37%)
+### 57/151 implemented rules (38%)
 
-#### Automated rules: 56/77 (73%)
+#### Automated rules: 57/77 (74%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -489,7 +489,7 @@
 |  [4.3.4](bundle/compliance/cis_azure/rules/cis_4_3_4)  | PostgreSQL Database Server              | Ensure server parameter 'log_disconnections' is set to 'ON' for PostgreSQL Database Server                                                             | :white_check_mark: | Automated |
 |  [4.3.5](bundle/compliance/cis_azure/rules/cis_4_3_5)  | PostgreSQL Database Server              | Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server                                                          | :white_check_mark: | Automated |
 |  [4.3.6](bundle/compliance/cis_azure/rules/cis_4_3_6)  | PostgreSQL Database Server              | Ensure Server Parameter 'log_retention_days' is greater than 3 days for PostgreSQL Database Server                                                     | :white_check_mark: | Automated |
-|                         4.3.7                          | PostgreSQL Database Server              | Ensure 'Allow access to Azure services' for PostgreSQL Database Server is disabled                                                                     |        :x:         | Automated |
+|  [4.3.7](bundle/compliance/cis_azure/rules/cis_4_3_7)  | PostgreSQL Database Server              | Ensure 'Allow access to Azure services' for PostgreSQL Database Server is disabled                                                                     | :white_check_mark: | Automated |
 |  [4.3.8](bundle/compliance/cis_azure/rules/cis_4_3_8)  | PostgreSQL Database Server              | Ensure 'Infrastructure double encryption' for PostgreSQL Database Server is 'Enabled'                                                                  | :white_check_mark: | Automated |
 |  [4.4.1](bundle/compliance/cis_azure/rules/cis_4_4_1)  | MySQL Database                          | Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server                                                                 | :white_check_mark: | Automated |
 |                         4.4.2                          | MySQL Database                          | Ensure 'TLS Version' is set to 'TLSV1.2' for MySQL flexible Database Server                                                                            |        :x:         | Automated |

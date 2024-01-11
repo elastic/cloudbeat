@@ -182,18 +182,18 @@ func (p *psqlProvider) ListSinglePostgresFirewallRules(ctx context.Context, subI
 		}
 
 		assets = append(assets, AzureAsset{
-			Id:       ptrs.Deref(fr.ID),
-			Name:     ptrs.Deref(fr.Name),
+			Id:       pointers.Deref(fr.ID),
+			Name:     pointers.Deref(fr.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":           ptrs.Deref(fr.Name),
-				"startIPAddress": ptrs.Deref(fr.Properties.StartIPAddress),
-				"endIPAddress":   ptrs.Deref(fr.Properties.EndIPAddress),
+				"name":           pointers.Deref(fr.Name),
+				"startIPAddress": pointers.Deref(fr.Properties.StartIPAddress),
+				"endIPAddress":   pointers.Deref(fr.Properties.EndIPAddress),
 			},
 			ResourceGroup:  resourceGroup,
 			SubscriptionId: subID,
 			TenantId:       "",
-			Type:           ptrs.Deref(fr.Type),
+			Type:           pointers.Deref(fr.Type),
 		})
 	}
 
@@ -217,18 +217,18 @@ func (p *psqlProvider) ListFlexiblePostgresFirewallRules(ctx context.Context, su
 		}
 
 		assets = append(assets, AzureAsset{
-			Id:       ptrs.Deref(fr.ID),
-			Name:     ptrs.Deref(fr.Name),
+			Id:       pointers.Deref(fr.ID),
+			Name:     pointers.Deref(fr.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":           ptrs.Deref(fr.Name),
-				"startIPAddress": ptrs.Deref(fr.Properties.StartIPAddress),
-				"endIPAddress":   ptrs.Deref(fr.Properties.EndIPAddress),
+				"name":           pointers.Deref(fr.Name),
+				"startIPAddress": pointers.Deref(fr.Properties.StartIPAddress),
+				"endIPAddress":   pointers.Deref(fr.Properties.EndIPAddress),
 			},
 			ResourceGroup:  resourceGroup,
 			SubscriptionId: subID,
 			TenantId:       "",
-			Type:           ptrs.Deref(fr.Type),
+			Type:           pointers.Deref(fr.Type),
 		})
 	}
 

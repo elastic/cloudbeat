@@ -58,7 +58,7 @@ const (
 	ExtensionSQLBlobAuditPolicy            = "sqlBlobAuditPolicy"
 	ExtensionSQLTransparentDataEncryptions = "sqlTransparentDataEncryptions"
 	ExtensionPostgresqlConfigurations      = "psqlConfigurations"
-	ExtensionPostgresqlFirewallRules       = "psqlFirewalRules"
+	ExtensionPostgresqlFirewallRules       = "psqlFirewallRules"
 	ExtensionStorageAccountID              = "storageAccountId"
 	ExtensionStorageAccountName            = "storageAccountName"
 	ExtensionBlobDiagnosticSettings        = "blobDiagnosticSettings"
