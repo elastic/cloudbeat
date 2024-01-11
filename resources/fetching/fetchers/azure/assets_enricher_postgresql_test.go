@@ -44,10 +44,11 @@ type psqlEnricherResponse struct {
 
 func TestPostgresqlEnricher_Enrich(t *testing.T) {
 	tcs := map[string]struct {
-		input       []inventory.AzureAsset
-		expected    []inventory.AzureAsset
-		expectError bool
-		configRes   map[string]psqlEnricherResponse
+		input            []inventory.AzureAsset
+		expected         []inventory.AzureAsset
+		expectError      bool
+		configRes        map[string]psqlEnricherResponse
+		firewallRulesRes map[string]psqlEnricherResponse
 	}{
 		"Error on enriching configs": {
 			expectError: true,
@@ -75,8 +76,37 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 					errorRes(errors.New("error")), psqlServerTypeSingle,
 				},
 			},
+			firewallRulesRes: map[string]psqlEnricherResponse{
+				"psql-a": {serverType: psqlServerTypeSingle}, //nolint:exhaustruct
+				"psql-b": {serverType: psqlServerTypeSingle}, //nolint:exhaustruct
+			},
 		},
-		"Enrich configs": {
+		"Error on enriching firewall rules": {
+			expectError: true,
+			input: []inventory.AzureAsset{
+				mockPostgresAsset("id1", "psql-a"),
+				mockOther("id2"),
+				mockPostgresAsset("id3", "psql-b"),
+			},
+			expected: []inventory.AzureAsset{
+				addExtension(mockPostgresAsset("id1", "psql-a"), map[string]any{
+					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
+						psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"),
+					},
+				}),
+				mockOther("id2"),
+				mockPostgresAsset("id3", "psql-b"),
+			},
+			configRes: map[string]psqlEnricherResponse{
+				"psql-a": {serverType: psqlServerTypeSingle}, //nolint:exhaustruct
+				"psql-b": {serverType: psqlServerTypeSingle}, //nolint:exhaustruct
+			},
+			firewallRulesRes: map[string]psqlEnricherResponse{
+				"psql-a": {assetRes(mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"))), psqlServerTypeSingle},
+				"psql-b": {errorRes(errors.New("error")), psqlServerTypeSingle},
+			},
+		},
+		"Enrich configs and firewall rules": {
 			expectError: false,
 			input: []inventory.AzureAsset{
 				mockPostgresAsset("id1", "psql-a"),
@@ -90,6 +120,9 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						psqlConfigProps("log_checkpoints", "on"),
 						psqlConfigProps("log_connections", "off"),
 					},
+					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
+						psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"),
+					},
 				}),
 				mockOther("id2"),
 				addExtension(mockPostgresAsset("id3", "psql-b"), map[string]any{
@@ -97,10 +130,16 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						psqlConfigProps("log_disconnections", "on"),
 						psqlConfigProps("connection_throttling", "off"),
 					},
+					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
+						psqlFirewallRuleProps("0.0.0.1", "196.198.198.255"),
+					},
 				}),
 				addExtension(mockFlexiblePostgresAsset("id4", "flex-psql-a"), map[string]any{
 					inventory.ExtensionPostgresqlConfigurations: []map[string]any{
 						psqlConfigProps("log_disconnections", "on"),
+					},
+					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
+						psqlFirewallRuleProps("0.0.0.2", "196.198.198.254"),
 					},
 				}),
 			},
@@ -123,6 +162,11 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 					psqlServerTypeFlexible,
 				},
 			},
+			firewallRulesRes: map[string]psqlEnricherResponse{
+				"psql-a":      {assetRes(mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("0.0.0.0", "196.198.198.256"))), psqlServerTypeSingle},
+				"psql-b":      {assetRes(mockPostgresFirewallRuleAsset("fr2", psqlFirewallRuleProps("0.0.0.1", "196.198.198.255"))), psqlServerTypeSingle},
+				"flex-psql-a": {assetRes(mockPostgresFirewallRuleAsset("fr3", psqlFirewallRuleProps("0.0.0.2", "196.198.198.254"))), psqlServerTypeFlexible},
+			},
 		},
 	}
 
@@ -133,9 +177,17 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 			provider := azurelib.NewMockProviderAPI(t)
 			for serverName, r := range tc.configRes {
 				if r.serverType == psqlServerTypeSingle {
-					provider.EXPECT().ListPostgresConfigurations(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+					provider.EXPECT().ListSinglePostgresConfigurations(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
 				} else {
 					provider.EXPECT().ListFlexiblePostgresConfigurations(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+				}
+			}
+
+			for serverName, r := range tc.firewallRulesRes {
+				if r.serverType == psqlServerTypeSingle {
+					provider.EXPECT().ListSinglePostgresFirewallRules(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+				} else {
+					provider.EXPECT().ListFlexiblePostgresFirewallRules(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
 				}
 			}
 
@@ -154,41 +206,48 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 }
 
 func mockPostgresAsset(id, name string) inventory.AzureAsset {
-	return inventory.AzureAsset{
-		Id:             id,
-		SubscriptionId: "subId",
-		ResourceGroup:  "group",
-		Name:           name,
-		Type:           inventory.PostgreSQLDBAssetType,
-	}
+	return mockAsset(id, name, inventory.PostgreSQLDBAssetType)
 }
 
 func mockFlexiblePostgresAsset(id, name string) inventory.AzureAsset {
+	return mockAsset(id, name, inventory.FlexiblePostgreSQLDBAssetType)
+}
+
+func mockAsset(id, name, assetType string) inventory.AzureAsset {
 	return inventory.AzureAsset{
 		Id:             id,
 		SubscriptionId: "subId",
 		ResourceGroup:  "group",
 		Name:           name,
-		Type:           inventory.FlexiblePostgreSQLDBAssetType,
+		Type:           assetType,
 	}
 }
 
 func mockPostgresConfigAsset(id string, props map[string]any) inventory.AzureAsset {
-	return inventory.AzureAsset{
-		Id:             id,
-		SubscriptionId: "subId",
-		ResourceGroup:  "group",
-		Type:           inventory.PostgreSQLDBAssetType + "/configuration",
-		Properties:     props,
-	}
+	a := mockAsset(id, "name-"+id, inventory.PostgreSQLDBAssetType+"/configuration")
+	a.Properties = props
+	return a
 }
 
-func psqlConfigProps(name string, value string) map[string]any {
+func mockPostgresFirewallRuleAsset(id string, props map[string]any) inventory.AzureAsset {
+	a := mockAsset(id, "name-"+id, inventory.PostgreSQLDBAssetType+"/configuration")
+	a.Properties = props
+	return a
+}
+
+func psqlConfigProps(name, value string) map[string]any {
 	return map[string]any{
 		"name":         name,
 		"source":       "system-default",
 		"value":        value,
 		"dataType":     "Boolean",
 		"defaultValue": "on",
+	}
+}
+
+func psqlFirewallRuleProps(startIpAddr, endIpAddr string) map[string]any {
+	return map[string]any{
+		"startIPAddress": startIpAddr,
+		"endIPAddress":   endIpAddr,
 	}
 }

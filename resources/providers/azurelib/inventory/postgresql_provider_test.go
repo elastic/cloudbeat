@@ -31,38 +31,66 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type assetConfigFn func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error)
+type assetSingleConfigFn func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error)
 type assetFlexConfigFn func() ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error)
+type assetSingleFirewallRuleFn func() ([]armpostgresql.FirewallRulesClientListByServerResponse, error)
+type assetFlexFirewallRuleFn func() ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error)
 
-func mockAssetPSQLConfiguration(f assetConfigFn) PostgresqlProviderAPI {
+func mockAssetSinglePSQLConfiguration(f assetSingleConfigFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
-		AssetConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
+		AssetSingleServerConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
 			return f()
 		},
 	}
 
 	return &psqlProvider{
-		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    logp.NewLogger("mock_single_psql_config"),
 		client: cl,
 	}
 }
 
 func mockAssetFlexPSQLConfiguration(f assetFlexConfigFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
-		AssetFlexibleConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
+		AssetFlexibleServerConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
 			return f()
 		},
 	}
 
 	return &psqlProvider{
-		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    logp.NewLogger("mock_flex_psql_config"),
 		client: cl,
 	}
 }
 
-func TestListPostgresConfigurations(t *testing.T) {
+func mockAssetSinglePSQLFirewallRule(f assetSingleFirewallRuleFn) PostgresqlProviderAPI {
+	cl := &psqlAzureClientWrapper{
+		AssetSingleServerFirewallRules: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.FirewallRulesClientListByServerOptions) ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
+			return f()
+		},
+	}
+
+	return &psqlProvider{
+		log:    logp.NewLogger("mock_single_psql_firewall_rules"),
+		client: cl,
+	}
+}
+
+func mockAssetFlexPSQLFirewallRule(f assetFlexFirewallRuleFn) PostgresqlProviderAPI {
+	cl := &psqlAzureClientWrapper{
+		AssetFlexibleServerFirewallRules: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.FirewallRulesClientListByServerOptions) ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
+			return f()
+		},
+	}
+
+	return &psqlProvider{
+		log:    logp.NewLogger("mock_flexs_psql_firewall_rules"),
+		client: cl,
+	}
+}
+
+func TestListSinglePostgresConfigurations(t *testing.T) {
 	tcs := map[string]struct {
-		apiMockCall    assetConfigFn
+		apiMockCall    assetSingleConfigFn
 		expectError    bool
 		expectedAssets []AzureAsset
 	}{
@@ -73,7 +101,7 @@ func TestListPostgresConfigurations(t *testing.T) {
 			expectError:    true,
 			expectedAssets: nil,
 		},
-		"No Encryption Protector Response": {
+		"Empty Response": {
 			apiMockCall: func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
 				return nil, nil
 			},
@@ -82,44 +110,44 @@ func TestListPostgresConfigurations(t *testing.T) {
 		},
 		"Response with encryption protectors in different pages": {
 			apiMockCall: func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
-				return wrapPsqlConfigResponse(
-					wrapPsqlConfigResult(
-						psqlConfigAzure("id1", "log_checkpoints", "on"),
-						psqlConfigAzure("id2", "log_connections", "off"),
+				return wrapSinglePsqlConfigResponse(
+					wrapSinglePsqlConfigResult(
+						singlePsqlConfigAzure("id1", "log_checkpoints", "on"),
+						singlePsqlConfigAzure("id2", "log_connections", "off"),
 					),
-					wrapPsqlConfigResult(
-						psqlConfigAzure("id3", "log_disconnections", "on"),
-						psqlConfigAzure("id4", "connection_throttling", "off"),
+					wrapSinglePsqlConfigResult(
+						singlePsqlConfigAzure("id3", "log_disconnections", "on"),
+						singlePsqlConfigAzure("id4", "connection_throttling", "off"),
 					),
 				), nil
 			},
 			expectError: false,
 			expectedAssets: []AzureAsset{
-				psqlConfigAsset("id1", "log_checkpoints", "on"),
-				psqlConfigAsset("id2", "log_connections", "off"),
-				psqlConfigAsset("id3", "log_disconnections", "on"),
-				psqlConfigAsset("id4", "connection_throttling", "off"),
+				singlePsqlConfigAsset("id1", "log_checkpoints", "on"),
+				singlePsqlConfigAsset("id2", "log_connections", "off"),
+				singlePsqlConfigAsset("id3", "log_disconnections", "on"),
+				singlePsqlConfigAsset("id4", "connection_throttling", "off"),
 			},
 		},
 		"Lower case values": {
 			apiMockCall: func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
-				return wrapPsqlConfigResponse(
-					wrapPsqlConfigResult(
-						psqlConfigAzure("id1", "log_checkpoints", "ON"),
+				return wrapSinglePsqlConfigResponse(
+					wrapSinglePsqlConfigResult(
+						singlePsqlConfigAzure("id1", "log_checkpoints", "ON"),
 					),
 				), nil
 			},
 			expectError: false,
 			expectedAssets: []AzureAsset{
-				psqlConfigAsset("id1", "log_checkpoints", "on"),
+				singlePsqlConfigAsset("id1", "log_checkpoints", "on"),
 			},
 		},
 	}
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetPSQLConfiguration(tc.apiMockCall)
-			got, err := p.ListPostgresConfigurations(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
+			p := mockAssetSinglePSQLConfiguration(tc.apiMockCall)
+			got, err := p.ListSinglePostgresConfigurations(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -145,7 +173,7 @@ func TestListFlexiblePostgresConfigurations(t *testing.T) {
 			expectError:    true,
 			expectedAssets: nil,
 		},
-		"No Encryption Protector Response": {
+		"Empty Response": {
 			apiMockCall: func() ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
 				return nil, nil
 			},
@@ -204,7 +232,125 @@ func TestListFlexiblePostgresConfigurations(t *testing.T) {
 	}
 }
 
-func wrapPsqlConfigResponse(results ...armpostgresql.ConfigurationListResult) []armpostgresql.ConfigurationsClientListByServerResponse {
+func TestListSinglePostgresFirewallRules(t *testing.T) {
+	tcs := map[string]struct {
+		apiMockCall    assetSingleFirewallRuleFn
+		expectError    bool
+		expectedAssets []AzureAsset
+	}{
+		"Error on calling api": {
+			apiMockCall: func() ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
+				return nil, errors.New("error")
+			},
+			expectError:    true,
+			expectedAssets: nil,
+		},
+		"Empty Response": {
+			apiMockCall: func() ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
+				return nil, nil
+			},
+			expectError:    false,
+			expectedAssets: nil,
+		},
+		"Response with encryption protectors in different pages": {
+			apiMockCall: func() ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
+				return wrapSinglePsqlFirewallRulesResponse(
+					wrapSinglePsqlFirewallRulesResult(
+						singlePsqlFirewallRuleAzure("id1", "0.0.0.0", "196.81.61.0"),
+						singlePsqlFirewallRuleAzure("id2", "199.32.26.89", "156.12.92.0"),
+					),
+					wrapSinglePsqlFirewallRulesResult(
+						singlePsqlFirewallRuleAzure("id3", "0.0.5.0", "56.12.98.88"),
+						singlePsqlFirewallRuleAzure("id4", "255.255.255.1", "12.28.19.1"),
+					),
+				), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				singlePsqlFirewallConfigAsset("id1", "0.0.0.0", "196.81.61.0"),
+				singlePsqlFirewallConfigAsset("id2", "199.32.26.89", "156.12.92.0"),
+				singlePsqlFirewallConfigAsset("id3", "0.0.5.0", "56.12.98.88"),
+				singlePsqlFirewallConfigAsset("id4", "255.255.255.1", "12.28.19.1"),
+			},
+		},
+	}
+
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			p := mockAssetSinglePSQLFirewallRule(tc.apiMockCall)
+			got, err := p.ListSinglePostgresFirewallRules(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expectedAssets, got)
+		})
+	}
+}
+
+func TestFlexibleSinglePostgresFirewallRules(t *testing.T) {
+	tcs := map[string]struct {
+		apiMockCall    assetFlexFirewallRuleFn
+		expectError    bool
+		expectedAssets []AzureAsset
+	}{
+		"Error on calling api": {
+			apiMockCall: func() ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
+				return nil, errors.New("error")
+			},
+			expectError:    true,
+			expectedAssets: nil,
+		},
+		"Empty Response": {
+			apiMockCall: func() ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
+				return nil, nil
+			},
+			expectError:    false,
+			expectedAssets: nil,
+		},
+		"Response with encryption protectors in different pages": {
+			apiMockCall: func() ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
+				return wrapFlexPsqlFirewallRulesResponse(
+					wrapFlexPsqlFirewallRulesResult(
+						flexPsqlFirewallRuleAzure("id1", "0.0.0.0", "196.81.61.0"),
+						flexPsqlFirewallRuleAzure("id2", "199.32.26.89", "156.12.92.0"),
+					),
+					wrapFlexPsqlFirewallRulesResult(
+						flexPsqlFirewallRuleAzure("id3", "0.0.5.0", "56.12.98.88"),
+						flexPsqlFirewallRuleAzure("id4", "255.255.255.1", "12.28.19.1"),
+					),
+				), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				flexPsqlFirewallConfigAsset("id1", "0.0.0.0", "196.81.61.0"),
+				flexPsqlFirewallConfigAsset("id2", "199.32.26.89", "156.12.92.0"),
+				flexPsqlFirewallConfigAsset("id3", "0.0.5.0", "56.12.98.88"),
+				flexPsqlFirewallConfigAsset("id4", "255.255.255.1", "12.28.19.1"),
+			},
+		},
+	}
+
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			p := mockAssetFlexPSQLFirewallRule(tc.apiMockCall)
+			got, err := p.ListFlexiblePostgresFirewallRules(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expectedAssets, got)
+		})
+	}
+}
+
+func wrapSinglePsqlConfigResponse(results ...armpostgresql.ConfigurationListResult) []armpostgresql.ConfigurationsClientListByServerResponse {
 	return lo.Map(results, func(r armpostgresql.ConfigurationListResult, index int) armpostgresql.ConfigurationsClientListByServerResponse {
 		return armpostgresql.ConfigurationsClientListByServerResponse{
 			ConfigurationListResult: r,
@@ -212,13 +358,13 @@ func wrapPsqlConfigResponse(results ...armpostgresql.ConfigurationListResult) []
 	})
 }
 
-func wrapPsqlConfigResult(configs ...*armpostgresql.Configuration) armpostgresql.ConfigurationListResult {
+func wrapSinglePsqlConfigResult(configs ...*armpostgresql.Configuration) armpostgresql.ConfigurationListResult {
 	return armpostgresql.ConfigurationListResult{
 		Value: configs,
 	}
 }
 
-func psqlConfigAzure(id, name, value string) *armpostgresql.Configuration {
+func singlePsqlConfigAzure(id, name, value string) *armpostgresql.Configuration {
 	return &armpostgresql.Configuration{
 		ID:   to.Ptr(id),
 		Name: to.Ptr(name),
@@ -234,7 +380,7 @@ func psqlConfigAzure(id, name, value string) *armpostgresql.Configuration {
 	}
 }
 
-func psqlConfigAsset(id string, name, value string) AzureAsset {
+func singlePsqlConfigAsset(id, name, value string) AzureAsset {
 	return AzureAsset{
 		Id:             id,
 		Name:           name,
@@ -287,7 +433,7 @@ func flexPsqlConfigAzure(id, name, value string) *armpostgresqlflexibleservers.C
 	}
 }
 
-func flexPsqlConfigAsset(id string, name, value string) AzureAsset {
+func flexPsqlConfigAsset(id, name, value string) AzureAsset {
 	return AzureAsset{
 		Id:             id,
 		Name:           name,
@@ -305,6 +451,98 @@ func flexPsqlConfigAsset(id string, name, value string) AzureAsset {
 			"value":        value,
 			"dataType":     "Boolean",
 			"defaultValue": "on",
+		},
+		Extension: nil,
+	}
+}
+
+func wrapSinglePsqlFirewallRulesResponse(results ...armpostgresql.FirewallRuleListResult) []armpostgresql.FirewallRulesClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresql.FirewallRuleListResult, index int) armpostgresql.FirewallRulesClientListByServerResponse {
+		return armpostgresql.FirewallRulesClientListByServerResponse{
+			FirewallRuleListResult: r,
+		}
+	})
+}
+
+func wrapSinglePsqlFirewallRulesResult(rules ...*armpostgresql.FirewallRule) armpostgresql.FirewallRuleListResult {
+	return armpostgresql.FirewallRuleListResult{
+		Value: rules,
+	}
+}
+
+func singlePsqlFirewallRuleAzure(id, startIpAddr, endIpAddr string) *armpostgresql.FirewallRule {
+	return &armpostgresql.FirewallRule{
+		ID:   to.Ptr(id),
+		Name: to.Ptr("name-" + id),
+		Type: to.Ptr("psql/firewall-rule"),
+		Properties: &armpostgresql.FirewallRuleProperties{
+			StartIPAddress: to.Ptr(startIpAddr),
+			EndIPAddress:   to.Ptr(endIpAddr),
+		},
+	}
+}
+
+func singlePsqlFirewallConfigAsset(id, startIpAddr, endIpAddr string) AzureAsset {
+	return AzureAsset{
+		Id:             id,
+		Name:           "name-" + id,
+		DisplayName:    "",
+		Location:       "global",
+		ResourceGroup:  "resourceGroup",
+		SubscriptionId: "subId",
+		Type:           "psql/firewall-rule",
+		TenantId:       "",
+		Sku:            nil,
+		Identity:       nil,
+		Properties: map[string]any{
+			"startIPAddress": startIpAddr,
+			"endIPAddress":   endIpAddr,
+		},
+		Extension: nil,
+	}
+}
+
+func wrapFlexPsqlFirewallRulesResponse(results ...armpostgresqlflexibleservers.FirewallRuleListResult) []armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresqlflexibleservers.FirewallRuleListResult, index int) armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
+		return armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse{
+			FirewallRuleListResult: r,
+		}
+	})
+}
+
+func wrapFlexPsqlFirewallRulesResult(rules ...*armpostgresqlflexibleservers.FirewallRule) armpostgresqlflexibleservers.FirewallRuleListResult {
+	return armpostgresqlflexibleservers.FirewallRuleListResult{
+		Value: rules,
+	}
+}
+
+func flexPsqlFirewallRuleAzure(id, startIpAddr, endIpAddr string) *armpostgresqlflexibleservers.FirewallRule {
+	return &armpostgresqlflexibleservers.FirewallRule{
+		ID:   to.Ptr(id),
+		Name: to.Ptr("name-" + id),
+		Type: to.Ptr("flex-psql/firewall-rule"),
+		Properties: &armpostgresqlflexibleservers.FirewallRuleProperties{
+			StartIPAddress: to.Ptr(startIpAddr),
+			EndIPAddress:   to.Ptr(endIpAddr),
+		},
+	}
+}
+
+func flexPsqlFirewallConfigAsset(id, startIpAddr, endIpAddr string) AzureAsset {
+	return AzureAsset{
+		Id:             id,
+		Name:           "name-" + id,
+		DisplayName:    "",
+		Location:       "global",
+		ResourceGroup:  "resourceGroup",
+		SubscriptionId: "subId",
+		Type:           "flex-psql/firewall-rule",
+		TenantId:       "",
+		Sku:            nil,
+		Identity:       nil,
+		Properties: map[string]any{
+			"startIPAddress": startIpAddr,
+			"endIPAddress":   endIpAddr,
 		},
 		Extension: nil,
 	}

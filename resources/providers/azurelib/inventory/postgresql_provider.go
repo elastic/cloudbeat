@@ -32,13 +32,17 @@ import (
 )
 
 type psqlAzureClientWrapper struct {
-	AssetConfigurations         func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error)
-	AssetFlexibleConfigurations func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error)
+	AssetSingleServerConfigurations   func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error)
+	AssetFlexibleServerConfigurations func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error)
+	AssetSingleServerFirewallRules    func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.FirewallRulesClientListByServerOptions) ([]armpostgresql.FirewallRulesClientListByServerResponse, error)
+	AssetFlexibleServerFirewallRules  func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.FirewallRulesClientListByServerOptions) ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error)
 }
 
 type PostgresqlProviderAPI interface {
-	ListPostgresConfigurations(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
+	ListSinglePostgresConfigurations(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 	ListFlexiblePostgresConfigurations(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
+	ListSinglePostgresFirewallRules(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
+	ListFlexiblePostgresFirewallRules(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 }
 
 type psqlProvider struct {
@@ -49,18 +53,34 @@ type psqlProvider struct {
 func NewPostgresqlProvider(log *logp.Logger, credentials azcore.TokenCredential) PostgresqlProviderAPI {
 	// We wrap the client, so we can mock it in tests
 	wrapper := &psqlAzureClientWrapper{
-		AssetConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
+		AssetSingleServerConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
 			cl, err := armpostgresql.NewConfigurationsClient(subID, credentials, clientOptions)
 			if err != nil {
 				return nil, err
 			}
 			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, options))
 		},
-		AssetFlexibleConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
+		AssetFlexibleServerConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
 			cl, err := armpostgresqlflexibleservers.NewConfigurationsClient(subID, credentials, clientOptions)
 			if err != nil {
 				return nil, err
 			}
+			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, options))
+		},
+		AssetSingleServerFirewallRules: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.FirewallRulesClientListByServerOptions) ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
+			cl, err := armpostgresql.NewFirewallRulesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+
+			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, options))
+		},
+		AssetFlexibleServerFirewallRules: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.FirewallRulesClientListByServerOptions) ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
+			cl, err := armpostgresqlflexibleservers.NewFirewallRulesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+
 			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, options))
 		},
 	}
@@ -71,8 +91,8 @@ func NewPostgresqlProvider(log *logp.Logger, credentials azcore.TokenCredential)
 	}
 }
 
-func (p *psqlProvider) ListPostgresConfigurations(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
-	paged, err := p.client.AssetConfigurations(ctx, subID, resourceGroup, serverName, nil, nil)
+func (p *psqlProvider) ListSinglePostgresConfigurations(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
+	paged, err := p.client.AssetSingleServerConfigurations(ctx, subID, resourceGroup, serverName, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +129,7 @@ func (p *psqlProvider) ListPostgresConfigurations(ctx context.Context, subID, re
 }
 
 func (p *psqlProvider) ListFlexiblePostgresConfigurations(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
-	paged, err := p.client.AssetFlexibleConfigurations(ctx, subID, resourceGroup, serverName, nil, nil)
+	paged, err := p.client.AssetFlexibleServerConfigurations(ctx, subID, resourceGroup, serverName, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -139,6 +159,74 @@ func (p *psqlProvider) ListFlexiblePostgresConfigurations(ctx context.Context, s
 			SubscriptionId: subID,
 			TenantId:       "",
 			Type:           pointers.Deref(c.Type),
+		})
+	}
+
+	return assets, nil
+}
+
+func (p *psqlProvider) ListSinglePostgresFirewallRules(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
+	paged, err := p.client.AssetSingleServerFirewallRules(ctx, subID, resourceGroup, serverName, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	configs := lo.FlatMap(paged, func(p armpostgresql.FirewallRulesClientListByServerResponse, _ int) []*armpostgresql.FirewallRule {
+		return p.Value
+	})
+
+	assets := make([]AzureAsset, 0, len(configs))
+	for _, fr := range configs {
+		if fr == nil || fr.Properties == nil {
+			continue
+		}
+
+		assets = append(assets, AzureAsset{
+			Id:       ptrs.Deref(fr.ID),
+			Name:     ptrs.Deref(fr.Name),
+			Location: assetLocationGlobal,
+			Properties: map[string]any{
+				"startIPAddress": ptrs.Deref(fr.Properties.StartIPAddress),
+				"endIPAddress":   ptrs.Deref(fr.Properties.EndIPAddress),
+			},
+			ResourceGroup:  resourceGroup,
+			SubscriptionId: subID,
+			TenantId:       "",
+			Type:           ptrs.Deref(fr.Type),
+		})
+	}
+
+	return assets, nil
+}
+
+func (p *psqlProvider) ListFlexiblePostgresFirewallRules(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
+	paged, err := p.client.AssetFlexibleServerFirewallRules(ctx, subID, resourceGroup, serverName, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	configs := lo.FlatMap(paged, func(p armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, _ int) []*armpostgresqlflexibleservers.FirewallRule {
+		return p.Value
+	})
+
+	assets := make([]AzureAsset, 0, len(configs))
+	for _, fr := range configs {
+		if fr == nil || fr.Properties == nil {
+			continue
+		}
+
+		assets = append(assets, AzureAsset{
+			Id:       ptrs.Deref(fr.ID),
+			Name:     ptrs.Deref(fr.Name),
+			Location: assetLocationGlobal,
+			Properties: map[string]any{
+				"startIPAddress": ptrs.Deref(fr.Properties.StartIPAddress),
+				"endIPAddress":   ptrs.Deref(fr.Properties.EndIPAddress),
+			},
+			ResourceGroup:  resourceGroup,
+			SubscriptionId: subID,
+			TenantId:       "",
+			Type:           ptrs.Deref(fr.Type),
 		})
 	}
 
