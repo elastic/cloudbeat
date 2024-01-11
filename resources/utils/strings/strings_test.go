@@ -20,40 +20,8 @@ package strings
 import (
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/require"
 )
-
-func TestDereference(t *testing.T) {
-	tests := []struct {
-		name string
-		s    *string
-		want string
-	}{
-		{
-			name: "nil",
-			s:    nil,
-			want: "",
-		},
-		{
-			name: "empty",
-			s:    aws.String(""),
-			want: "",
-		},
-		{
-			name: "something",
-			s:    aws.String("something"),
-			want: "something",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := Dereference(tt.s); got != tt.want {
-				t.Errorf("Dereference() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestFirstNonEmpty(t *testing.T) {
 	tests := []struct {
