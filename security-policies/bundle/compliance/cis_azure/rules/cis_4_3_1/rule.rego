@@ -16,5 +16,5 @@ finding = result if {
 }
 
 ssl_enforcement_enabled if {
-	data_adapter.properties.sslEnforcement == "Enabled"
+	lower(data_adapter.properties.sslEnforcement) == "enabled"
 } else = false

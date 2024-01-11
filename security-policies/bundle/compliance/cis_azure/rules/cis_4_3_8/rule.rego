@@ -18,5 +18,5 @@ finding = result if {
 default infrastructure_encryption_enabled = false
 
 infrastructure_encryption_enabled if {
-	data_adapter.properties.infrastructureEncryption == "Enabled"
+	lower(data_adapter.properties.infrastructureEncryption) == "enabled"
 }
