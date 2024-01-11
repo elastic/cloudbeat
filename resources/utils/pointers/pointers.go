@@ -15,18 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package strings
+package pointers
 
-func FirstNonEmpty(args ...string) string {
-	for _, arg := range args {
-		if arg != "" {
-			return arg
-		}
+func Deref[T any](v *T) T {
+	if v == nil {
+		var zero T
+		return zero
 	}
-	return ""
-}
 
-func FromMap(data map[string]any, key string) string {
-	value, _ := data[key].(string)
-	return value
+	return *v
 }

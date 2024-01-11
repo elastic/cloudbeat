@@ -27,6 +27,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
+
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
 type sqlAzureClientWrapper struct {
@@ -126,29 +128,30 @@ func (p *sqlProvider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, res
 
 	return []AzureAsset{
 		{
-			Id:       deref(policy.ID),
-			Name:     deref(policy.Name),
-			Location: "global",
+
+			Id:       pointers.Deref(policy.ID),
+			Name:     pointers.Deref(policy.Name),
+			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"state":                        string(deref(policy.Properties.State)),
-				"isAzureMonitorTargetEnabled":  deref(policy.Properties.IsAzureMonitorTargetEnabled),
-				"isDevopsAuditEnabled":         deref(policy.Properties.IsDevopsAuditEnabled),
-				"isManagedIdentityInUse":       deref(policy.Properties.IsManagedIdentityInUse),
-				"isStorageSecondaryKeyInUse":   deref(policy.Properties.IsStorageSecondaryKeyInUse),
-				"queueDelayMs":                 deref(policy.Properties.QueueDelayMs),
-				"retentionDays":                deref(policy.Properties.RetentionDays),
-				"storageAccountAccessKey":      deref(policy.Properties.StorageAccountAccessKey),
-				"storageAccountSubscriptionID": deref(policy.Properties.StorageAccountSubscriptionID),
-				"storageEndpoint":              deref(policy.Properties.StorageEndpoint),
+				"state":                        string(pointers.Deref(policy.Properties.State)),
+				"isAzureMonitorTargetEnabled":  pointers.Deref(policy.Properties.IsAzureMonitorTargetEnabled),
+				"isDevopsAuditEnabled":         pointers.Deref(policy.Properties.IsDevopsAuditEnabled),
+				"isManagedIdentityInUse":       pointers.Deref(policy.Properties.IsManagedIdentityInUse),
+				"isStorageSecondaryKeyInUse":   pointers.Deref(policy.Properties.IsStorageSecondaryKeyInUse),
+				"queueDelayMs":                 pointers.Deref(policy.Properties.QueueDelayMs),
+				"retentionDays":                pointers.Deref(policy.Properties.RetentionDays),
+				"storageAccountAccessKey":      pointers.Deref(policy.Properties.StorageAccountAccessKey),
+				"storageAccountSubscriptionID": pointers.Deref(policy.Properties.StorageAccountSubscriptionID),
+				"storageEndpoint":              pointers.Deref(policy.Properties.StorageEndpoint),
 
 				"auditActionsAndGroups": lo.Map(policy.Properties.AuditActionsAndGroups, func(s *string, _ int) string {
-					return deref(s)
+					return pointers.Deref(s)
 				}),
 			},
 			ResourceGroup:  resourceGroup,
 			SubscriptionId: subID,
 			TenantId:       "",
-			Type:           deref(policy.Type),
+			Type:           pointers.Deref(policy.Type),
 		},
 	}, nil
 }
@@ -170,7 +173,7 @@ func (p *sqlProvider) ListSQLTransparentDataEncryptions(ctx context.Context, sub
 			continue
 		}
 
-		assetsByDb, err := p.listTransparentDataEncryptionsByDB(ctx, subID, resourceGroup, sqlServerName, deref(db.Name))
+		assetsByDb, err := p.listTransparentDataEncryptionsByDB(ctx, subID, resourceGroup, sqlServerName, pointers.Deref(db.Name))
 		if err != nil {
 			errs = errors.Join(errs, err)
 		}
@@ -207,46 +210,37 @@ func (p *sqlProvider) listTransparentDataEncryptionsByDB(ctx context.Context, su
 
 func convertTransparentDataEncryption(tde *armsql.LogicalDatabaseTransparentDataEncryption, dbName, subID, resourceGroup string) AzureAsset {
 	return AzureAsset{
-		Id:       deref(tde.ID),
-		Name:     deref(tde.Name),
-		Location: "global",
+		Id:       pointers.Deref(tde.ID),
+		Name:     pointers.Deref(tde.Name),
+		Location: assetLocationGlobal,
 		Properties: map[string]any{
 			"databaseName": dbName,
-			"state":        string(deref(tde.Properties.State)),
+			"state":        string(pointers.Deref(tde.Properties.State)),
 		},
 		ResourceGroup:  resourceGroup,
 		SubscriptionId: subID,
 		TenantId:       "",
-		Type:           deref(tde.Type),
+		Type:           pointers.Deref(tde.Type),
 	}
 }
 
 func convertEncryptionProtector(ep *armsql.EncryptionProtector, resourceGroup string, subID string) AzureAsset {
 	return AzureAsset{
-		Id:       deref(ep.ID),
-		Name:     deref(ep.Name),
-		Location: deref(ep.Location),
+		Id:       pointers.Deref(ep.ID),
+		Name:     pointers.Deref(ep.Name),
+		Location: pointers.Deref(ep.Location),
 		Properties: map[string]any{
-			"kind":                deref(ep.Kind),
-			"serverKeyType":       string(deref(ep.Properties.ServerKeyType)),
-			"autoRotationEnabled": deref(ep.Properties.AutoRotationEnabled),
-			"serverKeyName":       deref(ep.Properties.ServerKeyName),
-			"subregion":           deref(ep.Properties.Subregion),
-			"thumbprint":          deref(ep.Properties.Thumbprint),
-			"uri":                 deref(ep.Properties.URI),
+			"kind":                pointers.Deref(ep.Kind),
+			"serverKeyType":       string(pointers.Deref(ep.Properties.ServerKeyType)),
+			"autoRotationEnabled": pointers.Deref(ep.Properties.AutoRotationEnabled),
+			"serverKeyName":       pointers.Deref(ep.Properties.ServerKeyName),
+			"subregion":           pointers.Deref(ep.Properties.Subregion),
+			"thumbprint":          pointers.Deref(ep.Properties.Thumbprint),
+			"uri":                 pointers.Deref(ep.Properties.URI),
 		},
 		ResourceGroup:  resourceGroup,
 		SubscriptionId: subID,
 		TenantId:       "",
-		Type:           deref(ep.Type),
+		Type:           pointers.Deref(ep.Type),
 	}
-}
-
-func deref[T any](v *T) T {
-	if v == nil {
-		var zero T
-		return zero
-	}
-
-	return *v
 }

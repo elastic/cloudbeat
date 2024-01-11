@@ -15,18 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package strings
+package fetchers
 
-func FirstNonEmpty(args ...string) string {
-	for _, arg := range args {
-		if arg != "" {
-			return arg
-		}
-	}
-	return ""
+import "github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+
+type enricherResponse struct {
+	assets []inventory.AzureAsset
+	err    error
 }
 
-func FromMap(data map[string]any, key string) string {
-	value, _ := data[key].(string)
-	return value
+func noRes() enricherResponse {
+	return enricherResponse{
+		assets: nil,
+		err:    nil,
+	}
+}
+
+func assetRes(a ...inventory.AzureAsset) enricherResponse {
+	return enricherResponse{
+		assets: a,
+		err:    nil,
+	}
+}
+
+func errorRes(err error) enricherResponse {
+	return enricherResponse{
+		assets: nil,
+		err:    err,
+	}
 }

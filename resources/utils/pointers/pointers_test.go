@@ -15,18 +15,41 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package strings
+package pointers
 
-func FirstNonEmpty(args ...string) string {
-	for _, arg := range args {
-		if arg != "" {
-			return arg
-		}
+import (
+	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+)
+
+func TestDeref(t *testing.T) {
+	tests := []struct {
+		name string
+		s    *string
+		want string
+	}{
+		{
+			name: "nil",
+			s:    nil,
+			want: "",
+		},
+		{
+			name: "empty",
+			s:    aws.String(""),
+			want: "",
+		},
+		{
+			name: "something",
+			s:    aws.String("something"),
+			want: "something",
+		},
 	}
-	return ""
-}
-
-func FromMap(data map[string]any, key string) string {
-	value, _ := data[key].(string)
-	return value
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Deref(tt.s); got != tt.want {
+				t.Errorf("Deref() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

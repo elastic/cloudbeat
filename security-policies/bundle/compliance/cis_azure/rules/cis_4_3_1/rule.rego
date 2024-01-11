@@ -6,7 +6,7 @@ import future.keywords.if
 
 finding = result if {
 	# filter
-	data_adapter.is_postgresql_server_db
+	data_adapter.is_postgresql_single_server_db
 
 	# set result
 	result := common.generate_result_without_expected(

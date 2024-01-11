@@ -30,32 +30,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type enricherResponse struct {
-	assets []inventory.AzureAsset
-	err    error
-}
-
-func noRes() enricherResponse {
-	return enricherResponse{
-		assets: nil,
-		err:    nil,
-	}
-}
-
-func assetRes(a ...inventory.AzureAsset) enricherResponse {
-	return enricherResponse{
-		assets: a,
-		err:    nil,
-	}
-}
-
-func errorRes(err error) enricherResponse {
-	return enricherResponse{
-		assets: nil,
-		err:    err,
-	}
-}
-
 func TestSQLServerEnricher_Enrich(t *testing.T) {
 	tcs := map[string]struct {
 		input       []inventory.AzureAsset
@@ -72,7 +46,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id2", "serverName2"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{epProps("serverKey1", true)},
 				}),
 				mockOther("id4"),
@@ -96,7 +70,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id1", "serverName1"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
 						epProps("serverKey1", true),
 						epProps("serverKey2", false),
@@ -123,7 +97,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
 						epProps("serverKey1", true),
 					},
@@ -150,7 +124,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
 						epProps("serverKey1", true),
 					},
@@ -175,7 +149,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id2", "serverName2"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
 					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{
 						tdeProps("Enabled"),
 						tdeProps("Disabled"),
@@ -207,7 +181,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{epProps("serverKey1", true)},
 					inventory.ExtensionSQLBlobAuditPolicy:      bapProps("Enabled"),
 				}),
@@ -230,7 +204,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id1", "serverName1"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors:       []map[string]any{epProps("serverKey1", true)},
 					inventory.ExtensionSQLBlobAuditPolicy:            bapProps("Disabled"),
 					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{tdeProps("Enabled")},
@@ -279,10 +253,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 	}
 }
 
-func mockSQLServerWithEncryptionProtectorExtension(id, name string, ext map[string]any) inventory.AzureAsset {
-	m := mockSQLServer(id, name)
-	m.Extension = ext
-	return m
+func addExtension(a inventory.AzureAsset, ext map[string]any) inventory.AzureAsset {
+	a.Extension = ext
+	return a
 }
 
 func mockSQLServer(id, name string) inventory.AzureAsset {
