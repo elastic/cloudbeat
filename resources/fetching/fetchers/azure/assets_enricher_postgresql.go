@@ -33,14 +33,20 @@ type postgresqlEnricher struct {
 func (p postgresqlEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
 	var errs error
 
+	enrichFn := []func(context.Context, *inventory.AzureAsset) error{
+		p.enrichConfigurations,
+		p.enrichFirewallRules,
+	}
+
 	for i, a := range assets {
-		if a.Type != inventory.PostgreSQLDBAssetType &&
-			a.Type != inventory.FlexiblePostgreSQLDBAssetType {
+		if !isPsql(a.Type) {
 			continue
 		}
 
-		if err := p.enrichConfigurations(ctx, &a); err != nil {
-			errs = errors.Join(errs, err)
+		for _, fn := range enrichFn {
+			if err := fn(ctx, &a); err != nil {
+				errs = errors.Join(errs, err)
+			}
 		}
 
 		assets[i] = a
@@ -60,9 +66,35 @@ func (p postgresqlEnricher) enrichConfigurations(ctx context.Context, a *invento
 }
 
 func (p postgresqlEnricher) listConfigurations(ctx context.Context, a *inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	if a.Type == inventory.PostgreSQLDBAssetType {
-		return p.provider.ListPostgresConfigurations(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if isPsqlSingleServer(a.Type) {
+		return p.provider.ListSinglePostgresConfigurations(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
 	}
 
 	return p.provider.ListFlexiblePostgresConfigurations(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+}
+
+func (p postgresqlEnricher) enrichFirewallRules(ctx context.Context, a *inventory.AzureAsset) error {
+	configs, err := p.listFirewallRules(ctx, a)
+	if err != nil {
+		return err
+	}
+
+	enrichExtension(a, inventory.ExtensionPostgresqlFirewallRules, configs)
+	return nil
+}
+
+func (p postgresqlEnricher) listFirewallRules(ctx context.Context, a *inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	if isPsqlSingleServer(a.Type) {
+		return p.provider.ListSinglePostgresFirewallRules(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	}
+
+	return p.provider.ListFlexiblePostgresFirewallRules(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+}
+
+func isPsqlSingleServer(t string) bool {
+	return t == inventory.PostgreSQLDBAssetType
+}
+
+func isPsql(t string) bool {
+	return isPsqlSingleServer(t) || t == inventory.FlexiblePostgreSQLDBAssetType
 }
