@@ -89,6 +89,10 @@ is_postgresql_server_db if {
 	is_postgresql_flexible_server_db
 }
 
+is_flexible_mysql_server_db if {
+	input.subType == "azure-flexible-mysql-server-db"
+}
+
 is_mysql_server_db if {
 	input.subType == "azure-mysql-server-db"
 }

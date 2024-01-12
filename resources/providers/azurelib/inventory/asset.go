@@ -32,6 +32,7 @@ const (
 	DiskAssetType                      = "microsoft.compute/disks"
 	DocumentDBDatabaseAccountAssetType = "microsoft.documentdb/databaseaccounts"
 	MySQLDBAssetType                   = "microsoft.dbformysql/servers"
+	FlexibleMySQLDBAssetType           = "microsoft.dbformysql/flexibleservers"
 	NetworkWatchersAssetType           = "microsoft.network/networkwatchers"
 	NetworkWatchersFlowLogAssetType    = "microsoft.network/networkwatchers/flowlogs"
 	NetworkSecurityGroup               = "microsoft.network/networksecuritygroups"

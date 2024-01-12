@@ -163,6 +163,11 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		ListFlexiblePostgresFirewallRules(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
 
+	// since we have mysql  asset we need to mock the enricher
+	mockProvider.EXPECT().
+		GetFlexibleTLSVersionConfiguration(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)
 	for index, result := range results {

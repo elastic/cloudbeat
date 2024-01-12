@@ -43,6 +43,63 @@ func (_m *MockProviderAPI) EXPECT() *MockProviderAPI_Expecter {
 	return &MockProviderAPI_Expecter{mock: &_m.Mock}
 }
 
+// GetFlexibleTLSVersionConfiguration provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockProviderAPI) GetFlexibleTLSVersionConfiguration(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, serverName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetFlexibleTLSVersionConfiguration'
+type MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call struct {
+	*mock.Call
+}
+
+// GetFlexibleTLSVersionConfiguration is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - serverName string
+func (_e *MockProviderAPI_Expecter) GetFlexibleTLSVersionConfiguration(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	return &MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call{Call: _e.mock.On("GetFlexibleTLSVersionConfiguration", ctx, subID, resourceGroup, serverName)}
+}
+
+func (_c *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call) RunAndReturn(run func(context.Context, string, string, string) ([]inventory.AzureAsset, error)) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetSQLBlobAuditingPolicies provides a mock function with given fields: ctx, subID, resourceGroup, serverName
 func (_m *MockProviderAPI) GetSQLBlobAuditingPolicies(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, subID, resourceGroup, serverName)
