@@ -1,4 +1,4 @@
-package compliance.cis_azure.rules.cis_4_3_1
+package compliance.cis_azure.rules.cis_4_3_8
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
@@ -10,11 +10,13 @@ finding = result if {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(ssl_enforcement_enabled),
+		common.calculate_result(infrastructure_encryption_enabled),
 		{"Resource": data_adapter.resource},
 	)
 }
 
-ssl_enforcement_enabled if {
-	lower(data_adapter.properties.sslEnforcement) == "enabled"
-} else = false
+default infrastructure_encryption_enabled = false
+
+infrastructure_encryption_enabled if {
+	lower(data_adapter.properties.infrastructureEncryption) == "enabled"
+}
