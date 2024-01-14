@@ -26,13 +26,6 @@ func FirstNonEmpty(args ...string) string {
 	return ""
 }
 
-func Dereference(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
-}
-
 func FromMap(data map[string]any, key string) string {
 	value, _ := data[key].(string)
 	return value

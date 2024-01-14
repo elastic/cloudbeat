@@ -74,6 +74,7 @@ const (
 	AzureNetworkWatchersType           = "azure-network-watcher"
 	AzureNetworkSecurityGroupType      = "azure-network-group"
 	AzurePostgreSQLDBType              = "azure-postgresql-server-db"
+	AzureFlexiblePostgreSQLDBType      = "azure-flexible-postgresql-server-db"
 	AzureSQLServerType                 = "azure-sql-server"
 	AzureStorageAccountType            = "azure-storage-account"
 	AzureVMType                        = "azure-vm"

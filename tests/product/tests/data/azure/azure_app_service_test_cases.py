@@ -7,12 +7,12 @@ App service identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-CIS_9_4 = "CIS 9.4"
-CIS_9_10 = "CIS 9.10"
 CIS_9_2 = "CIS 9.2"
 CIS_9_3 = "CIS 9.3"
+CIS_9_4 = "CIS 9.4"
 CIS_9_5 = "CIS 9.5"
 CIS_9_9 = "CIS 9.9"
+CIS_9_10 = "CIS 9.10"
 
 cis_azure_9_4_pass = AzureServiceCase(
     rule_tag=CIS_9_4,
@@ -127,10 +127,10 @@ cis_azure_9_9 = {
 }
 
 cis_azure_app_service_cases = {
-    **cis_azure_9_4,
-    **cis_azure_9_10,
     **cis_azure_9_2,
     **cis_azure_9_3,
+    **cis_azure_9_4,
     **cis_azure_9_5,
     **cis_azure_9_9,
+    **cis_azure_9_10,
 }

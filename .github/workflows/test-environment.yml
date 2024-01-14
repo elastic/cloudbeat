@@ -17,7 +17,7 @@ on:
         default: false
       elk-stack-version:
         required: true
-        description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.11.0"
         type: string
       ess-region:
@@ -54,7 +54,7 @@ on:
         default: false
       elk-stack-version:
         required: true
-        description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.10.0"
         type: string
       ess-region:
@@ -104,7 +104,6 @@ jobs:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     env:
-      TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
       TF_VAR_ess_region: ${{ inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
       TF_VAR_serverless_mode: ${{ inputs.serverless_mode }}
@@ -112,7 +111,6 @@ jobs:
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
-      STACK_VERSION: ${{ inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
     # Add "id-token" with the intended permissions.
     permissions:
@@ -151,6 +149,39 @@ jobs:
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+
+      - name: Process Stack Version
+        id: remove-commit-hash
+        run: |
+          # Extract the stack version
+          stack_version="${{ inputs.elk-stack-version }}"
+
+          echo "TF_VAR_stack_version=$stack_version" >> $GITHUB_ENV
+          echo "STACK_VERSION=$stack_version" >> $GITHUB_ENV
+
+          # Handle BC versions with commit hash (e.g. 8.11.0-1234567890)
+          if [[ $stack_version =~ -[a-f0-9]+ ]]; then
+            cleaned_version=$(echo $stack_version | awk -F"-" '{print $1}')
+
+            # Versions with commit hash are not allowed for EC regular deployments and should be modified
+            # EC module resource:
+            # ec_deployment.deployment.version is required attribute and should be in format 8.x.y | 8.x.y-SNAPSHOT
+            # Therefore, we need to modify the version in the env variable
+            echo "TF_VAR_stack_version=$cleaned_version" >> $GITHUB_ENV
+
+            # env variable STACK_VERSION is used in sanity tests for findings validation
+            # findings are saved with version without commit hash
+            # therefore, we need to modify the version in the env variable
+            echo "STACK_VERSION=$cleaned_version" >> $GITHUB_ENV
+
+            # TF_VAR_pin_version is used to override stack docker images
+            # for BC versions with commit hash
+            # This version will be used to override the docker images
+            # elasticsearch.config.docker_image
+            # kibana.config.docker_image
+            # integrations_server.config.docker_image
+            echo "TF_VAR_pin_version=$stack_version" >> $GITHUB_ENV
+          fi
 
       - name: Init Enrollment Token
         run: |
@@ -198,7 +229,8 @@ jobs:
           terraform apply --auto-approve \
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
-            -var="project=${{ github.actor }}"
+            -var="project=${{ github.actor }}" \
+            -var="owner=${{ github.actor }}"
 
       - name: Set Environment Output
         id: env-output

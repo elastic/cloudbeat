@@ -31,17 +31,13 @@ import (
 )
 
 func TestSQLServerEnricher_Enrich(t *testing.T) {
-	type enricherResponse struct {
-		assets []inventory.AzureAsset
-		err    error
-	}
-
 	tcs := map[string]struct {
-		input                       []inventory.AzureAsset
-		expected                    []inventory.AzureAsset
-		expectError                 bool
-		encryptionProtectorResponse map[string]enricherResponse
-		blobAuditPolicyResponse     map[string]enricherResponse
+		input       []inventory.AzureAsset
+		expected    []inventory.AzureAsset
+		expectError bool
+		epRes       map[string]enricherResponse
+		bapRes      map[string]enricherResponse
+		tdeRes      map[string]enricherResponse
 	}{
 		"Some assets have encryption protection, others don't": {
 			input: []inventory.AzureAsset{
@@ -50,98 +46,50 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id2", "serverName2"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						},
-					},
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{epProps("serverKey1", true)},
 				}),
 				mockOther("id4"),
 				mockSQLServer("id2", "serverName2"),
 			},
-			encryptionProtectorResponse: map[string]enricherResponse{
-				"serverName1": { //nolint:exhaustruct
-					assets: []inventory.AzureAsset{
-						mockEncryptionProtector("ep1", map[string]any{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						}),
-					},
-				},
-				"serverName2": {}, //nolint:exhaustruct
+			epRes: map[string]enricherResponse{
+				"serverName1": assetRes(mockEncryptionProtector("ep1", epProps("serverKey1", true))),
+				"serverName2": noRes(),
 			},
-			blobAuditPolicyResponse: map[string]enricherResponse{
-				"serverName1": {}, //nolint:exhaustruct
-				"serverName2": {}, //nolint:exhaustruct
+			bapRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
 			},
 		},
-		"Multiple policy protectors": {
+		"Multiple encryption protectors": {
 			input: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						},
-						{
-							"serverKeyType":       "ServiceManaged",
-							"autoRotationEnabled": false,
-							"serverKeyName":       "serverKey2",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						},
+						epProps("serverKey1", true),
+						epProps("serverKey2", false),
 					},
 				}),
 			},
-			encryptionProtectorResponse: map[string]enricherResponse{
-				"serverName1": { //nolint:exhaustruct
-					assets: []inventory.AzureAsset{
-						mockEncryptionProtector("ep1", map[string]any{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						}),
-						mockEncryptionProtector("ep2", map[string]any{
-							"serverKeyType":       "ServiceManaged",
-							"autoRotationEnabled": false,
-							"serverKeyName":       "serverKey2",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						}),
-					},
-				},
+			epRes: map[string]enricherResponse{
+				"serverName1": assetRes(
+					mockEncryptionProtector("ep1", epProps("serverKey1", true)),
+					mockEncryptionProtector("ep2", epProps("serverKey2", false))),
 			},
-			blobAuditPolicyResponse: map[string]enricherResponse{
-				"serverName1": {}, //nolint:exhaustruct
+			bapRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": noRes(),
 			},
 		},
-		"Error in one policy protector": {
+		"Error in one encryption protector": {
 			expectError: true,
 			input: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
@@ -149,41 +97,23 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						},
+						epProps("serverKey1", true),
 					},
 				}),
 			},
-			encryptionProtectorResponse: map[string]enricherResponse{
-				"serverName1": { //nolint:exhaustruct
-					err: errors.New("error"),
-				},
-				"serverName2": { //nolint:exhaustruct
-					assets: []inventory.AzureAsset{
-						mockEncryptionProtector("ep1", map[string]any{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						}),
-					},
-				},
+			epRes: map[string]enricherResponse{
+				"serverName1": errorRes(errors.New("error")),
+				"serverName2": assetRes(mockEncryptionProtector("ep1", epProps("serverKey1", true))),
 			},
-			blobAuditPolicyResponse: map[string]enricherResponse{
-				"serverName1": {}, //nolint:exhaustruct
-				"serverName2": {}, //nolint:exhaustruct
+			bapRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
 			},
 		},
 		"Error in one blob audit policy": {
@@ -194,106 +124,100 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
 					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						},
+						epProps("serverKey1", true),
 					},
 				}),
 			},
-			encryptionProtectorResponse: map[string]enricherResponse{
-				"serverName1": {}, //nolint:exhaustruct
-				"serverName2": { //nolint:exhaustruct
-					assets: []inventory.AzureAsset{
-						mockEncryptionProtector("ep1", map[string]any{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						}),
-					},
-				},
+			epRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": assetRes(mockEncryptionProtector("ep1", epProps("serverKey1", true))),
 			},
-			blobAuditPolicyResponse: map[string]enricherResponse{
-				"serverName1": {},                         //nolint:exhaustruct
-				"serverName2": {err: errors.New("error")}, //nolint:exhaustruct
+			bapRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": errorRes(errors.New("error")),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
 			},
 		},
-		"Policy protector and blob audit policies": {
+		"Multiple transparent data encryption": {
+			input: []inventory.AzureAsset{
+				mockSQLServer("id1", "serverName1"),
+				mockSQLServer("id2", "serverName2"),
+			},
+			expected: []inventory.AzureAsset{
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
+					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{
+						tdeProps("Enabled"),
+						tdeProps("Disabled"),
+					},
+				}),
+				mockSQLServer("id2", "serverName2"),
+			},
+			epRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+			bapRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": assetRes(
+					mockTransparentDataEncryption("tde1", tdeProps("Enabled")),
+					mockTransparentDataEncryption("tde2", tdeProps("Disabled")),
+				),
+				"serverName2": noRes(),
+			},
+		},
+		"Error in one transparent data encryption": {
+			expectError: true,
+			input: []inventory.AzureAsset{
+				mockSQLServer("id1", "serverName1"),
+				mockSQLServer("id2", "serverName2"),
+			},
+			expected: []inventory.AzureAsset{
+				mockSQLServer("id1", "serverName1"),
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{epProps("serverKey1", true)},
+					inventory.ExtensionSQLBlobAuditPolicy:      bapProps("Enabled"),
+				}),
+			},
+			epRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": assetRes(mockEncryptionProtector("ep1", epProps("serverKey1", true))),
+			},
+			bapRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": assetRes(mockBlobAuditingPolicies("ep1", bapProps("Enabled"))),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": errorRes(errors.New("error")),
+			},
+		},
+		"Encryption Protector,  blob audit policies and transparent data encryption": {
 			input: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						},
-					},
-					inventory.ExtensionSQLBlobAuditPolicy: map[string]any{
-						"state":                        "Enabled",
-						"isAzureMonitorTargetEnabled":  true,
-						"isDevopsAuditEnabled":         false,
-						"isManagedIdentityInUse":       true,
-						"isStorageSecondaryKeyInUse":   true,
-						"queueDelayMs":                 int32(100),
-						"retentionDays":                int32(90),
-						"storageAccountAccessKey":      "access-key",
-						"storageAccountSubscriptionID": "sub-id",
-						"storageEndpoint":              "",
-						"auditActionsAndGroups":        []string{"a", "b"},
-					},
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors:       []map[string]any{epProps("serverKey1", true)},
+					inventory.ExtensionSQLBlobAuditPolicy:            bapProps("Disabled"),
+					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{tdeProps("Enabled")},
 				}),
 			},
-			encryptionProtectorResponse: map[string]enricherResponse{
-				"serverName1": { //nolint:exhaustruct
-					assets: []inventory.AzureAsset{
-						mockEncryptionProtector("ep1", map[string]any{
-							"kind":                "azurekeyvault",
-							"serverKeyType":       "AzureKeyVault",
-							"autoRotationEnabled": true,
-							"serverKeyName":       "serverKey1",
-							"subregion":           "",
-							"thumbprint":          "",
-							"uri":                 "",
-						}),
-					},
-				},
+			epRes: map[string]enricherResponse{
+				"serverName1": assetRes(mockEncryptionProtector("ep1", epProps("serverKey1", true))),
 			},
-			blobAuditPolicyResponse: map[string]enricherResponse{
-				"serverName1": { //nolint:exhaustruct
-					assets: []inventory.AzureAsset{
-						mockBlobAuditingPolicies("ep1", map[string]any{
-							"state":                        "Enabled",
-							"isAzureMonitorTargetEnabled":  true,
-							"isDevopsAuditEnabled":         false,
-							"isManagedIdentityInUse":       true,
-							"isStorageSecondaryKeyInUse":   true,
-							"queueDelayMs":                 int32(100),
-							"retentionDays":                int32(90),
-							"storageAccountAccessKey":      "access-key",
-							"storageAccountSubscriptionID": "sub-id",
-							"storageEndpoint":              "",
-							"auditActionsAndGroups":        []string{"a", "b"},
-						}),
-					},
-				},
+			bapRes: map[string]enricherResponse{
+				"serverName1": assetRes(mockBlobAuditingPolicies("ep1", bapProps("Disabled"))),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": assetRes(mockTransparentDataEncryption("tde1", tdeProps("Enabled"))),
 			},
 		},
 	}
@@ -303,12 +227,16 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			cmd := cycle.Metadata{}
 
 			provider := azurelib.NewMockProviderAPI(t)
-			for serverName, r := range tc.encryptionProtectorResponse {
+			for serverName, r := range tc.epRes {
 				provider.EXPECT().ListSQLEncryptionProtector(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
 			}
 
-			for serverName, r := range tc.blobAuditPolicyResponse {
+			for serverName, r := range tc.bapRes {
 				provider.EXPECT().GetSQLBlobAuditingPolicies(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+			}
+
+			for serverName, r := range tc.tdeRes {
+				provider.EXPECT().ListSQLTransparentDataEncryptions(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
 			}
 
 			e := sqlServerEnricher{provider: provider}
@@ -325,10 +253,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 	}
 }
 
-func mockSQLServerWithEncryptionProtectorExtension(id, name string, ext map[string]any) inventory.AzureAsset {
-	m := mockSQLServer(id, name)
-	m.Extension = ext
-	return m
+func addExtension(a inventory.AzureAsset, ext map[string]any) inventory.AzureAsset {
+	a.Extension = ext
+	return a
 }
 
 func mockSQLServer(id, name string) inventory.AzureAsset {
@@ -357,9 +284,51 @@ func mockBlobAuditingPolicies(id string, props map[string]any) inventory.AzureAs
 	}
 }
 
+func mockTransparentDataEncryption(id string, props map[string]any) inventory.AzureAsset {
+	return inventory.AzureAsset{
+		Id:         id,
+		Type:       inventory.SQLServersAssetType + "/transparentDataEncryption",
+		Properties: props,
+	}
+}
+
 func mockOther(id string) inventory.AzureAsset {
 	return inventory.AzureAsset{
 		Id:   id,
 		Type: "otherType",
+	}
+}
+
+func epProps(keyName string, rotationEnabled bool) map[string]any {
+	return map[string]any{
+		"kind":                "azurekeyvault",
+		"serverKeyType":       "AzureKeyVault",
+		"autoRotationEnabled": rotationEnabled,
+		"serverKeyName":       keyName,
+		"subregion":           "",
+		"thumbprint":          "",
+		"uri":                 "",
+	}
+}
+
+func bapProps(state string) map[string]any {
+	return map[string]any{
+		"state":                        state,
+		"isAzureMonitorTargetEnabled":  true,
+		"isDevopsAuditEnabled":         false,
+		"isManagedIdentityInUse":       true,
+		"isStorageSecondaryKeyInUse":   true,
+		"queueDelayMs":                 int32(100),
+		"retentionDays":                int32(90),
+		"storageAccountAccessKey":      "access-key",
+		"storageAccountSubscriptionID": "sub-id",
+		"storageEndpoint":              "",
+		"auditActionsAndGroups":        []string{"a", "b"},
+	}
+}
+
+func tdeProps(state string) map[string]any {
+	return map[string]any{
+		"state": state,
 	}
 }

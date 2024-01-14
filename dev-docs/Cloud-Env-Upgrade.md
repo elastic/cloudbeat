@@ -22,8 +22,8 @@ Follow these steps to run the workflow:
       instance: `john-8-11-0-nov1`.
 
     - **`target-elk-stack-version`**: Specify the target version for the Elastic Cloud stack upgrade. This version represents the goal to which the workflow will upgrade the stack. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
-      For BC, enter only the version without additions/commit sha, e.g. `8.11.0`.
-      For SNAPSHOT, enter the full version, e.g. `8.12.0-SNAPSHOT`.
+      For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
+      For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
 
    ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/9475f553-70c9-4dd7-8330-260bbd704df8)
 

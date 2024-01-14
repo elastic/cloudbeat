@@ -130,6 +130,23 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().
 		GetSQLBlobAuditingPolicies(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSQLTransparentDataEncryptions(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+
+	// since we have postgresql asset we need to mock the enricher
+	mockProvider.EXPECT().
+		ListSinglePostgresConfigurations(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListFlexiblePostgresConfigurations(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSinglePostgresFirewallRules(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListFlexiblePostgresFirewallRules(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)
