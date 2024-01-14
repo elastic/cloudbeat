@@ -62,13 +62,16 @@ jobs:
         run: |
           ./cloudbeat -c deploy/azure/cloudbeat-azure.yml -d '*' &
 
+      - name: Wait for cloudbeat to send events
+        run: sleep 120
+
       - name: Check for findings
         working-directory: ./tests
         env:
           USE_K8S: false
         run: |
           poetry install
-          poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+          poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3

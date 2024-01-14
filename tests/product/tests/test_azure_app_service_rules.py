@@ -31,10 +31,8 @@ def test_azure_app_service_rules(
     @return: None - Test Pass / Fail result is generated.
     """
     app_service_identifier = partial(res_identifier, RES_NAME, case_identifier)
-    print(f"JENIA NAME {app_service_identifier} for expected {expected}")
 
     app_service_identifier_id = partial(res_identifier, RES_ID, case_identifier)
-    print(f"JENIA ID {app_service_identifier_id} for expected {expected}")
 
 
     evaluation = get_ES_evaluation(

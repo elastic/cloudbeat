@@ -348,7 +348,6 @@ def res_identifier(field_chain: str, case_identifier, eval_resource) -> bool:
         # the code is equivalent to:
         # current_value = eval_resource.resource.name, where field_chain is 'resource.name'
         current_value = reduce(getattr, field_chain.split("."), eval_resource)
-        print(f"JENIA EQUAL {current_value} for expected {case_identifier}")
         return current_value == case_identifier
     except AttributeError:
         return False
