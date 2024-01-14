@@ -9,7 +9,7 @@ from commonlib.utils import get_ES_evaluation, res_identifier
 
 from product.tests.data.azure import azure_app_service_test_cases as azure_app_service_tc
 from product.tests.parameters import register_params, Parameters
-from .data.constants import RES_NAME
+from .data.constants import RES_NAME, RES_ID
 
 
 @pytest.mark.azure_app_service_rules
@@ -31,6 +31,11 @@ def test_azure_app_service_rules(
     @return: None - Test Pass / Fail result is generated.
     """
     app_service_identifier = partial(res_identifier, RES_NAME, case_identifier)
+    print(f"JENIA NAME {app_service_identifier} for expected {expected}")
+
+    app_service_identifier_id = partial(res_identifier, RES_ID, case_identifier)
+    print(f"JENIA ID {app_service_identifier_id} for expected {expected}")
+
 
     evaluation = get_ES_evaluation(
         elastic_client=cspm_client,
