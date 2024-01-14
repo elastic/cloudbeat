@@ -17,7 +17,7 @@ cis_azure_8_5_pass = AzureServiceCase(
 
 cis_azure_8_5_fail = AzureServiceCase(
     rule_tag=CIS_8_5,
-    case_identifier="test-key-vault-fail",
+    case_identifier="test-key-vault-fail-arm",
     expected=RULE_FAIL_STATUS,
 )
 

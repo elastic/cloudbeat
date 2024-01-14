@@ -14,30 +14,31 @@ CIS_7_4 = "CIS 7.4"
 
 cis_azure_7_1_pass = AzureServiceCase(
     rule_tag=CIS_7_1,
-    case_identifier="test-virtual-machine-pass",
+    case_identifier="azure-bastion-ef111ee2-6c89-4b09-92c6-5c2321f888df",
     expected=RULE_PASS_STATUS,
 )
 
-cis_azure_7_1_fail = AzureServiceCase(
-    rule_tag=CIS_7_1,
-    case_identifier="test-virtual-machine-pass",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: Bastions are per subscription, no bastions for evaluation of fail not possible due to having bastion for pass
+# cis_azure_7_1_fail = AzureServiceCase(
+#     rule_tag=CIS_7_1,
+#     case_identifier="TODO",
+#     expected=RULE_FAIL_STATUS,
+# )
 
 cis_azure_7_1 = {
     "7.1 Ensure an Azure Bastion Host Exists expect: passed": cis_azure_7_1_pass,
-    "7.1 Ensure an Azure Bastion Host Exists expect: failed": cis_azure_7_1_fail,
+    # "7.1 Ensure an Azure Bastion Host Exists expect: failed": cis_azure_7_1_fail,
 }
 
 cis_azure_7_2_pass = AzureServiceCase(
     rule_tag=CIS_7_2,
-    case_identifier="test-virtual-machine-pass",
+    case_identifier="test-vm-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_7_2_fail = AzureServiceCase(
     rule_tag=CIS_7_2,
-    case_identifier="test-virtual-machine-fail",
+    case_identifier="test-vm-fail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -48,13 +49,13 @@ cis_azure_7_2 = {
 
 cis_azure_7_3_pass = AzureServiceCase(
     rule_tag=CIS_7_3,
-    case_identifier="test-virtual-machine-pass",
+    case_identifier="test-vm-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_7_3_fail = AzureServiceCase(
     rule_tag=CIS_7_3,
-    case_identifier="test-virtual-machine-fail",
+    case_identifier="test-vm-fail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -67,13 +68,13 @@ cis_azure_7_3 = {
 
 cis_azure_7_4_pass = AzureServiceCase(
     rule_tag=CIS_7_4,
-    case_identifier="test-virtual-machine-pass",
+    case_identifier="test-vm-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_7_4_fail = AzureServiceCase(
     rule_tag=CIS_7_4,
-    case_identifier="test-virtual-machine-fail",
+    case_identifier="test-vm-fail",
     expected=RULE_FAIL_STATUS,
 )
 
