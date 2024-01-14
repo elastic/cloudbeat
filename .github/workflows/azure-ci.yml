@@ -73,11 +73,11 @@ jobs:
           poetry install
           poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true      
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   if: failure()
+      #   with:
+      #     limit-access-to-actor: true      
 
       - name: Print cloudbeat logs
         if: always()
