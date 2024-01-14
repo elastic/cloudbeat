@@ -14,7 +14,7 @@ jobs:
   Run-CSPM-AZURE-Tests:
     name: CIS AZURE integration test
     # TODO: Remove after testing
-    if: false
+    # if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
