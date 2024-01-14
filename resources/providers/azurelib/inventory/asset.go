@@ -36,6 +36,7 @@ const (
 	NetworkWatchersFlowLogAssetType    = "microsoft.network/networkwatchers/flowlogs"
 	NetworkSecurityGroup               = "microsoft.network/networksecuritygroups"
 	PostgreSQLDBAssetType              = "microsoft.dbforpostgresql/servers"
+	FlexiblePostgreSQLDBAssetType      = "microsoft.dbforpostgresql/flexibleservers"
 	SQLServersAssetType                = "microsoft.sql/servers"
 	StorageAccountAssetType            = "microsoft.storage/storageaccounts"
 	VaultAssetType                     = "microsoft.keyvault/vaults"
@@ -56,11 +57,16 @@ const (
 	ExtensionSQLEncryptionProtectors       = "sqlEncryptionProtectors"
 	ExtensionSQLBlobAuditPolicy            = "sqlBlobAuditPolicy"
 	ExtensionSQLTransparentDataEncryptions = "sqlTransparentDataEncryptions"
+	ExtensionPostgresqlConfigurations      = "psqlConfigurations"
+	ExtensionPostgresqlFirewallRules       = "psqlFirewallRules"
 	ExtensionStorageAccountID              = "storageAccountId"
 	ExtensionStorageAccountName            = "storageAccountName"
 	ExtensionBlobDiagnosticSettings        = "blobDiagnosticSettings"
 	ExtensionTableDiagnosticSettings       = "tableDiagnosticSettings"
 	ExtensionQueueDiagnosticSettings       = "queueDiagnosticSettings"
+
+	// AssetLocation
+	assetLocationGlobal = "global"
 )
 
 type AzureAsset struct {

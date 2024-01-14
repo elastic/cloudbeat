@@ -18,21 +18,22 @@
 package azurelib
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
 type ProviderAPI interface {
-	inventory.ProviderAPI
+	inventory.ResourceGraphProviderAPI
+	inventory.SQLProviderAPI
+	inventory.StorageAccountProviderAPI
+	inventory.PostgresqlProviderAPI
 	governance.ProviderAPI
 }
 
@@ -57,54 +58,20 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		return nil, fmt.Errorf("failed to init monitor client: %w", err)
 	}
 
-	inventoryProvider := inventory.NewProvider(log, resourceGraphClientFactory, diagnosticSettingsClient, azureConfig.Credentials)
+	resourceGraphProvider := inventory.NewResourceGraphProvider(log, resourceGraphClientFactory)
 	return &provider{
-		inventory:  inventoryProvider,
-		governance: governance.NewProvider(log, inventoryProvider),
+		ResourceGraphProviderAPI:  resourceGraphProvider,
+		SQLProviderAPI:            inventory.NewSQLProvider(log, azureConfig.Credentials),
+		PostgresqlProviderAPI:     inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
+		StorageAccountProviderAPI: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		ProviderAPI:               governance.NewProvider(log, resourceGraphProvider),
 	}, nil
 }
 
 type provider struct {
-	inventory  inventory.ProviderAPI
-	governance governance.ProviderAPI
-}
-
-func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListAllAssetTypesByName(ctx, assetGroup, assets)
-}
-
-func (p provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
-}
-
-func (p provider) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountBlobServices(ctx, storageAccounts)
-}
-
-func (p provider) ListSQLEncryptionProtector(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListSQLEncryptionProtector(ctx, subID, resourceGroup, sqlServerName)
-}
-
-func (p provider) ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListSQLTransparentDataEncryptions(ctx, subID, resourceGroup, sqlServerName)
-}
-
-func (p provider) GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, sqlServerName string) ([]inventory.AzureAsset, error) {
-	return p.inventory.GetSQLBlobAuditingPolicies(ctx, subID, resourceGroup, sqlServerName)
-}
-
-func (p provider) ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountsBlobDiagnosticSettings(ctx, storageAccounts)
-}
-
-func (p provider) ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountsTableDiagnosticSettings(ctx, storageAccounts)
-}
-
-func (p provider) ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListStorageAccountsQueueDiagnosticSettings(ctx, storageAccounts)
-}
-
-func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {
-	return p.governance.GetSubscriptions(ctx, cycleMetadata)
+	inventory.ResourceGraphProviderAPI
+	inventory.SQLProviderAPI
+	inventory.StorageAccountProviderAPI
+	inventory.PostgresqlProviderAPI
+	governance.ProviderAPI
 }

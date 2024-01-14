@@ -12,7 +12,7 @@ on:
         required: true
       target-elk-stack-version:
         required: true
-        description: "Target version of the ELK stack: For BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        description: "Target version of the ELK stack: For BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.11.0"
         type: string
       base-elk-stack-version:
@@ -38,8 +38,9 @@ jobs:
   init:
     runs-on: ubuntu-20.04
     outputs:
-      stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
+      base-stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
       ess-region: ${{ env.TF_VAR_ess_region }}
+      target-agent-version: ${{ steps.clean-version.outputs.AGENT_VERSION }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -52,7 +53,20 @@ jobs:
             PREVIOUS_VERSION=$(./.ci/scripts/get-previous-version.sh "$VERSION")
             echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
           else
-            echo "PREVIOUS_VERSION=${{ inputs.base-elk-stack-version }}" >> $GITHUB_ENV
+            echo "PREVIOUS_VERSION=${{ inputs.base-elk-stack-version }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Process BC version
+        id: clean-version
+        run: |
+          # Extract the stack version
+          stack_version="${{ inputs.target-elk-stack-version }}"
+
+          # Check if the version contains a commit hash, remove it
+          if [[ $stack_version =~ -[a-f0-9]+ ]]; then
+            cleaned_version=$(echo $stack_version | awk -F"-" '{print $1}')
+            echo "AGENT_VERSION=$cleaned_version" >> $GITHUB_OUTPUT
+          else
+            echo "AGENT_VERSION=$stack_version" >> $GITHUB_OUTPUT
           fi
   deploy:
     uses: ./.github/workflows/test-environment.yml
@@ -63,7 +77,7 @@ jobs:
       id-token: 'write'
     with:
       deployment_name: ${{ inputs.deployment_name }}
-      elk-stack-version: ${{ needs.init.outputs.stack-version }}
+      elk-stack-version: ${{ needs.init.outputs.base-stack-version }}
       ess-region: ${{ needs.init.outputs.ess-region }}
       run-sanity-tests: false # Set to true once the issue at https://github.com/elastic/kibana/pull/171200 is resolved.
       serverless_mode: false
@@ -125,7 +139,11 @@ jobs:
         id: apply
         if: success()
         run: |
-          terraform apply --auto-approve -var="deployment_name=${{ inputs.deployment_name }}" -var="region=${{ env.AWS_REGION }}"
+          terraform apply --auto-approve \
+            -var="deployment_name=${{ inputs.deployment_name }}" \
+            -var="region=${{ env.AWS_REGION }}" \
+            -var="project=${{ github.actor }}" \
+            -var="owner=${{ github.actor }}"
 
       - name: Set Environment Output
         id: env-output
@@ -167,7 +185,7 @@ jobs:
         working-directory: ./tests
         env:
           USE_K8S: false
-          AGENT_VERSION: ${{ needs.init.outputs.stack-version }}
+          AGENT_VERSION: ${{ needs.init.outputs.base-stack-version }}
         run: |
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
@@ -198,12 +216,13 @@ jobs:
               --name $(terraform output -raw deployment_name) --alias eks-config
           kubectl config use-context eks-config
           kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
+          kubectl rollout restart daemonset/elastic-agent -n kube-system
 
       - name: Upgrade Linux agents
         working-directory: ${{ env.WORKING_DIR }}/${{ env.FLEET_API_DIR }}
         env:
           CNVM_STACK_NAME: ${{ needs.deploy.outputs.cnvm-stack-name }}
-          STACK_VERSION: ${{ inputs.target-elk-stack-version }}
+          STACK_VERSION: ${{ needs.init.outputs.target-agent-version }}
         run: |
           poetry run python upgrade_agents.py
 
@@ -211,7 +230,7 @@ jobs:
         if: success()
         working-directory: ./tests
         env:
-          AGENT_VERSION: ${{ inputs.target-elk-stack-version }}
+          AGENT_VERSION: ${{ needs.init.outputs.target-agent-version }}
           USE_K8S: false
         run: |
           poetry install
