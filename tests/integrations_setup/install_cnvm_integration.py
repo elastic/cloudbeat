@@ -12,9 +12,10 @@ import json
 from pathlib import Path
 from munch import Munch
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy
-from api.package_policy_api import create_cnvm_integration
-from api.common_api import (
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.package_policy_api import create_cnvm_integration
+from fleet_api.utils import rename_file_by_suffix
+from fleet_api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     get_artifact_server,
@@ -31,11 +32,10 @@ from package_policy import (
     get_package_default_url,
     extract_template_url,
 )
-from utils import rename_file_by_suffix
 
 CNVM_EXPECTED_AGENTS = 1
-CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
-CNMV_TEMPLATE = "../../../cloudformation/elastic-agent-ec2-cnvm.yml"
+CNVM_CLOUDFORMATION_CONFIG = "../../deploy/cloudformation/config.json"
+CNMV_TEMPLATE = "../../deploy/cloudformation/elastic-agent-ec2-cnvm.yml"
 CNMV_TEMP_FILE = "elastic-agent-ec2-cnvm-temp.yml"
 CNVM_AGENT_TAGS = ["cft_version:*", "cft_arn:arn:aws:cloudformation:.*"]
 PKG_DEFAULT_VERSION = VERSION_MAP.get("vuln_mgmt_aws", "")

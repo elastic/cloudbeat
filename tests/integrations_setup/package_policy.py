@@ -10,7 +10,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 from packaging import version
 from munch import Munch
 from loguru import logger
-from api.common_api import get_package
+from fleet_api.common_api import get_package
 
 # Constants
 CLOUD_SECURITY_POSTURE = "cloud_security_posture"

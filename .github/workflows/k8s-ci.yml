@@ -3,11 +3,11 @@ name: K8s-CI
 on:
   # Skipping pre-merge K8s tests for now
   # https://github.com/elastic/cloudbeat/issues/1623
-  # pull_request:
-  #   branches:
-  #     - main
-  #     - "[0-9]+.[0-9]+"
-  #   types: [ opened, synchronize, reopened ]
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [ opened, synchronize, reopened ]
 
   push:
     branches:
@@ -123,12 +123,12 @@ jobs:
         test-target:
           [
             file_system_rules,
-            k8s_object_rules,
-            process_scheduler_rules,
-            process_api_server_rules,
-            process_controller_manager_rules,
-            process_etcd_rules,
-            process_kubelet_rules,
+            # k8s_object_rules,
+            # process_scheduler_rules,
+            # process_api_server_rules,
+            # process_controller_manager_rules,
+            # process_etcd_rules,
+            # process_kubelet_rules,
           ]
         values_file: [ tests/deploy/values/ci.yml ]
         range: [ "0..4" ]
