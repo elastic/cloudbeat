@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 57/151 implemented rules (38%)
+### 58/151 implemented rules (38%)
 
-#### Automated rules: 57/77 (74%)
+#### Automated rules: 58/77 (75%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -478,7 +478,7 @@
 |  [4.1.4](bundle/compliance/cis_azure/rules/cis_4_1_4)  | SQL Server - Auditing                   | Ensure that Azure Active Directory Admin is Configured for SQL Servers                                                                                 | :white_check_mark: | Automated |
 |  [4.1.5](bundle/compliance/cis_azure/rules/cis_4_1_5)  | SQL Server - Auditing                   | Ensure that 'Data encryption' is set to 'On' on a SQL Database                                                                                         | :white_check_mark: | Automated |
 |  [4.1.6](bundle/compliance/cis_azure/rules/cis_4_1_6)  | SQL Server - Auditing                   | Ensure that 'Auditing' Retention is 'greater than 90 days'                                                                                             | :white_check_mark: | Automated |
-|                         4.2.1                          | SQL Server - Microsoft Defender for SQL | Ensure that Microsoft Defender for SQL is set to 'On' for critical SQL Servers                                                                         |        :x:         | Automated |
+|  [4.2.1](bundle/compliance/cis_azure/rules/cis_4_2_1)  | SQL Server - Microsoft Defender for SQL | Ensure that Microsoft Defender for SQL is set to 'On' for critical SQL Servers                                                                         | :white_check_mark: | Automated |
 |                         4.2.2                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) is enabled on a SQL server by setting a Storage Account                                                      |        :x:         | Automated |
 |                         4.2.3                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Periodic recurring scans' is set to 'on' for each SQL server                                        |        :x:         | Automated |
 |                         4.2.4                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Send scan reports to' is configured for a SQL server                                                |        :x:         | Automated |
