@@ -40,7 +40,7 @@ require (
 	github.com/aws/smithy-go v1.19.0
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240108094715-95f0f85a3edd
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240114213844-a9e07e45ec28
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.6
 	github.com/elastic/elastic-agent-client/v7 v7.6.0
@@ -382,7 +382,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
-	github.com/pierrec/lz4/v4 v4.1.17 // indirect
+	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect

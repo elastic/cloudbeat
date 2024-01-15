@@ -1288,8 +1288,8 @@ github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 h1:YEetp8
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240108094715-95f0f85a3edd h1:rC9i9rR72M3X3w11rINvTnJ12WsRu4wHlMBswfZjdAs=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240108094715-95f0f85a3edd/go.mod h1:rNNO1YXUHEa0qVE9csGluxw/OohHciGvMzAUAjK1uS4=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240114213844-a9e07e45ec28 h1:swF+0BuxOhMJUBCwlX1TynAbV2VgrR39tYjiRu7mO1o=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240114213844-a9e07e45ec28/go.mod h1:19gAgHoNnjo9m31bYe4p4Mu2xot7fuibd6rnVkl18AQ=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc h1:3hGO3+tipLIULlrabnXpXpOV5qSDbN/EJo9Xsj3hqyo=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc/go.mod h1:8q2d8dmwavJXISowwaoreHFBnbR/uK4qanfRGhC/W9A=
 github.com/elastic/elastic-agent-autodiscover v0.6.6 h1:P1y0dDpbhJc7Uw/xe85irPEad4Vljygc+y4iSxtqW7A=
@@ -2417,8 +2417,9 @@ github.com/pierrec/lz4 v2.6.1+incompatible h1:9UY3+iC23yxF0UfGaYrGplQ+79Rg+h/q9F
 github.com/pierrec/lz4 v2.6.1+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pierrec/lz4/v4 v4.1.2/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pierrec/lz4/v4 v4.1.15/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
-github.com/pierrec/lz4/v4 v4.1.17 h1:kV4Ip+/hUBC+8T6+2EgburRtkE9ef4nbY3f4dFhGjMc=
 github.com/pierrec/lz4/v4 v4.1.17/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
+github.com/pierrec/lz4/v4 v4.1.18 h1:xaKrnTkyoqfh1YItXl56+6KJNVYWlEEPuAQW9xsplYQ=
+github.com/pierrec/lz4/v4 v4.1.18/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0 h1:i5VIxp6QB8oWZ8IkK8zrDgeT6ORGIUeiN+61iETwJbI=
 github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0/go.mod h1:4xpMLz7RBWyB+ElzHu8Llua96TRCB3YwX+l5EP1wmHk=
 github.com/pjbgf/sha1cd v0.3.0 h1:4D5XXmUUBUl/xQ6IjCkEAbqXskkq/4O7LmGn0AqMDs4=
