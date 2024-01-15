@@ -123,12 +123,12 @@ jobs:
         test-target:
           [
             file_system_rules,
-            # k8s_object_rules,
-            # process_scheduler_rules,
-            # process_api_server_rules,
-            # process_controller_manager_rules,
-            # process_etcd_rules,
-            # process_kubelet_rules,
+            k8s_object_rules,
+            process_scheduler_rules,
+            process_api_server_rules,
+            process_controller_manager_rules,
+            process_etcd_rules,
+            process_kubelet_rules,
           ]
         values_file: [ tests/deploy/values/ci.yml ]
         range: [ "0..4" ]
