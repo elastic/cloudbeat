@@ -95,8 +95,8 @@ func (_c *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call) Run
 	return _c
 }
 
-// ListPostgresConfigurations provides a mock function with given fields: ctx, subID, resourceGroup, serverName
-func (_m *MockPostgresqlProviderAPI) ListPostgresConfigurations(ctx context.Context, subID string, resourceGroup string, serverName string) ([]AzureAsset, error) {
+// ListFlexiblePostgresFirewallRules provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockPostgresqlProviderAPI) ListFlexiblePostgresFirewallRules(ctx context.Context, subID string, resourceGroup string, serverName string) ([]AzureAsset, error) {
 	ret := _m.Called(ctx, subID, resourceGroup, serverName)
 
 	var r0 []AzureAsset
@@ -121,33 +121,147 @@ func (_m *MockPostgresqlProviderAPI) ListPostgresConfigurations(ctx context.Cont
 	return r0, r1
 }
 
-// MockPostgresqlProviderAPI_ListPostgresConfigurations_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListPostgresConfigurations'
-type MockPostgresqlProviderAPI_ListPostgresConfigurations_Call struct {
+// MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListFlexiblePostgresFirewallRules'
+type MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call struct {
 	*mock.Call
 }
 
-// ListPostgresConfigurations is a helper method to define mock.On call
+// ListFlexiblePostgresFirewallRules is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockPostgresqlProviderAPI_Expecter) ListPostgresConfigurations(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListPostgresConfigurations_Call {
-	return &MockPostgresqlProviderAPI_ListPostgresConfigurations_Call{Call: _e.mock.On("ListPostgresConfigurations", ctx, subID, resourceGroup, serverName)}
+func (_e *MockPostgresqlProviderAPI_Expecter) ListFlexiblePostgresFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call {
+	return &MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call{Call: _e.mock.On("ListFlexiblePostgresFirewallRules", ctx, subID, resourceGroup, serverName)}
 }
 
-func (_c *MockPostgresqlProviderAPI_ListPostgresConfigurations_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockPostgresqlProviderAPI_ListPostgresConfigurations_Call {
+func (_c *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
 	})
 	return _c
 }
 
-func (_c *MockPostgresqlProviderAPI_ListPostgresConfigurations_Call) Return(_a0 []AzureAsset, _a1 error) *MockPostgresqlProviderAPI_ListPostgresConfigurations_Call {
+func (_c *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call) Return(_a0 []AzureAsset, _a1 error) *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockPostgresqlProviderAPI_ListPostgresConfigurations_Call) RunAndReturn(run func(context.Context, string, string, string) ([]AzureAsset, error)) *MockPostgresqlProviderAPI_ListPostgresConfigurations_Call {
+func (_c *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call) RunAndReturn(run func(context.Context, string, string, string) ([]AzureAsset, error)) *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListSinglePostgresConfigurations provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockPostgresqlProviderAPI) ListSinglePostgresConfigurations(ctx context.Context, subID string, resourceGroup string, serverName string) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, serverName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListSinglePostgresConfigurations'
+type MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call struct {
+	*mock.Call
+}
+
+// ListSinglePostgresConfigurations is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - serverName string
+func (_e *MockPostgresqlProviderAPI_Expecter) ListSinglePostgresConfigurations(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call {
+	return &MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call{Call: _e.mock.On("ListSinglePostgresConfigurations", ctx, subID, resourceGroup, serverName)}
+}
+
+func (_c *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call) Return(_a0 []AzureAsset, _a1 error) *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call) RunAndReturn(run func(context.Context, string, string, string) ([]AzureAsset, error)) *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListSinglePostgresFirewallRules provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockPostgresqlProviderAPI) ListSinglePostgresFirewallRules(ctx context.Context, subID string, resourceGroup string, serverName string) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, serverName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListSinglePostgresFirewallRules'
+type MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call struct {
+	*mock.Call
+}
+
+// ListSinglePostgresFirewallRules is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - serverName string
+func (_e *MockPostgresqlProviderAPI_Expecter) ListSinglePostgresFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call {
+	return &MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call{Call: _e.mock.On("ListSinglePostgresFirewallRules", ctx, subID, resourceGroup, serverName)}
+}
+
+func (_c *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call) Return(_a0 []AzureAsset, _a1 error) *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call) RunAndReturn(run func(context.Context, string, string, string) ([]AzureAsset, error)) *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call {
 	_c.Call.Return(run)
 	return _c
 }

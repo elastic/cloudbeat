@@ -1,6 +1,7 @@
 name: CIS-AZURE-CI
 
 on:
+  # TODO: Remove after testing
   workflow_dispatch:
     inputs:
   pull_request_target:
@@ -12,6 +13,7 @@ on:
 jobs:
   Run-CSPM-AZURE-Tests:
     name: CIS AZURE integration test
+    # TODO: Remove after testing
     if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
@@ -54,9 +56,9 @@ jobs:
           ES_PASSWORD: changeme
           AZURE_ACCOUNT_TYPE: single-account
           AZURE_CREDENTIALS_TYPE: service_principal_with_client_secret
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CREDENTIALS.clientId }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CREDENTIALS.clientSecret }}
+          AZURE_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+          AZURE_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+          AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
         run: |
           ./cloudbeat -c deploy/azure/cloudbeat-azure.yml -d '*' &
 
