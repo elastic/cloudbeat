@@ -21,7 +21,13 @@ test_violation if {
 	# fail if tls is not v1.2
 	eval_fail with input as test_data.generate_flexible_mysql_server_with_extension({"mysqlConfigurations": [{
 		"name": "tls_version",
-		"value": "tlsv1.3",
+		"value": "tlsv1.1,tlsv1.0",
+	}]})
+
+	# fail if tls is not v1.2
+	eval_fail with input as test_data.generate_flexible_mysql_server_with_extension({"mysqlConfigurations": [{
+		"name": "tls_version",
+		"value": "tlsv0.9",
 	}]})
 }
 
@@ -30,6 +36,26 @@ test_pass if {
 	eval_pass with input as test_data.generate_flexible_mysql_server_with_extension({"mysqlConfigurations": [{
 		"name": "tls_version",
 		"value": "tlsv1.2",
+	}]})
+
+	eval_pass with input as test_data.generate_flexible_mysql_server_with_extension({"mysqlConfigurations": [{
+		"name": "tls_version",
+		"value": "tlsv1.2,tlsv1.3",
+	}]})
+
+	eval_pass with input as test_data.generate_flexible_mysql_server_with_extension({"mysqlConfigurations": [{
+		"name": "tls_version",
+		"value": "tlsv1.3,tlsv1.2",
+	}]})
+
+	eval_pass with input as test_data.generate_flexible_mysql_server_with_extension({"mysqlConfigurations": [{
+		"name": "tls_version",
+		"value": "tlsv1.3,tlsv1.2",
+	}]})
+
+	eval_pass with input as test_data.generate_flexible_mysql_server_with_extension({"mysqlConfigurations": [{
+		"name": "tls_version",
+		"value": "tlsv2.7",
 	}]})
 }
 

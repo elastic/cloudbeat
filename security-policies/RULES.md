@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 62/151 implemented rules (41%)
+### 63/151 implemented rules (42%)
 
-#### Automated rules: 62/77 (81%)
+#### Automated rules: 63/77 (82%)
 
 #### Manual rules: 0/74 (0%)
 

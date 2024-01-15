@@ -10,15 +10,32 @@ finding = result if {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(is_tls_version_1_2),
+		common.calculate_result(contains_tls_version_higher_than_1_2),
 		{"Resource": data_adapter.resource},
 	)
 }
 
-default is_tls_version_1_2 = false
+default contains_tls_version_higher_than_1_2 = false
 
-is_tls_version_1_2 if {
+contains_tls_version_higher_than_1_2 if {
 	some i
 	data_adapter.resource.extension.mysqlConfigurations[i].name == "tls_version"
-	data_adapter.resource.extension.mysqlConfigurations[i].value == "tlsv1.2"
+	is_list_of_versions_higher(data_adapter.resource.extension.mysqlConfigurations[i].value)
+}
+
+is_list_of_versions_higher(version) if {
+	versions := split(version, ",")
+	some i
+	clean_version = trim(versions[i], "tlsv")
+	chunks := split(clean_version, ".")
+	is_version_higher(to_number(chunks[0]), to_number(chunks[1]))
+}
+
+is_version_higher(major, minor) if {
+	major == 1
+	minor >= 2
+}
+
+is_version_higher(major, _) if {
+	major > 1
 }

@@ -40,8 +40,8 @@ type mysqlAzureClientWrapper struct {
 type MysqlProviderAPI interface {
 	// GetFlexibleTLSVersionConfiguration fetches SSL Configuration for flexible mysql servers
 	// We are fetching specifically SSL configuration only. There is, though a bulk configurations call
-	// in the SDK. If more configurations for flexible mysql servers are needed, it's switch to bulk and
-	// refactor this specific call to SSL
+	// in the SDK. If more configurations for flexible mysql servers are needed, it's good switch to the bulk call
+	// instead of making singular calls
 	GetFlexibleTLSVersionConfiguration(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 }
 
