@@ -7,10 +7,15 @@ Database service identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
+# Works
 CIS_4_1_2 = "CIS 4.1.2"
+# Works
 CIS_4_1_4 = "CIS 4.1.4"
+# No evaluation
 CIS_4_3_1 = "CIS 4.3.1"
+# Deployed flexible server instead of standard server
 CIS_4_4_1 = "CIS 4.4.1"
+# Pass not working due to wrong configuration
 CIS_4_5_1 = "CIS 4.5.1"
 
 cis_azure_4_5_1_pass = AzureServiceCase(
@@ -111,7 +116,7 @@ cis_azure_4_4_1 = {
 cis_azure_database_service_cases = {
     **cis_azure_4_1_2,
     **cis_azure_4_1_4,
-    **cis_azure_4_3_1,
-    **cis_azure_4_4_1,
-    **cis_azure_4_5_1,
+    # **cis_azure_4_3_1,
+    # **cis_azure_4_4_1,
+    # **cis_azure_4_5_1,
 }

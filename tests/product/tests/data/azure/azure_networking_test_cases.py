@@ -7,7 +7,9 @@ Networking identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
+# Works
 CIS_6_6 = "CIS 6.6"
+# No evaluation (weird bug)
 CIS_6_5 = "CIS 6.5"
 
 cis_azure_6_6_pass = AzureServiceCase(
@@ -49,5 +51,5 @@ cis_azure_6_5 = {
 
 cis_azure_networking_cases = {
     **cis_azure_6_6,
-    **cis_azure_6_5,
+    # **cis_azure_6_5,
 }

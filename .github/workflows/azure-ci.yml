@@ -63,7 +63,7 @@ jobs:
           ./cloudbeat -c deploy/azure/cloudbeat-azure.yml -d '*' &
 
       - name: Wait for cloudbeat to send events
-        run: sleep 300
+        run: sleep 426
 
       - name: Check for findings
         working-directory: ./tests

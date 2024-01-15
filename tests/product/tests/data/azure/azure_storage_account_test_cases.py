@@ -7,13 +7,19 @@ Storage account identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-
+# Works
 CIS_3_1 = "CIS 3.1"
+# Works
 CIS_3_2 = "CIS 3.2"
+# Works
 CIS_3_7 = "CIS 3.7"
+# Works
 CIS_3_8 = "CIS 3.8"
+# Works
 CIS_3_9 = "CIS 3.9"
+# Works
 CIS_3_10 = "CIS 3.10"
+# Works
 CIS_3_15 = "CIS 3.15"
 
 cis_azure_3_1_pass = AzureServiceCase(
