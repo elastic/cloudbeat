@@ -72,13 +72,13 @@ cis_azure_7_3 = {
 
 cis_azure_7_4_pass = AzureServiceCase(
     rule_tag=CIS_7_4,
-    case_identifier="test-vm-pass",
+    case_identifier="test-vm-pass-unattached",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_7_4_fail = AzureServiceCase(
     rule_tag=CIS_7_4,
-    case_identifier="test-vm-fail",
+    case_identifier="test-vm-fail-unattached",
     expected=RULE_FAIL_STATUS,
 )
 
