@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 40
     # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
-    if: false
+    # if: false
     steps:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
@@ -110,9 +110,9 @@ jobs:
 
   k8s_functional_tests:
     # Run only selected tests on PRs
-    # if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request'
     # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
-    if: false
+    # if: false
     name: ${{ matrix.test-target }}-tests
     needs: [ Build ]
     runs-on: ubuntu-22.04
