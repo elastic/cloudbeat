@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 63/151 implemented rules (42%)
+### 67/151 implemented rules (44%)
 
-#### Automated rules: 63/77 (82%)
+#### Automated rules: 67/77 (87%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -479,10 +479,10 @@
 |  [4.1.5](bundle/compliance/cis_azure/rules/cis_4_1_5)  | SQL Server - Auditing                   | Ensure that 'Data encryption' is set to 'On' on a SQL Database                                                                                         | :white_check_mark: | Automated |
 |  [4.1.6](bundle/compliance/cis_azure/rules/cis_4_1_6)  | SQL Server - Auditing                   | Ensure that 'Auditing' Retention is 'greater than 90 days'                                                                                             | :white_check_mark: | Automated |
 |  [4.2.1](bundle/compliance/cis_azure/rules/cis_4_2_1)  | SQL Server - Microsoft Defender for SQL | Ensure that Microsoft Defender for SQL is set to 'On' for critical SQL Servers                                                                         | :white_check_mark: | Automated |
-|                         4.2.2                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) is enabled on a SQL server by setting a Storage Account                                                      |        :x:         | Automated |
-|                         4.2.3                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Periodic recurring scans' is set to 'on' for each SQL server                                        |        :x:         | Automated |
-|                         4.2.4                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Send scan reports to' is configured for a SQL server                                                |        :x:         | Automated |
-|                         4.2.5                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Also send email notifications to admins and subscription owners' is set for each SQL Server         |        :x:         | Automated |
+|  [4.2.2](bundle/compliance/cis_azure/rules/cis_4_2_2)  | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) is enabled on a SQL server by setting a Storage Account                                                      | :white_check_mark: | Automated |
+|  [4.2.3](bundle/compliance/cis_azure/rules/cis_4_2_3)  | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Periodic recurring scans' is set to 'on' for each SQL server                                        | :white_check_mark: | Automated |
+|  [4.2.4](bundle/compliance/cis_azure/rules/cis_4_2_4)  | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Send scan reports to' is configured for a SQL server                                                | :white_check_mark: | Automated |
+|  [4.2.5](bundle/compliance/cis_azure/rules/cis_4_2_5)  | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Also send email notifications to admins and subscription owners' is set for each SQL Server         | :white_check_mark: | Automated |
 |  [4.3.1](bundle/compliance/cis_azure/rules/cis_4_3_1)  | PostgreSQL Database Server              | Ensure 'Enforce SSL connection' is set to 'ENABLED' for PostgreSQL Database Server                                                                     | :white_check_mark: | Automated |
 |  [4.3.2](bundle/compliance/cis_azure/rules/cis_4_3_2)  | PostgreSQL Database Server              | Ensure Server Parameter 'log_checkpoints' is set to 'ON' for PostgreSQL Database Server                                                                | :white_check_mark: | Automated |
 |  [4.3.3](bundle/compliance/cis_azure/rules/cis_4_3_3)  | PostgreSQL Database Server              | Ensure server parameter 'log_connections' is set to 'ON' for PostgreSQL Database Server                                                                | :white_check_mark: | Automated |
