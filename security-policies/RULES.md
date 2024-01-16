@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 59/151 implemented rules (39%)
+### 60/151 implemented rules (40%)
 
-#### Automated rules: 59/77 (77%)
+#### Automated rules: 60/77 (78%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -533,7 +533,7 @@
 |                          7.6                           | Virtual Machines                        | Ensure that Endpoint Protection for all Virtual Machines is installed                                                                                  |        :x:         |  Manual   |
 |                          7.7                           | Virtual Machines                        | [Legacy] Ensure that VHDs are Encrypted                                                                                                                |        :x:         |  Manual   |
 |    [8.1](bundle/compliance/cis_azure/rules/cis_8_1)    | Key Vault                               | Ensure that the Expiration Date is set for all Keys in RBAC Key Vaults                                                                                 | :white_check_mark: | Automated |
-|                          8.2                           | Key Vault                               | Ensure that the Expiration Date is set for all Keys in Non-RBAC Key Vaults.                                                                            |        :x:         | Automated |
+|    [8.2](bundle/compliance/cis_azure/rules/cis_8_2)    | Key Vault                               | Ensure that the Expiration Date is set for all Keys in Non-RBAC Key Vaults.                                                                            | :white_check_mark: | Automated |
 |                          8.3                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in RBAC Key Vaults                                                                              |        :x:         | Automated |
 |                          8.4                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in Non-RBAC Key Vaults                                                                          |        :x:         | Automated |
 |    [8.5](bundle/compliance/cis_azure/rules/cis_8_5)    | Key Vault                               | Ensure the Key Vault is Recoverable                                                                                                                    | :white_check_mark: | Automated |

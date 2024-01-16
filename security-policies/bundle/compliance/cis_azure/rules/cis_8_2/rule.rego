@@ -1,15 +1,14 @@
-package compliance.cis_azure.rules.cis_8_1
+package compliance.cis_azure.rules.cis_8_2
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import data.compliance.policy.azure.disk.ensure_expiration as audit
-import future.keywords.every
 import future.keywords.if
 
 finding = result if {
 	# filter
 	data_adapter.is_vault
-	data_adapter.properties.enableRbacAuthorization
+	not data_adapter.properties.enableRbacAuthorization
 
 	# set result
 	result := common.generate_result_without_expected(

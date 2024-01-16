@@ -335,3 +335,11 @@ generate_key_vault_rbac(extension) = {
 		"extension": extension,
 	},
 }
+
+generate_key_vault(properties, extension) = {
+	"subType": "azure-vault",
+	"resource": {
+		"properties": properties,
+		"extension": extension,
+	},
+}
