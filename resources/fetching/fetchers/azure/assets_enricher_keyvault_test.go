@@ -21,11 +21,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 )
 
 func TestKeyVaultEnricher(t *testing.T) {
