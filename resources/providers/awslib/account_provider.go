@@ -27,7 +27,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/resources/utils/strings"
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
 type AccountProviderAPI interface {
@@ -69,7 +69,7 @@ func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI
 			accounts = append(accounts, cloud.Identity{
 				Provider:         "aws",
 				Account:          *account.Id,
-				AccountAlias:     strings.Dereference(account.Name),
+				AccountAlias:     pointers.Deref(account.Name),
 				OrganizationId:   organization.id,
 				OrganizationName: organization.name,
 			})
@@ -136,7 +136,7 @@ func describeOU(ctx context.Context, client organizationsAPI, cache map[string]s
 		return organizationalUnitInfo{id: *id}, err
 	}
 
-	name := strings.Dereference(o.OrganizationalUnit.Name)
+	name := pointers.Deref(o.OrganizationalUnit.Name)
 	if cache != nil {
 		cache[*id] = name
 	}

@@ -35,6 +35,22 @@ func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
 	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
 	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})
 	enrichers = append(enrichers, sqlServerEnricher{provider: provider})
+	enrichers = append(enrichers, postgresqlEnricher{provider: provider})
+	enrichers = append(enrichers, mysqlAssetEnricher{provider: provider})
+	enrichers = append(enrichers, keyVaultEnricher{provider: provider})
 
 	return enrichers
+}
+
+func enrichExtension(a *inventory.AzureAsset, key string, assets []inventory.AzureAsset) {
+	if len(assets) == 0 {
+		return
+	}
+
+	props := make([]map[string]any, 0, len(assets))
+	for _, asset := range assets {
+		props = append(props, asset.Properties)
+	}
+
+	a.AddExtension(key, props)
 }

@@ -7,21 +7,21 @@ Database service identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-CIS_4_5_1 = "CIS 4.5.1"
 CIS_4_1_2 = "CIS 4.1.2"
 CIS_4_1_4 = "CIS 4.1.4"
 CIS_4_3_1 = "CIS 4.3.1"
 CIS_4_4_1 = "CIS 4.4.1"
+CIS_4_5_1 = "CIS 4.5.1"
 
 cis_azure_4_5_1_pass = AzureServiceCase(
     rule_tag=CIS_4_5_1,
-    case_identifier="test-database-service-pass",
+    case_identifier="test-cosmos-db-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_5_1_fail = AzureServiceCase(
     rule_tag=CIS_4_5_1,
-    case_identifier="test-database-service-fail",
+    case_identifier="test-cosmos-db-fail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -34,13 +34,13 @@ cis_azure_4_5_1 = {
 
 cis_azure_4_1_2_pass = AzureServiceCase(
     rule_tag=CIS_4_1_2,
-    case_identifier="test-database-service-pass",
+    case_identifier="test-sql-db-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_1_2_fail = AzureServiceCase(
     rule_tag=CIS_4_1_2,
-    case_identifier="test-database-service-fail",
+    case_identifier="test-sql-db-fail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -53,13 +53,13 @@ cis_azure_4_1_2 = {
 
 cis_azure_4_1_4_pass = AzureServiceCase(
     rule_tag=CIS_4_1_4,
-    case_identifier="test-database-service-pass",
+    case_identifier="test-sql-db-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_1_4_fail = AzureServiceCase(
     rule_tag=CIS_4_1_4,
-    case_identifier="test-database-service-fail",
+    case_identifier="test-sql-db-fail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -72,13 +72,13 @@ cis_azure_4_1_4 = {
 
 cis_azure_4_3_1_pass = AzureServiceCase(
     rule_tag=CIS_4_3_1,
-    case_identifier="test-database-service-pass",
+    case_identifier="test-pgdb-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_3_1_fail = AzureServiceCase(
     rule_tag=CIS_4_3_1,
-    case_identifier="test-database-service-fail",
+    case_identifier="test-pgdb-fail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -91,13 +91,13 @@ cis_azure_4_3_1 = {
 
 cis_azure_4_4_1_pass = AzureServiceCase(
     rule_tag=CIS_4_4_1,
-    case_identifier="test-database-service-pass",
+    case_identifier="test-mysql-db-pass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_4_1_fail = AzureServiceCase(
     rule_tag=CIS_4_4_1,
-    case_identifier="test-database-service-fail",
+    case_identifier="test-mysql-db-fail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -109,9 +109,9 @@ cis_azure_4_4_1 = {
 }
 
 cis_azure_database_service_cases = {
-    **cis_azure_4_5_1,
     **cis_azure_4_1_2,
     **cis_azure_4_1_4,
     **cis_azure_4_3_1,
     **cis_azure_4_4_1,
+    **cis_azure_4_5_1,
 }

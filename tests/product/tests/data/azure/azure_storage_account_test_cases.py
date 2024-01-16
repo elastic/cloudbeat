@@ -18,13 +18,13 @@ CIS_3_15 = "CIS 3.15"
 
 cis_azure_3_1_pass = AzureServiceCase(
     rule_tag=CIS_3_1,
-    case_identifier="test-storage-account-pass",
+    case_identifier="testsapass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_3_1_fail = AzureServiceCase(
     rule_tag=CIS_3_1,
-    case_identifier="test-storage-account-fail",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -35,13 +35,13 @@ cis_azure_3_1 = {
 
 cis_azure_3_2_pass = AzureServiceCase(
     rule_tag=CIS_3_2,
-    case_identifier="test-storage-account-pass",
+    case_identifier="testsapass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_3_2_fail = AzureServiceCase(
     rule_tag=CIS_3_2,
-    case_identifier="test-storage-account-fail",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -54,13 +54,13 @@ cis_azure_3_2 = {
 
 cis_azure_3_7_pass = AzureServiceCase(
     rule_tag=CIS_3_7,
-    case_identifier="test-storage-account-pass",
+    case_identifier="testsapass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_3_7_fail = AzureServiceCase(
     rule_tag=CIS_3_7,
-    case_identifier="test-storage-account-fail",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -73,13 +73,13 @@ cis_azure_3_7 = {
 
 cis_azure_3_8_pass = AzureServiceCase(
     rule_tag=CIS_3_8,
-    case_identifier="test-storage-account-pass",
+    case_identifier="testsapass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_3_8_fail = AzureServiceCase(
     rule_tag=CIS_3_8,
-    case_identifier="test-storage-account-fail",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -90,13 +90,13 @@ cis_azure_3_8 = {
 
 cis_azure_3_9_pass = AzureServiceCase(
     rule_tag=CIS_3_9,
-    case_identifier="test-storage-account-pass",
+    case_identifier="testsansgflow",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_3_9_fail = AzureServiceCase(
     rule_tag=CIS_3_9,
-    case_identifier="test-storage-account-fail",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -109,13 +109,13 @@ cis_azure_3_9 = {
 
 cis_azure_3_10_pass = AzureServiceCase(
     rule_tag=CIS_3_10,
-    case_identifier="test-storage-account-pass",
+    case_identifier="testsapass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_3_10_fail = AzureServiceCase(
     rule_tag=CIS_3_10,
-    case_identifier="test-storage-account-fail",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -126,13 +126,13 @@ cis_azure_3_10 = {
 
 cis_azure_3_15_pass = AzureServiceCase(
     rule_tag=CIS_3_15,
-    case_identifier="test-storage-account-pass",
+    case_identifier="testsapass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_3_15_fail = AzureServiceCase(
     rule_tag=CIS_3_15,
-    case_identifier="test-storage-account-fail",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 

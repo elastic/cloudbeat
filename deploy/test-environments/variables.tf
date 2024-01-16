@@ -35,6 +35,12 @@ variable "stack_version" {
   type        = string
 }
 
+variable "pin_version" {
+  default     = ""
+  description = "Optional pinned stack version for BC reasons"
+  type        = string
+}
+
 variable "serverless_mode" {
   default     = false
   description = "Set to true to create a serverless security project instead of an ESS deployment"
@@ -59,28 +65,19 @@ variable "elasticsearch_size" {
 }
 
 variable "elasticsearch_zone_count" {
-  default     = 1
+  default     = 2
   type        = number
   description = "Optional Elasticsearch zone count"
 }
 
 variable "docker_image_tag_override" {
   default = {
-    "elasticsearch" : "",
-    "kibana" : "",
-    "apm" : "",
+    "elasticsearch" = "",
+    "kibana"        = "",
+    "apm"           = "",
   }
   description = "Optional docker image tag override"
   type        = map(string)
-}
-
-variable "docker_image_override" {
-  default = {
-    "elasticsearch" : "docker.elastic.co/cloud-release/elasticsearch-cloud-ess",
-    "kibana" : "docker.elastic.co/cloud-release/kibana-cloud",
-    "apm" : "docker.elastic.co/cloud-release/elastic-agent-cloud",
-  }
-  type = map(string)
 }
 
 variable "division" {
@@ -107,4 +104,9 @@ variable "project" {
   description = "Optional project resource tag"
 }
 
+variable "owner" {
+  default     = "cloudbeat"
+  type        = string
+  description = "Optional owner tag"
+}
 # ============================================

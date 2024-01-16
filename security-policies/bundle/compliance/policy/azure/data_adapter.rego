@@ -73,8 +73,24 @@ is_diagnostic_settings if {
 	input.subType == "azure-diagnostic-settings"
 }
 
-is_postgresql_server_db if {
+is_postgresql_single_server_db if {
 	input.subType == "azure-postgresql-server-db"
+}
+
+is_postgresql_flexible_server_db if {
+	input.subType == "azure-flexible-postgresql-server-db"
+}
+
+is_postgresql_server_db if {
+	is_postgresql_single_server_db
+}
+
+is_postgresql_server_db if {
+	is_postgresql_flexible_server_db
+}
+
+is_flexible_mysql_server_db if {
+	input.subType == "azure-flexible-mysql-server-db"
 }
 
 is_mysql_server_db if {
