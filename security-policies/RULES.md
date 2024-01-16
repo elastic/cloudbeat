@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 63/151 implemented rules (42%)
+### 64/151 implemented rules (42%)
 
-#### Automated rules: 63/77 (82%)
+#### Automated rules: 64/77 (83%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -501,7 +501,7 @@
 |                         5.1.1                          | Configuring Diagnostic Settings         | Ensure that a 'Diagnostic Setting' exists                                                                                                              |        :x:         |  Manual   |
 |  [5.1.2](bundle/compliance/cis_azure/rules/cis_5_1_2)  | Configuring Diagnostic Settings         | Ensure Diagnostic Setting captures appropriate categories                                                                                              | :white_check_mark: | Automated |
 |  [5.1.3](bundle/compliance/cis_azure/rules/cis_5_1_3)  | Configuring Diagnostic Settings         | Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible                                                                      | :white_check_mark: | Automated |
-|                         5.1.4                          | Configuring Diagnostic Settings         | Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key                                          |        :x:         | Automated |
+|  [5.1.4](bundle/compliance/cis_azure/rules/cis_5_1_4)  | Configuring Diagnostic Settings         | Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key                                          | :white_check_mark: | Automated |
 |                         5.1.5                          | Configuring Diagnostic Settings         | Ensure that logging for Azure Key Vault is 'Enabled'                                                                                                   |        :x:         | Automated |
 |                         5.1.6                          | Configuring Diagnostic Settings         | Ensure that Network Security Group Flow logs are captured and sent to Log Analytics                                                                    |        :x:         |  Manual   |
 |                         5.1.7                          | Configuring Diagnostic Settings         | Ensure that logging for Azure AppService 'HTTP logs' is enabled                                                                                        |        :x:         |  Manual   |
