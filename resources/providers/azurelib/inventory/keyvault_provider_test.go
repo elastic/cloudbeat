@@ -85,9 +85,6 @@ func TestListKeyVaultKeys(t *testing.T) {
 				"keyUri":     to.Ptr("key_uri"),
 				"attributes": key("key1").Properties.Attributes,
 			},
-			Extension: map[string]any{
-				ExtensionVaultID: "kv1",
-			},
 		}
 	}
 
@@ -201,9 +198,6 @@ func TestListKeyVaultSecrets(t *testing.T) {
 			Properties: map[string]any{
 				"secretUri":  to.Ptr("secret_uri"),
 				"attributes": secret("").Properties.Attributes,
-			},
-			Extension: map[string]any{
-				ExtensionVaultID: "kv1",
 			},
 		}
 	}

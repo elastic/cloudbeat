@@ -65,7 +65,6 @@ const (
 	ExtensionBlobDiagnosticSettings              = "blobDiagnosticSettings"
 	ExtensionTableDiagnosticSettings             = "tableDiagnosticSettings"
 	ExtensionQueueDiagnosticSettings             = "queueDiagnosticSettings"
-	ExtensionVaultID                             = "vaultId"
 	ExtensionKeyVaultKeys                        = "vaultKeys"
 	ExtensionKeyVaultSecrets                     = "vaultSecrets"
 

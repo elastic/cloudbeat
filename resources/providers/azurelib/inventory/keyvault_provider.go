@@ -116,9 +116,6 @@ func (p *keyVaultProvider) transformKey(key *armkeyvault.Key, vault AzureAsset) 
 		TenantId:       vault.TenantId,
 		Type:           pointers.Deref(key.Type),
 		Properties:     properties,
-		Extension: map[string]any{
-			ExtensionVaultID: vault.Id,
-		},
 	}, true
 }
 
@@ -165,9 +162,6 @@ func (p *keyVaultProvider) transformSecret(secret *armkeyvault.Secret, vault Azu
 		TenantId:       vault.TenantId,
 		Type:           pointers.Deref(secret.Type),
 		Properties:     properties,
-		Extension: map[string]any{
-			ExtensionVaultID: vault.Id,
-		},
 	}, true
 }
 
