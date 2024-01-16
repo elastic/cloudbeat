@@ -36,6 +36,7 @@ func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
 	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})
 	enrichers = append(enrichers, sqlServerEnricher{provider: provider})
 	enrichers = append(enrichers, postgresqlEnricher{provider: provider})
+	enrichers = append(enrichers, keyVaultEnricher{provider: provider})
 
 	return enrichers
 }

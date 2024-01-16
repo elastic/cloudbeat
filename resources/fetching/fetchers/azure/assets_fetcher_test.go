@@ -123,6 +123,18 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		ListStorageAccountsQueueDiagnosticSettings(mock.Anything, storageAccounts).
 		Return(nil, nil)
 
+	vaults := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.VaultAssetType
+	})
+	for _, v := range vaults {
+		mockProvider.EXPECT().
+			ListKeyVaultKeys(mock.Anything, v).
+			Return(nil, nil)
+		mockProvider.EXPECT().
+			ListKeyVaultSecrets(mock.Anything, v).
+			Return(nil, nil)
+	}
+
 	// since we have sql server asset we need to mock the enricher
 	mockProvider.EXPECT().
 		ListSQLEncryptionProtector(mock.Anything, "subId", "rg", "name").
