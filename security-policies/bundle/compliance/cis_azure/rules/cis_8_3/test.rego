@@ -40,6 +40,16 @@ test_not_evaluated if {
 			]},
 		},
 	}
+	not_eval with input as {
+		"subType": "azure-vault",
+		"resource": {
+			"properties": {"enableRbacAuthorization": true},
+			"extension": {"vaultSecrets": [
+				test_data.generate_key_vault_extension_key({"enabled": false, "exp": 1768523299}),
+				test_data.generate_key_vault_extension_key({"enabled": false}),
+			]},
+		},
+	}
 }
 
 eval_fail if {

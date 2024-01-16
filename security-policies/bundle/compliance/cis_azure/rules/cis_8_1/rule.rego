@@ -10,6 +10,7 @@ finding = result if {
 	# filter
 	data_adapter.is_vault
 	data_adapter.properties.enableRbacAuthorization
+	data_adapter.resource.extension.vaultKeys[_].properties.attributes.enabled == true
 
 	# set result
 	result := common.generate_result_without_expected(
