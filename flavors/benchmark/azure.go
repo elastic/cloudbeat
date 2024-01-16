@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -49,6 +50,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
+		builder.WithManagerTimeout(20 * time.Minute),
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
