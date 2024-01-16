@@ -34,10 +34,11 @@ func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets 
 	var errs error
 
 	enrichFn := []func(context.Context, *inventory.AzureAsset) error{
-		s.enrichSQLEncryptionProtector,
-		s.enrichSQLBlobAuditPolicy,
+		s.enrichEncryptionProtector,
+		s.enrichBlobAuditPolicy,
 		s.enrichTransparentDataEncryption,
 		s.enrichAdvancedThreatProtectionSettings,
+		s.enrichVulnerabilityAssessmentSettings,
 	}
 
 	for i, a := range assets {
@@ -57,7 +58,7 @@ func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets 
 	return errs
 }
 
-func (s sqlServerEnricher) enrichSQLEncryptionProtector(ctx context.Context, a *inventory.AzureAsset) error {
+func (s sqlServerEnricher) enrichEncryptionProtector(ctx context.Context, a *inventory.AzureAsset) error {
 	encryptProtectors, err := s.provider.ListSQLEncryptionProtector(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
 	if err != nil {
 		return err
@@ -67,7 +68,7 @@ func (s sqlServerEnricher) enrichSQLEncryptionProtector(ctx context.Context, a *
 	return nil
 }
 
-func (s sqlServerEnricher) enrichSQLBlobAuditPolicy(ctx context.Context, a *inventory.AzureAsset) error {
+func (s sqlServerEnricher) enrichBlobAuditPolicy(ctx context.Context, a *inventory.AzureAsset) error {
 	policy, err := s.provider.GetSQLBlobAuditingPolicies(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
 	if err != nil {
 		return err
@@ -98,5 +99,15 @@ func (s sqlServerEnricher) enrichAdvancedThreatProtectionSettings(ctx context.Co
 	}
 
 	enrichExtension(a, inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
+	return nil
+}
+
+func (s sqlServerEnricher) enrichVulnerabilityAssessmentSettings(ctx context.Context, a *inventory.AzureAsset) error {
+	settings, err := s.provider.ListSQLVulnerabilityAssessmentSettings(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return err
+	}
+
+	enrichExtension(a, inventory.ExtensionSQLVulnerabilityAssessmentSettings, settings)
 	return nil
 }

@@ -148,6 +148,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().
 		ListSQLAdvancedThreatProtectionSettings(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSQLVulnerabilityAssessmentSettings(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
 
 	// since we have postgresql asset we need to mock the enricher
 	mockProvider.EXPECT().

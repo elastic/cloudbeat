@@ -61,6 +61,7 @@ const (
 	ExtensionSQLAdvancedThreatProtectionSettings = "sqlAdvancedThreatProtectionSettings"
 	ExtensionMysqlConfigurations                 = "mysqlConfigurations"
 	ExtensionPostgresqlConfigurations            = "psqlConfigurations"
+	ExtensionSQLVulnerabilityAssessmentSettings  = "sqlVulnerabilityAssessmentSettings"
 	ExtensionPostgresqlFirewallRules             = "psqlFirewallRules"
 	ExtensionStorageAccountID                    = "storageAccountId"
 	ExtensionStorageAccountName                  = "storageAccountName"
