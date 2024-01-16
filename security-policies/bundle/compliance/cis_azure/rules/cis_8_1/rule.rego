@@ -13,7 +13,7 @@ finding = result if {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(audit.all_enabled_keys_have_expiration(data_adapter.resource.extension.vaultKeys)),
+		common.calculate_result(audit.all_enabled_items_have_expiration(data_adapter.resource.extension.vaultKeys)),
 		{"Resource": data_adapter.resource},
 	)
 }

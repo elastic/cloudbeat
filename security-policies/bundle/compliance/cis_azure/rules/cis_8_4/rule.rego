@@ -1,4 +1,4 @@
-package compliance.cis_azure.rules.cis_8_2
+package compliance.cis_azure.rules.cis_8_4
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
@@ -12,7 +12,7 @@ finding = result if {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(audit.all_enabled_items_have_expiration(data_adapter.resource.extension.vaultKeys)),
+		common.calculate_result(audit.all_enabled_items_have_expiration(data_adapter.resource.extension.vaultSecrets)),
 		{"Resource": data_adapter.resource},
 	)
 }
