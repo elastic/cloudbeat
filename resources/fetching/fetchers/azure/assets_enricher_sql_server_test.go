@@ -497,6 +497,6 @@ func vulnerabilityAssessmentProps() map[string]any {
 		"scanResultsContainerName": "",
 		"recurringScansEnabled":    false,
 		"emailSubscriptionAdmins":  true,
-		"notificationEmail":        []string{},
+		"notificationEmails":       []string{},
 	}
 }

@@ -328,10 +328,10 @@ func convertAdvancedThreatProtectionSettings(s *armsql.ServerAdvancedThreatProte
 func convertVulnerabilityAssessmentSetting(a *armsql.ServerVulnerabilityAssessment, resourceGroup string, subID string) AzureAsset {
 	recurringScansEnabled := false
 	emailSubscriptionAdmins := true
-	notificationEmail := make([]string, 0)
+	notificationEmails := make([]string, 0)
 	if a.Properties.RecurringScans != nil {
 		recurringScansEnabled = pointers.Deref(a.Properties.RecurringScans.IsEnabled)
-		notificationEmail = lo.Map(a.Properties.RecurringScans.Emails, func(s *string, _ int) string {
+		notificationEmails = lo.Map(a.Properties.RecurringScans.Emails, func(s *string, _ int) string {
 			return pointers.Deref(s)
 		})
 		emailSubscriptionAdmins = pointers.Deref(a.Properties.RecurringScans.EmailSubscriptionAdmins)
@@ -363,7 +363,7 @@ func convertVulnerabilityAssessmentSetting(a *armsql.ServerVulnerabilityAssessme
 			"scanResultsContainerName": scanResultsContainerName,
 			"recurringScansEnabled":    recurringScansEnabled,
 			"emailSubscriptionAdmins":  emailSubscriptionAdmins,
-			"notificationEmail":        notificationEmail,
+			"notificationEmails":       notificationEmails,
 		},
 		ResourceGroup:  resourceGroup,
 		SubscriptionId: subID,

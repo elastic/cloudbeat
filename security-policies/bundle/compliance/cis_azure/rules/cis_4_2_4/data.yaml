@@ -1,0 +1,102 @@
+metadata:
+  id: 50c1c389-dbd2-5cd1-a16e-ea271625e902
+  name: |-
+    Ensure that Vulnerability Assessment (VA) setting 'Send scan reports to' is configured for a SQL server
+  profile_applicability: '* Level 2'
+  description: |-
+    Configure 'Send scan reports to' with email addresses of concerned data owners/stakeholders for a critical SQL servers.
+  rationale: |-
+    Vulnerability Assessment (VA) scan reports and alerts will be sent to email addresses configured at 'Send scan reports to'.
+    This may help in reducing time required for identifying risks and taking corrective measures.
+  audit: |-
+    **From Azure Portal**
+
+    1. Go to `SQL servers`
+    2. Select a server instance
+    3. Select `Microsoft Defender for Cloud`
+    4. Ensure that `Enablement status` is set to `Enabled`
+    5. Select `Configure` next to `Enablement status`
+    6. Under `Vulnerability Assessment Settings`, ensure `Storage Accounts` is configured
+    7. Under `Vulnerability Assessment Settings`, ensure `Send scan reports to` is not empty
+
+    **From PowerShell**
+
+    Get the list of all SQL Servers
+    ```
+    Get-AZSqlServer
+    ```
+    For each Server
+    ```
+    Get-AzSqlServerVulnerabilityAssessmentSetting -ResourceGroupName <resource group name> -ServerName <server name>
+    ```
+    Ensure that value for parameter `NotificationEmail` is not blank/empty {}.
+
+    Sample Output:
+
+    ```
+    ResourceGroupName : ResourceGroup01
+
+    ServerName : Server01
+
+    StorageAccountName : mystorage
+
+    ScanResultsContainerName : vulnerability-assessment
+
+    RecurringScansInterval : weekly
+
+    EmailSubscriptionAdmins : False
+
+    NotificationEmail : {}
+    ```
+  remediation: |-
+    **From Azure Portal**
+
+    1. Go to `SQL servers`
+    2. Select a server instance
+    3. Select `Microsoft Defender for Cloud`
+    4. Select `Configure` next to `Enablement status`
+    5. Set `Microsoft Defender for SQL` to `On`
+    6. Under `Vulnerability Assessment Settings`, select a Storage Account
+    7. Set `Periodic recurring scans` to `On`
+    8. Under `Send scan reports to`, provide email addresses for data owners and stakeholders
+    9. Click `Save`
+
+    **From PowerShell**
+
+    If not already, Enable `Advanced Data Security` for a SQL Server: 
+    ```
+    Set-AZSqlServerThreatDetectionPolicy -ResourceGroupName <resource group name> -ServerName <server name> -EmailAdmins $True
+    ```
+    To enable ADS-VA service and Set 'Send scan reports to'
+    ```
+    Update-AzSqlServerVulnerabilityAssessmentSetting `
+     -ResourceGroupName "<resource group name>"`
+     -ServerName "<Server Name>"`
+     -StorageAccountName "<Storage Name from same subscription and same Location" `
+     -ScanResultsContainerName "vulnerability-assessment" `
+     -RecurringScansInterval Weekly `
+     -EmailSubscriptionAdmins $true `
+     -NotificationEmail @("mail1@mail.com" , "mail2@mail.com")
+    ```
+  impact: Enabling the `Microsoft Defender for SQL` features will incur additional
+    costs for each SQL server.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/sql-database/sql-vulnerability-assessment
+    2. https://docs.microsoft.com/en-us/rest/api/sql/servervulnerabilityassessments/listbyserver
+    3. https://docs.microsoft.com/en-in/powershell/module/Az.Sql/Update-AzSqlServerVulnerabilityAssessmentSetting?view=azps-2.6.0
+    4. https://docs.microsoft.com/en-in/powershell/module/Az.Sql/Get-AzSqlServerVulnerabilityAssessmentSetting?view=azps-2.6.0
+    5. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-posture-vulnerability-management#pv-6-perform-software-vulnerability-assessments
+  section: SQL Server - Microsoft Defender for SQL
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 4.2.4
+  - SQL Server - Microsoft Defender for SQL
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 4.2.4
+    posture_type: cspm

@@ -2,6 +2,7 @@ package compliance.cis_azure.rules.cis_4_2_3
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import data.compliance.policy.azure.sql_server.ensure_vulnerability_assessment_storage_account as audit
 import future.keywords.every
 import future.keywords.if
 
@@ -22,8 +23,7 @@ va_recurrent_scans_enabled if {
 	count(data_adapter.resource.extension.sqlVulnerabilityAssessmentSettings) > 0
 
 	every setting in data_adapter.resource.extension.sqlVulnerabilityAssessmentSettings {
-		not setting.storageAccountName == null
-		not trim(setting.storageAccountName, " ") == ""
+		audit.ensure_vulnerability_assessment_storage_account(setting)
 		setting.recurringScansEnabled == true
 	}
 }

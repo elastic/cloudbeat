@@ -693,7 +693,7 @@ func vulnerabilityAssessmentAzure(id string, storageContainerPath *string, recur
 	}
 }
 
-func vulnerabilityAssessmentAsset(id, storageAccountName, scanResultsContainerName string, recurringScansEnabled, emailSubscriptionAdmins bool, notificationEmail []string) AzureAsset {
+func vulnerabilityAssessmentAsset(id, storageAccountName, scanResultsContainerName string, recurringScansEnabled, emailSubscriptionAdmins bool, notificationEmails []string) AzureAsset {
 	return AzureAsset{
 		Id:             id,
 		Name:           "name-" + id,
@@ -710,7 +710,7 @@ func vulnerabilityAssessmentAsset(id, storageAccountName, scanResultsContainerNa
 			"scanResultsContainerName": scanResultsContainerName,
 			"recurringScansEnabled":    recurringScansEnabled,
 			"emailSubscriptionAdmins":  emailSubscriptionAdmins,
-			"notificationEmail":        notificationEmail,
+			"notificationEmails":       notificationEmails,
 		},
 		Extension: nil,
 	}
