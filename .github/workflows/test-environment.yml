@@ -375,7 +375,7 @@ jobs:
           echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
           aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
           kubectl config use-context eks-config
-          kubectl apply -f ./kspm_d4c.yaml
+          kubectl apply -f ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_d4c.yaml
 
       - name: Install KSPM Unmanaged integration
         id: kspm-unmanaged
