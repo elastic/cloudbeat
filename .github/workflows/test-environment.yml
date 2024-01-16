@@ -190,15 +190,15 @@ jobs:
           echo "::add-mask::$enrollment_token"
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
 
-      # - name: Set up Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
 
-      # - name: Install Poetry
-      #   run: |
-      #     curl -sSL https://install.python-poetry.org | python3 -
-      #     poetry --version
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
 
       - name: Install Fleet & Tests Dependencies
         id: fleet-and-tests-deps
