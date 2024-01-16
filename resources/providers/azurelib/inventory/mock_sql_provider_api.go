@@ -266,6 +266,63 @@ func (_c *MockSQLProviderAPI_ListSQLTransparentDataEncryptions_Call) RunAndRetur
 	return _c
 }
 
+// ListSQLVulnerabilityAssessmentSettings provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockSQLProviderAPI) ListSQLVulnerabilityAssessmentSettings(ctx context.Context, subID string, resourceGroup string, serverName string) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, serverName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListSQLVulnerabilityAssessmentSettings'
+type MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call struct {
+	*mock.Call
+}
+
+// ListSQLVulnerabilityAssessmentSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - serverName string
+func (_e *MockSQLProviderAPI_Expecter) ListSQLVulnerabilityAssessmentSettings(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call {
+	return &MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call{Call: _e.mock.On("ListSQLVulnerabilityAssessmentSettings", ctx, subID, resourceGroup, serverName)}
+}
+
+func (_c *MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call) Return(_a0 []AzureAsset, _a1 error) *MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call) RunAndReturn(run func(context.Context, string, string, string) ([]AzureAsset, error)) *MockSQLProviderAPI_ListSQLVulnerabilityAssessmentSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockSQLProviderAPI creates a new instance of MockSQLProviderAPI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockSQLProviderAPI(t interface {

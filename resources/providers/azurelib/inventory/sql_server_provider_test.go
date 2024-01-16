@@ -36,6 +36,7 @@ type auditingPoliciesFn func() (armsql.ServerBlobAuditingPoliciesClientGetRespon
 type transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
 type databaseFn func() ([]armsql.DatabasesClientListByServerResponse, error)
 type threatProtectionFn func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
+type assessmentFn func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error)
 
 func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
@@ -49,6 +50,7 @@ func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 		client: wrapper,
 	}
 }
+
 func mockAssetBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
 		AssetBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
@@ -87,6 +89,19 @@ func mockAssetThreatProtection(f threatProtectionFn) SQLProviderAPI {
 
 	return &sqlProvider{
 		log:    logp.NewLogger("mock_asset_sql_advanced_threat_protection"),
+		client: wrapper,
+	}
+}
+
+func mockAssetVulnerabilityAssessmentSettings(f assessmentFn) SQLProviderAPI {
+	wrapper := &sqlAzureClientWrapper{
+		AssetVulnerabilityAssessmentSettings: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerVulnerabilityAssessmentsClientListByServerOptions) ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+			return f()
+		},
+	}
+
+	return &sqlProvider{
+		log:    logp.NewLogger("mock_asset_sql_vulnerability_assessment_settings"),
 		client: wrapper,
 	}
 }
@@ -368,6 +383,124 @@ func TestListSQLAdvancedThreatProtectionSettings(t *testing.T) {
 	}
 }
 
+func TestListSQLVulnerabilityAssessmentSettings(t *testing.T) {
+	tcs := map[string]struct {
+		apiMockCall    assessmentFn
+		expectError    bool
+		expectedAssets []AzureAsset
+	}{
+		"Error on calling api": {
+			apiMockCall: func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+				return nil, errors.New("error")
+			},
+			expectError:    true,
+			expectedAssets: nil,
+		},
+		"No threat protection settings": {
+			apiMockCall: func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+				return nil, nil
+			},
+			expectError:    false,
+			expectedAssets: nil,
+		},
+		"Response with threat protection in different pages": {
+			apiMockCall: func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+				return wrapVulnerabilityAssessmentResponse(
+					wrapVulnerabilityAssessmentResult(
+						vulnerabilityAssessmentAzure("id1", nil, nil),
+						vulnerabilityAssessmentAzure("id2", nil, nil),
+					),
+					wrapVulnerabilityAssessmentResult(
+						vulnerabilityAssessmentAzure("id3", nil, nil),
+					),
+				), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				vulnerabilityAssessmentAsset("id1", "", "", false, true, make([]string, 0)),
+				vulnerabilityAssessmentAsset("id2", "", "", false, true, make([]string, 0)),
+				vulnerabilityAssessmentAsset("id3", "", "", false, true, make([]string, 0)),
+			},
+		},
+
+		"Default assessment": {
+			apiMockCall: func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+				return wrapVulnerabilityAssessmentResponse(wrapVulnerabilityAssessmentResult(
+					vulnerabilityAssessmentAzure("id1", nil, nil),
+				)), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				vulnerabilityAssessmentAsset("id1", "", "", false, true, make([]string, 0)),
+			},
+		},
+
+		"Assessment with recurring scans": {
+			apiMockCall: func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+				return wrapVulnerabilityAssessmentResponse(wrapVulnerabilityAssessmentResult(
+					vulnerabilityAssessmentAzure("id1", nil, &armsql.VulnerabilityAssessmentRecurringScansProperties{
+						EmailSubscriptionAdmins: to.Ptr(false),
+						IsEnabled:               to.Ptr(true),
+						Emails: []*string{
+							to.Ptr("test@elastic.co"),
+							to.Ptr("test2@elastic.co"),
+						},
+					}),
+				)), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				vulnerabilityAssessmentAsset("id1", "", "", true, false, []string{"test@elastic.co", "test2@elastic.co"}),
+			},
+		},
+
+		"Assessment with storage container path": {
+			apiMockCall: func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+				return wrapVulnerabilityAssessmentResponse(wrapVulnerabilityAssessmentResult(
+					vulnerabilityAssessmentAzure("id1", to.Ptr("https://va1storage.blob.core.windows.net/vulnerability-assessment"), nil),
+				)), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				vulnerabilityAssessmentAsset("id1", "va1storage", "vulnerability-assessment", false, true, []string{}),
+			},
+		},
+
+		"Complete assessment": {
+			apiMockCall: func() ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+				return wrapVulnerabilityAssessmentResponse(wrapVulnerabilityAssessmentResult(
+					vulnerabilityAssessmentAzure("id4", to.Ptr("https://myStorage.blob.core.windows.net/VaScans/"), &armsql.VulnerabilityAssessmentRecurringScansProperties{
+						EmailSubscriptionAdmins: to.Ptr(true),
+						IsEnabled:               to.Ptr(true),
+						Emails: []*string{
+							to.Ptr("test@elastic.co"),
+						},
+					}),
+				)), nil
+			},
+			expectError: false,
+			expectedAssets: []AzureAsset{
+				vulnerabilityAssessmentAsset("id4", "myStorage", "VaScans", true, true, []string{"test@elastic.co"}),
+			},
+		},
+	}
+
+	for name, tc := range tcs {
+		t.Run(name, func(t *testing.T) {
+			p := mockAssetVulnerabilityAssessmentSettings(tc.apiMockCall)
+			got, err := p.ListSQLVulnerabilityAssessmentSettings(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expectedAssets, got)
+		})
+	}
+}
+
 func wrapEpResult(eps ...*armsql.EncryptionProtector) armsql.EncryptionProtectorListResult {
 	return armsql.EncryptionProtectorListResult{
 		Value: eps,
@@ -527,6 +660,57 @@ func threatProtectionAsset(id, state string) AzureAsset {
 		Properties: map[string]any{
 			"state":        state,
 			"creationTime": creationTime,
+		},
+		Extension: nil,
+	}
+}
+
+func wrapVulnerabilityAssessmentResponse(results ...armsql.ServerVulnerabilityAssessmentListResult) []armsql.ServerVulnerabilityAssessmentsClientListByServerResponse {
+	return lo.Map(results, func(r armsql.ServerVulnerabilityAssessmentListResult, index int) armsql.ServerVulnerabilityAssessmentsClientListByServerResponse {
+		return armsql.ServerVulnerabilityAssessmentsClientListByServerResponse{
+			ServerVulnerabilityAssessmentListResult: r,
+		}
+	})
+}
+
+func wrapVulnerabilityAssessmentResult(assessments ...*armsql.ServerVulnerabilityAssessment) armsql.ServerVulnerabilityAssessmentListResult {
+	return armsql.ServerVulnerabilityAssessmentListResult{
+		Value: assessments,
+	}
+}
+
+func vulnerabilityAssessmentAzure(id string, storageContainerPath *string, recurringScans *armsql.VulnerabilityAssessmentRecurringScansProperties) *armsql.ServerVulnerabilityAssessment {
+	return &armsql.ServerVulnerabilityAssessment{
+		Properties: &armsql.ServerVulnerabilityAssessmentProperties{
+			StorageContainerPath:    storageContainerPath,
+			RecurringScans:          recurringScans,
+			StorageAccountAccessKey: nil,
+			StorageContainerSasKey:  nil,
+		},
+		ID:   to.Ptr(id),
+		Name: to.Ptr("name-" + id),
+		Type: to.Ptr("vulnerability-assessment"),
+	}
+}
+
+func vulnerabilityAssessmentAsset(id, storageAccountName, scanResultsContainerName string, recurringScansEnabled, emailSubscriptionAdmins bool, notificationEmail []string) AzureAsset {
+	return AzureAsset{
+		Id:             id,
+		Name:           "name-" + id,
+		DisplayName:    "",
+		Location:       "global",
+		ResourceGroup:  "resourceGroup",
+		SubscriptionId: "subId",
+		Type:           "vulnerability-assessment",
+		TenantId:       "",
+		Sku:            nil,
+		Identity:       nil,
+		Properties: map[string]any{
+			"storageAccountName":       storageAccountName,
+			"scanResultsContainerName": scanResultsContainerName,
+			"recurringScansEnabled":    recurringScansEnabled,
+			"emailSubscriptionAdmins":  emailSubscriptionAdmins,
+			"notificationEmail":        notificationEmail,
 		},
 		Extension: nil,
 	}

@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -37,6 +38,7 @@ type sqlAzureClientWrapper struct {
 	AssetTransparentDataEncryptions             func(ctx context.Context, subID, resourceGroup, serverName, dbName string, clientOptions *arm.ClientOptions, options *armsql.TransparentDataEncryptionsClientListByDatabaseOptions) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
 	AssetDatabases                              func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error)
 	AssetServerAdvancedThreatProtectionSettings func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
+	AssetVulnerabilityAssessmentSettings        func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerVulnerabilityAssessmentsClientListByServerOptions) ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error)
 }
 
 type SQLProviderAPI interface {
@@ -44,6 +46,7 @@ type SQLProviderAPI interface {
 	ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 	GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 	ListSQLAdvancedThreatProtectionSettings(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
+	ListSQLVulnerabilityAssessmentSettings(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 }
 
 type sqlProvider struct {
@@ -87,6 +90,14 @@ func NewSQLProvider(log *logp.Logger, credentials azcore.TokenCredential) SQLPro
 			if err != nil {
 				return nil, err
 			}
+			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, options))
+		},
+		AssetVulnerabilityAssessmentSettings: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerVulnerabilityAssessmentsClientListByServerOptions) ([]armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, error) {
+			cl, err := armsql.NewServerVulnerabilityAssessmentsClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+
 			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, options))
 		},
 	}
@@ -214,6 +225,28 @@ func (p *sqlProvider) ListSQLAdvancedThreatProtectionSettings(ctx context.Contex
 	return assets, nil
 }
 
+func (p *sqlProvider) ListSQLVulnerabilityAssessmentSettings(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
+	paged, err := p.client.AssetVulnerabilityAssessmentSettings(ctx, subID, resourceGroup, serverName, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	settings := lo.FlatMap(paged, func(a armsql.ServerVulnerabilityAssessmentsClientListByServerResponse, _ int) []*armsql.ServerVulnerabilityAssessment {
+		return a.Value
+	})
+
+	assets := make([]AzureAsset, 0, len(settings))
+	for _, a := range settings {
+		if a == nil || a.Properties == nil {
+			continue
+		}
+
+		assets = append(assets, convertVulnerabilityAssessmentSetting(a, resourceGroup, subID))
+	}
+
+	return assets, nil
+}
+
 func (p *sqlProvider) listTransparentDataEncryptionsByDB(ctx context.Context, subID, resourceGroup, serverName, dbName string) ([]AzureAsset, error) {
 	pagedTdes, err := p.client.AssetTransparentDataEncryptions(ctx, subID, resourceGroup, serverName, dbName, nil, nil)
 	if err != nil {
@@ -289,4 +322,58 @@ func convertAdvancedThreatProtectionSettings(s *armsql.ServerAdvancedThreatProte
 		TenantId:       "",
 		Type:           pointers.Deref(s.Type),
 	}
+}
+
+// Logic based on https://github.com/Azure/azure-powershell/blob/main/src/Sql/Sql/VulnerabilityAssessment/Services/BaseSqlVulnerabilityAssessmentAdapter.cs#L81
+func convertVulnerabilityAssessmentSetting(a *armsql.ServerVulnerabilityAssessment, resourceGroup string, subID string) AzureAsset {
+	recurringScansEnabled := false
+	emailSubscriptionAdmins := true
+	notificationEmail := make([]string, 0)
+	if a.Properties.RecurringScans != nil {
+		recurringScansEnabled = pointers.Deref(a.Properties.RecurringScans.IsEnabled)
+		notificationEmail = lo.Map(a.Properties.RecurringScans.Emails, func(s *string, _ int) string {
+			return pointers.Deref(s)
+		})
+		emailSubscriptionAdmins = pointers.Deref(a.Properties.RecurringScans.EmailSubscriptionAdmins)
+	}
+
+	storageAccountName := ""
+	scanResultsContainerName := ""
+	storageContainerPath := pointers.Deref(a.Properties.StorageContainerPath)
+	if storageContainerPath != "" {
+		// StorageContainerPath is in the format of : "https://va1storage.blob.core.windows.net/vulnerability-assessment"
+		storageAccountNamePart := strings.Replace(storageContainerPath, "https://", "", 1)
+		storageAccountNameChunks := filterEmptyStringOut(strings.Split(storageAccountNamePart, "."))
+		if len(storageAccountNameChunks) > 0 {
+			storageAccountName = storageAccountNameChunks[0]
+		}
+
+		storageBlobContainerChunks := filterEmptyStringOut(strings.Split(storageAccountNamePart, "/"))
+		if len(storageBlobContainerChunks) > 0 {
+			scanResultsContainerName = storageBlobContainerChunks[len(storageBlobContainerChunks)-1]
+		}
+	}
+
+	return AzureAsset{
+		Id:       pointers.Deref(a.ID),
+		Name:     pointers.Deref(a.Name),
+		Location: assetLocationGlobal,
+		Properties: map[string]any{
+			"storageAccountName":       storageAccountName,
+			"scanResultsContainerName": scanResultsContainerName,
+			"recurringScansEnabled":    recurringScansEnabled,
+			"emailSubscriptionAdmins":  emailSubscriptionAdmins,
+			"notificationEmail":        notificationEmail,
+		},
+		ResourceGroup:  resourceGroup,
+		SubscriptionId: subID,
+		TenantId:       "",
+		Type:           pointers.Deref(a.Type),
+	}
+}
+
+func filterEmptyStringOut(list []string) []string {
+	return lo.Filter(list, func(s string, _ int) bool {
+		return s != ""
+	})
 }
