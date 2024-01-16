@@ -62,6 +62,7 @@ const (
 	ExtensionMysqlConfigurations                 = "mysqlConfigurations"
 	ExtensionPostgresqlConfigurations            = "psqlConfigurations"
 	ExtensionPostgresqlFirewallRules             = "psqlFirewallRules"
+	ExtensionStorageAccount                      = "storageAccount"
 	ExtensionStorageAccountID                    = "storageAccountId"
 	ExtensionStorageAccountName                  = "storageAccountName"
 	ExtensionBlobDiagnosticSettings              = "blobDiagnosticSettings"

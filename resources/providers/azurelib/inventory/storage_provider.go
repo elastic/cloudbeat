@@ -38,6 +38,7 @@ import (
 type storageAccountAzureClientWrapper struct {
 	AssetDiagnosticSettings func(ctx context.Context, subID string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error)
 	AssetBlobServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error)
+	AssetAccountStorage     func(ctx context.Context, subID string, clientOptions *arm.ClientOptions) ([]armstorage.AccountsClientListResponse, error)
 }
 
 type StorageAccountProviderAPI interface {
@@ -46,6 +47,7 @@ type StorageAccountProviderAPI interface {
 	ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]AzureAsset, error)
 }
 
 type storageAccountProvider struct {
@@ -68,6 +70,13 @@ func NewStorageAccountProvider(log *logp.Logger, diagnosticSettingsClient *armmo
 			}
 			return readPager(ctx, cl.NewListPager(resourceGroupName, storageAccountName, options))
 		},
+		AssetAccountStorage: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions) ([]armstorage.AccountsClientListResponse, error) {
+			accountsClient, err := armstorage.NewAccountsClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, accountsClient.NewListPager(&armstorage.AccountsClientListOptions{}))
+		},
 	}
 
 	return &storageAccountProvider{
@@ -77,9 +86,52 @@ func NewStorageAccountProvider(log *logp.Logger, diagnosticSettingsClient *armmo
 	}
 }
 
+func (p *storageAccountProvider) ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, saID := range storageAccountsSubscriptionsIds {
+		res, err := p.client.AssetAccountStorage(ctx, saID, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching storage accounts: %w", err)
+		}
+		storageAccountsAssets, err := transformStorageAccounts(res, saID)
+		if err != nil {
+			return nil, fmt.Errorf("error while transforming storage accounts: %w", err)
+		}
+		assets = append(assets, storageAccountsAssets...)
+	}
+	return assets, nil
+}
+
+func transformStorageAccounts(accountPages []armstorage.AccountsClientListResponse, storageAccountId string) (_ []AzureAsset, errs error) {
+	return lo.FlatMap(accountPages, func(response armstorage.AccountsClientListResponse, _ int) []AzureAsset {
+		return lo.Map(response.Value, func(item *armstorage.Account, _ int) AzureAsset {
+			properties, err := maps.AsMapStringAny(item.Properties)
+			if err != nil {
+				errs = errors.Join(errs, err)
+			}
+
+			return AzureAsset{
+				Id:   pointers.Deref(item.ID),
+				Name: pointers.Deref(item.Name),
+				Type: strings.ToLower(pointers.Deref(item.Type)),
+				// These are kept empty because:
+				// 1. they are not used for evaluation
+				// 2. only subscriptionId is required for the request issued by armstorage.NewAccountsClient
+				ResourceGroup:  "",
+				TenantId:       "",
+				SubscriptionId: storageAccountId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   pointers.Deref(item.ID),
+					ExtensionStorageAccountName: pointers.Deref(item.Name),
+				},
+			}
+		})
+	}), errs
+}
+
 func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
 	var assets []AzureAsset
-
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetBlobServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
