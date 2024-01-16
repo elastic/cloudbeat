@@ -19,38 +19,44 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type AssetsEnricher interface {
-	Enrich(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset) error
+type mysqlAssetEnricher struct {
+	provider azurelib.ProviderAPI
 }
 
-func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
-	var enrichers []AssetsEnricher
+func (e mysqlAssetEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
+	var errAgg error
+	for i, a := range assets {
+		if a.Type != inventory.FlexibleMySQLDBAssetType {
+			continue
+		}
 
-	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
-	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})
-	enrichers = append(enrichers, sqlServerEnricher{provider: provider})
-	enrichers = append(enrichers, postgresqlEnricher{provider: provider})
-	enrichers = append(enrichers, mysqlAssetEnricher{provider: provider})
-	enrichers = append(enrichers, keyVaultEnricher{provider: provider})
+		if err := e.enrichTLSVersion(ctx, &a); err != nil {
+			errAgg = errors.Join(errAgg, err)
+		}
 
-	return enrichers
+		assets[i] = a
+	}
+
+	return errAgg
 }
 
-func enrichExtension(a *inventory.AzureAsset, key string, assets []inventory.AzureAsset) {
-	if len(assets) == 0 {
-		return
+func (e mysqlAssetEnricher) enrichTLSVersion(ctx context.Context, asset *inventory.AzureAsset) error {
+	tlsVersion, err := e.provider.GetFlexibleTLSVersionConfiguration(ctx, asset.SubscriptionId, asset.ResourceGroup, asset.Name)
+	if err != nil {
+		return err
 	}
 
-	props := make([]map[string]any, 0, len(assets))
-	for _, asset := range assets {
-		props = append(props, asset.Properties)
+	if len(tlsVersion) == 0 {
+		return nil
 	}
 
-	a.AddExtension(key, props)
+	enrichExtension(asset, inventory.ExtensionMysqlConfigurations, tlsVersion)
+	return nil
 }
