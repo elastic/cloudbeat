@@ -70,6 +70,7 @@ const (
 	AzureDocumentDBDatabaseAccountType = "azure-document-db-database-account"
 	AzureInsightsComponentType         = "azure-insights-component"
 	AzureMySQLDBType                   = "azure-mysql-server-db"
+	AzureFlexibleMySQLDBType           = "azure-flexible-mysql-server-db"
 	AzureNetworkWatchersFlowLogType    = "azure-network-watchers-flow-log"
 	AzureNetworkWatchersType           = "azure-network-watcher"
 	AzureNetworkSecurityGroupType      = "azure-network-group"

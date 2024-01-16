@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 62/151 implemented rules (41%)
+### 63/151 implemented rules (42%)
 
-#### Automated rules: 62/77 (81%)
+#### Automated rules: 63/77 (82%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -492,7 +492,7 @@
 |  [4.3.7](bundle/compliance/cis_azure/rules/cis_4_3_7)  | PostgreSQL Database Server              | Ensure 'Allow access to Azure services' for PostgreSQL Database Server is disabled                                                                     | :white_check_mark: | Automated |
 |  [4.3.8](bundle/compliance/cis_azure/rules/cis_4_3_8)  | PostgreSQL Database Server              | Ensure 'Infrastructure double encryption' for PostgreSQL Database Server is 'Enabled'                                                                  | :white_check_mark: | Automated |
 |  [4.4.1](bundle/compliance/cis_azure/rules/cis_4_4_1)  | MySQL Database                          | Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server                                                                 | :white_check_mark: | Automated |
-|                         4.4.2                          | MySQL Database                          | Ensure 'TLS Version' is set to 'TLSV1.2' for MySQL flexible Database Server                                                                            |        :x:         | Automated |
+|  [4.4.2](bundle/compliance/cis_azure/rules/cis_4_4_2)  | MySQL Database                          | Ensure 'TLS Version' is set to 'TLSV1.2' for MySQL flexible Database Server                                                                            | :white_check_mark: | Automated |
 |                         4.4.3                          | MySQL Database                          | Ensure server parameter 'audit_log_enabled' is set to 'ON' for MySQL Database Server                                                                   |        :x:         |  Manual   |
 |                         4.4.4                          | MySQL Database                          | Ensure server parameter 'audit_log_events' has 'CONNECTION' set for MySQL Database Server                                                              |        :x:         |  Manual   |
 |  [4.5.1](bundle/compliance/cis_azure/rules/cis_4_5_1)  | Cosmos DB                               | Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead of All Networks                                                         | :white_check_mark: | Automated |

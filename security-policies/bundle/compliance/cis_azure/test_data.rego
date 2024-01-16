@@ -113,6 +113,11 @@ generate_mysql_server_with_ssl_enforcement(enabled) = {
 	"resource": {"properties": {"sslEnforcement": enabled}},
 }
 
+generate_flexible_mysql_server_with_extension(extension) = {
+	"subType": "azure-flexible-mysql-server-db",
+	"resource": {"extension": extension},
+}
+
 generate_activity_log_alerts_no_alerts = {
 	"subType": "azure-activity-log-alert",
 	"resource": [],
