@@ -368,7 +368,6 @@ jobs:
       - name: Deploy KSPM EKS agent
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
           aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
               --name $(terraform output -raw deployment_name) --alias eks-config
