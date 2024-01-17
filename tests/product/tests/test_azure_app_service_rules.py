@@ -32,8 +32,6 @@ def test_azure_app_service_rules(
     """
     app_service_identifier = partial(res_identifier, RES_NAME, case_identifier)
 
-    app_service_identifier_id = partial(res_identifier, RES_ID, case_identifier)
-
     evaluation = get_ES_evaluation(
         elastic_client=cspm_client,
         timeout=cloudbeat_agent.azure_findings_timeout,

@@ -5,7 +5,7 @@ Each rule has one or more test cases.
 Logging and monitoring identification is performed by resource name.
 """
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from ..constants import RULE_PASS_STATUS
 
 # Works
 CIS_5_5 = "CIS 5.5"
