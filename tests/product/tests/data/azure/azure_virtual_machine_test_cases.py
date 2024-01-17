@@ -7,13 +7,11 @@ Virtual machine identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-# Works
 CIS_7_1 = "CIS 7.1"
 # Fail not working
 CIS_7_2 = "CIS 7.2"
 # No evaluation
 CIS_7_3 = "CIS 7.3"
-# Works
 CIS_7_4 = "CIS 7.4"
 
 cis_azure_7_1_pass = AzureServiceCase(

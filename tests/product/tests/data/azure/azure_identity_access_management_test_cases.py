@@ -7,7 +7,7 @@ Identity access management identification is performed by resource name.
 # from ..azure_test_case import AzureServiceCase
 # from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-# Conflicts due to single subscription
+# TODO: Conflicts due to single subscription
 # Also no permissions to create custom roles
 # CIS_1_23 = "CIS 1.23"
 

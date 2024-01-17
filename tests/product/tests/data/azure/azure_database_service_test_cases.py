@@ -7,15 +7,13 @@ Database service identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-# Works
 CIS_4_1_2 = "CIS 4.1.2"
-# Works
 CIS_4_1_4 = "CIS 4.1.4"
-# No evaluation
-CIS_4_3_1 = "CIS 4.3.1"
 # Deployed flexible server instead of standard server
+CIS_4_3_1 = "CIS 4.3.1"
+# TODO: Deployed flexible server in addition to standard server (standard server is reaching end of life)
 CIS_4_4_1 = "CIS 4.4.1"
-# Pass not working due to wrong configuration
+# Pass not working due to wrong configuration (fixed)
 CIS_4_5_1 = "CIS 4.5.1"
 
 cis_azure_4_5_1_pass = AzureServiceCase(
@@ -96,13 +94,13 @@ cis_azure_4_3_1 = {
 
 cis_azure_4_4_1_pass = AzureServiceCase(
     rule_tag=CIS_4_4_1,
-    case_identifier="test-mysql-db-pass",
+    case_identifier="rule-441",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_4_1_fail = AzureServiceCase(
     rule_tag=CIS_4_4_1,
-    case_identifier="test-mysql-db-fail",
+    case_identifier="rule-441-fail",
     expected=RULE_FAIL_STATUS,
 )
 
