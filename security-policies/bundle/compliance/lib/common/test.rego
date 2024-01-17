@@ -13,6 +13,20 @@ test_calculate_result_rule_evaluation_true if {
 	calculate_result(rule_evaluation) == "passed"
 }
 
+test_collect_evidence_empty_keypaths if {
+	collect_evidence({}, {}) == {}
+}
+
+test_collect_evidence_self_referential_keypaths if {
+	resource := {"a": 1, "b": 2}
+	collect_evidence(resource, {"self": []}) == {"self": resource}
+}
+
+test_collect_evidence_blank_paths if {
+	resource := {"a": 1, "b": 2}
+	collect_evidence(resource, {"empty": ""}) == {"empty": "<undefined>"}
+}
+
 test_ensure_array_empty if {
 	ensure_array([]) == []
 }
