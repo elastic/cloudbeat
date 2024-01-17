@@ -65,7 +65,9 @@ jobs:
         run: |
           terraform init
           terraform validate
-          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -target=module.ec_deployment
+          # To address the conditional statement outputting stack values in the deployment stack,
+          # we need to specify both targets: ec_project and ec_deployment.
+          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -target=module.ec_deployment -target="module.ec_project"
 
       - name: Set Environment Output
         id: env-output
@@ -106,6 +108,6 @@ jobs:
       - name: Cleanup Environment
         if: always()
         run: |
-          terraform destroy --auto-approve
+          terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
           aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
           aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
