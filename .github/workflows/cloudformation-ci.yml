@@ -15,8 +15,8 @@ on:
 env:
   WORKING_DIR: deploy/test-environments
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
-  DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
-  CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
+  # DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
+  # CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -28,6 +28,12 @@ jobs:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     steps:
+      - name: Set up unique deployment names
+        run: |
+          suffix="$(date +%s | tail -c 3)"
+          echo "TF_VAR_deployment_name=DEPLOY_PR${{ github.event.number }}-$suffix" >> $GITHUB_ENV
+          echo "CNVM_STACK_NAME=cnvm-stack-pr${{ github.event.number }}-$suffix" >> $GITHUB_ENV
+
       - name: Check out the repo
         uses: actions/checkout@v4
 
@@ -69,7 +75,7 @@ jobs:
           terraform validate
           # To address the conditional statement outputting stack values in the deployment stack,
           # we need to specify both targets: ec_project and ec_deployment.
-          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -target=module.ec_deployment -target="module.ec_project"
+          terraform apply --auto-approve -target=module.ec_deployment -target="module.ec_project"
 
       - name: Set Environment Output
         id: env-output
