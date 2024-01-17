@@ -111,5 +111,6 @@ jobs:
         if: always()
         run: |
           terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
-          aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
-          aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
+          # TODO: Uncomment after debugging
+          # aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
+          # aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
