@@ -42,6 +42,11 @@ test_collect_evidence_non_existent_path_segment if {
 	collect_evidence(resource, {"a.x.c": ["a", "x", "c"]}) == {"a.x.c": "<undefined>"}
 }
 
+test_collect_evidence_with_out_of_bounds_array_index if {
+	resource := {"arr": [0, 1, 2, 3, 4]}
+	collect_evidence(resource, {"arr[99]": ["arr", 99]}) == {"arr[99]": "<undefined>"}
+}
+
 test_ensure_array_empty if {
 	ensure_array([]) == []
 }
