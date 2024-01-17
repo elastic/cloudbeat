@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 57/151 implemented rules (38%)
+### 63/151 implemented rules (42%)
 
-#### Automated rules: 57/77 (74%)
+#### Automated rules: 63/77 (82%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -478,7 +478,7 @@
 |  [4.1.4](bundle/compliance/cis_azure/rules/cis_4_1_4)  | SQL Server - Auditing                   | Ensure that Azure Active Directory Admin is Configured for SQL Servers                                                                                 | :white_check_mark: | Automated |
 |  [4.1.5](bundle/compliance/cis_azure/rules/cis_4_1_5)  | SQL Server - Auditing                   | Ensure that 'Data encryption' is set to 'On' on a SQL Database                                                                                         | :white_check_mark: | Automated |
 |  [4.1.6](bundle/compliance/cis_azure/rules/cis_4_1_6)  | SQL Server - Auditing                   | Ensure that 'Auditing' Retention is 'greater than 90 days'                                                                                             | :white_check_mark: | Automated |
-|                         4.2.1                          | SQL Server - Microsoft Defender for SQL | Ensure that Microsoft Defender for SQL is set to 'On' for critical SQL Servers                                                                         |        :x:         | Automated |
+|  [4.2.1](bundle/compliance/cis_azure/rules/cis_4_2_1)  | SQL Server - Microsoft Defender for SQL | Ensure that Microsoft Defender for SQL is set to 'On' for critical SQL Servers                                                                         | :white_check_mark: | Automated |
 |                         4.2.2                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) is enabled on a SQL server by setting a Storage Account                                                      |        :x:         | Automated |
 |                         4.2.3                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Periodic recurring scans' is set to 'on' for each SQL server                                        |        :x:         | Automated |
 |                         4.2.4                          | SQL Server - Microsoft Defender for SQL | Ensure that Vulnerability Assessment (VA) setting 'Send scan reports to' is configured for a SQL server                                                |        :x:         | Automated |
@@ -492,7 +492,7 @@
 |  [4.3.7](bundle/compliance/cis_azure/rules/cis_4_3_7)  | PostgreSQL Database Server              | Ensure 'Allow access to Azure services' for PostgreSQL Database Server is disabled                                                                     | :white_check_mark: | Automated |
 |  [4.3.8](bundle/compliance/cis_azure/rules/cis_4_3_8)  | PostgreSQL Database Server              | Ensure 'Infrastructure double encryption' for PostgreSQL Database Server is 'Enabled'                                                                  | :white_check_mark: | Automated |
 |  [4.4.1](bundle/compliance/cis_azure/rules/cis_4_4_1)  | MySQL Database                          | Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server                                                                 | :white_check_mark: | Automated |
-|                         4.4.2                          | MySQL Database                          | Ensure 'TLS Version' is set to 'TLSV1.2' for MySQL flexible Database Server                                                                            |        :x:         | Automated |
+|  [4.4.2](bundle/compliance/cis_azure/rules/cis_4_4_2)  | MySQL Database                          | Ensure 'TLS Version' is set to 'TLSV1.2' for MySQL flexible Database Server                                                                            | :white_check_mark: | Automated |
 |                         4.4.3                          | MySQL Database                          | Ensure server parameter 'audit_log_enabled' is set to 'ON' for MySQL Database Server                                                                   |        :x:         |  Manual   |
 |                         4.4.4                          | MySQL Database                          | Ensure server parameter 'audit_log_events' has 'CONNECTION' set for MySQL Database Server                                                              |        :x:         |  Manual   |
 |  [4.5.1](bundle/compliance/cis_azure/rules/cis_4_5_1)  | Cosmos DB                               | Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead of All Networks                                                         | :white_check_mark: | Automated |
@@ -532,10 +532,10 @@
 |                          7.5                           | Virtual Machines                        | Ensure that Only Approved Extensions Are Installed                                                                                                     |        :x:         |  Manual   |
 |                          7.6                           | Virtual Machines                        | Ensure that Endpoint Protection for all Virtual Machines is installed                                                                                  |        :x:         |  Manual   |
 |                          7.7                           | Virtual Machines                        | [Legacy] Ensure that VHDs are Encrypted                                                                                                                |        :x:         |  Manual   |
-|                          8.1                           | Key Vault                               | Ensure that the Expiration Date is set for all Keys in RBAC Key Vaults                                                                                 |        :x:         | Automated |
-|                          8.2                           | Key Vault                               | Ensure that the Expiration Date is set for all Keys in Non-RBAC Key Vaults.                                                                            |        :x:         | Automated |
-|                          8.3                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in RBAC Key Vaults                                                                              |        :x:         | Automated |
-|                          8.4                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in Non-RBAC Key Vaults                                                                          |        :x:         | Automated |
+|    [8.1](bundle/compliance/cis_azure/rules/cis_8_1)    | Key Vault                               | Ensure that the Expiration Date is set for all Keys in RBAC Key Vaults                                                                                 | :white_check_mark: | Automated |
+|    [8.2](bundle/compliance/cis_azure/rules/cis_8_2)    | Key Vault                               | Ensure that the Expiration Date is set for all Keys in Non-RBAC Key Vaults.                                                                            | :white_check_mark: | Automated |
+|    [8.3](bundle/compliance/cis_azure/rules/cis_8_3)    | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in RBAC Key Vaults                                                                              | :white_check_mark: | Automated |
+|    [8.4](bundle/compliance/cis_azure/rules/cis_8_4)    | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in Non-RBAC Key Vaults                                                                          | :white_check_mark: | Automated |
 |    [8.5](bundle/compliance/cis_azure/rules/cis_8_5)    | Key Vault                               | Ensure the Key Vault is Recoverable                                                                                                                    | :white_check_mark: | Automated |
 |                          8.6                           | Key Vault                               | Enable Role Based Access Control for Azure Key Vault                                                                                                   |        :x:         |  Manual   |
 |                          8.7                           | Key Vault                               | Ensure that Private Endpoints are Used for Azure Key Vault                                                                                             |        :x:         |  Manual   |

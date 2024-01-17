@@ -113,6 +113,11 @@ generate_mysql_server_with_ssl_enforcement(enabled) = {
 	"resource": {"properties": {"sslEnforcement": enabled}},
 }
 
+generate_flexible_mysql_server_with_extension(extension) = {
+	"subType": "azure-flexible-mysql-server-db",
+	"resource": {"extension": extension},
+}
+
 generate_activity_log_alerts_no_alerts = {
 	"subType": "azure-activity-log-alert",
 	"resource": [],
@@ -323,5 +328,23 @@ generate_diagnostic_setting_element_log(category, enabled) = {
 	"retentionPolicy": {
 		"days": 0,
 		"enabled": false,
+	},
+}
+
+generate_key_vault_extension_key(attributes) = {"properties": {"attributes": attributes}}
+
+generate_key_vault_rbac(extension) = {
+	"subType": "azure-vault",
+	"resource": {
+		"properties": {"enableRbacAuthorization": true},
+		"extension": extension,
+	},
+}
+
+generate_key_vault(properties, extension) = {
+	"subType": "azure-vault",
+	"resource": {
+		"properties": properties,
+		"extension": extension,
 	},
 }

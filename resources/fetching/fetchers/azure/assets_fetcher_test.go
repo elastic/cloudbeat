@@ -123,6 +123,18 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		ListStorageAccountsQueueDiagnosticSettings(mock.Anything, storageAccounts).
 		Return(nil, nil)
 
+	vaults := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.VaultAssetType
+	})
+	for _, v := range vaults {
+		mockProvider.EXPECT().
+			ListKeyVaultKeys(mock.Anything, v).
+			Return(nil, nil)
+		mockProvider.EXPECT().
+			ListKeyVaultSecrets(mock.Anything, v).
+			Return(nil, nil)
+	}
+
 	// since we have sql server asset we need to mock the enricher
 	mockProvider.EXPECT().
 		ListSQLEncryptionProtector(mock.Anything, "subId", "rg", "name").
@@ -132,6 +144,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		Return(nil, nil)
 	mockProvider.EXPECT().
 		ListSQLTransparentDataEncryptions(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSQLAdvancedThreatProtectionSettings(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
 
 	// since we have postgresql asset we need to mock the enricher
@@ -146,6 +161,11 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		Return(nil, nil)
 	mockProvider.EXPECT().
 		ListFlexiblePostgresFirewallRules(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+
+	// since we have mysql  asset we need to mock the enricher
+	mockProvider.EXPECT().
+		GetFlexibleTLSVersionConfiguration(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
