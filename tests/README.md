@@ -105,7 +105,12 @@ or alternatively, right-click the tests folder and select **Mark Directory as** 
 The project main folders are:
 
 - commonlib - contains helper functions used for tests development.
-- deploy - contains helm charts for deploying ELK, cloudbeat, and tests docker.
+- fleet_api - contains the API wrapper for fleet functionality.
+- integrations_setup - holds automated scripts responsible for installing integrations like KSPM and CSPM.
+  Additionally, it generates manifests and input data needed to deploy agents on hosts.
+  The detailed information is available in the [README](./integrations_setup/README.md) file.
+
+- deploy_test_envs - contains helm charts for deploying ELK, cloudbeat, and tests docker.
 - product - contains cloudbeat tests, for example cloudbeat behavior and functional tests.
 - integration - contains cloudbeat integration tests.
 - project root content - contains project and tests configuration files.
@@ -123,7 +128,7 @@ The project main folders are:
 
 #### Test Folders
 
-- Product tests folder is **product/tests**.</br>
+- Product tests folder is **product/tests**.
 - Integration tests folder is **intergration/tests**.
 
 #### Logging
