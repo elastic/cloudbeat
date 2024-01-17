@@ -35,7 +35,7 @@ Before performing steps below verify that **just** tool is installed and your ro
 3. Install elasticsearch and start cloudbeat
 
     ```shell
-    just deploy-tests-helm pre_merge values_file='tests/deploy/values/ci.yml' range=''
+    just deploy-tests-helm pre_merge values_file='tests/test_environments/values/ci.yml' range=''
     ```
 
 This command will install elasticsearch one node instance in kubernetes cluster and prepare configuration
@@ -110,7 +110,7 @@ The project main folders are:
   Additionally, it generates manifests and input data needed to deploy agents on hosts.
   The detailed information is available in the [README](./integrations_setup/README.md) file.
 
-- deploy_test_envs - contains helm charts for deploying ELK, cloudbeat, and tests docker.
+- test_environments - contains helm charts for deploying ELK, cloudbeat, and tests docker.
 - product - contains cloudbeat tests, for example cloudbeat behavior and functional tests.
 - integration - contains cloudbeat integration tests.
 - project root content - contains project and tests configuration files.
@@ -400,8 +400,8 @@ Before tests execution ensure that the following pods are running:
 
 Pods definition location:
 
-- [test-eks-good-pod](deploy/eks-psp-pass-pod.yaml)
-- [test-eks-bad-pod](deploy/eks-psp-failures-pod.yaml)
+- [test-eks-good-pod](test_environments/eks-psp-pass-pod.yaml)
+- [test-eks-bad-pod](test_environments/eks-psp-failures-pod.yaml)
 
 Pods are identified by label `testResourceId`.
 
