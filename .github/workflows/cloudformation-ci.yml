@@ -1,9 +1,7 @@
 name: CloudFormation-CI
 
 on:
-  # Changing trigger to pull_request to be able to test before merging to main
-  # TODO: set pull_request_target once the fix is working
-  pull_request:
+  pull_request_target:
     branches:
       - main
       - "[0-9]+.[0-9]+"
@@ -15,8 +13,6 @@ on:
 env:
   WORKING_DIR: deploy/test-environments
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
-  # DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
-  # CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -117,6 +113,5 @@ jobs:
         if: always()
         run: |
           terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
-          # TODO: Uncomment after debugging
-          # aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
-          # aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
+          aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
+          aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
