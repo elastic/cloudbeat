@@ -50,7 +50,7 @@ jobs:
       # TODO: Should consider having a strict mapping for findings
       - name: Elasticsearch increase fields limit for findings
         run: |
-          curl -s -XPUT http://localhost:9200/_index_template/common_template -H 'Content-Type: application/json' -d '{"index_patterns": ["*"],"priority": 1,"template": {"settings": {"index.mapping.total_fields.limit": 9999}}}'
+          curl -s -XPUT http://localhost:9200/_index_template/common_template -H 'Content-Type: application/json' -d '{ "index_patterns": ["logs-cloud_security_posture.findings*"], "priority": 500, "template": { "mappings": { "dynamic": false, "properties": { "rule": { "dynamic": true, "properties": {} }, "@timestamp": { "dynamic": true, "properties": {} }}}}}'
 
       - name: Run cloudbeat in background
         env:
