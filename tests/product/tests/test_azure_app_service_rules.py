@@ -9,7 +9,7 @@ from commonlib.utils import get_ES_evaluation, res_identifier
 
 from product.tests.data.azure import azure_app_service_test_cases as azure_app_service_tc
 from product.tests.parameters import register_params, Parameters
-from .data.constants import RES_NAME, RES_ID
+from .data.constants import RES_NAME
 
 
 @pytest.mark.azure_app_service_rules
