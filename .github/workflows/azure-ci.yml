@@ -47,6 +47,11 @@ jobs:
           stack-version: ${{ env.ELK_VERSION }}
           security-enabled: false
 
+      # TODO: Should consider having a strict mapping for findings
+      - name: Elasticsearch increase fields limit for findings
+        run: |
+          curl -s -XPUT http://localhost:9200/*findings*/_settings  -H 'Content-Type: application/json' -d '{"index.mapping.total_fields.limit": 9999}'
+
       - name: Run cloudbeat in background
         env:
           ES_HOST: http://localhost:9200
@@ -60,9 +65,8 @@ jobs:
         run: |
           ./cloudbeat -c deploy/azure/cloudbeat-azure.yml -d '*' &
 
-      # Reduce after testing
       - name: Wait for cloudbeat to send events
-        run: sleep 1800
+        run: sleep 264
 
       - name: Check for findings
         working-directory: ./tests
