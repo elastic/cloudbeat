@@ -68,17 +68,24 @@ jobs:
           # To address the conditional statement outputting stack values in the deployment stack,
           # we need to specify both targets: ec_project and ec_deployment.
           terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -target=module.ec_deployment -target="module.ec_project"
-
-      - name: Set Environment Output
-        id: env-output
-        run: |
+          terraform output
           echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
           echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
           echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
-
           export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
           echo "::add-mask::$ES_PASSWORD"
           echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+
+      # - name: Set Environment Output
+      #   id: env-output
+      #   run: |
+      #     echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
+      #     echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
+      #     echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
+
+      #     export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
+      #     echo "::add-mask::$ES_PASSWORD"
+      #     echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
 
       - name: Install integrations
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
