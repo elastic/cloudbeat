@@ -28,18 +28,18 @@ jobs:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     steps:
-      - name: Set up unique deployment names
-        run: |
-          suffix="$(date +%s | tail -c 3)"
-          echo "TF_VAR_deployment_name=DEPLOY_PR${{ github.event.number }}-$suffix" >> $GITHUB_ENV
-          echo "CNVM_STACK_NAME=cnvm-stack-pr${{ github.event.number }}-$suffix" >> $GITHUB_ENV
-
       - name: Check out the repo
         uses: actions/checkout@v4
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
+
+      - name: Set up unique deployment names
+        run: |
+          suffix="$(date +%s | tail -c 3)"
+          echo "TF_VAR_deployment_name=DEPLOY_PR${{ github.event.number }}-$suffix" >> $GITHUB_ENV
+          echo "CNVM_STACK_NAME=cnvm-stack-pr${{ github.event.number }}-$suffix" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
