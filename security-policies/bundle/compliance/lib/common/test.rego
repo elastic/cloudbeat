@@ -13,6 +13,32 @@ test_calculate_result_rule_evaluation_true if {
 	calculate_result(rule_evaluation) == "passed"
 }
 
+test_collect_evidence_keys if {
+	resource := {
+		"type": "escape-pod",
+		"contents": "no life-forms aboard",
+		"crew": ["R2-D2", "C-3PO"],
+	}
+	collect_evidence(resource, {"Type": "type", "Crew": "crew"}) == {
+		"Type": resource.type,
+		"Crew": resource.crew,
+	}
+}
+
+test_collect_evidence_nested_keys if {
+	resource := {"a": {"b": {"c": {"d": "nested_value"}}}}
+	collect_evidence(resource, {"D": ["a", "b", "c", "d"]}) == {"D": resource.a.b.c.d}
+}
+
+test_collect_evidence_array_element if {
+	resource := {
+		"type": "escape-pod",
+		"contents": "no life-forms aboard",
+		"crew": ["R2-D2", "C-3PO"],
+	}
+	collect_evidence(resource, {"Second Robot": ["crew", 1]}) == {"Second Robot": "C-3PO"}
+}
+
 test_collect_evidence_empty_keypaths if {
 	collect_evidence({}, {}) == {}
 }
