@@ -43,17 +43,17 @@ func (_m *MockProviderAPI) EXPECT() *MockProviderAPI_Expecter {
 	return &MockProviderAPI_Expecter{mock: &_m.Mock}
 }
 
-// GetSQLBlobAuditingPolicies provides a mock function with given fields: ctx, subID, resourceGroup, sqlServerName
-func (_m *MockProviderAPI) GetSQLBlobAuditingPolicies(ctx context.Context, subID string, resourceGroup string, sqlServerName string) ([]inventory.AzureAsset, error) {
-	ret := _m.Called(ctx, subID, resourceGroup, sqlServerName)
+// GetFlexibleTLSVersionConfiguration provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockProviderAPI) GetFlexibleTLSVersionConfiguration(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
 
 	var r0 []inventory.AzureAsset
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]inventory.AzureAsset, error)); ok {
-		return rf(ctx, subID, resourceGroup, sqlServerName)
+		return rf(ctx, subID, resourceGroup, serverName)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []inventory.AzureAsset); ok {
-		r0 = rf(ctx, subID, resourceGroup, sqlServerName)
+		r0 = rf(ctx, subID, resourceGroup, serverName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]inventory.AzureAsset)
@@ -61,7 +61,64 @@ func (_m *MockProviderAPI) GetSQLBlobAuditingPolicies(ctx context.Context, subID
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = rf(ctx, subID, resourceGroup, sqlServerName)
+		r1 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetFlexibleTLSVersionConfiguration'
+type MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call struct {
+	*mock.Call
+}
+
+// GetFlexibleTLSVersionConfiguration is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - serverName string
+func (_e *MockProviderAPI_Expecter) GetFlexibleTLSVersionConfiguration(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	return &MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call{Call: _e.mock.On("GetFlexibleTLSVersionConfiguration", ctx, subID, resourceGroup, serverName)}
+}
+
+func (_c *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call) RunAndReturn(run func(context.Context, string, string, string) ([]inventory.AzureAsset, error)) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetSQLBlobAuditingPolicies provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockProviderAPI) GetSQLBlobAuditingPolicies(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, serverName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, serverName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -78,12 +135,12 @@ type MockProviderAPI_GetSQLBlobAuditingPolicies_Call struct {
 //   - ctx context.Context
 //   - subID string
 //   - resourceGroup string
-//   - sqlServerName string
-func (_e *MockProviderAPI_Expecter) GetSQLBlobAuditingPolicies(ctx interface{}, subID interface{}, resourceGroup interface{}, sqlServerName interface{}) *MockProviderAPI_GetSQLBlobAuditingPolicies_Call {
-	return &MockProviderAPI_GetSQLBlobAuditingPolicies_Call{Call: _e.mock.On("GetSQLBlobAuditingPolicies", ctx, subID, resourceGroup, sqlServerName)}
+//   - serverName string
+func (_e *MockProviderAPI_Expecter) GetSQLBlobAuditingPolicies(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_GetSQLBlobAuditingPolicies_Call {
+	return &MockProviderAPI_GetSQLBlobAuditingPolicies_Call{Call: _e.mock.On("GetSQLBlobAuditingPolicies", ctx, subID, resourceGroup, serverName)}
 }
 
-func (_c *MockProviderAPI_GetSQLBlobAuditingPolicies_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, sqlServerName string)) *MockProviderAPI_GetSQLBlobAuditingPolicies_Call {
+func (_c *MockProviderAPI_GetSQLBlobAuditingPolicies_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockProviderAPI_GetSQLBlobAuditingPolicies_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
 	})
@@ -381,17 +438,127 @@ func (_c *MockProviderAPI_ListFlexiblePostgresFirewallRules_Call) RunAndReturn(r
 	return _c
 }
 
-// ListSQLEncryptionProtector provides a mock function with given fields: ctx, subID, resourceGroup, sqlServerName
-func (_m *MockProviderAPI) ListSQLEncryptionProtector(ctx context.Context, subID string, resourceGroup string, sqlServerName string) ([]inventory.AzureAsset, error) {
-	ret := _m.Called(ctx, subID, resourceGroup, sqlServerName)
+// ListKeyVaultKeys provides a mock function with given fields: ctx, vault
+func (_m *MockProviderAPI) ListKeyVaultKeys(ctx context.Context, vault inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, vault)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, vault)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, vault)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, vault)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListKeyVaultKeys_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListKeyVaultKeys'
+type MockProviderAPI_ListKeyVaultKeys_Call struct {
+	*mock.Call
+}
+
+// ListKeyVaultKeys is a helper method to define mock.On call
+//   - ctx context.Context
+//   - vault inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) ListKeyVaultKeys(ctx interface{}, vault interface{}) *MockProviderAPI_ListKeyVaultKeys_Call {
+	return &MockProviderAPI_ListKeyVaultKeys_Call{Call: _e.mock.On("ListKeyVaultKeys", ctx, vault)}
+}
+
+func (_c *MockProviderAPI_ListKeyVaultKeys_Call) Run(run func(ctx context.Context, vault inventory.AzureAsset)) *MockProviderAPI_ListKeyVaultKeys_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListKeyVaultKeys_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListKeyVaultKeys_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListKeyVaultKeys_Call) RunAndReturn(run func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListKeyVaultKeys_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListKeyVaultSecrets provides a mock function with given fields: ctx, vault
+func (_m *MockProviderAPI) ListKeyVaultSecrets(ctx context.Context, vault inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, vault)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, vault)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, vault)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, vault)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListKeyVaultSecrets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListKeyVaultSecrets'
+type MockProviderAPI_ListKeyVaultSecrets_Call struct {
+	*mock.Call
+}
+
+// ListKeyVaultSecrets is a helper method to define mock.On call
+//   - ctx context.Context
+//   - vault inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) ListKeyVaultSecrets(ctx interface{}, vault interface{}) *MockProviderAPI_ListKeyVaultSecrets_Call {
+	return &MockProviderAPI_ListKeyVaultSecrets_Call{Call: _e.mock.On("ListKeyVaultSecrets", ctx, vault)}
+}
+
+func (_c *MockProviderAPI_ListKeyVaultSecrets_Call) Run(run func(ctx context.Context, vault inventory.AzureAsset)) *MockProviderAPI_ListKeyVaultSecrets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListKeyVaultSecrets_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListKeyVaultSecrets_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListKeyVaultSecrets_Call) RunAndReturn(run func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListKeyVaultSecrets_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListSQLAdvancedThreatProtectionSettings provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockProviderAPI) ListSQLAdvancedThreatProtectionSettings(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
 
 	var r0 []inventory.AzureAsset
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]inventory.AzureAsset, error)); ok {
-		return rf(ctx, subID, resourceGroup, sqlServerName)
+		return rf(ctx, subID, resourceGroup, serverName)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []inventory.AzureAsset); ok {
-		r0 = rf(ctx, subID, resourceGroup, sqlServerName)
+		r0 = rf(ctx, subID, resourceGroup, serverName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]inventory.AzureAsset)
@@ -399,7 +566,64 @@ func (_m *MockProviderAPI) ListSQLEncryptionProtector(ctx context.Context, subID
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = rf(ctx, subID, resourceGroup, sqlServerName)
+		r1 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListSQLAdvancedThreatProtectionSettings'
+type MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call struct {
+	*mock.Call
+}
+
+// ListSQLAdvancedThreatProtectionSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subID string
+//   - resourceGroup string
+//   - serverName string
+func (_e *MockProviderAPI_Expecter) ListSQLAdvancedThreatProtectionSettings(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
+	return &MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call{Call: _e.mock.On("ListSQLAdvancedThreatProtectionSettings", ctx, subID, resourceGroup, serverName)}
+}
+
+func (_c *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call) RunAndReturn(run func(context.Context, string, string, string) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListSQLEncryptionProtector provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockProviderAPI) ListSQLEncryptionProtector(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, subID, resourceGroup, serverName)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, subID, resourceGroup, serverName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, subID, resourceGroup, serverName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -416,12 +640,12 @@ type MockProviderAPI_ListSQLEncryptionProtector_Call struct {
 //   - ctx context.Context
 //   - subID string
 //   - resourceGroup string
-//   - sqlServerName string
-func (_e *MockProviderAPI_Expecter) ListSQLEncryptionProtector(ctx interface{}, subID interface{}, resourceGroup interface{}, sqlServerName interface{}) *MockProviderAPI_ListSQLEncryptionProtector_Call {
-	return &MockProviderAPI_ListSQLEncryptionProtector_Call{Call: _e.mock.On("ListSQLEncryptionProtector", ctx, subID, resourceGroup, sqlServerName)}
+//   - serverName string
+func (_e *MockProviderAPI_Expecter) ListSQLEncryptionProtector(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSQLEncryptionProtector_Call {
+	return &MockProviderAPI_ListSQLEncryptionProtector_Call{Call: _e.mock.On("ListSQLEncryptionProtector", ctx, subID, resourceGroup, serverName)}
 }
 
-func (_c *MockProviderAPI_ListSQLEncryptionProtector_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, sqlServerName string)) *MockProviderAPI_ListSQLEncryptionProtector_Call {
+func (_c *MockProviderAPI_ListSQLEncryptionProtector_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockProviderAPI_ListSQLEncryptionProtector_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
 	})
@@ -438,17 +662,17 @@ func (_c *MockProviderAPI_ListSQLEncryptionProtector_Call) RunAndReturn(run func
 	return _c
 }
 
-// ListSQLTransparentDataEncryptions provides a mock function with given fields: ctx, subID, resourceGroup, sqlServerName
-func (_m *MockProviderAPI) ListSQLTransparentDataEncryptions(ctx context.Context, subID string, resourceGroup string, sqlServerName string) ([]inventory.AzureAsset, error) {
-	ret := _m.Called(ctx, subID, resourceGroup, sqlServerName)
+// ListSQLTransparentDataEncryptions provides a mock function with given fields: ctx, subID, resourceGroup, serverName
+func (_m *MockProviderAPI) ListSQLTransparentDataEncryptions(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subID, resourceGroup, serverName)
 
 	var r0 []inventory.AzureAsset
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) ([]inventory.AzureAsset, error)); ok {
-		return rf(ctx, subID, resourceGroup, sqlServerName)
+		return rf(ctx, subID, resourceGroup, serverName)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []inventory.AzureAsset); ok {
-		r0 = rf(ctx, subID, resourceGroup, sqlServerName)
+		r0 = rf(ctx, subID, resourceGroup, serverName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]inventory.AzureAsset)
@@ -456,7 +680,7 @@ func (_m *MockProviderAPI) ListSQLTransparentDataEncryptions(ctx context.Context
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
-		r1 = rf(ctx, subID, resourceGroup, sqlServerName)
+		r1 = rf(ctx, subID, resourceGroup, serverName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -473,12 +697,12 @@ type MockProviderAPI_ListSQLTransparentDataEncryptions_Call struct {
 //   - ctx context.Context
 //   - subID string
 //   - resourceGroup string
-//   - sqlServerName string
-func (_e *MockProviderAPI_Expecter) ListSQLTransparentDataEncryptions(ctx interface{}, subID interface{}, resourceGroup interface{}, sqlServerName interface{}) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
-	return &MockProviderAPI_ListSQLTransparentDataEncryptions_Call{Call: _e.mock.On("ListSQLTransparentDataEncryptions", ctx, subID, resourceGroup, sqlServerName)}
+//   - serverName string
+func (_e *MockProviderAPI_Expecter) ListSQLTransparentDataEncryptions(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
+	return &MockProviderAPI_ListSQLTransparentDataEncryptions_Call{Call: _e.mock.On("ListSQLTransparentDataEncryptions", ctx, subID, resourceGroup, serverName)}
 }
 
-func (_c *MockProviderAPI_ListSQLTransparentDataEncryptions_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, sqlServerName string)) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
+func (_c *MockProviderAPI_ListSQLTransparentDataEncryptions_Call) Run(run func(ctx context.Context, subID string, resourceGroup string, serverName string)) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
 	})
