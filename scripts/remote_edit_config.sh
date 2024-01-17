@@ -10,7 +10,7 @@ TMP_LOCAL="/tmp/cloudbeat.yml"
 PODS=$(kubectl -n kube-system get pod -l app=elastic-agent -o name)
 for P in $PODS; do
     POD=$(echo "$P" | cut -d '/' -f 2)
-    CONFIG_FILEPATH="$(find_cloudbeat_config $POD)"
+    CONFIG_FILEPATH="$(find_cloudbeat_config "$POD")"
     if [ -z "$CONFIG_FILEPATH" ]; then
         echo "could not find remote config file"
         exit 1
