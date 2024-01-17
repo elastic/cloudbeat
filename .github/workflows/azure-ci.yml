@@ -13,8 +13,6 @@ on:
 jobs:
   Run-CSPM-AZURE-Tests:
     name: CIS AZURE integration test
-    # TODO: Remove after testing
-    # if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
@@ -71,13 +69,7 @@ jobs:
           USE_K8S: false
         run: |
           poetry install
-          poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
-
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   if: failure()
-      #   with:
-      #     limit-access-to-actor: true      
+          poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir 
 
       - name: Print cloudbeat logs
         if: always()
