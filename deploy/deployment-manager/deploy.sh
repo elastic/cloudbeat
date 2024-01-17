@@ -28,7 +28,7 @@
 #3. A dedicated network for the compute instance.
 #4. A service account bindings that associates the builtin roles with the service account.
 
-#In case the deployment encounters any issues and fails, the script will attempt to delete the deployment along with all the associated resources that were created during the process.
+# In case the deployment encounters any issues and fails, the script will attempt to delete the deployment along with all the associated resources that were created during the process.
 
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm}
 ALLOW_SSH=${ALLOW_SSH:-false}
