@@ -90,8 +90,8 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockPostgresAsset("id1", "psql-a"), map[string]any{
-					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256"),
+					inventory.ExtensionPostgresqlFirewallRules: []inventory.AzureAsset{
+						mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256")),
 					},
 				}),
 				mockOther("id2"),
@@ -120,8 +120,8 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						mockPostgresConfigAsset("log_checkpoints", psqlConfigProps("on")),
 						mockPostgresConfigAsset("log_connections", psqlConfigProps("off")),
 					},
-					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256"),
+					inventory.ExtensionPostgresqlFirewallRules: []inventory.AzureAsset{
+						mockPostgresFirewallRuleAsset("fr1", psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256")),
 					},
 				}),
 				mockOther("id2"),
@@ -130,16 +130,16 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 						mockPostgresConfigAsset("log_disconnections", psqlConfigProps("on")),
 						mockPostgresConfigAsset("connection_throttling", psqlConfigProps("off")),
 					},
-					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("name-fr2", "0.0.0.1", "196.198.198.255"),
+					inventory.ExtensionPostgresqlFirewallRules: []inventory.AzureAsset{
+						mockPostgresFirewallRuleAsset("fr2", psqlFirewallRuleProps("name-fr2", "0.0.0.1", "196.198.198.255")),
 					},
 				}),
 				addExtension(mockFlexiblePostgresAsset("id4", "flex-psql-a"), map[string]any{
 					inventory.ExtensionPostgresqlConfigurations: []inventory.AzureAsset{
 						mockPostgresConfigAsset("log_disconnections", psqlConfigProps("on")),
 					},
-					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
-						psqlFirewallRuleProps("name-fr3", "0.0.0.2", "196.198.198.254"),
+					inventory.ExtensionPostgresqlFirewallRules: []inventory.AzureAsset{
+						mockPostgresFirewallRuleAsset("fr3", psqlFirewallRuleProps("name-fr3", "0.0.0.2", "196.198.198.254")),
 					},
 				}),
 			},

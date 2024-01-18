@@ -493,7 +493,6 @@ func singlePsqlFirewallConfigAsset(id, startIpAddr, endIpAddr string) AzureAsset
 		Sku:            nil,
 		Identity:       nil,
 		Properties: map[string]any{
-			"name":           "name-" + id,
 			"startIPAddress": startIpAddr,
 			"endIPAddress":   endIpAddr,
 		},
@@ -540,7 +539,6 @@ func flexPsqlFirewallConfigAsset(id, startIpAddr, endIpAddr string) AzureAsset {
 		Sku:            nil,
 		Identity:       nil,
 		Properties: map[string]any{
-			"name":           "name-" + id,
 			"startIPAddress": startIpAddr,
 			"endIPAddress":   endIpAddr,
 		},
