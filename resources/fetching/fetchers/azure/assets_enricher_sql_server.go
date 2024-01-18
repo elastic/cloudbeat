@@ -77,7 +77,7 @@ func (s sqlServerEnricher) enrichSQLBlobAuditPolicy(ctx context.Context, a *inve
 		return nil
 	}
 
-	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0].Properties)
+	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0])
 	return nil
 }
 
