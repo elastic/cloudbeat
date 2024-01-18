@@ -91,11 +91,13 @@ func (p *storageAccountProvider) ListStorageAccounts(ctx context.Context, storag
 	for _, saID := range storageAccountsSubscriptionsIds {
 		res, err := p.client.AssetAccountStorage(ctx, saID, nil)
 		if err != nil {
-			return nil, fmt.Errorf("error while fetching storage accounts: %w", err)
+			p.log.Errorf("error while fetching storage accounts for subscriptionId: %s, error: %v", saID, err)
+			continue
 		}
 		storageAccountsAssets, err := transformStorageAccounts(res, saID)
 		if err != nil {
-			return nil, fmt.Errorf("error while transforming storage accounts: %w", err)
+			p.log.Errorf("error while transforming storage for subscriptionId: %s, error: %v", saID, err)
+			continue
 		}
 		assets = append(assets, storageAccountsAssets...)
 	}
