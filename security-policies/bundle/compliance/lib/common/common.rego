@@ -36,8 +36,8 @@ calculate_result(evaluation) = "passed" if {
 
 # Safely evaluate evidence. In case a key is undefined, it will be defaulted.
 # keypaths is an object defined as {str: array}
-collect_evidence(resource, keypaths) := {key: evidence |
-	some key, path in keypaths
+collect_evidence(resource, key_paths) := {key: evidence |
+	some key, path in key_paths
 	evidence := object.get(resource, path, "<undefined>")
 }
 
