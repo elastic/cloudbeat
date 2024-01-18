@@ -5,7 +5,7 @@ Each rule has one or more test cases.
 Logging and monitoring identification is performed by resource name.
 """
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from ..constants import RULE_PASS_STATUS
 
 CIS_5_5 = "CIS 5.5"
 # TODO: Alert Rules are per subscription
@@ -235,19 +235,21 @@ cis_azure_5_2_9 = {
 
 cis_azure_5_1_2_pass = AzureServiceCase(
     rule_tag=CIS_5_1_2,
-    case_identifier="test-al-pass",
+    case_identifier="azure-diagnostic-settings-ef111ee2-6c89-4b09-92c6-5c2321f888df",
     expected=RULE_PASS_STATUS,
 )
 
-cis_azure_5_1_2_fail = AzureServiceCase(
-    rule_tag=CIS_5_1_2,
-    case_identifier="test-al-fail",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: Diagnostic Settings are per subscription
+# TODO: No Diagnostic Settings for evaluation of fail not possible due to having Diagnostic Settings for pass
+# cis_azure_5_1_2_fail = AzureServiceCase(
+#     rule_tag=CIS_5_1_2,
+#     case_identifier="TODO",
+#     expected=RULE_FAIL_STATUS,
+# )
 
 cis_azure_5_1_2 = {
     "5.1.2 Ensure Diagnostic Setting captures appropriate categories expect: passed": cis_azure_5_1_2_pass,
-    "5.1.2 Ensure Diagnostic Setting captures appropriate categories expect: failed": cis_azure_5_1_2_fail,
+    # "5.1.2 Ensure Diagnostic Setting captures appropriate categories expect: failed": cis_azure_5_1_2_fail,
 }
 
 cis_azure_5_3_1_pass = AzureServiceCase(
