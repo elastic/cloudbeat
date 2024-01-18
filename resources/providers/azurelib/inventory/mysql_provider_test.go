@@ -89,7 +89,6 @@ func TestMysqlProvider_GetFlexibleTLSVersionConfiguration(t *testing.T) {
 					SubscriptionId: "subscription",
 					ResourceGroup:  "resource",
 					Properties: map[string]any{
-						"name":         "tls_version",
 						"source":       "system-default",
 						"value":        "tlsv1.2",
 						"dataType":     "string",
