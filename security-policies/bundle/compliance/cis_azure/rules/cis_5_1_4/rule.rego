@@ -18,7 +18,6 @@ finding = result if {
 
 is_customer_managed_key_encrypted if {
 	data_adapter.resource.extension.storageAccount.properties.encryption.keySource == "Microsoft.KeyVault"
-	common.contains_key(data_adapter.resource.extension.storageAccount.properties.encryption, "keyVaultProperties")
 	data_adapter.resource.extension.storageAccount.properties.encryption.keyVaultProperties != null
 } else = false
 
