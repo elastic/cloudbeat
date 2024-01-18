@@ -63,7 +63,11 @@ func (s sqlServerEnricher) enrichSQLEncryptionProtector(ctx context.Context, a *
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionSQLEncryptionProtectors, encryptProtectors)
+	if len(encryptProtectors) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLEncryptionProtectors, encryptProtectors)
 	return nil
 }
 
