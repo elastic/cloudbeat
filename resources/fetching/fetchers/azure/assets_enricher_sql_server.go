@@ -97,6 +97,10 @@ func (s sqlServerEnricher) enrichAdvancedThreatProtectionSettings(ctx context.Co
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
+	if len(settings) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
 	return nil
 }

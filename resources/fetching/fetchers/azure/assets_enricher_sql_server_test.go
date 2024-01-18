@@ -261,10 +261,12 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors:             []map[string]any{epProps("serverKey1", true)},
-					inventory.ExtensionSQLBlobAuditPolicy:                  bapProps("Disabled"),
-					inventory.ExtensionSQLTransparentDataEncryptions:       []map[string]any{tdeProps("Enabled")},
-					inventory.ExtensionSQLAdvancedThreatProtectionSettings: []map[string]any{threatProtectionPros("Enabled")},
+					inventory.ExtensionSQLEncryptionProtectors:       []map[string]any{epProps("serverKey1", true)},
+					inventory.ExtensionSQLBlobAuditPolicy:            bapProps("Disabled"),
+					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{tdeProps("Enabled")},
+					inventory.ExtensionSQLAdvancedThreatProtectionSettings: []inventory.AzureAsset{
+						mockThreatProtection("tde1", threatProtectionPros("Enabled")),
+					},
 				}),
 			},
 			epRes: map[string]enricherResponse{
