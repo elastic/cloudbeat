@@ -87,7 +87,11 @@ func (s sqlServerEnricher) enrichTransparentDataEncryption(ctx context.Context, 
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionSQLTransparentDataEncryptions, tdes)
+	if len(tdes) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLTransparentDataEncryptions, tdes)
 	return nil
 }
 

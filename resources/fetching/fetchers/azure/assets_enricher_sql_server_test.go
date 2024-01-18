@@ -198,9 +198,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
-					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{
-						tdeProps("Enabled"),
-						tdeProps("Disabled"),
+					inventory.ExtensionSQLTransparentDataEncryptions: []inventory.AzureAsset{
+						mockTransparentDataEncryption("tde1", tdeProps("Enabled")),
+						mockTransparentDataEncryption("tde2", tdeProps("Disabled")),
 					},
 				}),
 				mockSQLServer("id2", "serverName2"),
@@ -261,9 +261,11 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors:       []map[string]any{epProps("serverKey1", true)},
-					inventory.ExtensionSQLBlobAuditPolicy:            bapProps("Disabled"),
-					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{tdeProps("Enabled")},
+					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{epProps("serverKey1", true)},
+					inventory.ExtensionSQLBlobAuditPolicy:      bapProps("Disabled"),
+					inventory.ExtensionSQLTransparentDataEncryptions: []inventory.AzureAsset{
+						mockTransparentDataEncryption("tde1", tdeProps("Enabled")),
+					},
 					inventory.ExtensionSQLAdvancedThreatProtectionSettings: []inventory.AzureAsset{
 						mockThreatProtection("tde1", threatProtectionPros("Enabled")),
 					},
