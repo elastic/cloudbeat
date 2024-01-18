@@ -9,11 +9,8 @@ from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_4_1_2 = "CIS 4.1.2"
 CIS_4_1_4 = "CIS 4.1.4"
-# Deployed flexible server instead of standard server
 CIS_4_3_1 = "CIS 4.3.1"
-# TODO: Deployed flexible server in addition to standard server (standard server is reaching end of life)
 CIS_4_4_1 = "CIS 4.4.1"
-# Pass not working due to wrong configuration (fixed)
 CIS_4_5_1 = "CIS 4.5.1"
 
 cis_azure_4_5_1_pass = AzureServiceCase(
@@ -75,13 +72,13 @@ cis_azure_4_1_4 = {
 
 cis_azure_4_3_1_pass = AzureServiceCase(
     rule_tag=CIS_4_3_1,
-    case_identifier="test-pgdb-pass",
+    case_identifier="test-postgresql-single-server",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_3_1_fail = AzureServiceCase(
     rule_tag=CIS_4_3_1,
-    case_identifier="test-pgdb-fail",
+    case_identifier="test-postgresql-single-server-failpgserver",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -114,7 +111,7 @@ cis_azure_4_4_1 = {
 cis_azure_database_service_cases = {
     **cis_azure_4_1_2,
     **cis_azure_4_1_4,
-    # **cis_azure_4_3_1,
-    # **cis_azure_4_4_1,
-    # **cis_azure_4_5_1,
+    **cis_azure_4_3_1,
+    **cis_azure_4_4_1,
+    **cis_azure_4_5_1,
 }

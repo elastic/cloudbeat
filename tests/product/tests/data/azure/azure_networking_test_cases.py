@@ -8,7 +8,6 @@ from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_6_6 = "CIS 6.6"
-# No evaluation (weird bug)
 CIS_6_5 = "CIS 6.5"
 
 cis_azure_6_6_pass = AzureServiceCase(
@@ -31,13 +30,13 @@ cis_azure_6_6 = {
 
 cis_azure_6_5_pass = AzureServiceCase(
     rule_tag=CIS_6_5,
-    case_identifier="test-vm-pass-nsg",
+    case_identifier="test-vm-pass-nsg-azurecloudbeatcitests-flowlog",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_6_5_fail = AzureServiceCase(
     rule_tag=CIS_6_5,
-    case_identifier="test-vm-fail-nsg",
+    case_identifier="test-vm-fail-nsg-azurecloudbeatcitests-flowlog",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -50,5 +49,5 @@ cis_azure_6_5 = {
 
 cis_azure_networking_cases = {
     **cis_azure_6_6,
-    # **cis_azure_6_5,
+    **cis_azure_6_5,
 }

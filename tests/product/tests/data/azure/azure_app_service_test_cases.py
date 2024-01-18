@@ -7,7 +7,6 @@ App service identification is performed by resource name.
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-# None of this works (TODO: Investigate because it worked on BC)
 CIS_9_2 = "CIS 9.2"
 # TODO: Removed rule
 # CIS_9_3 = "CIS 9.3"
@@ -23,17 +22,18 @@ cis_azure_9_4_pass = AzureServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
-cis_azure_9_4_fail = AzureServiceCase(
-    rule_tag=CIS_9_4,
-    case_identifier="test-app-service-fail",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: https://github.com/elastic/cloudbeat/issues/1828
+# cis_azure_9_4_fail = AzureServiceCase(
+#     rule_tag=CIS_9_4,
+#     case_identifier="test-app-service-fail",
+#     expected=RULE_FAIL_STATUS,
+# )
 
 cis_azure_9_4 = {
     """9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)'
       set to 'On' expect: passed""": cis_azure_9_4_pass,
-    """9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)'
-      set to 'On' expect: failed""": cis_azure_9_4_fail,
+    # """9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)'
+    #   set to 'On' expect: failed""": cis_azure_9_4_fail,
 }
 
 # cis_azure_9_10_pass = AzureServiceCase(
@@ -130,10 +130,10 @@ cis_azure_9_9 = {
 }
 
 cis_azure_app_service_cases = {
-    # **cis_azure_9_2,
-    # # **cis_azure_9_3,
-    # **cis_azure_9_4,
-    # **cis_azure_9_5,
-    # **cis_azure_9_9,
-    # # **cis_azure_9_10,
+    **cis_azure_9_2,
+    # **cis_azure_9_3,
+    **cis_azure_9_4,
+    **cis_azure_9_5,
+    **cis_azure_9_9,
+    # **cis_azure_9_10,
 }
