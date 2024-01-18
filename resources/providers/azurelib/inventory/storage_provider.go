@@ -102,7 +102,8 @@ func (p *storageAccountProvider) ListStorageAccounts(ctx context.Context, storag
 	return assets, nil
 }
 
-func transformStorageAccounts(accountPages []armstorage.AccountsClientListResponse, storageAccountId string) (_ []AzureAsset, errs error) {
+func transformStorageAccounts(accountPages []armstorage.AccountsClientListResponse, storageAccountId string) ([]AzureAsset, error) {
+	var errs error
 	return lo.FlatMap(accountPages, func(response armstorage.AccountsClientListResponse, _ int) []AzureAsset {
 		return lo.Map(response.Value, func(item *armstorage.Account, _ int) AzureAsset {
 			properties, err := maps.AsMapStringAny(item.Properties)
@@ -149,7 +150,8 @@ func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Cont
 	return assets, nil
 }
 
-func transformBlobServices(servicesPages []armstorage.BlobServicesClientListResponse, storageAccount AzureAsset) (_ []AzureAsset, errs error) {
+func transformBlobServices(servicesPages []armstorage.BlobServicesClientListResponse, storageAccount AzureAsset) ([]AzureAsset, error) {
+	var errs error
 	return lo.FlatMap(servicesPages, func(response armstorage.BlobServicesClientListResponse, _ int) []AzureAsset {
 		return lo.Map(response.Value, func(item *armstorage.BlobServiceProperties, _ int) AzureAsset {
 			properties, err := maps.AsMapStringAny(item.BlobServiceProperties)
