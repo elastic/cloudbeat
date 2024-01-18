@@ -72,13 +72,13 @@ cis_azure_4_1_4 = {
 
 cis_azure_4_3_1_pass = AzureServiceCase(
     rule_tag=CIS_4_3_1,
-    case_identifier="test-pgdb-pass",
+    case_identifier="test-postgresql-single-server",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_3_1_fail = AzureServiceCase(
     rule_tag=CIS_4_3_1,
-    case_identifier="test-pgdb-fail",
+    case_identifier="test-postgresql-single-server-failpgserver",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -91,13 +91,13 @@ cis_azure_4_3_1 = {
 
 cis_azure_4_4_1_pass = AzureServiceCase(
     rule_tag=CIS_4_4_1,
-    case_identifier="test-mysql-db-pass",
+    case_identifier="rule-441",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_4_4_1_fail = AzureServiceCase(
     rule_tag=CIS_4_4_1,
-    case_identifier="test-mysql-db-fail",
+    case_identifier="rule-441-fail",
     expected=RULE_FAIL_STATUS,
 )
 

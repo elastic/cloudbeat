@@ -16,7 +16,7 @@ cis_azure_6_6_pass = AzureServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
-# https://github.com/elastic/cloudbeat/issues/1473
+# TODO: https://github.com/elastic/cloudbeat/issues/1473
 # cis_azure_6_6_fail = AzureServiceCase(
 #     rule_tag=CIS_6_6,
 #     case_identifier="TODO",
@@ -30,13 +30,13 @@ cis_azure_6_6 = {
 
 cis_azure_6_5_pass = AzureServiceCase(
     rule_tag=CIS_6_5,
-    case_identifier="test-vm-pass-nsg",
+    case_identifier="test-vm-pass-nsg-azurecloudbeatcitests-flowlog",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_6_5_fail = AzureServiceCase(
     rule_tag=CIS_6_5,
-    case_identifier="test-vm-fail-nsg",
+    case_identifier="test-vm-fail-nsg-azurecloudbeatcitests-flowlog",
     expected=RULE_FAIL_STATUS,
 )
 
