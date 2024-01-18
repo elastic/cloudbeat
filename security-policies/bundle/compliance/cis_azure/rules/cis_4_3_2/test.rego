@@ -8,12 +8,12 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_checkpoints",
-		"value": "off",
+		"properties": {"value": "off"},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_connections",
-		"value": "on",
+		"properties": {"value": "on"},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": []})
@@ -24,7 +24,7 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_checkpoints",
-		"value": "on",
+		"properties": {"value": "on"},
 	}]})
 }
 

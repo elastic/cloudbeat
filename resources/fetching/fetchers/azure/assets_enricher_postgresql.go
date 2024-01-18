@@ -61,7 +61,11 @@ func (p postgresqlEnricher) enrichConfigurations(ctx context.Context, a *invento
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionPostgresqlConfigurations, configs)
+	if len(configs) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionPostgresqlConfigurations, configs)
 	return nil
 }
 

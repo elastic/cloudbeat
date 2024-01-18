@@ -393,7 +393,6 @@ func singlePsqlConfigAsset(id, name, value string) AzureAsset {
 		Sku:            nil,
 		Identity:       nil,
 		Properties: map[string]any{
-			"name":         name,
 			"source":       "system-default",
 			"value":        value,
 			"dataType":     "Boolean",
@@ -446,7 +445,6 @@ func flexPsqlConfigAsset(id, name, value string) AzureAsset {
 		Sku:            nil,
 		Identity:       nil,
 		Properties: map[string]any{
-			"name":         name,
 			"source":       "system-default",
 			"value":        value,
 			"dataType":     "Boolean",

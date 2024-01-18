@@ -59,9 +59,9 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockPostgresAsset("id1", "psql-a"), map[string]any{
-					inventory.ExtensionPostgresqlConfigurations: []map[string]any{
-						psqlConfigProps("log_checkpoints", "on"),
-						psqlConfigProps("log_connections", "off"),
+					inventory.ExtensionPostgresqlConfigurations: []inventory.AzureAsset{
+						mockPostgresConfigAsset("log_checkpoints", psqlConfigProps("on")),
+						mockPostgresConfigAsset("log_connections", psqlConfigProps("off")),
 					},
 				}),
 				mockOther("id2"),
@@ -69,8 +69,8 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 			},
 			configRes: map[string]psqlEnricherResponse{
 				"psql-a": {assetRes(
-					mockPostgresConfigAsset("conf1", psqlConfigProps("log_checkpoints", "on")),
-					mockPostgresConfigAsset("conf2", psqlConfigProps("log_connections", "off")),
+					mockPostgresConfigAsset("log_checkpoints", psqlConfigProps("on")),
+					mockPostgresConfigAsset("log_connections", psqlConfigProps("off")),
 				), psqlServerTypeSingle},
 				"psql-b": {
 					errorRes(errors.New("error")), psqlServerTypeSingle,
@@ -116,9 +116,9 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockPostgresAsset("id1", "psql-a"), map[string]any{
-					inventory.ExtensionPostgresqlConfigurations: []map[string]any{
-						psqlConfigProps("log_checkpoints", "on"),
-						psqlConfigProps("log_connections", "off"),
+					inventory.ExtensionPostgresqlConfigurations: []inventory.AzureAsset{
+						mockPostgresConfigAsset("log_checkpoints", psqlConfigProps("on")),
+						mockPostgresConfigAsset("log_connections", psqlConfigProps("off")),
 					},
 					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
 						psqlFirewallRuleProps("name-fr1", "0.0.0.0", "196.198.198.256"),
@@ -126,17 +126,17 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 				}),
 				mockOther("id2"),
 				addExtension(mockPostgresAsset("id3", "psql-b"), map[string]any{
-					inventory.ExtensionPostgresqlConfigurations: []map[string]any{
-						psqlConfigProps("log_disconnections", "on"),
-						psqlConfigProps("connection_throttling", "off"),
+					inventory.ExtensionPostgresqlConfigurations: []inventory.AzureAsset{
+						mockPostgresConfigAsset("log_disconnections", psqlConfigProps("on")),
+						mockPostgresConfigAsset("connection_throttling", psqlConfigProps("off")),
 					},
 					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
 						psqlFirewallRuleProps("name-fr2", "0.0.0.1", "196.198.198.255"),
 					},
 				}),
 				addExtension(mockFlexiblePostgresAsset("id4", "flex-psql-a"), map[string]any{
-					inventory.ExtensionPostgresqlConfigurations: []map[string]any{
-						psqlConfigProps("log_disconnections", "on"),
+					inventory.ExtensionPostgresqlConfigurations: []inventory.AzureAsset{
+						mockPostgresConfigAsset("log_disconnections", psqlConfigProps("on")),
 					},
 					inventory.ExtensionPostgresqlFirewallRules: []map[string]any{
 						psqlFirewallRuleProps("name-fr3", "0.0.0.2", "196.198.198.254"),
@@ -146,19 +146,19 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 			configRes: map[string]psqlEnricherResponse{
 				"psql-a": {
 					assetRes(
-						mockPostgresConfigAsset("conf1", psqlConfigProps("log_checkpoints", "on")),
-						mockPostgresConfigAsset("conf2", psqlConfigProps("log_connections", "off"))),
+						mockPostgresConfigAsset("log_checkpoints", psqlConfigProps("on")),
+						mockPostgresConfigAsset("log_connections", psqlConfigProps("off"))),
 					psqlServerTypeSingle,
 				},
 				"psql-b": {
 					assetRes(
-						mockPostgresConfigAsset("conf1", psqlConfigProps("log_disconnections", "on")),
-						mockPostgresConfigAsset("conf2", psqlConfigProps("connection_throttling", "off")),
+						mockPostgresConfigAsset("log_disconnections", psqlConfigProps("on")),
+						mockPostgresConfigAsset("connection_throttling", psqlConfigProps("off")),
 					), psqlServerTypeSingle,
 				},
 				"flex-psql-a": {
 					assetRes(
-						mockPostgresConfigAsset("conf1", psqlConfigProps("log_disconnections", "on"))),
+						mockPostgresConfigAsset("log_disconnections", psqlConfigProps("on"))),
 					psqlServerTypeFlexible,
 				},
 			},
@@ -235,9 +235,8 @@ func mockPostgresFirewallRuleAsset(id string, props map[string]any) inventory.Az
 	return a
 }
 
-func psqlConfigProps(name, value string) map[string]any {
+func psqlConfigProps(value string) map[string]any {
 	return map[string]any{
-		"name":         name,
 		"source":       "system-default",
 		"value":        value,
 		"dataType":     "Boolean",
