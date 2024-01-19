@@ -3,7 +3,6 @@
 **Motivation**
 To provide an easy and deterministic way to set up the latest cloud environment, ensuring proper monitoring and usability
 
-
 **Prerequisite**
 
 This project utilizes AWS and Elastic Cloud accounts. To ensure proper deployment and usage, it is essential to obtain appropriate licenses in compliance with the licensing terms and conditions provided by the respective service providers.
@@ -20,17 +19,16 @@ To generate an Elastic Cloud token, you have two options:
 
 Choose the method that is most convenient for you to obtain the Elastic Cloud token required for deployment.
 
-
 Ensure that the following AWS credentials are defined:
 
 - `AWS_ACCESS_KEY_ID`: Your AWS access key ID.
 - `AWS_SECRET_ACCESS_KEY`: Your AWS secret access key.
 
-
 To successfully deploy the environment, ensure that the following variables are provided as deployment parameters or exported as environment variables:
 
 ```bash
 export TF_VAR_ec_api_key={TOKEN} # <-- should be replaced by Elastic Cloud TOKEN
+export TF_VAR_ec_url=https://cloud.elastic.co # <-- should be replaced by Elastic Cloud TOKEN
 export TF_VAR_stack_version=8.7.2-SNAPSHOT
 export TF_VAR_ess_region=gcp-us-west2
 ```
@@ -49,22 +47,20 @@ Please note that the customized image is currently available in the following re
 
 **Module variables (CSPM / KSPM)**
 
-| Variable  | Default Value | Comment |
-|:-------------:|:-------------:|:------------|
-| region      |   eu-west-1   | AWS EC2 deployment region |
-
-
+| Variable | Default Value | Comment                   |
+| :------: | :-----------: | :------------------------ |
+|  region  |   eu-west-1   | AWS EC2 deployment region |
 
 ### Elastic Cloud
 
 **ec_deployment** - This module facilitates the deployment of Elastic Cloud instance.
 
-| Variable  | Default Value | Comment |
-|:-------------:|:-------------:|:------------|
-| ec_api_key    |   None   | The API key for Elastic Cloud can also be defined using the `TF_VAR_ec_api_key` environment variable |
-| ess_region    | gcp-us-west2 | The ESS deployment region can also be defined using the `TF_VAR_stack_version` environment variable|
-| stack_version | latest | The ELK stack version can also be defined using the `TF_VAR_stack_version` environment variable |
-| pin_version   | None | Optional: The ELK pin version (docker tag override) can also be defined using the `TF_VAR_pin_version` environment variable |
+|   Variable    | Default Value | Comment                                                                                                                     |
+| :-----------: | :-----------: | :-------------------------------------------------------------------------------------------------------------------------- |
+|  ec_api_key   |     None      | The API key for Elastic Cloud can also be defined using the `TF_VAR_ec_api_key` environment variable                        |
+|  ess_region   | gcp-us-west2  | The ESS deployment region can also be defined using the `TF_VAR_stack_version` environment variable                         |
+| stack_version |    latest     | The ELK stack version can also be defined using the `TF_VAR_stack_version` environment variable                             |
+|  pin_version  |     None      | Optional: The ELK pin version (docker tag override) can also be defined using the `TF_VAR_pin_version` environment variable |
 
 ## Execution
 
@@ -111,7 +107,6 @@ BC version
 terraform apply --auto-approve -var="stack_version=8.12.0" -var="pin_version=8.12.0-9f05a310" -target "module.ec_deployment"
 ```
 
-
 - EKS Deployment
 
 ```bash
@@ -122,10 +117,9 @@ terraform apply --auto-approve -target "module.eks"
 
 To destroy local environment use
 
-``` bash
+```bash
 terraform destroy -var="region=eu-west-1"
 ```
-
 
 To destroy the environment provisioned using the Sanity job, follow these steps:
 
@@ -133,6 +127,6 @@ To destroy the environment provisioned using the Sanity job, follow these steps:
 2. Rename the state file, for example, `terraform-sanity.tfstate`.
 3. Run the following command:
 
-``` bash
+```bash
 terraform destroy -var="region=eu-west-1" -state terraform-sanity.tfstate
 ```

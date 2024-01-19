@@ -10,7 +10,7 @@ locals {
     project  = "${var.project}"
     owner    = "${var.owner}"
   }
-  ec_url = "https://cloud.elastic.co"
+  ec_url = "${var.ec_url}"
   ec_headers = {
     Content-type  = "application/json"
     Authorization = "ApiKey ${var.ec_api_key}"
@@ -44,11 +44,12 @@ resource "random_string" "suffix" {
 
 provider "ec" {
   apikey = var.ec_api_key
+  url    = var.ec_url
 }
 
 provider "restapi" {
   alias                = "ec"
-  uri                  = local.ec_url
+  uri                  = var.ec_url
   write_returns_object = true
   headers              = local.ec_headers
 }
@@ -88,7 +89,7 @@ module "ec_project" {
   count        = var.serverless_mode ? 1 : 0
   source       = "../cloud/modules/serverless"
   ec_apikey    = var.ec_api_key
-  ec_url       = local.ec_url
+  ec_url       = var.ec_url
   project_name = "${var.deployment_name}-${random_string.suffix.result}"
   region_id    = "aws-us-east-1" # TODO: replace with var.ess_region when more regions are supported
 }

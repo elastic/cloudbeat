@@ -15,6 +15,14 @@ on:
         type: boolean
         required: true
         default: false
+      ec-url:
+        required: true
+        default: "https://cloud.elastic.co/"
+        type: choice
+        description: Select the Environment URL
+        options:
+          - https://cloud.elastic.co/
+          - https://console.qa.cld.elstc.co/
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
@@ -30,9 +38,9 @@ on:
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
       run-sanity-tests:
-          description: "Run sanity tests after provision"
-          default: false
-          type: boolean
+        description: "Run sanity tests after provision"
+        default: false
+        type: boolean
       cleanup-env:
         description: "Cleanup resources after provision"
         default: false
@@ -52,6 +60,14 @@ on:
         type: boolean
         required: true
         default: false
+      ec-url:
+        required: true
+        default: "https://cloud.elastic.co/"
+        type: choice
+        description: Select the Environment URL
+        options:
+          - https://cloud.elastic.co/
+          - https://console.qa.cld.elstc.co/
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
@@ -95,6 +111,7 @@ env:
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_ec_url: ${{ secrets.EC_URL }}
 
 jobs:
   Deploy:
@@ -114,8 +131,8 @@ jobs:
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
     # Add "id-token" with the intended permissions.
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     outputs:
       deploy-s3-bucket: ${{ steps.upload-state.outputs.s3-bucket-folder }}
       aws-cnvm-stack-name: ${{ steps.upload-state.outputs.aws-cnvm-stack }}
@@ -192,7 +209,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install Poetry
         run: |

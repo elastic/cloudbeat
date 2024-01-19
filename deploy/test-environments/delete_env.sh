@@ -88,6 +88,7 @@ done
 # Ensure required environment variables and parameters are set
 : "${ENV_PREFIX:?$(echo "Missing -p|--prefix. Please provide an environment prefix to delete" && usage && exit 1)}"
 : "${TF_VAR_ec_api_key:?Please set TF_VAR_ec_api_key with an Elastic Cloud API Key}"
+: "${TF_VAR_ec_url:?Please set TF_VAR_url with an Elastic Cloud Environment URL}"
 
 BUCKET=s3://tf-state-bucket-test-infra
 ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')

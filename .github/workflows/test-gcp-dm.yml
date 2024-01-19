@@ -15,6 +15,7 @@ on:
 env:
   WORKING_DIR: deploy/test-environments
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_ec_url: ${{ secrets.EC_URL }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
 
 jobs:

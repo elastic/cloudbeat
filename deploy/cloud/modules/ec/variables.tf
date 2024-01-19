@@ -2,6 +2,10 @@ variable "ec_api_key" {
   type = string
 }
 
+variable "ec_url" {
+  type = string
+}
+
 variable "stack_version" {
   description = "Optional version of the Elastic Cloud deployment"
   type        = string

@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: "Environment to deploy"
         type: choice
         options:
           - weekly environment
       logLevel:
-        description: 'Log level'
+        description: "Log level"
         required: true
-        default: 'INFO'
+        default: "INFO"
         type: choice
         options:
           - TRACE
@@ -24,6 +24,7 @@ env:
   WORKING_DIR: deploy/weekly-environment
   SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_ec_url: ${{ secrets.EC_URL }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
   TF_VAR_stack_version: 8.7.0-SNAPSHOT

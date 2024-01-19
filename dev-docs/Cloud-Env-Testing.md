@@ -18,49 +18,50 @@ Follow these steps to run the workflow:
 
 3. Complete the required parameters:
 
-    - **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For
-      instance: `john-8-7-2-June01`.
+   - **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For
+     instance: `john-8-7-2-June01`.
 
-    - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
-      version. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
-      For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
-      For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
+   - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
+     version. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
+     For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
+     For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
 
-    - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
-      supports
-      snapshot and build candidate (BC) versions. Specify a different region only if necessary.
+   - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
+     supports
+     snapshot and build candidate (BC) versions. Specify a different region only if necessary.
 
    ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
 4. Optionally, modify other parameters if required:
 
-    - **`docker-image-override`** (**optional**): Use this to replace the default agent Docker image for build candidate (BC) or
-      SNAPSHOT versions.
-      Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
-      path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`. If you're not sure where to get this
-      image path from, look for message like [this](https://elastic.slack.com/archives/C0JFN9HJL/p1689227472876399) in
-      #mission-control channel, you can see it specify the stack version and the BC commit sha in the first line,
-      e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
-      and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
+   - **`docker-image-override`** (**optional**): Use this to replace the default agent Docker image for build candidate (BC) or
+     SNAPSHOT versions.
+     Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
+     path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`. If you're not sure where to get this
+     image path from, look for message like [this](https://elastic.slack.com/archives/C0JFN9HJL/p1689227472876399) in
+     #mission-control channel, you can see it specify the stack version and the BC commit sha in the first line,
+     e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
+     and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
 
-    - **`run-sanity-tests`** (**optional**): Set to `true` to run sanity tests after the environment is set up. Default: `false`
+   - **`run-sanity-tests`** (**optional**): Set to `true` to run sanity tests after the environment is set up. Default: `false`
 
-    - **`cleanup-env`** (**optional**): Set to `true` if you want the resources to automatically be cleaned up after
-      provisioning - useful if you don't want to test the env manually after deployment.
-      Default: `false`.
+   - **`cleanup-env`** (**optional**): Set to `true` if you want the resources to automatically be cleaned up after
+     provisioning - useful if you don't want to test the env manually after deployment.
+     Default: `false`.
 
-    - **`ec-api-key`** (**optional**): By default, all the new environments will be created in our EC Cloud Security organization.
-      If you want to create the environment on your personal org (`@elastic.co`) you can enter
-      your private [Elastic Cloud](https://cloud.elastic.co/home) API key. Follow the
-      [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
-      step-by-step instructions on generating the token.
+   - **`ec-url`** (**optional**): By default, all the new environments will be created in the Production environment (https://cloud.elastic.co/). If you want to create the environment others environment you can enter other Environment URL.
+
+   - **`ec-api-key`** (**optional**): By default, all the new environments will be created in our EC Cloud Security organization.
+     If you want to create the environment on your personal org (`@elastic.co`) you can enter
+     your private [Elastic Cloud](https://cloud.elastic.co/home) API key. Follow the
+     [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
+     step-by-step instructions on generating the token.
 
    ![Optional Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/17933589-ee0e-4181-a244-f501f54bda6c)
 
 5. Click the `Run workflow` button to start.
 
    ![Run Workflow](https://github.com/oren-zohar/cloudbeat/assets/85433724/7b05bf58-cc0b-4ec9-8e49-55d117673df8)
-
 
 ## Tracking Workflow Execution
 
@@ -121,7 +122,7 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
    To configure kubectl to communicate with your EKS cluster, replace `<cluster_name>` with your EKS cluster's name and run the following command:
 
-   ```aws eks update-kubeconfig --region eu-west-1 --name <cluster_name>```
+   `aws eks update-kubeconfig --region eu-west-1 --name <cluster_name>`
 
    This command updates your ~/.kube/config file with the necessary cluster configuration.
 
@@ -129,10 +130,9 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
    To verify your connectivity to the EKS cluster, run the following kubectl command:
 
-   ```kubectl get po -n kube-system```
+   `kubectl get po -n kube-system`
 
    This command should list the pods in the kube-system namespace, confirming that you have successfully connected to your EKS cluster.
-
 
 ## Cleanup Procedure
 
@@ -158,14 +158,14 @@ Follow these steps to run the workflow:
 
 3. Complete the required input fields:
 
-    - `prefix` (required): The prefix used to identify the environments to be deleted.
+   - `prefix` (required): The prefix used to identify the environments to be deleted.
 
    <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91">
 
 4. Optionally, modify other input value if required:
 
-    - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
-    - `ec-api-key` (required): Use your own [Elastic Cloud](https://cloud.elastic.co/home) API key if you want to delete environments from your Elastic Cloud account.
+   - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
+   - `ec-api-key` (required): Use your own [Elastic Cloud](https://cloud.elastic.co/home) API key if you want to delete environments from your Elastic Cloud account.
 
    <img width="411" alt="Optional Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/aa89ad4e-fd32-461d-ab2d-3fee28094a9d">
 

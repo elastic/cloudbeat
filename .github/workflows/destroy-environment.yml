@@ -12,6 +12,14 @@ on:
       ignore-prefix:
         type: string
         description: "Ignore all environments starting with `ignore-prefix`"
+      ec-url:
+        required: true
+        default: "https://cloud.elastic.co/"
+        type: choice
+        description: Select the Environment URL to delete
+        options:
+          - https://cloud.elastic.co/
+          - https://console.qa.cld.elstc.co/
       ec-api-key:
         type: string
         description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
@@ -31,8 +39,8 @@ jobs:
     timeout-minutes: 120
     # Add "id-token" with the intended permissions.
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -45,8 +53,10 @@ jobs:
         if: ${{ inputs.ec-api-key != '' }}
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
+          ec_url=$(jq -r '.inputs["ec-url"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          echo "TF_VAR_ec_url=$ec_url" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
