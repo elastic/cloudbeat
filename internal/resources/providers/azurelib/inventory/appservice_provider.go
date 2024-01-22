@@ -24,6 +24,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
 type azureAppServiceWrapper struct {
@@ -70,7 +72,62 @@ func (p *appServiceProvider) ListWebAppsAuthSettings(ctx context.Context, webApp
 		return nil, fmt.Errorf("error while retrieving WebApp Auth settings: %w", err)
 	}
 
-	webApp.Extension["authSettings"] = response.Properties
+	if response.Properties == nil {
+		return nil, fmt.Errorf("error: got empty WebApp Auth settings for %s", webApp.Name)
+	}
 
-	return []AzureAsset{webApp}, nil
+	properties := pointers.Deref(response.Properties)
+	authSettings := AzureAsset{
+		Id:          pointers.Deref(response.ID),
+		Name:        pointers.Deref(response.Name),
+		DisplayName: webApp.DisplayName,
+		Location:    webApp.Location,
+		Properties: map[string]any{
+			"AADClaimsAuthorization":                  pointers.Deref(properties.AADClaimsAuthorization),
+			"AdditionalLoginParams":                   properties.AdditionalLoginParams,
+			"AllowedAudiences":                        properties.AllowedAudiences,
+			"AllowedExternalRedirectUrls":             properties.AllowedExternalRedirectUrls,
+			"AuthFilePath":                            pointers.Deref(properties.AuthFilePath),
+			"ClientID":                                pointers.Deref(properties.ClientID),
+			"ClientSecret":                            pointers.Deref(properties.ClientSecret),
+			"ClientSecretCertificateThumbprint":       pointers.Deref(properties.ClientSecretCertificateThumbprint),
+			"ClientSecretSettingName":                 pointers.Deref(properties.ClientSecretSettingName),
+			"ConfigVersion":                           pointers.Deref(properties.ConfigVersion),
+			"DefaultProvider":                         pointers.Deref(properties.DefaultProvider),
+			"Enabled":                                 pointers.Deref(properties.Enabled),
+			"FacebookAppID":                           pointers.Deref(properties.FacebookAppID),
+			"FacebookAppSecret":                       pointers.Deref(properties.FacebookAppSecret),
+			"FacebookAppSecretSettingName":            pointers.Deref(properties.FacebookAppSecretSettingName),
+			"FacebookOAuthScopes":                     properties.FacebookOAuthScopes,
+			"GitHubClientID":                          pointers.Deref(properties.GitHubClientID),
+			"GitHubClientSecret":                      pointers.Deref(properties.GitHubClientSecret),
+			"GitHubClientSecretSettingName":           pointers.Deref(properties.GitHubClientSecretSettingName),
+			"GitHubOAuthScopes":                       properties.GitHubOAuthScopes,
+			"GoogleClientID":                          pointers.Deref(properties.GoogleClientID),
+			"GoogleClientSecret":                      pointers.Deref(properties.GoogleClientSecret),
+			"GoogleClientSecretSettingName":           pointers.Deref(properties.GoogleClientSecretSettingName),
+			"GoogleOAuthScopes":                       properties.GoogleOAuthScopes,
+			"IsAuthFromFile":                          pointers.Deref(properties.IsAuthFromFile),
+			"Issuer":                                  pointers.Deref(properties.Issuer),
+			"MicrosoftAccountClientID":                pointers.Deref(properties.MicrosoftAccountClientID),
+			"MicrosoftAccountClientSecret":            pointers.Deref(properties.MicrosoftAccountClientSecret),
+			"MicrosoftAccountClientSecretSettingName": pointers.Deref(properties.MicrosoftAccountClientSecretSettingName),
+			"MicrosoftAccountOAuthScopes":             properties.MicrosoftAccountOAuthScopes,
+			"RuntimeVersion":                          pointers.Deref(properties.RuntimeVersion),
+			"TokenRefreshExtensionHours":              pointers.Deref(properties.TokenRefreshExtensionHours),
+			"TokenStoreEnabled":                       pointers.Deref(properties.TokenStoreEnabled),
+			"TwitterConsumerKey":                      pointers.Deref(properties.TwitterConsumerKey),
+			"TwitterConsumerSecret":                   pointers.Deref(properties.TwitterConsumerSecret),
+			"TwitterConsumerSecretSettingName":        pointers.Deref(properties.TwitterConsumerSecretSettingName),
+			"UnauthenticatedClientAction":             pointers.Deref(properties.UnauthenticatedClientAction),
+			"ValidateIssuer":                          pointers.Deref(properties.ValidateIssuer),
+		},
+		Extension:      map[string]any{},
+		ResourceGroup:  webApp.ResourceGroup,
+		SubscriptionId: webApp.SubscriptionId,
+		TenantId:       webApp.TenantId,
+		Type:           pointers.Deref(response.Type),
+	}
+
+	return []AzureAsset{authSettings}, nil
 }
