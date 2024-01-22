@@ -40,7 +40,7 @@ cis_azure_7_2_pass = AzureServiceCase(
 
 cis_azure_7_2_fail = AzureServiceCase(
     rule_tag=CIS_7_2,
-    case_identifier="test-vm-fail",
+    case_identifier="test-vm-unmanaged",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -51,13 +51,13 @@ cis_azure_7_2 = {
 
 cis_azure_7_3_pass = AzureServiceCase(
     rule_tag=CIS_7_3,
-    case_identifier="test-vm-pass",
+    case_identifier="test-vm-unmanaged",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_7_3_fail = AzureServiceCase(
     rule_tag=CIS_7_3,
-    case_identifier="test-vm-fail",
+    case_identifier="attached-disk",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -89,7 +89,7 @@ cis_azure_7_4 = {
 
 cis_azure_virtual_machine_cases = {
     **cis_azure_7_1,
-    # **cis_azure_7_2,
-    # **cis_azure_7_3,
+    **cis_azure_7_2,
+    **cis_azure_7_3,
     **cis_azure_7_4,
 }
