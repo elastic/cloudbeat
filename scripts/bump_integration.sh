@@ -3,7 +3,7 @@ set -euo pipefail
 
 export MANIFEST_PATH="packages/cloud_security_posture/manifest.yml"
 export CHANGELOG_PATH="packages/cloud_security_posture/changelog.yml"
-export INTEGRATION_REPO="orouz/integrations" # TODO: change to elastic/integrations
+export INTEGRATION_REPO="elastic/integrations"
 export BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
 export MAJOR_MINOR_CLOUDBEAT=$(echo "$NEXT_CLOUDBEAT_VERSION" | cut -d. -f1,2)
 
@@ -14,7 +14,7 @@ checkout_integration_repo() {
     gh auth setup-git
     gh repo clone $INTEGRATION_REPO
     cd integrations
-    git checkout -b "$BRANCH" main
+    git checkout -b "$BRANCH" origin/main
 }
 
 get_next_integration_version() {
@@ -45,9 +45,15 @@ update_manifest_version_vars() {
 
 create_integrations_pr() {
     echo 'Creating a PR to update integration'
+    cat <<EOF >pr_body
+Bump integration version - \`$NEXT_INTEGRATION_VERSION\`
 
-    export PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
-        --body "Bumps integration to new version (Automated PR)" \
+> [!NOTE]  
+> This is an automated PR
+EOF
+
+    export PR_URL="$(gh pr create --title "[TEST][Cloud Security] Bump integration - DO NOT MERGE" \
+        --body-file pr_body \
         --base "main" \
         --head "$BRANCH" \
         --label "enhancement" \
