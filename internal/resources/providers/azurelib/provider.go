@@ -31,15 +31,16 @@ import (
 )
 
 type ProviderAPI interface {
+	governance.ProviderAPI
+	inventory.AppServiceProviderAPI
+	inventory.KeyVaultProviderAPI
+	inventory.MysqlProviderAPI
+	inventory.PostgresqlProviderAPI
 	inventory.ResourceGraphProviderAPI
 	inventory.SQLProviderAPI
-	inventory.MysqlProviderAPI
-	inventory.StorageAccountProviderAPI
-	inventory.PostgresqlProviderAPI
-	inventory.KeyVaultProviderAPI
-	inventory.SubscriptionProviderAPI
 	inventory.SecurityContactsProviderAPI
-	governance.ProviderAPI
+	inventory.StorageAccountProviderAPI
+	inventory.SubscriptionProviderAPI
 }
 
 type ProviderInitializer struct{}
@@ -70,26 +71,26 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 
 	resourceGraphProvider := inventory.NewResourceGraphProvider(log, resourceGraphClientFactory)
 	return &provider{
-		ResourceGraphProviderAPI:    resourceGraphProvider,
-		SQLProviderAPI:              inventory.NewSQLProvider(log, azureConfig.Credentials),
+		KeyVaultProviderAPI:         inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
 		MysqlProviderAPI:            inventory.NewMysqlProvider(log, azureConfig.Credentials),
 		PostgresqlProviderAPI:       inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
-		StorageAccountProviderAPI:   inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
-		KeyVaultProviderAPI:         inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
-		SubscriptionProviderAPI:     inventory.NewSubscriptionProvider(log, azureConfig.Credentials),
-		SecurityContactsProviderAPI: inventory.NewSecurityContacts(log, azureConfig.Credentials, genericARMClient),
 		ProviderAPI:                 governance.NewProvider(log, resourceGraphProvider),
+		ResourceGraphProviderAPI:    resourceGraphProvider,
+		SQLProviderAPI:              inventory.NewSQLProvider(log, azureConfig.Credentials),
+		SecurityContactsProviderAPI: inventory.NewSecurityContacts(log, azureConfig.Credentials, genericARMClient),
+		StorageAccountProviderAPI:   inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		SubscriptionProviderAPI:     inventory.NewSubscriptionProvider(log, azureConfig.Credentials),
 	}, nil
 }
 
 type provider struct {
+	governance.ProviderAPI
+	inventory.KeyVaultProviderAPI
+	inventory.MysqlProviderAPI
+	inventory.PostgresqlProviderAPI
 	inventory.ResourceGraphProviderAPI
 	inventory.SQLProviderAPI
-	inventory.MysqlProviderAPI
-	inventory.StorageAccountProviderAPI
-	inventory.PostgresqlProviderAPI
-	inventory.KeyVaultProviderAPI
-	inventory.SubscriptionProviderAPI
 	inventory.SecurityContactsProviderAPI
-	governance.ProviderAPI
+	inventory.StorageAccountProviderAPI
+	inventory.SubscriptionProviderAPI
 }
