@@ -54,7 +54,6 @@ func (e appServiceEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets
 }
 
 func (e appServiceEnricher) enrichWebAppWithAuthSettings(ctx context.Context, a *inventory.AzureAsset) error {
-	// TODO(kuba): plug this in
 	authSettings, err := e.provider.ListWebAppsAuthSettings(ctx, *a)
 	if err != nil {
 		return err
@@ -64,7 +63,6 @@ func (e appServiceEnricher) enrichWebAppWithAuthSettings(ctx context.Context, a 
 		return nil
 	}
 
-	// TODO(kuba): add custom key for WebApp's AuthSettings extension
-	a.AddExtension(inventory.ExtensionKeyVaultKeys, authSettings)
+	a.AddExtension(inventory.ExtensionAuthSettings, authSettings)
 	return nil
 }
