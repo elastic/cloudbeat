@@ -15,6 +15,9 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
 
+permissions:
+  contents: write
+
 jobs:
   bump_version:
     runs-on: ubuntu-latest
@@ -35,9 +38,12 @@ jobs:
           version=8.14.0
           echo "CURRENT_CLOUDBEAT_VERSION=$version" >> $GITHUB_ENV
           echo "Bumping $version to $NEXT_CLOUDBEAT_VERSION"
+          git checkout -b orz_test
+          git commit --allow-empty -m "test"
+          git push origin orz_test
 
-      - name: Bump cloudbeat
-        run: scripts/bump_cloudbeat.sh
+      # - name: Bump cloudbeat
+      #   run: scripts/bump_cloudbeat.sh
 
       # - name: Bump integration
       #   run: scripts/bump_integration.sh
