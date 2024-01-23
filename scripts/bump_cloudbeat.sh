@@ -62,6 +62,9 @@ update_version_arm_template() {
 
   sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$NEXT_MINOR_VERSION/g" $single_account_file
   sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$NEXT_MINOR_VERSION/g" $organization_account_file
+
+  ./deploy/azure/generate_dev_template.py --template-type single-account
+  ./deploy/azure/generate_dev_template.py --template-type organization-account
 }
 
 update_version_beat() {
