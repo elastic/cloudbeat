@@ -13,25 +13,25 @@ echo "CURRENT_MINOR_VERSION: $CURRENT_MINOR_VERSION"
 git config --global user.email "cloudsecmachine@users.noreply.github.com"
 git config --global user.name "Cloud Security Machine"
 
-create_release_branch() {
-  if git fetch origin "$CURRENT_MINOR_VERSION" 2>/dev/null; then
-    echo "• Release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
-  else
-    echo "• Create and push a new release branch $CURRENT_MINOR_VERSION from main"
-    git checkout -b "$CURRENT_MINOR_VERSION"
-    git fetch origin main
-    git reset --hard origin/main
-    echo "Push release branch $CURRENT_MINOR_VERSION to origin"
-    git push origin $CURRENT_MINOR_VERSION
+# create_release_branch() {
+#   if git fetch origin "$CURRENT_MINOR_VERSION" 2>/dev/null; then
+#     echo "• Release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
+#   else
+#     echo "• Create and push a new release branch $CURRENT_MINOR_VERSION from main"
+#     git checkout -b "$CURRENT_MINOR_VERSION"
+#     git fetch origin main
+#     git reset --hard origin/main
+#     echo "Push release branch $CURRENT_MINOR_VERSION to origin"
+#     git push origin $CURRENT_MINOR_VERSION
 
-    # git checkout main
-    # git pull --rebase origin main
-    # git checkout -b "$CURRENT_MINOR_VERSION" origin/main
-    # git log --merges --oneline --pretty=format:"%h %an %ad %s" --date=format-local:"%d/%m/%H:%M"
-    # echo "Push release branch $CURRENT_MINOR_VERSION to origin"
-    # git push origin $CURRENT_MINOR_VERSION
-  fi
-}
+#     # git checkout main
+#     # git pull --rebase origin main
+#     # git checkout -b "$CURRENT_MINOR_VERSION" origin/main
+#     # git log --merges --oneline --pretty=format:"%h %an %ad %s" --date=format-local:"%d/%m/%H:%M"
+#     # echo "Push release branch $CURRENT_MINOR_VERSION to origin"
+#     # git push origin $CURRENT_MINOR_VERSION
+#   fi
+# }
 
 update_version_mergify() {
   echo "Update .mergify.yml with new version"
@@ -79,7 +79,8 @@ create_cloudbeat_versions_pr() {
 }
 
 bump_cloudbeat() {
-  git checkout -b "$NEXT_CLOUDBEAT_BRANCH" main
+  git fetch origin main
+  git checkout -b "$NEXT_CLOUDBEAT_BRANCH" origin/main
   update_version_mergify
   update_version_arm_template
   update_version_beat
@@ -106,7 +107,7 @@ upload_cloud_formation_templates() {
   scripts/publish_cft.sh
 }
 
-create_release_branch
-# bump_cloudbeat
-# bump_hermit
+# create_release_branch
+bump_cloudbeat
+bump_hermit
 # upload_cloud_formation_templates
