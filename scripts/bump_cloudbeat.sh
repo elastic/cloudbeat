@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+export NEXT_CLOUDBEAT_BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
 export NEXT_MINOR_VERSION=$(echo $NEXT_CLOUDBEAT_VERSION | cut -d '.' -f1,2)
 export CURRENT_MINOR_VERSION=$(echo $CURRENT_CLOUDBEAT_VERSION | cut -d '.' -f1,2)
 
@@ -60,18 +61,17 @@ update_version_beat() {
 }
 
 create_cloudbeat_versions_pr() {
-  local BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
-  git checkout -b "$BRANCH" main
   git add .
   git commit -m "Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
-  git push origin "$BRANCH"
+  git push origin "$NEXT_CLOUDBEAT_BRANCH"
   gh pr create --title "Bump cloudbeat version" \
     --body "Bump cloudbeat to new version - $NEXT_CLOUDBEAT_VERSION (Automated PR)" \
     --base "main" \
-    --head "$BRANCH"
+    --head "$NEXT_CLOUDBEAT_BRANCH"
 }
 
 bump_cloudbeat() {
+  git checkout -b "$NEXT_CLOUDBEAT_BRANCH" main
   update_version_mergify
   update_version_arm_template
   update_version_beat
