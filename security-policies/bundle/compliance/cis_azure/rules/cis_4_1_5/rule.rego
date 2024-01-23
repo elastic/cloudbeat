@@ -22,7 +22,7 @@ is_transaparent_data_encryption_enabled_for_all_dbs if {
 	count(data_adapter.resource.extension.sqlTransparentDataEncryptions) > 0
 
 	every p in data_adapter.resource.extension.sqlTransparentDataEncryptions {
-		is_transparent_data_encryption_enabled(p.databaseName, p.state)
+		is_transparent_data_encryption_enabled(p.properties.databaseName, p.properties.state)
 	}
 }
 

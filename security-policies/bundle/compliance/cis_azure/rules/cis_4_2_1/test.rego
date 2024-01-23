@@ -7,25 +7,25 @@ import future.keywords.if
 
 test_violation if {
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": []})
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": [{"state": "Disabled"}]})
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": [{"properties": {"state": "Disabled"}}]})
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": [
-		{"state": "Disabled"},
-		{"state": "Enabled"},
+		{"properties": {"state": "Disabled"}},
+		{"properties": {"state": "Enabled"}},
 	]})
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": [
-		{"state": "Disabled"},
-		{"state": "Disabled"},
+		{"properties": {"state": "Disabled"}},
+		{"properties": {"state": "Disabled"}},
 	]})
 
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": [{"state": "Enabled"}]})
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": [{"properties": {"state": "Enabled"}}]})
 	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlAdvancedThreatProtectionSettings": [
-		{"state": "Enabled"},
-		{"state": "Enabled"},
-		{"state": "Enabled"},
+		{"properties": {"state": "Enabled"}},
+		{"properties": {"state": "Enabled"}},
+		{"properties": {"state": "Enabled"}},
 	]})
 }
 

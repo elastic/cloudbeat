@@ -8,17 +8,17 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_retention_days",
-		"value": "3",
+		"properties": {"value": "3"},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_retention_days",
-		"value": "1",
+		"properties": {"value": "1"},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_checkpoints",
-		"value": "on",
+		"properties": {"value": "on"},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": []})
@@ -29,12 +29,12 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_retention_days",
-		"value": "4",
+		"properties": {"value": "4"},
 	}]})
 
 	eval_pass with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_retention_days",
-		"value": "99",
+		"properties": {"value": "99"},
 	}]})
 }
 
