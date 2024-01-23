@@ -32,7 +32,10 @@ import (
 type ProviderAPI interface {
 	inventory.ResourceGraphProviderAPI
 	inventory.SQLProviderAPI
+	inventory.MysqlProviderAPI
 	inventory.StorageAccountProviderAPI
+	inventory.PostgresqlProviderAPI
+	inventory.KeyVaultProviderAPI
 	governance.ProviderAPI
 }
 
@@ -61,7 +64,10 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 	return &provider{
 		ResourceGraphProviderAPI:  resourceGraphProvider,
 		SQLProviderAPI:            inventory.NewSQLProvider(log, azureConfig.Credentials),
+		MysqlProviderAPI:          inventory.NewMysqlProvider(log, azureConfig.Credentials),
+		PostgresqlProviderAPI:     inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
 		StorageAccountProviderAPI: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		KeyVaultProviderAPI:       inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
 		ProviderAPI:               governance.NewProvider(log, resourceGraphProvider),
 	}, nil
 }
@@ -69,6 +75,9 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 type provider struct {
 	inventory.ResourceGraphProviderAPI
 	inventory.SQLProviderAPI
+	inventory.MysqlProviderAPI
 	inventory.StorageAccountProviderAPI
+	inventory.PostgresqlProviderAPI
+	inventory.KeyVaultProviderAPI
 	governance.ProviderAPI
 }

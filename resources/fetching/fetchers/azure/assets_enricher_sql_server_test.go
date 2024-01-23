@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -30,40 +31,15 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type enricherResponse struct {
-	assets []inventory.AzureAsset
-	err    error
-}
-
-func noRes() enricherResponse {
-	return enricherResponse{
-		assets: nil,
-		err:    nil,
-	}
-}
-
-func assetRes(a ...inventory.AzureAsset) enricherResponse {
-	return enricherResponse{
-		assets: a,
-		err:    nil,
-	}
-}
-
-func errorRes(err error) enricherResponse {
-	return enricherResponse{
-		assets: nil,
-		err:    err,
-	}
-}
-
 func TestSQLServerEnricher_Enrich(t *testing.T) {
 	tcs := map[string]struct {
-		input       []inventory.AzureAsset
-		expected    []inventory.AzureAsset
-		expectError bool
-		epRes       map[string]enricherResponse
-		bapRes      map[string]enricherResponse
-		tdeRes      map[string]enricherResponse
+		input               []inventory.AzureAsset
+		expected            []inventory.AzureAsset
+		expectError         bool
+		epRes               map[string]enricherResponse
+		bapRes              map[string]enricherResponse
+		tdeRes              map[string]enricherResponse
+		threatProtectionRes map[string]enricherResponse
 	}{
 		"Some assets have encryption protection, others don't": {
 			input: []inventory.AzureAsset{
@@ -72,8 +48,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id2", "serverName2"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{epProps("serverKey1", true)},
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []inventory.AzureAsset{
+						mockEncryptionProtector("ep1", epProps("serverKey1", true)),
+					},
 				}),
 				mockOther("id4"),
 				mockSQLServer("id2", "serverName2"),
@@ -90,16 +68,20 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
 		"Multiple encryption protectors": {
 			input: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						epProps("serverKey1", true),
-						epProps("serverKey2", false),
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []inventory.AzureAsset{
+						mockEncryptionProtector("ep1", epProps("serverKey1", true)),
+						mockEncryptionProtector("ep2", epProps("serverKey2", false)),
 					},
 				}),
 			},
@@ -114,6 +96,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			tdeRes: map[string]enricherResponse{
 				"serverName1": noRes(),
 			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+			},
 		},
 		"Error in one encryption protector": {
 			expectError: true,
@@ -123,9 +108,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						epProps("serverKey1", true),
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []inventory.AzureAsset{
+						mockEncryptionProtector("ep1", epProps("serverKey1", true)),
 					},
 				}),
 			},
@@ -141,6 +126,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
 		"Error in one blob audit policy": {
 			expectError: true,
@@ -150,9 +139,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{
-						epProps("serverKey1", true),
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []inventory.AzureAsset{
+						mockEncryptionProtector("ep1", epProps("serverKey1", true)),
 					},
 				}),
 			},
@@ -168,6 +157,41 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+		},
+		"Error in one threat protection": {
+			expectError: true,
+			input: []inventory.AzureAsset{
+				mockSQLServer("id1", "serverName1"),
+				mockSQLServer("id2", "serverName2"),
+			},
+			expected: []inventory.AzureAsset{
+				mockSQLServer("id1", "serverName1"),
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []inventory.AzureAsset{
+						mockEncryptionProtector("ep1", epProps("serverKey1", true)),
+					},
+				}),
+			},
+			epRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": assetRes(mockEncryptionProtector("ep1", epProps("serverKey1", true))),
+			},
+			bapRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+			tdeRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": errorRes(errors.New("error")),
+			},
 		},
 		"Multiple transparent data encryption": {
 			input: []inventory.AzureAsset{
@@ -175,10 +199,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				mockSQLServer("id2", "serverName2"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
-					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{
-						tdeProps("Enabled"),
-						tdeProps("Disabled"),
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
+					inventory.ExtensionSQLTransparentDataEncryptions: []inventory.AzureAsset{
+						mockTransparentDataEncryption("tde1", tdeProps("Enabled")),
+						mockTransparentDataEncryption("tde2", tdeProps("Disabled")),
 					},
 				}),
 				mockSQLServer("id2", "serverName2"),
@@ -198,6 +222,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				),
 				"serverName2": noRes(),
 			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
 		"Error in one transparent data encryption": {
 			expectError: true,
@@ -207,9 +235,11 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
-				mockSQLServerWithEncryptionProtectorExtension("id2", "serverName2", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors: []map[string]any{epProps("serverKey1", true)},
-					inventory.ExtensionSQLBlobAuditPolicy:      bapProps("Enabled"),
+				addExtension(mockSQLServer("id2", "serverName2"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []inventory.AzureAsset{
+						mockEncryptionProtector("ep1", epProps("serverKey1", true)),
+					},
+					inventory.ExtensionSQLBlobAuditPolicy: mockBlobAuditingPolicies("ep2", bapProps("Enabled")),
 				}),
 			},
 			epRes: map[string]enricherResponse{
@@ -218,22 +248,33 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			bapRes: map[string]enricherResponse{
 				"serverName1": noRes(),
-				"serverName2": assetRes(mockBlobAuditingPolicies("ep1", bapProps("Enabled"))),
+				"serverName2": assetRes(mockBlobAuditingPolicies("ep2", bapProps("Enabled"))),
 			},
 			tdeRes: map[string]enricherResponse{
 				"serverName1": noRes(),
 				"serverName2": errorRes(errors.New("error")),
 			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
-		"Encryption Protector,  blob audit policies and transparent data encryption": {
+		"All enrichments": {
 			input: []inventory.AzureAsset{
 				mockSQLServer("id1", "serverName1"),
 			},
 			expected: []inventory.AzureAsset{
-				mockSQLServerWithEncryptionProtectorExtension("id1", "serverName1", map[string]any{
-					inventory.ExtensionSQLEncryptionProtectors:       []map[string]any{epProps("serverKey1", true)},
-					inventory.ExtensionSQLBlobAuditPolicy:            bapProps("Disabled"),
-					inventory.ExtensionSQLTransparentDataEncryptions: []map[string]any{tdeProps("Enabled")},
+				addExtension(mockSQLServer("id1", "serverName1"), map[string]any{
+					inventory.ExtensionSQLEncryptionProtectors: []inventory.AzureAsset{
+						mockEncryptionProtector("ep1", epProps("serverKey1", true)),
+					},
+					inventory.ExtensionSQLBlobAuditPolicy: mockBlobAuditingPolicies("ep1", bapProps("Disabled")),
+					inventory.ExtensionSQLTransparentDataEncryptions: []inventory.AzureAsset{
+						mockTransparentDataEncryption("tde1", tdeProps("Enabled")),
+					},
+					inventory.ExtensionSQLAdvancedThreatProtectionSettings: []inventory.AzureAsset{
+						mockThreatProtection("tde1", threatProtectionPros("Enabled")),
+					},
 				}),
 			},
 			epRes: map[string]enricherResponse{
@@ -244,6 +285,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			tdeRes: map[string]enricherResponse{
 				"serverName1": assetRes(mockTransparentDataEncryption("tde1", tdeProps("Enabled"))),
+			},
+			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": assetRes(mockThreatProtection("tde1", threatProtectionPros("Enabled"))),
 			},
 		},
 	}
@@ -265,6 +309,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				provider.EXPECT().ListSQLTransparentDataEncryptions(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
 			}
 
+			for serverName, r := range tc.threatProtectionRes {
+				provider.EXPECT().ListSQLAdvancedThreatProtectionSettings(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+			}
+
 			e := sqlServerEnricher{provider: provider}
 
 			err := e.Enrich(context.Background(), cmd, tc.input)
@@ -279,10 +327,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 	}
 }
 
-func mockSQLServerWithEncryptionProtectorExtension(id, name string, ext map[string]any) inventory.AzureAsset {
-	m := mockSQLServer(id, name)
-	m.Extension = ext
-	return m
+func addExtension(a inventory.AzureAsset, ext map[string]any) inventory.AzureAsset {
+	a.Extension = ext
+	return a
 }
 
 func mockSQLServer(id, name string) inventory.AzureAsset {
@@ -315,6 +362,14 @@ func mockTransparentDataEncryption(id string, props map[string]any) inventory.Az
 	return inventory.AzureAsset{
 		Id:         id,
 		Type:       inventory.SQLServersAssetType + "/transparentDataEncryption",
+		Properties: props,
+	}
+}
+
+func mockThreatProtection(id string, props map[string]any) inventory.AzureAsset {
+	return inventory.AzureAsset{
+		Id:         id,
+		Type:       inventory.SQLServersAssetType + "/threatProtection",
 		Properties: props,
 	}
 }
@@ -357,5 +412,13 @@ func bapProps(state string) map[string]any {
 func tdeProps(state string) map[string]any {
 	return map[string]any{
 		"state": state,
+	}
+}
+
+func threatProtectionPros(state string) map[string]any {
+	creationTime, _ := time.Parse("2006-01-02", "2023-01-01")
+	return map[string]any{
+		"state":        state,
+		"creationTime": creationTime,
 	}
 }

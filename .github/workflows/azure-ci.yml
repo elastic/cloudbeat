@@ -1,6 +1,7 @@
 name: CIS-AZURE-CI
 
 on:
+  # TODO: Remove after testing
   workflow_dispatch:
     inputs:
   pull_request_target:
@@ -12,12 +13,11 @@ on:
 jobs:
   Run-CSPM-AZURE-Tests:
     name: CIS AZURE integration test
-    if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install Poetry
         run: |
@@ -47,6 +47,10 @@ jobs:
           stack-version: ${{ env.ELK_VERSION }}
           security-enabled: false
 
+      - name: Elasticsearch disable dynamic mapping for findings
+        run: |
+          curl -s -XPUT http://localhost:9200/_index_template/common_template -H 'Content-Type: application/json' -d '{ "index_patterns": ["logs-cloud_security_posture.findings*"], "priority": 500, "template": { "mappings": { "dynamic": false, "properties": { "resource": { "dynamic": false, "properties": { "type": { "type": "keyword" } } }, "result": { "dynamic": false, "properties": { "evaluation": { "type": "keyword" } } }, "rule": { "dynamic": false, "properties": { "benchmark": { "dynamic": false, "properties": { "id": { "type": "keyword" } } }, "tags": { "type": "keyword" } } }, "agent": { "dynamic": false, "properties": { "id": { "type": "keyword" }, "version": { "type": "keyword" } } }, "@timestamp": { "type": "date" } } } } }'
+
       - name: Run cloudbeat in background
         env:
           ES_HOST: http://localhost:9200
@@ -54,11 +58,14 @@ jobs:
           ES_PASSWORD: changeme
           AZURE_ACCOUNT_TYPE: single-account
           AZURE_CREDENTIALS_TYPE: service_principal_with_client_secret
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CREDENTIALS.clientId }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CREDENTIALS.clientSecret }}
+          AZURE_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+          AZURE_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+          AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
         run: |
           ./cloudbeat -c deploy/azure/cloudbeat-azure.yml -d '*' &
+
+      - name: Wait for cloudbeat to send events
+        run: sleep 264
 
       - name: Check for findings
         working-directory: ./tests
@@ -66,7 +73,7 @@ jobs:
           USE_K8S: false
         run: |
           poetry install
-          poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+          poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
       - name: Print cloudbeat logs
         if: always()

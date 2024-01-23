@@ -8,11 +8,14 @@ import future.keywords.if
 test_violation if {
 	# fail if ssl_enforcement is disabled
 	eval_fail with input as test_data.generate_postgresql_server_with_ssl_enforcement("Disabled")
+	eval_fail with input as test_data.generate_postgresql_server_with_ssl_enforcement("")
 }
 
 test_pass if {
 	# pass if ssl_enforcement is enabled
 	eval_pass with input as test_data.generate_postgresql_server_with_ssl_enforcement("Enabled")
+	eval_pass with input as test_data.generate_postgresql_server_with_ssl_enforcement("enabled")
+	eval_pass with input as test_data.generate_postgresql_server_with_ssl_enforcement("ENABLED")
 }
 
 test_not_evaluated if {

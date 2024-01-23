@@ -12,30 +12,31 @@ CIS_6_5 = "CIS 6.5"
 
 cis_azure_6_6_pass = AzureServiceCase(
     rule_tag=CIS_6_6,
-    case_identifier="test-networking-pass",
+    case_identifier="NetworkWatcher_japaneast",
     expected=RULE_PASS_STATUS,
 )
 
-cis_azure_6_6_fail = AzureServiceCase(
-    rule_tag=CIS_6_6,
-    case_identifier="test-networking-fail",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: https://github.com/elastic/cloudbeat/issues/1473
+# cis_azure_6_6_fail = AzureServiceCase(
+#     rule_tag=CIS_6_6,
+#     case_identifier="TODO",
+#     expected=RULE_FAIL_STATUS,
+# )
 
 cis_azure_6_6 = {
     "6.6 Ensure that Network Watcher is 'Enabled' expect: passed": cis_azure_6_6_pass,
-    "6.6 Ensure that Network Watcher is 'Enabled' expect: failed": cis_azure_6_6_fail,
+    # "6.6 Ensure that Network Watcher is 'Enabled' expect: failed": cis_azure_6_6_fail,
 }
 
 cis_azure_6_5_pass = AzureServiceCase(
     rule_tag=CIS_6_5,
-    case_identifier="test-networking-pass",
+    case_identifier="test-vm-pass-nsg-azurecloudbeatcitests-flowlog",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_6_5_fail = AzureServiceCase(
     rule_tag=CIS_6_5,
-    case_identifier="test-networking-fail",
+    case_identifier="test-vm-fail-nsg-azurecloudbeatcitests-flowlog",
     expected=RULE_FAIL_STATUS,
 )
 

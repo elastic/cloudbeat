@@ -19,9 +19,9 @@ finding = result if {
 default is_retention_long_enough = false
 
 is_retention_long_enough if {
-	data_adapter.resource.extension.sqlBlobAuditPolicy.retentionDays > 90
+	data_adapter.resource.extension.sqlBlobAuditPolicy.properties.retentionDays > 90
 }
 
 is_retention_long_enough if {
-	data_adapter.resource.extension.sqlBlobAuditPolicy.retentionDays == 0 # unlimited retention
+	data_adapter.resource.extension.sqlBlobAuditPolicy.properties.retentionDays == 0 # unlimited retention
 }

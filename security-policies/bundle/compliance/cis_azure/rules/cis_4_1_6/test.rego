@@ -6,17 +6,17 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"retentionDays": 55}})
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"retentionDays": 90}})
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"retentionDays": 1}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"retentionDays": 55}}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"retentionDays": 90}}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"retentionDays": 1}}})
 
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"retentionDays": 91}})
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"retentionDays": 1000}})
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"retentionDays": 0}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"retentionDays": 91}}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"retentionDays": 1000}}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"retentionDays": 0}}})
 }
 
 test_not_evaluated if {

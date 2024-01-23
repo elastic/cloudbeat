@@ -37,6 +37,7 @@ func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets 
 		s.enrichSQLEncryptionProtector,
 		s.enrichSQLBlobAuditPolicy,
 		s.enrichTransparentDataEncryption,
+		s.enrichAdvancedThreatProtectionSettings,
 	}
 
 	for i, a := range assets {
@@ -66,12 +67,7 @@ func (s sqlServerEnricher) enrichSQLEncryptionProtector(ctx context.Context, a *
 		return nil
 	}
 
-	props := make([]map[string]any, 0, len(encryptProtectors))
-	for _, ep := range encryptProtectors {
-		props = append(props, ep.Properties)
-	}
-
-	a.AddExtension(inventory.ExtensionSQLEncryptionProtectors, props)
+	a.AddExtension(inventory.ExtensionSQLEncryptionProtectors, encryptProtectors)
 	return nil
 }
 
@@ -85,8 +81,7 @@ func (s sqlServerEnricher) enrichSQLBlobAuditPolicy(ctx context.Context, a *inve
 		return nil
 	}
 
-	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0].Properties)
-
+	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0])
 	return nil
 }
 
@@ -100,11 +95,20 @@ func (s sqlServerEnricher) enrichTransparentDataEncryption(ctx context.Context, 
 		return nil
 	}
 
-	props := make([]map[string]any, 0, len(tdes))
-	for _, tde := range tdes {
-		props = append(props, tde.Properties)
+	a.AddExtension(inventory.ExtensionSQLTransparentDataEncryptions, tdes)
+	return nil
+}
+
+func (s sqlServerEnricher) enrichAdvancedThreatProtectionSettings(ctx context.Context, a *inventory.AzureAsset) error {
+	settings, err := s.provider.ListSQLAdvancedThreatProtectionSettings(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return err
 	}
 
-	a.AddExtension(inventory.ExtensionSQLTransparentDataEncryptions, props)
+	if len(settings) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
 	return nil
 }

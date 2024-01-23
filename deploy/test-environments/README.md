@@ -63,7 +63,8 @@ Please note that the customized image is currently available in the following re
 |:-------------:|:-------------:|:------------|
 | ec_api_key    |   None   | The API key for Elastic Cloud can also be defined using the `TF_VAR_ec_api_key` environment variable |
 | ess_region    | gcp-us-west2 | The ESS deployment region can also be defined using the `TF_VAR_stack_version` environment variable|
-| stack_version | latest | The ELK stack version can alsob be defined using the `TF_VAR_stack_version` environment variable |
+| stack_version | latest | The ELK stack version can also be defined using the `TF_VAR_stack_version` environment variable |
+| pin_version   | None | Optional: The ELK pin version (docker tag override) can also be defined using the `TF_VAR_pin_version` environment variable |
 
 ## Execution
 
@@ -103,6 +104,13 @@ terraform apply --auto-approve -target "module.aws_ec2_for_kspm"
 ```bash
 terraform apply --auto-approve -target "module.ec_deployment"
 ```
+
+BC version
+
+```bash
+terraform apply --auto-approve -var="stack_version=8.12.0" -var="pin_version=8.12.0-9f05a310" -target "module.ec_deployment"
+```
+
 
 - EKS Deployment
 

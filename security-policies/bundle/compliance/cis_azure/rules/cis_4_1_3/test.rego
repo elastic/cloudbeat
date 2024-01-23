@@ -7,43 +7,43 @@ import future.keywords.if
 
 test_violation if {
 	# Fail with ServiceManaged
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{"properties": {
 		"serverKeyType": "ServiceManaged",
 		"kind": "azurekeyvault",
 		"uri": "any",
-	}]})
+	}}]})
 
 	# Fail with non azurekeyvault kind
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{"properties": {
 		"serverKeyType": "AzureKeyVault",
 		"kind": "other",
 		"uri": "any",
-	}]})
+	}}]})
 
 	# Fail with empty uri
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{"properties": {
 		"serverKeyType": "AzureKeyVault",
 		"kind": "azurekeyvault",
 		"uri": "",
-	}]})
+	}}]})
 
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{"properties": {
 		"serverKeyType": "AzureKeyVault",
 		"kind": "azurekeyvault",
-	}]})
+	}}]})
 
 	# fail with one good
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [
-		{
+		{"properties": {
 			"serverKeyType": "AzureKeyVault",
 			"kind": "azurekeyvault",
 			"uri": "",
-		},
-		{
+		}},
+		{"properties": {
 			"serverKeyType": "AzureKeyVault",
 			"kind": "azurekeyvault",
 			"uri": "uri",
-		},
+		}},
 	]})
 
 	# fail with without protector
@@ -51,28 +51,28 @@ test_violation if {
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [{"properties": {
 		"serverKeyType": "AzureKeyVault",
 		"kind": "azurekeyvault",
 		"uri": "uri",
-	}]})
+	}}]})
 
 	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlEncryptionProtectors": [
-		{
+		{"properties": {
 			"serverKeyType": "AzureKeyVault",
 			"kind": "azurekeyvault",
 			"uri": "uri",
-		},
-		{
+		}},
+		{"properties": {
 			"serverKeyType": "AzureKeyVault",
 			"kind": "azurekeyvault",
 			"uri": "uri",
-		},
-		{
+		}},
+		{"properties": {
 			"serverKeyType": "AzureKeyVault",
 			"kind": "azurekeyvault",
 			"uri": "uri",
-		},
+		}},
 	]})
 }
 
