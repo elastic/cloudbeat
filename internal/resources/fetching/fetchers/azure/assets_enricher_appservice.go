@@ -37,7 +37,7 @@ func (e appServiceEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets
 
 	var errs []error
 	for i, a := range assets {
-		if a.Type != inventory.VaultAssetType {
+		if a.Type != inventory.WebsitesAssetType {
 			continue
 		}
 
