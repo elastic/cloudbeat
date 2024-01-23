@@ -8,15 +8,11 @@ on:
     #     required: true
 
 env:
-  # GH_TOKEN: ${{ secrets.CLOUDSEC_CLIENT_TOKEN }}
   GH_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
   NEXT_CLOUDBEAT_VERSION: 8.15.0
   AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
-
-permissions:
-  contents: write
 
 jobs:
   bump_version:
@@ -39,14 +35,8 @@ jobs:
           echo "CURRENT_CLOUDBEAT_VERSION=$version" >> $GITHUB_ENV
           echo "Bumping $version to $NEXT_CLOUDBEAT_VERSION"
 
-          git config --global user.email "cloudsecmachine@users.noreply.github.com"
-          git config --global user.name "Cloud Security Machine"
-          git checkout -b orz_test
-          git commit --allow-empty -m "test"
-          git push origin orz_test
-
-      # - name: Bump cloudbeat
-      #   run: scripts/bump_cloudbeat.sh
+      - name: Bump cloudbeat
+        run: scripts/bump_cloudbeat.sh
 
       # - name: Bump integration
       #   run: scripts/bump_integration.sh
