@@ -27,6 +27,12 @@
             "metadata": {
                 "description": "The enrollment token of elastic-agent"
             }
+        },
+        "PublicKeyDevOnly": {
+            "type": "string",
+            "metadata": {
+                "description": "The public key of the SSH key pair"
+            }
         }
     },
     "variables": {
@@ -94,8 +100,7 @@
                             "name": "cloudbeatVM",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "cloudbeatNic",
-                                "cloudbeatGenerateKeypair"
+                                "cloudbeatNic"
                             ],
                             "properties": {
                                 "hardwareProfile": {
@@ -124,7 +129,7 @@
                                             "publicKeys": [
                                                 {
                                                     "path": "/home/cloudbeat/.ssh/authorized_keys",
-                                                    "keyData": "[reference('cloudbeatGenerateKeypair').outputs.public_key]"
+                                                    "keyData": "[parameters('PublicKeyDevOnly')]"
                                                 }
                                             ]
                                         }
@@ -157,11 +162,17 @@
                                     {
                                         "name": "cloudbeatSubnet",
                                         "properties": {
-                                            "addressPrefix": "10.0.0.0/24"
+                                            "addressPrefix": "10.0.0.0/24",
+                                            "networkSecurityGroup": {
+                                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', 'cloudbeatNSGDevOnly')]"
+                                            }
                                         }
                                     }
                                 ]
-                            }
+                            },
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/networkSecurityGroups', 'cloudbeatNSGDevOnly')]"
+                            ]
                         },
                         {
                             "type": "Microsoft.Network/networkInterfaces",
@@ -169,7 +180,8 @@
                             "name": "cloudbeatNic",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "cloudbeatVNet"
+                                "cloudbeatVNet",
+                                "[resourceId('Microsoft.Network/publicIPAddresses', 'cloudbeatPublicIPDevOnly')]"
                             ],
                             "properties": {
                                 "ipConfigurations": [
@@ -178,6 +190,9 @@
                                         "properties": {
                                             "subnet": {
                                                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'cloudbeatVNet', 'cloudbeatSubnet')]"
+                                            },
+                                            "publicIpAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'cloudbeatPublicIPDevOnly')]"
                                             }
                                         }
                                     }
@@ -203,20 +218,48 @@
                             }
                         },
                         {
-                            "type": "Microsoft.Resources/deploymentScripts",
-                            "apiVersion": "2020-10-01",
-                            "name": "cloudbeatGenerateKeypair",
+                            "type": "Microsoft.Network/publicIPAddresses",
+                            "name": "cloudbeatPublicIpDevOnly",
+                            "apiVersion": "2020-05-01",
                             "location": "[resourceGroup().location]",
-                            "kind": "AzureCLI",
                             "properties": {
-                                "azCliVersion": "2.51.0",
-                                "cleanupPreference": "Always",
-                                "retentionInterval": "P1D",
-                                "scriptContent": "#/bin/bash -e\nyes | ssh-keygen -f sshkey -N ''\necho \"{\\\"public_key\\\":\\\"$(cat sshkey.pub)\\\"}\" > $AZ_SCRIPTS_OUTPUT_PATH",
-                                "timeout": "PT30M"
+                                "publicIPAllocationMethod": "Dynamic"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "name": "cloudbeatNSGDevOnly",
+                            "apiVersion": "2021-04-01",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "AllowSshAll",
+                                        "properties": {
+                                            "access": "Allow",
+                                            "destinationAddressPrefix": "*",
+                                            "destinationPortRange": "22",
+                                            "direction": "Inbound",
+                                            "priority": 100,
+                                            "protocol": "Tcp",
+                                            "sourceAddressPrefix": "*",
+                                            "sourcePortRange": "*"
+                                        }
+                                    }
+                                ]
                             }
                         }
-                    ]
+                    ],
+                    "parameters": {
+                        "PublicKeyDevOnly": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "parameters": {
+                    "PublicKeyDevOnly": {
+                        "value": "[parameters('PublicKeyDevOnly')]"
+                    }
                 }
             }
         },
@@ -272,9 +315,9 @@
                                 "typeHandlerVersion": "2.1",
                                 "settings": {
                                     "fileUris": [
-                                        "https://raw.githubusercontent.com/elastic/cloudbeat/main/deploy/azure/install-agent.sh"
+                                        "https://raw.githubusercontent.com/elastic/cloudbeat/main/deploy/azure/install-agent-dev.sh"
                                     ],
-                                    "commandToExecute": "[concat('bash install-agent.sh ', parameters('ElasticAgentVersion'), ' ', parameters('ElasticArtifactServer'), ' ', parameters('FleetUrl'), ' ', parameters('EnrollmentToken'))]"
+                                    "commandToExecute": "[concat('bash install-agent-dev.sh ', parameters('ElasticAgentVersion'), ' ', parameters('ElasticArtifactServer'), ' ', parameters('FleetUrl'), ' ', parameters('EnrollmentToken'))]"
                                 }
                             }
                         }
