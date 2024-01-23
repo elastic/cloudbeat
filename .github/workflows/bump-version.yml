@@ -38,6 +38,9 @@ jobs:
           version=8.14.0
           echo "CURRENT_CLOUDBEAT_VERSION=$version" >> $GITHUB_ENV
           echo "Bumping $version to $NEXT_CLOUDBEAT_VERSION"
+
+          git config --global user.email "cloudsecmachine@users.noreply.github.com"
+          git config --global user.name "Cloud Security Machine"
           git checkout -b orz_test
           git commit --allow-empty -m "test"
           git push origin orz_test
