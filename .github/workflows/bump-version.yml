@@ -22,6 +22,7 @@ jobs:
       - name: Checkout Cloudbeat repo
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }} # TODO: remove
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
       - name: exract version
