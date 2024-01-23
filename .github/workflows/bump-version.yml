@@ -1,16 +1,16 @@
 name: Bump Cloudbeat version
 
 on:
-  workflow_dispatch:
-    inputs:
-      cloudbeat_version:
-        description: "New cloudbeat version number to bump to (e.g. 8.13.0)"
-        required: true
+  pull_request:
+    # inputs:
+    #   cloudbeat_version:
+    #     description: "New cloudbeat version number to bump to (e.g. 8.13.0)"
+    #     required: true
 
 env:
   # GH_TOKEN: ${{ secrets.CLOUDSEC_CLIENT_TOKEN }}
   GH_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_BUMP_TOKEN }}
-  NEXT_CLOUDBEAT_VERSION: ${{ inputs.cloudbeat_version }}
+  NEXT_CLOUDBEAT_VERSION: 8.15.0
   AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
 
