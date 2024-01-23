@@ -15,9 +15,7 @@ git config --global user.name "Cloud Security Machine"
 
 create_release_branch() {
   if git fetch origin "$CURRENT_MINOR_VERSION" 2>/dev/null; then
-    echo "release branch '$CURRENT_MINOR_VERSION' already exists"
-    git checkout "$CURRENT_MINOR_VERSION"
-    git pull origin $CURRENT_MINOR_VERSION
+    echo "release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
   else
     echo "Create and push a new release branch $CURRENT_MINOR_VERSION from main"
     git checkout -b "$CURRENT_MINOR_VERSION" main
@@ -64,8 +62,8 @@ create_cloudbeat_versions_pr() {
   git add .
   git commit -m "Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
   git push origin "$NEXT_CLOUDBEAT_BRANCH"
-  gh pr create --title "Bump cloudbeat version" \
-    --body "Bump cloudbeat to new version - $NEXT_CLOUDBEAT_VERSION (Automated PR)" \
+  gh pr create --title "[TEST] Bump cloudbeat version" \
+    --body "Bump cloudbeat to new version - $NEXT_CLOUDBEAT_VERSION (Automated PR)\n THIS IS A TEST, NOT TO BE MERGED" \
     --base "main" \
     --head "$NEXT_CLOUDBEAT_BRANCH"
 }
@@ -83,10 +81,10 @@ bump_hermit() {
   git checkout -b "$BRANCH" main
   sed -i'' -E "s/\"CLOUDBEAT_VERSION\": .*/\"CLOUDBEAT_VERSION\": \"$NEXT_CLOUDBEAT_VERSION\",/g" bin/hermit.hcl
   git add bin/hermit.hcl
-  git commit -m "Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
+  git commit -m "[TEST] Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
   git push origin "$BRANCH"
   gh pr create --title "Bump hermit cloudbeat version" \
-    --body "to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available. (Automated PR)" \
+    --body "to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available. (Automated PR) \n THIS IS A TEST, NOT TO BE MERGED" \
     --base "main" \
     --head "$BRANCH"
 }
