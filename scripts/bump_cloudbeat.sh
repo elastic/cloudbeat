@@ -18,9 +18,11 @@ create_release_branch() {
     echo "• Release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
   else
     echo "• Create and push a new release branch $CURRENT_MINOR_VERSION from main"
+    echo 'fetch main'
     git fetch origin main
+    echo 'checkout main'
     git checkout main
-    git log
+    # git log
     # git pull --rebase origin main
     # git checkout -b "$CURRENT_MINOR_VERSION" origin/main
     # echo "Push release branch $CURRENT_MINOR_VERSION to origin"
