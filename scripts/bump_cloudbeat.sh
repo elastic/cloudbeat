@@ -17,17 +17,13 @@ create_release_branch() {
   if git fetch origin "$CURRENT_MINOR_VERSION" 2>/dev/null; then
     echo "• Release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
   else
-    git log --oneline --pretty=format:"%h %an %ad %s" --date=format-local:"%d/%m/%H:%M"
-    # echo "• Create and push a new release branch $CURRENT_MINOR_VERSION from main"
-    # echo 'fetch main'
-    # git fetch origin main
-    # echo 'checkout main'
-    # git checkout main
-    # git log
-    # git pull --rebase origin main
-    # git checkout -b "$CURRENT_MINOR_VERSION" origin/main
-    # echo "Push release branch $CURRENT_MINOR_VERSION to origin"
-    # git push origin $CURRENT_MINOR_VERSION
+    echo "• Create and push a new release branch $CURRENT_MINOR_VERSION from main"
+    git fetch origin main
+    git checkout main
+    git pull --rebase origin main
+    git checkout -b "$CURRENT_MINOR_VERSION" origin/main
+    echo "Push release branch $CURRENT_MINOR_VERSION to origin"
+    git push origin $CURRENT_MINOR_VERSION
   fi
 }
 
