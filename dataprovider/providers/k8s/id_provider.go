@@ -20,6 +20,7 @@ package k8s
 import (
 	"github.com/gofrs/uuid"
 
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 )
@@ -32,7 +33,7 @@ type idProvider struct {
 	nodeID    string
 }
 
-func NewIdProvider(clusterID, nodeID string) *idProvider {
+func NewIdProvider(clusterID, nodeID string) dataprovider.IdProvider {
 	return &idProvider{
 		namespace: uuidNamespace,
 		clusterID: clusterID,

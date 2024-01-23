@@ -53,6 +53,7 @@ func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
+//revive:disable-next-line:function-result-limit
 func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
@@ -70,12 +71,9 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	}
 
 	return registry.NewRegistry(
-			log,
-			registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
-		), cloud.NewDataProvider(
-			cloud.WithLogger(log),
-			cloud.WithAccount(*awsIdentity),
-		), nil, nil
+		log,
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
+	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 
 func (a *AWS) checkDependencies() error {

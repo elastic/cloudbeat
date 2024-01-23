@@ -19,15 +19,14 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -133,10 +132,9 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 			f := NetworkFetcher{
-				log:           testhelper.NewLogger(t),
-				ec2Client:     tt.networkProvider(),
-				resourceCh:    ch,
-				cloudIdentity: &cloud.Identity{Account: tt.name},
+				log:        testhelper.NewLogger(t),
+				ec2Client:  tt.networkProvider(),
+				resourceCh: ch,
 			}
 
 			err := f.Fetch(ctx, cycle.Metadata{})
@@ -154,7 +152,6 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 func TestACLResource_GetMetadata(t *testing.T) {
 	r := NetworkResource{
 		AwsResource: ec2.NACLInfo{},
-		identity:    &cloud.Identity{},
 	}
 	meta, err := r.GetMetadata()
 	require.NoError(t, err)

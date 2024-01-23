@@ -55,6 +55,7 @@ func (a *AWSOrg) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
+//revive:disable-next-line:function-result-limit
 func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
@@ -90,10 +91,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 			return m, nil
 		}))
 
-	return reg, cloud.NewDataProvider(
-		cloud.WithLogger(log),
-		cloud.WithAccount(*awsIdentity),
-	), nil, nil
+	return reg, cloud.NewDataProvider(), nil, nil
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
@@ -114,7 +112,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 		return nil, err
 	}
 
-	var accounts []preset.AwsAccount
+	accounts := make([]preset.AwsAccount, 0, len(accountIdentities))
 	for _, identity := range accountIdentities {
 		var memberCfg awssdk.Config
 		if identity.Account == rootIdentity.Account {

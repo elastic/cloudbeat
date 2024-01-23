@@ -20,6 +20,8 @@ package iam
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -29,7 +31,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/smithy-go"
 	"github.com/gocarina/gocsv"
-	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -42,7 +43,6 @@ const (
 )
 
 func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
-	var users []awslib.AwsResource
 	apiUsers, err := p.listUsers(ctx)
 	if err != nil {
 		p.log.Errorf("fail to list users, error: %v", err)
@@ -59,6 +59,7 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		apiUsers = append(apiUsers, *rootUser)
 	}
 
+	users := make([]awslib.AwsResource, 0, len(apiUsers))
 	var userAccount *CredentialReport
 	for _, apiUser := range apiUsers {
 		var username string
@@ -181,7 +182,7 @@ func (p Provider) listMFADevices(ctx context.Context, user types.User) ([]AuthDe
 		input.Marker = output.Marker
 	}
 
-	var devices []AuthDevice
+	devices := make([]AuthDevice, 0, len(apiDevices))
 	for _, apiDevice := range apiDevices {
 		isVirtual := true
 		if !strings.HasPrefix(*apiDevice.SerialNumber, "arn:") {
@@ -220,12 +221,13 @@ func (p Provider) getUserKeys(username string, report map[string]*CredentialRepo
 	}
 }
 
+//revive:disable-next-line:cognitive-complexity,cyclomatic
 func (p Provider) getCredentialReport(ctx context.Context) (map[string]*CredentialReport, error) {
 	report, err := p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 	if err != nil {
 		var awsFailErr *types.ServiceFailureException
 		if errors.As(err, &awsFailErr) {
-			return nil, errors.Wrap(err, "could not gather aws iam credential report")
+			return nil, fmt.Errorf("could not gather aws iam credential report: %w", err)
 		}
 
 		// if we have an error, and it is not a server err we generate a report
@@ -241,12 +243,12 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 		}
 
 		// loop until max retries or till the report is ready
-		var countRetries = 0
+		countRetries := 0
 		report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 		if errors.As(err, &apiErr) {
 			for apiErr.ErrorCode() == "NoSuchEntity" || apiErr.ErrorCode() == "ReportInProgress" {
 				if countRetries >= maxRetries {
-					return nil, errors.Wrap(err, "reached to max retries")
+					return nil, fmt.Errorf("reached max retries: %w", err)
 				}
 
 				report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
@@ -261,12 +263,15 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 	}
 
 	if report == nil {
-		return nil, errors.Wrap(err, "could not gather aws iam credential report")
+		if err != nil {
+			return nil, fmt.Errorf("could not gather aws iam credential report: %w", err)
+		}
+		return nil, nil
 	}
 
 	parsedReport, err := parseCredentialsReport(report)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to parse credentials report")
+		return nil, fmt.Errorf("fail to parse credentials report: %w", err)
 	}
 
 	return parsedReport, nil

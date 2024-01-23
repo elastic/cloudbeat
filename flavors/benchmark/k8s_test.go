@@ -24,9 +24,12 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestK8S_Initialize(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	t.Setenv("NODE_NAME", "node-name")
 	tests := []struct {
 		name           string

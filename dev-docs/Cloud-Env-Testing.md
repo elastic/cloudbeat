@@ -23,8 +23,8 @@ Follow these steps to run the workflow:
 
     - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
       version. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
-      For BC, enter only the version without additions/commit sha, e.g. `8.8.1`.
-      For SNAPSHOT, enter the full version, e.g. `8.8.1-SNAPSHOT`.
+      For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
+      For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
 
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
       supports
@@ -34,7 +34,7 @@ Follow these steps to run the workflow:
 
 4. Optionally, modify other parameters if required:
 
-    - **`docker-image-override`** (**optional**): Use this to replace the default Docker image for build candidate (BC) or
+    - **`docker-image-override`** (**optional**): Use this to replace the default agent Docker image for build candidate (BC) or
       SNAPSHOT versions.
       Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
       path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`. If you're not sure where to get this

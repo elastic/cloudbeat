@@ -10,7 +10,7 @@ finding = result if {
 	data_adapter.is_activity_log_alerts
 
 	operations = ["Microsoft.Security/securitySolutions/write"]
-	categories = ["Administrative"]
+	categories = ["Security"]
 
 	# set result
 	result := common.generate_result_without_expected(

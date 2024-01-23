@@ -18,21 +18,24 @@
 package azurelib
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
 type ProviderAPI interface {
-	inventory.ProviderAPI
+	inventory.ResourceGraphProviderAPI
+	inventory.SQLProviderAPI
+	inventory.MysqlProviderAPI
+	inventory.StorageAccountProviderAPI
+	inventory.PostgresqlProviderAPI
+	inventory.KeyVaultProviderAPI
 	governance.ProviderAPI
 }
 
@@ -57,26 +60,24 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		return nil, fmt.Errorf("failed to init monitor client: %w", err)
 	}
 
-	inventoryProvider := inventory.NewProvider(log, resourceGraphClientFactory, diagnosticSettingsClient)
+	resourceGraphProvider := inventory.NewResourceGraphProvider(log, resourceGraphClientFactory)
 	return &provider{
-		inventory:  inventoryProvider,
-		governance: governance.NewProvider(log, inventoryProvider),
+		ResourceGraphProviderAPI:  resourceGraphProvider,
+		SQLProviderAPI:            inventory.NewSQLProvider(log, azureConfig.Credentials),
+		MysqlProviderAPI:          inventory.NewMysqlProvider(log, azureConfig.Credentials),
+		PostgresqlProviderAPI:     inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
+		StorageAccountProviderAPI: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		KeyVaultProviderAPI:       inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
+		ProviderAPI:               governance.NewProvider(log, resourceGraphProvider),
 	}, nil
 }
 
 type provider struct {
-	inventory  inventory.ProviderAPI
-	governance governance.ProviderAPI
-}
-
-func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListAllAssetTypesByName(ctx, assetGroup, assets)
-}
-
-func (p provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
-	return p.inventory.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
-}
-
-func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {
-	return p.governance.GetSubscriptions(ctx, cycleMetadata)
+	inventory.ResourceGraphProviderAPI
+	inventory.SQLProviderAPI
+	inventory.MysqlProviderAPI
+	inventory.StorageAccountProviderAPI
+	inventory.PostgresqlProviderAPI
+	inventory.KeyVaultProviderAPI
+	governance.ProviderAPI
 }

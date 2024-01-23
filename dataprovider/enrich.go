@@ -23,17 +23,17 @@ type ElasticCommonDataProvider interface {
 	GetElasticCommonData() (map[string]any, error)
 }
 
-type enricher struct {
+type Enricher struct {
 	dataprovider ElasticCommonDataProvider
 }
 
-func NewEnricher(dataprovider ElasticCommonDataProvider) *enricher {
-	return &enricher{
+func NewEnricher(dataprovider ElasticCommonDataProvider) *Enricher {
+	return &Enricher{
 		dataprovider: dataprovider,
 	}
 }
 
-func (e *enricher) EnrichEvent(event *beat.Event) error {
+func (e *Enricher) EnrichEvent(event *beat.Event) error {
 	ecsData, err := e.dataprovider.GetElasticCommonData()
 	if err != nil {
 		return err

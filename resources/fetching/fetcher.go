@@ -65,15 +65,17 @@ const (
 	AzureActivityLogAlertType          = "azure-activity-log-alert"
 	AzureBastionType                   = "azure-bastion"
 	AzureClassicStorageAccountType     = "azure-classic-storage-account"
-	AzureClassicVMType                 = "azure-classic-vm"
 	AzureDiagnosticSettingsType        = "azure-diagnostic-settings"
 	AzureDiskType                      = "azure-disk"
 	AzureDocumentDBDatabaseAccountType = "azure-document-db-database-account"
 	AzureInsightsComponentType         = "azure-insights-component"
 	AzureMySQLDBType                   = "azure-mysql-server-db"
+	AzureFlexibleMySQLDBType           = "azure-flexible-mysql-server-db"
 	AzureNetworkWatchersFlowLogType    = "azure-network-watchers-flow-log"
 	AzureNetworkWatchersType           = "azure-network-watcher"
+	AzureNetworkSecurityGroupType      = "azure-network-group"
 	AzurePostgreSQLDBType              = "azure-postgresql-server-db"
+	AzureFlexiblePostgreSQLDBType      = "azure-flexible-postgresql-server-db"
 	AzureSQLServerType                 = "azure-sql-server"
 	AzureStorageAccountType            = "azure-storage-account"
 	AzureVMType                        = "azure-vm"
@@ -133,7 +135,7 @@ type Resource interface {
 
 type ResourceFields struct {
 	ResourceMetadata
-	Raw interface{} `json:"raw"`
+	Raw any `json:"raw"`
 }
 
 type ResourceMetadata struct {
@@ -154,9 +156,9 @@ type CloudAccountMetadata struct {
 }
 
 type Result struct {
-	Type     string      `json:"type"`
-	SubType  string      `json:"subType"`
-	Resource interface{} `json:"resource"`
+	Type     string `json:"type"`
+	SubType  string `json:"subType"`
+	Resource any    `json:"resource"`
 }
 
 type ResourceMap map[string][]Resource

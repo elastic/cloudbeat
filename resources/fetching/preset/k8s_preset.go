@@ -62,7 +62,7 @@ func NewCisK8sFetchers(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqu
 	m[fetching.ProcessType] = registry.RegisteredFetcher{Fetcher: procFetcher}
 
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, k8sClient)
-	m[fetching.KubeAPIType] = registry.RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+	m[fetching.KubeAPIType] = registry.RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
 
 	return m
 }

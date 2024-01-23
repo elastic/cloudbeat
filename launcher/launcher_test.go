@@ -135,11 +135,12 @@ type LauncherTestSuite struct {
 
 type launcherMocks struct {
 	reloader  *reloaderMock
-	beat      *beat.Beat
 	validator Validator
 }
 
 func TestLauncherTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(LauncherTestSuite)
 	s.log = testhelper.NewLogger(t)
 
@@ -288,6 +289,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 	}
 
 	for _, tt := range testcases {
+		tt := tt
 		s.Run(tt.name, func() {
 			mocks := s.initMocks()
 			sut := s.newLauncher(mocks, beaterMockCreator)
@@ -488,9 +490,10 @@ func (s *LauncherTestSuite) TestLauncherStopTimeout() {
 
 	sut.wg.Add(1) // keep waiting for graceful period
 	go func() {
+		defer sut.wg.Done()
+
 		sut.Stop()
-		time.Sleep(shutdownGracePeriod + 10*time.Millisecond)
-		sut.wg.Done()
+		time.Sleep(shutdownGracePeriod + 100*time.Millisecond)
 	}()
 
 	err := sut.run()
@@ -505,7 +508,6 @@ func (s *LauncherTestSuite) initMocks() *launcherMocks {
 	mocks.validator = &validatorMock{
 		expected: config.MustNewConfigFrom(mapstr.M{"a": 1}),
 	}
-	mocks.beat = &beat.Beat{}
 	return &mocks
 }
 

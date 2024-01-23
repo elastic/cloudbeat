@@ -31,9 +31,12 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestAWSOrg_Initialize(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	tests := []struct {
 		name             string
 		identityProvider awslib.IdentityProviderGetter
@@ -142,11 +145,11 @@ func Test_getAwsAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			A := AWSOrg{
+			a := AWSOrg{
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
 			}
-			got, err := A.getAwsAccounts(context.Background(), nil, aws.Config{}, &tt.rootIdentity)
+			got, err := a.getAwsAccounts(context.Background(), nil, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
 				return

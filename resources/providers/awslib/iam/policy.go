@@ -29,7 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/utils/strings"
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
 const awsSupportAccessArn = "arn:aws:iam::aws:policy/AWSSupportAccess"
@@ -57,7 +57,7 @@ func (p Provider) getPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 		}
 
 		for _, policy := range listPoliciesOutput.Policies {
-			if strings.Dereference(policy.Arn) == awsSupportAccessArn {
+			if pointers.Deref(policy.Arn) == awsSupportAccessArn {
 				// Fetch this one explicitly with getSupportPolicy().
 				// The reasoning is that we want to attach roles to the AWS support access policy. If we don't skip it
 				// here, we will produce it another time in getSupportPolicy(), leading to duplicated resources. We
@@ -124,7 +124,7 @@ func (p Provider) getSupportPolicy(ctx context.Context) (awslib.AwsResource, err
 	return awsSupportAccessPolicy, nil
 }
 
-func (p Provider) getPolicyDocument(ctx context.Context, policy types.Policy) (map[string]interface{}, error) {
+func (p Provider) getPolicyDocument(ctx context.Context, policy types.Policy) (map[string]any, error) {
 	if policy.Arn == nil || policy.DefaultVersionId == nil {
 		return nil, fmt.Errorf("invalid policy: %v", policy)
 	}
@@ -141,7 +141,7 @@ func (p Provider) getPolicyDocument(ctx context.Context, policy types.Policy) (m
 	return doc, nil
 }
 
-func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]interface{}, error) {
+func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]any, error) {
 	if policyVersion == nil || policyVersion.Document == nil {
 		return nil, fmt.Errorf("invalid policy version: %v", policyVersion)
 	}
@@ -152,7 +152,7 @@ func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]interf
 		return nil, fmt.Errorf("failed to unescape policy document: %w", err)
 	}
 
-	var doc map[string]interface{}
+	var doc map[string]any
 	err = json.Unmarshal([]byte(docString), &doc)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal policy document: %w", err)
@@ -162,11 +162,11 @@ func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]interf
 }
 
 func (p Policy) GetResourceArn() string {
-	return strings.Dereference(p.Arn)
+	return pointers.Deref(p.Arn)
 }
 
 func (p Policy) GetResourceName() string {
-	return strings.Dereference(p.PolicyName)
+	return pointers.Deref(p.PolicyName)
 }
 
 func (p Policy) GetResourceType() string {
@@ -216,13 +216,12 @@ func (p Provider) listInlinePolicies(ctx context.Context, identity *string) ([]P
 		input.Marker = output.Marker
 	}
 
-	var policies []PolicyDocument
+	policies := make([]PolicyDocument, 0, len(policyNames))
 	for i := range policyNames {
 		inlinePolicy, err := p.client.GetUserPolicy(ctx, &iamsdk.GetUserPolicyInput{
 			PolicyName: &policyNames[i],
 			UserName:   identity,
 		})
-
 		if err != nil {
 			p.log.Errorf("fail to get inline policy for user: %s, policy name: %s", *identity, policyNames[i])
 			policies = append(policies, PolicyDocument{PolicyName: policyNames[i]})

@@ -27,6 +27,8 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type CachedRegionSelectorTestSuite struct {
@@ -34,22 +36,23 @@ type CachedRegionSelectorTestSuite struct {
 }
 
 func TestCachedRegionSelectorTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(CachedRegionSelectorTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *CachedRegionSelectorTestSuite) InitTest() (*cachedRegionSelector, *MockRegionsSelector) {
+func (s *CachedRegionSelectorTestSuite) initTest() (*cachedRegionSelector, *MockRegionsSelector) {
 	var err error
 	mocked := &MockRegionsSelector{}
 	selector := newCachedRegionSelector(mocked, s.T().Name(), time.Second) // Unique cache space for each test
-	selector.cache, err = newCachedRegions()
 	s.Require().NoError(err)
 	return selector, mocked
 }
 
 func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_SingleCall() {
-	selector, mocked := s.InitTest()
+	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
 	s.Require().NoError(err)
@@ -57,7 +60,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_SingleCall() {
 }
 
 func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_DoubleCallCached() {
-	selector, mocked := s.InitTest()
+	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
 	s.Require().NoError(err)
@@ -73,7 +76,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_DoubleCallCache
 }
 
 func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_DoubleCallEvicted() {
-	selector, mocked := s.InitTest()
+	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
 	s.Require().NoError(err)
@@ -88,7 +91,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_DoubleCallEvict
 }
 
 func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_CacheEvictionFlow() {
-	selector, mocked := s.InitTest()
+	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
@@ -122,7 +125,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_CacheEvictionFl
 }
 
 func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_FirstFail() {
-	selector, mocked := s.InitTest()
+	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(nil, errors.New("mock")).Once()
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
 	s.Require().Error(err)
@@ -136,7 +139,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_FirstFail() {
 }
 
 func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCalls() {
-	selector, mocked := s.InitTest()
+	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	wg := sync.WaitGroup{}
 	for i := 0; i < 5; i++ {
@@ -156,7 +159,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCalls()
 }
 
 func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCallsFail() {
-	selector, mocked := s.InitTest()
+	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(nil, errors.New("mock"))
 	wg := sync.WaitGroup{}
 	for i := 0; i < 5; i++ {

@@ -153,7 +153,7 @@ func createStack(stackName string, templatePath string, params map[string]string
 	}
 
 	svc := cloudformation.NewFromConfig(cfg)
-	var cfParams []types.Parameter
+	cfParams := make([]types.Parameter, 0, len(params))
 	for key, value := range params {
 		p := types.Parameter{
 			ParameterKey:   aws.String(key),

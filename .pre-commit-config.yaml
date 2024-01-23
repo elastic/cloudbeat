@@ -30,14 +30,14 @@ repos:
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
+    rev: 7.0.0
     hooks:
       - id: flake8
-        name: flake8 ./tests/ ./fleet_api/
-        files: ^(tests|deploy/test-environments/fleet_api)/
+        name: flake8 ./tests/ ./fleet_api/ ./.ci/scripts ./github/actions
+        files: ^(.ci/scripts|.github/actions|tests|deploy/test-environments/fleet_api)/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.0.1
+    rev: v3.0.3
     hooks:
       - id: pylint
         args: [
@@ -48,10 +48,9 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 23.12.1
     hooks:
       - id: black
-        args: [--line-length=120, --check, --diff]
 
   - repo: local
     hooks:
@@ -66,7 +65,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.83.3
+    rev: v0.84.0
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -77,8 +76,7 @@ repos:
       - id: shfmt
         args: ["-i", "4"]
       - id: shellcheck
-        files: (deploy/.*sh|scripts/publish_cft.sh|.ci/scripts/.*sh)
-        exclude: deploy/deployment-manager/.*sh
+        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|dev-tools/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash)
 
   - repo: local
     hooks:
@@ -93,6 +91,18 @@ repos:
         entry: bash -c 'mage AddLicenseHeaders'
         language: system
         files: .*.go
+        pass_filenames: false
+      - id: go-test
+        name: Run short unit tests
+        entry: bash -c 'go test -short -timeout 100ms ./...'
+        language: system
+        files: .*.go
+        pass_filenames: false
+      - id: go-mod-tidy
+        name: Run go mod tidy
+        entry: bash -c 'go mod tidy'
+        language: system
+        files: (go.mod|go.sum)
         pass_filenames: false
 
   - repo: local
@@ -142,7 +152,7 @@ repos:
         files: (\.rego)$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.37.0
+    rev: v0.38.0
     hooks:
       - id: markdownlint
         args: [ '--disable',
@@ -155,7 +165,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.13.0
+    rev: v0.15.0
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]

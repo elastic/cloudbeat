@@ -45,7 +45,7 @@ func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 		return nil, err
 	}
 
-	var result []TrailInfo
+	result := make([]TrailInfo, 0, len(output.TrailList))
 	for _, trail := range output.TrailList {
 		if trail.Name == nil {
 			continue
@@ -75,7 +75,7 @@ func (p Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloud
 		return nil, err
 	}
 
-	return client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.Name})
+	return client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.TrailARN})
 }
 
 func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]types.EventSelector, error) {
@@ -84,7 +84,7 @@ func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]t
 		return nil, err
 	}
 
-	output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
+	output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.TrailARN})
 	if err != nil {
 		return []types.EventSelector{}, err
 	}

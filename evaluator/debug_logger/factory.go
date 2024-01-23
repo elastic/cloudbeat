@@ -26,17 +26,16 @@ import (
 
 type Factory struct{}
 
-func (Factory) New(m *plugins.Manager, conf interface{}) plugins.Plugin {
+func (Factory) New(m *plugins.Manager, _ any) plugins.Plugin {
 	m.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 
 	return &plugin{
 		manager: m,
 		mtx:     sync.Mutex{},
-		config:  conf.(config),
 	}
 }
 
-func (Factory) Validate(_ *plugins.Manager, conf []byte) (interface{}, error) {
+func (Factory) Validate(_ *plugins.Manager, conf []byte) (any, error) {
 	parsedConfig := config{}
 	return parsedConfig, util.Unmarshal(conf, &parsedConfig)
 }

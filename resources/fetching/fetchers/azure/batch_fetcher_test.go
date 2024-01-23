@@ -57,7 +57,6 @@ func (s *AzureBatchAssetFetcherTestSuite) TearDownTest() {
 
 func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	mockAssetGroups := make(map[string][]inventory.AzureAsset)
-	totalMockAssets := 0
 	var flatMockAssets []inventory.AzureAsset
 	for _, assetGroup := range AzureBatchAssetGroups {
 		var mockAssets []inventory.AzureAsset
@@ -68,16 +67,16 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 					Id:             mockId,
 					Name:           mockId,
 					Location:       "location",
-					Properties:     map[string]interface{}{"key": "value"},
+					Properties:     map[string]any{"key": "value"},
 					ResourceGroup:  "rg",
 					SubscriptionId: "subId1",
 					TenantId:       "tenantId",
 					Type:           assetType,
-					Sku:            "",
+					Sku:            map[string]any{"key": "value"},
+					Identity:       map[string]any{"key": "value"},
 				},
 			)
 		}
-		totalMockAssets += len(mockAssets)
 		mockAssetGroups[assetGroup] = mockAssets
 		flatMockAssets = append(flatMockAssets, mockAssets...)
 	}
@@ -91,11 +90,12 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
 		map[string]governance.Subscription{
 			"subId1": {
-				ID:          "subId1",
-				DisplayName: "subName1",
+				FullyQualifiedID: "subId1",
+				ShortID:          "subId1",
+				DisplayName:      "subName1",
 				ManagementGroup: governance.ManagementGroup{
-					ID:          "mgId1",
-					DisplayName: "mgName1",
+					FullyQualifiedID: "mgId1",
+					DisplayName:      "mgName1",
 				},
 			},
 		}, nil,
@@ -150,17 +150,17 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 
 func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 	mockAssetGroups := make(map[string][]inventory.AzureAsset)
-	totalMockAssets := 0
 
 	subMap := make(map[string]governance.Subscription)
 	for subId := 1; subId <= 4; subId++ {
 		subIdStr := fmt.Sprintf("subId%d", subId)
 		subMap[subIdStr] = governance.Subscription{
-			ID:          subIdStr,
-			DisplayName: fmt.Sprintf("subName%d", subId),
+			FullyQualifiedID: subIdStr,
+			ShortID:          subIdStr,
+			DisplayName:      fmt.Sprintf("subName%d", subId),
 			ManagementGroup: governance.ManagementGroup{
-				ID:          fmt.Sprintf("mgId%d", subId),
-				DisplayName: fmt.Sprintf("mgName%d", subId),
+				FullyQualifiedID: fmt.Sprintf("mgId%d", subId),
+				DisplayName:      fmt.Sprintf("mgName%d", subId),
 			},
 		}
 	}
@@ -175,17 +175,17 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 						Id:             mockId,
 						Name:           mockId,
 						Location:       "location",
-						Properties:     map[string]interface{}{"key": "value"},
+						Properties:     map[string]any{"key": "value"},
 						ResourceGroup:  "rg",
 						SubscriptionId: subKey,
 						TenantId:       "tenantId",
 						Type:           assetType,
-						Sku:            "",
+						Sku:            map[string]any{"key": "value"},
+						Identity:       map[string]any{"key": "value"},
 					},
 				)
 			}
 		}
-		totalMockAssets += len(mockAssets)
 		mockAssetGroups[assetGroup] = mockAssets
 	}
 
@@ -209,7 +209,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 	s.Len(results, len(AzureBatchAssets)*len(subMap))
 
 	expectedSubs := lo.GroupBy(results, func(result fetching.ResourceInfo) string {
-		return result.Resource.(*AzureBatchResource).Subscription.ID
+		return result.Resource.(*AzureBatchResource).Subscription.FullyQualifiedID
 	})
 	s.Len(expectedSubs, len(subMap))
 
@@ -230,9 +230,9 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 				Name:    fmt.Sprintf("%s-%s", AzureBatchAssets[assets[0].Type].SubType, subKey),
 				Region:  "global",
 				CloudAccountMetadata: fetching.CloudAccountMetadata{
-					AccountId:        expectedSub.ID,
+					AccountId:        expectedSub.FullyQualifiedID,
 					AccountName:      expectedSub.DisplayName,
-					OrganisationId:   expectedSub.ManagementGroup.ID,
+					OrganisationId:   expectedSub.ManagementGroup.FullyQualifiedID,
 					OrganizationName: expectedSub.ManagementGroup.DisplayName,
 				},
 			}, metadata)

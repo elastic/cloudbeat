@@ -1,0 +1,69 @@
+metadata:
+  id: 70f92ed3-5659-5c95-a8f8-a63211c57635
+  name: Ensure 'Infrastructure double encryption' for PostgreSQL Database Server is
+    'Enabled'
+  profile_applicability: '* Level 1'
+  description: |-
+    Azure Database for PostgreSQL servers should be created with 'infrastructure double encryption' enabled.
+  rationale: |-
+    If Double Encryption is enabled, another layer of encryption is implemented at the hardware level before the storage or network level.
+    Information will be encrypted before it is even accessed, preventing both interception of data in motion if the network layer encryption is broken and data at rest in system resources such as memory or processor cache.
+    Encryption will also be in place for any backups taken of the database, so the key will secure access the data in all forms.
+    For the most secure implementation of key based encryption, it is recommended to use a Customer Managed asymmetric RSA 2048 Key in Azure Key Vault.
+  audit: |-
+    **From Azure Portal**
+
+    1. From Azure Home, click on more services.
+    2. Click on Databases.
+    3. Click on Azure Database for PostgreSQL servers.
+    4. Select the database by clicking on its name.
+    5. Under Security, click Data encryption.
+    6. Ensure that 'Infrastructure encryption enabled' is displayed and is 'checked'.
+
+    **From Azure CLI**
+
+    7. Enter the command
+    ```
+    az postgres server configuration show --name <servername> --resource-group <resourcegroup> --query 'properties.infrastructureEncryption' -o tsv
+    ```
+    8. Verify that Infrastructure encryption is enabled.
+  remediation: |-
+    It is not possible to enable 'infrastructure double encryption' on an existing Azure Database for PostgreSQL server.
+    The remediation steps detail the creation of a new Azure Database for PostgreSQL server with 'infrastructure double encryption' enabled.
+
+    **From Azure Portal**
+
+    1. Go through the normal process of database creation.
+    2. On step 2 titled 'Additional settings' ensure that 'Infrastructure double encryption enabled' is 'checked'.
+    3. Acknowledge that you understand this will impact database performance.
+    4. Finish database creation as normal.
+
+    **From Azure CLI**
+
+    ```
+    az postgres server create --resource-group <resourcegroup> --name <servername> --location <location> --admin-user <adminusername> --admin-password <server_admin_password> --sku-name GP_Gen4_2 --version 11 --infrastructure-encryption Enabled
+    ```
+  impact: |-
+    The read and write speeds to the database will be impacted if both default encryption and Infrastructure Encryption are checked, as a secondary form of encryption requires more resource overhead for the cryptography of information. This cost is justified for information security.
+    Customer managed keys are recommended for the most secure implementation, leading to overhead of key management. The key will also need to be backed up in a secure location, as loss of the key will mean loss of the information in the database.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/postgresql/howto-double-encryption
+    2. https://docs.microsoft.com/en-us/azure/postgresql/concepts-infrastructure-double-encryption
+    3. https://docs.microsoft.com/en-us/azure/postgresql/concepts-data-encryption-postgresql
+    4. https://docs.microsoft.com/en-us/azure/key-vault/keys/byok-specification
+    5. https://docs.microsoft.com/en-us/azure/postgresql/howto-double-encryption
+    6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-data-protection#dp-4-enable-data-at-rest-encryption-by-default
+  section: PostgreSQL Database Server
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 4.3.8
+  - PostgreSQL Database Server
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 4.3.8
+    posture_type: cspm

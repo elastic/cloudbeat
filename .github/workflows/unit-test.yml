@@ -36,10 +36,6 @@ jobs:
         with:
           args: buildOpaBundle
 
-      - name: Copy bundle to required dirs
-        run: |
-          cp bundle.tar.gz evaluator/
-
       - name: Unit-Test
         run: |
           go install gotest.tools/gotestsum
@@ -47,7 +43,7 @@ jobs:
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-file
           path: cover.out
@@ -68,7 +64,7 @@ jobs:
         run: go install github.com/mattn/goveralls@latest
 
       - name: Download coverage artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: coverage-file
 
@@ -131,7 +127,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@v3
+        uses: actions/dependency-review-action@v4
 
   terraform-linter:
     name: terraform-lint

@@ -1,7 +1,7 @@
 # Cloud Environment Upgrade Testing
 
 The [`Test Upgrade Environment`](https://github.com/elastic/cloudbeat/actions/workflows/upgrade-environment.yml) GitHub action automates the process of deploying a fully-featured cloud environment, pre-configured with all integrations (KSPM, CSPM, and D4C).
-It also facilitates the upgrade of the environment to a new version of the ELK stack and all installed agents, while also performing checks for findings retrieval. For example, if the target ELK version is 8.12.0, the workflow will automatically calculate the previous released version (e.g., 8.11.1), install that version, and then proceed to upgrade to the specified target version (8.12.0). Essentially, this workflow is designed to test the upgrade feature on upcoming versions that are currently in development or will be release candidates (BC).
+It also facilitates the upgrade of the environment to a new version of the ELK stack and all installed agents, while also performing checks for findings retrieval. For example, if the target ELK version is 8.12.0 and the base version was not selected, the workflow will automatically calculate the previously released version (e.g., 8.11.3), install that version, and then proceed to upgrade to the specified target version (8.12.0). Essentially, this workflow is designed to test the upgrade feature on upcoming versions that are currently in development or will be release candidates (BC).
 
 
 ## How to Run the Workflow
@@ -22,13 +22,13 @@ Follow these steps to run the workflow:
       instance: `john-8-11-0-nov1`.
 
     - **`target-elk-stack-version`**: Specify the target version for the Elastic Cloud stack upgrade. This version represents the goal to which the workflow will upgrade the stack. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
-      For BC, enter only the version without additions/commit sha, e.g. `8.11.0`.
-      For SNAPSHOT, enter the full version, e.g. `8.12.0-SNAPSHOT`.
+      For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
+      For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
 
-   ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/3e363d00-313e-4660-a575-6c688de3d1f1)
+   ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/9475f553-70c9-4dd7-8330-260bbd704df8)
 
 4. Optionally, modify other parameters if required:
-
+    - **`base-elk-stack-version`** (**optional**): Use this if you're planning to upgrade from a specific released version.
     - **`docker-image-override`** (**optional**): Use this to replace the default Docker image for build candidate (BC) or
       SNAPSHOT versions.
       Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
@@ -38,7 +38,7 @@ Follow these steps to run the workflow:
       e.g. `elastic / unified-release - staging # 8.11 - 10 - 8.9.0-cb971279`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.11.0-cb971279`.
 
-   ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/5b7f15bd-6f56-4eb0-b7d6-fc6a7656ffb0)
+   ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/e852adb1-d9f9-47d0-b364-ec5486263b95)
 
 ## Tracking Workflow Execution
 

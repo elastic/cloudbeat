@@ -23,7 +23,7 @@ import (
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	client_gokubernetes "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/config"
@@ -31,21 +31,21 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 )
 
-type k8sBenchmarkHelper struct {
+type K8SBenchmarkHelper struct {
 	log    *logp.Logger
 	cfg    *config.Config
 	client client_gokubernetes.Interface
 }
 
-func NewK8sBenchmarkHelper(log *logp.Logger, cfg *config.Config, client client_gokubernetes.Interface) *k8sBenchmarkHelper {
-	return &k8sBenchmarkHelper{
+func NewK8sBenchmarkHelper(log *logp.Logger, cfg *config.Config, client client_gokubernetes.Interface) *K8SBenchmarkHelper {
+	return &K8SBenchmarkHelper{
 		log:    log,
 		cfg:    cfg,
 		client: client,
 	}
 }
 
-func (h *k8sBenchmarkHelper) GetK8sDataProvider(ctx context.Context, clusterNameProvider k8s.ClusterNameProviderAPI) (dataprovider.CommonDataProvider, error) {
+func (h *K8SBenchmarkHelper) GetK8sDataProvider(ctx context.Context, clusterNameProvider k8s.ClusterNameProviderAPI) (dataprovider.CommonDataProvider, error) {
 	clusterName, err := clusterNameProvider.GetClusterName(ctx, h.cfg)
 	if err != nil {
 		h.log.Errorf("failed to get cluster name: %v", err)
@@ -62,7 +62,6 @@ func (h *k8sBenchmarkHelper) GetK8sDataProvider(ctx context.Context, clusterName
 	}
 
 	options := []k8s.Option{
-		k8s.WithLogger(h.log),
 		k8s.WithClusterName(clusterName),
 		k8s.WithClusterID(clusterId),
 		k8s.WithClusterVersion(serverVersion.String()),
@@ -70,7 +69,7 @@ func (h *k8sBenchmarkHelper) GetK8sDataProvider(ctx context.Context, clusterName
 	return k8s.New(options...), nil
 }
 
-func (h *k8sBenchmarkHelper) GetK8sIdProvider(ctx context.Context) (dataprovider.IdProvider, error) {
+func (h *K8SBenchmarkHelper) GetK8sIdProvider(ctx context.Context) (dataprovider.IdProvider, error) {
 	nodeId, err := h.getK8sNodeId(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get node id: %w", err)
@@ -84,7 +83,7 @@ func (h *k8sBenchmarkHelper) GetK8sIdProvider(ctx context.Context) (dataprovider
 	return k8s.NewIdProvider(clusterId, nodeId), nil
 }
 
-func (h *k8sBenchmarkHelper) getK8sClusterId(ctx context.Context) (string, error) {
+func (h *K8SBenchmarkHelper) getK8sClusterId(ctx context.Context) (string, error) {
 	namespace, err := h.client.CoreV1().Namespaces().Get(ctx, "kube-system", v1.GetOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to get namespace data: %w", err)
@@ -93,7 +92,7 @@ func (h *k8sBenchmarkHelper) getK8sClusterId(ctx context.Context) (string, error
 	return string(namespace.ObjectMeta.UID), nil
 }
 
-func (h *k8sBenchmarkHelper) getK8sNodeId(ctx context.Context) (string, error) {
+func (h *K8SBenchmarkHelper) getK8sNodeId(ctx context.Context) (string, error) {
 	nodeName, err := kubernetes.DiscoverKubernetesNode(h.log, &kubernetes.DiscoverKubernetesNodeParams{
 		ConfigHost:  "",
 		Client:      h.client,

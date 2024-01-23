@@ -31,21 +31,28 @@ import (
 )
 
 type ManagementGroup struct {
-	ID          string
-	DisplayName string
+	// FullyQualifiedID is the fully qualified ID for the management group.
+	// For example, /providers/Microsoft.Management/managementGroups/0000000-0000-0000-0000-000000000000
+	FullyQualifiedID string
+	DisplayName      string
 }
 
 type Subscription struct {
-	ID              string
+	// FullyQualifiedID is the fully qualified ID for the subscription.
+	// For example, /subscriptions/8d65815f-a5b6-402f-9298-045155da7d74
+	FullyQualifiedID string
+	// ShortID is the ID of the subscription which is the SubscriptionId field of the asset.
+	// For example, 8d65815f-a5b6-402f-9298-045155da7d74.
+	ShortID         string
 	DisplayName     string
 	ManagementGroup ManagementGroup
 }
 
 func (s Subscription) GetCloudAccountMetadata() fetching.CloudAccountMetadata {
 	return fetching.CloudAccountMetadata{
-		AccountId:        s.ID,
+		AccountId:        s.FullyQualifiedID,
 		AccountName:      s.DisplayName,
-		OrganisationId:   s.ManagementGroup.ID,
+		OrganisationId:   s.ManagementGroup.FullyQualifiedID,
 		OrganizationName: s.ManagementGroup.DisplayName,
 	}
 }
@@ -56,10 +63,10 @@ type ProviderAPI interface {
 
 type provider struct {
 	cache  *cycle.Cache[map[string]Subscription]
-	client inventory.ProviderAPI
+	client inventory.ResourceGraphProviderAPI
 }
 
-func NewProvider(log *logp.Logger, client inventory.ProviderAPI) ProviderAPI {
+func NewProvider(log *logp.Logger, client inventory.ResourceGraphProviderAPI) ProviderAPI {
 	p := provider{
 		client: client,
 	}
@@ -90,8 +97,8 @@ func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
 	managementGroups := make(map[string]ManagementGroup)
 	for _, asset := range lo.Filter(assets, typeFilter(managementGroupType)) {
 		managementGroups[asset.Name] = ManagementGroup{
-			ID:          asset.Id,
-			DisplayName: strings.FirstNonEmpty(asset.DisplayName, asset.Name),
+			FullyQualifiedID: asset.Id,
+			DisplayName:      strings.FirstNonEmpty(asset.DisplayName, asset.Name),
 		}
 	}
 
@@ -105,9 +112,10 @@ func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
 
 		mg := managementGroups[strings.FromMap(parent, "name")]
 		subscriptions[asset.SubscriptionId] = Subscription{
-			ID:              asset.Id,
-			DisplayName:     strings.FirstNonEmpty(asset.DisplayName, asset.Name),
-			ManagementGroup: mg,
+			FullyQualifiedID: asset.Id,
+			ShortID:          asset.SubscriptionId,
+			DisplayName:      strings.FirstNonEmpty(asset.DisplayName, asset.Name),
+			ManagementGroup:  mg,
 		}
 	}
 

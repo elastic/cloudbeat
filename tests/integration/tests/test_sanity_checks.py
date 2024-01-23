@@ -6,30 +6,35 @@ have been created.
 The goal of this suite is to perform basic sanity checks by querying Elasticsearch (ES) and
 verifying that there are findings of 'resource.type' for each feature.
 """
+import time
 import pytest
-from commonlib.utils import get_findings
-from configuration import elasticsearch
 from loguru import logger
+from configuration import elasticsearch
+from commonlib.utils import get_findings
+from commonlib.agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 900
 CNVM_CONFIG_TIMEOUT = 3600
 
-STACK_VERSION = elasticsearch.stack_version
+# The timeout and backoff for waiting all agents are running the specified component.
+COMPONENTS_TIMEOUT = 180
+COMPONENTS_BACKOFF = 10
 
-# Check if STACK_VERSION is provided
-if not STACK_VERSION:
-    logger.warning("STACK_VERSION is not provided. Please set the STACK_VERSION in the configuration.")
+AGENT_VERSION = elasticsearch.agent_version
+
+# Check if AGENT_VERSION is provided
+if not AGENT_VERSION:
+    logger.warning("AGENT_VERSION is not provided. Please set the AGENT_VERSION in the configuration.")
 
 tests_data = {
     "cis_aws": [
-        "cloud-compute",
         "identity-management",
         "monitoring",
         "cloud-audit",
         "cloud-database",
         "cloud-config",
-    ],  # Exclude "cloud-storage" due to lack of fetcher control and potential delays.
+    ],  # Exclude "cloud-compute", "cloud-storage" due to lack of fetcher control and potential delays.
     "cis_gcp": [
         "cloud-compute",
         "cloud-database",
@@ -53,7 +58,7 @@ tests_data = {
 }
 
 
-def build_query_list(benchmark_id: str = "", match_type: str = "", version: str = "") -> list:
+def build_query_list(benchmark_id: str = "", match_type: str = "", version: str = "", agent: str = "") -> list:
     """
     Build a list of terms for Elasticsearch query based on the provided parameters.
 
@@ -74,6 +79,9 @@ def build_query_list(benchmark_id: str = "", match_type: str = "", version: str 
 
     if version:
         query_list.append({"term": {"agent.version": version}})
+
+    if agent:
+        query_list.append({"term": {"agent.id": agent}})
 
     return query_list
 
@@ -97,7 +105,7 @@ def test_kspm_unmanaged_findings(kspm_client, match_type):
     query_list = build_query_list(
         benchmark_id="cis_k8s",
         match_type=match_type,
-        version=STACK_VERSION,
+        version=AGENT_VERSION,
     )
     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
     result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
@@ -123,7 +131,7 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
     query_list = build_query_list(
         benchmark_id="cis_eks",
         match_type=match_type,
-        version=STACK_VERSION,
+        version=AGENT_VERSION,
     )
     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
 
@@ -133,7 +141,12 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_aws"])
-def test_cspm_findings(cspm_client, match_type):
+def test_cspm_aws_findings(
+    cspm_client,
+    match_type,
+    agents_actual_components: AgentComponentMapping,
+    agents_expected_components: AgentExpectedMapping,
+):
     """
     Test case to check for AWS findings in CSPM.
 
@@ -147,15 +160,18 @@ def test_cspm_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(
-        benchmark_id="cis_aws",
-        match_type=match_type,
-        version=STACK_VERSION,
-    )
-    query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
+    aws_agents = wait_components_list(agents_actual_components, agents_expected_components, CIS_AWS_COMPONENT)
+    for agent in aws_agents:
+        query_list = build_query_list(
+            benchmark_id="cis_aws",
+            match_type=match_type,
+            version=AGENT_VERSION,
+            agent=agent,
+        )
+        query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
-    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-    assert len(results) > 0, f"The resource type '{match_type}' is missing"
+        results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+        assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
 
 @pytest.mark.sanity
@@ -174,7 +190,7 @@ def test_cnvm_findings(cnvm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(version=STACK_VERSION)
+    query_list = build_query_list(version=AGENT_VERSION)
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
@@ -199,7 +215,7 @@ def test_cspm_gcp_findings(cspm_client, match_type):
     query_list = build_query_list(
         benchmark_id="cis_gcp",
         match_type=match_type,
-        version=STACK_VERSION,
+        version=AGENT_VERSION,
     )
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
@@ -223,7 +239,7 @@ def test_cspm_azure_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(benchmark_id="cis_azure", version=STACK_VERSION)
+    query_list = build_query_list(benchmark_id="cis_azure", version=AGENT_VERSION)
     query, sort = cspm_client.build_es_must_match_query(
         must_query_list=query_list,
         time_range="now-24h",
@@ -231,3 +247,30 @@ def test_cspm_azure_findings(cspm_client, match_type):
 
     results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
+
+
+def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str):
+    """
+    Wait for the list of agents running the specified component.
+
+    Args:
+        component (str): The component to match.
+
+    Returns:
+        list: The list of agents running the specified component.
+    """
+
+    start_time = time.time()
+    while time.time() - start_time < COMPONENTS_TIMEOUT:
+        if len(actual.component_map[component]) == expected.expected_map[component]:
+            break
+
+        time.sleep(COMPONENTS_BACKOFF)
+        actual.load_map()
+
+    assert expected.expected_map[component] == len(
+        actual.component_map[component],
+    ), f"Expected {expected.expected_map[component]} agents running\
+ {component}, but got {len(actual.component_map[component])}"
+
+    return actual.component_map[component]

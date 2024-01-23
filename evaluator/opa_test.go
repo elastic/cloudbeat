@@ -55,6 +55,8 @@ type OpaTestSuite struct {
 }
 
 func TestOpaTestSuite(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	s := new(OpaTestSuite)
 	s.log = testhelper.NewLogger(t)
 
@@ -68,7 +70,7 @@ func (s *OpaTestSuite) SetupSuite() {
 
 func (s *OpaTestSuite) TestOpaEvaluator_decode() {
 	type args struct {
-		result interface{}
+		result any
 		now    func() time.Time
 	}
 	tests := []struct {
@@ -112,6 +114,8 @@ func (s *OpaTestSuite) TestOpaEvaluator_decode() {
 }
 
 func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
+	testhelper.SkipLong(s.T())
+
 	ctx := context.Background()
 	tests := []struct {
 		evals    int
@@ -147,7 +151,7 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 }
 
 func (s *OpaTestSuite) getTestConfig() *config.Config {
-	path, err := filepath.Abs("bundle.tar.gz")
+	path, err := filepath.Abs("../bundle.tar.gz")
 	s.Require().NoError(err)
 	_, err = os.Stat(path)
 	s.Require().NoError(err)

@@ -39,7 +39,6 @@ func init() {
 }
 
 type addClusterID struct {
-	config config
 	helper ClusterHelper
 }
 
@@ -60,8 +59,7 @@ func New(agentCfg *agentconfig.C) (beat.Processor, error) {
 		return nil, err
 	}
 	return &addClusterID{
-		cfg,
-		helper,
+		helper: helper,
 	}, nil
 }
 

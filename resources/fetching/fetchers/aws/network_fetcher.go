@@ -22,7 +22,6 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -30,10 +29,9 @@ import (
 )
 
 type NetworkFetcher struct {
-	log           *logp.Logger
-	ec2Client     ec2.ElasticCompute
-	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *cloud.Identity
+	log        *logp.Logger
+	ec2Client  ec2.ElasticCompute
+	resourceCh chan fetching.ResourceInfo
 }
 
 type ACLFetcherConfig struct {
@@ -42,15 +40,13 @@ type ACLFetcherConfig struct {
 
 type NetworkResource struct {
 	awslib.AwsResource
-	identity *cloud.Identity
 }
 
-func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo, identity *cloud.Identity) *NetworkFetcher {
+func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo) *NetworkFetcher {
 	return &NetworkFetcher{
-		log:           log,
-		ec2Client:     ec2Client,
-		resourceCh:    ch,
-		cloudIdentity: identity,
+		log:        log,
+		ec2Client:  ec2Client,
+		resourceCh: ch,
 	}
 }
 
@@ -63,7 +59,6 @@ func (f NetworkFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata)
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource: NetworkResource{
 				AwsResource: resource,
-				identity:    f.cloudIdentity,
 			},
 			CycleMetadata: cycleMetadata,
 		}
@@ -90,7 +85,7 @@ func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r NetworkResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]interface{}{
+	return map[string]any{
 		"cloud.service.name": "EC2",
 	}, nil
 }

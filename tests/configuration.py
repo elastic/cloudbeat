@@ -17,7 +17,9 @@ agent.namespace = os.getenv("AGENT_NAMESPACE", "kube-system")
 agent.findings_timeout = 500
 agent.eks_findings_timeout = 120
 agent.aws_findings_timeout = 10
+agent.azure_findings_timeout = 10
 agent.cluster_type = os.getenv("CLUSTER_TYPE", "eks")  # options: vanilla / eks / vanilla_aws
+agent.agentless = os.getenv("TEST_AGENTLESS", "false") == "true"
 
 # The K8S Node on which the test Pod is running.
 agent.node_name = os.getenv("NODE_NAME")
@@ -67,6 +69,7 @@ elasticsearch.kspm_index = os.getenv("KSPM_INDEX", FINDINGS_INDEX_PATTERN)
 elasticsearch.cspm_index = os.getenv("CSPM_INDEX", FINDINGS_INDEX_PATTERN)
 elasticsearch.cnvm_index = os.getenv("CNVM_INDEX", VULNERABILITIES_INDEX_PATTERN)
 elasticsearch.stack_version = os.getenv("STACK_VERSION", "")
+elasticsearch.agent_version = os.getenv("AGENT_VERSION", "")
 
 # --- Docker environment definition
 docker = Munch()

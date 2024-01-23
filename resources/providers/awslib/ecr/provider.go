@@ -29,7 +29,7 @@ import (
 
 // DescribeAllEcrRepositories returns a list of all the existing repositories
 func (provider *Provider) DescribeAllEcrRepositories(ctx context.Context, region string) ([]types.Repository, error) {
-	/// When repoNames is nil, it will describe all the existing Repositories
+	// When repoNames is nil, it will describe all the existing Repositories
 	return provider.DescribeRepositories(ctx, nil, region)
 }
 

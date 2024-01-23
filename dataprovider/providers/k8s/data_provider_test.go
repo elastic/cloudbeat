@@ -26,60 +26,59 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 	tests := []struct {
 		name    string
 		options []Option
-		want    map[string]interface{}
+		want    map[string]any
 	}{
 		{
-			name: "should return empty map",
-			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
+			name:    "should return empty map",
+			options: []Option{},
+			want: map[string]any{
+				orchestratorType: "kubernetes",
 			},
-			want: map[string]interface{}{},
 		}, {
 			name: "should return cluster version",
 			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
 				WithClusterVersion("test_version"),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				clusterVersionField: "test_version",
+				orchestratorType:    "kubernetes",
 			},
 		}, {
 			name: "should return cluster name",
 			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
 				WithClusterName("test_cluster"),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				clusterNameField: "test_cluster",
+				orchestratorType: "kubernetes",
 			},
 		}, {
 			name: "should return cluster id",
 			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
 				WithClusterID("test_id"),
 			},
-			want: map[string]interface{}{
-				clusterIdField: "test_id",
+			want: map[string]any{
+				clusterIdField:   "test_id",
+				orchestratorType: "kubernetes",
 			},
 		}, {
 			name: "should return all fields",
 			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
 				WithClusterID("test_id"),
 				WithClusterName("test_cluster"),
 				WithClusterVersion("test_version"),
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				clusterIdField:      "test_id",
 				clusterNameField:    "test_cluster",
 				clusterVersionField: "test_version",
+				orchestratorType:    "kubernetes",
 			},
 		},
 	}

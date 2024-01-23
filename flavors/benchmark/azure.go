@@ -40,8 +40,6 @@ type Azure struct {
 	providerInitializer azurelib.ProviderInitializerAPI
 }
 
-func (a *Azure) Run(context.Context) error { return nil }
-
 func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
@@ -54,6 +52,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
+//revive:disable-next-line:function-result-limit
 func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
@@ -76,7 +75,6 @@ func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
 		cloud.NewDataProvider(
-			cloud.WithLogger(log),
 			cloud.WithAccount(cloud.Identity{
 				Provider: "azure",
 			}),

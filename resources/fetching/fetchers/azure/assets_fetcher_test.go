@@ -22,7 +22,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/maps"
@@ -67,12 +67,13 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 					Id:             "id",
 					Name:           "name",
 					Location:       "location",
-					Properties:     map[string]interface{}{"key": "value"},
+					Properties:     map[string]any{"key": "value"},
 					ResourceGroup:  "rg",
 					SubscriptionId: "subId",
 					TenantId:       "tenantId",
 					Type:           assetType,
-					Sku:            "",
+					Sku:            map[string]any{"key": "value"},
+					Identity:       map[string]any{"key": "value"},
 				},
 			)
 		}
@@ -90,17 +91,81 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
 		map[string]governance.Subscription{
 			"subId": {
-				ID:          "subId",
-				DisplayName: "subName",
+				FullyQualifiedID: "subId",
+				ShortID:          "subId",
+				DisplayName:      "subName",
 				ManagementGroup: governance.ManagementGroup{
-					ID:          "mgId",
-					DisplayName: "mgName",
+					FullyQualifiedID: "mgId",
+					DisplayName:      "mgName",
 				},
 			},
 		}, nil,
-	).Once()
+	).Twice()
+
+	// since we have storage account asset those the storage account enricher will be called and so these two provider functions.
 	mockProvider.EXPECT().
 		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{"subId"}).
+		Return(nil, nil).
+		Once()
+	storageAccounts := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.StorageAccountAssetType
+	})
+	mockProvider.EXPECT().
+		ListStorageAccountBlobServices(mock.Anything, storageAccounts).
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListStorageAccountsBlobDiagnosticSettings(mock.Anything, storageAccounts).
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListStorageAccountsTableDiagnosticSettings(mock.Anything, storageAccounts).
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListStorageAccountsQueueDiagnosticSettings(mock.Anything, storageAccounts).
+		Return(nil, nil)
+
+	vaults := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.VaultAssetType
+	})
+	for _, v := range vaults {
+		mockProvider.EXPECT().
+			ListKeyVaultKeys(mock.Anything, v).
+			Return(nil, nil)
+		mockProvider.EXPECT().
+			ListKeyVaultSecrets(mock.Anything, v).
+			Return(nil, nil)
+	}
+
+	// since we have sql server asset we need to mock the enricher
+	mockProvider.EXPECT().
+		ListSQLEncryptionProtector(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		GetSQLBlobAuditingPolicies(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSQLTransparentDataEncryptions(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSQLAdvancedThreatProtectionSettings(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+
+	// since we have postgresql asset we need to mock the enricher
+	mockProvider.EXPECT().
+		ListSinglePostgresConfigurations(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListFlexiblePostgresConfigurations(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListSinglePostgresFirewallRules(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListFlexiblePostgresFirewallRules(mock.Anything, "subId", "rg", "name").
+		Return(nil, nil)
+
+	// since we have mysql  asset we need to mock the enricher
+	mockProvider.EXPECT().
+		GetFlexibleTLSVersionConfiguration(mock.Anything, "subId", "rg", "name").
 		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
@@ -152,10 +217,10 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch_Errors() {
 			}
 			return nil, errors.New("some list asset error")
 		})
-	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(nil, errors.New("some get subscription error")).Once()
 	mockProvider.EXPECT().
-		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{}).
-		Return(nil, nil)
+		GetSubscriptions(mock.Anything, mock.Anything).
+		Return(nil, errors.New("some get subscription error")).
+		Twice()
 
 	results, err := s.fetch(mockProvider, 1)
 	s.Require().ErrorContains(err, "some list asset error")
@@ -181,70 +246,10 @@ func (s *AzureAssetsFetcherTestSuite) fetch(provider *azurelib.MockProviderAPI, 
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   provider,
+		enrichers:  initEnrichers(provider),
 	}
 	err := fetcher.Fetch(context.Background(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 	s.Require().Len(results, expectedLength)
 	return results, err
-}
-
-func TestAddUsedForActivityLogsFlag(t *testing.T) {
-	tests := map[string]struct {
-		inputAssets       []inventory.AzureAsset
-		inputDiagSettings []inventory.AzureAsset
-		expected          []inventory.AzureAsset
-	}{
-		"no storage account asset": {
-			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{}}},
-			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
-		},
-		"storage account asset not used for activity log": {
-			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{}}},
-			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
-		},
-		"storage account asset used for activity log": {
-			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{"storageAccountId": "id_1"}}},
-			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}}},
-		},
-		"multiple storage account asset, one used for activity log": {
-			inputAssets: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType},
-			},
-			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{"storageAccountId": "id_2"}}},
-			expected: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType},
-			},
-		},
-		"multiple storage account asset, two used for activity log": {
-			inputAssets: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType},
-			},
-			inputDiagSettings: []inventory.AzureAsset{
-				{Properties: map[string]any{"storageAccountId": "id_2"}},
-				{Properties: map[string]any{"storageAccountId": "id_3"}},
-			},
-			expected: []inventory.AzureAsset{
-				{Id: "id_1", Type: inventory.StorageAccountAssetType},
-				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
-				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
-			},
-		},
-	}
-
-	for name, tc := range tests {
-		tc := tc
-		t.Run(name, func(t *testing.T) {
-			addUsedForActivityLogsFlag(tc.inputAssets, tc.inputDiagSettings)
-			assert.Equal(t, tc.expected, tc.inputAssets)
-		})
-	}
 }

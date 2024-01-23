@@ -70,7 +70,7 @@ func CollectResourcesWithTimeout[T any](ch chan T, maxCount int, timeout time.Du
 // This function waits for the channel to close before returning.
 // See CollectResources for a non-blocking version of the function.
 func CollectResourcesBlocking[T any](ch chan T) []T {
-	var results []T
+	results := make([]T, 0)
 	for v := range ch {
 		results = append(results, v)
 	}
@@ -78,7 +78,7 @@ func CollectResourcesBlocking[T any](ch chan T) []T {
 }
 
 func CreateMockClients[T any](client T, regions []string) map[string]T {
-	var m = make(map[string]T, 0)
+	m := make(map[string]T, 0)
 	for _, clientRegion := range regions {
 		m[clientRegion] = client
 	}
@@ -96,4 +96,10 @@ func NewLogger(t *testing.T) *logp.Logger {
 	})
 
 	return logp.NewLogger(t.Name())
+}
+
+func SkipLong(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
 }

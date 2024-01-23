@@ -32,7 +32,7 @@ type RuleResult struct {
 	Findings []Finding `json:"findings"`
 	Metadata Metadata  `json:"metadata"`
 	// Golang 1.18 will introduce generics which will be useful for typing the resource field
-	Resource interface{} `json:"resource"`
+	Resource any `json:"resource"`
 }
 
 type Finding struct {
@@ -46,9 +46,9 @@ type EventData struct {
 }
 
 type Result struct {
-	Evaluation string      `json:"evaluation"`
-	Expected   interface{} `json:"expected"`
-	Evidence   interface{} `json:"evidence"`
+	Evaluation string `json:"evaluation"`
+	Expected   any    `json:"expected"`
+	Evidence   any    `json:"evidence"`
 }
 
 type Rule struct {

@@ -26,15 +26,18 @@ const (
 	ActivityLogAlertAssetType          = "microsoft.insights/activitylogalerts"
 	ApplicationInsights                = "microsoft.insights/components"
 	BastionAssetType                   = "microsoft.network/bastionhosts"
+	BlobServiceAssetType               = "microsoft.storage/storageaccounts/blobservices"
 	ClassicStorageAccountAssetType     = "microsoft.classicstorage/storageaccounts"
-	ClassicVirtualMachineAssetType     = "microsoft.classiccompute/virtualmachines"
 	DiagnosticSettingsAssetType        = "microsoft.insights/diagnosticSettings"
 	DiskAssetType                      = "microsoft.compute/disks"
 	DocumentDBDatabaseAccountAssetType = "microsoft.documentdb/databaseaccounts"
 	MySQLDBAssetType                   = "microsoft.dbformysql/servers"
+	FlexibleMySQLDBAssetType           = "microsoft.dbformysql/flexibleservers"
 	NetworkWatchersAssetType           = "microsoft.network/networkwatchers"
 	NetworkWatchersFlowLogAssetType    = "microsoft.network/networkwatchers/flowlogs"
+	NetworkSecurityGroup               = "microsoft.network/networksecuritygroups"
 	PostgreSQLDBAssetType              = "microsoft.dbforpostgresql/servers"
+	FlexiblePostgreSQLDBAssetType      = "microsoft.dbforpostgresql/flexibleservers"
 	SQLServersAssetType                = "microsoft.sql/servers"
 	StorageAccountAssetType            = "microsoft.storage/storageaccounts"
 	VaultAssetType                     = "microsoft.keyvault/vaults"
@@ -47,6 +50,28 @@ const (
 	// Azure Resource Graph table groups
 	AssetGroupResources              = "resources"
 	AssetGroupAuthorizationResources = "authorizationresources"
+
+	// Extension keys
+	ExtensionBlobService                         = "blobService"
+	ExtensionNetwork                             = "network"
+	ExtensionUsedForActivityLogs                 = "usedForActivityLogs"
+	ExtensionSQLEncryptionProtectors             = "sqlEncryptionProtectors"
+	ExtensionSQLBlobAuditPolicy                  = "sqlBlobAuditPolicy"
+	ExtensionSQLTransparentDataEncryptions       = "sqlTransparentDataEncryptions"
+	ExtensionSQLAdvancedThreatProtectionSettings = "sqlAdvancedThreatProtectionSettings"
+	ExtensionMysqlConfigurations                 = "mysqlConfigurations"
+	ExtensionPostgresqlConfigurations            = "psqlConfigurations"
+	ExtensionPostgresqlFirewallRules             = "psqlFirewallRules"
+	ExtensionStorageAccountID                    = "storageAccountId"
+	ExtensionStorageAccountName                  = "storageAccountName"
+	ExtensionBlobDiagnosticSettings              = "blobDiagnosticSettings"
+	ExtensionTableDiagnosticSettings             = "tableDiagnosticSettings"
+	ExtensionQueueDiagnosticSettings             = "queueDiagnosticSettings"
+	ExtensionKeyVaultKeys                        = "vaultKeys"
+	ExtensionKeyVaultSecrets                     = "vaultSecrets"
+
+	// AssetLocation
+	assetLocationGlobal = "global"
 )
 
 type AzureAsset struct {
@@ -60,13 +85,28 @@ type AzureAsset struct {
 	SubscriptionId string         `json:"subscription_id,omitempty"`
 	TenantId       string         `json:"tenant_id,omitempty"`
 	Type           string         `json:"type,omitempty"`
-	Sku            string         `json:"sku,omitempty"`
+	Sku            map[string]any `json:"sku,omitempty"`
+	Identity       map[string]any `json:"identity,omitempty"`
+}
+
+func (a *AzureAsset) AddExtension(key string, value any) {
+	if a.Extension == nil {
+		a.Extension = map[string]any{}
+	}
+	a.Extension[key] = value
 }
 
 func getAssetFromData(data map[string]any) AzureAsset {
 	subId := strings.FromMap(data, "subscriptionId")
 	properties, _ := data["properties"].(map[string]any)
-
+	identity, ok := data["identity"].(map[string]any)
+	if !ok {
+		identity = nil
+	}
+	sku, ok := data["sku"].(map[string]any)
+	if !ok {
+		sku = nil
+	}
 	return AzureAsset{
 		Id:             strings.FromMap(data, "id"),
 		Name:           strings.FromMap(data, "name"),
@@ -76,7 +116,8 @@ func getAssetFromData(data map[string]any) AzureAsset {
 		ResourceGroup:  strings.FromMap(data, "resourceGroup"),
 		SubscriptionId: subId,
 		TenantId:       strings.FromMap(data, "tenantId"),
-		Sku:            strings.FromMap(data, "sku"),
+		Sku:            sku,
+		Identity:       identity,
 		Type:           strings.FromMap(data, "type"),
 	}
 }

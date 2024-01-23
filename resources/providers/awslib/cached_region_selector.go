@@ -30,8 +30,8 @@ import (
 
 var (
 	ristrettoCache        *ristretto.Cache
-	allRegionCacheTTL                   = 720 * time.Hour
-	currentRegionCacheTTL time.Duration = 0
+	allRegionCacheTTL     = 720 * time.Hour
+	currentRegionCacheTTL time.Duration
 )
 
 func init() {
@@ -64,7 +64,6 @@ type cachedRegions struct {
 
 type cachedRegionSelector struct {
 	lock   *sync.RWMutex
-	cache  *ristretto.Cache
 	keep   time.Duration
 	key    string
 	client RegionsSelector
@@ -73,7 +72,6 @@ type cachedRegionSelector struct {
 func newCachedRegionSelector(selector RegionsSelector, cache string, keep time.Duration) *cachedRegionSelector {
 	return &cachedRegionSelector{
 		lock:   &sync.RWMutex{},
-		cache:  ristrettoCache,
 		keep:   keep,
 		key:    cache,
 		client: selector,

@@ -104,8 +104,10 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 	})
 
 	t.Run("lock", func(t *testing.T) {
+		testhelper.SkipLong(t)
+
 		firstRun := atomic.NewBool(false)
-		m := inventory.NewMockProviderAPI(t)
+		m := inventory.NewMockResourceGraphProviderAPI(t)
 		m.EXPECT().
 			ListAllAssetTypesByName(mock.Anything, mock.Anything, mock.Anything).
 			RunAndReturn(func(ctx context.Context, s string, strings []string) ([]inventory.AzureAsset, error) {
@@ -134,9 +136,9 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 	})
 }
 
-func mockClient(t *testing.T, assets []inventory.AzureAsset, err error) *inventory.MockProviderAPI {
+func mockClient(t *testing.T, assets []inventory.AzureAsset, err error) inventory.ResourceGraphProviderAPI {
 	t.Helper()
-	client := inventory.NewMockProviderAPI(t)
+	client := inventory.NewMockResourceGraphProviderAPI(t)
 	client.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.Anything, mock.Anything).
 		Return(assets, err).
@@ -146,16 +148,17 @@ func mockClient(t *testing.T, assets []inventory.AzureAsset, err error) *invento
 
 func generateManagementGroup(id int) ManagementGroup {
 	return ManagementGroup{
-		ID:          fmtField("mg-id", id),
-		DisplayName: fmtField("mg-display-name", id),
+		FullyQualifiedID: fmtField("mg-id", id),
+		DisplayName:      fmtField("mg-display-name", id),
 	}
 }
 
 func generateSubscription(id int, parentId int) Subscription {
 	return Subscription{
-		ID:              fmtField("sub-id", id),
-		DisplayName:     fmtField("sub-display-name", id),
-		ManagementGroup: generateManagementGroup(parentId),
+		FullyQualifiedID: fmtField("/subscriptions/sub-id", id),
+		ShortID:          fmtField("sub-id", id),
+		DisplayName:      fmtField("sub-display-name", id),
+		ManagementGroup:  generateManagementGroup(parentId),
 	}
 }
 
@@ -172,9 +175,8 @@ func generateManagementGroupAsset(id int) inventory.AzureAsset {
 }
 
 func generateSubscriptionAsset(id int, parentId int) inventory.AzureAsset {
-	subId := fmtField("sub-id", id)
 	return inventory.AzureAsset{
-		Id:       subId,
+		Id:       fmtField("/subscriptions/sub-id", id),
 		Name:     fmtField("sub-display-name", id),
 		Location: "location",
 		Properties: map[string]any{
@@ -185,7 +187,7 @@ func generateSubscriptionAsset(id int, parentId int) inventory.AzureAsset {
 				},
 			},
 		},
-		SubscriptionId: subId,
+		SubscriptionId: fmtField("sub-id", id),
 		TenantId:       "tenant-id",
 		Type:           "microsoft.resources/subscriptions",
 	}

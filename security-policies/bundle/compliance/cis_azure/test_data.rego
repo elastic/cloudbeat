@@ -60,6 +60,16 @@ generate_azure_asset(type, properties) = {
 	"resource": {"properties": properties},
 }
 
+generate_azure_asset_with_ext(type, properties, ext) = {
+	"subType": type,
+	"resource": {"properties": properties, "extension": ext},
+}
+
+generate_azure_asset_resource(type, properties) = {
+	"subType": type,
+	"resource": properties,
+}
+
 generate_azure_sku_asset_with_properties(type, properties) = {
 	"subType": type,
 	"resource": {
@@ -88,9 +98,24 @@ generate_postgresql_server_with_ssl_enforcement(enabled) = {
 	"resource": {"properties": {"sslEnforcement": enabled}},
 }
 
+generate_postgresql_server_with_extension(ext) = {
+	"subType": "azure-postgresql-server-db",
+	"resource": {"extension": ext},
+}
+
+generate_postgresql_server_with_infrastructure_encryption(enabled) = {
+	"subType": "azure-postgresql-server-db",
+	"resource": {"properties": {"infrastructureEncryption": enabled}},
+}
+
 generate_mysql_server_with_ssl_enforcement(enabled) = {
 	"subType": "azure-mysql-server-db",
 	"resource": {"properties": {"sslEnforcement": enabled}},
+}
+
+generate_flexible_mysql_server_with_extension(extension) = {
+	"subType": "azure-flexible-mysql-server-db",
+	"resource": {"extension": extension},
 }
 
 generate_activity_log_alerts_no_alerts = {
@@ -136,8 +161,12 @@ valid_managed_disk = {
 	"storageAccountType": "Standard_LRS",
 }
 
+generate_vm(managed_disk) = generate_vm_full(managed_disk, {})
+
+generate_vm_with_extension(extension) = generate_vm_full({}, extension)
+
 # regal ignore:rule-length
-generate_vm(managed_disk) = {
+generate_vm_full(managed_disk, extension) = {
 	"subType": "azure-vm",
 	"resource": {
 		"extendedLocation": null,
@@ -152,6 +181,7 @@ generate_vm(managed_disk) = {
 		"managedBy": "",
 		"name": "cloudbeatVM",
 		"plan": null,
+		"extension": extension,
 		"properties": {
 			"extended": {"instanceView": {
 				"computerName": "cloudbeatVM",
@@ -298,5 +328,23 @@ generate_diagnostic_setting_element_log(category, enabled) = {
 	"retentionPolicy": {
 		"days": 0,
 		"enabled": false,
+	},
+}
+
+generate_key_vault_extension_key(attributes) = {"properties": {"attributes": attributes}}
+
+generate_key_vault_rbac(extension) = {
+	"subType": "azure-vault",
+	"resource": {
+		"properties": {"enableRbacAuthorization": true},
+		"extension": extension,
+	},
+}
+
+generate_key_vault(properties, extension) = {
+	"subType": "azure-vault",
+	"resource": {
+		"properties": properties,
+		"extension": extension,
 	},
 }
