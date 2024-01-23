@@ -22,6 +22,7 @@ create_release_branch() {
     git checkout main
     git pull --rebase origin main
     git checkout -b "$CURRENT_MINOR_VERSION" origin/main
+    git log --oneline --pretty=format:"%h %an %ad %s" --date=format-local:"%d/%m/%H:%M"
     echo "Push release branch $CURRENT_MINOR_VERSION to origin"
     git push origin $CURRENT_MINOR_VERSION
   fi
