@@ -12,6 +12,7 @@ echo "CURRENT_MINOR_VERSION: $CURRENT_MINOR_VERSION"
 
 git config --global user.email "cloudsecmachine@users.noreply.github.com"
 git config --global user.name "Cloud Security Machine"
+git fetch origin main
 
 # create_release_branch() {
 #   if git fetch origin "$CURRENT_MINOR_VERSION" 2>/dev/null; then
@@ -72,14 +73,22 @@ create_cloudbeat_versions_pr() {
   git add .
   git commit -m "Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
   git push origin "$NEXT_CLOUDBEAT_BRANCH"
+
+  cat <<EOF >cloudbeat_pr_body
+Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
+
+> [!NOTE]  
+> This is an automated PR
+EOF
+
   gh pr create --title "[TEST] Bump cloudbeat version" \
-    --body "Bump cloudbeat to new version - $NEXT_CLOUDBEAT_VERSION (Automated PR)\n THIS IS A TEST, NOT TO BE MERGED" \
+    --body-file cloudbeat_pr_body \
     --base "main" \
-    --head "$NEXT_CLOUDBEAT_BRANCH"
+    --head "$NEXT_CLOUDBEAT_BRANCH" \
+    --label "backport-skip"
 }
 
 bump_cloudbeat() {
-  git fetch origin main
   git checkout -b "$NEXT_CLOUDBEAT_BRANCH" origin/main
   update_version_mergify
   update_version_arm_template
@@ -89,15 +98,26 @@ bump_cloudbeat() {
 
 bump_hermit() {
   local BRANCH="bump-hermit-to-$NEXT_CLOUDBEAT_VERSION"
-  git checkout -b "$BRANCH" main
+  git checkout -b "$BRANCH" origin/main
   sed -i'' -E "s/\"CLOUDBEAT_VERSION\": .*/\"CLOUDBEAT_VERSION\": \"$NEXT_CLOUDBEAT_VERSION\",/g" bin/hermit.hcl
   git add bin/hermit.hcl
   git commit -m "[TEST] Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
   git push origin "$BRANCH"
+
+  cat <<EOF >hermit_pr_body
+Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
+
+> [!IMPORTANT]  
+> to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available
+> [!NOTE]  
+> This is an automated PR
+EOF
+
   gh pr create --title "Bump hermit cloudbeat version" \
-    --body "to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available. (Automated PR) \n THIS IS A TEST, NOT TO BE MERGED" \
+    --body-file hermit_pr_body \
     --base "main" \
-    --head "$BRANCH"
+    --head "$BRANCH" \
+    --label "backport-skip"
 }
 
 upload_cloud_formation_templates() {
