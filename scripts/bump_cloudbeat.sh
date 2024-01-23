@@ -19,7 +19,7 @@ create_release_branch() {
   else
     git fetch origin main
     echo "Create and push a new release branch $CURRENT_MINOR_VERSION from main"
-    git checkout -b "$CURRENT_MINOR_VERSION" main
+    git checkout -b "$CURRENT_MINOR_VERSION" origin/main
     git push origin $CURRENT_MINOR_VERSION
   fi
 }
