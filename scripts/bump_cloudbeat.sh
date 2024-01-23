@@ -9,9 +9,9 @@ echo "NEXT_MINOR_VERSION: $NEXT_MINOR_VERSION"
 echo "CURRENT_CLOUDBEAT_VERSION: $CURRENT_CLOUDBEAT_VERSION"
 echo "CURRENT_MINOR_VERSION: $CURRENT_MINOR_VERSION"
 
-# TODO use obtained service account user
-git config --global user.email "elasticmachine@users.noreply.github.com"
-git config --global user.name "Elastic Machine"
+
+git config --global user.email "cloudsecmachine@users.noreply.github.com"
+git config --global user.name "Cloud Security Machine"
 
 create_release_branch() {
     if git show-ref --quiet refs/heads/$CURRENT_MINOR_VERSION; then
