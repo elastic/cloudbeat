@@ -46,8 +46,8 @@ func TestMysqlAssetEnricher_Enrich(t *testing.T) {
 				mockFlexibleMysqlAsset("mysql-1", "mysql-1"),
 				mockPostgresAsset("psql-1", "psql"),
 				addExtension(mockFlexibleMysqlAsset("mysql-2", "mysql-2"), map[string]any{
-					inventory.ExtensionMysqlConfigurations: []map[string]any{
-						flexMysqlTLSVersionProps("tlsv1.2"),
+					inventory.ExtensionMysqlConfigurations: []inventory.AzureAsset{
+						mockFlexMysqlTLSVersionConfig("mysql-2/tls_version", "tlsv1.2"),
 					},
 				}),
 			},
@@ -66,20 +66,20 @@ func TestMysqlAssetEnricher_Enrich(t *testing.T) {
 			},
 			expected: []inventory.AzureAsset{
 				addExtension(mockFlexibleMysqlAsset("mysql-1", "mysql-1"), map[string]any{
-					inventory.ExtensionMysqlConfigurations: []map[string]any{
-						flexMysqlTLSVersionProps("tlsv1.2"),
+					inventory.ExtensionMysqlConfigurations: []inventory.AzureAsset{
+						mockFlexMysqlTLSVersionConfig("mysql-1/tls_version", "tlsv1.2"),
 					},
 				}),
 				addExtension(mockFlexibleMysqlAsset("mysql-2", "mysql-2"), map[string]any{
-					inventory.ExtensionMysqlConfigurations: []map[string]any{
-						flexMysqlTLSVersionProps("tlsv1.3"),
+					inventory.ExtensionMysqlConfigurations: []inventory.AzureAsset{
+						mockFlexMysqlTLSVersionConfig("mysql-2/tls_version", "tlsv1.3"),
 					},
 				}),
 				mockFlexibleMysqlAsset("mysql-3", "mysql-3"),
 			},
 			expectError: false,
 			configRes: map[string]enricherResponse{
-				"mysql-1": assetRes(mockFlexMysqlTLSVersionConfig("mysql-2/tls_version", "tlsv1.2")),
+				"mysql-1": assetRes(mockFlexMysqlTLSVersionConfig("mysql-1/tls_version", "tlsv1.2")),
 				"mysql-2": assetRes(mockFlexMysqlTLSVersionConfig("mysql-2/tls_version", "tlsv1.3")),
 				"mysql-3": assetRes(),
 			},
@@ -118,20 +118,15 @@ func mockFlexMysqlTLSVersionConfig(id, tlsVersion string) inventory.AzureAsset {
 		ResourceGroup:  "group",
 		Name:           "tls_version",
 		Type:           inventory.FlexibleMySQLDBAssetType + "/configuration",
-		Properties:     flexMysqlTLSVersionProps(tlsVersion),
+		Properties: map[string]any{
+			"name":         "tls_version",
+			"source":       "system-default",
+			"value":        tlsVersion,
+			"dataType":     "string",
+			"defaultValue": "",
+		},
 	}
 }
-
-func flexMysqlTLSVersionProps(tlsVersion string) map[string]any {
-	return map[string]any{
-		"name":         "tls_version",
-		"source":       "system-default",
-		"value":        tlsVersion,
-		"dataType":     "string",
-		"defaultValue": "",
-	}
-}
-
 func mockFlexibleMysqlAsset(id string, name string) inventory.AzureAsset {
 	return inventory.AzureAsset{
 		Id:             id,
