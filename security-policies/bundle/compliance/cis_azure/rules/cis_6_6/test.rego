@@ -6,11 +6,26 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
-	eval_fail with input as test_data.generate_azure_asset("azure-network-watcher", {"provisioningState": "NotSucceeded"})
+	# No network watchers
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {})
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": []})
+
+	# No succeeded network watcher
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [{"properties": {"provisioningState": "NotSucceeded"}}]})
+
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [
+		{"properties": {"provisioningState": "NotSucceeded"}},
+		{"properties": {"provisioningState": "NotSucceeded"}},
+	]})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset("azure-network-watcher", {"provisioningState": "Succeeded"})
+	eval_pass with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [{"properties": {"provisioningState": "Succeeded"}}]})
+
+	eval_pass with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [
+		{"properties": {"provisioningState": "Succeeded"}},
+		{"properties": {"provisioningState": "NotSucceeded"}},
+	]})
 }
 
 test_not_evaluated if {

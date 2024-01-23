@@ -6,7 +6,7 @@ import future.keywords.if
 
 finding = result if {
 	# filter
-	data_adapter.is_network_watcher
+	data_adapter.is_batched_network_watcher_by_location
 
 	# set result
 	result := common.generate_result_without_expected(
@@ -16,5 +16,8 @@ finding = result if {
 }
 
 ensure_enabled if {
-	data_adapter.properties.provisioningState == "Succeeded"
+	count(data_adapter.resource.networkWatchers) > 0
+
+	some i
+	data_adapter.resource.networkWatchers[i].properties.provisioningState == "Succeeded"
 } else = false

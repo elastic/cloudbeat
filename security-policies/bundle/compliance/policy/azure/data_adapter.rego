@@ -105,8 +105,8 @@ is_network_watchers_flow_log if {
 	input.subType == "azure-network-watchers-flow-log"
 }
 
-is_network_watcher if {
-	input.subType == "azure-network-watcher"
+is_batched_network_watcher_by_location if {
+	input.subType == "azure-batched-network-watchers-by-location"
 }
 
 is_sql_server if {

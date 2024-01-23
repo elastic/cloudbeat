@@ -65,6 +65,7 @@ func TestAzure_Initialize(t *testing.T) {
 				"azure_cloud_assets_fetcher",
 				"azure_cloud_batch_asset_fetcher",
 				"azure_cloud_insights_batch_asset_fetcher",
+				"azure_cloud_locations_network_watchers_batch_assets_fetcher",
 			},
 		},
 		{
