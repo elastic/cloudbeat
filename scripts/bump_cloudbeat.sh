@@ -35,7 +35,7 @@ git fetch origin main
 # }
 
 update_version_mergify() {
-  echo "Update .mergify.yml with new version"
+  echo "• Update .mergify.yml with new version"
   cat <<EOF >>.mergify.yml
   - name: backport patches to $CURRENT_MINOR_VERSION branch
     conditions:
@@ -54,7 +54,7 @@ EOF
 }
 
 update_version_arm_template() {
-  echo "Update ARM template with new version"
+  echo "• Update ARM template with new version"
   local single_account_file="deploy/azure/ARM-for-single-account.json"
   local organization_account_file="deploy/azure/ARM-for-organization-account.json"
   jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"$NEXT_CLOUDBEAT_VERSION\"" $single_account_file >tmp.json && mv tmp.json $single_account_file
@@ -65,7 +65,7 @@ update_version_arm_template() {
 }
 
 update_version_beat() {
-  echo "Update version/version.go with new version"
+  echo "• Update version/version.go with new version"
   sed -i'' -E "s/const defaultBeatVersion = .*/const defaultBeatVersion = \"$NEXT_CLOUDBEAT_VERSION\"/g" version/version.go
 }
 

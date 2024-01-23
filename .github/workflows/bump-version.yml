@@ -25,7 +25,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }} # TODO: remove
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
-      - name: exract version
+      - name: extract version
         run: |
           # version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           # echo "CURRENT_CLOUDBEAT_VERSION=$version" >> $GITHUB_ENV

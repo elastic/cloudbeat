@@ -50,6 +50,8 @@ create_integrations_pr() {
         --body "Bumps integration to new version (Automated PR)" \
         --base "main" \
         --head "$BRANCH" \
+        --label "enhancement" \
+        --label "Team:Cloud Security" \
         --repo "$INTEGRATION_REPO")"
 }
 
