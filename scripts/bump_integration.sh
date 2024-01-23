@@ -17,6 +17,16 @@ checkout_integration_repo() {
     git checkout -b "$BRANCH" main
 }
 
+get_next_integration_version() {
+    input_line=$(sed -n '3p' $CHANGELOG_PATH) # last version is always on line 3
+    first_version=$(echo $input_line | cut -d' ' -f2)
+    major_minor=$(echo $first_version | cut -d'.' -f1-2)
+    major=$(echo $major_minor | cut -d'.' -f1)
+    minor=$(echo $major_minor | cut -d'.' -f2)
+    next_minor=$((minor + 1))
+    export NEXT_INTEGRATION_VERSION="$major.$next_minor.0"
+}
+
 update_manifest_version_vars() {
     # cis_gcp
     sed -i'' -E "s/cloudshell_git_branch=[0-9]+\.[0-9]+/cloudshell_git_branch=$MAJOR_MINOR_CLOUDBEAT/g" $MANIFEST_PATH
@@ -34,13 +44,13 @@ update_manifest_version_vars() {
 }
 
 create_integrations_pr() {
-  echo 'Creating a PR to update integration'
+    echo 'Creating a PR to update integration'
 
-  export PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
-  --body "Bumps integration to new version (Automated PR)" \
-  --base "main" \
-  --head "$BRANCH" \
-  --repo "$INTEGRATION_REPO")"
+    export PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
+        --body "Bumps integration to new version (Automated PR)" \
+        --base "main" \
+        --head "$BRANCH" \
+        --repo "$INTEGRATION_REPO")"
 }
 
 update_manifest_version() {
@@ -60,19 +70,11 @@ update_changelog_version() {
 }
 
 update_changelog_version_map() {
-    # extract current major.minor version from changelog
-    input_line=$(sed -n '3p' $CHANGELOG_PATH) # last version is always on line 3
-    first_version=$(echo $input_line | cut -d' ' -f2)
-    major_minor=$(echo $first_version | cut -d'.' -f1-2)
-    major=$(echo $major_minor | cut -d'.' -f1)
-    minor=$(echo $major_minor | cut -d'.' -f2)
-    next_minor=$((minor + 1))
-
-    # write new version map
+    major_minor=$(echo "$NEXT_INTEGRATION_VERSION" | cut -d'.' -f1,2)
     new_comment="# ${next_minor}.x - ${MAJOR_MINOR_CLOUDBEAT}.x"
     file_content=$(<"$CHANGELOG_PATH")
     new_file_content=$(awk -v var="$new_comment" 'NR==3 {print var} {print}' "$CHANGELOG_PATH")
-    echo -e "$new_file_content" > temp.yaml
+    echo -e "$new_file_content" >temp.yaml
     mv temp.yaml "$CHANGELOG_PATH"
     git add $CHANGELOG_PATH
     git commit -m "Update changelog version map"
@@ -80,6 +82,7 @@ update_changelog_version_map() {
 }
 
 checkout_integration_repo
+get_next_integration_version
 update_manifest_version_vars
 create_integrations_pr
 update_manifest_version
