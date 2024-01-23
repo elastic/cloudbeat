@@ -70,7 +70,7 @@ update_changelog_version() {
 }
 
 update_changelog_version_map() {
-    major_minor=$(echo "$NEXT_INTEGRATION_VERSION" | cut -d'.' -f1,2)
+    next_minor=$(echo "$NEXT_INTEGRATION_VERSION" | cut -d'.' -f1,2)
     new_comment="# ${next_minor}.x - ${MAJOR_MINOR_CLOUDBEAT}.x"
     file_content=$(<"$CHANGELOG_PATH")
     new_file_content=$(awk -v var="$new_comment" 'NR==3 {print var} {print}' "$CHANGELOG_PATH")
