@@ -109,11 +109,12 @@ Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
 
 > [!IMPORTANT]  
 > to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available
+
 > [!NOTE]  
 > This is an automated PR
 EOF
 
-  gh pr create --title "Bump hermit cloudbeat version" \
+  gh pr create --title "[TEST] Bump hermit cloudbeat version" \
     --body-file hermit_pr_body \
     --base "main" \
     --head "$BRANCH" \
