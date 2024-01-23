@@ -6,15 +6,14 @@ export CHANGELOG_PATH="packages/cloud_security_posture/changelog.yml"
 export INTEGRATION_REPO="orouz/integrations" # TODO: change to elastic/integrations
 export BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
 export MAJOR_MINOR_CLOUDBEAT=$(echo "$NEXT_CLOUDBEAT_VERSION" | cut -d. -f1,2)
-export MAJOR_MINOR_INTEGRATION=$(echo "$NEXT_INTEGRATION_VERSION" | cut -d. -f1,2)
+
+git config --global user.email "cloudsecmachine@users.noreply.github.com"
+git config --global user.name "Cloud Security Machine"
 
 checkout_integration_repo() {
     gh auth setup-git
     gh repo clone $INTEGRATION_REPO
     cd integrations
-    # TODO: use obtained service account user
-    git config --global user.email "elasticmachine@users.noreply.github.com"
-    git config --global user.name "Elastic Machine"
     git checkout -b "$BRANCH" main
 }
 
@@ -61,7 +60,16 @@ update_changelog_version() {
 }
 
 update_changelog_version_map() {
-    new_comment="# ${MAJOR_MINOR_INTEGRATION}.x - ${MAJOR_MINOR_CLOUDBEAT}.x"
+    # extract current major.minor version from changelog
+    input_line=$(sed -n '3p' $CHANGELOG_PATH) # last version is always on line 3
+    first_version=$(echo $input_line | cut -d' ' -f2)
+    major_minor=$(echo $first_version | cut -d'.' -f1-2)
+    major=$(echo $major_minor | cut -d'.' -f1)
+    minor=$(echo $major_minor | cut -d'.' -f2)
+    next_minor=$((minor + 1))
+
+    # write new version map
+    new_comment="# ${next_minor}.x - ${MAJOR_MINOR_CLOUDBEAT}.x"
     file_content=$(<"$CHANGELOG_PATH")
     new_file_content=$(awk -v var="$new_comment" 'NR==3 {print var} {print}' "$CHANGELOG_PATH")
     echo -e "$new_file_content" > temp.yaml
