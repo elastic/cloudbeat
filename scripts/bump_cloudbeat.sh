@@ -15,15 +15,15 @@ git config --global user.name "Cloud Security Machine"
 
 create_release_branch() {
   if git fetch origin "$CURRENT_MINOR_VERSION" 2>/dev/null; then
-    echo "release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
+    echo "• Release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
   else
-    git fetch origin main
-    git checkout main
-    git pull --rebase origin main
-    echo "Create and push a new release branch $CURRENT_MINOR_VERSION from main"
-    git checkout -b "$CURRENT_MINOR_VERSION" origin/main
-    echo "Push release branch $CURRENT_MINOR_VERSION to origin"
-    git push origin $CURRENT_MINOR_VERSION
+    echo "• Create and push a new release branch $CURRENT_MINOR_VERSION from main"
+    # git fetch origin main
+    # git checkout main
+    # git pull --rebase origin main
+    # git checkout -b "$CURRENT_MINOR_VERSION" origin/main
+    # echo "Push release branch $CURRENT_MINOR_VERSION to origin"
+    # git push origin $CURRENT_MINOR_VERSION
   fi
 }
 
@@ -101,6 +101,6 @@ upload_cloud_formation_templates() {
 }
 
 create_release_branch
-bump_cloudbeat
-bump_hermit
+# bump_cloudbeat
+# bump_hermit
 # upload_cloud_formation_templates
