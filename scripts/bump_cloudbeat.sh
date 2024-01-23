@@ -17,8 +17,7 @@ create_release_branch() {
   if git fetch origin "$CURRENT_MINOR_VERSION" 2>/dev/null; then
     echo "• Release branch '$CURRENT_MINOR_VERSION' already exists, not creating a new one from main"
   else
-    git status
-    git log
+    git log --oneline --pretty=format:"%h %an %ad %s" --date=format-local:"%d/%m/%H:%M"
     # echo "• Create and push a new release branch $CURRENT_MINOR_VERSION from main"
     # echo 'fetch main'
     # git fetch origin main
