@@ -36,8 +36,8 @@ jobs:
           echo "CURRENT_CLOUDBEAT_VERSION=$version" >> $GITHUB_ENV
           echo "Bumping $version to $NEXT_CLOUDBEAT_VERSION"
 
-      - name: Bump cloudbeat
-        run: scripts/bump_cloudbeat.sh
+      # - name: Bump cloudbeat
+      #   run: scripts/bump_cloudbeat.sh
 
-      # - name: Bump integration
-      #   run: scripts/bump_integration.sh
+      - name: Bump integration
+        run: scripts/bump_integration.sh
