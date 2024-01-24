@@ -111,7 +111,7 @@ env:
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
-  TF_VAR_ec_url: ${{ secrets.EC_URL }}
+  TF_VAR_ec_url: ${{ inputs.ec-url }}
 
 jobs:
   Deploy:
@@ -365,7 +365,7 @@ jobs:
         working-directory: deploy/azure
         run: |
           if [[ "${{ env.STACK_VERSION }}" == *"8.11"* ]]; then
-            az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+            az deployment sub create --locatPion EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
           else
             az group create --location EastUS --name "${{ env.DEPLOYMENT_NAME }}"
             az deployment group create --resource-group "${{ env.DEPLOYMENT_NAME }}" --template-file ARM-for-single-account.json --parameters @arm_parameters.json
