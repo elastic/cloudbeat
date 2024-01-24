@@ -23,8 +23,8 @@ jobs:
     steps:
       - name: Checkout Cloudbeat Repo
         uses: actions/checkout@v4
-        # with:
-        #   token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+        with:
+          token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
       - name: Setup Cloudbeat Versions
         run: |
