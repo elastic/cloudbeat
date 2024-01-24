@@ -129,7 +129,6 @@ jobs:
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
-      TF_VAR_EC_URL_OPTION: ${{inputs.ec-url}}
     # Add "id-token" with the intended permissions.
     permissions:
       contents: "read"
@@ -247,7 +246,7 @@ jobs:
           terraform apply --auto-approve \
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
-            -var="ec_url"=${{ env.TF_VAR_EC_URL_OPTION }}"\
+            -var="ec_url"=${{ env.TF_VAR_ec_url }}"\
             -var="project=${{ github.actor }}" \
             -var="owner=${{ github.actor }}"
 
@@ -365,7 +364,7 @@ jobs:
         working-directory: deploy/azure
         run: |
           if [[ "${{ env.STACK_VERSION }}" == *"8.11"* ]]; then
-            az deployment sub create --locatPion EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
+            az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
           else
             az group create --location EastUS --name "${{ env.DEPLOYMENT_NAME }}"
             az deployment group create --resource-group "${{ env.DEPLOYMENT_NAME }}" --template-file ARM-for-single-account.json --parameters @arm_parameters.json
