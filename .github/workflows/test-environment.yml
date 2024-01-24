@@ -32,6 +32,9 @@ on:
         required: true
         description: "Elastic Cloud deployment region"
         default: "gcp-us-west2"
+        options:
+          - gcp-us-west2
+          - aws-eu-west-1
         type: string
       docker-image-override:
         required: false
@@ -126,6 +129,7 @@ jobs:
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
+      TF_VAR_EC_URL_OPTION: ${{inputs.ec-url}}
     # Add "id-token" with the intended permissions.
     permissions:
       contents: "read"
@@ -152,8 +156,8 @@ jobs:
           fi
 
           # Check pattern required for cloud deployment
-          if ! [[ $deployment_name =~ ^[a-z][-a-z0-9]*$ ]]; then
-            echo "error: Deployment name doesn't match the required pattern [a-z][-a-z0-9]*"
+          if ! [[ $deployment_name =~ (^keep_[a-z][-a-z0-9]*|[a-z][-a-z0-9]*)$ ]]; then
+            echo "error: Deployment name doesn't match the required pattern QA env keep_[a-z][-a-z0-9]* or regular env [a-z][-a-z0-9]*"
             exit 1
           fi
 
@@ -243,6 +247,7 @@ jobs:
           terraform apply --auto-approve \
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
+            -var="ec_url"=${{ env.TF_VAR_EC_URL_OPTION }}"\
             -var="project=${{ github.actor }}" \
             -var="owner=${{ github.actor }}"
 
