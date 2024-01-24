@@ -63,6 +63,7 @@ elasticsearch.password = os.getenv("ES_PASSWORD", "changeme")
 elasticsearch.basic_auth = (elasticsearch.user, elasticsearch.password)
 elasticsearch.port = os.getenv("ES_PORT", "9200")
 elasticsearch.protocol = os.getenv("ES_PROTOCOL", "http")
+elasticsearch.use_ssl = os.getenv("ES_USE_SSL", "true") == "true"
 elasticsearch.url = os.getenv("ES_URL", f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}")
 elasticsearch.kibana_url = os.getenv("KIBANA_URL", "")
 elasticsearch.kspm_index = os.getenv("KSPM_INDEX", FINDINGS_INDEX_PATTERN)
