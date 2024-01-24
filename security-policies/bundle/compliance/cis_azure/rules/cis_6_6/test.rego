@@ -7,22 +7,22 @@ import future.keywords.if
 
 test_violation if {
 	# No network watchers
-	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {})
-	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": []})
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-network-watcher", {})
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-network-watcher", {"networkWatchers": []})
 
 	# No succeeded network watcher
-	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [{"properties": {"provisioningState": "NotSucceeded"}}]})
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-network-watcher", {"networkWatchers": [{"properties": {"provisioningState": "NotSucceeded"}}]})
 
-	eval_fail with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [
+	eval_fail with input as test_data.generate_azure_asset_resource("azure-network-watcher", {"networkWatchers": [
 		{"properties": {"provisioningState": "NotSucceeded"}},
 		{"properties": {"provisioningState": "NotSucceeded"}},
 	]})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [{"properties": {"provisioningState": "Succeeded"}}]})
+	eval_pass with input as test_data.generate_azure_asset_resource("azure-network-watcher", {"networkWatchers": [{"properties": {"provisioningState": "Succeeded"}}]})
 
-	eval_pass with input as test_data.generate_azure_asset_resource("azure-batched-network-watchers-by-location", {"networkWatchers": [
+	eval_pass with input as test_data.generate_azure_asset_resource("azure-network-watcher", {"networkWatchers": [
 		{"properties": {"provisioningState": "Succeeded"}},
 		{"properties": {"provisioningState": "NotSucceeded"}},
 	]})

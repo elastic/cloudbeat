@@ -6,7 +6,7 @@ import future.keywords.if
 
 finding = result if {
 	# filter
-	data_adapter.is_batched_network_watcher_by_location
+	data_adapter.is_network_watcher
 
 	# set result
 	result := common.generate_result_without_expected(

@@ -331,7 +331,7 @@ func batchedNetworkWatcherByLocationResourceInfo(cycle cycle.Metadata, subscript
 	return fetching.ResourceInfo{
 		CycleMetadata: cycle,
 		Resource: &NetworkWatchersBatchedByLocationResource{
-			typePair:        newPair(fetching.AzureBatchedNetworkWatchersByLocation, fetching.MonitoringIdentity),
+			typePair:        newPair(fetching.AzureNetworkWatchersType, fetching.MonitoringIdentity),
 			Subscription:    subscription,
 			Location:        azAssetLocation(subscription.ShortID, location),
 			NetworkWatchers: networkWatchers,
@@ -340,12 +340,12 @@ func batchedNetworkWatcherByLocationResourceInfo(cycle cycle.Metadata, subscript
 }
 
 func batchedNetworkWatcherByLocationMetadata(subscription governance.Subscription, location string) fetching.ResourceMetadata {
-	id := fmt.Sprintf("%s-%s-%s", fetching.AzureBatchedNetworkWatchersByLocation, location, subscription.ShortID)
+	id := fmt.Sprintf("%s-%s-%s", fetching.AzureNetworkWatchersType, location, subscription.ShortID)
 	return fetching.ResourceMetadata{
 		ID:                   id,
 		Name:                 id,
 		Type:                 fetching.MonitoringIdentity,
-		SubType:              fetching.AzureBatchedNetworkWatchersByLocation,
+		SubType:              fetching.AzureNetworkWatchersType,
 		Region:               location,
 		CloudAccountMetadata: subscription.GetCloudAccountMetadata(),
 	}
