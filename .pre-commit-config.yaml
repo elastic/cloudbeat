@@ -58,10 +58,7 @@ repos:
         name: format with rain
         language: system
         entry: rain
-        args: [
-          "fmt",
-          "-w",
-        ]
+        args: ["fmt", "-w"]
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
@@ -76,7 +73,7 @@ repos:
       - id: shfmt
         args: ["-i", "4"]
       - id: shellcheck
-        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|dev-tools/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash)
+        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|dev-tools/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash|scripts/bump_cloudbeat.sh|scripts/bump_integration.sh)
 
   - repo: local
     hooks:
@@ -117,7 +114,7 @@ repos:
         name: OPA fmt
         description: Formats Rego policy using opa fmt
         entry: opa fmt
-        args: [ -w ]
+        args: [-w]
         language: system
         files: (\.rego)$
 
@@ -125,7 +122,7 @@ repos:
         name: OPA check
         description: Check syntax of staged Rego files
         entry: opa check
-        args: [ -S, './security-policies/bundle/compliance' ]
+        args: [-S, "./security-policies/bundle/compliance"]
         pass_filenames: false
         language: system
         files: (\.rego)$
@@ -134,7 +131,7 @@ repos:
         name: OPA test
         description: Runs OPA unit tests on rego source files
         entry: opa test
-        args: [ -b, './security-policies/bundle' ]
+        args: [-b, "./security-policies/bundle"]
         pass_filenames: false
         language: system
         files: (\.rego)$
@@ -161,12 +158,14 @@ repos:
     rev: v0.38.0
     hooks:
       - id: markdownlint
-        args: [ '--disable',
-                MD013,  # Line length can be ignored for now
-                MD033,  # Allow inline HTML
-                MD046,  # Allow code blocks to be fenced with backticks
-                MD041,  # Allow multiple top level headers
-                '--' ]
+        args: [
+            "--disable",
+            MD013, # Line length can be ignored for now
+            MD033, # Allow inline HTML
+            MD046, # Allow code blocks to be fenced with backticks
+            MD041, # Allow multiple top level headers
+            "--",
+          ]
         # TODO: Apply makrdownlint in other files
         files: security-policies/.*\.(md|markdown)$
 

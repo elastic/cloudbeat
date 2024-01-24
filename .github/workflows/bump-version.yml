@@ -1,16 +1,15 @@
 name: Bump Cloudbeat version
 
 on:
-  pull_request:
-    # inputs:
-    #   cloudbeat_version:
-    #     description: "New cloudbeat version number to bump to (e.g. 8.13.0)"
-    #     required: true
+  workflow_dispatch:
+    inputs:
+      cloudbeat_version:
+        description: "New cloudbeat major.minor version (e.g. 8.13)"
+        required: true
 
 env:
-  GH_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
-  NEXT_CLOUDBEAT_VERSION: 8.15.0
+  NEXT_CLOUDBEAT_VERSION: ${{ inputs.cloudbeat_version }}
   AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
 
@@ -19,25 +18,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Cloudbeat repo
+      - name: Checkout Cloudbeat Repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }} # TODO: remove
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
-      - name: extract version
+      - name: Setup Cloudbeat Versions
         run: |
-          # version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          # echo "CURRENT_CLOUDBEAT_VERSION=$version" >> $GITHUB_ENV
-          # echo "Bumping $version to $NEXT_CLOUDBEAT_VERSION"
+          echo "CURRENT_CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")" >> $GITHUB_ENV
+          echo "NEXT_CLOUDBEAT_VERSION=$NEXT_CLOUDBEAT_VERSION.0" >> $GITHUB_ENV
+          echo "Bumping $CURRENT_CLOUDBEAT_VERSION to $NEXT_CLOUDBEAT_VERSION"
 
-          # USING NON-EXSITING VERSION FOR TESTING ONLY
-          version=8.14.0
-          echo "CURRENT_CLOUDBEAT_VERSION=$version" >> $GITHUB_ENV
-          echo "Bumping $version to $NEXT_CLOUDBEAT_VERSION"
+      - name: Setup Git User
+        run: |
+          git config --global user.email "cloudsecmachine@users.noreply.github.com"
+          git config --global user.name "Cloud Security Machine"
 
-      # - name: Bump cloudbeat
-      #   run: scripts/bump_cloudbeat.sh
+      - name: Bump Cloudbeat
+        run: scripts/bump_cloudbeat.sh
 
-      - name: Bump integration
-        run: scripts/bump_integration.sh
+      # - name: Bump Cloud Security Posture Integration
+      #   run: scripts/bump_integration.sh

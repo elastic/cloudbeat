@@ -7,17 +7,18 @@ export INTEGRATION_REPO="elastic/integrations"
 export BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
 export MAJOR_MINOR_CLOUDBEAT=$(echo "$NEXT_CLOUDBEAT_VERSION" | cut -d. -f1,2)
 
-git config --global user.email "cloudsecmachine@users.noreply.github.com"
-git config --global user.name "Cloud Security Machine"
-
 checkout_integration_repo() {
+    echo "• Checkout integration repo"
     gh auth setup-git
     gh repo clone $INTEGRATION_REPO
     cd integrations
     git checkout -b "$BRANCH" origin/main
 }
 
+# reads the last version from changelog.yml version map
+# and increments the minor version
 get_next_integration_version() {
+    echo "• Get next integration version"
     input_line=$(sed -n '3p' $CHANGELOG_PATH) # last version is always on line 3
     first_version=$(echo $input_line | cut -d' ' -f2)
     major_minor=$(echo $first_version | cut -d'.' -f1-2)
@@ -25,17 +26,21 @@ get_next_integration_version() {
     minor=$(echo $major_minor | cut -d'.' -f2)
     next_minor=$((minor + 1))
     export NEXT_INTEGRATION_VERSION="$major.$next_minor.0"
+    echo "NEXT_INTEGRATION_VERSION: $NEXT_INTEGRATION_VERSION"
 }
 
 update_manifest_version_vars() {
     # cis_gcp
+    echo "• Update cloudshell_git_branch in manifest.yml"
     sed -i'' -E "s/cloudshell_git_branch=[0-9]+\.[0-9]+/cloudshell_git_branch=$MAJOR_MINOR_CLOUDBEAT/g" $MANIFEST_PATH
 
     # cis_aws + vuln_mgmt_aws
+    echo "• Update cloudformation-* in manifest.yml"
     sed -i'' -E "s/cloudformation-cnvm-[0-9]+\.[0-9]+\.[0-9]+/cloudformation-cnvm-$NEXT_CLOUDBEAT_VERSION/g" $MANIFEST_PATH
     sed -i'' -E "s/cloudformation-cspm-ACCOUNT_TYPE-[0-9]+\.[0-9]+\.[0-9]+/cloudformation-cspm-ACCOUNT_TYPE-$NEXT_CLOUDBEAT_VERSION/g" $MANIFEST_PATH
 
     # cis_azure
+    echo "• Update cloudshell_git_branch in manifest.yml"
     sed -i'' -E "s/cloudbeat%2F[0-9]+\.[0-9]+/cloudbeat%2F$MAJOR_MINOR_CLOUDBEAT/g" $MANIFEST_PATH
 
     git add $MANIFEST_PATH
@@ -44,7 +49,6 @@ update_manifest_version_vars() {
 }
 
 create_integrations_pr() {
-    echo 'Creating a PR to update integration'
     cat <<EOF >pr_body
 Bump integration version - \`$NEXT_INTEGRATION_VERSION\`
 
@@ -52,7 +56,8 @@ Bump integration version - \`$NEXT_INTEGRATION_VERSION\`
 > This is an automated PR
 EOF
 
-    export PR_URL="$(gh pr create --title "[TEST][Cloud Security] Bump integration - DO NOT MERGE" \
+    echo '• Create a PR to update integration'
+    export PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
         --body-file pr_body \
         --base "main" \
         --head "$BRANCH" \
@@ -62,6 +67,7 @@ EOF
 }
 
 update_manifest_version() {
+    echo "• Update manifest version"
     yq -i ".version = \"$NEXT_INTEGRATION_VERSION\"" $MANIFEST_PATH
     git add $MANIFEST_PATH
     git commit -m "Update manifest version"
@@ -69,6 +75,7 @@ update_manifest_version() {
 }
 
 update_changelog_version() {
+    echo "• Update changelog version"
     yq -i ".[0].version = \"$NEXT_INTEGRATION_VERSION\"" $CHANGELOG_PATH
     # this line below requires single quotes and env(PR) to interpolate this env var
     yq -i '.[0].changes += [{"description": "Bump version", "type": "enhancement", "link": env(PR_URL) }]' $CHANGELOG_PATH
@@ -78,6 +85,7 @@ update_changelog_version() {
 }
 
 update_changelog_version_map() {
+    echo "• Update changelog version map"
     next_minor=$(echo "$NEXT_INTEGRATION_VERSION" | cut -d'.' -f1,2)
     new_comment="# ${next_minor}.x - ${MAJOR_MINOR_CLOUDBEAT}.x"
     file_content=$(<"$CHANGELOG_PATH")
