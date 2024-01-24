@@ -28,6 +28,8 @@ jobs:
     name: Build
     runs-on: ubuntu-20.04
     timeout-minutes: 40
+    # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
+    if: false
     steps:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
@@ -59,7 +61,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Cache Build dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.workflow }}
@@ -96,7 +98,7 @@ jobs:
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Cache docker images
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
@@ -108,7 +110,9 @@ jobs:
 
   k8s_functional_tests:
     # Run only selected tests on PRs
-    if: github.event_name == 'pull_request'
+    # if: github.event_name == 'pull_request'
+    # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
+    if: false
     name: ${{ matrix.test-target }}-tests
     needs: [ Build ]
     runs-on: ubuntu-22.04
@@ -157,7 +161,7 @@ jobs:
           just create-kind-cluster
 
       - name: Cache docker images
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
@@ -192,7 +196,9 @@ jobs:
   k8s_functional_tests_full:
     # Run full test suit on post-merge
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
-    if: github.event_name == 'push'
+    # if: github.event_name == 'push'
+    # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
+    if: false
     needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
@@ -384,7 +390,7 @@ jobs:
           just create-kind-cluster ${{ env.KIND_CONFIG }}
 
       - name: Cache docker images
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}

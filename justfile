@@ -119,6 +119,9 @@ logs-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
+deploy-arm:
+  deploy/azure/generate_dev_template.py --deploy
+
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 

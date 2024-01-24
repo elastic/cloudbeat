@@ -30,7 +30,7 @@ repos:
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
+    rev: 7.0.0
     hooks:
       - id: flake8
         name: flake8 ./tests/ ./fleet_api/ ./.ci/scripts ./github/actions
@@ -65,7 +65,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.83.7
+    rev: v0.84.0
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -76,8 +76,7 @@ repos:
       - id: shfmt
         args: ["-i", "4"]
       - id: shellcheck
-        files: (deploy/.*sh|scripts/publish_cft.sh|.ci/scripts/.*sh)
-        exclude: deploy/deployment-manager/.*sh
+        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|dev-tools/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash)
 
   - repo: local
     hooks:
@@ -104,6 +103,12 @@ repos:
         entry: bash -c 'go mod tidy'
         language: system
         files: (go.mod|go.sum)
+        pass_filenames: false
+      - id: generate-arm-dev-templates
+        name: Generate ARM dev templates
+        entry: bash -c 'deploy/azure/generate_dev_template.py --template-type single-account && deploy/azure/generate_dev_template.py --template-type organization-account'
+        language: python
+        files: deploy/azure/.*
         pass_filenames: false
 
   - repo: local
@@ -166,7 +171,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.14.0
+    rev: v0.15.0
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
