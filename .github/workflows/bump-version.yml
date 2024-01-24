@@ -1,11 +1,14 @@
 name: Bump Cloudbeat version
 
 on:
-  workflow_dispatch:
-    inputs:
-      cloudbeat_version:
-        description: "New cloudbeat major.minor version (e.g. 8.13)"
-        required: true
+  # workflow_dispatch:
+  #   inputs:
+  #     cloudbeat_version:
+  #       description: "New cloudbeat major.minor version (e.g. 8.13)"
+  #       required: true
+  pull_request:
+    branches:
+      - main
 
 env:
   GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
