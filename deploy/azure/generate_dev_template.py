@@ -25,7 +25,7 @@ def main():
 
     modify_template(template)
     with open(args.output_file, "w") as f:
-        json.dump(template, f, indent=4)
+        print(json.dumps(template, indent=4), file=f)
 
     if args.deploy:
         if args.template_type == "organization-account":
