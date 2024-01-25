@@ -418,6 +418,8 @@ jobs:
         id: agentless
         if: env.TEST_AGENTLESS == 'true'
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
           poetry run python src/install_agentless_integrations.py
 
