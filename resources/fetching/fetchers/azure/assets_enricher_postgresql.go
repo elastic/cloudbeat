@@ -61,7 +61,11 @@ func (p postgresqlEnricher) enrichConfigurations(ctx context.Context, a *invento
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionPostgresqlConfigurations, configs)
+	if len(configs) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionPostgresqlConfigurations, configs)
 	return nil
 }
 
@@ -79,7 +83,11 @@ func (p postgresqlEnricher) enrichFirewallRules(ctx context.Context, a *inventor
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionPostgresqlFirewallRules, configs)
+	if len(configs) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionPostgresqlFirewallRules, configs)
 	return nil
 }
 

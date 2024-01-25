@@ -87,7 +87,6 @@ func (p *mysqlProvider) GetFlexibleTLSVersionConfiguration(ctx context.Context, 
 			SubscriptionId: subID,
 			Location:       assetLocationGlobal,
 			Properties: map[string]any{
-				"name":         pointers.Deref(tlsVersion.Name),
 				"source":       string(pointers.Deref(tlsVersion.Properties.Source)),
 				"value":        strings.ToLower(pointers.Deref(tlsVersion.Properties.Value)),
 				"dataType":     pointers.Deref(tlsVersion.Properties.DataType),

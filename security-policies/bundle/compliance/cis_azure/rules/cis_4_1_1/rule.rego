@@ -19,5 +19,5 @@ finding = result if {
 default is_audit_enabled = false
 
 is_audit_enabled if {
-	data_adapter.resource.extension.sqlBlobAuditPolicy.state == "Enabled"
+	data_adapter.resource.extension.sqlBlobAuditPolicy.properties.state == "Enabled"
 }

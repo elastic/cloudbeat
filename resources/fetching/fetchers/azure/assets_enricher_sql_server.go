@@ -63,7 +63,11 @@ func (s sqlServerEnricher) enrichSQLEncryptionProtector(ctx context.Context, a *
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionSQLEncryptionProtectors, encryptProtectors)
+	if len(encryptProtectors) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLEncryptionProtectors, encryptProtectors)
 	return nil
 }
 
@@ -77,7 +81,7 @@ func (s sqlServerEnricher) enrichSQLBlobAuditPolicy(ctx context.Context, a *inve
 		return nil
 	}
 
-	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0].Properties)
+	a.AddExtension(inventory.ExtensionSQLBlobAuditPolicy, policy[0])
 	return nil
 }
 
@@ -87,7 +91,11 @@ func (s sqlServerEnricher) enrichTransparentDataEncryption(ctx context.Context, 
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionSQLTransparentDataEncryptions, tdes)
+	if len(tdes) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLTransparentDataEncryptions, tdes)
 	return nil
 }
 
@@ -97,6 +105,10 @@ func (s sqlServerEnricher) enrichAdvancedThreatProtectionSettings(ctx context.Co
 		return err
 	}
 
-	enrichExtension(a, inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
+	if len(settings) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
 	return nil
 }

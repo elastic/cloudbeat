@@ -28,6 +28,6 @@ has_allow_all_firewall_rule if {
 
 has_allow_all_firewall_rule if {
 	some i
-	data_adapter.resource.extension.psqlFirewallRules[i].startIPAddress == "0.0.0.0"
-	data_adapter.resource.extension.psqlFirewallRules[i].endIPAddress == "0.0.0.0"
+	data_adapter.resource.extension.psqlFirewallRules[i].properties.startIPAddress == "0.0.0.0"
+	data_adapter.resource.extension.psqlFirewallRules[i].properties.endIPAddress == "0.0.0.0"
 }

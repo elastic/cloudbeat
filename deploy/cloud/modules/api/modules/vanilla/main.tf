@@ -54,4 +54,3 @@ locals {
   yaml_src = jsondecode(data.http.yaml.response_body).item
   yaml     = var.agent_docker_img != "" ? replace(local.yaml_src, "/image: docker\\.elastic\\.co\\/beats\\/elastic-agent:\\d+\\.\\d+\\.\\d/", "image: ${var.agent_docker_img}") : local.yaml_src
 }
-

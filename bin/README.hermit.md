@@ -26,4 +26,3 @@ or
 ```shell
 hermit install opa@0.46 # install a specific version
 ```
-

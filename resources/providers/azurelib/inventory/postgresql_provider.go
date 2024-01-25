@@ -112,7 +112,6 @@ func (p *psqlProvider) ListSinglePostgresConfigurations(ctx context.Context, sub
 			Name:     pointers.Deref(c.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":         pointers.Deref(c.Name),
 				"source":       pointers.Deref(c.Properties.Source),
 				"value":        strings.ToLower(pointers.Deref(c.Properties.Value)),
 				"dataType":     pointers.Deref(c.Properties.DataType),
@@ -149,7 +148,6 @@ func (p *psqlProvider) ListFlexiblePostgresConfigurations(ctx context.Context, s
 			Name:     pointers.Deref(c.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":         pointers.Deref(c.Name),
 				"source":       pointers.Deref(c.Properties.Source),
 				"value":        strings.ToLower(pointers.Deref(c.Properties.Value)),
 				"dataType":     string(pointers.Deref(c.Properties.DataType)),
@@ -186,7 +184,6 @@ func (p *psqlProvider) ListSinglePostgresFirewallRules(ctx context.Context, subI
 			Name:     pointers.Deref(fr.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":           pointers.Deref(fr.Name),
 				"startIPAddress": pointers.Deref(fr.Properties.StartIPAddress),
 				"endIPAddress":   pointers.Deref(fr.Properties.EndIPAddress),
 			},
@@ -221,7 +218,6 @@ func (p *psqlProvider) ListFlexiblePostgresFirewallRules(ctx context.Context, su
 			Name:     pointers.Deref(fr.Name),
 			Location: assetLocationGlobal,
 			Properties: map[string]any{
-				"name":           pointers.Deref(fr.Name),
 				"startIPAddress": pointers.Deref(fr.Properties.StartIPAddress),
 				"endIPAddress":   pointers.Deref(fr.Properties.EndIPAddress),
 			},

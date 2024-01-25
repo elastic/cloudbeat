@@ -6,53 +6,53 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [{
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [{"properties": {
 		"state": "Disabled",
 		"databaseName": "dbName",
-	}]})
+	}}]})
 
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [
-		{
+		{"properties": {
 			"state": "Disabled",
 			"databaseName": "dbName",
-		},
-		{
+		}},
+		{"properties": {
 			"state": "Enabled",
 			"databaseName": "dbName",
-		},
-		{
+		}},
+		{"properties": {
 			"state": "Enabled",
 			"databaseName": "master",
-		},
+		}},
 	]})
 
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [{
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [{"properties": {
 		"state": "Enabled",
 		"databaseName": "dbName",
-	}]})
+	}}]})
 
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [{
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [{"properties": {
 		"state": "Disabled",
 		"databaseName": "master",
-	}]})
+	}}]})
 
 	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlTransparentDataEncryptions": [
-		{
+		{"properties": {
 			"state": "Enabled",
 			"databaseName": "dbName",
-		},
-		{
+		}},
+		{"properties": {
 			"state": "Enabled",
 			"databaseName": "dbName",
-		},
-		{
+		}},
+		{"properties": {
 			"state": "Disabled",
 			"databaseName": "master",
-		},
+		}},
 	]})
 }
 

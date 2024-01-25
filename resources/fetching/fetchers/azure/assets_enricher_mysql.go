@@ -48,15 +48,15 @@ func (e mysqlAssetEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets
 }
 
 func (e mysqlAssetEnricher) enrichTLSVersion(ctx context.Context, asset *inventory.AzureAsset) error {
-	tlsVersion, err := e.provider.GetFlexibleTLSVersionConfiguration(ctx, asset.SubscriptionId, asset.ResourceGroup, asset.Name)
+	configs, err := e.provider.GetFlexibleTLSVersionConfiguration(ctx, asset.SubscriptionId, asset.ResourceGroup, asset.Name)
 	if err != nil {
 		return err
 	}
 
-	if len(tlsVersion) == 0 {
+	if len(configs) == 0 {
 		return nil
 	}
 
-	enrichExtension(asset, inventory.ExtensionMysqlConfigurations, tlsVersion)
+	asset.AddExtension(inventory.ExtensionMysqlConfigurations, configs)
 	return nil
 }
