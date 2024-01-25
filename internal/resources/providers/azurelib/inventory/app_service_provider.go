@@ -53,18 +53,18 @@ type AppServiceProviderAPI interface {
 }
 
 func NewAppServiceProvider(log *logp.Logger, credentials azcore.TokenCredential) AppServiceProviderAPI {
-	return &appServiceProvider{
+	return &azureAppServiceProvider{
 		log:    log,
 		client: defaultAzureAppServiceWrapper(credentials),
 	}
 }
 
-type appServiceProvider struct {
+type azureAppServiceProvider struct {
 	log    *logp.Logger
 	client *azureAppServiceWrapper
 }
 
-func (p *appServiceProvider) GetWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
+func (p *azureAppServiceProvider) GetWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
 	p.log.Info("Getting Azure AppService WebApp Auth settings")
 
 	response, err := p.client.AssetWebAppsAuthSettings(ctx, webApp.SubscriptionId, webApp.ResourceGroup, webApp.Name)
