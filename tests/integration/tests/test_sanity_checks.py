@@ -47,7 +47,12 @@ tests_data = {
         # Exclude "data-processing" due to lack of Dataproc assets in the test account.
     ],
     "cis_azure": [
-        "configuration",
+        "cloud-compute",
+        "cloud-storage",
+        "cloud-database",
+        "key-management",
+        "monitoring",
+        "cloud-dns",
     ],  # Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": [
