@@ -54,7 +54,7 @@ func (e appServiceEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets
 }
 
 func (e appServiceEnricher) enrichWebAppWithAuthSettings(ctx context.Context, a *inventory.AzureAsset) error {
-	authSettings, err := e.provider.ListWebAppsAuthSettings(ctx, *a)
+	authSettings, err := e.provider.GetWebAppsAuthSettings(ctx, *a)
 	if err != nil {
 		return err
 	}

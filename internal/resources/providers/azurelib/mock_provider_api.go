@@ -212,6 +212,61 @@ func (_c *MockProviderAPI_GetSubscriptions_Call) RunAndReturn(run func(context.C
 	return _c
 }
 
+// GetWebAppsAuthSettings provides a mock function with given fields: ctx, webApp
+func (_m *MockProviderAPI) GetWebAppsAuthSettings(ctx context.Context, webApp inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, webApp)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, webApp)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, webApp)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, webApp)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_GetWebAppsAuthSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWebAppsAuthSettings'
+type MockProviderAPI_GetWebAppsAuthSettings_Call struct {
+	*mock.Call
+}
+
+// GetWebAppsAuthSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - webApp inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) GetWebAppsAuthSettings(ctx interface{}, webApp interface{}) *MockProviderAPI_GetWebAppsAuthSettings_Call {
+	return &MockProviderAPI_GetWebAppsAuthSettings_Call{Call: _e.mock.On("GetWebAppsAuthSettings", ctx, webApp)}
+}
+
+func (_c *MockProviderAPI_GetWebAppsAuthSettings_Call) Run(run func(ctx context.Context, webApp inventory.AzureAsset)) *MockProviderAPI_GetWebAppsAuthSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_GetWebAppsAuthSettings_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_GetWebAppsAuthSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_GetWebAppsAuthSettings_Call) RunAndReturn(run func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_GetWebAppsAuthSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListAllAssetTypesByName provides a mock function with given fields: ctx, assetsGroup, assets
 func (_m *MockProviderAPI) ListAllAssetTypesByName(ctx context.Context, assetsGroup string, assets []string) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, assetsGroup, assets)
@@ -1269,61 +1324,6 @@ func (_c *MockProviderAPI_ListStorageAccountsTableDiagnosticSettings_Call) Retur
 }
 
 func (_c *MockProviderAPI_ListStorageAccountsTableDiagnosticSettings_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountsTableDiagnosticSettings_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// ListWebAppsAuthSettings provides a mock function with given fields: ctx, webApp
-func (_m *MockProviderAPI) ListWebAppsAuthSettings(ctx context.Context, webApp inventory.AzureAsset) ([]inventory.AzureAsset, error) {
-	ret := _m.Called(ctx, webApp)
-
-	var r0 []inventory.AzureAsset
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
-		return rf(ctx, webApp)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) []inventory.AzureAsset); ok {
-		r0 = rf(ctx, webApp)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]inventory.AzureAsset)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, inventory.AzureAsset) error); ok {
-		r1 = rf(ctx, webApp)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockProviderAPI_ListWebAppsAuthSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListWebAppsAuthSettings'
-type MockProviderAPI_ListWebAppsAuthSettings_Call struct {
-	*mock.Call
-}
-
-// ListWebAppsAuthSettings is a helper method to define mock.On call
-//   - ctx context.Context
-//   - webApp inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListWebAppsAuthSettings(ctx interface{}, webApp interface{}) *MockProviderAPI_ListWebAppsAuthSettings_Call {
-	return &MockProviderAPI_ListWebAppsAuthSettings_Call{Call: _e.mock.On("ListWebAppsAuthSettings", ctx, webApp)}
-}
-
-func (_c *MockProviderAPI_ListWebAppsAuthSettings_Call) Run(run func(ctx context.Context, webApp inventory.AzureAsset)) *MockProviderAPI_ListWebAppsAuthSettings_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(inventory.AzureAsset))
-	})
-	return _c
-}
-
-func (_c *MockProviderAPI_ListWebAppsAuthSettings_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListWebAppsAuthSettings_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockProviderAPI_ListWebAppsAuthSettings_Call) RunAndReturn(run func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListWebAppsAuthSettings_Call {
 	_c.Call.Return(run)
 	return _c
 }

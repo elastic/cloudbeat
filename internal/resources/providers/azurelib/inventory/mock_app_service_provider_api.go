@@ -38,8 +38,8 @@ func (_m *MockAppServiceProviderAPI) EXPECT() *MockAppServiceProviderAPI_Expecte
 	return &MockAppServiceProviderAPI_Expecter{mock: &_m.Mock}
 }
 
-// ListWebAppsAuthSettings provides a mock function with given fields: ctx, webApp
-func (_m *MockAppServiceProviderAPI) ListWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
+// GetWebAppsAuthSettings provides a mock function with given fields: ctx, webApp
+func (_m *MockAppServiceProviderAPI) GetWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
 	ret := _m.Called(ctx, webApp)
 
 	var r0 []AzureAsset
@@ -64,31 +64,31 @@ func (_m *MockAppServiceProviderAPI) ListWebAppsAuthSettings(ctx context.Context
 	return r0, r1
 }
 
-// MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListWebAppsAuthSettings'
-type MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call struct {
+// MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWebAppsAuthSettings'
+type MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call struct {
 	*mock.Call
 }
 
-// ListWebAppsAuthSettings is a helper method to define mock.On call
+// GetWebAppsAuthSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - webApp AzureAsset
-func (_e *MockAppServiceProviderAPI_Expecter) ListWebAppsAuthSettings(ctx interface{}, webApp interface{}) *MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call {
-	return &MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call{Call: _e.mock.On("ListWebAppsAuthSettings", ctx, webApp)}
+func (_e *MockAppServiceProviderAPI_Expecter) GetWebAppsAuthSettings(ctx interface{}, webApp interface{}) *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call {
+	return &MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call{Call: _e.mock.On("GetWebAppsAuthSettings", ctx, webApp)}
 }
 
-func (_c *MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call) Run(run func(ctx context.Context, webApp AzureAsset)) *MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call {
+func (_c *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call) Run(run func(ctx context.Context, webApp AzureAsset)) *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(AzureAsset))
 	})
 	return _c
 }
 
-func (_c *MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call) Return(_a0 []AzureAsset, _a1 error) *MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call {
+func (_c *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call) Return(_a0 []AzureAsset, _a1 error) *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call) RunAndReturn(run func(context.Context, AzureAsset) ([]AzureAsset, error)) *MockAppServiceProviderAPI_ListWebAppsAuthSettings_Call {
+func (_c *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call) RunAndReturn(run func(context.Context, AzureAsset) ([]AzureAsset, error)) *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call {
 	_c.Call.Return(run)
 	return _c
 }
