@@ -32,6 +32,7 @@ type keyVaultEnricher struct {
 
 func (e keyVaultEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
 	singleAssetEnrichers := []func(context.Context, *inventory.AzureAsset) error{
+		e.enrichKeyVaultDiagnosticSettings,
 		e.enrichKeyVaultWithKeys,
 		e.enrichKeyVaultWithSecrets,
 	}
@@ -52,6 +53,20 @@ func (e keyVaultEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets [
 	}
 
 	return errors.Join(errs...)
+}
+
+func (e keyVaultEnricher) enrichKeyVaultDiagnosticSettings(ctx context.Context, a *inventory.AzureAsset) error {
+	diagSettings, err := e.provider.ListKeyVaultDiagnosticSettings(ctx, *a)
+	if err != nil {
+		return err
+	}
+
+	if len(diagSettings) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionKeyVaultDiagnosticSettings, diagSettings)
+	return nil
 }
 
 func (e keyVaultEnricher) enrichKeyVaultWithKeys(ctx context.Context, a *inventory.AzureAsset) error {
