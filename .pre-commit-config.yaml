@@ -11,6 +11,8 @@ repos:
         exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$
       - id: check-json
       - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+        exclude: (cloudbeat.reference.yml|security-policies/bundle/.*)
       - id: trailing-whitespace
         exclude: (cloudbeat.reference.yml|security-policies/bundle/.*)
 
