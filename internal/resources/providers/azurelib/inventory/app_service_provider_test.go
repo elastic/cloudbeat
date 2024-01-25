@@ -19,12 +19,15 @@ package inventory
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/elastic/cloudbeat/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -40,57 +43,10 @@ func (m *mockAzureAppServiceWrapper) AssetAuthSettings(_ context.Context, subscr
 func TestGetAuthSettings(t *testing.T) {
 	log := testhelper.NewLogger(t)
 
-	//	response := func(keys ...*armkeyvault.Key) armkeyvault.KeysClientListResponse {
-	//		return armkeyvault.KeysClientListResponse{
-	//			KeyListResult: armkeyvault.KeyListResult{
-	//				Value: keys,
-	//			},
-	//		}
-	//	}
-	//
-	//	key := func(id string) *armkeyvault.Key {
-	//		return &armkeyvault.Key{
-	//			ID:       to.Ptr(id),
-	//			Name:     to.Ptr("keyName"),
-	//			Location: to.Ptr("location"),
-	//			Type:     to.Ptr("Microsoft.KeyVault/vaults/keys"),
-	//			Properties: &armkeyvault.KeyProperties{
-	//				KeyURI: to.Ptr("key_uri"),
-	//				Attributes: &armkeyvault.KeyAttributes{
-	//					Enabled: to.Ptr(true),
-	//					Expires: to.Ptr(int64(1705356581)),
-	//				},
-	//			},
-	//		}
-	//	}
-	//
-	//	assetKey := func(id string) AzureAsset {
-	//		return AzureAsset{
-	//			Id:             id,
-	//			Name:           "keyName",
-	//			DisplayName:    "",
-	//			Location:       "location",
-	//			ResourceGroup:  "rg1",
-	//			SubscriptionId: "sub1",
-	//			TenantId:       "ten1",
-	//			Type:           "Microsoft.KeyVault/vaults/keys",
-	//			Properties: map[string]any{
-	//				"keyUri":     to.Ptr("key_uri"),
-	//				"attributes": key("key1").Properties.Attributes,
-	//			},
-	//		}
-	//	}
-
-	vaultAsset := AzureAsset{
-		Id:             "kv1",
-		Name:           "name1",
-		ResourceGroup:  "rg1",
-		SubscriptionId: "sub1",
-		TenantId:       "ten1",
-	}
+	webAppId := "/subscriptions/space/resourceGroups/galaxy/providers/Microsoft.Web/sites/cats-in-space"
 
 	webAppAsset := AzureAsset{
-		Id:             "/subscriptions/space/resourceGroups/galaxy/providers/Microsoft.Web/sites/cats-in-space",
+		Id:             webAppId,
 		Name:           "cats-in-space",
 		ResourceGroup:  "galaxy",
 		SubscriptionId: "space",
@@ -98,12 +54,34 @@ func TestGetAuthSettings(t *testing.T) {
 		Type:           "Microsoft.Web/sites",
 	}
 
-	authSettings := func(authEnabled *bool) AzureAsset {
-		return AzureAsset{}
+	buildResponse := func(authEnabled *bool) armappservice.WebAppsClientGetAuthSettingsResponse {
+		response := armappservice.WebAppsClientGetAuthSettingsResponse{
+			SiteAuthSettings: armappservice.SiteAuthSettings{
+				Kind:       nil,
+				ID:         to.Ptr(webAppId + "/config/authsettings"),
+				Name:       to.Ptr("authsettings"),
+				Type:       to.Ptr("Microsoft.Web/sites/config"),
+				Properties: &armappservice.SiteAuthSettingsProperties{},
+			},
+		}
+		response.Properties.Enabled = authEnabled
+		return response
 	}
 
-	response := func(authEnabled *bool) armappservice.WebAppsClientGetAuthSettingsResponse {
-		return armappservice.WebAppsClientGetAuthSettingsResponse{}
+	buildExpectedAzureAsset := func(authEnabled *bool) AzureAsset {
+		response := buildResponse(authEnabled)
+		return AzureAsset{
+			Id:             pointers.Deref(response.ID),
+			Name:           pointers.Deref(response.Name),
+			DisplayName:    "",
+			Location:       "",
+			Properties:     unwrapResponseProperties(response.Properties),
+			Extension:      map[string]any{},
+			ResourceGroup:  "galaxy",
+			SubscriptionId: "space",
+			TenantId:       "???",
+			Type:           pointers.Deref(response.Type),
+		}
 	}
 
 	tests := map[string]struct {
@@ -113,39 +91,45 @@ func TestGetAuthSettings(t *testing.T) {
 		expected                 []AzureAsset
 		expectError              bool
 	}{
-		"test WebApp with no AuthSettings (should not happen)": {
+		"expected error: could not fetch AuthSettings from Azure": {
 			inputWebApp:              webAppAsset,
 			mockWrapperResponse:      armappservice.WebAppsClientGetAuthSettingsResponse{},
+			mockWrapperResponseError: fmt.Errorf("error fetching resource"),
+			expected:                 []AzureAsset{},
+			expectError:              true,
+		},
+		"expected error: AuthSettings.Properties are <nil>": {
+			inputWebApp: webAppAsset,
+			mockWrapperResponse: armappservice.WebAppsClientGetAuthSettingsResponse{
+				SiteAuthSettings: armappservice.SiteAuthSettings{
+					Properties: nil,
+				},
+			},
 			mockWrapperResponseError: nil,
 			expected:                 []AzureAsset{},
 			expectError:              true,
 		},
-
-		/*
-			"test with filter out": {
-				inputVault: vaultAsset,
-				mockWrapperResponse: []armkeyvault.KeysClientListResponse{
-					response(nil, key("key1"), nil),
-				},
-				mockWrapperResponseError: nil,
-				expected: []AzureAsset{
-					assetKey("key1"),
-				},
-				expectError: false,
-			},
-			"test multiple": {
-				inputVault: vaultAsset,
-				mockWrapperResponse: []armkeyvault.KeysClientListResponse{
-					response(key("key1"), key("key2")),
-				},
-				mockWrapperResponseError: nil,
-				expected: []AzureAsset{
-					assetKey("key1"),
-					assetKey("key2"),
-				},
-				expectError: false,
-			},
-		*/
+		"fetch AuthSettings with authorization set to null": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(nil),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(nil)},
+			expectError:              false,
+		},
+		"fetch AuthSettings with authorization set to false": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(to.Ptr(false)),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(to.Ptr(false))},
+			expectError:              false,
+		},
+		"fetch AuthSettings with authorization set to true": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(to.Ptr(true)),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(to.Ptr(true))},
+			expectError:              false,
+		},
 	}
 
 	for name, tc := range tests {
