@@ -235,7 +235,8 @@ cis_aws_log_3_11_skip = {
 }
 
 
-cis_aws_log_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_log_3_1,
     **skip_param_case(
         cis_aws_log_3_1_skip,

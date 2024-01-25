@@ -50,7 +50,7 @@ register_params(
     test_aws_iam_management_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_iam_tc.cis_aws_iam_cases.values()],
-        ids=[*aws_iam_tc.cis_aws_iam_cases.keys()],
+        [*aws_iam_tc.test_cases.values()],
+        ids=[*aws_iam_tc.test_cases.keys()],
     ),
 )

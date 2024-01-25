@@ -113,4 +113,4 @@ cis_eks_all = {
     "test-eks-config-2": aws_test_config_2,
 }
 
-cis_eks_aws_cases = cis_eks_all[eks.current_config]
+test_cases = cis_eks_all[eks.current_config]

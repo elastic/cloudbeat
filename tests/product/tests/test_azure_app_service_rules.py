@@ -49,7 +49,7 @@ register_params(
     test_azure_app_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_app_service_tc.cis_azure_app_service_cases.values()],
-        ids=[*azure_app_service_tc.cis_azure_app_service_cases.keys()],
+        [*azure_app_service_tc.test_cases.values()],
+        ids=[*azure_app_service_tc.test_cases.keys()],
     ),
 )

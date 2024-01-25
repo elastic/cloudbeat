@@ -50,7 +50,7 @@ register_params(
     test_aws_s3_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_s3_tc.cis_aws_s3_cases.values()],
-        ids=[*aws_s3_tc.cis_aws_s3_cases.keys()],
+        [*aws_s3_tc.test_cases.values()],
+        ids=[*aws_s3_tc.test_cases.keys()],
     ),
 )

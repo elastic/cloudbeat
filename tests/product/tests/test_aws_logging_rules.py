@@ -50,7 +50,7 @@ register_params(
     test_aws_logging_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_logging_tc.cis_aws_log_cases.values()],
-        ids=[*aws_logging_tc.cis_aws_log_cases.keys()],
+        [*aws_logging_tc.test_cases.values()],
+        ids=[*aws_logging_tc.test_cases.keys()],
     ),
 )

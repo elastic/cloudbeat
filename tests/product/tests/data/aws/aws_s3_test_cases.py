@@ -102,7 +102,8 @@ cis_aws_s3_2_1_5 = {
     "2.1.5 Ensure S3 block public access: Public access allowed -> expect: failed": cis_aws_s3_2_1_5_fail,
 }
 
-cis_aws_s3_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_s3_2_1_1,
     **skip_param_case(
         cis_aws_s3_2_1_1_skip,
