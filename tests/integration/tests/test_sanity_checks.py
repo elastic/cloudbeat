@@ -171,7 +171,7 @@ def test_cspm_aws_findings(
         query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
         results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-        assert len(results) > 0, f"The resource type '{match_type}' is missing"
+        assert len(results) > 0, f"The resource type '{match_type}' is missing for agent {agent}"
 
 
 @pytest.mark.sanity
@@ -255,7 +255,7 @@ def test_cspm_azure_findings(
         query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
         results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-        assert len(results) > 0, f"The resource type '{match_type}' is missing"
+        assert len(results) > 0, f"The resource type '{match_type}' is missing for agent {agent}"
 
 
 def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str):
