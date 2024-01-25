@@ -52,7 +52,7 @@ create_integrations_pr() {
     cat <<EOF >pr_body
 Bump integration version - \`$NEXT_INTEGRATION_VERSION\`
 
-> [!NOTE]  
+> [!NOTE]
 > This is an automated PR
 EOF
 

@@ -61,7 +61,7 @@ create_cloudbeat_versions_pr() {
     cat <<EOF >cloudbeat_pr_body
 Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
 
-> [!NOTE]  
+> [!NOTE]
 > This is an automated PR
 EOF
 
@@ -95,10 +95,10 @@ bump_hermit() {
     cat <<EOF >hermit_pr_body
 Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available
 
-> [!NOTE]  
+> [!NOTE]
 > This is an automated PR
 EOF
 
