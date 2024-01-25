@@ -9,7 +9,7 @@ on:
 
 env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.7.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.13.0-SNAPSHOT"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 concurrency:
