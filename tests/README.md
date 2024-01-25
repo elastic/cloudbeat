@@ -69,6 +69,29 @@ cd cloudbeat/tests
 poetry install
 ```
 
+### Running CSPM Tests from shell against local elastic
+
+1. Bring an ES instance up, e.g
+
+```shell
+  elastic-package stack up -v --version $ES_VERSION
+```
+
+2. Start cloudbeat locally and generate findings on the ES cluster
+3. From the `tests` dir, run the tests with desired rules, e.g.
+```bash
+USE_K8S=false \
+  ES_USER=elastic \
+  ES_USE_SSL=false \
+  ES_PROTOCOL=https \
+  poetry run pytest -m "azure_networking_rules" --alluredir=./allure/results/
+```
+  - `USE_K8S=false` skip k8s tests
+  - `ES_USER=elastic` configure the elastic user, default from elastic package is `elastic`
+  - `ES_USE_SSL=false` skip SSL verification
+  - `ES_PROTOCOL=https` use https protocol to connecto elastic
+
+
 ### Configuring IDE
 
 Tests development may be done using any IDE like [visual studio code](https://code.visualstudio.com/)
