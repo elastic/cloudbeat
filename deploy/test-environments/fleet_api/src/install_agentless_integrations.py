@@ -87,10 +87,11 @@ if __name__ == "__main__":
     cspm_template = generate_policy_template(cfg=cnfg.elk_config)
     for integration_data in integrations:
         NAME = integration_data["name"]
-        logger.info(f"Create {NAME} integration for policy {AGENT_POLICY_ID}")
+        logger.info(f"Creating {NAME} integration for policy {AGENT_POLICY_ID}")
         package_policy = generate_package_policy(cspm_template, integration_data)
+        package_policy["force"] = True
 
-        logger.info(f"Created {package_policy}")
+        logger.info(f"Creating {package_policy}")
 
         create_cspm_integration(
             cfg=cnfg.elk_config,
