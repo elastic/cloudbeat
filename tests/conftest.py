@@ -276,6 +276,7 @@ def create_es_client(index: str) -> ElasticWrapper:
         configuration.elasticsearch.url,
         configuration.elasticsearch.basic_auth,
         index,
+        configuration.elasticsearch.use_ssl,
     )
     logger.info(f"client with ElasticSearch url: {configuration.elasticsearch.url}")
     return es_client

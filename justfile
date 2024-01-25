@@ -223,4 +223,3 @@ cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/deploy/values/ci.yml {{range}}
-
