@@ -40,6 +40,11 @@ func (m *mockAzureAppServiceWrapper) AssetAuthSettings(_ context.Context, subscr
 	return r.Get(0).(armappservice.WebAppsClientGetAuthSettingsResponse), r.Error(1)
 }
 
+func (m *mockAzureAppServiceWrapper) AssetSiteConfigs(_ context.Context, subscriptionID string, resourceGroupName string, webAppName string) (armappservice.SiteConfig, error) {
+	r := m.Called(subscriptionID, resourceGroupName, webAppName)
+	return r.Get(0).(armappservice.SiteConfig), r.Error(1)
+}
+
 func TestGetAuthSettings(t *testing.T) {
 	log := testhelper.NewLogger(t)
 
