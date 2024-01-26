@@ -40,12 +40,12 @@ func (m *mockAzureAppServiceWrapper) AssetAuthSettings(_ context.Context, subscr
 	return r.Get(0).(armappservice.WebAppsClientGetAuthSettingsResponse), r.Error(1)
 }
 
-func (m *mockAzureAppServiceWrapper) AssetSiteConfigs(_ context.Context, subscriptionID string, resourceGroupName string, webAppName string) (armappservice.SiteConfig, error) {
+func (m *mockAzureAppServiceWrapper) AssetSiteConfigs(_ context.Context, subscriptionID string, resourceGroupName string, webAppName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, webAppName)
-	return r.Get(0).(armappservice.SiteConfig), r.Error(1)
+	return r.Get(0).(armappservice.WebAppsClientGetConfigurationResponse), r.Error(1)
 }
 
-func TestGetAuthSettings(t *testing.T) {
+func TestGetAppServiceAuthSettings(t *testing.T) {
 	log := testhelper.NewLogger(t)
 
 	webAppId := "/subscriptions/space/resourceGroups/galaxy/providers/Microsoft.Web/sites/cats-in-space"
@@ -62,14 +62,15 @@ func TestGetAuthSettings(t *testing.T) {
 	buildResponse := func(authEnabled *bool) armappservice.WebAppsClientGetAuthSettingsResponse {
 		response := armappservice.WebAppsClientGetAuthSettingsResponse{
 			SiteAuthSettings: armappservice.SiteAuthSettings{
-				Kind:       nil,
-				ID:         to.Ptr(webAppId + "/config/authsettings"),
-				Name:       to.Ptr("authsettings"),
-				Type:       to.Ptr("Microsoft.Web/sites/config"),
-				Properties: &armappservice.SiteAuthSettingsProperties{},
+				Kind: nil,
+				ID:   to.Ptr(webAppId + "/config/authsettings"),
+				Name: to.Ptr("authsettings"),
+				Type: to.Ptr("Microsoft.Web/sites/config"),
+				Properties: &armappservice.SiteAuthSettingsProperties{
+					Enabled: authEnabled,
+				},
 			},
 		}
-		response.Properties.Enabled = authEnabled
 		return response
 	}
 
@@ -80,7 +81,7 @@ func TestGetAuthSettings(t *testing.T) {
 			Name:           pointers.Deref(response.Name),
 			DisplayName:    "",
 			Location:       "",
-			Properties:     unwrapResponseProperties(response.Properties),
+			Properties:     unwrapAuthSettingsResponseProperties(response.Properties),
 			Extension:      map[string]any{},
 			ResourceGroup:  "galaxy",
 			SubscriptionId: "space",
@@ -156,6 +157,116 @@ func TestGetAuthSettings(t *testing.T) {
 			}
 
 			got, err := provider.GetWebAppsAuthSettings(context.Background(), tc.inputWebApp)
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestGetAppServiceSiteConfig(t *testing.T) {
+	log := testhelper.NewLogger(t)
+
+	webAppId := "/subscriptions/space/resourceGroups/galaxy/providers/Microsoft.Web/sites/cats-in-space"
+
+	webAppAsset := AzureAsset{
+		Id:             webAppId,
+		Name:           "cats-in-space",
+		ResourceGroup:  "galaxy",
+		SubscriptionId: "space",
+		TenantId:       "???",
+		Type:           "Microsoft.Web/sites",
+	}
+
+	buildResponse := func(minTlsVersion armappservice.SupportedTLSVersions, ftpsState armappservice.FtpsState) armappservice.WebAppsClientGetConfigurationResponse {
+		response := armappservice.WebAppsClientGetConfigurationResponse{
+			SiteConfigResource: armappservice.SiteConfigResource{
+				Kind: nil,
+				ID:   to.Ptr(webAppId + "/config/authsettings"),
+				Name: to.Ptr("authsettings"),
+				Type: to.Ptr("Microsoft.Web/sites/config"),
+				Properties: &armappservice.SiteConfig{
+					MinTLSVersion: to.Ptr(minTlsVersion),
+					FtpsState:     to.Ptr(ftpsState),
+				},
+			},
+		}
+		return response
+	}
+
+	buildExpectedAzureAsset := func(minTlsVersion armappservice.SupportedTLSVersions, ftpsState armappservice.FtpsState) AzureAsset {
+		response := buildResponse(minTlsVersion, ftpsState)
+		return AzureAsset{
+			Id:             pointers.Deref(response.ID),
+			Name:           pointers.Deref(response.Name),
+			DisplayName:    "",
+			Location:       "",
+			Properties:     unwrapSiteConfigResponseProperties(response.Properties),
+			Extension:      map[string]any{},
+			ResourceGroup:  "galaxy",
+			SubscriptionId: "space",
+			TenantId:       "???",
+			Type:           pointers.Deref(response.Type),
+		}
+	}
+
+	tests := map[string]struct {
+		inputWebApp              AzureAsset
+		mockWrapperResponse      armappservice.WebAppsClientGetConfigurationResponse
+		mockWrapperResponseError error
+		expected                 []AzureAsset
+		expectError              bool
+	}{
+		"expected error: could not fetch SiteConfig from Azure": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      armappservice.WebAppsClientGetConfigurationResponse{},
+			mockWrapperResponseError: fmt.Errorf("error fetching resource"),
+			expected:                 []AzureAsset{},
+			expectError:              true,
+		},
+		"expected error: SiteConfigResource.Properties are <nil>": {
+			inputWebApp: webAppAsset,
+			mockWrapperResponse: armappservice.WebAppsClientGetConfigurationResponse{
+				SiteConfigResource: armappservice.SiteConfigResource{
+					Properties: nil,
+				},
+			},
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{},
+			expectError:              true,
+		},
+		"fetch AuthSettings with MinTLSVersion == 1.0": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(armappservice.SupportedTLSVersionsOne0, armappservice.FtpsStateFtpsOnly),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(armappservice.SupportedTLSVersionsOne0, armappservice.FtpsStateFtpsOnly)},
+			expectError:              false,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			mockWrapper := &mockAzureAppServiceWrapper{}
+			mockWrapper.Test(t)
+			mockWrapper.
+				On("AssetSiteConfigs", tc.inputWebApp.SubscriptionId, tc.inputWebApp.ResourceGroup, tc.inputWebApp.Name).
+				Return(tc.mockWrapperResponse, tc.mockWrapperResponseError).
+				Once()
+			t.Cleanup(func() { mockWrapper.AssertExpectations(t) })
+
+			provider := azureAppServiceProvider{
+				log: log,
+				client: &azureAppServiceWrapper{
+					AssetWebAppsSiteConfig: mockWrapper.AssetSiteConfigs,
+				},
+			}
+
+			got, err := provider.GetWebAppsSiteConfig(context.Background(), tc.inputWebApp)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
