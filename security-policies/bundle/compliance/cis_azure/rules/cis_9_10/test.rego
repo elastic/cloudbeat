@@ -12,13 +12,14 @@ test_violation if {
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {"hey": {}}, {"authSettings": {}})
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": null})
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {}})
-	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": null}})
-	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": "AllAllowed"}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {}}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"FtpsState": null}}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"FtpsState": "AllAllowed"}}})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": "FtpsOnly"}})
-	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": "Disabled"}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"FtpsState": "FtpsOnly"}}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"FtpsState": "Disabled"}}})
 }
 
 eval_fail if {
