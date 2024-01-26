@@ -64,7 +64,7 @@ func (e appServiceEnricher) enrichWebAppWithAuthSettings(ctx context.Context, a 
 		return nil
 	}
 
-	a.AddExtension(inventory.ExtensionAppServiceAuthSettings, authSettings)
+	a.AddExtension(inventory.ExtensionAppServiceAuthSettings, authSettings[0])
 	return nil
 }
 
@@ -78,6 +78,6 @@ func (e appServiceEnricher) enrichWebAppWithSiteConfig(ctx context.Context, a *i
 		return nil
 	}
 
-	a.AddExtension(inventory.ExtensionAppServiceSiteConfig, siteConfigs)
+	a.AddExtension(inventory.ExtensionAppServiceSiteConfig, siteConfigs[0])
 	return nil
 }
