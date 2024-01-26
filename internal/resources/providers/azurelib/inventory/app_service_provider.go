@@ -29,29 +29,29 @@ import (
 )
 
 type azureAppServiceWrapper struct {
-	AssetWebAppsAuthSettings func(ctx context.Context, subscriptionID, resourceGroupName, webAppName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error)
-	AssetWebAppsSiteConfig   func(ctx context.Context, subscriptionID, resourceGroupName, webAppName string) (armappservice.WebAppsClientGetConfigurationResponse, error)
+	AssetWebAppsAuthSettings func(ctx context.Context, subscriptionID, resourceGroupName, appName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error)
+	AssetWebAppsSiteConfig   func(ctx context.Context, subscriptionID, resourceGroupName, appName string) (armappservice.WebAppsClientGetConfigurationResponse, error)
 }
 
 func defaultAzureAppServiceWrapper(credentials azcore.TokenCredential) *azureAppServiceWrapper {
 	return &azureAppServiceWrapper{
-		AssetWebAppsAuthSettings: func(ctx context.Context, subscriptionID, resourceGroupName, webAppName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error) {
+		AssetWebAppsAuthSettings: func(ctx context.Context, subscriptionID, resourceGroupName, appName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error) {
 			client, err := armappservice.NewWebAppsClient(subscriptionID, credentials, nil)
 			if err != nil {
 				return armappservice.WebAppsClientGetAuthSettingsResponse{}, err
 			}
-			response, err := client.GetAuthSettings(ctx, resourceGroupName, webAppName, nil)
+			response, err := client.GetAuthSettings(ctx, resourceGroupName, appName, nil)
 			if err != nil {
 				return armappservice.WebAppsClientGetAuthSettingsResponse{}, err
 			}
 			return response, nil
 		},
-		AssetWebAppsSiteConfig: func(ctx context.Context, subscriptionID, resourceGroupName, webAppName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
+		AssetWebAppsSiteConfig: func(ctx context.Context, subscriptionID, resourceGroupName, appName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
 			client, err := armappservice.NewWebAppsClient(subscriptionID, credentials, nil)
 			if err != nil {
 				return armappservice.WebAppsClientGetConfigurationResponse{}, err
 			}
-			response, err := client.GetConfiguration(ctx, resourceGroupName, webAppName, nil)
+			response, err := client.GetConfiguration(ctx, resourceGroupName, appName, nil)
 			if err != nil {
 				return armappservice.WebAppsClientGetConfigurationResponse{}, err
 			}
@@ -61,8 +61,8 @@ func defaultAzureAppServiceWrapper(credentials azcore.TokenCredential) *azureApp
 }
 
 type AppServiceProviderAPI interface {
-	GetWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error)
-	GetWebAppsSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error)
+	GetAppServiceAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error)
+	GetAppServiceSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error)
 }
 
 func NewAppServiceProvider(log *logp.Logger, credentials azcore.TokenCredential) AppServiceProviderAPI {
@@ -77,7 +77,7 @@ type azureAppServiceProvider struct {
 	client *azureAppServiceWrapper
 }
 
-func (p *azureAppServiceProvider) GetWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
+func (p *azureAppServiceProvider) GetAppServiceAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
 	p.log.Info("Getting Azure AppService AuthSettings")
 
 	response, err := p.client.AssetWebAppsAuthSettings(ctx, webApp.SubscriptionId, webApp.ResourceGroup, webApp.Name)
@@ -105,7 +105,7 @@ func (p *azureAppServiceProvider) GetWebAppsAuthSettings(ctx context.Context, we
 	return []AzureAsset{authSettings}, nil
 }
 
-func (p *azureAppServiceProvider) GetWebAppsSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
+func (p *azureAppServiceProvider) GetAppServiceSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
 	p.log.Info("Getting Azure AppService SiteConfig")
 
 	response, err := p.client.AssetWebAppsSiteConfig(ctx, webApp.SubscriptionId, webApp.ResourceGroup, webApp.Name)

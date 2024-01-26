@@ -147,10 +147,10 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	})
 	for _, as := range appServices {
 		mockProvider.EXPECT().
-			GetWebAppsAuthSettings(mock.Anything, as).
+			GetAppServiceAuthSettings(mock.Anything, as).
 			Return(nil, nil)
 		mockProvider.EXPECT().
-			GetWebAppsSiteConfig(mock.Anything, as).
+			GetAppServiceSiteConfig(mock.Anything, as).
 			Return(nil, nil)
 	}
 

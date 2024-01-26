@@ -35,13 +35,13 @@ type mockAzureAppServiceWrapper struct {
 	mock.Mock
 }
 
-func (m *mockAzureAppServiceWrapper) AssetAuthSettings(_ context.Context, subscriptionID string, resourceGroupName string, webAppName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error) {
-	r := m.Called(subscriptionID, resourceGroupName, webAppName)
+func (m *mockAzureAppServiceWrapper) AssetAuthSettings(_ context.Context, subscriptionID string, resourceGroupName string, appName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error) {
+	r := m.Called(subscriptionID, resourceGroupName, appName)
 	return r.Get(0).(armappservice.WebAppsClientGetAuthSettingsResponse), r.Error(1)
 }
 
-func (m *mockAzureAppServiceWrapper) AssetSiteConfigs(_ context.Context, subscriptionID string, resourceGroupName string, webAppName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
-	r := m.Called(subscriptionID, resourceGroupName, webAppName)
+func (m *mockAzureAppServiceWrapper) AssetSiteConfigs(_ context.Context, subscriptionID string, resourceGroupName string, appName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
+	r := m.Called(subscriptionID, resourceGroupName, appName)
 	return r.Get(0).(armappservice.WebAppsClientGetConfigurationResponse), r.Error(1)
 }
 
@@ -156,7 +156,7 @@ func TestGetAppServiceAuthSettings(t *testing.T) {
 				},
 			}
 
-			got, err := provider.GetWebAppsAuthSettings(context.Background(), tc.inputWebApp)
+			got, err := provider.GetAppServiceAuthSettings(context.Background(), tc.inputWebApp)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
@@ -301,7 +301,7 @@ func TestGetAppServiceSiteConfig(t *testing.T) {
 				},
 			}
 
-			got, err := provider.GetWebAppsSiteConfig(context.Background(), tc.inputWebApp)
+			got, err := provider.GetAppServiceSiteConfig(context.Background(), tc.inputWebApp)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
