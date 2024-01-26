@@ -392,7 +392,7 @@
 
 ### 67/151 implemented rules (44%)
 
-#### Automated rules: 66/77 (87%)
+#### Automated rules: 67/77 (87%)
 
 #### Manual rules: 0/74 (0%)
 
