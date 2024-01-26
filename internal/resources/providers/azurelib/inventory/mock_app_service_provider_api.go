@@ -93,6 +93,61 @@ func (_c *MockAppServiceProviderAPI_GetWebAppsAuthSettings_Call) RunAndReturn(ru
 	return _c
 }
 
+// GetWebAppsSiteConfig provides a mock function with given fields: ctx, webApp
+func (_m *MockAppServiceProviderAPI) GetWebAppsSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, webApp)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, AzureAsset) ([]AzureAsset, error)); ok {
+		return rf(ctx, webApp)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, AzureAsset) []AzureAsset); ok {
+		r0 = rf(ctx, webApp)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, AzureAsset) error); ok {
+		r1 = rf(ctx, webApp)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWebAppsSiteConfig'
+type MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call struct {
+	*mock.Call
+}
+
+// GetWebAppsSiteConfig is a helper method to define mock.On call
+//   - ctx context.Context
+//   - webApp AzureAsset
+func (_e *MockAppServiceProviderAPI_Expecter) GetWebAppsSiteConfig(ctx interface{}, webApp interface{}) *MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call {
+	return &MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call{Call: _e.mock.On("GetWebAppsSiteConfig", ctx, webApp)}
+}
+
+func (_c *MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call) Run(run func(ctx context.Context, webApp AzureAsset)) *MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call) Return(_a0 []AzureAsset, _a1 error) *MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call) RunAndReturn(run func(context.Context, AzureAsset) ([]AzureAsset, error)) *MockAppServiceProviderAPI_GetWebAppsSiteConfig_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockAppServiceProviderAPI creates a new instance of MockAppServiceProviderAPI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockAppServiceProviderAPI(t interface {

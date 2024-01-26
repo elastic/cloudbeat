@@ -267,6 +267,61 @@ func (_c *MockProviderAPI_GetWebAppsAuthSettings_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// GetWebAppsSiteConfig provides a mock function with given fields: ctx, webApp
+func (_m *MockProviderAPI) GetWebAppsSiteConfig(ctx context.Context, webApp inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, webApp)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, webApp)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, webApp)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, webApp)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_GetWebAppsSiteConfig_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWebAppsSiteConfig'
+type MockProviderAPI_GetWebAppsSiteConfig_Call struct {
+	*mock.Call
+}
+
+// GetWebAppsSiteConfig is a helper method to define mock.On call
+//   - ctx context.Context
+//   - webApp inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) GetWebAppsSiteConfig(ctx interface{}, webApp interface{}) *MockProviderAPI_GetWebAppsSiteConfig_Call {
+	return &MockProviderAPI_GetWebAppsSiteConfig_Call{Call: _e.mock.On("GetWebAppsSiteConfig", ctx, webApp)}
+}
+
+func (_c *MockProviderAPI_GetWebAppsSiteConfig_Call) Run(run func(ctx context.Context, webApp inventory.AzureAsset)) *MockProviderAPI_GetWebAppsSiteConfig_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_GetWebAppsSiteConfig_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_GetWebAppsSiteConfig_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_GetWebAppsSiteConfig_Call) RunAndReturn(run func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_GetWebAppsSiteConfig_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListAllAssetTypesByName provides a mock function with given fields: ctx, assetsGroup, assets
 func (_m *MockProviderAPI) ListAllAssetTypesByName(ctx context.Context, assetsGroup string, assets []string) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, assetsGroup, assets)
