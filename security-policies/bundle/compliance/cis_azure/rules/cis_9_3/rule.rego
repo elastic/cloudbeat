@@ -18,5 +18,5 @@ finding = result if {
 default is_min_tls_version_1_2 := false
 
 is_min_tls_version_1_2 if {
-	data_adapter.site_config.minTlsVersion == "1.2"
+	data_adapter.resource.extension.siteConfig.minTlsVersion == "1.2"
 }

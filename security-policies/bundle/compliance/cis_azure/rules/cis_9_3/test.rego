@@ -8,17 +8,17 @@ import future.keywords.if
 kind := "azure-web-site"
 
 test_violation if {
-	eval_fail with input as test_data.generate_azure_asset(kind, {})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"httpsOnly": true})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": null})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": {}})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": {"minTlsVersion": null}})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": {"minTlsVersion": "1.0"}})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": {"minTlsVersion": "1.1"}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {"httpsOnly": true}, {"authSettings": {}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": null})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"minTlsVersion": null}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"minTlsVersion": "1.0"}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"minTlsVersion": "1.1"}})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset(kind, {"siteConfig": {"minTlsVersion": "1.2"}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"minTlsVersion": "1.2"}})
 }
 
 eval_fail if {
