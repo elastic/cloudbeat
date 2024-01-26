@@ -81,15 +81,15 @@ type azureAppServiceProvider struct {
 }
 
 func (p *azureAppServiceProvider) GetWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
-	p.log.Info("Getting Azure AppService WebApp Auth settings")
+	p.log.Info("Getting Azure AppService AuthSettings")
 
 	response, err := p.client.AssetWebAppsAuthSettings(ctx, webApp.SubscriptionId, webApp.ResourceGroup, webApp.Name)
 	if err != nil {
-		return nil, fmt.Errorf("error while retrieving WebApp Auth settings: %w", err)
+		return nil, fmt.Errorf("error while retrieving AppService AuthSettings: %w", err)
 	}
 
 	if response.Properties == nil {
-		return nil, fmt.Errorf("error: got empty WebApp Auth settings for %s", webApp.Name)
+		return nil, fmt.Errorf("error: got empty AppService AuthSettings for %s", webApp.Name)
 	}
 
 	authSettings := AzureAsset{
