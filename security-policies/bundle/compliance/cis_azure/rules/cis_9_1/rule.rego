@@ -18,5 +18,5 @@ finding = result if {
 default is_app_service_authentication_enabled := false
 
 is_app_service_authentication_enabled if {
-	data_adapter.resource.extension.authSettings.enabled == true
+	data_adapter.resource.extension.authSettings.properties.Enabled == true
 }

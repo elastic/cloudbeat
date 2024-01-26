@@ -11,13 +11,14 @@ test_violation if {
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {"httpsOnly": true}, {})
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {})
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {}})
-	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {"enabled": false}})
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": null})
-	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {"enabled": null}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {"properties": {}}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {"properties": {"Enabled": false}}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {"properties": {"Enabled": null}}})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {"enabled": true}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"authSettings": {"properties": {"Enabled": true}}})
 }
 
 eval_fail if {
