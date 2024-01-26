@@ -30,6 +30,7 @@ import (
 
 type azureAppServiceWrapper struct {
 	AssetWebAppsAuthSettings func(ctx context.Context, subscriptionID, resourceGroupName, webAppName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error)
+	AssetWebAppsSiteConfig   func(ctx context.Context, subscriptionID, resourceGroupName, webAppName string) (*armappservice.SiteConfig, error)
 }
 
 func defaultAzureAppServiceWrapper(credentials azcore.TokenCredential) *azureAppServiceWrapper {
@@ -45,11 +46,26 @@ func defaultAzureAppServiceWrapper(credentials azcore.TokenCredential) *azureApp
 			}
 			return response, nil
 		},
+		AssetWebAppsSiteConfig: func(ctx context.Context, subscriptionID, resourceGroupName, webAppName string) (*armappservice.SiteConfig, error) {
+			client, err := armappservice.NewWebAppsClient(subscriptionID, credentials, nil)
+			if err != nil {
+				return nil, err
+			}
+			response, err := client.Get(ctx, resourceGroupName, webAppName, nil)
+			if err != nil {
+				return nil, err
+			}
+			if response.Properties == nil {
+				return nil, nil
+			}
+			return response.Properties.SiteConfig, nil
+		},
 	}
 }
 
 type AppServiceProviderAPI interface {
 	GetWebAppsAuthSettings(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error)
+	GetWebAppsSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error)
 }
 
 func NewAppServiceProvider(log *logp.Logger, credentials azcore.TokenCredential) AppServiceProviderAPI {
@@ -87,6 +103,34 @@ func (p *azureAppServiceProvider) GetWebAppsAuthSettings(ctx context.Context, we
 		SubscriptionId: webApp.SubscriptionId,
 		TenantId:       webApp.TenantId,
 		Type:           pointers.Deref(response.Type),
+	}
+
+	return []AzureAsset{authSettings}, nil
+}
+
+func (p *azureAppServiceProvider) GetWebAppsSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error) {
+	p.log.Info("Getting Azure AppService SiteConfig")
+
+	siteConfig, err := p.client.AssetWebAppsSiteConfig(ctx, webApp.SubscriptionId, webApp.ResourceGroup, webApp.Name)
+	if err != nil {
+		return nil, fmt.Errorf("error while retrieving AppService SiteConfig: %w", err)
+	}
+
+	if siteConfig == nil {
+		return nil, fmt.Errorf("error: got empty AppService SiteConfig for %s", webApp.Name)
+	}
+
+	authSettings := AzureAsset{
+		Id:             webApp.Id,
+		Name:           webApp.Name,
+		DisplayName:    webApp.DisplayName,
+		Location:       webApp.Location,
+		Properties:     unwrapSiteConfig(siteConfig),
+		Extension:      map[string]any{},
+		ResourceGroup:  webApp.ResourceGroup,
+		SubscriptionId: webApp.SubscriptionId,
+		TenantId:       webApp.TenantId,
+		Type:           webApp.Type,
 	}
 
 	return []AzureAsset{authSettings}, nil
@@ -132,5 +176,82 @@ func unwrapResponseProperties(properties *armappservice.SiteAuthSettingsProperti
 		"TwitterConsumerSecretSettingName":        pointers.Deref(properties.TwitterConsumerSecretSettingName),
 		"UnauthenticatedClientAction":             pointers.Deref(properties.UnauthenticatedClientAction),
 		"ValidateIssuer":                          pointers.Deref(properties.ValidateIssuer),
+	}
+}
+
+func unwrapSiteConfig(siteConfig *armappservice.SiteConfig) map[string]any {
+	return map[string]any{
+		"APIDefinition":                          pointers.Deref(siteConfig.APIDefinition),
+		"APIManagementConfig":                    pointers.Deref(siteConfig.APIManagementConfig),
+		"AcrUseManagedIdentityCreds":             pointers.Deref(siteConfig.AcrUseManagedIdentityCreds),
+		"AcrUserManagedIdentityID":               pointers.Deref(siteConfig.AcrUserManagedIdentityID),
+		"AlwaysOn":                               pointers.Deref(siteConfig.AlwaysOn),
+		"AppCommandLine":                         pointers.Deref(siteConfig.AppCommandLine),
+		"AppSettings":                            siteConfig.AppSettings,
+		"AutoHealEnabled":                        pointers.Deref(siteConfig.AutoHealEnabled),
+		"AutoHealRules":                          pointers.Deref(siteConfig.AutoHealRules),
+		"AutoSwapSlotName":                       pointers.Deref(siteConfig.AutoSwapSlotName),
+		"AzureStorageAccounts":                   siteConfig.AzureStorageAccounts,
+		"ConnectionStrings":                      siteConfig.ConnectionStrings,
+		"Cors":                                   pointers.Deref(siteConfig.Cors),
+		"DefaultDocuments":                       siteConfig.DefaultDocuments,
+		"DetailedErrorLoggingEnabled":            pointers.Deref(siteConfig.DetailedErrorLoggingEnabled),
+		"DocumentRoot":                           pointers.Deref(siteConfig.DocumentRoot),
+		"ElasticWebAppScaleLimit":                pointers.Deref(siteConfig.ElasticWebAppScaleLimit),
+		"Experiments":                            pointers.Deref(siteConfig.Experiments),
+		"FtpsState":                              pointers.Deref(siteConfig.FtpsState),
+		"FunctionAppScaleLimit":                  pointers.Deref(siteConfig.FunctionAppScaleLimit),
+		"FunctionsRuntimeScaleMonitoringEnabled": pointers.Deref(siteConfig.FunctionsRuntimeScaleMonitoringEnabled),
+		"HTTPLoggingEnabled":                     pointers.Deref(siteConfig.HTTPLoggingEnabled),
+		"HandlerMappings":                        siteConfig.HandlerMappings,
+		"HealthCheckPath":                        pointers.Deref(siteConfig.HealthCheckPath),
+		"Http20Enabled":                          pointers.Deref(siteConfig.Http20Enabled),
+		"IPSecurityRestrictions":                 siteConfig.IPSecurityRestrictions,
+		"IPSecurityRestrictionsDefaultAction":    pointers.Deref(siteConfig.IPSecurityRestrictionsDefaultAction),
+		"JavaContainer":                          pointers.Deref(siteConfig.JavaContainer),
+		"JavaContainerVersion":                   pointers.Deref(siteConfig.JavaContainerVersion),
+		"JavaVersion":                            pointers.Deref(siteConfig.JavaVersion),
+		"KeyVaultReferenceIdentity":              pointers.Deref(siteConfig.KeyVaultReferenceIdentity),
+		"Limits":                                 pointers.Deref(siteConfig.Limits),
+		"LinuxFxVersion":                         pointers.Deref(siteConfig.LinuxFxVersion),
+		"LoadBalancing":                          pointers.Deref(siteConfig.LoadBalancing),
+		"LocalMySQLEnabled":                      pointers.Deref(siteConfig.LocalMySQLEnabled),
+		"LogsDirectorySizeLimit":                 pointers.Deref(siteConfig.LogsDirectorySizeLimit),
+		"ManagedPipelineMode":                    pointers.Deref(siteConfig.ManagedPipelineMode),
+		"ManagedServiceIdentityID":               pointers.Deref(siteConfig.ManagedServiceIdentityID),
+		"Metadata":                               siteConfig.Metadata,
+		"MinTLSCipherSuite":                      pointers.Deref(siteConfig.MinTLSCipherSuite),
+		"MinTLSVersion":                          pointers.Deref(siteConfig.MinTLSVersion),
+		"MinimumElasticInstanceCount":            pointers.Deref(siteConfig.MinimumElasticInstanceCount),
+		"NetFrameworkVersion":                    pointers.Deref(siteConfig.NetFrameworkVersion),
+		"NodeVersion":                            pointers.Deref(siteConfig.NodeVersion),
+		"NumberOfWorkers":                        pointers.Deref(siteConfig.NumberOfWorkers),
+		"PhpVersion":                             pointers.Deref(siteConfig.PhpVersion),
+		"PowerShellVersion":                      pointers.Deref(siteConfig.PowerShellVersion),
+		"PreWarmedInstanceCount":                 pointers.Deref(siteConfig.PreWarmedInstanceCount),
+		"PublicNetworkAccess":                    pointers.Deref(siteConfig.PublicNetworkAccess),
+		"PublishingUsername":                     pointers.Deref(siteConfig.PublishingUsername),
+		"Push":                                   pointers.Deref(siteConfig.Push),
+		"PythonVersion":                          pointers.Deref(siteConfig.PythonVersion),
+		"RemoteDebuggingEnabled":                 pointers.Deref(siteConfig.RemoteDebuggingEnabled),
+		"RemoteDebuggingVersion":                 pointers.Deref(siteConfig.RemoteDebuggingVersion),
+		"RequestTracingEnabled":                  pointers.Deref(siteConfig.RequestTracingEnabled),
+		"RequestTracingExpirationTime":           pointers.Deref(siteConfig.RequestTracingExpirationTime),
+		"ScmIPSecurityRestrictions":              siteConfig.ScmIPSecurityRestrictions,
+		"ScmIPSecurityRestrictionsDefaultAction": pointers.Deref(siteConfig.ScmIPSecurityRestrictionsDefaultAction),
+		"ScmIPSecurityRestrictionsUseMain":       pointers.Deref(siteConfig.ScmIPSecurityRestrictionsUseMain),
+		"ScmMinTLSVersion":                       pointers.Deref(siteConfig.ScmMinTLSVersion),
+		"ScmType":                                pointers.Deref(siteConfig.ScmType),
+		"TracingOptions":                         pointers.Deref(siteConfig.TracingOptions),
+		"Use32BitWorkerProcess":                  pointers.Deref(siteConfig.Use32BitWorkerProcess),
+		"VirtualApplications":                    siteConfig.VirtualApplications,
+		"VnetName":                               pointers.Deref(siteConfig.VnetName),
+		"VnetPrivatePortsCount":                  pointers.Deref(siteConfig.VnetPrivatePortsCount),
+		"VnetRouteAllEnabled":                    pointers.Deref(siteConfig.VnetRouteAllEnabled),
+		"WebSocketsEnabled":                      pointers.Deref(siteConfig.WebSocketsEnabled),
+		"WebsiteTimeZone":                        pointers.Deref(siteConfig.WebsiteTimeZone),
+		"WindowsFxVersion":                       pointers.Deref(siteConfig.WindowsFxVersion),
+		"XManagedServiceIdentityID":              pointers.Deref(siteConfig.XManagedServiceIdentityID),
+		"MachineKey":                             pointers.Deref(siteConfig.MachineKey),
 	}
 }
