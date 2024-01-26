@@ -57,7 +57,8 @@ const (
 	AssetGroupAuthorizationResources = "authorizationresources"
 
 	// Extension keys
-	ExtensionAuthSettings                        = "authSettings"
+	ExtensionAppServiceAuthSettings              = "authSettings"
+	ExtensionAppServiceSiteConfig                = "siteConfig"
 	ExtensionBlobService                         = "blobService"
 	ExtensionNetwork                             = "network"
 	ExtensionUsedForActivityLogs                 = "usedForActivityLogs"

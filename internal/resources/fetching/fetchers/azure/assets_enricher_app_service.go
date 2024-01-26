@@ -33,6 +33,7 @@ type appServiceEnricher struct {
 func (e appServiceEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
 	singleAssetEnrichers := []func(context.Context, *inventory.AzureAsset) error{
 		e.enrichWebAppWithAuthSettings,
+		e.enrichWebAppWithSiteConfig,
 	}
 
 	var errs []error
@@ -63,6 +64,20 @@ func (e appServiceEnricher) enrichWebAppWithAuthSettings(ctx context.Context, a 
 		return nil
 	}
 
-	a.AddExtension(inventory.ExtensionAuthSettings, authSettings)
+	a.AddExtension(inventory.ExtensionAppServiceAuthSettings, authSettings)
+	return nil
+}
+
+func (e appServiceEnricher) enrichWebAppWithSiteConfig(ctx context.Context, a *inventory.AzureAsset) error {
+	siteConfigs, err := e.provider.GetWebAppsSiteConfig(ctx, *a)
+	if err != nil {
+		return err
+	}
+
+	if len(siteConfigs) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionAppServiceSiteConfig, siteConfigs)
 	return nil
 }
