@@ -18,9 +18,9 @@ finding = result if {
 default is_ftp_state_disabled_or_ftps := false
 
 is_ftp_state_disabled_or_ftps if {
-	data_adapter.site_config.ftpsState == "Disabled"
+	data_adapter.resource.extension.siteConfig.ftpsState == "Disabled"
 }
 
 is_ftp_state_disabled_or_ftps if {
-	data_adapter.site_config.ftpsState == "FtpsOnly"
+	data_adapter.resource.extension.siteConfig.ftpsState == "FtpsOnly"
 }

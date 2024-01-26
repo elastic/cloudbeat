@@ -8,17 +8,17 @@ import future.keywords.if
 kind := "azure-web-site"
 
 test_violation if {
-	eval_fail with input as test_data.generate_azure_asset(kind, {})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"httpsOnly": true})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": null})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": {}})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": {"ftpsState": null}})
-	eval_fail with input as test_data.generate_azure_asset(kind, {"siteConfig": {"ftpsState": "AllAllowed"}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {"hey": {}}, {"authSettings": {}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": null})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": null}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": "AllAllowed"}})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset(kind, {"siteConfig": {"ftpsState": "FtpsOnly"}})
-	eval_pass with input as test_data.generate_azure_asset(kind, {"siteConfig": {"ftpsState": "Disabled"}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": "FtpsOnly"}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"ftpsState": "Disabled"}})
 }
 
 eval_fail if {
