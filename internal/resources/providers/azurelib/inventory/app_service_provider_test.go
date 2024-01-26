@@ -246,6 +246,41 @@ func TestGetAppServiceSiteConfig(t *testing.T) {
 			expected:                 []AzureAsset{buildExpectedAzureAsset(armappservice.SupportedTLSVersionsOne0, armappservice.FtpsStateFtpsOnly)},
 			expectError:              false,
 		},
+		"fetch AuthSettings with MinTLSVersion == 1.1": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(armappservice.SupportedTLSVersionsOne1, armappservice.FtpsStateFtpsOnly),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(armappservice.SupportedTLSVersionsOne1, armappservice.FtpsStateFtpsOnly)},
+			expectError:              false,
+		},
+		"fetch AuthSettings with MinTLSVersion == 1.2": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateFtpsOnly),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateFtpsOnly)},
+			expectError:              false,
+		},
+		"fetch AuthSettings with FtpsState == FtpsOnly": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateFtpsOnly),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateFtpsOnly)},
+			expectError:              false,
+		},
+		"fetch AuthSettings with FtpsState == AllAllowed": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateAllAllowed),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateAllAllowed)},
+			expectError:              false,
+		},
+		"fetch AuthSettings with FtpsState == Disabled": {
+			inputWebApp:              webAppAsset,
+			mockWrapperResponse:      buildResponse(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateDisabled),
+			mockWrapperResponseError: nil,
+			expected:                 []AzureAsset{buildExpectedAzureAsset(armappservice.SupportedTLSVersionsOne2, armappservice.FtpsStateDisabled)},
+			expectError:              false,
+		},
 	}
 
 	for name, tc := range tests {
