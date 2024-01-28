@@ -263,7 +263,7 @@ def test_cspm_azure_findings(
         assert len(results) > 0, f"The resource type '{match_type}' is missing for agent {agent}"
 
 
-def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str):
+def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str) -> list[str]:
     """
     Wait for the list of agents running the specified component.
 
@@ -274,6 +274,11 @@ def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedM
         list: The list of agents running the specified component.
     """
 
+    # Skip waiting for agents if fleet is not available.
+    if not elasticsearch.kibana_url:
+        return [""]
+
+    actual.load_map()
     start_time = time.time()
     while time.time() - start_time < COMPONENTS_TIMEOUT:
         if len(actual.component_map[component]) == expected.expected_map[component]:

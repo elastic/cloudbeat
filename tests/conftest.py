@@ -298,5 +298,4 @@ def agents_actual_components() -> AgentComponentMapping:
     @return: an mapping of the agent components.
     """
     mapping = AgentComponentMapping()
-    mapping.load_map()
     return mapping
