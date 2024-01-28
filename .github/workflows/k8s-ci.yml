@@ -1,8 +1,6 @@
 name: K8s-CI
 
 on:
-  # Skipping pre-merge K8s tests for now
-  # https://github.com/elastic/cloudbeat/issues/1623
   pull_request:
     branches:
       - main
@@ -28,8 +26,6 @@ jobs:
     name: Build
     runs-on: ubuntu-20.04
     timeout-minutes: 40
-    # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
-    # if: false
     steps:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
@@ -111,8 +107,6 @@ jobs:
   k8s_functional_tests:
     # Run only selected tests on PRs
     if: github.event_name == 'pull_request'
-    # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
-    # if: false
     name: ${{ matrix.test-target }}-tests
     needs: [ Build ]
     runs-on: ubuntu-22.04
@@ -196,9 +190,7 @@ jobs:
   k8s_functional_tests_full:
     # Run full test suit on post-merge
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
-    # if: github.event_name == 'push'
-    # Skipping post-merge K8s tests until https://github:com/elastic/cloudbeat/issues/1638 is resolved
-    if: false
+    if: github.event_name == 'push'
     needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
