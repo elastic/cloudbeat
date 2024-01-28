@@ -53,6 +53,7 @@ class AgentComponentMapping:
         """
         Load the components map with the agent IDs.
         """
+        logger.info("amiramir loading map")
         self.reset_map()
         cfg = Munch()
         cfg.auth = elasticsearch.basic_auth
