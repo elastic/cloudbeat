@@ -419,6 +419,8 @@ jobs:
         id: agentless
         if: env.TEST_AGENTLESS == 'true'
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
           poetry run python ./install_agentless_integrations.py
 

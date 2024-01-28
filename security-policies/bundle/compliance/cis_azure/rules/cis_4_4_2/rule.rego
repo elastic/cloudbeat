@@ -20,7 +20,7 @@ default contains_tls_version_higher_than_1_2 = false
 contains_tls_version_higher_than_1_2 if {
 	some i
 	data_adapter.resource.extension.mysqlConfigurations[i].name == "tls_version"
-	is_list_of_versions_higher(data_adapter.resource.extension.mysqlConfigurations[i].value)
+	is_list_of_versions_higher(data_adapter.resource.extension.mysqlConfigurations[i].properties.value)
 }
 
 is_list_of_versions_higher(version) if {

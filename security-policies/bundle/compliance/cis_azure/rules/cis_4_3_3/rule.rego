@@ -20,5 +20,5 @@ default config_enabled = false
 config_enabled if {
 	some i
 	data_adapter.resource.extension.psqlConfigurations[i].name == "log_connections"
-	data_adapter.resource.extension.psqlConfigurations[i].value == "on"
+	data_adapter.resource.extension.psqlConfigurations[i].properties.value == "on"
 }

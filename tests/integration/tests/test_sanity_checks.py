@@ -11,7 +11,7 @@ import pytest
 from loguru import logger
 from configuration import elasticsearch
 from commonlib.utils import get_findings
-from commonlib.agents_map import CIS_AWS_COMPONENT, AgentExpectedMapping, AgentComponentMapping
+from commonlib.agents_map import CIS_AWS_COMPONENT, CIS_AZURE_COMPONENT, AgentExpectedMapping, AgentComponentMapping
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
@@ -47,7 +47,12 @@ tests_data = {
         # Exclude "data-processing" due to lack of Dataproc assets in the test account.
     ],
     "cis_azure": [
-        "configuration",
+        "cloud-compute",
+        "cloud-storage",
+        "cloud-database",
+        "key-management",
+        "monitoring",
+        "cloud-dns",
     ],  # Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": [
@@ -171,7 +176,7 @@ def test_cspm_aws_findings(
         query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
         results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-        assert len(results) > 0, f"The resource type '{match_type}' is missing"
+        assert len(results) > 0, f"The resource type '{match_type}' is missing for agent {agent}"
 
 
 @pytest.mark.sanity
@@ -225,7 +230,12 @@ def test_cspm_gcp_findings(cspm_client, match_type):
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_azure"])
-def test_cspm_azure_findings(cspm_client, match_type):
+def test_cspm_azure_findings(
+    cspm_client,
+    match_type,
+    agents_actual_components: AgentComponentMapping,
+    agents_expected_components: AgentExpectedMapping,
+):
     """
     Test case to check for Azure findings in CSPM.
 
@@ -239,14 +249,18 @@ def test_cspm_azure_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(benchmark_id="cis_azure", version=AGENT_VERSION)
-    query, sort = cspm_client.build_es_must_match_query(
-        must_query_list=query_list,
-        time_range="now-24h",
-    )
+    azure_agents = wait_components_list(agents_actual_components, agents_expected_components, CIS_AZURE_COMPONENT)
+    for agent in azure_agents:
+        query_list = build_query_list(
+            benchmark_id="cis_azure",
+            version=AGENT_VERSION,
+            match_type=match_type,
+            agent=agent,
+        )
+        query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
-    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-    assert len(results) > 0, f"The resource type '{match_type}' is missing"
+        results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+        assert len(results) > 0, f"The resource type '{match_type}' is missing for agent {agent}"
 
 
 def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str):

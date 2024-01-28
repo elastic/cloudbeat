@@ -7,6 +7,7 @@ The following steps are performed:
 3. Create a CSPM GCP integration.
 """
 
+import json
 import configuration_fleet as cnfg
 from loguru import logger
 from fleet_api.package_policy_api import create_cspm_integration
@@ -41,6 +42,7 @@ def generate_azure_integration_data():
     """
     Generate data for creating CSPM Azure integration
     """
+    creds = json.loads(cnfg.azure_arm_parameters.credentials)
     return {
         "name": generate_random_name("agentless-pkg-cspm-azure"),
         "input_name": "cis_azure",
@@ -49,9 +51,9 @@ def generate_azure_integration_data():
         "vars": {
             "azure.account_type": "single-account",
             "azure.credentials.type": "service_principal_with_client_secret",
-            "azure.credentials.client_id": "",
-            "azure.credentials.tenant_id": "",
-            "azure.credentials.client_secret": "",
+            "azure.credentials.client_id": creds["clientId"],
+            "azure.credentials.tenant_id": creds["tenantId"],
+            "azure.credentials.client_secret": creds["clientSecret"],
         },
     }
 
@@ -79,14 +81,16 @@ def generate_gcp_integration_data():
 if __name__ == "__main__":
     integrations = [
         generate_aws_integration_data(),
+        generate_azure_integration_data(),
     ]
     cspm_template = generate_policy_template(cfg=cnfg.elk_config)
     for integration_data in integrations:
         NAME = integration_data["name"]
-        logger.info(f"Create {NAME} integration for policy {AGENT_POLICY_ID}")
+        logger.info(f"Creating {NAME} integration for policy {AGENT_POLICY_ID}")
         package_policy = generate_package_policy(cspm_template, integration_data)
+        package_policy["force"] = True
 
-        logger.info(f"Created {package_policy}")
+        logger.info(f"Creating {package_policy}")
 
         create_cspm_integration(
             cfg=cnfg.elk_config,

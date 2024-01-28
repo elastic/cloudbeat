@@ -119,6 +119,9 @@ logs-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
+deploy-arm:
+  deploy/azure/generate_dev_template.py --deploy
+
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
@@ -220,4 +223,3 @@ cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/test_environments/values/ci.yml {{range}}
-

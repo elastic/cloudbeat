@@ -113,7 +113,43 @@ This is useful for testing and development purposes.
    -e "FLEET_URL=<fleet-server-host-url>" \
    -e "FLEET_ENROLLMENT_TOKEN=<enrollment-token>" \
    -e "FLEET_ENROLL=1" \
-   docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
+   docker.elastic.co/beats/elastic-agent:8.13.0-SNAPSHOT
+   ```
+
+## Deploying Fleet enrolled Elastic Agent in a container with custom cloudbeat binary (and optionally custom integration)
+
+1. Spin up Elastic stack (See [ELK stack setup](ELK-Deployment.md))
+   Optionally: In order to load local `elastic/integration` changes, run `elastic-package up` from inside the `elastic/integrations` locally cloned folder.
+2. Setup cspm/kspm/cnvm integration and collect the relevant information:
+   - Enrollment token
+3. Build cloudbeat binary and opa bundle (inside `cloudbeat` folder)
+   ```bash
+    GOOS=linux mage build
+   ```
+4. Build elastic agent docker image overwriting with the locally produced cloudbeat
+   ```bash
+    export BASE_IMAGE="docker.elastic.co/beats/elastic-agent:8.13.0-SNAPSHOT"
+    docker pull $BASE_IMAGE
+    export STACK_VERSION=$(docker inspect -f '{{index .Config.Labels "org.label-schema.version"}}' $BASE_IMAGE)
+    export VCS_REF=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vcs-ref"}}' $BASE_IMAGE)
+    docker buildx build \
+        -f ./dev-tools/packaging/docker/elastic-agent/Dockerfile \
+        --build-arg ELASTIC_AGENT_IMAGE=$BASE_IMAGE \
+        --build-arg STACK_VERSION=$STACK_VERSION \
+        --build-arg VCS_REF_SHORT=${VCS_REF:0:6} \
+        --platform linux/$(go env GOARCH) \
+        -t "docker.elastic.co/beats/elastic-agent:DEVEL" \
+        .
+   ```
+5. Run a standalone container using the perviously produced image and attach it to `elastic-package` default docker network.
+   ```bash
+   docker run \
+    -e "FLEET_URL=https://fleet-server:8220" \
+    -e "FLEET_ENROLLMENT_TOKEN=<enrollment-token>" \
+    -e "FLEET_ENROLL=1" \
+    -e "FLEET_INSECURE=true" \
+    --network elastic-package-stack_default \
+    docker.elastic.co/beats/elastic-agent:DEVEL
    ```
 
 For more information see [Run Elastic Agent in a container](https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html#elastic-agent-container).

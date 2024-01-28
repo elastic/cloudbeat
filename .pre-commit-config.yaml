@@ -11,6 +11,8 @@ repos:
         exclude: (^tests/test_environments/k8s-cloudbeat-tests/templates/.*)$
       - id: check-json
       - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+        exclude: (cloudbeat.yml|cloudbeat.reference.yml|security-policies/bundle/.*)
       - id: trailing-whitespace
         exclude: (cloudbeat.reference.yml|security-policies/bundle/.*)
 
@@ -65,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.83.8
+    rev: v0.84.0
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -103,6 +105,12 @@ repos:
         entry: bash -c 'go mod tidy'
         language: system
         files: (go.mod|go.sum)
+        pass_filenames: false
+      - id: generate-arm-dev-templates
+        name: Generate ARM dev templates
+        entry: bash -c 'deploy/azure/generate_dev_template.py --template-type single-account && deploy/azure/generate_dev_template.py --template-type organization-account'
+        language: python
+        files: deploy/azure/.*
         pass_filenames: false
 
   - repo: local

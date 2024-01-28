@@ -22,8 +22,8 @@ is_encryption_protector_key_vault if {
 	count(data_adapter.resource.extension.sqlEncryptionProtectors) > 0
 
 	every p in data_adapter.resource.extension.sqlEncryptionProtectors {
-		p.serverKeyType == "AzureKeyVault"
-		p.kind == "azurekeyvault"
-		count(trim_space(p.uri)) > 0
+		p.properties.serverKeyType == "AzureKeyVault"
+		p.properties.kind == "azurekeyvault"
+		count(trim_space(p.properties.uri)) > 0
 	}
 }

@@ -110,6 +110,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	storageAccounts := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
 		return item.Type == inventory.StorageAccountAssetType
 	})
+	storageAccountsSubscriptionsIds := lo.Uniq(lo.Map(storageAccounts, func(item inventory.AzureAsset, i int) string {
+		return item.SubscriptionId
+	}))
 	mockProvider.EXPECT().
 		ListStorageAccountBlobServices(mock.Anything, storageAccounts).
 		Return(nil, nil)
@@ -121,6 +124,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		Return(nil, nil)
 	mockProvider.EXPECT().
 		ListStorageAccountsQueueDiagnosticSettings(mock.Anything, storageAccounts).
+		Return(nil, nil)
+	mockProvider.EXPECT().
+		ListStorageAccounts(mock.Anything, storageAccountsSubscriptionsIds).
 		Return(nil, nil)
 
 	vaults := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {

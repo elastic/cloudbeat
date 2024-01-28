@@ -6,13 +6,13 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
-	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"state": "Disabled"}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"state": "Disabled"}}})
 
 	eval_fail with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {})
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"state": "Enabled"}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext("azure-sql-server", {}, {"sqlBlobAuditPolicy": {"properties": {"state": "Enabled"}}})
 }
 
 test_not_evaluated if {
