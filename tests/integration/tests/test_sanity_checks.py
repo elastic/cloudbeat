@@ -276,7 +276,6 @@ def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedM
 
     # Skip waiting for agents if fleet is not available.
     if not elasticsearch.kibana_url:
-        logger.info("amiramir skip loading map")
         return [""]
 
     actual.load_map()
