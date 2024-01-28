@@ -13,9 +13,9 @@ from pathlib import Path
 from munch import Munch
 from packaging import version
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy
-from api.package_policy_api import create_cspm_integration
-from api.common_api import (
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.package_policy_api import create_cspm_integration
+from fleet_api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     get_artifact_server,
@@ -32,7 +32,7 @@ from package_policy import (
 )
 
 CSPM_GCP_EXPECTED_AGENTS = 1
-DEPLOYMENT_MANAGER_CONFIG = "../../../deployment-manager/config.json"
+DEPLOYMENT_MANAGER_CONFIG = "../../deploy/deployment-manager/config.json"
 
 cspm_gcp_deployment_manager_config = Path(__file__).parent / DEPLOYMENT_MANAGER_CONFIG
 INTEGRATION_NAME = "CSPM GCP"

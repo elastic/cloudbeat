@@ -11,10 +11,14 @@ import json
 from pathlib import Path
 from munch import Munch
 from packaging import version
+from loguru import logger
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy
-from api.package_policy_api import create_cspm_integration
-from api.common_api import (
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.package_policy_api import create_cspm_integration
+from fleet_api.utils import (
+    rename_file_by_suffix,
+)
+from fleet_api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     get_artifact_server,
@@ -31,19 +35,13 @@ from package_policy import (
     load_data,
     generate_random_name,
 )
-
-
-from loguru import logger
-from utils import (
-    rename_file_by_suffix,
-)
 from state_file_manager import state_manager, PolicyState, HostType
 
-CSPM_AZURE_AGENT_POLICY = "../../../cloud/data/agent_policy_cspm_azure.json"
-CSPM_AZURE_PACKAGE_POLICY = "../../../cloud/data/package_policy_cspm_azure.json"
+CSPM_AZURE_AGENT_POLICY = "../../deploy/cloud/data/agent_policy_cspm_azure.json"
+CSPM_AZURE_PACKAGE_POLICY = "../../deploy/cloud/data/package_policy_cspm_azure.json"
 CSPM_AZURE_EXPECTED_AGENTS = 1
-AZURE_ARM_PARAMETERS = "../../../azure/arm_parameters.json"
-AZURE_ARM_TEMPLATE = "../../../azure/ARM-for-single-account.json"
+AZURE_ARM_PARAMETERS = "../../deploy/azure/arm_parameters.json"
+AZURE_ARM_TEMPLATE = "../../deploy/azure/ARM-for-single-account.json"
 
 cspm_azure_agent_policy_data = Path(__file__).parent / CSPM_AZURE_AGENT_POLICY
 cspm_azure_pkg_policy_data = Path(__file__).parent / CSPM_AZURE_PACKAGE_POLICY

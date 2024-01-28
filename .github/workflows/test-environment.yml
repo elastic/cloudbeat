@@ -91,7 +91,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
-  FLEET_API_DIR: fleet_api/src
+  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
@@ -199,9 +199,9 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           poetry --version
 
-      - name: Install Fleet API dependencies
-        id: fleet-api-deps
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+      - name: Install Fleet & Tests Dependencies
+        id: fleet-and-tests-deps
+        working-directory: ./tests
         run: |
           poetry install
 
@@ -297,9 +297,9 @@ jobs:
 
       - name: Install CNVM integration
         id: cnvm
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/install_cnvm_integration.py
+          poetry run python ./install_cnvm_integration.py
 
       - name: Deploy CNVM agent
         env:
@@ -310,9 +310,9 @@ jobs:
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/install_cspm_gcp_integration.py
+          poetry run python ./install_cspm_gcp_integration.py
 
       - id: google-auth
         name: Authenticate to Google Cloud
@@ -331,9 +331,9 @@ jobs:
 
       - name: Install CSPM Azure integration
         id: cspm-azure-integration
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/install_cspm_azure_integration.py
+          poetry run python ./install_cspm_azure_integration.py
 
       - id: azure-auth
         name: Azure login
@@ -354,15 +354,15 @@ jobs:
 
       - name: Install D4C integration
         id: kspm-d4c
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/install_d4c_integration.py
+          poetry run python ./install_d4c_integration.py
 
       - name: Install KSPM EKS integration
         id: kspm-eks
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/install_kspm_eks_integration.py
+          poetry run python ./install_kspm_eks_integration.py
 
       - name: Deploy KSPM EKS agent
         env:
@@ -373,33 +373,33 @@ jobs:
           echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
           aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
           kubectl config use-context eks-config
-          kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_d4c.yaml
+          kubectl apply -f ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_d4c.yaml
 
       - name: Install KSPM Unmanaged integration
         id: kspm-unmanaged
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/install_kspm_unmanaged_integration.py
+          poetry run python ./install_kspm_unmanaged_integration.py
 
       - name: Deploy KSPM Unmanaged agent
         run: |
           chmod 600 ${{ env.EC2_KSPM_KEY }}
           # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ${{ env.FLEET_API_DIR}}/kspm_unmanaged.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
+          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_unmanaged.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_unmanaged.yaml"
 
       - name: Install CSPM integration
         id: cspm
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/install_cspm_integration.py
+          poetry run python ./install_cspm_integration.py
 
       - name: Deploy CSPM agent
         run: |
           chmod 600 ${{ env.EC2_CSPM_KEY }}
           # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ${{ env.FLEET_API_DIR}}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
+          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
 
@@ -407,33 +407,33 @@ jobs:
         if: always()
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
-          aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
-          aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
-          aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
-          aws s3 cp "${{ env.FLEET_API_DIR}}/state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
+          aws s3 cp "./kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
+          aws s3 cp "./kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
+          aws s3 cp "./kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
+          aws s3 cp "./cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
+          aws s3 cp "./state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
 
       - name: Install Agentless integrations
         id: agentless
         if: env.TEST_AGENTLESS == 'true'
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          poetry run python src/install_agentless_integrations.py
+          poetry run python ./install_agentless_integrations.py
 
       - name: Wait for agents to enroll
         id: wait-for-agents
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          poetry run python src/agents_enrolled.py
+          poetry run python ./agents_enrolled.py
 
       - name: Run Sanity checks
         if: ${{ success() && inputs.run-sanity-tests == true }}
         working-directory: ./tests
         run: |
-          poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Cleanup Environment

@@ -15,12 +15,12 @@ Usage:
 
 """
 from loguru import logger
-from api.agent_policy_api import (
+from fleet_api.agent_policy_api import (
     delete_agent_policy,
     get_agents,
     unenroll_agents_from_policy,
 )
-from api.package_policy_api import delete_package_policy
+from fleet_api.package_policy_api import delete_package_policy
 import configuration_fleet as cnfg
 from state_file_manager import state_manager
 

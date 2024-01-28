@@ -11,25 +11,25 @@ The following steps are performed:
 from pathlib import Path
 from typing import Dict, Tuple
 from munch import Munch
+from loguru import logger
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy
-from api.package_policy_api import create_integration
-from api.common_api import (
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.package_policy_api import create_integration
+from fleet_api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     create_kubernetes_manifest,
     get_package_version,
     update_package_version,
 )
-from loguru import logger
-from utils import read_json
+from fleet_api.utils import read_json
 from state_file_manager import state_manager, PolicyState, HostType
 
-D4C_AGENT_POLICY = "../../../cloud/data/agent_policy_d4c.json"
-D4C_PACKAGE_POLICY = "../../../cloud/data/package_policy_d4c.json"
+D4C_AGENT_POLICY = "../../deploy/cloud/data/agent_policy_d4c.json"
+D4C_PACKAGE_POLICY = "../../deploy/cloud/data/package_policy_d4c.json"
 D4C_AGENT_POLICY_NAME = "tf-ap-d4c"
 D4C_EXPECTED_AGENTS = 2
-INTEGRATAION_NAME = "D4C"
+INTEGRATION_NAME = "D4C"
 
 d4c_agent_policy_data = Path(__file__).parent / D4C_AGENT_POLICY
 d4c_pkg_policy_data = Path(__file__).parent / D4C_PACKAGE_POLICY
@@ -58,13 +58,13 @@ if __name__ == "__main__":
         package_version=package_version,
     )
 
-    logger.info(f"Starting installation of {INTEGRATAION_NAME} integration.")
+    logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data()
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
 
-    logger.info(f"Create {INTEGRATAION_NAME} integration")
+    logger.info(f"Create {INTEGRATION_NAME} integration")
     package_policy_id = create_integration(
         cfg=cnfg.elk_config,
         pkg_policy=package_data,
@@ -93,6 +93,6 @@ if __name__ == "__main__":
     manifest_params.yaml_path = Path(__file__).parent / "kspm_d4c.yaml"
     manifest_params.docker_image_override = cnfg.kspm_config.docker_image_override
     manifest_params.capabilities = True
-    logger.info(f"Creating {INTEGRATAION_NAME} manifest")
+    logger.info(f"Creating {INTEGRATION_NAME} manifest")
     create_kubernetes_manifest(cfg=cnfg.elk_config, params=manifest_params)
-    logger.info(f"Installation of {INTEGRATAION_NAME} integration is done")
+    logger.info(f"Installation of {INTEGRATION_NAME} integration is done")

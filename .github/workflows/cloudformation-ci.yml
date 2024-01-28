@@ -12,9 +12,7 @@ on:
 
 env:
   WORKING_DIR: deploy/test-environments
-  FLEET_API_DIR: fleet_api/src
-  DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
-  CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
+  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -33,6 +31,12 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
+      - name: Set up unique deployment names
+        run: |
+          suffix="$(date +%s | tail -c 3)"
+          echo "TF_VAR_deployment_name=DEPLOY_PR${{ github.event.number }}-$suffix" >> $GITHUB_ENV
+          echo "CNVM_STACK_NAME=cnvm-stack-pr${{ github.event.number }}-$suffix" >> $GITHUB_ENV
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -45,7 +49,7 @@ jobs:
 
       - name: Install Fleet API dependencies
         id: fleet-api-deps
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ./tests
         run: |
           poetry install
 
@@ -65,7 +69,9 @@ jobs:
         run: |
           terraform init
           terraform validate
-          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -target=module.ec_deployment
+          # To address the conditional statement outputting stack values in the deployment stack,
+          # we need to specify both targets: ec_project and ec_deployment.
+          terraform apply --auto-approve -target=module.ec_deployment -target="module.ec_project"
 
       - name: Set Environment Output
         id: env-output
@@ -79,11 +85,11 @@ jobs:
           echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
 
       - name: Install integrations
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
         run: |
-          poetry run python src/install_cnvm_integration.py
+          poetry run python ./install_cnvm_integration.py
 
       - name: Deploy CNVM agent
         env:
@@ -98,14 +104,14 @@ jobs:
 
       - name: Wait for agents to enroll
         id: wait-for-agents
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         timeout-minutes: 1
         run: |
-          poetry run python src/agents_enrolled.py
+          poetry run python ./agents_enrolled.py
 
       - name: Cleanup Environment
         if: always()
         run: |
-          terraform destroy --auto-approve
+          terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
           aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
           aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}

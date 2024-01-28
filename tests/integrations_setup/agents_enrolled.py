@@ -6,7 +6,7 @@ import sys
 import time
 import re
 from dataclasses import dataclass
-from api.agent_policy_api import get_agents
+from fleet_api.agent_policy_api import get_agents
 import configuration_fleet as cnfg
 from state_file_manager import state_manager
 from loguru import logger
