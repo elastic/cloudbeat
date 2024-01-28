@@ -73,7 +73,7 @@ jobs:
           USE_K8S: false
         run: |
           poetry install
-          poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
+          poetry run pytest -m "sanity" -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
       - name: Print cloudbeat logs
         if: always()
