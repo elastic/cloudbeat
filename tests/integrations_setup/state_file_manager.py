@@ -5,7 +5,7 @@ Exports state_manager object as a singleton.
 import json
 from pathlib import Path
 from enum import Enum
-from utils import delete_file
+from fleet_api.utils import delete_file
 from loguru import logger
 
 __state_file = Path(__file__).parent / "state_data.json"

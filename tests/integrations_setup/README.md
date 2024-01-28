@@ -24,10 +24,10 @@ Make sure to set these variables with the appropriate values based on your speci
 
 Follow these steps to install the dependencies and execute the different scripts:
 
-1. Open your terminal and navigate to the directory `deploy/test-environments/fleet_api` using the following command:
+1. Open your terminal and navigate to the directory `tests` using the following command:
 
     ```bash
-    cd deploy/test-environments/fleet_api
+    cd tests
     ```
 
 2. Install the dependencies using Poetry by running the command:
@@ -39,40 +39,46 @@ Follow these steps to install the dependencies and execute the different scripts
 3. To execute the KSPM unmanaged integration, use the following command:
 
     ``` bash
-    poetry run python src/install_kspm_unmanaged_integration.py
+    poetry run python ./integrations_setup/install_kspm_unmanaged_integration.py
     ```
 
 4. To execute the KSPM EKS integration, use the following command:
 
     ``` bash
-    poetry run python src/install_kspm_eks_integration.py
+    poetry run python ./integrations_setup//install_kspm_eks_integration.py
     ```
 
 5. To execute the CSPM integration, use the following command:
 
     ``` bash
-    poetry run python src/install_cspm_integration.py
+    poetry run python ./integrations_setup/install_cspm_integration.py
     ```
 
 6. To execute the CNVM integration, use the following command:
 
     ``` bash
-    poetry run python src/install_cnvm_integration.py
+    poetry run python ./integrations_setup/install_cnvm_integration.py
     ```
 
 7. To execute the Defend for Containers (D4C) integration, use the following command:
 
     ``` bash
-    poetry run python src/install_d4c_integration.py
+    poetry run python ./integrations_setup/install_d4c_integration.py
     ```
 
 8. To execute the CSPM GCP integration, use the following command:
 
     ``` bash
-    poetry run python src/install_cspm_gcp_integration.py
+    poetry run python ./integrations_setup/install_cspm_gcp_integration.py
     ```
 
-9. To purge integrations, use the following command:
+9. To execute the CSPM AZURE integration, use the following command:
+
+    ``` bash
+    poetry run python ./integrations_setup/install_cspm_azure_integration.py
+    ```
+
+10. To purge integrations, use the following command:
 
     ``` bash
     poetry run python src/purge_integrations.py
