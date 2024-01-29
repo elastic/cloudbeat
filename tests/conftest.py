@@ -297,5 +297,4 @@ def agents_actual_components() -> AgentComponentMapping:
     This function (fixture) instantiate an AgentComponentMapping.
     @return: an mapping of the agent components.
     """
-    mapping = AgentComponentMapping()
-    return mapping
+    return AgentComponentMapping()
