@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
@@ -38,15 +39,9 @@ const (
 	PROD = "PROD_TEMPLATE"
 )
 
-var templatePaths = map[string]map[string]string{
-	DeploymentTypeCSPM: {
-		DEV:  "elastic-agent-ec2-dev-cspm.yml",
-		PROD: "elastic-agent-ec2-cspm.yml",
-	},
-	DeploymentTypeCNVM: {
-		DEV:  "elastic-agent-ec2-dev-cnvm.yml",
-		PROD: "elastic-agent-ec2-cnvm.yml",
-	},
+var templatePaths = map[string]string{
+	DeploymentTypeCSPM: "elastic-agent-ec2-cspm.yml",
+	DeploymentTypeCNVM: "elastic-agent-ec2-cnvm.yml",
 }
 
 func main() {
@@ -72,30 +67,30 @@ func createFromConfig(cfg *config) error {
 		params["ElasticArtifactServer"] = *cfg.ElasticArtifactServer
 	}
 
-	templatePath := getTemplatePath(cfg.DeploymentType, PROD)
+	templateSourcePath := getTemplateSourcePath(cfg.DeploymentType)
+	templateTargetPath := getTemplateTargetPath(templateSourcePath)
+	if err := generateProdTemplate(templateSourcePath, templateTargetPath); err != nil {
+		return fmt.Errorf("failed to generate prod template: %w", err)
+	}
 
 	if cfg.Dev != nil && cfg.Dev.AllowSSH {
 		params["KeyName"] = cfg.Dev.KeyName
 
-		devTemplatePath := getTemplatePath(cfg.DeploymentType, DEV)
-
-		err := generateDevTemplate(templatePath, devTemplatePath)
+		err := generateDevTemplate(templateTargetPath, templateTargetPath)
 		if err != nil {
-			return fmt.Errorf("could not generate dev template: %v", err)
+			return fmt.Errorf("failed to generate dev template: %w", err)
 		}
-
-		templatePath = devTemplatePath
 	}
 
-	err := createStack(cfg.StackName, templatePath, params)
+	err := createStack(cfg.StackName, templateTargetPath, params)
 	if err != nil {
-		return fmt.Errorf("failed to create CloudFormation stack: %v", err)
+		return fmt.Errorf("failed to create CloudFormation stack: %w", err)
 	}
 
 	return nil
 }
 
-func generateDevTemplate(prodTemplatePath string, devTemplatePath string) (err error) {
+func generateDevTemplate(prodTemplatePath string, devTemplatePath string) error {
 	const yqExpression = `
 .Parameters.KeyName = {
 	"Description": "SSH Keypair to login to the instance",
@@ -110,7 +105,33 @@ func generateDevTemplate(prodTemplatePath string, devTemplatePath string) (err e
 	"ToPort": 22
 }
 `
-	inputBytes, err := os.ReadFile(prodTemplatePath)
+	return generateTemplate(prodTemplatePath, devTemplatePath, yqExpression)
+}
+
+func generateProdTemplate(prodTemplatePath string, devTemplatePath string) error {
+	const yqExpression = `
+.Resources.ElasticAgentEc2Instance.Properties.Tags += {
+	"Key": "division",
+	"Value": "engineering"
+} |
+.Resources.ElasticAgentEc2Instance.Properties.Tags += {
+	"Key": "org",
+	"Value": "security"
+} |
+.Resources.ElasticAgentEc2Instance.Properties.Tags += {
+	"Key": "team",
+	"Value": "cloud-security"
+} |
+.Resources.ElasticAgentEc2Instance.Properties.Tags += {
+	"Key": "project",
+	"Value": "cloudformation"
+}
+`
+	return generateTemplate(prodTemplatePath, devTemplatePath, yqExpression)
+}
+
+func generateTemplate(sourcePath string, targetPath string, yqExpression string) (err error) {
+	inputBytes, err := os.ReadFile(sourcePath)
 	if err != nil {
 		return err
 	}
@@ -125,7 +146,7 @@ func generateDevTemplate(prodTemplatePath string, devTemplatePath string) (err e
 		return err
 	}
 
-	f, err := os.Create(devTemplatePath)
+	f, err := os.Create(targetPath)
 	if err != nil {
 		return err
 	}
@@ -138,7 +159,7 @@ func generateDevTemplate(prodTemplatePath string, devTemplatePath string) (err e
 
 	_, err = f.WriteString(generatedTemplateString)
 	if err != nil {
-		return fmt.Errorf("failed to write to dev template: %w", err)
+		return fmt.Errorf("failed to write template: %w", err)
 	}
 
 	return
@@ -183,10 +204,14 @@ func createStack(stackName string, templatePath string, params map[string]string
 	return nil
 }
 
-func getTemplatePath(deploymentType string, env string) string {
+func getTemplateSourcePath(deploymentType string) string {
 	if deploymentType == "" {
 		// Default is CNVM
 		deploymentType = DeploymentTypeCNVM
 	}
-	return templatePaths[deploymentType][env]
+	return templatePaths[deploymentType]
+}
+
+func getTemplateTargetPath(source string) string {
+	return strings.Replace(source, ".yml", "-generated.yml", 1)
 }
