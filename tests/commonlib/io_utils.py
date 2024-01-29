@@ -2,7 +2,6 @@
 This module provides input / output manipulations on streams / files
 """
 
-
 import io
 import json
 import os

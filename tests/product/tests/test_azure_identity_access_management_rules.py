@@ -2,6 +2,7 @@
 CIS Azure Identity Access Management rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
+
 from datetime import datetime, timedelta
 from functools import partial
 import pytest

@@ -2,6 +2,7 @@
 Kubernetes CIS rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
+
 from datetime import datetime, timedelta
 import pytest
 from commonlib.utils import get_ES_evaluation

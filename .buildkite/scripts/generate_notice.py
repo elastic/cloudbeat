@@ -1,6 +1,7 @@
 """
 This module generates the NOTICE.txt and dependencies.csv files
 """
+
 from __future__ import print_function
 
 import argparse
