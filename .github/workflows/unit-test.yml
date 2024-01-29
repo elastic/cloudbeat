@@ -43,7 +43,7 @@ jobs:
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-file
           path: cover.out
