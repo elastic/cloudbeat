@@ -148,7 +148,7 @@ repos:
         entry: poetry run -C security-policies python security-policies/dev/update_rule_status.py
         pass_filenames: false
         language: system
-        files: (\.rego)$
+        files: (.*\.rego|tests\/product\/.*\.py)$
 
       - id: update-rule-metadata
         name: Update rule metadata
