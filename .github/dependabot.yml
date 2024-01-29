@@ -54,8 +54,8 @@ updates:
         - "actions/download-artifact"
         - "actions/upload-artifact"
     ignore:
+        # Skip versions 4.x upload-artifact and download-artifact due to this issue: https://github.com/actions/upload-artifact/issues/478
       - dependency-name: "github.com/actions/download-artifact"
-        # Skip upload-artifact due to this issue: https://github.com/actions/upload-artifact/issues/478
         versions: ["4.x"]
       - dependency-name: "github.com/actions/upload-artifact"
         versions: ["4.x"]
