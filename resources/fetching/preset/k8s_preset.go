@@ -45,11 +45,11 @@ var vanillaFsPatterns = []string{
 }
 
 var vanillaRequiredProcesses = fetchers.ProcessesConfigMap{
-	"etcd":            {ConfigFileArguments: nil},
-	"kube-apiserver":  {ConfigFileArguments: nil},
-	"kube-controller": {ConfigFileArguments: nil},
-	"kube-scheduler":  {ConfigFileArguments: nil},
-	"kubelet":         {ConfigFileArguments: []string{"config"}},
+	"etcd":                    {ConfigFileArguments: nil},
+	"kube-apiserver":          {ConfigFileArguments: nil},
+	"kube-controller-manager": {ConfigFileArguments: nil},
+	"kube-scheduler":          {ConfigFileArguments: nil},
+	"kubelet":                 {ConfigFileArguments: []string{"config"}},
 }
 
 func NewCisK8sFetchers(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) registry.FetchersMap {

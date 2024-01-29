@@ -22,10 +22,12 @@ import (
 	"fmt"
 	"io/fs"
 	"strconv"
+	"strings"
 	"testing"
 	"testing/fstest"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -41,8 +43,10 @@ const (
 	EksCmdLineDelimiter     = " "
 )
 
-var Status = `Name:   %s`
-var CmdLine = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s%s%s`
+var (
+	Status  = `Name:   %s`
+	CmdLine = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s%s%s`
+)
 
 type TextProcessContext struct {
 	Pid               string
@@ -84,7 +88,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 		ConfigFilePath:    "test/path",
 	}
 	sysfs := createProcess(testProcess, VanillaCmdLineDelimiter)
-	var procCfg = ProcessesConfigMap{
+	procCfg := ProcessesConfigMap{
 		testProcess.Name: {ConfigFileArguments: []string{"fetcherConfig"}},
 	}
 	processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
@@ -112,7 +116,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 	}
 
 	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
-	var procCfg = ProcessesConfigMap{
+	procCfg := ProcessesConfigMap{
 		"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}},
 	}
 	processesFetcher := &ProcessesFetcher{
@@ -137,8 +141,9 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 		ConfigFilePath:    "test/path",
 	}
 	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
-	var procCfg = ProcessesConfigMap{
-		"kubelet": {ConfigFileArguments: []string{}}}
+	procCfg := ProcessesConfigMap{
+		"kubelet": {ConfigFileArguments: []string{}},
+	}
 	processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: fsys, resourceCh: s.resourceCh, processes: procCfg}
 	err := processesFetcher.Fetch(context.TODO(), cycle.Metadata{})
 
@@ -235,5 +240,46 @@ func createProcess(process TextProcessContext, cmdDelimiter string) fs.FS {
 		fmt.Sprintf("proc/%s/cmdline", process.Pid): {
 			Data: []byte(fmt.Sprintf(CmdLine, process.Name, process.ConfigFileFlagKey, cmdDelimiter, process.ConfigFilePath)),
 		},
+	}
+}
+
+func TestExtractCommandName(t *testing.T) {
+	tests := []struct {
+		cmd      string
+		expected string
+	}{
+		{
+			cmd:      "",
+			expected: "",
+		},
+		{
+			cmd:      "/usr/bin/kube-controllers",
+			expected: "kube-controllers",
+		},
+		{
+			cmd:      "/usr/bin/kube-controllers --test",
+			expected: "kube-controllers",
+		},
+		{
+			cmd:      "kube-scheduler --authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/scheduler.conf",
+			expected: "kube-scheduler",
+		},
+		{
+			cmd:      "etcd --advertise-client-urls=https://172.19.0.4:2379 --cert-file=/etc/kubernetes/pki/etcd/server.crt --client-cert-auth=true",
+			expected: "etcd",
+		},
+		{
+			cmd:      "/usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf",
+			expected: "kubelet",
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		name := strings.ReplaceAll(tc.cmd, "/", "|") // For readability, because tests are also hierarchical with '/'.
+		t.Run(name, func(t *testing.T) {
+			got := extractCommandName(tc.cmd)
+			require.Equal(t, tc.expected, got)
+		})
 	}
 }

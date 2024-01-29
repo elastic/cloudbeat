@@ -8,9 +8,11 @@ repos:
       - id: check-added-large-files
       - id: check-yaml
         args: [--allow-multiple-documents, --unsafe]
-        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$
+        exclude: (^tests/test_environments/k8s-cloudbeat-tests/templates/.*)$
       - id: check-json
       - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+        exclude: (cloudbeat.yml|cloudbeat.reference.yml|security-policies/bundle/.*)
       - id: trailing-whitespace
         exclude: (cloudbeat.reference.yml|security-policies/bundle/.*)
 
@@ -33,8 +35,8 @@ repos:
     rev: 7.0.0
     hooks:
       - id: flake8
-        name: flake8 ./tests/ ./fleet_api/ ./.ci/scripts ./github/actions
-        files: ^(.ci/scripts|.github/actions|tests|deploy/test-environments/fleet_api)/
+        name: flake8 ./tests/ ./.ci/scripts ./github/actions
+        files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
     rev: v3.0.3

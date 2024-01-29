@@ -35,7 +35,7 @@ Before performing steps below verify that **just** tool is installed and your ro
 3. Install elasticsearch and start cloudbeat
 
     ```shell
-    just deploy-tests-helm pre_merge values_file='tests/deploy/values/ci.yml' range=''
+    just deploy-tests-helm pre_merge values_file='tests/test_environments/values/ci.yml' range=''
     ```
 
 This command will install elasticsearch one node instance in kubernetes cluster and prepare configuration
@@ -68,6 +68,29 @@ git clone https://github.com/<yourname>/cloudbeat.git
 cd cloudbeat/tests
 poetry install
 ```
+
+### Running CSPM Tests from shell against local elastic
+
+1. Bring an ES instance up, e.g
+
+```shell
+  elastic-package stack up -v --version $ES_VERSION
+```
+
+2. Start cloudbeat locally and generate findings on the ES cluster
+3. From the `tests` dir, run the tests with desired rules, e.g.
+```bash
+USE_K8S=false \
+  ES_USER=elastic \
+  ES_USE_SSL=false \
+  ES_PROTOCOL=https \
+  poetry run pytest -m "azure_networking_rules" --alluredir=./allure/results/
+```
+  - `USE_K8S=false` skip k8s tests
+  - `ES_USER=elastic` configure the elastic user, default from elastic package is `elastic`
+  - `ES_USE_SSL=false` skip SSL verification
+  - `ES_PROTOCOL=https` use https protocol to connecto elastic
+
 
 ### Configuring IDE
 
@@ -105,7 +128,12 @@ or alternatively, right-click the tests folder and select **Mark Directory as** 
 The project main folders are:
 
 - commonlib - contains helper functions used for tests development.
-- deploy - contains helm charts for deploying ELK, cloudbeat, and tests docker.
+- fleet_api - contains the API wrapper for fleet functionality.
+- integrations_setup - holds automated scripts responsible for installing integrations like KSPM and CSPM.
+  Additionally, it generates manifests and input data needed to deploy agents on hosts.
+  The detailed information is available in the [README](./integrations_setup/README.md) file.
+
+- test_environments - contains helm charts for deploying ELK, cloudbeat, and tests docker.
 - product - contains cloudbeat tests, for example cloudbeat behavior and functional tests.
 - integration - contains cloudbeat integration tests.
 - project root content - contains project and tests configuration files.
@@ -123,7 +151,7 @@ The project main folders are:
 
 #### Test Folders
 
-- Product tests folder is **product/tests**.</br>
+- Product tests folder is **product/tests**.
 - Integration tests folder is **intergration/tests**.
 
 #### Logging
@@ -395,8 +423,8 @@ Before tests execution ensure that the following pods are running:
 
 Pods definition location:
 
-- [test-eks-good-pod](deploy/eks-psp-pass-pod.yaml)
-- [test-eks-bad-pod](deploy/eks-psp-failures-pod.yaml)
+- [test-eks-good-pod](test_environments/eks-psp-pass-pod.yaml)
+- [test-eks-bad-pod](test_environments/eks-psp-failures-pod.yaml)
 
 Pods are identified by label `testResourceId`.
 
