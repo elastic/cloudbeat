@@ -52,4 +52,5 @@ updates:
       artifact:
         patterns:
         - "actions/download-artifact"
-        - "actions/upload-artifact"
+        # Skip upload-artifact due to this issue: https://github.com/actions/upload-artifact/issues/478
+        # - "actions/upload-artifact"
