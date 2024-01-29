@@ -1,9 +1,6 @@
 name: CIS-AZURE-CI
 
 on:
-  # TODO: Remove after testing
-  workflow_dispatch:
-    inputs:
   push:
     branches:
       - main
