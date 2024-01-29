@@ -274,7 +274,7 @@ class KubernetesHelper:
         """
         Delete and recreate the given resource with the given patch.
         """
-        file_path = Path(__file__).parent / "../deploy/mock-pod.yml"
+        file_path = Path(__file__).parent / "../test_environments/mock-pod.yml"
         k8s_resources = get_k8s_yaml_objects(file_path=file_path)
 
         patch_metadata = patch_body["metadata"]

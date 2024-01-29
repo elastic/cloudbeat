@@ -1,56 +1,53 @@
 #!/usr/bin/env python
 """
-This script installs CSPM AWS integration
+This script installs KSPM EKS integration
 
 The following steps are performed:
 1. Create an agent policy.
-2. Create a CSPM AWS integration.
-3. Create a CSPM bash script to be deployed on a host.
+2. Create a KSPM EKS integration.
+3. Create a KSPM manifest to be deployed on a host.
 """
 import sys
 from pathlib import Path
 from munch import Munch
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy
-from api.package_policy_api import create_cspm_integration
-from api.common_api import (
+from fleet_api.agent_policy_api import create_agent_policy, get_agent_policy_id_by_name
+from fleet_api.package_policy_api import create_kspm_eks_integration
+from fleet_api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
-    get_artifact_server,
+    create_kubernetes_manifest,
     get_package_version,
     update_package_version,
 )
 from loguru import logger
-from utils import render_template
 from state_file_manager import state_manager, PolicyState, HostType
 from package_policy import (
     load_data,
     version_compatible,
     generate_random_name,
-    patch_vars,
     VERSION_MAP,
 )
 
-CSPM_EXPECTED_AGENTS = 1
-INTEGRATION_NAME = "CSPM AWS"
-PKG_DEFAULT_VERSION = VERSION_MAP.get("cis_aws", "")
-aws_config = cnfg.aws_config
+
+KSPM_EKS_EXPECTED_AGENTS = 2
+D4C_AGENT_POLICY_NAME = "tf-ap-d4c"
+INTEGRATION_NAME = "KSPM EKS"
+PKG_DEFAULT_VERSION = VERSION_MAP.get("cis_eks", "")
 INTEGRATION_INPUT = {
-    "name": generate_random_name("pkg-cspm-aws"),
-    "input_name": "cis_aws",
-    "posture": "cspm",
-    "deployment": "cloudbeat/cis_aws",
+    "name": generate_random_name("pkg-kspm-eks"),
+    "input_name": "cis_eks",
+    "posture": "kspm",
+    "deployment": "cloudbeat/cis_eks",
     "vars": {
-        "access_key_id": aws_config.access_key_id,
-        "secret_access_key": aws_config.secret_access_key,
+        "access_key_id": cnfg.aws_config.access_key_id,
+        "secret_access_key": cnfg.aws_config.secret_access_key,
         "aws.credentials.type": "direct_access_keys",
     },
 }
 AGENT_INPUT = {
-    "name": generate_random_name("cspm-aws"),
+    "name": generate_random_name("kspm-eks"),
 }
-
-cspm_template = Path(__file__).parent / "data/cspm-linux.j2"
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
@@ -69,10 +66,6 @@ if __name__ == "__main__":
         package_version=package_version,
     )
 
-    patch_vars(
-        var_dict=INTEGRATION_INPUT.get("vars", {}),
-        package_version=package_version,
-    )
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
@@ -81,23 +74,31 @@ if __name__ == "__main__":
     )
 
     logger.info("Create agent policy")
-    agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
+    agent_policy_id = get_agent_policy_id_by_name(
+        cfg=cnfg.elk_config,
+        policy_name=D4C_AGENT_POLICY_NAME,
+    )
+    if not agent_policy_id:
+        agent_policy_id = create_agent_policy(
+            cfg=cnfg.elk_config,
+            json_policy=agent_data,
+        )
 
     logger.info(f"Create {INTEGRATION_NAME} integration")
-    package_policy_id = create_cspm_integration(
+    package_policy_id = create_kspm_eks_integration(
         cfg=cnfg.elk_config,
         pkg_policy=package_data,
         agent_policy_id=agent_policy_id,
-        cspm_data={},
+        eks_data={},
     )
 
     state_manager.add_policy(
         PolicyState(
             agent_policy_id,
             package_policy_id,
-            CSPM_EXPECTED_AGENTS,
+            KSPM_EKS_EXPECTED_AGENTS,
             [],
-            HostType.LINUX_TAR.value,
+            HostType.KUBERNETES.value,
             INTEGRATION_INPUT["name"],
         ),
     )
@@ -109,16 +110,8 @@ if __name__ == "__main__":
     )
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
-    manifest_params.file_path = Path(__file__).parent / "cspm.sh"
-    manifest_params.agent_version = cnfg.elk_config.stack_version
-    manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
-
-    # Render the template and get the replaced content
-    rendered_content = render_template(cspm_template, manifest_params.toDict())
-
-    logger.info(f"Creating {INTEGRATION_NAME} linux manifest")
-    # Write the rendered content to a file
-    with open(Path(__file__).parent / "cspm-linux.sh", "w", encoding="utf-8") as cspm_file:
-        cspm_file.write(rendered_content)
-
+    manifest_params.yaml_path = Path(__file__).parent / "kspm_eks.yaml"
+    manifest_params.docker_image_override = cnfg.kspm_config.docker_image_override
+    logger.info(f"Creating {INTEGRATION_NAME} manifest")
+    create_kubernetes_manifest(cfg=cnfg.elk_config, params=manifest_params)
     logger.info(f"Installation of {INTEGRATION_NAME} integration is done")

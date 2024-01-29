@@ -14,8 +14,8 @@ from commonlib.io_utils import get_k8s_yaml_objects
 from product.tests.parameters import TEST_PARAMETERS
 
 
-DEPLOY_YML = "../../deploy/cloudbeat-pytest.yml"
-KUBE_RULES_ENV_YML = "../../deploy/mock-pod.yml"
+DEPLOY_YML = "../../test_environments/cloudbeat-pytest.yml"
+KUBE_RULES_ENV_YML = "../../test_environments/mock-pod.yml"
 POD_RESOURCE_TYPE = "Pod"
 
 

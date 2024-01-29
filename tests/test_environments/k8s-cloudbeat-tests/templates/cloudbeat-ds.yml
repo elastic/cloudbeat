@@ -1,4 +1,4 @@
-{{- if .Values.cloudbeat.deploy -}}
+{{- if .Values.cloudbeat.test_environments -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

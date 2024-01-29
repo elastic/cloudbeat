@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
 This script installs CSPM integrations on the 'Agentless' agent policy.
-
 The following steps are performed:
 1. Create a CSPM AWS integration.
 2. Create a CSPM Azure integration.
@@ -10,13 +9,13 @@ The following steps are performed:
 
 import json
 import configuration_fleet as cnfg
-from api.package_policy_api import create_cspm_integration
+from loguru import logger
+from fleet_api.package_policy_api import create_cspm_integration
 from package_policy import (
     generate_package_policy,
     generate_policy_template,
     generate_random_name,
 )
-from loguru import logger
 
 AGENT_POLICY_ID = "agentless"
 
@@ -64,7 +63,7 @@ def generate_gcp_integration_data():
     Generate data for creating CSPM GCP integration
     """
     with open(cnfg.gcp_dm_config.credentials_file, "r") as credentials_json_file:
-        creadentials_json = credentials_json_file.read()
+        credentials_json = credentials_json_file.read()
     return {
         "name": generate_random_name("agentless-pkg-cspm-gcp"),
         "input_name": "cis_gcp",
@@ -74,7 +73,7 @@ def generate_gcp_integration_data():
             "setup_access": "manual",
             "gcp.account_type": "single-account",
             "gcp.credentials.type": "credentials-json",
-            "gcp.credentials.json": creadentials_json,
+            "gcp.credentials.json": credentials_json,
         },
     }
 

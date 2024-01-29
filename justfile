@@ -189,7 +189,7 @@ NAMESPACE := 'kube-system'
 ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
 patch-cb-yml-tests:
-  kubectl kustomize deploy/k8s/kustomize/test > tests/deploy/cloudbeat-pytest.yml
+  kubectl kustomize deploy/k8s/kustomize/test > tests/test_environments/cloudbeat-pytest.yml
 
 build-pytest-docker:
   cd tests; docker build -t {{TESTS_RELEASE}} .
@@ -202,8 +202,8 @@ load-pytest-eks:
   docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
   docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
-deploy-tests-helm target values_file='tests/deploy/values/ci.yml' range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker='{{target}}' --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}} tests/deploy/k8s-cloudbeat-tests/
+deploy-tests-helm target values_file='tests/test_environments/values/ci.yml' range='':
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker='{{target}}' --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}} tests/test_environments/k8s-cloudbeat-tests/
 
 purge-tests:
   helm del {{TESTS_RELEASE}} -n {{NAMESPACE}} & kubectl delete pvc --all -n {{NAMESPACE}}
@@ -222,4 +222,4 @@ delete-kind-cluster kind='kind-multi':
 cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete-kind-cluster create-kind-cluster
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
-  just deploy-tests-helm {{target}} tests/deploy/values/ci.yml {{range}}
+  just deploy-tests-helm {{target}} tests/test_environments/values/ci.yml {{range}}

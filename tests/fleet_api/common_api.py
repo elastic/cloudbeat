@@ -7,8 +7,8 @@ import codecs
 from typing import Dict, Any, List
 from munch import Munch, munchify
 from loguru import logger
-from api.base_call_api import APICallException, perform_api_call
-from utils import (
+from fleet_api.base_call_api import APICallException, perform_api_call
+from fleet_api.utils import (
     replace_image_field,
     add_capabilities,
     add_tags,
@@ -522,3 +522,40 @@ def wait_for_action_status(
             return False  # Timeout reached
 
         time.sleep(2)  # Fixed sleep interval of 1 second
+
+
+def get_telemetry(cfg: Munch) -> dict:
+    """
+    This function create API call to Kibana snapshot telemetry api and return is payload.
+
+    Args:
+        cfg: configuration object contains kibana host and auth
+
+    Returns:
+        dict: Telemetry payload
+    """
+    url = f"{cfg.kibana_url}/internal/telemetry/clusters/_stats"
+    headers = {
+        "Content-Type": "application/json",
+        "kbn-xsrf": "true",
+        "elastic-api-version": "2",
+        "x-elastic-internal-origin": "Kibana",
+    }
+    try:
+        response = perform_api_call(
+            method="POST",
+            url=url,
+            headers=headers,
+            auth=cfg.auth,
+            params={
+                "json": {
+                    "unencrypted": True,
+                },
+            },
+        )
+        return response
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        raise

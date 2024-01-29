@@ -35,18 +35,18 @@ import time
 from pathlib import Path
 from loguru import logger
 import configuration_fleet as cnfg
-from api.agent_policy_api import (
+from fleet_api.agent_policy_api import (
     create_agent_download_source,
     get_agents,
     update_agent_policy,
 )
-from api.common_api import (
+from fleet_api.common_api import (
     get_artifact_server,
     bulk_upgrade_agents,
     wait_for_action_status,
     get_package_version,
 )
-from api.package_policy_api import get_package_policy_by_id
+from fleet_api.package_policy_api import get_package_policy_by_id
 from state_file_manager import state_manager, HostType
 
 STATE_DATA_PATH = Path(__file__).parent / "state_data.json"
