@@ -15,7 +15,7 @@ from commonlib.utils import get_findings
 from commonlib.agents_map import CIS_AWS_COMPONENT, CIS_AZURE_COMPONENT, AgentExpectedMapping, AgentComponentMapping
 
 CONFIG_TIMEOUT = 120
-GCP_CONFIG_TIMEOUT = 900
+GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
 
 # The timeout and backoff for waiting all agents are running the specified component.
