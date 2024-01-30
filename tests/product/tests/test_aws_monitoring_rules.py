@@ -50,7 +50,7 @@ register_params(
     test_aws_monitoring_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_monitoring_tc.cis_aws_monitoring_cases.values()],
-        ids=[*aws_monitoring_tc.cis_aws_monitoring_cases.keys()],
+        [*aws_monitoring_tc.test_cases.values()],
+        ids=[*aws_monitoring_tc.test_cases.keys()],
     ),
 )

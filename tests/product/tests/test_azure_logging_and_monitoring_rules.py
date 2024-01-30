@@ -49,7 +49,7 @@ register_params(
     test_azure_logging_and_monitoring_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_logging_and_monitoring_tc.cis_azure_logging_and_monitoring_cases.values()],
-        ids=[*azure_logging_and_monitoring_tc.cis_azure_logging_and_monitoring_cases.keys()],
+        [*azure_logging_and_monitoring_tc.test_cases.values()],
+        ids=[*azure_logging_and_monitoring_tc.test_cases.keys()],
     ),
 )

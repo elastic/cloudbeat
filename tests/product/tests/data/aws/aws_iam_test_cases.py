@@ -267,7 +267,8 @@ cis_aws_iam_1_20 = {
     ),
 }
 
-cis_aws_iam_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_iam_1_4,
     **skip_param_case(
         cis_aws_iam_1_4_skip,

@@ -119,7 +119,8 @@ cis_azure_6_5 = {
       is 'greater than 90 days' expect: failed""": cis_azure_6_5_fail,
 }
 
-cis_azure_networking_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_6_1,
     **cis_azure_6_2,
     **cis_azure_6_3,

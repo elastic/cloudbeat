@@ -49,7 +49,7 @@ register_params(
     test_aws_ec2_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_ec2_tc.cis_aws_ec2_cases.values()],
-        ids=[*aws_ec2_tc.cis_aws_ec2_cases.keys()],
+        [*aws_ec2_tc.test_cases.values()],
+        ids=[*aws_ec2_tc.test_cases.keys()],
     ),
 )

@@ -27,6 +27,7 @@ cis_aws_ec2_2_2_1 = {
     "2.2.1 Ensure EBS volume is enabled, EbsEncryptionByDefault=false expect: failed": cis_aws_ec2_2_2_1_fail,
 }
 
-cis_aws_ec2_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_ec2_2_2_1,
 }

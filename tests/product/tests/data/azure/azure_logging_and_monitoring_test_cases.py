@@ -272,7 +272,8 @@ cis_azure_5_3_1 = {
     # "5.3.1 Ensure Application Insights are Configured expect: failed": cis_azure_5_3_1_fail,
 }
 
-cis_azure_logging_and_monitoring_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_5_5,
     **cis_azure_5_2_1,
     **cis_azure_5_2_10,

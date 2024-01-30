@@ -49,7 +49,7 @@ register_params(
     test_azure_key_vault_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_key_vault_tc.cis_azure_key_vault_cases.values()],
-        ids=[*azure_key_vault_tc.cis_azure_key_vault_cases.keys()],
+        [*azure_key_vault_tc.test_cases.values()],
+        ids=[*azure_key_vault_tc.test_cases.keys()],
     ),
 )
