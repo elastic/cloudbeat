@@ -49,7 +49,7 @@ register_params(
     test_azure_networking_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_networking_tc.cis_azure_networking_cases.values()],
-        ids=[*azure_networking_tc.cis_azure_networking_cases.keys()],
+        [*azure_networking_tc.test_cases.values()],
+        ids=[*azure_networking_tc.test_cases.keys()],
     ),
 )

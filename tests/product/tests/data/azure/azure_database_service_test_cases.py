@@ -109,7 +109,8 @@ cis_azure_4_4_1 = {
       for Standard MySQL Database Server expect: failed""": cis_azure_4_4_1_fail,
 }
 
-cis_azure_database_service_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_4_1_2,
     **cis_azure_4_1_4,
     **cis_azure_4_3_1,

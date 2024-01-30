@@ -50,7 +50,7 @@ register_params(
     test_aws_rds_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_rds_tc.cis_aws_rds_cases.values()],
-        ids=[*aws_rds_tc.cis_aws_rds_cases.keys()],
+        [*aws_rds_tc.test_cases.values()],
+        ids=[*aws_rds_tc.test_cases.keys()],
     ),
 )

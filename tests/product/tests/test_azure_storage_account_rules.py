@@ -49,7 +49,7 @@ register_params(
     test_azure_storage_account_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_storage_account_tc.cis_azure_storage_account_cases.values()],
-        ids=[*azure_storage_account_tc.cis_azure_storage_account_cases.keys()],
+        [*azure_storage_account_tc.test_cases.values()],
+        ids=[*azure_storage_account_tc.test_cases.keys()],
     ),
 )

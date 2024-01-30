@@ -86,7 +86,8 @@ cis_azure_7_4 = {
       with 'Customer Managed Key' (CMK) expect: failed""": cis_azure_7_4_fail,
 }
 
-cis_azure_virtual_machine_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_7_1,
     **cis_azure_7_2,
     **cis_azure_7_3,

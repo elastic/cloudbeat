@@ -143,7 +143,8 @@ cis_azure_3_15 = {
       is set to 'Version 1.2' expect: failed""": cis_azure_3_15_fail,
 }
 
-cis_azure_storage_account_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_3_1,
     **cis_azure_3_2,
     **cis_azure_3_7,

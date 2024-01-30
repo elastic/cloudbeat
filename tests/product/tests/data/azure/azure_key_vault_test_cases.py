@@ -27,6 +27,7 @@ cis_azure_8_5 = {
     "8.5 Ensure the Key Vault is Recoverable expect: failed": cis_azure_8_5_fail,
 }
 
-cis_azure_key_vault_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_8_5,
 }

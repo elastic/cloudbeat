@@ -49,7 +49,7 @@ register_params(
     test_azure_identity_access_management_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_identity_access_management_tc.cis_azure_identity_access_management_cases.values()],
-        ids=[*azure_identity_access_management_tc.cis_azure_identity_access_management_cases.keys()],
+        [*azure_identity_access_management_tc.test_cases.values()],
+        ids=[*azure_identity_access_management_tc.test_cases.keys()],
     ),
 )

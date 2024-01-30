@@ -130,7 +130,8 @@ cis_azure_9_9 = {
       if Used to Run the Web App expect: failed""": cis_azure_9_9_fail,
 }
 
-cis_azure_app_service_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_9_2,
     # **cis_azure_9_3,
     **cis_azure_9_4,
