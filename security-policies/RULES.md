@@ -398,9 +398,9 @@
 
 ## AZURE CIS Benchmark
 
-### 70/151 implemented rules (46%)
+### 67/151 implemented rules (44%)
 
-#### Automated rules: 70/77 (91%)
+#### Automated rules: 67/77 (87%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -550,11 +550,11 @@
 |                          8.6                           | Key Vault                               | Enable Role Based Access Control for Azure Key Vault                                                                                                   |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                          8.7                           | Key Vault                               | Ensure that Private Endpoints are Used for Azure Key Vault                                                                                             |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                          8.8                           | Key Vault                               | Ensure Automatic Key Rotation is Enabled Within Azure Key Vault for the Supported Services                                                             |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-|                          9.1                           | AppService                              | Ensure App Service Authentication is set up for apps in Azure App Service                                                                              | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
-|                          9.10                          | AppService                              | Ensure FTP deployments are Disabled                                                                                                                    | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
+|    [9.1](bundle/compliance/cis_azure/rules/cis_9_1)    | AppService                              | Ensure App Service Authentication is set up for apps in Azure App Service                                                                              | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
+|   [9.10](bundle/compliance/cis_azure/rules/cis_9_10)   | AppService                              | Ensure FTP deployments are Disabled                                                                                                                    | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
 |                          9.11                          | AppService                              | Ensure Azure Key Vaults are Used to Store Secrets                                                                                                      |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |    [9.2](bundle/compliance/cis_azure/rules/cis_9_2)    | AppService                              | Ensure Web App Redirects All HTTP traffic to HTTPS in Azure App Service                                                                                | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
-|                          9.3                           | AppService                              | Ensure Web App is using the latest version of TLS encryption                                                                                           | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
+|    [9.3](bundle/compliance/cis_azure/rules/cis_9_3)    | AppService                              | Ensure Web App is using the latest version of TLS encryption                                                                                           | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
 |    [9.4](bundle/compliance/cis_azure/rules/cis_9_4)    | AppService                              | Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On'                                                                | :white_check_mark: |        Passed :white_check_mark: / Failed :x:         | Automated |
 |    [9.5](bundle/compliance/cis_azure/rules/cis_9_5)    | AppService                              | Ensure that Register with Azure Active Directory is enabled on App Service                                                                             | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
 |                          9.6                           | AppService                              | Ensure That 'PHP version' is the Latest, If Used to Run the Web App                                                                                    |        :x:         |                Passed :x: / Failed :x:                | Manual    |
