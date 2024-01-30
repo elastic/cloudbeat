@@ -2,6 +2,7 @@
 CIS Azure Database Service rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
+
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
@@ -48,7 +49,7 @@ register_params(
     test_azure_database_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_database_service_tc.cis_azure_database_service_cases.values()],
-        ids=[*azure_database_service_tc.cis_azure_database_service_cases.keys()],
+        [*azure_database_service_tc.test_cases.values()],
+        ids=[*azure_database_service_tc.test_cases.keys()],
     ),
 )

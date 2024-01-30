@@ -1,6 +1,7 @@
 """
 Generate agent parameterization for pytest.
 """
+
 from loguru import logger
 from munch import Munch
 from configuration import elasticsearch, agent

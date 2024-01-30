@@ -2,6 +2,7 @@
 Define a class to manage the policies state using a file.
 Exports state_manager object as a singleton.
 """
+
 import json
 from pathlib import Path
 from enum import Enum

@@ -15,6 +15,7 @@ Note: This module assumes that environment variables for
 the ELK configuration (ES_USER, ES_PASSWORD, KIBANA_URL)
 have been set in the system environment.
 """
+
 import os
 from munch import Munch
 

@@ -2,6 +2,7 @@
 Wait for agents to be enrolled for a given policies
 If the expected number of agents is not enrolled within the timeout, the test will fail
 """
+
 import sys
 import time
 import re

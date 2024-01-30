@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Logging identification is performed by resource name.
 """
+
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 from ..eks_test_case import EksAwsServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
@@ -234,7 +235,8 @@ cis_aws_log_3_11_skip = {
 }
 
 
-cis_aws_log_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_log_3_1,
     **skip_param_case(
         cis_aws_log_3_1_skip,

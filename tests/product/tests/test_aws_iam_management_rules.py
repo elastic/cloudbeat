@@ -2,6 +2,7 @@
 CIS AWS IAM management rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
+
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
@@ -49,7 +50,7 @@ register_params(
     test_aws_iam_management_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_iam_tc.cis_aws_iam_cases.values()],
-        ids=[*aws_iam_tc.cis_aws_iam_cases.keys()],
+        [*aws_iam_tc.test_cases.values()],
+        ids=[*aws_iam_tc.test_cases.keys()],
     ),
 )

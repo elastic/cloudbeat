@@ -227,7 +227,8 @@ cis_aws_log_3_1 = {
 - Finally, reference created dictionary in the group of all test cases, for example
 
 ```python
-cis_aws_log_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_log_3_1,
     ...
 ```
@@ -242,8 +243,8 @@ register_params(
     test_aws_logging_rules, # should be updated
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_logging_tc.cis_aws_log_cases.values()], # should be replaced by new data
-        ids=[*aws_logging_tc.cis_aws_log_cases.keys()], # should be replaced by new data
+        [*aws_logging_tc.test_cases.values()], # should be replaced by new data
+        ids=[*aws_logging_tc.test_cases.keys()], # should be replaced by new data
     ),
 )
 ```

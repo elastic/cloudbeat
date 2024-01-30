@@ -2,6 +2,7 @@
 CIS Azure Virtual Machine rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
+
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
@@ -48,7 +49,7 @@ register_params(
     test_azure_virtual_machine_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*azure_virtual_machine_tc.cis_azure_virtual_machine_cases.values()],
-        ids=[*azure_virtual_machine_tc.cis_azure_virtual_machine_cases.keys()],
+        [*azure_virtual_machine_tc.test_cases.values()],
+        ids=[*azure_virtual_machine_tc.test_cases.keys()],
     ),
 )

@@ -1,6 +1,7 @@
 """
 This module contains API calls related to Fleet settings
 """
+
 import time
 import json
 import codecs

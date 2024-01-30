@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Monitoring rules identification is performed by resource name.
 """
+
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 from ..eks_test_case import EksAwsServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
@@ -346,7 +347,8 @@ cis_aws_monitoring_4_16 = {
     "4.16 Ensure AWS Security Hub is enabled, Hub Enabled=false expect: failed": cis_aws_monitoring_4_16_fail,
 }
 
-cis_aws_monitoring_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_monitoring_4_1,
     **skip_param_case(
         cis_aws_monitoring_4_1_skip,
