@@ -79,6 +79,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 		inputMockBlobServicesDiagnosticSettings  mockProviderResponse
 		inputMockTableServicesDiagnosticSettings mockProviderResponse
 		inputMockQueueServicesDiagnosticSettings mockProviderResponse
+		inputMockStorageAccounts                 mockProviderResponse
 		expected                                 []inventory.AzureAsset
 		expectError                              bool
 	}{
@@ -89,6 +90,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected:                                 []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
 			expectError:                              false,
 		},
@@ -99,6 +101,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected:                                 []inventory.AzureAsset{storageAccount("id_1")},
 			expectError:                              false,
 		},
@@ -109,6 +112,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -125,6 +129,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -141,6 +146,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:   "id_1",
@@ -164,6 +170,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
@@ -182,6 +189,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
@@ -203,6 +211,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
@@ -221,6 +230,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				storageAccount("id_1"),
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
@@ -240,6 +250,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true}},
 				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{inventory.ExtensionUsedForActivityLogs: true, inventory.ExtensionBlobService: blobServiceAsMap("id_2")}},
@@ -255,6 +266,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -271,6 +283,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
 			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
@@ -287,11 +300,47 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{
 					Id:        "id_1",
 					Type:      inventory.StorageAccountAssetType,
 					Extension: map[string]any{inventory.ExtensionQueueDiagnosticSettings: serviceDiagSettingsAsMap("id_1")},
+				},
+			},
+			expectError: false,
+		},
+		"enriched storage account asset": {
+			inputAssets: []inventory.AzureAsset{
+				storageAccount("id_1"),
+			},
+			inputMockDiagSettings:                    mockEmpty(),
+			inputMockBlobServices:                    mockEmpty(),
+			inputMockBlobServicesDiagnosticSettings:  mockEmpty(),
+			inputMockTableServicesDiagnosticSettings: mockEmpty(),
+			inputMockQueueServicesDiagnosticSettings: mockEmpty(),
+			inputMockStorageAccounts: mockSuccess([]inventory.AzureAsset{
+				{
+					Id:   "id_1",
+					Type: inventory.StorageAccountAssetType,
+					Extension: map[string]any{
+						inventory.ExtensionStorageAccountID: "id_1",
+					},
+				},
+			}),
+			expected: []inventory.AzureAsset{
+				{
+					Id:   "id_1",
+					Type: inventory.StorageAccountAssetType,
+					Extension: map[string]any{
+						inventory.ExtensionStorageAccount: map[string]any{
+							"id":   "id_1",
+							"type": inventory.StorageAccountAssetType,
+							"extension": map[string]any{
+								inventory.ExtensionStorageAccountID: "id_1",
+							},
+						},
+					},
 				},
 			},
 			expectError: false,
@@ -308,6 +357,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			inputMockBlobServicesDiagnosticSettings:  mockFail(errors.New("mock error")),
 			inputMockTableServicesDiagnosticSettings: mockEmpty(),
 			inputMockQueueServicesDiagnosticSettings: mockSuccess([]inventory.AzureAsset{serviceDiagSettings("id_1")}),
+			inputMockStorageAccounts:                 mockEmpty(),
 			expected: []inventory.AzureAsset{
 				{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{
 					inventory.ExtensionUsedForActivityLogs:     true,
@@ -363,6 +413,9 @@ func TestStorageAccountEnricher(t *testing.T) {
 				provider.EXPECT().
 					ListStorageAccountsQueueDiagnosticSettings(mock.Anything, mock.MatchedBy(storageAccountsCompare)).
 					Return(tc.inputMockQueueServicesDiagnosticSettings.assets, tc.inputMockQueueServicesDiagnosticSettings.err)
+				provider.EXPECT().
+					ListStorageAccounts(mock.Anything, mock.AnythingOfType("[]string")).
+					Return(tc.inputMockStorageAccounts.assets, tc.inputMockStorageAccounts.err)
 			}
 
 			e := storageAccountEnricher{provider: provider}

@@ -68,4 +68,3 @@ jobs:
         if: always()
         run: |
           cat logs/cloudbeat*
-

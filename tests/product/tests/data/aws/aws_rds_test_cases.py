@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 RDS rules identification is performed by resource name.
 """
+
 from ..eks_test_case import EksAwsServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 

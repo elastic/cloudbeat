@@ -44,6 +44,9 @@ const (
 	VirtualMachineAssetType            = "microsoft.compute/virtualmachines"
 	WebsitesAssetType                  = "microsoft.web/sites"
 
+	// Resource Types not present in Azure Resource Graph
+	LocationAssetType = "locations"
+
 	// Authorizationresources group
 	RoleDefinitionsType = "microsoft.authorization/roledefinitions"
 
@@ -62,6 +65,7 @@ const (
 	ExtensionMysqlConfigurations                 = "mysqlConfigurations"
 	ExtensionPostgresqlConfigurations            = "psqlConfigurations"
 	ExtensionPostgresqlFirewallRules             = "psqlFirewallRules"
+	ExtensionStorageAccount                      = "storageAccount"
 	ExtensionStorageAccountID                    = "storageAccountId"
 	ExtensionStorageAccountName                  = "storageAccountName"
 	ExtensionBlobDiagnosticSettings              = "blobDiagnosticSettings"

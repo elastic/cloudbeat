@@ -36,12 +36,12 @@ type storageAccountEnricher struct {
 }
 
 func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset) error {
+	var errs []error
+
 	subscriptions, err := e.provider.GetSubscriptions(ctx, cycleMetadata)
 	if err != nil {
 		return fmt.Errorf("storageAccountEnricher: error while getting subscription: %w", err)
 	}
-
-	var errs []error
 
 	if err := e.addUsedForActivityLogsFlag(ctx, cycleMetadata, assets, lo.Keys(subscriptions)); err != nil {
 		errs = append(errs, err)
@@ -59,11 +59,33 @@ func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.
 		errs = append(errs, fmt.Errorf("storageAccountEnricher: error while getting services diagnostic settings: %w", err))
 	}
 
+	storageAccountsSubscriptionsIds := lo.Uniq(lo.Map(storageAccounts, func(item inventory.AzureAsset, i int) string {
+		return item.SubscriptionId
+	}))
+
+	// Assets of the storage account type that are returned from Azure Resource Graph API need to
+	// be enriched with additional data from the Azure Go SDK Account client
+	if err := e.addStorageAccounts(ctx, storageAccountsSubscriptionsIds, assets); err != nil {
+		errs = append(errs, fmt.Errorf("storageAccountEnricher: error while getting storage accounts: %w", err))
+	}
+
 	if len(errs) > 0 {
 		return errors.Join(errs...)
 	}
 
 	return nil
+}
+
+func (e storageAccountEnricher) addStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string, assets []inventory.AzureAsset) error {
+	if len(storageAccountsSubscriptionsIds) == 0 {
+		return nil
+	}
+
+	sa, err := e.provider.ListStorageAccounts(ctx, storageAccountsSubscriptionsIds)
+	if err != nil {
+		return fmt.Errorf("storageAccountEnricher: error while getting storage accounts: %w", err)
+	}
+	return e.appendExtensionAssets(inventory.ExtensionStorageAccount, sa, assets)
 }
 
 func (e storageAccountEnricher) addUsedForActivityLogsFlag(ctx context.Context, cycleMetadata cycle.Metadata, assets []inventory.AzureAsset, subscriptionIDs []string) error {

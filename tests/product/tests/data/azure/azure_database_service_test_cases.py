@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Database service identification is performed by resource name.
 """
+
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 

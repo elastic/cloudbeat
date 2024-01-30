@@ -16,5 +16,8 @@ finding = result if {
 }
 
 ensure_enabled if {
-	data_adapter.properties.provisioningState == "Succeeded"
+	count(data_adapter.resource.networkWatchers) > 0
+
+	some i
+	data_adapter.resource.networkWatchers[i].properties.provisioningState == "Succeeded"
 } else = false
