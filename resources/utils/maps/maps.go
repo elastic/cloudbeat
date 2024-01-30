@@ -36,3 +36,21 @@ func AsMapStringAny(item any) (map[string]any, error) {
 
 	return m, nil
 }
+
+func AddIfNotNil[Value any](m map[string]any, key string, val *Value) {
+	if val != nil {
+		m[key] = val
+	}
+}
+
+func AddIfMapNotEmpty[Value any](m map[string]any, key string, val map[string]*Value) {
+	if len(val) > 0 {
+		m[key] = val
+	}
+}
+
+func AddIfSliceNotEmpty[Value any](m map[string]any, key string, val []Value) {
+	if len(val) > 0 {
+		m[key] = val
+	}
+}

@@ -353,3 +353,13 @@ generate_key_vault(properties, extension) = {
 		"extension": extension,
 	},
 }
+
+generate_security_contacts(resources) = {
+	"subType": "azure-security-contacts",
+	"resource": resources,
+}
+
+generate_single_security_contact(name, notificationsByRole) = {
+	"name": name,
+	"properties": {"notificationsByRole": notificationsByRole},
+}

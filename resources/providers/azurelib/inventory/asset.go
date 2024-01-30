@@ -38,6 +38,7 @@ const (
 	NetworkSecurityGroup               = "microsoft.network/networksecuritygroups"
 	PostgreSQLDBAssetType              = "microsoft.dbforpostgresql/servers"
 	FlexiblePostgreSQLDBAssetType      = "microsoft.dbforpostgresql/flexibleservers"
+	SecurityContacts                   = "microsoft.security/securitycontacts"
 	SQLServersAssetType                = "microsoft.sql/servers"
 	StorageAccountAssetType            = "microsoft.storage/storageaccounts"
 	VaultAssetType                     = "microsoft.keyvault/vaults"

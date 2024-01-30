@@ -26,6 +26,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/resources/utils/maps"
 	"github.com/elastic/cloudbeat/resources/utils/pointers"
 )
 
@@ -92,16 +93,16 @@ func (p *keyVaultProvider) transformKey(key *armkeyvault.Key, vault AzureAsset) 
 
 	properties := map[string]any{}
 
-	addKeyIfMapNotEmpty(properties, "tags", key.Tags)
-	addKeyIfNotEmpty(properties, "attributes", key.Properties.Attributes)
-	addKeyIfNotEmpty(properties, "curveName", key.Properties.CurveName)
-	addKeyIfSliceNotEmpty(properties, "keyOps", key.Properties.KeyOps)
-	addKeyIfNotEmpty(properties, "keySize", key.Properties.KeySize)
-	addKeyIfNotEmpty(properties, "keyUri", key.Properties.KeyURI)
-	addKeyIfNotEmpty(properties, "keyUriWithVersion", key.Properties.KeyURIWithVersion)
-	addKeyIfNotEmpty(properties, "kty", key.Properties.Kty)
-	addKeyIfNotEmpty(properties, "releasePolicy", key.Properties.ReleasePolicy)
-	addKeyIfNotEmpty(properties, "rotationPolicy", key.Properties.RotationPolicy)
+	maps.AddIfMapNotEmpty(properties, "tags", key.Tags)
+	maps.AddIfNotNil(properties, "attributes", key.Properties.Attributes)
+	maps.AddIfNotNil(properties, "curveName", key.Properties.CurveName)
+	maps.AddIfSliceNotEmpty(properties, "keyOps", key.Properties.KeyOps)
+	maps.AddIfNotNil(properties, "keySize", key.Properties.KeySize)
+	maps.AddIfNotNil(properties, "keyUri", key.Properties.KeyURI)
+	maps.AddIfNotNil(properties, "keyUriWithVersion", key.Properties.KeyURIWithVersion)
+	maps.AddIfNotNil(properties, "kty", key.Properties.Kty)
+	maps.AddIfNotNil(properties, "releasePolicy", key.Properties.ReleasePolicy)
+	maps.AddIfNotNil(properties, "rotationPolicy", key.Properties.RotationPolicy)
 	if len(properties) == 0 {
 		properties = nil
 	}
@@ -141,11 +142,11 @@ func (p *keyVaultProvider) transformSecret(secret *armkeyvault.Secret, vault Azu
 
 	properties := map[string]any{}
 
-	addKeyIfMapNotEmpty(properties, "tags", secret.Tags)
-	addKeyIfNotEmpty(properties, "attributes", secret.Properties.Attributes)
-	addKeyIfNotEmpty(properties, "contentType", secret.Properties.ContentType)
-	addKeyIfNotEmpty(properties, "secretUri", secret.Properties.SecretURI)
-	addKeyIfNotEmpty(properties, "secretUrlWithVersion", secret.Properties.SecretURIWithVersion)
+	maps.AddIfMapNotEmpty(properties, "tags", secret.Tags)
+	maps.AddIfNotNil(properties, "attributes", secret.Properties.Attributes)
+	maps.AddIfNotNil(properties, "contentType", secret.Properties.ContentType)
+	maps.AddIfNotNil(properties, "secretUri", secret.Properties.SecretURI)
+	maps.AddIfNotNil(properties, "secretUrlWithVersion", secret.Properties.SecretURIWithVersion)
 	// secret.Properties.Value // do not use
 
 	if len(properties) == 0 {
@@ -163,22 +164,4 @@ func (p *keyVaultProvider) transformSecret(secret *armkeyvault.Secret, vault Azu
 		Type:           pointers.Deref(secret.Type),
 		Properties:     properties,
 	}, true
-}
-
-func addKeyIfNotEmpty[Value any](m map[string]any, key string, val *Value) {
-	if val != nil {
-		m[key] = val
-	}
-}
-
-func addKeyIfSliceNotEmpty[Value any](m map[string]any, key string, val []Value) {
-	if len(val) > 0 {
-		m[key] = val
-	}
-}
-
-func addKeyIfMapNotEmpty[Value any](m map[string]any, key string, val map[string]Value) {
-	if len(val) > 0 {
-		m[key] = val
-	}
 }
