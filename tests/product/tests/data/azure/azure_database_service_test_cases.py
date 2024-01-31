@@ -24,6 +24,7 @@ CIS_4_3_6 = "CIS 4.3.6"
 CIS_4_3_7 = "CIS 4.3.7"
 CIS_4_3_8 = "CIS 4.3.8"
 CIS_4_4_1 = "CIS 4.4.1"
+CIS_4_4_2 = "CIS 4.4.2"
 CIS_4_5_1 = "CIS 4.5.1"
 
 # 4.1.* Rules ====================================
@@ -345,6 +346,18 @@ cis_azure_4_4_1 = {
       for Standard MySQL Database Server expect: failed""": cis_azure_4_4_1_fail,
 }
 
+cis_azure_4_4_2_pass = AzureServiceCase(
+    rule_tag=CIS_4_4_2,
+    case_identifier="test-mysql-db-pass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_azure_4_4_2 = {
+    # Can't test this rule failing, motivation: https://github.com/elastic/cloudbeat/pull/1811
+    """4.4.2 Ensure 'TLS Version' is set to 'TLSV1.2' for MySQL flexible
+        Database Server (Automated) expect: passed""": cis_azure_4_4_2_pass,
+}
+
 # 4.5.* Rules ====================================
 
 cis_azure_4_5_1_pass = AzureServiceCase(
@@ -383,5 +396,6 @@ test_cases = {
     **cis_azure_4_3_7,
     **cis_azure_4_3_8,
     **cis_azure_4_4_1,
+    **cis_azure_4_4_2,
     **cis_azure_4_5_1,
 }
