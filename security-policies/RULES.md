@@ -404,7 +404,7 @@
 
 #### Manual rules: 0/74 (0%)
 
-#### Integration Tests Coverage: 88/302 (29%)
+#### Integration Tests Coverage: 90/302 (30%)
 
 <details><summary><h3>Full Table 📋</h3></summary>
 
@@ -453,10 +453,10 @@
 |                         2.1.15                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Log Analytics agent for Azure VMs' is Set to 'On'                                                                    |        :x:         |                Passed :x: / Failed :x:                | Automated |
 |                         2.1.16                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Vulnerability assessment for machines' is Set to 'On'                                                                |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.17                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Microsoft Defender for Containers components' is Set to 'On'                                                         |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-| [2.1.18](bundle/compliance/cis_azure/rules/cis_2_1_18) | Microsoft Defender for Cloud            | Ensure That 'All users with the following roles' is set to 'Owner'                                                                                     | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
+| [2.1.18](bundle/compliance/cis_azure/rules/cis_2_1_18) | Microsoft Defender for Cloud            | Ensure That 'All users with the following roles' is set to 'Owner'                                                                                     | :white_check_mark: |        Passed :white_check_mark: / Failed :x:         | Automated |
 |                         2.1.19                         | Microsoft Defender for Cloud            | Ensure 'Additional email addresses' is Configured with a Security Contact Email                                                                        |        :x:         |                Passed :x: / Failed :x:                | Automated |
 |                         2.1.2                          | Microsoft Defender for Cloud            | Ensure That Microsoft Defender for App Services Is Set To 'On'                                                                                         |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-| [2.1.20](bundle/compliance/cis_azure/rules/cis_2_1_20) | Microsoft Defender for Cloud            | Ensure That 'Notify about alerts with the following severity' is Set to 'High'                                                                         | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
+| [2.1.20](bundle/compliance/cis_azure/rules/cis_2_1_20) | Microsoft Defender for Cloud            | Ensure That 'Notify about alerts with the following severity' is Set to 'High'                                                                         | :white_check_mark: |        Passed :white_check_mark: / Failed :x:         | Automated |
 |                         2.1.21                         | Microsoft Defender for Cloud            | Ensure that Microsoft Defender for Cloud Apps integration with Microsoft Defender for Cloud is Selected                                                |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.22                         | Microsoft Defender for Cloud            | Ensure that Microsoft Defender for Endpoint integration with Microsoft Defender for Cloud is selected                                                  |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.3                          | Microsoft Defender for Cloud            | Ensure That Microsoft Defender for Databases Is Set To 'On'                                                                                            |        :x:         |                Passed :x: / Failed :x:                | Manual    |
