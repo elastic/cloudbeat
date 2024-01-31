@@ -24,5 +24,5 @@ owner_enabled if {
 
 	security_contact.name == "default"
 	"Owner" in security_contact.properties.notificationsByRole.roles
-	security_contact.properties.notificationsByRole.state == "On"
+	lower(security_contact.properties.notificationsByRole.state) == "on"
 }
