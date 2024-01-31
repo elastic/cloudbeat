@@ -1,7 +1,7 @@
 name: CIS-GCP-CI
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
       - "[0-9]+.[0-9]+"
