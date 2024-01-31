@@ -11,6 +11,16 @@ test_violation if {
 		"properties": {"value": "off"},
 	}]})
 
+	eval_fail with input as test_data.generate_flexible_postgresql_server_with_extension({"psqlConfigurations": [{
+		"name": "connection_throttling",
+		"properties": {"value": "on"},
+	}]})
+
+	eval_fail with input as test_data.generate_flexible_postgresql_server_with_extension({"psqlConfigurations": [{
+		"name": "connection_throttle.enable",
+		"properties": {"value": "off"},
+	}]})
+
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "log_checkpoints",
 		"properties": {"value": "on"},
@@ -24,6 +34,11 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_postgresql_server_with_extension({"psqlConfigurations": [{
 		"name": "connection_throttling",
+		"properties": {"value": "on"},
+	}]})
+
+	eval_pass with input as test_data.generate_flexible_postgresql_server_with_extension({"psqlConfigurations": [{
+		"name": "connection_throttle.enable",
 		"properties": {"value": "on"},
 	}]})
 }
