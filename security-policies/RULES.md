@@ -404,7 +404,7 @@
 
 #### Manual rules: 0/74 (0%)
 
-#### Integration Tests Coverage: 87/302 (29%)
+#### Integration Tests Coverage: 88/302 (29%)
 
 <details><summary><h3>Full Table 📋</h3></summary>
 
