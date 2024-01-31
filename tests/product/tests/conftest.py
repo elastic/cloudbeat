@@ -2,6 +2,7 @@
 This module provides fixtures and configurations for
 product tests.
 """
+
 from pathlib import Path
 import time
 import json

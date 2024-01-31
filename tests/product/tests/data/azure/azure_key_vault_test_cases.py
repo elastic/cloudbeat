@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Key vault identification is performed by resource name.
 """
+
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
@@ -26,6 +27,7 @@ cis_azure_8_5 = {
     "8.5 Ensure the Key Vault is Recoverable expect: failed": cis_azure_8_5_fail,
 }
 
-cis_azure_key_vault_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_8_5,
 }

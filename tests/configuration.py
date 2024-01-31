@@ -3,6 +3,7 @@ This module provides common configuration of the test project,
 and also mapping environment variables
 
 """
+
 import os
 from munch import Munch
 from loguru import logger

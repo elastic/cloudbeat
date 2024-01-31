@@ -6,6 +6,7 @@ have been created.
 The goal of this suite is to perform basic sanity checks to verify the telemetry fetchers are working
  as expected.
 """
+
 import pytest
 from fleet_api.common_api import get_telemetry
 from integrations_setup.configuration_fleet import elk_config

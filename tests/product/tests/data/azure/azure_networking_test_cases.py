@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Networking identification is performed by resource name.
 """
+
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
@@ -118,7 +119,8 @@ cis_azure_6_5 = {
       is 'greater than 90 days' expect: failed""": cis_azure_6_5_fail,
 }
 
-cis_azure_networking_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_6_1,
     **cis_azure_6_2,
     **cis_azure_6_3,
