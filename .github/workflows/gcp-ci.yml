@@ -1,7 +1,7 @@
 name: CIS-GCP-CI
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
       - "[0-9]+.[0-9]+"
@@ -75,6 +75,6 @@ jobs:
 
       - name: Print cloudbeat logs
         if: always()
-        continue-on-error: true # Due to logs oversized this step can fail; Don't fail the build if it does
+        continue-on-error: true # Due to logs oversized this step can fail; Workflow run should not fail because of this step
         run: |
           cat logs/cloudbeat*
