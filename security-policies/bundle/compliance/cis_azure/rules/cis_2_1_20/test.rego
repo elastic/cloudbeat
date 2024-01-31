@@ -19,14 +19,6 @@ test_violation if {
 		prop_alert_notifications({"state": "On"}),
 	)])
 
-	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
-		"non-default",
-		prop_alert_notifications({
-			"state": "On",
-			"minimalSeverity": "Medium",
-		}),
-	)])
-
 	eval_fail with input as test_data.generate_security_contacts([
 		test_data.generate_single_security_contact(
 			"non-default",
@@ -39,7 +31,7 @@ test_violation if {
 			"default",
 			prop_alert_notifications({
 				"state": "On",
-				"minimalSeverity": "Medium",
+				"minimalSeverity": "Wrong Value",
 			}),
 		),
 	])
@@ -51,6 +43,22 @@ test_pass if {
 		prop_alert_notifications({
 			"state": "On",
 			"minimalSeverity": "High",
+		}),
+	)])
+
+	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"default",
+		prop_alert_notifications({
+			"state": "On",
+			"minimalSeverity": "Medium",
+		}),
+	)])
+
+	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"default",
+		prop_alert_notifications({
+			"state": "On",
+			"minimalSeverity": "Low",
 		}),
 	)])
 

@@ -24,5 +24,11 @@ notification_alert_high if {
 
 	security_contact.name == "default"
 	lower(security_contact.properties.alertNotifications.state) == "on"
-	lower(security_contact.properties.alertNotifications.minimalSeverity) == "high"
+	ensure_minimal_severity(security_contact.properties.alertNotifications.minimalSeverity)
 }
+
+ensure_minimal_severity(minimal_severity) if lower(minimal_severity) == "high"
+
+ensure_minimal_severity(minimal_severity) if lower(minimal_severity) == "medium"
+
+ensure_minimal_severity(minimal_severity) if lower(minimal_severity) == "low"
