@@ -3,6 +3,7 @@ This module contains process test cases definition.
 Each rule is list of tuples
 Rule test case is defined as tuple of data
 """
+
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 cis_1_2_4 = [

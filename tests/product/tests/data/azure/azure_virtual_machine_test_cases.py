@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Virtual machine identification is performed by resource name.
 """
+
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
@@ -85,7 +86,8 @@ cis_azure_7_4 = {
       with 'Customer Managed Key' (CMK) expect: failed""": cis_azure_7_4_fail,
 }
 
-cis_azure_virtual_machine_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_7_1,
     **cis_azure_7_2,
     **cis_azure_7_3,

@@ -1,6 +1,7 @@
 """
 Integration tests setup configurations and fixtures
 """
+
 from pathlib import Path
 import time
 import pytest
@@ -9,9 +10,9 @@ from commonlib.kubernetes import ApiException
 from loguru import logger
 
 DEPLOY_YML_DICT = {
-    "cloudbeat_vanilla": "../../deploy/cloudbeat-pytest.yml",
-    "elastic-agent_vanilla": "../../deploy/sa-agent-pytest.yml",
-    "cloudbeat_eks": "../../deploy/cloudbeat-eks-pytest.yaml",
+    "cloudbeat_vanilla": "../../test_environments/cloudbeat-pytest.yml",
+    "elastic-agent_vanilla": "../../test_environments/sa-agent-pytest.yml",
+    "cloudbeat_eks": "../../test_environments/cloudbeat-eks-pytest.yaml",
 }
 
 

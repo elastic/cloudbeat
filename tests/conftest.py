@@ -1,6 +1,7 @@
 """
 Global pytest file for fixtures and test configs
 """
+
 import logging
 import sys
 import functools
@@ -276,6 +277,7 @@ def create_es_client(index: str) -> ElasticWrapper:
         configuration.elasticsearch.url,
         configuration.elasticsearch.basic_auth,
         index,
+        configuration.elasticsearch.use_ssl,
     )
     logger.info(f"client with ElasticSearch url: {configuration.elasticsearch.url}")
     return es_client
@@ -296,6 +298,4 @@ def agents_actual_components() -> AgentComponentMapping:
     This function (fixture) instantiate an AgentComponentMapping.
     @return: an mapping of the agent components.
     """
-    mapping = AgentComponentMapping()
-    mapping.load_map()
-    return mapping
+    return AgentComponentMapping()

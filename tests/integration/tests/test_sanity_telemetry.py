@@ -6,16 +6,17 @@ have been created.
 The goal of this suite is to perform basic sanity checks to verify the telemetry fetchers are working
  as expected.
 """
+
 import pytest
-from commonlib.utils import get_telemetry
-from configuration import elasticsearch
+from fleet_api.common_api import get_telemetry
+from integrations_setup.configuration_fleet import elk_config
 from munch import munchify
 
 
 @pytest.fixture(scope="module", name="cloud_security_telemetry_data")
 def get_cloud_security_telemetry_data():
     """Fixture to fetch telemetry data"""
-    telemetry_payload = get_telemetry(elasticsearch)
+    telemetry_payload = get_telemetry(elk_config)
     telemetry_object = munchify(telemetry_payload[0])
     return telemetry_object.stats.stack_stats.kibana.plugins.cloud_security_posture
 

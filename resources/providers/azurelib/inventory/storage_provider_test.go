@@ -40,6 +40,70 @@ func newBlobServicesClientListResponse(items ...*armstorage.BlobServicePropertie
 	}
 }
 
+func newAccountsClientListResponse(items ...*armstorage.Account) armstorage.AccountsClientListResponse {
+	return armstorage.AccountsClientListResponse{
+		AccountListResult: armstorage.AccountListResult{
+			Value: items,
+		},
+	}
+}
+
+func TestTransformStorageAccounts(t *testing.T) {
+	tests := map[string]struct {
+		inputServicesPages  []armstorage.AccountsClientListResponse
+		inputSubscriptionId string
+		expected            []AzureAsset
+		expectError         bool
+	}{
+		"noop": {},
+		"transform response": {
+			inputServicesPages: []armstorage.AccountsClientListResponse{
+				newAccountsClientListResponse(
+					&armstorage.Account{
+						ID:   to.Ptr("id1"),
+						Name: to.Ptr("name1"),
+						Type: to.Ptr("Microsoft.Storage/storageaccounts"),
+						Properties: &armstorage.AccountProperties{
+							Encryption: &armstorage.Encryption{},
+						},
+					},
+				),
+			},
+			inputSubscriptionId: "id1",
+			expected: []AzureAsset{
+				{
+					Id:   "id1",
+					Name: "name1",
+					Properties: map[string]any{
+						"encryption": map[string]any{},
+					},
+					Extension: map[string]any{
+						ExtensionStorageAccountID:   "id1",
+						ExtensionStorageAccountName: "name1",
+					},
+					Type:           StorageAccountAssetType,
+					SubscriptionId: "id1",
+				},
+			},
+			expectError: false,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			got, err := transformStorageAccounts(tc.inputServicesPages, tc.inputSubscriptionId)
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
 func TestTransformBlobServices(t *testing.T) {
 	tests := map[string]struct {
 		inputServicesPages  []armstorage.BlobServicesClientListResponse

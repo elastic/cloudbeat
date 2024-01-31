@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -141,33 +142,35 @@ func (f *ProcessesFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata
 	for _, p := range pids {
 		stat, err := proc.ReadStatFS(f.Fs, p)
 		if err != nil {
-			return err
+			f.log.Errorf("error while reading /proc/<pid>/stat: %s", err.Error())
+			continue
 		}
-		processConfig, isProcessRequired := f.processes[stat.Name]
+
+		// Get the full command line name and not the /proc/pid/status one which might be silently truncated.
+		cmd, err := proc.ReadCmdLineFS(f.Fs, p)
+		if err != nil {
+			f.log.Error("error while reading /proc/<pid>/cmdline: %s", err.Error())
+			continue
+		}
+		name := extractCommandName(cmd)
+
+		processConfig, isProcessRequired := f.processes[name]
 		if !isProcessRequired {
 			continue
 		}
 
-		fetchedResource, err := f.fetchProcessData(stat, processConfig, p)
-		if err != nil {
-			f.log.Error(err)
-			continue
-		}
+		fetchedResource := f.fetchProcessData(stat, processConfig, p, cmd)
 		f.resourceCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cycleMetadata}
 	}
 
 	return nil
 }
 
-func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string) (fetching.Resource, error) {
-	cmd, err := proc.ReadCmdLineFS(f.Fs, processId)
-	if err != nil {
-		return nil, err
-	}
+func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string, cmd string) fetching.Resource {
 	configMap := f.getProcessConfigurationFile(processConf, cmd, procStat.Name)
 	evalRes := EvalProcResource{PID: processId, Cmd: cmd, Stat: procStat, ExternalData: configMap}
 	procCd := f.createProcCommonData(procStat, cmd, processId)
-	return ProcResource{EvalResource: evalRes, ElasticCommon: procCd}, nil
+	return ProcResource{EvalResource: evalRes, ElasticCommon: procCd}
 }
 
 func (f *ProcessesFetcher) createProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
@@ -305,4 +308,19 @@ func (res ProcResource) GetElasticCommonData() (map[string]any, error) {
 func ticksToDuration(ticks uint64) time.Duration {
 	seconds := float64(ticks) / float64(userHz) * float64(time.Second)
 	return time.Duration(int64(seconds))
+}
+
+func extractCommandName(cmdline string) string {
+	// remove command line arguments by finding the first space.
+	// <root>/proc/pid/cmdline separates the strings with null bytes ('\0'),
+	// but proc.ReadCmdLineFS replaces them with space.
+	i := strings.IndexByte(cmdline, ' ')
+	if i > -1 {
+		cmdline = cmdline[:i]
+	}
+
+	// remove the path (if exists) and return the process' executable file name.
+	_, file := path.Split(cmdline)
+
+	return file
 }

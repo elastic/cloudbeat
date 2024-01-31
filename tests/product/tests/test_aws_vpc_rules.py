@@ -2,6 +2,7 @@
 CIS AWS Virtual Private Cloud rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
+
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
@@ -48,7 +49,7 @@ register_params(
     test_aws_vpc_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_vpc_tc.cis_aws_vpc_cases.values()],
-        ids=[*aws_vpc_tc.cis_aws_vpc_cases.keys()],
+        [*aws_vpc_tc.test_cases.values()],
+        ids=[*aws_vpc_tc.test_cases.keys()],
     ),
 )

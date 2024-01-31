@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Storage account identification is performed by resource name.
 """
+
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
@@ -142,7 +143,8 @@ cis_azure_3_15 = {
       is set to 'Version 1.2' expect: failed""": cis_azure_3_15_fail,
 }
 
-cis_azure_storage_account_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_3_1,
     **cis_azure_3_2,
     **cis_azure_3_7,
