@@ -20,6 +20,7 @@ package azurelib
 import (
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -37,6 +38,7 @@ type ProviderAPI interface {
 	inventory.PostgresqlProviderAPI
 	inventory.KeyVaultProviderAPI
 	inventory.SubscriptionProviderAPI
+	inventory.SecurityContactsProviderAPI
 	governance.ProviderAPI
 }
 
@@ -61,16 +63,22 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		return nil, fmt.Errorf("failed to init monitor client: %w", err)
 	}
 
+	genericARMClient, err := arm.NewClient("armsecurity-custom", "v0.0.1", azureConfig.Credentials, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to init generic arm client: %w", err)
+	}
+
 	resourceGraphProvider := inventory.NewResourceGraphProvider(log, resourceGraphClientFactory)
 	return &provider{
-		ResourceGraphProviderAPI:  resourceGraphProvider,
-		SQLProviderAPI:            inventory.NewSQLProvider(log, azureConfig.Credentials),
-		MysqlProviderAPI:          inventory.NewMysqlProvider(log, azureConfig.Credentials),
-		PostgresqlProviderAPI:     inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
-		StorageAccountProviderAPI: inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
-		KeyVaultProviderAPI:       inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
-		SubscriptionProviderAPI:   inventory.NewSubscriptionProvider(log, azureConfig.Credentials),
-		ProviderAPI:               governance.NewProvider(log, resourceGraphProvider),
+		ResourceGraphProviderAPI:    resourceGraphProvider,
+		SQLProviderAPI:              inventory.NewSQLProvider(log, azureConfig.Credentials),
+		MysqlProviderAPI:            inventory.NewMysqlProvider(log, azureConfig.Credentials),
+		PostgresqlProviderAPI:       inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
+		StorageAccountProviderAPI:   inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
+		KeyVaultProviderAPI:         inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
+		SubscriptionProviderAPI:     inventory.NewSubscriptionProvider(log, azureConfig.Credentials),
+		SecurityContactsProviderAPI: inventory.NewSecurityContacts(log, genericARMClient),
+		ProviderAPI:                 governance.NewProvider(log, resourceGraphProvider),
 	}, nil
 }
 
@@ -82,5 +90,6 @@ type provider struct {
 	inventory.PostgresqlProviderAPI
 	inventory.KeyVaultProviderAPI
 	inventory.SubscriptionProviderAPI
+	inventory.SecurityContactsProviderAPI
 	governance.ProviderAPI
 }

@@ -179,7 +179,7 @@ func mockVMs(id string, nics []string, opts ...mockAssetOption) inventory.AzureA
 func mockNSGs(id string, nics []string, opts ...mockAssetOption) inventory.AzureAsset {
 	asset := inventory.AzureAsset{
 		Id:   id,
-		Type: inventory.NetworkSecurityGroup,
+		Type: inventory.NetworkSecurityGroupAssetType,
 		Properties: map[string]any{
 			"networkInterfaces": mapNics(nics),
 		},
