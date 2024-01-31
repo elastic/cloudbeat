@@ -14,9 +14,12 @@ CIS_4_1_3 = "CIS 4.1.3"
 CIS_4_1_4 = "CIS 4.1.4"
 CIS_4_1_5 = "CIS 4.1.5"
 CIS_4_1_6 = "CIS 4.1.6"
+CIS_4_2_1 = "CIS 4.2.1"
 CIS_4_3_1 = "CIS 4.3.1"
 CIS_4_4_1 = "CIS 4.4.1"
 CIS_4_5_1 = "CIS 4.5.1"
+
+# 4.1.* Rules ====================================
 
 cis_azure_4_1_1_pass = AzureServiceCase(
     rule_tag=CIS_4_1_1,
@@ -130,6 +133,29 @@ cis_azure_4_1_6 = {
         (Automated) expect: failed""": cis_azure_4_1_6_fail,
 }
 
+# 4.2.* Rules ====================================
+
+cis_azure_4_2_1_pass = AzureServiceCase(
+    rule_tag=CIS_4_2_1,
+    case_identifier="test-sql-db-pass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_azure_4_2_1_fail = AzureServiceCase(
+    rule_tag=CIS_4_2_1,
+    case_identifier="test-sql-db-fail",
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_azure_4_2_1 = {
+    """4.2.1 Ensure that Microsoft Defender for SQL is set to 'On' for
+        critical SQL Servers (Automated) expect: passed""": cis_azure_4_2_1_pass,
+    """4.2.1 Ensure that Microsoft Defender for SQL is set to 'On' for
+        critical SQL Servers (Automated) expect: failed""": cis_azure_4_2_1_fail,
+}
+
+# 4.3.* Rules ====================================
+
 cis_azure_4_3_1_pass = AzureServiceCase(
     rule_tag=CIS_4_3_1,
     case_identifier="test-postgresql-single-server",
@@ -149,6 +175,8 @@ cis_azure_4_3_1 = {
       for PostgreSQL Database Server expect: failed""": cis_azure_4_3_1_fail,
 }
 
+# 4.4.* Rules ====================================
+
 cis_azure_4_4_1_pass = AzureServiceCase(
     rule_tag=CIS_4_4_1,
     case_identifier="rule-441",
@@ -167,6 +195,8 @@ cis_azure_4_4_1 = {
     """4.4.1 Ensure 'Enforce SSL connection' is set to 'Enabled'
       for Standard MySQL Database Server expect: failed""": cis_azure_4_4_1_fail,
 }
+
+# 4.5.* Rules ====================================
 
 cis_azure_4_5_1_pass = AzureServiceCase(
     rule_tag=CIS_4_5_1,
@@ -195,6 +225,7 @@ test_cases = {
     **cis_azure_4_1_4,
     **cis_azure_4_1_5,
     **cis_azure_4_1_6,
+    **cis_azure_4_2_1,
     **cis_azure_4_3_1,
     **cis_azure_4_4_1,
     **cis_azure_4_5_1,
