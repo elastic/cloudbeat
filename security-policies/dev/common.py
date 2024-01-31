@@ -1,6 +1,6 @@
+import json
 import os
 
-import json
 import git
 import pandas as pd
 import regex as re
@@ -13,6 +13,9 @@ rules_dir = os.path.join(
 )
 
 CODE_BLOCK_SIZE = 100
+
+negative_emoji = ":x:"  # ❌
+positive_emoji = ":white_check_mark:"  # ✅
 
 benchmark = {
     "cis_k8s": "CIS_Kubernetes_V1.23_Benchmark_v1.0.1.xlsx",
@@ -67,6 +70,12 @@ default_selected_columns_map = {
         "Assessment Status": "Type",
     },
 }
+
+
+def status_emoji(positive):
+    if positive:
+        return positive_emoji
+    return negative_emoji
 
 
 def parse_rules_data_from_excel(

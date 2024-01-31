@@ -4,6 +4,7 @@ The test executed on pre-merge events as required test.
 The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
+
 import pytest
 import configuration
 

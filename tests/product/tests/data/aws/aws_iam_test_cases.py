@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 IAM identification is performed by resource name.
 """
+
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 from ..eks_test_case import EksAwsServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
@@ -266,7 +267,8 @@ cis_aws_iam_1_20 = {
     ),
 }
 
-cis_aws_iam_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_iam_1_4,
     **skip_param_case(
         cis_aws_iam_1_4_skip,

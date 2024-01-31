@@ -6,6 +6,7 @@ have been created.
 The goal of this suite is to perform basic sanity checks by querying Elasticsearch (ES) and
 verifying that there are findings of 'resource.type' for each feature.
 """
+
 import time
 import pytest
 from loguru import logger

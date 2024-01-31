@@ -1,6 +1,7 @@
 """
 Global pytest file for fixtures and test configs
 """
+
 import logging
 import sys
 import functools

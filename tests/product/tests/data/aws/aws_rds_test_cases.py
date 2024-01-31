@@ -4,6 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 RDS rules identification is performed by resource name.
 """
+
 from ..eks_test_case import EksAwsServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
@@ -62,7 +63,8 @@ cis_aws_rds_2_3_3 = {
     "2.3.3 Ensure no public access, public access allowed, expect: failed": cis_aws_rds_2_3_3_fail,
 }
 
-cis_aws_rds_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_aws_rds_2_3_1,
     **cis_aws_rds_2_3_2,
     **cis_aws_rds_2_3_3,
