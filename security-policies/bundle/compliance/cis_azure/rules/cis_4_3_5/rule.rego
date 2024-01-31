@@ -18,7 +18,15 @@ finding = result if {
 default config_enabled = false
 
 config_enabled if {
+	data_adapter.is_postgresql_single_server_db
 	some i
 	data_adapter.resource.extension.psqlConfigurations[i].name == "connection_throttling"
+	data_adapter.resource.extension.psqlConfigurations[i].properties.value == "on"
+}
+
+config_enabled if {
+	data_adapter.is_postgresql_flexible_server_db
+	some i
+	data_adapter.resource.extension.psqlConfigurations[i].name == "connection_throttle.enable"
 	data_adapter.resource.extension.psqlConfigurations[i].properties.value == "on"
 }
