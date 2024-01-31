@@ -16,10 +16,12 @@ test_violation if {
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"MinTLSVersion": null}}})
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"MinTLSVersion": "1.0"}}})
 	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"MinTLSVersion": "1.1"}}})
+	eval_fail with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"MinTLSVersion": "NotANumber"}}})
 }
 
 test_pass if {
 	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"MinTLSVersion": "1.2"}}})
+	eval_pass with input as test_data.generate_azure_asset_with_ext(kind, {}, {"siteConfig": {"properties": {"MinTLSVersion": "1.3"}}})
 }
 
 eval_fail if {

@@ -18,5 +18,7 @@ finding = result if {
 default is_min_tls_version_1_2 := false
 
 is_min_tls_version_1_2 if {
-	data_adapter.resource.extension.siteConfig.properties.MinTLSVersion == "1.2"
+	tls_version := data_adapter.resource.extension.siteConfig.properties.MinTLSVersion
+	tls_version != null
+	common.greater_or_equal(tls_version, 1.2)
 }
