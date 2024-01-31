@@ -398,9 +398,9 @@
 
 ## AZURE CIS Benchmark
 
-### 64/151 implemented rules (42%)
+### 65/151 implemented rules (43%)
 
-#### Automated rules: 64/77 (83%)
+#### Automated rules: 65/77 (84%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -453,7 +453,7 @@
 |                         2.1.15                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Log Analytics agent for Azure VMs' is Set to 'On'                                                                    |        :x:         |                Passed :x: / Failed :x:                | Automated |
 |                         2.1.16                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Vulnerability assessment for machines' is Set to 'On'                                                                |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.17                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Microsoft Defender for Containers components' is Set to 'On'                                                         |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-|                         2.1.18                         | Microsoft Defender for Cloud            | Ensure That 'All users with the following roles' is set to 'Owner'                                                                                     |        :x:         |                Passed :x: / Failed :x:                | Automated |
+| [2.1.18](bundle/compliance/cis_azure/rules/cis_2_1_18) | Microsoft Defender for Cloud            | Ensure That 'All users with the following roles' is set to 'Owner'                                                                                     | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
 |                         2.1.19                         | Microsoft Defender for Cloud            | Ensure 'Additional email addresses' is Configured with a Security Contact Email                                                                        |        :x:         |                Passed :x: / Failed :x:                | Automated |
 |                         2.1.2                          | Microsoft Defender for Cloud            | Ensure That Microsoft Defender for App Services Is Set To 'On'                                                                                         |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.20                         | Microsoft Defender for Cloud            | Ensure That 'Notify about alerts with the following severity' is Set to 'High'                                                                         |        :x:         |                Passed :x: / Failed :x:                | Automated |
