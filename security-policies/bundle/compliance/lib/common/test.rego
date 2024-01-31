@@ -50,27 +50,27 @@ test_collect_evidence_self_referential_keypaths if {
 
 test_collect_evidence_blank_paths if {
 	resource := {"a": 1, "b": 2}
-	collect_evidence(resource, {"empty": ""}) == {"empty": "<undefined>"}
+	collect_evidence(resource, {"empty": ""}) == {"empty": resource}
 }
 
 test_collect_evidence_non_existent_key if {
 	resource := {"a": 1, "b": 2}
-	collect_evidence(resource, {"C": "c"}) == {"C": "<undefined>"}
+	collect_evidence(resource, {"C": "c"}) == {"C": resource}
 }
 
 test_collect_evidence_non_existent_path_tail if {
 	resource := {"a": {"b": {"c": 42}}}
-	collect_evidence(resource, {"a.b.x": ["a", "b", "x"]}) == {"a.b.x": "<undefined>"}
+	collect_evidence(resource, {"a.b.x": ["a", "b", "x"]}) == {"a.b.x": resource}
 }
 
 test_collect_evidence_non_existent_path_segment if {
 	resource := {"a": {"b": {"c": 42}}}
-	collect_evidence(resource, {"a.x.c": ["a", "x", "c"]}) == {"a.x.c": "<undefined>"}
+	collect_evidence(resource, {"a.x.c": ["a", "x", "c"]}) == {"a.x.c": resource}
 }
 
 test_collect_evidence_with_out_of_bounds_array_index if {
 	resource := {"arr": [0, 1, 2, 3, 4]}
-	collect_evidence(resource, {"arr[99]": ["arr", 99]}) == {"arr[99]": "<undefined>"}
+	collect_evidence(resource, {"arr[99]": ["arr", 99]}) == {"arr[99]": resource}
 }
 
 test_ensure_array_empty if {

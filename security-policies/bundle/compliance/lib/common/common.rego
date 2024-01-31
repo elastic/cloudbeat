@@ -38,7 +38,7 @@ calculate_result(evaluation) = "passed" if {
 # keypaths is an object defined as {str: array}
 collect_evidence(resource, key_paths) := {key: evidence |
 	some key, path in key_paths
-	evidence := object.get(resource, path, "<undefined>")
+	evidence := object.get(resource, path, resource)
 }
 
 # If value is not an array, enclose it in one
