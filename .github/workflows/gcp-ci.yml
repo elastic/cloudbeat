@@ -52,7 +52,7 @@ jobs:
           security-enabled: false
 
       - name: Elasticsearch disable dynamic mapping for findings
-        run: ./.ci/disable_dynamic_mapping.sh
+        run: ./.ci/scripts/disable_dynamic_mapping.sh
 
       - name: Run cloudbeat in background
         env:
