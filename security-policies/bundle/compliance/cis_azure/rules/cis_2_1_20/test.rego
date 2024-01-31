@@ -1,4 +1,4 @@
-package compliance.cis_azure.rules.cis_2_1_18
+package compliance.cis_azure.rules.cis_2_1_20
 
 import data.cis_azure.test_data
 import data.compliance.policy.azure.data_adapter
@@ -8,46 +8,38 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({
-			"state": "On",
-			"roles": ["Admin"],
-		}),
-	)])
-
-	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
-		"default",
-		prop_notification_by_role({
+		prop_alert_notifications({
 			"state": "Off",
-			"roles": ["Owner"],
+			"minimalSeverity": "Medium",
 		}),
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({"state": "On"}),
+		prop_alert_notifications({"state": "On"}),
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"non-default",
-		prop_notification_by_role({
+		prop_alert_notifications({
 			"state": "On",
-			"roles": ["Owner"],
+			"minimalSeverity": "Medium",
 		}),
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([
 		test_data.generate_single_security_contact(
 			"non-default",
-			prop_notification_by_role({
+			prop_alert_notifications({
 				"state": "On",
-				"roles": ["Owner"],
+				"minimalSeverity": "High",
 			}),
 		),
 		test_data.generate_single_security_contact(
 			"default",
-			prop_notification_by_role({
+			prop_alert_notifications({
 				"state": "On",
-				"roles": ["Admin"],
+				"minimalSeverity": "Medium",
 			}),
 		),
 	])
@@ -56,33 +48,25 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({
+		prop_alert_notifications({
 			"state": "On",
-			"roles": ["Owner"],
-		}),
-	)])
-
-	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
-		"default",
-		prop_notification_by_role({
-			"state": "On",
-			"roles": ["Owner", "Admin"],
+			"minimalSeverity": "High",
 		}),
 	)])
 
 	eval_pass with input as test_data.generate_security_contacts([
 		test_data.generate_single_security_contact(
 			"non-default",
-			prop_notification_by_role({
+			prop_alert_notifications({
 				"state": "On",
-				"roles": ["Admin"],
+				"minimalSeverity": "Low",
 			}),
 		),
 		test_data.generate_single_security_contact(
 			"default",
-			prop_notification_by_role({
+			prop_alert_notifications({
 				"state": "On",
-				"roles": ["Owner"],
+				"minimalSeverity": "High",
 			}),
 		),
 	])
@@ -104,4 +88,4 @@ not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
 
-prop_notification_by_role(notificationsByRole) = {"notificationsByRole": notificationsByRole}
+prop_alert_notifications(alertNotifications) = {"alertNotifications": alertNotifications}

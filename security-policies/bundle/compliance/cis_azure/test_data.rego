@@ -359,7 +359,7 @@ generate_security_contacts(resources) = {
 	"resource": resources,
 }
 
-generate_single_security_contact(name, notificationsByRole) = {
+generate_single_security_contact(name, properties) = {
 	"name": name,
-	"properties": {"notificationsByRole": notificationsByRole},
+	"properties": properties,
 }
