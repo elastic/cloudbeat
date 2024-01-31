@@ -40,22 +40,14 @@ func defaultAzureAppServiceWrapper(credentials azcore.TokenCredential) *azureApp
 			if err != nil {
 				return armappservice.WebAppsClientGetAuthSettingsResponse{}, err
 			}
-			response, err := client.GetAuthSettings(ctx, resourceGroupName, appName, nil)
-			if err != nil {
-				return armappservice.WebAppsClientGetAuthSettingsResponse{}, err
-			}
-			return response, nil
+			return client.GetAuthSettings(ctx, resourceGroupName, appName, nil)
 		},
 		AssetWebAppsSiteConfig: func(ctx context.Context, subscriptionID, resourceGroupName, appName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
 			client, err := armappservice.NewWebAppsClient(subscriptionID, credentials, nil)
 			if err != nil {
 				return armappservice.WebAppsClientGetConfigurationResponse{}, err
 			}
-			response, err := client.GetConfiguration(ctx, resourceGroupName, appName, nil)
-			if err != nil {
-				return armappservice.WebAppsClientGetConfigurationResponse{}, err
-			}
-			return response, nil
+			return client.GetConfiguration(ctx, resourceGroupName, appName, nil)
 		},
 	}
 }
