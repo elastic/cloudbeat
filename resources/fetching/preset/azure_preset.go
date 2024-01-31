@@ -42,5 +42,8 @@ func NewCisAzureFactory(log *logp.Logger, ch chan fetching.ResourceInfo, provide
 	locationsNetworkBatchFetcher := fetchers.NewAzureLocationsNetworkWatcherAssetBatchFetcher(log, ch, provider)
 	m["azure_cloud_locations_network_watchers_batch_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: locationsNetworkBatchFetcher}
 
+	securityContactsFetcher := fetchers.NewAzureSecurityAssetFetcher(log, ch, provider)
+	m["azure_security_contacts_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: securityContactsFetcher}
+
 	return m, nil
 }

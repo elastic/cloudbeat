@@ -61,6 +61,10 @@ is_storage_account if {
 	input.subType == "azure-storage-account"
 }
 
+is_security_contacts if {
+	input.subType == "azure-security-contacts"
+}
+
 is_activity_log_alerts if {
 	input.subType == "azure-activity-log-alert"
 }

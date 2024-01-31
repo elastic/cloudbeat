@@ -58,7 +58,7 @@ func (e vmNetworkSecurityGroupEnricher) Enrich(_ context.Context, _ cycle.Metada
 	var errAgg error
 
 	for _, asset := range assets {
-		if asset.Type != inventory.NetworkSecurityGroup {
+		if asset.Type != inventory.NetworkSecurityGroupAssetType {
 			continue
 		}
 
