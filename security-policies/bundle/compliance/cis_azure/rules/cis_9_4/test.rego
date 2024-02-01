@@ -6,20 +6,49 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
+	# Settings missing
 	eval_fail with input as test_data.generate_azure_asset(
 		"azure-web-site",
 		{},
 	)
+
+	# Partial conformance, one of the settings missing
 	eval_fail with input as test_data.generate_azure_asset(
 		"azure-web-site",
-		{"clientCertMode": "NotRequired"},
+		{"clientCertMode": "Required"},
+	)
+	eval_fail with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"clientCertEnabled": true},
+	)
+
+	#  Some or all of the settings invalid
+	eval_fail with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"clientCertMode": "Optional", "clientCertEnabled": false},
+	)
+	eval_fail with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"clientCertMode": "OptionalInteractiveUser", "clientCertEnabled": false},
+	)
+	eval_fail with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"clientCertMode": "Optional", "clientCertEnabled": true},
+	)
+	eval_fail with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"clientCertMode": "OptionalInteractiveUser", "clientCertEnabled": true},
+	)
+	eval_fail with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"clientCertMode": "Required", "clientCertEnabled": false},
 	)
 }
 
 test_pass if {
 	eval_pass with input as test_data.generate_azure_asset(
 		"azure-web-site",
-		{"clientCertMode": "Required"},
+		{"clientCertMode": "Required", "clientCertEnabled": true},
 	)
 }
 

@@ -404,7 +404,7 @@
 
 #### Manual rules: 0/74 (0%)
 
-#### Integration Tests Coverage: 87/302 (29%)
+#### Integration Tests Coverage: 88/302 (29%)
 
 <details><summary><h3>Full Table 📋</h3></summary>
 
@@ -555,7 +555,7 @@
 |                          9.11                          | AppService                              | Ensure Azure Key Vaults are Used to Store Secrets                                                                                                      |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |    [9.2](bundle/compliance/cis_azure/rules/cis_9_2)    | AppService                              | Ensure Web App Redirects All HTTP traffic to HTTPS in Azure App Service                                                                                | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
 |                          9.3                           | AppService                              | Ensure Web App is using the latest version of TLS encryption                                                                                           |        :x:         |                Passed :x: / Failed :x:                | Automated |
-|    [9.4](bundle/compliance/cis_azure/rules/cis_9_4)    | AppService                              | Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On'                                                                | :white_check_mark: |        Passed :white_check_mark: / Failed :x:         | Automated |
+|    [9.4](bundle/compliance/cis_azure/rules/cis_9_4)    | AppService                              | Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On'                                                                | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
 |    [9.5](bundle/compliance/cis_azure/rules/cis_9_5)    | AppService                              | Ensure that Register with Azure Active Directory is enabled on App Service                                                                             | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
 |                          9.6                           | AppService                              | Ensure That 'PHP version' is the Latest, If Used to Run the Web App                                                                                    |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                          9.7                           | AppService                              | Ensure that 'Python version' is the Latest Stable Version, if Used to Run the Web App                                                                  |        :x:         |                Passed :x: / Failed :x:                | Manual    |
