@@ -2,8 +2,11 @@
 set -euo pipefail
 
 export NEXT_CLOUDBEAT_BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
-export NEXT_MINOR_VERSION=$(echo $NEXT_CLOUDBEAT_VERSION | cut -d '.' -f1,2)
-export CURRENT_MINOR_VERSION=$(echo $CURRENT_CLOUDBEAT_VERSION | cut -d '.' -f1,2)
+NEXT_MINOR_VERSION=$(echo "$NEXT_CLOUDBEAT_VERSION" | cut -d '.' -f1,2)
+CURRENT_MINOR_VERSION=$(echo "$CURRENT_CLOUDBEAT_VERSION" | cut -d '.' -f1,2)
+
+export NEXT_MINOR_VERSION
+export CURRENT_MINOR_VERSION
 
 echo "NEXT_CLOUDBEAT_VERSION: $NEXT_CLOUDBEAT_VERSION"
 echo "NEXT_MINOR_VERSION: $NEXT_MINOR_VERSION"
@@ -112,8 +115,8 @@ EOF
 
 upload_cloud_formation_templates() {
     echo "• Upload cloud formation templates for $CURRENT_CLOUDBEAT_VERSION"
-    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+    aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
     aws configure set region us-east-2
     scripts/publish_cft.sh
 }
