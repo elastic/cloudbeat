@@ -23,18 +23,17 @@ cis_azure_9_4_pass = AzureServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
-# TODO: https://github.com/elastic/cloudbeat/issues/1828
-# cis_azure_9_4_fail = AzureServiceCase(
-#     rule_tag=CIS_9_4,
-#     case_identifier="test-app-service-fail",
-#     expected=RULE_FAIL_STATUS,
-# )
+cis_azure_9_4_fail = AzureServiceCase(
+    rule_tag=CIS_9_4,
+    case_identifier="test-app-service-fail",
+    expected=RULE_FAIL_STATUS,
+)
 
 cis_azure_9_4 = {
     """9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)'
       set to 'On' expect: passed""": cis_azure_9_4_pass,
-    # """9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)'
-    #   set to 'On' expect: failed""": cis_azure_9_4_fail,
+    """9.4 Ensure the web app has 'Client Certificates (Incoming client certificates)'
+      set to 'On' expect: failed""": cis_azure_9_4_fail,
 }
 
 # cis_azure_9_10_pass = AzureServiceCase(
