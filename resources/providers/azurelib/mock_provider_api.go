@@ -774,6 +774,61 @@ func (_c *MockProviderAPI_ListSQLTransparentDataEncryptions_Call) RunAndReturn(r
 	return _c
 }
 
+// ListSecurityContacts provides a mock function with given fields: ctx, subscriptionID
+func (_m *MockProviderAPI) ListSecurityContacts(ctx context.Context, subscriptionID string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subscriptionID)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, subscriptionID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, subscriptionID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, subscriptionID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListSecurityContacts_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListSecurityContacts'
+type MockProviderAPI_ListSecurityContacts_Call struct {
+	*mock.Call
+}
+
+// ListSecurityContacts is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subscriptionID string
+func (_e *MockProviderAPI_Expecter) ListSecurityContacts(ctx interface{}, subscriptionID interface{}) *MockProviderAPI_ListSecurityContacts_Call {
+	return &MockProviderAPI_ListSecurityContacts_Call{Call: _e.mock.On("ListSecurityContacts", ctx, subscriptionID)}
+}
+
+func (_c *MockProviderAPI_ListSecurityContacts_Call) Run(run func(ctx context.Context, subscriptionID string)) *MockProviderAPI_ListSecurityContacts_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListSecurityContacts_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListSecurityContacts_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListSecurityContacts_Call) RunAndReturn(run func(context.Context, string) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListSecurityContacts_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListSinglePostgresConfigurations provides a mock function with given fields: ctx, subID, resourceGroup, serverName
 func (_m *MockProviderAPI) ListSinglePostgresConfigurations(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, subID, resourceGroup, serverName)

@@ -75,7 +75,7 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.RoleDefinitionsType:                newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 
 	// This asset type is used only for enrichment purposes, but is sent to OPA layer, producing no findings.
-	inventory.NetworkSecurityGroup: newPair(fetching.AzureNetworkSecurityGroupType, fetching.MonitoringIdentity),
+	inventory.NetworkSecurityGroupAssetType: newPair(fetching.AzureNetworkSecurityGroupType, fetching.MonitoringIdentity),
 }
 
 // In order to simplify the mappings, we are trying to query all AzureAssetTypeToTypePair on every asset group
