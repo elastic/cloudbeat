@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: update-file-permissions
+  namespace: kube-system
 spec:
   template:
     spec:
@@ -30,9 +31,13 @@ spec:
           # 1.1.8
           chown root:daemon /etc/kubernetes/manifests/etcd.yaml
           # 1.1.11
-          chmod 710 /var/lib/etcd
+          chmod 777 /var/lib/etcd
           # 1.1.12
-          chown root:root /var/lib/etcd
+          # Update files directly
+          # TODO: check why this is not working
+          echo "etcd:x:1000:" | tee -a /etc/group
+          echo "etcd:x:1000:1000::/home/etcd:/bin/sh" | tee -a /etc/passwd
+          chown etcd:etcd /var/lib/etcd
           # 1.1.13
           chmod 700 /etc/kubernetes/admin.conf
           # 1.1.14
@@ -103,6 +108,7 @@ spec:
       - name: var-lib-etcd
         hostPath:
           path: /var/lib/etcd
+          type: DirectoryOrCreate
       - name: kubelet-service
         hostPath:
           path: /etc/systemd/system/kubelet.service.d
