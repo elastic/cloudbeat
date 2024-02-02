@@ -6,10 +6,17 @@ Microsoft Defender identification is performed by resource name.
 """
 
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS
+from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
+CIS_2_1_15 = "CIS 2.1.15"
 CIS_2_1_18 = "CIS 2.1.18"
 CIS_2_1_20 = "CIS 2.1.20"
+
+cis_azure_2_1_15_fail = AzureServiceCase(
+    rule_tag=CIS_2_1_15,
+    case_identifier="azure-security-auto-provisioning-settings-ef111ee2-6c89-4b09-92c6-5c2321f888df",
+    expected=RULE_FAIL_STATUS,
+)
 
 cis_azure_2_1_18_pass = AzureServiceCase(
     rule_tag=CIS_2_1_18,
@@ -23,8 +30,12 @@ cis_azure_2_1_20_pass = AzureServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
+cis_azure_2_1_15 = {
+    "2.1.15 Ensure auto provisioning of vm log analytics agent expect: failed": cis_azure_2_1_15_fail,
+}
+
 cis_azure_2_1_18 = {
-    "2.1.18 Ensure security alert emails to subscription owners: passed": cis_azure_2_1_18_pass,
+    "2.1.18 Ensure security alert emails to subscription owners expect: passed": cis_azure_2_1_18_pass,
 }
 
 cis_azure_2_1_20 = {
@@ -33,6 +44,7 @@ cis_azure_2_1_20 = {
 
 # The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
 test_cases = {
+    **cis_azure_2_1_15,
     **cis_azure_2_1_18,
     **cis_azure_2_1_20,
 }

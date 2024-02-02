@@ -38,6 +38,61 @@ func (_m *MockSecurityContactsProviderAPI) EXPECT() *MockSecurityContactsProvide
 	return &MockSecurityContactsProviderAPI_Expecter{mock: &_m.Mock}
 }
 
+// ListAutoProvisioningSettings provides a mock function with given fields: ctx, subscriptionID
+func (_m *MockSecurityContactsProviderAPI) ListAutoProvisioningSettings(ctx context.Context, subscriptionID string) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, subscriptionID)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]AzureAsset, error)); ok {
+		return rf(ctx, subscriptionID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []AzureAsset); ok {
+		r0 = rf(ctx, subscriptionID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, subscriptionID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAutoProvisioningSettings'
+type MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call struct {
+	*mock.Call
+}
+
+// ListAutoProvisioningSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subscriptionID string
+func (_e *MockSecurityContactsProviderAPI_Expecter) ListAutoProvisioningSettings(ctx interface{}, subscriptionID interface{}) *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call {
+	return &MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call{Call: _e.mock.On("ListAutoProvisioningSettings", ctx, subscriptionID)}
+}
+
+func (_c *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call) Run(run func(ctx context.Context, subscriptionID string)) *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call) Return(_a0 []AzureAsset, _a1 error) *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call) RunAndReturn(run func(context.Context, string) ([]AzureAsset, error)) *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListSecurityContacts provides a mock function with given fields: ctx, subscriptionID
 func (_m *MockSecurityContactsProviderAPI) ListSecurityContacts(ctx context.Context, subscriptionID string) ([]AzureAsset, error) {
 	ret := _m.Called(ctx, subscriptionID)

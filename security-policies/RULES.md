@@ -398,13 +398,13 @@
 
 ## AZURE CIS Benchmark
 
-### 66/151 implemented rules (44%)
+### 67/151 implemented rules (44%)
 
-#### Automated rules: 66/77 (86%)
+#### Automated rules: 67/77 (87%)
 
 #### Manual rules: 0/74 (0%)
 
-#### Integration Tests Coverage: 90/302 (30%)
+#### Integration Tests Coverage: 91/302 (30%)
 
 <details><summary><h3>Full Table 📋</h3></summary>
 
@@ -450,7 +450,7 @@
 |                         2.1.12                         | Microsoft Defender for Cloud            | Ensure That Microsoft Defender for Resource Manager Is Set To 'On'                                                                                     |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.13                         | Microsoft Defender for Cloud            | Ensure that Microsoft Defender Recommendation for 'Apply system updates' status is 'Completed'                                                         |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.14                         | Microsoft Defender for Cloud            | Ensure Any of the ASC Default Policy Settings are Not Set to 'Disabled'                                                                                |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-|                         2.1.15                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Log Analytics agent for Azure VMs' is Set to 'On'                                                                    |        :x:         |                Passed :x: / Failed :x:                | Automated |
+| [2.1.15](bundle/compliance/cis_azure/rules/cis_2_1_15) | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Log Analytics agent for Azure VMs' is Set to 'On'                                                                    | :white_check_mark: |        Passed :x: / Failed :white_check_mark:         | Automated |
 |                         2.1.16                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Vulnerability assessment for machines' is Set to 'On'                                                                |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                         2.1.17                         | Microsoft Defender for Cloud            | Ensure that Auto provisioning of 'Microsoft Defender for Containers components' is Set to 'On'                                                         |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 | [2.1.18](bundle/compliance/cis_azure/rules/cis_2_1_18) | Microsoft Defender for Cloud            | Ensure That 'All users with the following roles' is set to 'Owner'                                                                                     | :white_check_mark: |        Passed :white_check_mark: / Failed :x:         | Automated |

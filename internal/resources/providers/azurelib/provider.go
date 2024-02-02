@@ -77,7 +77,7 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		StorageAccountProviderAPI:   inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
 		KeyVaultProviderAPI:         inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
 		SubscriptionProviderAPI:     inventory.NewSubscriptionProvider(log, azureConfig.Credentials),
-		SecurityContactsProviderAPI: inventory.NewSecurityContacts(log, genericARMClient),
+		SecurityContactsProviderAPI: inventory.NewSecurityContacts(log, azureConfig.Credentials, genericARMClient),
 		ProviderAPI:                 governance.NewProvider(log, resourceGraphProvider),
 	}, nil
 }

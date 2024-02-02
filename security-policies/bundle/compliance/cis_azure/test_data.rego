@@ -363,3 +363,8 @@ generate_single_security_contact(name, properties) = {
 	"name": name,
 	"properties": properties,
 }
+
+generate_security_auto_provisioning_settings(resources) = {
+	"subType": "azure-security-auto-provisioning-settings",
+	"resource": resources,
+}

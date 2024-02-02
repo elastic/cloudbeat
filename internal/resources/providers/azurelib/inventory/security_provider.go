@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
@@ -35,6 +36,16 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/maps"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
+
+type securityClientWrapper interface {
+	ListSecurityContacts(ctx context.Context, subID string) (armsecurity.ContactsClientListResponse, error)
+	ListAutoProvisioningSettings(ctx context.Context, subID string) ([]armsecurity.AutoProvisioningSettingsClientListResponse, error)
+}
+
+type SecurityContactsProviderAPI interface {
+	ListSecurityContacts(ctx context.Context, subscriptionID string) ([]AzureAsset, error)
+	ListAutoProvisioningSettings(ctx context.Context, subscriptionID string) ([]AzureAsset, error)
+}
 
 const listSecurityContactsURI = "/subscriptions/%s/providers/Microsoft.Security/securityContacts"
 
@@ -99,24 +110,36 @@ func (*azureSecurityContactsClient) listSecurityContactsResponseDecode(resp *htt
 	return result, nil
 }
 
-type securityContactsClient interface {
-	ListSecurityContacts(ctx context.Context, subID string) (armsecurity.ContactsClientListResponse, error)
+type defaultSecurityClientWrapper struct {
+	credential                  azcore.TokenCredential
+	azureSecurityContactsClient *azureSecurityContactsClient
 }
 
-type SecurityContactsProviderAPI interface {
-	ListSecurityContacts(ctx context.Context, subscriptionID string) ([]AzureAsset, error)
+func (w *defaultSecurityClientWrapper) ListSecurityContacts(ctx context.Context, subID string) (armsecurity.ContactsClientListResponse, error) {
+	return w.azureSecurityContactsClient.ListSecurityContacts(ctx, subID)
+}
+
+func (w *defaultSecurityClientWrapper) ListAutoProvisioningSettings(ctx context.Context, subID string) ([]armsecurity.AutoProvisioningSettingsClientListResponse, error) {
+	cl, err := armsecurity.NewAutoProvisioningSettingsClient(subID, w.credential, nil)
+	if err != nil {
+		return nil, err
+	}
+	return readPager(ctx, cl.NewListPager(nil))
 }
 
 type securityContactsProvider struct {
-	client securityContactsClient
+	client securityClientWrapper
 	log    *logp.Logger //nolint:unused
 }
 
-func NewSecurityContacts(log *logp.Logger, armClient *arm.Client) SecurityContactsProviderAPI {
+func NewSecurityContacts(log *logp.Logger, credential azcore.TokenCredential, armClient *arm.Client) SecurityContactsProviderAPI {
 	return &securityContactsProvider{
 		log: log,
-		client: &azureSecurityContactsClient{
-			armClient: armClient,
+		client: &defaultSecurityClientWrapper{
+			credential: credential,
+			azureSecurityContactsClient: &azureSecurityContactsClient{
+				armClient: armClient,
+			},
 		},
 	}
 }
@@ -147,6 +170,38 @@ func (p *securityContactsProvider) transformSecurityContract(contact *armsecurit
 		Id:             pointers.Deref(contact.ID),
 		Name:           pointers.Deref(contact.Name),
 		Type:           strings.ToLower(pointers.Deref(contact.Type)),
+		SubscriptionId: subscriptionID,
+		Properties:     properties,
+	}
+}
+
+func (p *securityContactsProvider) ListAutoProvisioningSettings(ctx context.Context, subscriptionID string) ([]AzureAsset, error) {
+	res, err := p.client.ListAutoProvisioningSettings(ctx, subscriptionID)
+	if err != nil {
+		return nil, fmt.Errorf("error while fetching security contacts: %w", err)
+	}
+
+	return lo.FlatMap(res, func(response armsecurity.AutoProvisioningSettingsClientListResponse, index int) []AzureAsset {
+		return lo.FilterMap(response.Value, func(contract *armsecurity.AutoProvisioningSetting, _ int) (AzureAsset, bool) {
+			if contract == nil {
+				return AzureAsset{}, false
+			}
+			return p.transformAutoProvisioningSetting(contract, subscriptionID), true
+		})
+	}), nil
+}
+
+func (p *securityContactsProvider) transformAutoProvisioningSetting(settings *armsecurity.AutoProvisioningSetting, subscriptionID string) AzureAsset {
+	properties := map[string]any{}
+
+	if settings.Properties != nil {
+		maps.AddIfNotNil(properties, "autoProvision", settings.Properties.AutoProvision)
+	}
+
+	return AzureAsset{
+		Id:             pointers.Deref(settings.ID),
+		Name:           pointers.Deref(settings.Name),
+		Type:           strings.ToLower(pointers.Deref(settings.Type)), // Microsoft.Security/autoProvisioningSettings
 		SubscriptionId: subscriptionID,
 		Properties:     properties,
 	}
