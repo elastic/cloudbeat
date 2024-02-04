@@ -151,7 +151,7 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 }
 
 func (s *OpaTestSuite) getTestConfig() *config.Config {
-	path, err := filepath.Abs("../bundle.tar.gz")
+	path, err := filepath.Abs("../../bundle.tar.gz")
 	s.Require().NoError(err)
 	_, err = os.Stat(path)
 	s.Require().NoError(err)
