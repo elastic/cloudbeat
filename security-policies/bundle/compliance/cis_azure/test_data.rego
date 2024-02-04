@@ -108,6 +108,11 @@ generate_postgresql_server_with_infrastructure_encryption(enabled) = {
 	"resource": {"properties": {"infrastructureEncryption": enabled}},
 }
 
+generate_flexible_postgresql_server_with_extension(ext) = {
+	"subType": "azure-flexible-postgresql-server-db",
+	"resource": {"extension": ext},
+}
+
 generate_mysql_server_with_ssl_enforcement(enabled) = {
 	"subType": "azure-mysql-server-db",
 	"resource": {"properties": {"sslEnforcement": enabled}},
@@ -347,4 +352,14 @@ generate_key_vault(properties, extension) = {
 		"properties": properties,
 		"extension": extension,
 	},
+}
+
+generate_security_contacts(resources) = {
+	"subType": "azure-security-contacts",
+	"resource": resources,
+}
+
+generate_single_security_contact(name, notificationsByRole) = {
+	"name": name,
+	"properties": {"notificationsByRole": notificationsByRole},
 }

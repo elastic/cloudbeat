@@ -1,6 +1,7 @@
 package compliance.lib.common
 
 import future.keywords.if
+import future.keywords.in
 
 # get OPA version
 opa_version := opa.runtime().version
@@ -32,6 +33,13 @@ ConvertDaysToHours(duration) = result if {
 calculate_result(evaluation) = "passed" if {
 	evaluation
 } else = "failed"
+
+# Safely evaluate evidence. In case a key is undefined, it will be defaulted.
+# keypaths is an object defined as {str: array}
+collect_evidence(resource, key_paths) := {key: evidence |
+	some key, path in key_paths
+	evidence := object.get(resource, path, resource)
+}
 
 # If value is not an array, enclose it in one
 ensure_array(value) = [value] if {

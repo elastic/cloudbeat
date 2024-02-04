@@ -16,7 +16,9 @@ finding = result if {
 }
 
 is_client_cert_enabled if {
-	# Benchmark and Azure implementation in remediation checks previous implemented value
-	# Reading the description and rule metadata, we've decided to check the value of the property clientCertMode
+	# To confirm that Client Certificate Mode is set to "Required", both
+	# statements have to be true.
+	# See: https://github.com/elastic/cloudbeat/issues/1828
+	data_adapter.properties.clientCertEnabled == true
 	data_adapter.properties.clientCertMode == "Required"
 } else = false
