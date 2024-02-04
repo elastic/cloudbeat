@@ -22,28 +22,27 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
+	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
-const resourceChBufferSize = 10000
-
-type AWS struct {
-	IdentityProvider awslib.IdentityProviderGetter
+type GCP struct {
+	CfgProvider          auth.ConfigProviderAPI
+	inventoryInitializer inventory.ProviderInitializerAPI
 }
 
-func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
-	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
+	reg, bdp, _, err := g.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		return nil, err
 	}
@@ -54,31 +53,39 @@ func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 }
 
 //revive:disable-next-line:function-result-limit
-func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
-	if err := a.checkDependencies(); err != nil {
+func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+	if err := g.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
 
-	// TODO: make this mock-able
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 
-	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
+	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}
 
-	return registry.NewRegistry(
-		log,
-		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
-	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
+	fetchers, err := preset.NewCisGcpFetchers(ctx, log, ch, assetProvider, cfg.CloudConfig.Gcp)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
+	}
+
+	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
+		cloud.NewDataProvider(),
+		nil,
+		nil
 }
 
-func (a *AWS) checkDependencies() error {
-	if a.IdentityProvider == nil {
-		return errors.New("aws identity provider is uninitialized")
+func (g *GCP) checkDependencies() error {
+	if g.CfgProvider == nil {
+		return errors.New("gcp config provider is uninitialized")
+	}
+
+	if g.inventoryInitializer == nil {
+		return errors.New("gcp asset inventory is uninitialized")
 	}
 	return nil
 }

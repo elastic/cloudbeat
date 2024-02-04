@@ -21,71 +21,77 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 )
 
-type GCP struct {
-	CfgProvider          auth.ConfigProviderAPI
-	inventoryInitializer inventory.ProviderInitializerAPI
+type Azure struct {
+	cfgProvider         auth.ConfigProviderAPI
+	providerInitializer azurelib.ProviderInitializerAPI
 }
 
-func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
-	reg, bdp, _, err := g.initialize(ctx, log, cfg, resourceCh)
+	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		return nil, err
 	}
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
+		builder.WithManagerTimeout(20*time.Minute),
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
 //revive:disable-next-line:function-result-limit
-func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
-	if err := g.checkDependencies(); err != nil {
+func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
 
-	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
+	azureConfig, err := a.cfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
 
-	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
+	provider, err := a.providerInitializer.Init(log, *azureConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
 	}
 
-	fetchers, err := preset.NewCisGcpFetchers(ctx, log, ch, assetProvider, cfg.CloudConfig.Gcp)
+	fetchers, err := preset.NewCisAzureFactory(log, ch, provider)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
 	}
 
 	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
-		cloud.NewDataProvider(),
+		cloud.NewDataProvider(
+			cloud.WithAccount(cloud.Identity{
+				Provider: "azure",
+			}),
+		),
 		nil,
 		nil
 }
 
-func (g *GCP) checkDependencies() error {
-	if g.CfgProvider == nil {
-		return errors.New("gcp config provider is uninitialized")
+func (a *Azure) checkDependencies() error {
+	if a.cfgProvider == nil {
+		return errors.New("azure config provider is uninitialized")
 	}
 
-	if g.inventoryInitializer == nil {
-		return errors.New("gcp asset inventory is uninitialized")
+	if a.providerInitializer == nil {
+		return errors.New("azure asset inventory is uninitialized")
 	}
 	return nil
 }

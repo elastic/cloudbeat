@@ -26,7 +26,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/flavors"
+	"github.com/elastic/cloudbeat/internal/flavors"
 	"github.com/elastic/cloudbeat/internal/launcher"
 )
 

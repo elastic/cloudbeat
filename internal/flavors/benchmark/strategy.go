@@ -25,7 +25,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/k8s"
-	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"

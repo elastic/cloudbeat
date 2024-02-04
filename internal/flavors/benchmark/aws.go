@@ -21,27 +21,27 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
-	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
-type Azure struct {
-	cfgProvider         auth.ConfigProviderAPI
-	providerInitializer azurelib.ProviderInitializerAPI
+const resourceChBufferSize = 10000
+
+type AWS struct {
+	IdentityProvider awslib.IdentityProviderGetter
 }
 
-func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
@@ -50,48 +50,35 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-		builder.WithManagerTimeout(20*time.Minute),
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
 //revive:disable-next-line:function-result-limit
-func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
 
-	azureConfig, err := a.cfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure)
+	// TODO: make this mock-able
+	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	provider, err := a.providerInitializer.Init(log, *azureConfig)
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	fetchers, err := preset.NewCisAzureFactory(log, ch, provider)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
-	}
-
-	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
-		cloud.NewDataProvider(
-			cloud.WithAccount(cloud.Identity{
-				Provider: "azure",
-			}),
-		),
-		nil,
-		nil
+	return registry.NewRegistry(
+		log,
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
+	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 
-func (a *Azure) checkDependencies() error {
-	if a.cfgProvider == nil {
-		return errors.New("azure config provider is uninitialized")
-	}
-
-	if a.providerInitializer == nil {
-		return errors.New("azure asset inventory is uninitialized")
+func (a *AWS) checkDependencies() error {
+	if a.IdentityProvider == nil {
+		return errors.New("aws identity provider is uninitialized")
 	}
 	return nil
 }
