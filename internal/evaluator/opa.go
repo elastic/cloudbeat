@@ -133,7 +133,12 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 		return EventData{}, fmt.Errorf("error decoding findings: %v", err)
 	}
 
-	o.log.Debugf("Created %d findings for input: %v", len(ruleResults.Findings), fetcherResult)
+	if len(ruleResults.Findings) == 0 {
+		o.log.Debugf("Evaluated resource has no findings: %v", fetcherResult)
+	} else {
+		o.log.Debugf("Created %d findings for input: %v", len(ruleResults.Findings), fetcherResult)
+	}
+
 	return EventData{ruleResults, resourceInfo}, nil
 }
 
