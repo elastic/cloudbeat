@@ -32,7 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
-	"github.com/elastic/cloudbeat/uniqueness"
+	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
 func TestBase_Build_Success(t *testing.T) {

@@ -31,7 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
-	"github.com/elastic/cloudbeat/uniqueness"
+	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
 func TestK8sRun_ReturnEvents(t *testing.T) {

@@ -19,7 +19,7 @@ package condition
 
 import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
-	"github.com/elastic/cloudbeat/uniqueness"
+	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
 type IsLeader struct {

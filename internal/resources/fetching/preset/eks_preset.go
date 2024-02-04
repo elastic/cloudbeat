@@ -34,7 +34,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb"
-	"github.com/elastic/cloudbeat/uniqueness"
+	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
 const (

@@ -26,7 +26,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/uniqueness"
+	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
 type k8sbenchmark struct {

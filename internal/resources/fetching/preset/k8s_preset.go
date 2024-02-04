@@ -25,7 +25,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/condition"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/uniqueness"
+	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
 var vanillaFsPatterns = []string{
