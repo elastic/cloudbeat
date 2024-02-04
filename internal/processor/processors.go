@@ -18,5 +18,5 @@
 package processor
 
 import (
-	_ "github.com/elastic/cloudbeat/processor/add_cluster_id" // Add cloudbeat add_cluster_id processor
+	_ "github.com/elastic/cloudbeat/internal/processor/add_cluster_id" // Add cloudbeat add_cluster_id processor
 )

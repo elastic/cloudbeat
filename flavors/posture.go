@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/flavors/benchmark"
 	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
 )
 
 type posture struct {
