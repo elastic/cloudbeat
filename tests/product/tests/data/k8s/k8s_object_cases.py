@@ -5,17 +5,17 @@ This module defines k8s psp test cases
 from .k8s_test_case import ObjectTestCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
-CIS_5_1_3 = "CIS 5.1.3"
-CIS_5_1_5 = "CIS 5.1.5"
-CIS_5_1_6 = "CIS 5.1.6"
-CIS_5_2_2 = "CIS 5.2.2"
-CIS_5_2_3 = "CIS 5.2.3"
-CIS_5_2_4 = "CIS 5.2.4"
-CIS_5_2_5 = "CIS 5.2.5"
-CIS_5_2_6 = "CIS 5.2.6"
-CIS_5_2_7 = "CIS 5.2.7"
-CIS_5_2_8 = "CIS 5.2.8"
-CIS_5_2_10 = "CIS 5.2.10"
+K8S_CIS_5_1_3 = "CIS 5.1.3"
+K8S_CIS_5_1_5 = "CIS 5.1.5"
+K8S_CIS_5_1_6 = "CIS 5.1.6"
+K8S_CIS_5_2_2 = "CIS 5.2.2"
+K8S_CIS_5_2_3 = "CIS 5.2.3"
+K8S_CIS_5_2_4 = "CIS 5.2.4"
+K8S_CIS_5_2_5 = "CIS 5.2.5"
+K8S_CIS_5_2_6 = "CIS 5.2.6"
+K8S_CIS_5_2_7 = "CIS 5.2.7"
+K8S_CIS_5_2_8 = "CIS 5.2.8"
+K8S_CIS_5_2_10 = "CIS 5.2.10"
 
 TEST_FAIL_POD = "test-k8s-bad-pod"
 TEST_PASS_POD = "test-k8s-good-pod"
@@ -27,25 +27,25 @@ TEST_PASS_SERVICE_ACCOUNT = "test-service-account-pass"
 TEST_FAIL_SERVICE_ACCOUNT = "test-service-account-fail"
 
 cis_5_1_3_role_pass = ObjectTestCase(
-    rule_tag=CIS_5_1_3,
+    rule_tag=K8S_CIS_5_1_3,
     resource_name=TEST_PASS_ROLE,
     expected=RULE_PASS_STATUS,
 )
 
 cis_5_1_3_cluster_role_pass = ObjectTestCase(
-    rule_tag=CIS_5_1_3,
+    rule_tag=K8S_CIS_5_1_3,
     resource_name=TEST_PASS_CLUSTER_ROLE,
     expected=RULE_PASS_STATUS,
 )
 
 cis_5_1_3_role_fail = ObjectTestCase(
-    rule_tag=CIS_5_1_3,
+    rule_tag=K8S_CIS_5_1_3,
     resource_name=TEST_FAIL_ROLE,
     expected=RULE_FAIL_STATUS,
 )
 
 cis_5_1_3_cluster_role_fail = ObjectTestCase(
-    rule_tag=CIS_5_1_3,
+    rule_tag=K8S_CIS_5_1_3,
     resource_name=TEST_FAIL_CLUSTER_ROLE,
     expected=RULE_FAIL_STATUS,
 )
@@ -58,19 +58,19 @@ cis_5_1_3 = {
 }
 
 cis_5_1_5_sa_pass = ObjectTestCase(
-    rule_tag=CIS_5_1_5,
+    rule_tag=K8S_CIS_5_1_5,
     resource_name=TEST_PASS_SERVICE_ACCOUNT,
     expected=RULE_PASS_STATUS,
 )
 
 cis_5_1_5_pod_sa_default_fail = ObjectTestCase(
-    rule_tag=CIS_5_1_5,
+    rule_tag=K8S_CIS_5_1_5,
     resource_name="test-pod-sa-default",
     expected=RULE_FAIL_STATUS,
 )
 
 cis_5_1_5_pod_sa_name_default_fail = ObjectTestCase(
-    rule_tag=CIS_5_1_5,
+    rule_tag=K8S_CIS_5_1_5,
     resource_name="test-pod-sa-name-default",
     expected=RULE_FAIL_STATUS,
 )
@@ -82,25 +82,25 @@ cis_5_1_5 = {
 }
 
 cis_5_1_6_sa_fail = ObjectTestCase(
-    rule_tag=CIS_5_1_6,
+    rule_tag=K8S_CIS_5_1_6,
     resource_name=TEST_FAIL_SERVICE_ACCOUNT,
     expected=RULE_FAIL_STATUS,
 )
 
 cis_5_1_6_pod_fail = ObjectTestCase(
-    rule_tag=CIS_5_1_6,
+    rule_tag=K8S_CIS_5_1_6,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
 
 cis_5_1_6_sa_pass = ObjectTestCase(
-    rule_tag=CIS_5_1_6,
+    rule_tag=K8S_CIS_5_1_6,
     resource_name=TEST_PASS_SERVICE_ACCOUNT,
     expected=RULE_PASS_STATUS,
 )
 
 cis_5_1_6_pod_pass = ObjectTestCase(
-    rule_tag=CIS_5_1_6,
+    rule_tag=K8S_CIS_5_1_6,
     resource_name="test-pod-sa-default",
     expected=RULE_PASS_STATUS,
 )
@@ -113,13 +113,13 @@ cis_5_1_6 = {
 }
 
 cis_psp_5_2_2_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_2,
+    rule_tag=K8S_CIS_5_2_2,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_2_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_2,
+    rule_tag=K8S_CIS_5_2_2,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
@@ -130,13 +130,13 @@ cis_psp_5_2_2 = {
 }
 
 cis_psp_5_2_3_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_3,
+    rule_tag=K8S_CIS_5_2_3,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_3_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_3,
+    rule_tag=K8S_CIS_5_2_3,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
@@ -147,13 +147,13 @@ cis_psp_5_2_3 = {
 }
 
 cis_psp_5_2_4_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_4,
+    rule_tag=K8S_CIS_5_2_4,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_4_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_4,
+    rule_tag=K8S_CIS_5_2_4,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
@@ -164,13 +164,13 @@ cis_psp_5_2_4 = {
 }
 
 cis_psp_5_2_5_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_5,
+    rule_tag=K8S_CIS_5_2_5,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_5_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_5,
+    rule_tag=K8S_CIS_5_2_5,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
@@ -181,13 +181,13 @@ cis_psp_5_2_5 = {
 }
 
 cis_psp_5_2_6_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_6,
+    rule_tag=K8S_CIS_5_2_6,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_6_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_6,
+    rule_tag=K8S_CIS_5_2_6,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
@@ -198,13 +198,13 @@ cis_psp_5_2_6 = {
 }
 
 cis_psp_5_2_7_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_7,
+    rule_tag=K8S_CIS_5_2_7,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_7_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_7,
+    rule_tag=K8S_CIS_5_2_7,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
@@ -215,13 +215,13 @@ cis_psp_5_2_7 = {
 }
 
 cis_psp_5_2_8_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_8,
+    rule_tag=K8S_CIS_5_2_8,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_8_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_8,
+    rule_tag=K8S_CIS_5_2_8,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
@@ -232,13 +232,13 @@ cis_psp_5_2_8 = {
 }
 
 cis_psp_5_2_10_pass = ObjectTestCase(
-    rule_tag=CIS_5_2_10,
+    rule_tag=K8S_CIS_5_2_10,
     resource_name=TEST_PASS_POD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_psp_5_2_10_fail = ObjectTestCase(
-    rule_tag=CIS_5_2_10,
+    rule_tag=K8S_CIS_5_2_10,
     resource_name=TEST_FAIL_POD,
     expected=RULE_FAIL_STATUS,
 )
