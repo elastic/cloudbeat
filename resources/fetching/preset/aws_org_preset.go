@@ -24,7 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"go.uber.org/zap"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 )

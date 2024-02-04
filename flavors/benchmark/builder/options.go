@@ -20,7 +20,7 @@ package builder
 import (
 	"time"
 
-	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/internal/dataprovider"
 )
 
 type Option func(b *Builder)

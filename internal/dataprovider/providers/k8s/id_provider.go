@@ -20,7 +20,7 @@ package k8s
 import (
 	"github.com/gofrs/uuid"
 
-	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 )

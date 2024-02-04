@@ -25,8 +25,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/dataprovider/providers/common"
+	"github.com/elastic/cloudbeat/internal/dataprovider"
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/common"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/manager"
