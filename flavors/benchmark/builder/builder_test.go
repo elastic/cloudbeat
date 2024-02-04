@@ -29,9 +29,9 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 

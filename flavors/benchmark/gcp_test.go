@@ -24,8 +24,8 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
+	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
 func TestGCP_Initialize(t *testing.T) {

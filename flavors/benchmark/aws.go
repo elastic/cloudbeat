@@ -29,10 +29,10 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/preset"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 const resourceChBufferSize = 10000

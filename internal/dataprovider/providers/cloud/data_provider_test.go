@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
 var (

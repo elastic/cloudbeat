@@ -22,8 +22,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
 )
 
 func Test_k8sIdProvider_GetIdInCluster(t *testing.T) {

@@ -25,7 +25,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/pipeline"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
 type Manager interface {

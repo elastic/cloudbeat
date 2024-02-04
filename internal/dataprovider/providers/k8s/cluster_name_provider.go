@@ -27,7 +27,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type ClusterNameProviderAPI interface {

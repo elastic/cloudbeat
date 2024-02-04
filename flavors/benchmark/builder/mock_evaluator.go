@@ -23,7 +23,7 @@ import (
 	context "context"
 
 	evaluator "github.com/elastic/cloudbeat/internal/evaluator"
-	fetching "github.com/elastic/cloudbeat/resources/fetching"
+	fetching "github.com/elastic/cloudbeat/internal/resources/fetching"
 
 	mock "github.com/stretchr/testify/mock"
 )

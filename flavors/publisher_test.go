@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/goleak"
 
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestPublisher_HandleEvents(t *testing.T) {

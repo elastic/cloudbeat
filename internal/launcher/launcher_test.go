@@ -34,7 +34,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type beaterMock struct {

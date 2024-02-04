@@ -30,7 +30,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	dlogger "github.com/elastic/cloudbeat/internal/evaluator/debug_logger"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
 var now = func() time.Time { return time.Now().UTC() }

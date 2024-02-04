@@ -28,9 +28,9 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/common"
 	"github.com/elastic/cloudbeat/internal/evaluator"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/manager"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/version"
 )

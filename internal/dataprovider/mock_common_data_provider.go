@@ -21,7 +21,7 @@ package dataprovider
 
 import (
 	beat "github.com/elastic/beats/v7/libbeat/beat"
-	fetching "github.com/elastic/cloudbeat/resources/fetching"
+	fetching "github.com/elastic/cloudbeat/internal/resources/fetching"
 
 	mock "github.com/stretchr/testify/mock"
 )

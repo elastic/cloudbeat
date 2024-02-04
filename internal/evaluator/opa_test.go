@@ -31,9 +31,9 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type DummyResource struct {

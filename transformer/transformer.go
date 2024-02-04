@@ -18,7 +18,7 @@
 package transformer
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
 
 type ResourceTypeMetadata struct {

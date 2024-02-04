@@ -20,7 +20,7 @@ package builder
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
 type dataProvider struct{}

@@ -38,7 +38,7 @@ import (
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type LeaderElectionTestSuite struct {

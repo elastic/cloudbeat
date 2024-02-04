@@ -24,8 +24,8 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 )
 
 func TestAzure_Initialize(t *testing.T) {

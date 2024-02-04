@@ -20,7 +20,7 @@ package evaluator
 import (
 	"time"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
 type Metadata struct {

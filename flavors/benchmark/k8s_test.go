@@ -23,8 +23,8 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	k8sprovider "github.com/elastic/cloudbeat/internal/dataprovider/providers/k8s"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestK8S_Initialize(t *testing.T) {

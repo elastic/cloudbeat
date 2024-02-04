@@ -21,8 +21,8 @@ import (
 	"github.com/gofrs/uuid"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
 )
 
 var uuidNamespace = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))

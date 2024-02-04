@@ -31,10 +31,10 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/evaluator"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
 )
 
