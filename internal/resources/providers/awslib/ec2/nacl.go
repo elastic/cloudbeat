@@ -15,17 +15,41 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package ec2
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type NACLInfo struct {
+	types.NetworkAcl
+	awsAccount string
+	region     string
+}
+
+func (r NACLInfo) GetResourceArn() string {
+	if r.NetworkAclId == nil {
+		return ""
 	}
+	// arn:aws:ec2:region:account-id:network-acl/network-acl-id
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-acl/%s", r.region, r.awsAccount, *r.NetworkAclId)
+}
+
+func (r NACLInfo) GetResourceName() string {
+	if r.NetworkAclId == nil {
+		return ""
+	}
+	return *r.NetworkAclId
+}
+
+func (r NACLInfo) GetResourceType() string {
+	return fetching.NetworkNACLType
+}
+
+func (r NACLInfo) GetRegion() string {
+	return r.region
 }

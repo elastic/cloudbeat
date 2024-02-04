@@ -15,17 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package ec2
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+type EBSEncryption struct {
+	Enabled    bool `json:"enabled"`
+	region     string
+	awsAccount string
+}
+
+func (e EBSEncryption) GetResourceArn() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
+}
+
+func (e EBSEncryption) GetResourceName() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
+}
+
+func (e EBSEncryption) GetResourceType() string {
+	return fetching.EBSType
+}
+
+func (e EBSEncryption) GetRegion() string {
+	return e.region
 }

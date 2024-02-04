@@ -15,17 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package transformer
 
 import (
-	"os"
-
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+type ResourceTypeMetadata struct {
+	cycle.Metadata
+	Type string
 }

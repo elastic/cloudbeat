@@ -15,17 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package fetchers
 
-import (
-	"os"
+import "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
-)
+type enricherResponse struct {
+	assets []inventory.AzureAsset
+	err    error
+}
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+func noRes() enricherResponse {
+	return enricherResponse{
+		assets: nil,
+		err:    nil,
+	}
+}
+
+func assetRes(a ...inventory.AzureAsset) enricherResponse {
+	return enricherResponse{
+		assets: a,
+		err:    nil,
+	}
+}
+
+func errorRes(err error) enricherResponse {
+	return enricherResponse{
+		assets: nil,
+		err:    err,
 	}
 }

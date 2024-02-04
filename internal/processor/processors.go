@@ -15,17 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package processor
 
 import (
-	"os"
-
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	_ "github.com/elastic/cloudbeat/internal/processor/add_cluster_id" // Add cloudbeat add_cluster_id processor
 )
-
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
-}

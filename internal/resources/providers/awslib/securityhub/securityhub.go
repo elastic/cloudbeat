@@ -15,17 +15,45 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package securityhub
 
 import (
-	"os"
+	"context"
+	"fmt"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/aws/aws-sdk-go-v2/service/securityhub"
+
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type (
+	Service interface {
+		Describe(ctx context.Context) ([]SecurityHub, error)
 	}
+
+	SecurityHub struct {
+		Enabled   bool
+		Region    string
+		AccountId string
+		*securityhub.DescribeHubOutput
+	}
+)
+
+func (s SecurityHub) GetResourceArn() string {
+	if s.DescribeHubOutput == nil || s.HubArn == nil {
+		return s.GetResourceName()
+	}
+	return *s.HubArn
+}
+
+func (s SecurityHub) GetResourceName() string {
+	return fmt.Sprintf("securityhub-%s-%s", s.Region, s.AccountId)
+}
+
+func (s SecurityHub) GetResourceType() string {
+	return fetching.SecurityHubType
+}
+
+func (s SecurityHub) GetRegion() string {
+	return s.Region
 }

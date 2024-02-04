@@ -15,17 +15,29 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package logs
 
 import (
-	"os"
+	"context"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
+	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type CloudwatchLogs interface {
+	DescribeMetricFilters(ctx context.Context, region *string, logGroup string) ([]types.MetricFilter, error)
+}
+
+func NewCloudwatchLogsProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return cloudwatchlogs.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	return &Provider{
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }
