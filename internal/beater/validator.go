@@ -15,17 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+// Config is put into a different package to prevent cyclic imports in case
+// it is needed in several locations
+
+package beater
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+
+	"github.com/elastic/cloudbeat/internal/config"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type validator struct{}
+
+func (v *validator) Validate(cfg *agentconfig.C) error {
+	// TODO: Should we check something?
+	// Benchmark is being checked inside config.New
+	_, err := config.New(cfg)
+	if err != nil {
+		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
 	}
+
+	return nil
 }

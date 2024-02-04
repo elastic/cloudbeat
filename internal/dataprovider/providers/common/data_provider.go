@@ -15,17 +15,43 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package common
 
 import (
-	"os"
+	"github.com/mitchellh/mapstructure"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/version"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type DataProvider struct {
+	info map[string]any
+	cfg  *config.Config
+}
+
+func New(cloudbeatVersionInfo version.CloudbeatVersionInfo, cfg *config.Config) (*DataProvider, error) {
+	m := map[string]any{}
+	err := mapstructure.Decode(cloudbeatVersionInfo, &m)
+	if err != nil {
+		return nil, err
 	}
+
+	return &DataProvider{
+		info: m,
+		cfg:  cfg,
+	}, nil
+}
+
+func (c *DataProvider) GetElasticCommonData() (map[string]any, error) {
+	m := map[string]any{}
+	m["cloudbeat"] = c.info
+
+	if c.cfg != nil {
+		m["cloud_security_posture.package_policy"] = map[string]any{
+			"id":       c.cfg.PackagePolicyId,
+			"revision": c.cfg.PackagePolicyRevision,
+		}
+	}
+
+	return m, nil
 }

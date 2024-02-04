@@ -15,17 +15,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package flavors
 
 import (
-	"os"
+	"context"
+	"time"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/internal/config"
+	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+const (
+	flushInterval   = 10 * time.Second
+	eventsThreshold = 75
+)
+
+// flavorBase configuration.
+type flavorBase struct {
+	ctx       context.Context //nolint:containedctx
+	cancel    context.CancelFunc
+	config    *config.Config
+	client    beat.Client
+	log       *logp.Logger
+	publisher *Publisher
 }

@@ -15,17 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package condition
 
 import (
-	"os"
-
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type IsLeader struct {
+	provider uniqueness.Manager
+}
+
+func NewIsLeader(le uniqueness.Manager) fetching.Condition {
+	return &IsLeader{
+		provider: le,
 	}
+}
+
+func (c *IsLeader) Condition() bool {
+	return c.provider.IsLeader()
+}
+
+func (c *IsLeader) Name() string {
+	return "is_leader_conditional_fetcher"
 }

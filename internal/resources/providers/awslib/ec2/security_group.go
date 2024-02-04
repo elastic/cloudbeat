@@ -15,17 +15,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package ec2
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type SecurityGroup struct {
+	types.SecurityGroup
+	awsAccount string
+	region     string
+}
+
+func (s SecurityGroup) GetResourceArn() string {
+	if s.SecurityGroup.GroupId == nil {
+		return ""
 	}
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:security-group/%s", s.region, s.awsAccount, *s.SecurityGroup.GroupId)
+}
+
+func (s SecurityGroup) GetResourceName() string {
+	if s.SecurityGroup.GroupName == nil {
+		return ""
+	}
+	return *s.SecurityGroup.GroupName
+}
+
+func (s SecurityGroup) GetResourceType() string {
+	return fetching.SecurityGroupType
+}
+
+func (s SecurityGroup) GetRegion() string {
+	return s.region
 }

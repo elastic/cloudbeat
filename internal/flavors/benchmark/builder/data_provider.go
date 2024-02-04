@@ -15,17 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package builder
 
 import (
-	"os"
+	"github.com/elastic/beats/v7/libbeat/beat"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
-}
+type dataProvider struct{}
+
+func (d dataProvider) EnrichEvent(_ *beat.Event, _ fetching.ResourceMetadata) error { return nil }

@@ -15,17 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package dataprovider
 
 import (
-	"os"
+	"github.com/elastic/beats/v7/libbeat/beat"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+type CommonDataProvider interface {
+	EnrichEvent(event *beat.Event, resource fetching.ResourceMetadata) error
+}
+
+type IdProvider interface {
+	GetId(resourceType string, resourceId string) string
 }

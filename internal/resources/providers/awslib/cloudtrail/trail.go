@@ -15,17 +15,35 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package cloudtrail
 
 import (
-	"os"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type TrailInfo struct {
+	Trail          types.Trail
+	Status         *cloudtrail.GetTrailStatusOutput
+	EventSelectors []types.EventSelector
+}
+
+func (t TrailInfo) GetResourceArn() string {
+	if t.Trail.TrailARN == nil {
+		return ""
 	}
+	return *t.Trail.TrailARN
+}
+
+func (t TrailInfo) GetResourceName() string {
+	if t.Trail.Name == nil {
+		return ""
+	}
+	return *t.Trail.Name
+}
+
+func (t TrailInfo) GetResourceType() string {
+	return fetching.TrailType
 }

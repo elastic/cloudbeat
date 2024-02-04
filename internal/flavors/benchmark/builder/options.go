@@ -15,17 +15,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package builder
 
 import (
-	"os"
+	"time"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/elastic/cloudbeat/internal/dataprovider"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type Option func(b *Builder)
+
+func WithManagerTimeout(timeout time.Duration) Option {
+	return func(b *Builder) {
+		b.managerTimeout = timeout
+	}
+}
+
+func WithIdProvider(idp dataprovider.IdProvider) Option {
+	return func(b *Builder) {
+		b.idp = idp
+	}
+}
+
+func WithBenchmarkDataProvider(cdp dataprovider.CommonDataProvider) Option {
+	return func(b *Builder) {
+		b.bdp = cdp
 	}
 }

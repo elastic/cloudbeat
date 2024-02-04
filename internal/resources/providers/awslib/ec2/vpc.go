@@ -15,17 +15,41 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
+package ec2
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/internal/include"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		os.Exit(1)
+type VpcInfo struct {
+	Vpc        types.Vpc       `json:"vpc"`
+	FlowLogs   []types.FlowLog `json:"flow_logs"`
+	awsAccount string
+	region     string
+}
+
+func (v VpcInfo) GetResourceArn() string {
+	if v.Vpc.VpcId == nil {
+		return ""
 	}
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, v.awsAccount, *v.Vpc.VpcId)
+}
+
+func (v VpcInfo) GetResourceName() string {
+	if v.Vpc.VpcId == nil {
+		return ""
+	}
+	return *v.Vpc.VpcId
+}
+
+func (v VpcInfo) GetResourceType() string {
+	return fetching.VpcType
+}
+
+func (v VpcInfo) GetRegion() string {
+	return v.region
 }
