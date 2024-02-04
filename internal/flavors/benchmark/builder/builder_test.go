@@ -61,7 +61,7 @@ func TestBase_Build_Success(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
-			path, err := filepath.Abs("../../../bundle.tar.gz")
+			path, err := filepath.Abs("../../../../bundle.tar.gz")
 			require.NoError(t, err)
 
 			resourceCh := make(chan fetching.ResourceInfo)
@@ -108,7 +108,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
-			path, err := filepath.Abs("../../../bundle.tar.gz")
+			path, err := filepath.Abs("../../../../bundle.tar.gz")
 			require.NoError(t, err)
 
 			resourceCh := make(chan fetching.ResourceInfo)
