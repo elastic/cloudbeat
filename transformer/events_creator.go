@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/gofrs/uuid"
 
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"

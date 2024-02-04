@@ -20,7 +20,7 @@ package common
 import (
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/version"
 )
 

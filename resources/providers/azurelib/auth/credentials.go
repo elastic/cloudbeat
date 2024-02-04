@@ -23,7 +23,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/internal/config"
 )
 
 type AzureFactoryConfig struct {

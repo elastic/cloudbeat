@@ -25,7 +25,7 @@ import (
 
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/internal/config"
 )
 
 type validator struct{}

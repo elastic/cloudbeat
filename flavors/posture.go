@@ -25,7 +25,7 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/flavors/benchmark"
 	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.

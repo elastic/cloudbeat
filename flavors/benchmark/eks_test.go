@@ -24,7 +24,7 @@ import (
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/internal/config"
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"

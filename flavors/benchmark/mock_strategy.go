@@ -20,7 +20,7 @@
 package benchmark
 
 import (
-	config "github.com/elastic/cloudbeat/config"
+	config "github.com/elastic/cloudbeat/internal/config"
 	builder "github.com/elastic/cloudbeat/flavors/benchmark/builder"
 
 	context "context"

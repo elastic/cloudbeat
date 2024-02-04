@@ -22,7 +22,7 @@ package auth
 import (
 	context "context"
 
-	config "github.com/elastic/cloudbeat/config"
+	config "github.com/elastic/cloudbeat/internal/config"
 
 	logp "github.com/elastic/elastic-agent-libs/logp"
 

@@ -22,7 +22,7 @@ package k8s
 import (
 	context "context"
 
-	config "github.com/elastic/cloudbeat/config"
+	config "github.com/elastic/cloudbeat/internal/config"
 
 	mock "github.com/stretchr/testify/mock"
 )
