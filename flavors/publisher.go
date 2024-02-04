@@ -19,10 +19,17 @@ package flavors
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
+)
+
+const (
+	ecsEventActionField = "event.action"
+	ecsEventActionValue = "publish-events"
+	ecsEventCountField  = "event.count"
 )
 
 type client interface {
@@ -88,7 +95,8 @@ func (p *Publisher) publish(events *[]beat.Event) {
 		return
 	}
 
-	p.log.Infof("Publishing %d events to elasticsearch", len(*events))
+	msg := fmt.Sprintf("Publishing %d events to elasticsearch", len(*events))
+	p.log.Infow(msg, ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events))
 	p.client.PublishAll(*events)
 	*events = nil
 }
