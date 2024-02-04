@@ -31,7 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/transformer"
+	"github.com/elastic/cloudbeat/internal/transformer"
 	"github.com/elastic/cloudbeat/version"
 )
 
