@@ -29,7 +29,7 @@ import (
 	"github.com/open-policy-agent/opa/sdk"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	dlogger "github.com/elastic/cloudbeat/evaluator/debug_logger"
+	dlogger "github.com/elastic/cloudbeat/internal/evaluator/debug_logger"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 

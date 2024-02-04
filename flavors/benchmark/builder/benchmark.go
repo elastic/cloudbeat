@@ -23,7 +23,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/pipeline"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )

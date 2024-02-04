@@ -24,7 +24,7 @@ import (
 
 	beat "github.com/elastic/beats/v7/libbeat/beat"
 
-	evaluator "github.com/elastic/cloudbeat/evaluator"
+	evaluator "github.com/elastic/cloudbeat/internal/evaluator"
 
 	mock "github.com/stretchr/testify/mock"
 )

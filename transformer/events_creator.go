@@ -30,7 +30,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
-	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 

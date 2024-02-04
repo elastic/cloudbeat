@@ -22,7 +22,7 @@ package builder
 import (
 	context "context"
 
-	evaluator "github.com/elastic/cloudbeat/evaluator"
+	evaluator "github.com/elastic/cloudbeat/internal/evaluator"
 	fetching "github.com/elastic/cloudbeat/resources/fetching"
 
 	mock "github.com/stretchr/testify/mock"
