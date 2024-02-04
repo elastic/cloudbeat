@@ -16,7 +16,7 @@
 
 #### Manual rules: 19/51 (37%)
 
-#### Integration Tests Coverage: 62/250 (25%)
+#### Integration Tests Coverage: 68/250 (27%)
 
 <details><summary><h3>Full Table 📋</h3></summary>
 
@@ -119,10 +119,10 @@
 |  [4.2.9](bundle/compliance/cis_k8s/rules/cis_4_2_9)  | Kubelet                                | Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture      | :white_check_mark: |                Passed :x: / Failed :x:                | Manual    |
 |                        5.1.1                         | RBAC and Service Accounts              | Ensure that the cluster-admin role is only used where required                                           |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                        5.1.2                         | RBAC and Service Accounts              | Minimize access to secrets                                                                               |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-|  [5.1.3](bundle/compliance/cis_k8s/rules/cis_5_1_3)  | RBAC and Service Accounts              | Minimize wildcard use in Roles and ClusterRoles                                                          | :white_check_mark: |                Passed :x: / Failed :x:                | Manual    |
+|  [5.1.3](bundle/compliance/cis_k8s/rules/cis_5_1_3)  | RBAC and Service Accounts              | Minimize wildcard use in Roles and ClusterRoles                                                          | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Manual    |
 |                        5.1.4                         | RBAC and Service Accounts              | Minimize access to create pods                                                                           |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-|  [5.1.5](bundle/compliance/cis_k8s/rules/cis_5_1_5)  | RBAC and Service Accounts              | Ensure that default service accounts are not actively used.                                              | :white_check_mark: |                Passed :x: / Failed :x:                | Manual    |
-|  [5.1.6](bundle/compliance/cis_k8s/rules/cis_5_1_6)  | RBAC and Service Accounts              | Ensure that Service Account Tokens are only mounted where necessary                                      | :white_check_mark: |                Passed :x: / Failed :x:                | Manual    |
+|  [5.1.5](bundle/compliance/cis_k8s/rules/cis_5_1_5)  | RBAC and Service Accounts              | Ensure that default service accounts are not actively used.                                              | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Manual    |
+|  [5.1.6](bundle/compliance/cis_k8s/rules/cis_5_1_6)  | RBAC and Service Accounts              | Ensure that Service Account Tokens are only mounted where necessary                                      | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Manual    |
 |                        5.1.7                         | RBAC and Service Accounts              | Avoid use of system:masters group                                                                        |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                        5.1.8                         | RBAC and Service Accounts              | Limit use of the Bind, Impersonate and Escalate permissions in the Kubernetes cluster                    |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                        5.2.1                         | Pod Security Standards                 | Ensure that the cluster has at least one active policy control mechanism in place                        |        :x:         |                Passed :x: / Failed :x:                | Manual    |

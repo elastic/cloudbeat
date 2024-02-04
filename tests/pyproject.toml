@@ -44,6 +44,7 @@ markers = [
     # test target markers
     "file_system_rules",
     "k8s_file_system_rules",
+    "k8s_object_psp_rules",
     "k8s_object_rules",
     "process_api_server_rules",
     "process_controller_manager_rules",

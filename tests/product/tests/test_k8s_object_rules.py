@@ -4,19 +4,20 @@ This module verifies correctness of retrieved findings by manipulating audit and
 """
 
 from datetime import datetime, timedelta
+from functools import partial
 import pytest
-from commonlib.utils import get_ES_evaluation
+from commonlib.utils import get_ES_evaluation, res_identifier
 
-from product.tests.data.k8s import fs_test_cases as k8s_fs_tc
+from product.tests.data.k8s import k8s_object_cases as k8s_objects_tc
 from product.tests.parameters import register_params, Parameters
+from .data.constants import RES_NAME
 
 
-@pytest.mark.k8s_file_system_rules
-def test_k8s_file_system_configuration(
+@pytest.mark.k8s_object_psp_rules
+def test_k8s_object_rules(
     kspm_client,
     cloudbeat_agent,
     rule_tag,
-    node_hostname,
     resource_name,
     expected,
 ):
@@ -26,26 +27,18 @@ def test_k8s_file_system_configuration(
     Setup and teardown actions are defined in data method.
     This test creates verifies that cloudbeat returns correct finding.
     @param rule_tag: Name of rule to be verified.
-    @param node_hostname: k8s node hostname
     @param resource_name: resource file name
     @param expected: Result to be found in finding evaluation field.
     @return: None - Test Pass / Fail result is generated.
     """
-    # pylint: disable=duplicate-code
-
-    # file_identifier = partial(res_identifier, RES_HOST_NAME, node_hostname)
-    def file_identifier(eval_resource):
-        try:
-            return eval_resource.host.name == node_hostname and eval_resource.resource.name == resource_name
-        except AttributeError:
-            return False
+    psp_identifier = partial(res_identifier, RES_NAME, resource_name)
 
     evaluation = get_ES_evaluation(
         elastic_client=kspm_client,
         timeout=cloudbeat_agent.findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=15),
-        resource_identifier=file_identifier,
+        resource_identifier=psp_identifier,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
@@ -53,10 +46,10 @@ def test_k8s_file_system_configuration(
 
 
 register_params(
-    test_k8s_file_system_configuration,
+    test_k8s_object_rules,
     Parameters(
-        ("rule_tag", "node_hostname", "resource_name", "expected"),
-        [*k8s_fs_tc.test_cases.values()],
-        ids=[*k8s_fs_tc.test_cases.keys()],
+        ("rule_tag", "resource_name", "expected"),
+        [*k8s_objects_tc.test_cases.values()],
+        ids=[*k8s_objects_tc.test_cases.keys()],
     ),
 )

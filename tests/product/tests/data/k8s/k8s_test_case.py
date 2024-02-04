@@ -21,3 +21,20 @@ class FileTestCase:
 
     def __len__(self):
         return len(astuple(self))
+
+
+@dataclass
+class ObjectTestCase:
+    """
+    Represents k8s object test case
+    """
+
+    rule_tag: str
+    resource_name: str
+    expected: str
+
+    def __iter__(self):
+        return iter(astuple(self))
+
+    def __len__(self):
+        return len(astuple(self))
