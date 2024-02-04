@@ -27,7 +27,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/flavors"
-	"github.com/elastic/cloudbeat/launcher"
+	"github.com/elastic/cloudbeat/internal/launcher"
 )
 
 func New(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
