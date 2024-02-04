@@ -24,7 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/evaluator"
-	"github.com/elastic/cloudbeat/pipeline"
+	"github.com/elastic/cloudbeat/internal/pipeline"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
