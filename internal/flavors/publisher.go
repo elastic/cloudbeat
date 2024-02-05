@@ -25,6 +25,12 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
+const (
+	ecsEventActionField = "event.action"
+	ecsEventActionValue = "publish-events"
+	ecsEventCountField  = "event.count"
+)
+
 type client interface {
 	PublishAll([]beat.Event)
 }
@@ -88,7 +94,8 @@ func (p *Publisher) publish(events *[]beat.Event) {
 		return
 	}
 
-	p.log.Infof("Publishing %d events to elasticsearch", len(*events))
+	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events)).
+		Infof("Publishing %d events to elasticsearch", len(*events))
 	p.client.PublishAll(*events)
 	*events = nil
 }
