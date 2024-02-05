@@ -19,7 +19,6 @@ package flavors
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -95,8 +94,8 @@ func (p *Publisher) publish(events *[]beat.Event) {
 		return
 	}
 
-	msg := fmt.Sprintf("Publishing %d events to elasticsearch", len(*events))
-	p.log.Infow(msg, ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events))
+	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events)).
+		Infof("Publishing %d events to elasticsearch", len(*events))
 	p.client.PublishAll(*events)
 	*events = nil
 }
