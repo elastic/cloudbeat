@@ -16,5 +16,3 @@
 // under the License.
 
 package licenses
-
-//go:generate go run ../dev-tools/cmd/license/license_generate.go
