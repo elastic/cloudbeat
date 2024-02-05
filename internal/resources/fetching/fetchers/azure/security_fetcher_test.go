@@ -58,40 +58,87 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 		},
 	}
 
-	expectedPair := typePair{
+	expectedPairContactsType := typePair{
 		Type:    fetching.MonitoringIdentity,
 		SubType: fetching.AzureSecurityContactsType,
 	}
 
+	expectedPairAutoProvisioningSettingsType := typePair{
+		Type:    fetching.MonitoringIdentity,
+		SubType: fetching.AzureAutoProvisioningSettingsType,
+	}
+
+	type mockInventoryResponse struct {
+		MockAssets []inventory.AzureAsset
+		MockError  error
+	}
+
+	// mockInventoryAssets per subscription id
+	type mockInventoryAssets struct {
+		MockSecurityContacts                 map[string]mockInventoryResponse
+		MockSecurityAutoProvisioningSettings map[string]mockInventoryResponse
+	}
+
 	tests := map[string]struct {
 		mockSubscriptions   []governance.Subscription
-		mockInventoryAssets []inventory.AzureAsset
-		mockInventoryError  error
+		mockInventoryAssets mockInventoryAssets
 		cycleMetadata       cycle.Metadata
 		expected            []fetching.ResourceInfo
 		expectedMetaData    []fetching.ResourceMetadata
 		expectedErr         bool
 	}{
 		"error": {
-			mockSubscriptions:   []governance.Subscription{subscriptionOne},
-			mockInventoryAssets: []inventory.AzureAsset{},
-			mockInventoryError:  errors.New("mock error"),
-			cycleMetadata:       newCycle(123),
-			expected:            nil,
-			expectedMetaData:    []fetching.ResourceMetadata{},
-			expectedErr:         true,
+			mockSubscriptions: []governance.Subscription{subscriptionOne},
+			mockInventoryAssets: mockInventoryAssets{
+				MockSecurityContacts: map[string]mockInventoryResponse{
+					subscriptionOne.ShortID: {
+						MockAssets: []inventory.AzureAsset{},
+						MockError:  errors.New("mock error"),
+					},
+				},
+				MockSecurityAutoProvisioningSettings: map[string]mockInventoryResponse{
+					subscriptionOne.ShortID: {
+						MockAssets: []inventory.AzureAsset{},
+						MockError:  errors.New("mock error"),
+					},
+				},
+			},
+			cycleMetadata:    newCycle(123),
+			expected:         nil,
+			expectedMetaData: []fetching.ResourceMetadata{},
+			expectedErr:      true,
 		},
 
 		"empty - batch should be returned": {
-			mockSubscriptions:   []governance.Subscription{subscriptionOne},
-			mockInventoryAssets: []inventory.AzureAsset{},
-			mockInventoryError:  nil,
-			cycleMetadata:       newCycle(123),
+			mockSubscriptions: []governance.Subscription{subscriptionOne},
+			mockInventoryAssets: mockInventoryAssets{
+				MockSecurityContacts: map[string]mockInventoryResponse{
+					"sub1": {
+						MockAssets: []inventory.AzureAsset{},
+						MockError:  nil,
+					},
+				},
+				MockSecurityAutoProvisioningSettings: map[string]mockInventoryResponse{
+					"sub1": {
+						MockAssets: []inventory.AzureAsset{},
+						MockError:  nil,
+					},
+				},
+			},
+			cycleMetadata: newCycle(123),
 			expected: []fetching.ResourceInfo{
 				{
 					CycleMetadata: newCycle(123),
 					Resource: &AzureBatchResource{
-						typePair:     expectedPair,
+						typePair:     expectedPairContactsType,
+						Subscription: subscriptionOne,
+						Assets:       []inventory.AzureAsset{},
+					},
+				},
+				{
+					CycleMetadata: newCycle(123),
+					Resource: &AzureBatchResource{
+						typePair:     expectedPairAutoProvisioningSettingsType,
 						Subscription: subscriptionOne,
 						Assets:       []inventory.AzureAsset{},
 					},
@@ -99,10 +146,23 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 			},
 			expectedMetaData: []fetching.ResourceMetadata{
 				{
-					ID:      "azure-security-contacts-sub1",
+					ID:      fetching.AzureSecurityContactsType + "-sub1",
 					Type:    "monitoring",
 					SubType: fetching.AzureSecurityContactsType,
-					Name:    "azure-security-contacts-sub1",
+					Name:    fetching.AzureSecurityContactsType + "-sub1",
+					Region:  "global",
+					CloudAccountMetadata: fetching.CloudAccountMetadata{
+						AccountId:        "sub1",
+						AccountName:      "subName1",
+						OrganisationId:   "",
+						OrganizationName: "",
+					},
+				},
+				{
+					ID:      fetching.AzureAutoProvisioningSettingsType + "-sub1",
+					Type:    "monitoring",
+					SubType: fetching.AzureAutoProvisioningSettingsType,
+					Name:    fetching.AzureAutoProvisioningSettingsType + "-sub1",
 					Region:  "global",
 					CloudAccountMetadata: fetching.CloudAccountMetadata{
 						AccountId:        "sub1",
@@ -117,18 +177,41 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 
 		"2 subs": {
 			mockSubscriptions: []governance.Subscription{subscriptionOne, subscriptionTwo},
-			mockInventoryAssets: []inventory.AzureAsset{
-				{Id: "id1", Name: "name1", SubscriptionId: "sub1"},
-				{Id: "id2", Name: "name2", SubscriptionId: "sub1"},
-				{Id: "id3", Name: "name3", SubscriptionId: "sub2"},
+			mockInventoryAssets: mockInventoryAssets{
+				MockSecurityContacts: map[string]mockInventoryResponse{
+					"sub1": {
+						MockAssets: []inventory.AzureAsset{
+							{Id: "id1", Name: "name1", SubscriptionId: "sub1"},
+							{Id: "id2", Name: "name2", SubscriptionId: "sub1"},
+						},
+						MockError: nil,
+					},
+					"sub2": {
+						MockAssets: []inventory.AzureAsset{
+							{Id: "id3", Name: "name3", SubscriptionId: "sub2"},
+						},
+						MockError: nil,
+					},
+				},
+				MockSecurityAutoProvisioningSettings: map[string]mockInventoryResponse{
+					"sub1": {
+						MockAssets: []inventory.AzureAsset{},
+						MockError:  nil,
+					},
+					"sub2": {
+						MockAssets: []inventory.AzureAsset{
+							{Id: "id4", Name: "name4", SubscriptionId: "sub2"},
+						},
+						MockError: nil,
+					},
+				},
 			},
-			mockInventoryError: nil,
-			cycleMetadata:      newCycle(124),
+			cycleMetadata: newCycle(124),
 			expected: []fetching.ResourceInfo{
 				{
 					CycleMetadata: newCycle(124),
 					Resource: &AzureBatchResource{
-						typePair:     expectedPair,
+						typePair:     expectedPairContactsType,
 						Subscription: subscriptionOne,
 						Assets: []inventory.AzureAsset{
 							{Id: "id1", Name: "name1", SubscriptionId: "sub1"},
@@ -139,20 +222,38 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 				{
 					CycleMetadata: newCycle(124),
 					Resource: &AzureBatchResource{
-						typePair:     expectedPair,
+						typePair:     expectedPairContactsType,
 						Subscription: subscriptionTwo,
 						Assets: []inventory.AzureAsset{
 							{Id: "id3", Name: "name3", SubscriptionId: "sub2"},
 						},
 					},
 				},
+				{
+					CycleMetadata: newCycle(124),
+					Resource: &AzureBatchResource{
+						typePair:     expectedPairAutoProvisioningSettingsType,
+						Subscription: subscriptionOne,
+						Assets:       []inventory.AzureAsset{},
+					},
+				},
+				{
+					CycleMetadata: newCycle(124),
+					Resource: &AzureBatchResource{
+						typePair:     expectedPairAutoProvisioningSettingsType,
+						Subscription: subscriptionTwo,
+						Assets: []inventory.AzureAsset{
+							{Id: "id4", Name: "name4", SubscriptionId: "sub2"},
+						},
+					},
+				},
 			},
 			expectedMetaData: []fetching.ResourceMetadata{
 				{
-					ID:      "azure-security-contacts-sub2",
+					ID:      fetching.AzureSecurityContactsType + "-sub2",
 					Type:    "monitoring",
 					SubType: fetching.AzureSecurityContactsType,
-					Name:    "azure-security-contacts-sub2",
+					Name:    fetching.AzureSecurityContactsType + "-sub2",
 					Region:  "global",
 					CloudAccountMetadata: fetching.CloudAccountMetadata{
 						AccountId:        "sub2",
@@ -162,10 +263,36 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 					},
 				},
 				{
-					ID:      "azure-security-contacts-sub1",
+					ID:      fetching.AzureSecurityContactsType + "-sub1",
 					Type:    "monitoring",
 					SubType: fetching.AzureSecurityContactsType,
-					Name:    "azure-security-contacts-sub1",
+					Name:    fetching.AzureSecurityContactsType + "-sub1",
+					Region:  "global",
+					CloudAccountMetadata: fetching.CloudAccountMetadata{
+						AccountId:        "sub1",
+						AccountName:      "subName1",
+						OrganisationId:   "",
+						OrganizationName: "",
+					},
+				},
+				{
+					ID:      fetching.AzureAutoProvisioningSettingsType + "-sub2",
+					Type:    "monitoring",
+					SubType: fetching.AzureAutoProvisioningSettingsType,
+					Name:    fetching.AzureAutoProvisioningSettingsType + "-sub2",
+					Region:  "global",
+					CloudAccountMetadata: fetching.CloudAccountMetadata{
+						AccountId:        "sub2",
+						AccountName:      "subName2",
+						OrganisationId:   "",
+						OrganizationName: "",
+					},
+				},
+				{
+					ID:      fetching.AzureAutoProvisioningSettingsType + "-sub1",
+					Type:    "monitoring",
+					SubType: fetching.AzureAutoProvisioningSettingsType,
+					Name:    fetching.AzureAutoProvisioningSettingsType + "-sub1",
 					Region:  "global",
 					CloudAccountMetadata: fetching.CloudAccountMetadata{
 						AccountId:        "sub1",
@@ -192,13 +319,12 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 
 			m.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(subscriptions, nil).Once()
 
-			perSub := lo.GroupBy(tc.mockInventoryAssets, func(item inventory.AzureAsset) string { return item.SubscriptionId })
-			for _, sid := range tc.mockSubscriptions {
-				l := perSub[sid.ShortID]
-				if l == nil {
-					l = []inventory.AzureAsset{}
-				}
-				m.EXPECT().ListSecurityContacts(mock.Anything, sid.ShortID).Return(l, tc.mockInventoryError).Once()
+			for subID, mockResponse := range tc.mockInventoryAssets.MockSecurityContacts {
+				m.EXPECT().ListSecurityContacts(mock.Anything, subID).Return(mockResponse.MockAssets, mockResponse.MockError).Once()
+			}
+
+			for subID, mockResponse := range tc.mockInventoryAssets.MockSecurityAutoProvisioningSettings {
+				m.EXPECT().ListAutoProvisioningSettings(mock.Anything, subID).Return(mockResponse.MockAssets, mockResponse.MockError).Once()
 			}
 
 			ch := make(chan fetching.ResourceInfo, 100)
@@ -222,7 +348,7 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 			sortResourceInfoSlice(tc.expected)
 			sortResourceInfoSlice(got)
 
-			assert.Equal(t, tc.expected, got)
+			assert.ElementsMatch(t, tc.expected, got, "ResourceInfo slice mismatch")
 
 			for _, resourceInfo := range got {
 				elm, err := resourceInfo.GetElasticCommonData()

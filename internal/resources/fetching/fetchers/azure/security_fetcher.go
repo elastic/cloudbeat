@@ -44,6 +44,11 @@ func NewAzureSecurityAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInf
 	}
 }
 
+var AzureSecurityAssetTypeToTypePair = map[string]typePair{
+	inventory.SecurityContactsAssetType:            newPair(fetching.AzureSecurityContactsType, fetching.MonitoringIdentity),
+	inventory.SecurityAutoProvisioningSettingsType: newPair(fetching.AzureAutoProvisioningSettingsType, fetching.MonitoringIdentity),
+}
+
 func (f *AzureSecurityAssetFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting AzureSecurityAssetFetcher.Fetch")
 
@@ -52,36 +57,39 @@ func (f *AzureSecurityAssetFetcher) Fetch(ctx context.Context, cycleMetadata cyc
 		return fmt.Errorf("error fetching subscription information: %w", err)
 	}
 
+	fetches := map[string]func(context.Context, string) ([]inventory.AzureAsset, error){
+		inventory.SecurityAutoProvisioningSettingsType: f.provider.ListAutoProvisioningSettings,
+		inventory.SecurityContactsAssetType:            f.provider.ListSecurityContacts,
+	}
+
 	var errs []error
-
 	for _, sub := range subscriptions {
-		securityContacts, err := f.provider.ListSecurityContacts(ctx, sub.ShortID)
-		if err != nil {
-			f.log.Errorf("AzureSecurityAssetFetcher.Fetch failed to fetch contacts for subscription %s: %s", sub.ShortID, err.Error())
-			errs = append(errs, err)
-			continue
-		}
-		if securityContacts == nil {
-			securityContacts = []inventory.AzureAsset{}
-		}
+		for assetType, fn := range fetches {
+			securityContacts, err := fn(ctx, sub.ShortID)
+			if err != nil {
+				f.log.Errorf("AzureSecurityAssetFetcher.Fetch failed to fetch %s for subscription %s: %s", assetType, sub.ShortID, err.Error())
+				errs = append(errs, err)
+				continue
+			}
+			if securityContacts == nil {
+				securityContacts = []inventory.AzureAsset{}
+			}
 
-		select {
-		case <-ctx.Done():
-			err := ctx.Err()
-			f.log.Infof("AzureSecurityAssetFetcher.Fetch context err: %s", err.Error())
-			errs = append(errs, err)
-			return errors.Join(errs...)
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cycleMetadata,
-			Resource: &AzureBatchResource{
-				typePair: typePair{
-					Type:    fetching.MonitoringIdentity,
-					SubType: fetching.AzureSecurityContactsType,
+			select {
+			case <-ctx.Done():
+				err := ctx.Err()
+				f.log.Infof("AzureSecurityAssetFetcher.Fetch context err: %s", err.Error())
+				errs = append(errs, err)
+				return errors.Join(errs...)
+			case f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cycleMetadata,
+				Resource: &AzureBatchResource{
+					typePair:     AzureSecurityAssetTypeToTypePair[assetType],
+					Assets:       securityContacts,
+					Subscription: sub,
 				},
-				Assets:       securityContacts,
-				Subscription: sub,
-			},
-		}:
+			}:
+			}
 		}
 	}
 

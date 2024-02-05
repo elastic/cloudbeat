@@ -1,4 +1,4 @@
-package compliance.cis_azure.rules.cis_2_1_18
+package compliance.cis_azure.rules.cis_2_1_19
 
 import data.cis_azure.test_data
 import data.compliance.policy.azure.data_adapter
@@ -8,47 +8,32 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({
-			"state": "On",
-			"roles": ["Admin"],
-		}),
+		{"emails": ""},
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({
-			"state": "Off",
-			"roles": ["Owner"],
-		}),
+		{"emails": null},
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({"state": "On"}),
+		{},
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"non-default",
-		prop_notification_by_role({
-			"state": "On",
-			"roles": ["Owner"],
-		}),
+		{"emails": "test@test.org"},
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([
 		test_data.generate_single_security_contact(
 			"non-default",
-			prop_notification_by_role({
-				"state": "On",
-				"roles": ["Owner"],
-			}),
+			{"emails": "test@test.org"},
 		),
 		test_data.generate_single_security_contact(
 			"default",
-			prop_notification_by_role({
-				"state": "On",
-				"roles": ["Admin"],
-			}),
+			{},
 		),
 	])
 }
@@ -56,34 +41,22 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({
-			"state": "On",
-			"roles": ["Owner"],
-		}),
+		{"emails": "test@test.org"},
 	)])
 
 	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_notification_by_role({
-			"state": "On",
-			"roles": ["Owner", "Admin"],
-		}),
+		{"emails": "test@test.org,test2@test.org"},
 	)])
 
 	eval_pass with input as test_data.generate_security_contacts([
 		test_data.generate_single_security_contact(
 			"non-default",
-			prop_notification_by_role({
-				"state": "On",
-				"roles": ["Admin"],
-			}),
+			{},
 		),
 		test_data.generate_single_security_contact(
 			"default",
-			prop_notification_by_role({
-				"state": "On",
-				"roles": ["Owner"],
-			}),
+			{"emails": "test@test.org"},
 		),
 	])
 }

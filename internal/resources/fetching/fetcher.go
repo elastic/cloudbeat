@@ -77,6 +77,7 @@ const (
 	AzurePostgreSQLDBType              = "azure-postgresql-server-db"
 	AzureFlexiblePostgreSQLDBType      = "azure-flexible-postgresql-server-db"
 	AzureSecurityContactsType          = "azure-security-contacts"
+	AzureAutoProvisioningSettingsType  = "azure-security-auto-provisioning-settings"
 	AzureSQLServerType                 = "azure-sql-server"
 	AzureStorageAccountType            = "azure-storage-account"
 	AzureVMType                        = "azure-vm"
