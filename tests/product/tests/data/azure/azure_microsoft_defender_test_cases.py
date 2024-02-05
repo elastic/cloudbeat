@@ -10,6 +10,7 @@ from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_2_1_15 = "CIS 2.1.15"
 CIS_2_1_18 = "CIS 2.1.18"
+CIS_2_1_19 = "CIS 2.1.19"
 CIS_2_1_20 = "CIS 2.1.20"
 
 cis_azure_2_1_15_fail = AzureServiceCase(
@@ -20,6 +21,12 @@ cis_azure_2_1_15_fail = AzureServiceCase(
 
 cis_azure_2_1_18_pass = AzureServiceCase(
     rule_tag=CIS_2_1_18,
+    case_identifier="azure-security-contacts-ef111ee2-6c89-4b09-92c6-5c2321f888df",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_azure_2_1_19_pass = AzureServiceCase(
+    rule_tag=CIS_2_1_19,
     case_identifier="azure-security-contacts-ef111ee2-6c89-4b09-92c6-5c2321f888df",
     expected=RULE_PASS_STATUS,
 )
@@ -38,6 +45,10 @@ cis_azure_2_1_18 = {
     "2.1.18 Ensure security alert emails to subscription owners expect: passed": cis_azure_2_1_18_pass,
 }
 
+cis_azure_2_1_19 = {
+    "2.1.19 Ensure additional email addresses is configured expect: passed": cis_azure_2_1_19_pass,
+}
+
 cis_azure_2_1_20 = {
     "2.1.20 Ensure that notification alert severity is set to 'High' expect: passed": cis_azure_2_1_20_pass,
 }
@@ -46,5 +57,6 @@ cis_azure_2_1_20 = {
 test_cases = {
     **cis_azure_2_1_15,
     **cis_azure_2_1_18,
+    **cis_azure_2_1_19,
     **cis_azure_2_1_20,
 }
