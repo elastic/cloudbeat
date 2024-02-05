@@ -138,7 +138,7 @@ func TestListSecurityContacts(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
 
-			mockAzure := newMockSecurityContactsClient(t)
+			mockAzure := newMockSecurityClientWrapper(t)
 			mockAzure.EXPECT().ListSecurityContacts(mock.Anything, tc.inputSubID).Return(tc.mockReturn, tc.mockReturnError)
 
 			prov := securityContactsProvider{
@@ -147,6 +147,128 @@ func TestListSecurityContacts(t *testing.T) {
 			}
 
 			got, gotErr := prov.ListSecurityContacts(context.Background(), tc.inputSubID)
+			if tc.expectError {
+				require.Error(t, gotErr)
+			} else {
+				require.NoError(t, gotErr)
+			}
+
+			require.Equal(t, tc.expected, got)
+		})
+	}
+}
+
+func TestListAutoProvisioningSettings(t *testing.T) {
+	resourceType := "Microsoft.Security/autoProvisioningSettings"
+
+	responses := func(r ...armsecurity.AutoProvisioningSettingsClientListResponse) []armsecurity.AutoProvisioningSettingsClientListResponse {
+		return r
+	}
+
+	response := func(s ...*armsecurity.AutoProvisioningSetting) armsecurity.AutoProvisioningSettingsClientListResponse {
+		return armsecurity.AutoProvisioningSettingsClientListResponse{
+			AutoProvisioningSettingList: armsecurity.AutoProvisioningSettingList{
+				Value: s,
+			},
+		}
+	}
+
+	settings := func(id, name string, autoProvision *string) *armsecurity.AutoProvisioningSetting {
+		a := &armsecurity.AutoProvisioningSetting{
+			ID:   to.Ptr(id),
+			Name: to.Ptr(name),
+			Type: to.Ptr(resourceType),
+		}
+
+		if autoProvision != nil {
+			a.Properties = &armsecurity.AutoProvisioningSettingProperties{
+				AutoProvision: (*armsecurity.AutoProvision)(autoProvision),
+			}
+		}
+
+		return a
+	}
+
+	tests := map[string]struct {
+		inputSubID      string
+		mockReturn      []armsecurity.AutoProvisioningSettingsClientListResponse
+		mockReturnError error
+		expected        []AzureAsset
+		expectError     bool
+	}{
+		"nil": {
+			inputSubID:      "sub1",
+			mockReturn:      responses(),
+			mockReturnError: nil,
+			expected:        []AzureAsset{},
+			expectError:     false,
+		},
+		"single contact": {
+			inputSubID: "sub1",
+			mockReturn: responses(
+				response(settings("id1", "default", to.Ptr("On"))),
+			),
+			mockReturnError: nil,
+			expected: []AzureAsset{
+				{
+					Id:             "id1",
+					Name:           "default",
+					SubscriptionId: "sub1",
+					Type:           "microsoft.security/autoprovisioningsettings",
+					Properties: map[string]any{
+						"autoProvision": (*armsecurity.AutoProvision)(to.Ptr("On")),
+					},
+				},
+			},
+			expectError: false,
+		},
+		"multi contact": {
+			inputSubID: "sub1",
+			mockReturn: responses(
+				response(
+					settings("id1", "default", to.Ptr("On")),
+					settings("id2", "non-default", to.Ptr("Off")),
+				),
+			),
+			mockReturnError: nil,
+			expected: []AzureAsset{
+				{
+					Id:             "id1",
+					Name:           "default",
+					SubscriptionId: "sub1",
+					Type:           "microsoft.security/autoprovisioningsettings",
+					Properties: map[string]any{
+						"autoProvision": (*armsecurity.AutoProvision)(to.Ptr("On")),
+					},
+				},
+				{
+					Id:             "id2",
+					Name:           "non-default",
+					SubscriptionId: "sub1",
+					Type:           "microsoft.security/autoprovisioningsettings",
+					Properties: map[string]any{
+						"autoProvision": (*armsecurity.AutoProvision)(to.Ptr("Off")),
+					},
+				},
+			},
+			expectError: false,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			log := testhelper.NewLogger(t)
+
+			mockAzure := newMockSecurityClientWrapper(t)
+			mockAzure.EXPECT().ListAutoProvisioningSettings(mock.Anything, tc.inputSubID).Return(tc.mockReturn, tc.mockReturnError)
+
+			prov := securityContactsProvider{
+				log:    log,
+				client: mockAzure,
+			}
+
+			got, gotErr := prov.ListAutoProvisioningSettings(context.Background(), tc.inputSubID)
 			if tc.expectError {
 				require.Error(t, gotErr)
 			} else {

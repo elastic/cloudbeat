@@ -268,6 +268,61 @@ func (_c *MockProviderAPI_ListAllAssetTypesByName_Call) RunAndReturn(run func(co
 	return _c
 }
 
+// ListAutoProvisioningSettings provides a mock function with given fields: ctx, subscriptionID
+func (_m *MockProviderAPI) ListAutoProvisioningSettings(ctx context.Context, subscriptionID string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, subscriptionID)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, subscriptionID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, subscriptionID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, subscriptionID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListAutoProvisioningSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAutoProvisioningSettings'
+type MockProviderAPI_ListAutoProvisioningSettings_Call struct {
+	*mock.Call
+}
+
+// ListAutoProvisioningSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - subscriptionID string
+func (_e *MockProviderAPI_Expecter) ListAutoProvisioningSettings(ctx interface{}, subscriptionID interface{}) *MockProviderAPI_ListAutoProvisioningSettings_Call {
+	return &MockProviderAPI_ListAutoProvisioningSettings_Call{Call: _e.mock.On("ListAutoProvisioningSettings", ctx, subscriptionID)}
+}
+
+func (_c *MockProviderAPI_ListAutoProvisioningSettings_Call) Run(run func(ctx context.Context, subscriptionID string)) *MockProviderAPI_ListAutoProvisioningSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListAutoProvisioningSettings_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListAutoProvisioningSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListAutoProvisioningSettings_Call) RunAndReturn(run func(context.Context, string) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListAutoProvisioningSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListDiagnosticSettingsAssetTypes provides a mock function with given fields: ctx, cycleMetadata, subscriptionIDs
 func (_m *MockProviderAPI) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, cycleMetadata, subscriptionIDs)

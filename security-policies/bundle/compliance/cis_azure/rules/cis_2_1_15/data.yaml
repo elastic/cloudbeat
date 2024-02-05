@@ -1,0 +1,90 @@
+metadata:
+  id: 69ffe7f6-bc09-5019-ba77-a2f81169e9de
+  name: Ensure that Auto provisioning of 'Log Analytics agent for Azure VMs' is Set
+    to 'On'
+  profile_applicability: '* Level 1'
+  description: Enable automatic provisioning of the monitoring agent to collect security
+    data.
+  rationale: |-
+    When `Log Analytics agent for Azure VMs` is turned on, Microsoft Defender for Cloud provisions the Microsoft Monitoring Agent on all existing supported Azure virtual machines and any new ones that are created.
+    The Microsoft Monitoring Agent scans for various security-related configurations and events such as system updates, OS vulnerabilities, endpoint protection, and provides alerts.
+  audit: |-
+    **From Azure Portal**
+
+    1. From Azure Home select the Portal Menu
+    2. Select `Microsoft Defender for Cloud`
+    3. Then `Environment Settings`
+    4. Select a subscription
+    5. Click on `Settings & Monitoring`
+    6. Ensure that `Log Analytics agent/Azure Monitor agent` is set to `On`
+
+    Repeat the above for any additional subscriptions.
+
+    **From Azure CLI**
+
+    Ensure the output of the below command is `On`
+
+    ```
+    az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X GET -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/<subscriptionID>/providers/Microsoft.Security/autoProvisioningSettings?api-version=2017-08-01-preview' | jq '.|.value[] | select(.name=="default")'|jq '.properties.autoProvision'
+    ```
+
+    **Using PowerShell**
+    ```
+    Connect-AzAccount
+    Get-AzSecurityAutoProvisioningSetting
+    ```
+    Ensure output for `Id Name AutoProvision` is `/subscriptions//providers/Microsoft.Security/autoProvisioningSettings/default default On`
+  remediation: |-
+    **From Azure Portal**
+
+    1. From Azure Home select the Portal Menu
+    2. Select `Microsoft Defender for Cloud`
+    3. Select `Environment Settings`
+    4. Select a subscription
+    5. Click on `Settings & Monitoring`
+    6. Ensure that `Log Analytics agent for Azure VMs` is set to `On`
+
+    Repeat the above for any additional subscriptions.
+
+    **From Azure CLI**
+
+    Use the below command to set `Automatic provisioning of monitoring agent` to `On`.
+    ```
+    az account get-access-token --query "{subscription:subscription,accessToken:accessToken}" --out tsv | xargs -L1 bash -c 'curl -X PUT -H "Authorization: Bearer $1" -H "Content-Type: application/json" https://management.azure.com/subscriptions/subscriptionID/providers/Microsoft.Security/autoProvisioningSettings/default?api-version=2017-08-01-preview -d@"input.json"'
+    ```
+    Where `input.json` contains the Request body json data as mentioned below.
+    ```
+     {
+     "id": "/subscriptions/<Your_Subscription_Id>/providers/Microsoft.Security/autoProvisioningSettings/default",
+     "name": "default",
+     "type": "Microsoft.Security/autoProvisioningSettings",
+     "properties": {
+     "autoProvision": "On"
+     }
+    }
+    ```
+  impact: ''
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/security-center/security-center-data-security
+    2. https://docs.microsoft.com/en-us/azure/security-center/security-center-enable-data-collection
+    3. https://msdn.microsoft.com/en-us/library/mt704062.aspx
+    4. https://msdn.microsoft.com/en-us/library/mt704063.aspx
+    5. https://docs.microsoft.com/en-us/rest/api/securitycenter/autoprovisioningsettings/list
+    6. https://docs.microsoft.com/en-us/rest/api/securitycenter/autoprovisioningsettings/create
+    7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-logging-threat-detection#lt-5-centralize-security-log-management-and-analysis
+    8. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-logging-threat-detection#lt-3-enable-logging-for-security-investigation
+    9. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-incident-response#ir-2-preparation--setup-incident-notification
+  section: Microsoft Defender for Cloud
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 2.1.15
+  - Microsoft Defender for Cloud
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 2.1.15
+    posture_type: cspm
