@@ -38,6 +38,10 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: "cloudbeat-test"
 
+kindNode:
+  # Node to be used for the test pod deployment
+  name: kind-multi-control-plane
+
 podAnnotations: {}
 
 podSecurityContext:
