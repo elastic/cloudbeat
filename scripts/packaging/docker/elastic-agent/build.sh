@@ -6,7 +6,7 @@
 
 set -eu
 
-REPO_ROOT=$(realpath "$(dirname "$(realpath dev-tools/packaging/docker/elastic-agent/build.sh)")"/../../../..)
+REPO_ROOT=$(realpath "$(dirname "$(realpath scripts/packaging/docker/elastic-agent/build.sh)")"/../../../..)
 VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
 DEFAULT_IMAGE_TAG="${DEFAULT_IMAGE_TAG:-${VERSION}-SNAPSHOT}"
 BASE_IMAGE="${BASE_IMAGE:-docker.elastic.co/beats/elastic-agent:$DEFAULT_IMAGE_TAG}"
@@ -19,7 +19,7 @@ STACK_VERSION=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vers
 VCS_REF=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vcs-ref"}}' $BASE_IMAGE)
 
 docker buildx build \
-    -f $REPO_ROOT/dev-tools/packaging/docker/elastic-agent/Dockerfile \
+    -f $REPO_ROOT/scripts/packaging/docker/elastic-agent/Dockerfile \
     --build-arg ELASTIC_AGENT_IMAGE=$BASE_IMAGE \
     --build-arg STACK_VERSION=$STACK_VERSION \
     --build-arg VCS_REF_SHORT=${VCS_REF:0:6} \
