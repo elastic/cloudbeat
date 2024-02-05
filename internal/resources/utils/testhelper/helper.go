@@ -96,7 +96,7 @@ func NewLogger(t *testing.T) *logp.Logger {
 func NewObserverLogger(t *testing.T) *logp.Logger {
 	t.Helper()
 
-	require.NoError(t, logp.TestingSetup(logp.ToObserverOutput()))
+	require.NoError(t, logp.DevelopmentSetup(logp.ToObserverOutput()))
 
 	return logp.NewLogger(t.Name())
 }
