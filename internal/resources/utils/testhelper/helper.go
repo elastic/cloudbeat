@@ -18,6 +18,7 @@
 package testhelper
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -85,10 +86,14 @@ func CreateMockClients[T any](client T, regions []string) map[string]T {
 	return m
 }
 
+var once sync.Once
+
 func NewLogger(t *testing.T) *logp.Logger {
 	t.Helper()
 
-	require.NoError(t, logp.TestingSetup(logp.ToObserverOutput()))
+	once.Do(func() {
+		require.NoError(t, logp.TestingSetup(logp.ToObserverOutput()))
+	})
 
 	return logp.NewLogger(t.Name())
 }
