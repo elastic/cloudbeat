@@ -140,7 +140,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			log := testhelper.NewLogger(t)
+			log := testhelper.NewObserverLogger(t)
 			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
 			defer cancel()

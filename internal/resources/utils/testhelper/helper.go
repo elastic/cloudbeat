@@ -88,6 +88,14 @@ func CreateMockClients[T any](client T, regions []string) map[string]T {
 func NewLogger(t *testing.T) *logp.Logger {
 	t.Helper()
 
+	require.NoError(t, logp.TestingSetup())
+
+	return logp.NewLogger(t.Name())
+}
+
+func NewObserverLogger(t *testing.T) *logp.Logger {
+	t.Helper()
+
 	require.NoError(t, logp.TestingSetup(logp.ToObserverOutput()))
 
 	return logp.NewLogger(t.Name())
