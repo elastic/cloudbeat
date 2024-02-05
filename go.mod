@@ -38,7 +38,7 @@ require (
 	github.com/aws/smithy-go v1.15.0
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240129074943-cf731e633992
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240204092129-5e431f32119e
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.6
 	github.com/elastic/elastic-agent-client/v7 v7.5.0
@@ -217,7 +217,7 @@ require (
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.3.0 // indirect
 	github.com/elastic/go-structform v0.0.10 // indirect
-	github.com/elastic/go-sysinfo v1.11.1 // indirect
+	github.com/elastic/go-sysinfo v1.12.0 // indirect
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/elazarl/goproxy/ext v0.0.0-20230731152917-f99041a5c027 // indirect
