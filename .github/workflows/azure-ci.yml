@@ -1,14 +1,15 @@
 name: CIS-AZURE-CI
 
 on:
-  # TODO: Remove after testing
-  workflow_dispatch:
-    inputs:
   pull_request_target:
     branches:
       - main
       - "[0-9]+.[0-9]+"
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
 
 jobs:
   Run-CSPM-AZURE-Tests:
@@ -48,8 +49,7 @@ jobs:
           security-enabled: false
 
       - name: Elasticsearch disable dynamic mapping for findings
-        run: |
-          curl -s -XPUT http://localhost:9200/_index_template/common_template -H 'Content-Type: application/json' -d '{ "index_patterns": ["logs-cloud_security_posture.findings*"], "priority": 500, "template": { "mappings": { "dynamic": false, "properties": { "resource": { "dynamic": false, "properties": { "type": { "type": "keyword" } } }, "result": { "dynamic": false, "properties": { "evaluation": { "type": "keyword" } } }, "rule": { "dynamic": false, "properties": { "benchmark": { "dynamic": false, "properties": { "id": { "type": "keyword" } } }, "tags": { "type": "keyword" } } }, "agent": { "dynamic": false, "properties": { "id": { "type": "keyword" }, "version": { "type": "keyword" } } }, "@timestamp": { "type": "date" } } } } }'
+        run: ./.ci/scripts/disable_dynamic_mapping.sh
 
       - name: Run cloudbeat in background
         env:
