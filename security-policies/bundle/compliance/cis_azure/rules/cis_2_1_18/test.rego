@@ -6,55 +6,85 @@ import data.lib.test
 import future.keywords.if
 
 test_violation if {
-	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact("default", {
-		"state": "On",
-		"roles": ["Admin"],
-	})])
-
-	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact("default", {
-		"state": "Off",
-		"roles": ["Owner"],
-	})])
-
-	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact("default", {"state": "On"})])
-
-	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact("non-default", {
-		"state": "On",
-		"roles": ["Owner"],
-	})])
-
-	eval_fail with input as test_data.generate_security_contacts([
-		test_data.generate_single_security_contact("non-default", {
-			"state": "On",
-			"roles": ["Owner"],
-		}),
-		test_data.generate_single_security_contact("default", {
+	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"default",
+		prop_notification_by_role({
 			"state": "On",
 			"roles": ["Admin"],
 		}),
+	)])
+
+	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"default",
+		prop_notification_by_role({
+			"state": "Off",
+			"roles": ["Owner"],
+		}),
+	)])
+
+	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"default",
+		prop_notification_by_role({"state": "On"}),
+	)])
+
+	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"non-default",
+		prop_notification_by_role({
+			"state": "On",
+			"roles": ["Owner"],
+		}),
+	)])
+
+	eval_fail with input as test_data.generate_security_contacts([
+		test_data.generate_single_security_contact(
+			"non-default",
+			prop_notification_by_role({
+				"state": "On",
+				"roles": ["Owner"],
+			}),
+		),
+		test_data.generate_single_security_contact(
+			"default",
+			prop_notification_by_role({
+				"state": "On",
+				"roles": ["Admin"],
+			}),
+		),
 	])
 }
 
 test_pass if {
-	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact("default", {
-		"state": "On",
-		"roles": ["Owner"],
-	})])
-
-	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact("default", {
-		"state": "On",
-		"roles": ["Owner", "Admin"],
-	})])
-
-	eval_pass with input as test_data.generate_security_contacts([
-		test_data.generate_single_security_contact("non-default", {
-			"state": "On",
-			"roles": ["Admin"],
-		}),
-		test_data.generate_single_security_contact("default", {
+	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"default",
+		prop_notification_by_role({
 			"state": "On",
 			"roles": ["Owner"],
 		}),
+	)])
+
+	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
+		"default",
+		prop_notification_by_role({
+			"state": "On",
+			"roles": ["Owner", "Admin"],
+		}),
+	)])
+
+	eval_pass with input as test_data.generate_security_contacts([
+		test_data.generate_single_security_contact(
+			"non-default",
+			prop_notification_by_role({
+				"state": "On",
+				"roles": ["Admin"],
+			}),
+		),
+		test_data.generate_single_security_contact(
+			"default",
+			prop_notification_by_role({
+				"state": "On",
+				"roles": ["Owner"],
+			}),
+		),
 	])
 }
 
@@ -73,3 +103,5 @@ eval_pass if {
 not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
+
+prop_notification_by_role(notificationsByRole) = {"notificationsByRole": notificationsByRole}

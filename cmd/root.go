@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
 	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
 
-	"github.com/elastic/cloudbeat/beater"
+	"github.com/elastic/cloudbeat/internal/beater"
 	"github.com/elastic/cloudbeat/version"
 )
 
