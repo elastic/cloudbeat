@@ -24,9 +24,9 @@ class FileTestCase:
 
 
 @dataclass
-class ObjectTestCase:
+class K8sTestCase:
     """
-    Represents k8s object test case
+    Represents k8s object and process test case
     """
 
     rule_tag: str

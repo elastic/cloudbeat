@@ -33,6 +33,9 @@ kubernetes.is_in_cluster_config = bool(
 kubernetes.use_kubernetes = bool(
     os.getenv("USE_K8S", "true") == "true",
 )
+kubernetes.current_config = os.getenv("K8S_CONFIG", "test-k8s-config-1")
+kubernetes.config_1 = os.getenv("K8S_CONFIG_1", "test-k8s-config-1")
+kubernetes.config_2 = os.getenv("K8S_CONFIG_2", "test-k8s-config-2")
 
 # --- AWS EKS ---------------------------------------------
 eks = Munch()

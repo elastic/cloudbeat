@@ -236,7 +236,8 @@ cis_file_1_1_12_fail = FileTestCase(
 )
 
 cis_k8s_file_1_1_12 = {
-    "1.1.12 Ensure etcd pod file ownership is set to etcd:etcd: passed": cis_file_1_1_12_pass,
+    # TODO: fix etcd configuration tests/test_environments/k8s-cloudbeat-tests/templates/_k8s-file-permission-job.yaml
+    # "1.1.12 Ensure etcd pod file ownership is set to etcd:etcd: passed": cis_file_1_1_12_pass,
     "1.1.12 Ensure etcd pod file ownership is set to root:root: failed": cis_file_1_1_12_fail,
 }
 
