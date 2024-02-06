@@ -43,6 +43,116 @@ func (_m *MockProviderAPI) EXPECT() *MockProviderAPI_Expecter {
 	return &MockProviderAPI_Expecter{mock: &_m.Mock}
 }
 
+// GetAppServiceAuthSettings provides a mock function with given fields: ctx, webApp
+func (_m *MockProviderAPI) GetAppServiceAuthSettings(ctx context.Context, webApp inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, webApp)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, webApp)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, webApp)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, webApp)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_GetAppServiceAuthSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAppServiceAuthSettings'
+type MockProviderAPI_GetAppServiceAuthSettings_Call struct {
+	*mock.Call
+}
+
+// GetAppServiceAuthSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - webApp inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) GetAppServiceAuthSettings(ctx interface{}, webApp interface{}) *MockProviderAPI_GetAppServiceAuthSettings_Call {
+	return &MockProviderAPI_GetAppServiceAuthSettings_Call{Call: _e.mock.On("GetAppServiceAuthSettings", ctx, webApp)}
+}
+
+func (_c *MockProviderAPI_GetAppServiceAuthSettings_Call) Run(run func(ctx context.Context, webApp inventory.AzureAsset)) *MockProviderAPI_GetAppServiceAuthSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_GetAppServiceAuthSettings_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_GetAppServiceAuthSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_GetAppServiceAuthSettings_Call) RunAndReturn(run func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_GetAppServiceAuthSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetAppServiceSiteConfig provides a mock function with given fields: ctx, webApp
+func (_m *MockProviderAPI) GetAppServiceSiteConfig(ctx context.Context, webApp inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, webApp)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, webApp)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, webApp)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, webApp)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_GetAppServiceSiteConfig_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAppServiceSiteConfig'
+type MockProviderAPI_GetAppServiceSiteConfig_Call struct {
+	*mock.Call
+}
+
+// GetAppServiceSiteConfig is a helper method to define mock.On call
+//   - ctx context.Context
+//   - webApp inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) GetAppServiceSiteConfig(ctx interface{}, webApp interface{}) *MockProviderAPI_GetAppServiceSiteConfig_Call {
+	return &MockProviderAPI_GetAppServiceSiteConfig_Call{Call: _e.mock.On("GetAppServiceSiteConfig", ctx, webApp)}
+}
+
+func (_c *MockProviderAPI_GetAppServiceSiteConfig_Call) Run(run func(ctx context.Context, webApp inventory.AzureAsset)) *MockProviderAPI_GetAppServiceSiteConfig_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_GetAppServiceSiteConfig_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_GetAppServiceSiteConfig_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_GetAppServiceSiteConfig_Call) RunAndReturn(run func(context.Context, inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_GetAppServiceSiteConfig_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetFlexibleTLSVersionConfiguration provides a mock function with given fields: ctx, subID, resourceGroup, serverName
 func (_m *MockProviderAPI) GetFlexibleTLSVersionConfiguration(ctx context.Context, subID string, resourceGroup string, serverName string) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, subID, resourceGroup, serverName)
