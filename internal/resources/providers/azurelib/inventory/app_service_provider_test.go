@@ -27,8 +27,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/resources/utils/pointers"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type mockAzureAppServiceWrapper struct {

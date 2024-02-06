@@ -21,9 +21,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 )
 
 type appServiceEnricher struct {

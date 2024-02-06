@@ -25,7 +25,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type azureAppServiceWrapper struct {
