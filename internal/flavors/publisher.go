@@ -28,7 +28,7 @@ import (
 const (
 	ecsEventActionField = "event.action"
 	ecsEventActionValue = "publish-events"
-	ecsEventCountField  = "event.count"
+	ecsEventCountField  = "event.Count"
 )
 
 type client interface {
