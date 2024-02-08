@@ -30,6 +30,8 @@ nodes:
         # use-service-account-credentials: "false"
         bind-address: "0.0.0.0"
         feature-gates: "RotateKubeletServerCertificate=false"
+    apiServer:
+      extraArgs:
   extraMounts:
   - hostPath: ./tests/allure/results
     containerPath: /tmp/data

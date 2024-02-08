@@ -9,6 +9,7 @@ from configuration import kubernetes
 from .k8s_test_case import K8sTestCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
+K8S_CIS_1_2_2 = "CIS 1.2.2"
 K8S_CIS_1_3_2 = "CIS 1.3.2"
 K8S_CIS_1_3_3 = "CIS 1.3.3"
 K8S_CIS_1_3_4 = "CIS 1.3.4"
@@ -26,6 +27,63 @@ K8S_CIS_2_6 = "CIS 2.6"
 
 KUBE_SCHEDULER = "kube-scheduler"
 ETCD = "etcd"
+KUBE_CONTROLLER = "kube-controller"
+KUBELET = "kubelet"
+KUBE_APISERVER = "kube-apiserver"
+
+cis_1_3_2_fail = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_2,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_1_3_2_pass = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_2,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_PASS_STATUS,
+)
+
+cis_1_3_3_pass = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_3,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_PASS_STATUS,
+)
+
+cis_1_3_4_pass = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_4,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_PASS_STATUS,
+)
+
+cis_1_3_5_pass = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_5,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_PASS_STATUS,
+)
+
+cis_1_3_6_fail = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_6,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_1_3_6_pass = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_6,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_PASS_STATUS,
+)
+
+cis_1_3_7_fail = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_7,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_1_3_7_pass = K8sTestCase(
+    rule_tag=K8S_CIS_1_3_7,
+    resource_name=KUBE_CONTROLLER,
+    expected=RULE_PASS_STATUS,
+)
 
 cis_1_4_1_fail = K8sTestCase(
     rule_tag=K8S_CIS_1_4_1,
@@ -114,6 +172,9 @@ cis_2_6_pass = K8sTestCase(
 )
 
 k8s_process_config_1 = {
+    "1.3.2 kube-controller --profiling=true": cis_1_3_2_fail,
+    "1.3.6 kube-controller --feature-gates=RotateKubeletServerCertificate=false": cis_1_3_6_fail,
+    "1.3.7 kube-controller --bind-address=0.0.0.0": cis_1_3_7_fail,
     "1.4.1 kube-scheduler --profiling=true": cis_1_4_1_fail,
     "1.4.2 kube-scheduler --bind-address=0.0.0.0": cis_1_4_2_fail,
     "2.2 etcd --client-cert-auth=false": cis_2_2_fail,
@@ -123,6 +184,12 @@ k8s_process_config_1 = {
 }
 
 k8s_process_config_2 = {
+    "1.3.2 kube-controller --profiling=false": cis_1_3_2_pass,
+    "1.3.3 kube-controller --use-service-account-credentials=true": cis_1_3_3_pass,
+    "1.3.4 kube-controller --service-account-private-key-file=<file>": cis_1_3_4_pass,
+    "1.3.5 kube-controller --root-ca-file=<path/to/file>": cis_1_3_5_pass,
+    "1.3.6 kube-controller --feature-gates=RotateKubeletServerCertificate=true": cis_1_3_6_pass,
+    "1.3.7 kube-controller --bind-address=127.0.0.1": cis_1_3_7_pass,
     "1.4.1 kube-scheduler --profiling=false": cis_1_4_1_pass,
     "1.4.2 kube-scheduler --bind-address=127.0.0.1": cis_1_4_2_pass,
     "2.1 etcd --cert-file and --key-file are set": cis_2_1_pass,

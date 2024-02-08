@@ -16,7 +16,7 @@
 
 #### Manual rules: 19/51 (37%)
 
-#### Integration Tests Coverage: 73/250 (29%)
+#### Integration Tests Coverage: 76/250 (30%)
 
 <details><summary><h3>Full Table 📋</h3></summary>
 
@@ -76,12 +76,12 @@
 |  [1.2.8](bundle/compliance/cis_k8s/rules/cis_1_2_8)  | API Server                             | Ensure that the --authorization-mode argument includes Node                                              | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
 |  [1.2.9](bundle/compliance/cis_k8s/rules/cis_1_2_9)  | API Server                             | Ensure that the --authorization-mode argument includes RBAC                                              | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
 |                        1.3.1                         | Controller Manager                     | Ensure that the --terminated-pod-gc-threshold argument is set as appropriate                             |        :x:         |                Passed :x: / Failed :x:                | Manual    |
-|  [1.3.2](bundle/compliance/cis_k8s/rules/cis_1_3_2)  | Controller Manager                     | Ensure that the --profiling argument is set to false                                                     | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
+|  [1.3.2](bundle/compliance/cis_k8s/rules/cis_1_3_2)  | Controller Manager                     | Ensure that the --profiling argument is set to false                                                     | :white_check_mark: |        Passed :x: / Failed :white_check_mark:         | Automated |
 |  [1.3.3](bundle/compliance/cis_k8s/rules/cis_1_3_3)  | Controller Manager                     | Ensure that the --use-service-account-credentials argument is set to true                                | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
 |  [1.3.4](bundle/compliance/cis_k8s/rules/cis_1_3_4)  | Controller Manager                     | Ensure that the --service-account-private-key-file  argument is set as appropriate                       | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
 |  [1.3.5](bundle/compliance/cis_k8s/rules/cis_1_3_5)  | Controller Manager                     | Ensure that the --root-ca-file argument is set as appropriate                                            | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
-|  [1.3.6](bundle/compliance/cis_k8s/rules/cis_1_3_6)  | Controller Manager                     | Ensure that the RotateKubeletServerCertificate argument is set to true                                   | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
-|  [1.3.7](bundle/compliance/cis_k8s/rules/cis_1_3_7)  | Controller Manager                     | Ensure that the --bind-address argument is set to 127.0.0.1                                              | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
+|  [1.3.6](bundle/compliance/cis_k8s/rules/cis_1_3_6)  | Controller Manager                     | Ensure that the RotateKubeletServerCertificate argument is set to true                                   | :white_check_mark: |        Passed :x: / Failed :white_check_mark:         | Automated |
+|  [1.3.7](bundle/compliance/cis_k8s/rules/cis_1_3_7)  | Controller Manager                     | Ensure that the --bind-address argument is set to 127.0.0.1                                              | :white_check_mark: |        Passed :x: / Failed :white_check_mark:         | Automated |
 |  [1.4.1](bundle/compliance/cis_k8s/rules/cis_1_4_1)  | Scheduler                              | Ensure that the --profiling argument is set to false                                                     | :white_check_mark: |        Passed :x: / Failed :white_check_mark:         | Automated |
 |  [1.4.2](bundle/compliance/cis_k8s/rules/cis_1_4_2)  | Scheduler                              | Ensure that the --bind-address argument is set to 127.0.0.1                                              | :white_check_mark: |        Passed :x: / Failed :white_check_mark:         | Automated |
 |    [2.1](bundle/compliance/cis_k8s/rules/cis_2_1)    | etcd                                   | Ensure that the --cert-file and --key-file arguments are set as appropriate                              | :white_check_mark: |                Passed :x: / Failed :x:                | Automated |
