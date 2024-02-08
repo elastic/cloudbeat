@@ -10,6 +10,12 @@ It is designed to be used as part of the [Cloud Security](https://www.elastic.co
 
 ### CSP Security Policies
 
+[![CIS K8S](https://img.shields.io/badge/CIS-Kubernetes%20(74%25)-326CE5?logo=Kubernetes)](security-policies/RULES.md#k8s-cis-benchmark)
+[![CIS EKS](https://img.shields.io/badge/CIS-Amazon%20EKS%20(60%25)-FF9900?logo=Amazon+EKS)](security-policies/RULES.md#eks-cis-benchmark)
+[![CIS AWS](https://img.shields.io/badge/CIS-AWS%20(87%25)-232F3E?logo=Amazon+AWS)](security-policies/RULES.md#aws-cis-benchmark)
+[![CIS GCP](https://img.shields.io/badge/CIS-GCP%20(85%25)-4285F4?logo=Google+Cloud)](security-policies/RULES.md#gcp-cis-benchmark)
+[![CIS AZURE](https://img.shields.io/badge/CIS-AZURE%20(45%25)-0078D4?logo=Microsoft+Azure)](security-policies/RULES.md#azure-cis-benchmark)
+
 Cloudbeat uses security policies from the [Security Policies](./security-policies) directory to evaluate cloud resources.
 
 ## Getting Started
