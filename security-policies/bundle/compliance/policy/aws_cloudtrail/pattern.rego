@@ -9,9 +9,88 @@ get_filter_matched_to_pattern(trail, patterns) = name if {
 	some i, j
 	filter := trail.MetricFilters[i]
 	pattern := patterns[j]
-	filter.FilterPattern == pattern
+	expressions_equivalent(filter.FilterPattern, pattern)
 	name := filter.FilterName
 } else = ""
+
+complex_expression(op, expressions) = {
+	"complex": true,
+	"operator": op,
+	"expressions": expressions,
+}
+
+simple_expression(left, op, right) = {
+	"simple": true,
+	"left": left,
+	"operator": op,
+	"right": right,
+}
+
+default expressions_equivalent(expression1, expression2) = false
+
+expressions_equivalent(str1, str2) if {
+	exp1 = parse_expression(str1)
+	not exp1.error
+	exp2 = parse_expression(str2)
+	not exp2.error
+	compare_simple_expressions(exp1, exp2)
+}
+
+expressions_equivalent(str1, str2) if {
+	exp1 = parse_expression(str1)
+	not exp1.error
+	exp2 = parse_expression(str2)
+	not exp2.error
+	compare_complex_expressions(exp1, exp2)
+}
+
+compare_simple_expressions(exp1, exp2) if {
+	exp1.simple
+	exp2.simple
+	exp1.left == exp2.left
+	exp1.operator == exp2.operator
+	exp1.right == exp2.right
+}
+
+compare_simple_expressions(exp1, exp2) if {
+	exp1.simple
+	exp2.simple
+	exp1.left == exp2.right
+	exp1.operator == exp2.operator
+	exp1.right == exp2.left
+}
+
+compare_complex_expressions(exp1, exp2) if {
+	exp1.complex
+	exp2.complex
+	exp1.operator == exp2.operator
+	count(exp1.expressions) == count(exp2.expressions)
+
+	every subExp1 in exp1.expressions {
+		some subExp2 in exp2.expressions
+		compare_expressions_second_level(subExp1, subExp2)
+	}
+}
+
+compare_expressions_second_level(exp1, exp2) if {
+	compare_simple_expressions(exp1, exp2)
+}
+
+compare_expressions_second_level(exp1, exp2) if {
+	compare_complex_expressions_second_level(exp1, exp2)
+}
+
+compare_complex_expressions_second_level(exp1, exp2) if {
+	exp1.complex
+	exp2.complex
+	exp1.operator == exp2.operator
+	count(exp1.expressions) == count(exp2.expressions)
+
+	every subExp1 in exp1.expressions {
+		some subExp2 in exp2.expressions
+		compare_simple_expressions(subExp1, subExp2)
+	}
+}
 
 default parse_expression(s) = {"error": "Could not parse expression"}
 
@@ -20,7 +99,7 @@ parse_expression(s) = expression if { # handle simple expression
 	is_simple_expression(s)
 
 	# Clean
-	clean_s = remove_trailing_brackets(s)
+	clean_s = clean_full_expression(s)
 
 	# Parse
 	expression = parse_simple_expression(clean_s)
@@ -54,7 +133,7 @@ parse_expression(s) = expression if { # handle complex 2 operator (&& as main op
 	is_main_operator_and(s)
 
 	# Clean
-	clean_s = remove_trailing_brackets(s)
+	clean_s = clean_full_expression(s)
 
 	# Process
 	expression = parse_two_operators_expression(clean_s, "&&")
@@ -68,7 +147,7 @@ parse_expression(s) = expression if { # handle complex 2 operator (|| as main op
 	is_main_operator_or(s)
 
 	# Clean
-	clean_s = remove_trailing_brackets(s)
+	clean_s = clean_full_expression(s)
 
 	# Process
 	expression = parse_two_operators_expression(clean_s, "||")
@@ -115,11 +194,8 @@ parse_second_level(s) = expression if {
 	# Filter
 	is_simple_expression(s)
 
-	# Clean
-	clean_s = remove_trailing_brackets(s)
-
 	# Parse
-	expression = parse_simple_expression(clean_s)
+	expression = parse_simple_expression(s)
 }
 
 parse_second_level(s) = expression if { # handle complex one level deep AND only complex expression
@@ -146,16 +222,13 @@ parse_second_level(s) = expression if {
 	# Filter
 	is_simple_expression(s)
 
-	# Clean
-	clean_s = remove_trailing_brackets(s)
-
 	# Parse
-	expression = parse_simple_expression(clean_s)
+	expression = parse_simple_expression(s)
 }
 
 parse_one_level_one_operator_complex_expression(s, op) = expression if {
 	# Clean
-	clean_s = remove_trailing_brackets(s)
+	clean_s = clean_full_expression(s)
 
 	# Parse
 	subStrings = split(clean_s, op)
@@ -201,6 +274,15 @@ parse_simple_expression(s) = expression if { # not exists
 	expression := simple_expression(clean_left(parts[0]), op, "")
 }
 
+clean_full_expression(s) = clean if {
+	clean = remove_space_between_parenthesis(remove_trailing_brackets(s))
+}
+
+remove_space_between_parenthesis(s) = clean if {
+	clean_l = regex.replace(s, "(?:\\()\\s+\\(", "((")
+	clean = regex.replace(clean_l, "\\)\\s+\\)", "))")
+} else = s
+
 remove_trailing_brackets(s) = clean if {
 	no_space = trim_space(s)
 	no_left = trim_left(no_space, "{")
@@ -218,17 +300,6 @@ clean_right(s) = clean if {
 	no_space = trim_space(s)
 	no_parenthesis = trim_right(no_space, ")")
 	clean = trim_space(no_parenthesis)
-}
-
-complex_expression(op, expressions) = {
-	"operator": op,
-	"expressions": expressions,
-}
-
-simple_expression(left, op, right) = {
-	"left": left,
-	"operator": op,
-	"right": right,
 }
 
 default count_parenthesis(l) = 0

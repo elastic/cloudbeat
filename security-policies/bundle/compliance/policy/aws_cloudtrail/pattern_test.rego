@@ -2,13 +2,13 @@ package compliance.policy.aws_cloudtrail.pattern
 
 import future.keywords.if
 
-filter_1 = {"FilterPattern": "filter_1", "FilterName": "filter_1"}
+filter_1 = {"FilterPattern": "a=b", "FilterName": "filter_1"}
 
-filter_2 = {"FilterPattern": "filter_2", "FilterName": "filter_2"}
+filter_2 = {"FilterPattern": "b=c", "FilterName": "filter_2"}
 
-pattern_1 = "filter_1"
+pattern_1 = "a=b"
 
-pattern_2 = "filter_2"
+pattern_2 = "b=c"
 
 pattern_never_match = "not_match"
 
@@ -22,6 +22,159 @@ test_pass if {
 test_fail if {
 	get_filter_matched_to_pattern({"MetricFilters": [filter_1, filter_2]}, [pattern_never_match]) == ""
 	get_filter_matched_to_pattern({"MetricFilters": []}, []) == ""
+}
+
+test_expressions_equivalent if {
+	is_equal(
+		"TRUE simple expression equal", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy}",
+			"{$.eventName=DeleteGroupPolicy}",
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE simple expression inverted", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy}",
+			"{DeleteGroupPolicy=$.eventName}",
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE simple expression different spacing", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy}",
+			"{ $.eventName = DeleteGroupPolicy }",
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE simple expression different parenthesis", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy}",
+			"{ (($.eventName = DeleteGroupPolicy)) }",
+		),
+		true,
+	)
+
+	is_equal(
+		"FALSE simple expression different left", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy}",
+			"{$.eventName=Different}",
+		),
+		false,
+	)
+
+	is_equal(
+		"FALSE simple expression different left", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy}",
+			"{$.eventType=DeleteGroupPolicy}",
+		),
+		false,
+	)
+
+	is_equal(
+		"FALSE simple expression different operator", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy}",
+			"{$.eventName!=DeleteGroupPolicy}",
+		),
+		false,
+	)
+
+	is_equal(
+		"TRUE complex expression one level basic equal", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
+			"{ $.eventName = DeleteGroupPolicy || $.eventType = Type }",
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE complex expression one level basic inverted", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
+			"{ $.eventType = Type || $.eventName = DeleteGroupPolicy }",
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE complex expression one level basic inverted (also sub expressions)", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
+			"{ $.eventType = Type || DeleteGroupPolicy = $.eventName }",
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE complex expression one level global parenthesis", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
+			"{ ($.eventType = Type || DeleteGroupPolicy = $.eventName) }",
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE complex expression one level global and specific parenthesis", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
+			"{ (($.eventType = Type) || (DeleteGroupPolicy = $.eventName) ) }",
+		),
+		true,
+	)
+
+	is_equal(
+		"FALSE complex expression one level global different op", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
+			"{ (($.eventType = Type) && (DeleteGroupPolicy = $.eventName) ) }",
+		),
+		false,
+	)
+
+	is_equal(
+		"TRUE complex expression two levels global different op", expressions_equivalent(
+			"{$.eventName=DeleteGroupPolicy && (d =f || ($.eventType=Type))}",
+			"{ (($.eventType = Type) && (DeleteGroupPolicy = $.eventName || d= f) ) }",
+		),
+		false,
+	)
+	is_equal(
+		"Different Spaces", expressions_equivalent(
+			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
+			"{ ($.errorCode=\"*UnauthorizedOperation\")||($.errorCode=\"AccessDenied*\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\")||($.eventName!=\"HeadBucket\") }",
+		),
+		true,
+	)
+
+	is_equal(
+		"Different order of expressions", expressions_equivalent(
+			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
+			"{ ($.errorCode=\"AccessDenied*\")||($.eventName!=\"HeadBucket\")||($.errorCode=\"*UnauthorizedOperation\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") }",
+		),
+		true,
+	)
+
+	is_equal(
+		"Different logical operator", expressions_equivalent(
+			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
+			"{ ($.errorCode=\"AccessDenied*\")&&($.eventName!=\"HeadBucket\")||($.errorCode=\"*UnauthorizedOperation\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") }",
+		),
+		false,
+	)
+
+	is_equal(
+		"Different comparison operator", expressions_equivalent(
+			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
+			"{ ($.errorCode!=\"AccessDenied*\")||($.eventName!=\"HeadBucket\")||($.errorCode=\"*UnauthorizedOperation\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") }",
+		),
+		false,
+	)
+
+	is_equal(
+		"Different nested order", expressions_equivalent(
+			"{ ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }",
+			"{ (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) && ($.eventSource = organizations.amazonaws.com)}",
+		),
+		true,
+	)
 }
 
 test_parse if {
