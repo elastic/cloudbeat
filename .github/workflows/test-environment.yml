@@ -17,12 +17,12 @@ on:
         default: false
       ec-url:
         required: true
-        default: "https://cloud.elastic.co/"
+        default: "https://cloud.elastic.co"
         type: choice
         description: Select the Environment URL
         options:
-          - https://cloud.elastic.co/
-          - https://console.qa.cld.elstc.co/
+          - https://cloud.elastic.co
+          - https://console.qa.cld.elstc.co
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
@@ -65,9 +65,12 @@ on:
         default: false
       ec-url:
         required: true
-        default: "https://cloud.elastic.co/"
-        type: string
+        default: "https://cloud.elastic.co"
+        type: choice
         description: Environment URL
+        options:
+          - https://cloud.elastic.co
+          - https://console.qa.cld.elstc.co
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
