@@ -27,6 +27,17 @@ jobs:
       matrix:
         types: [tar.gz, docker]
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Check out the repo
         uses: actions/checkout@v4
 

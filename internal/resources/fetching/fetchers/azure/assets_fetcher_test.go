@@ -141,6 +141,19 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			Return(nil, nil)
 	}
 
+	// since we have app service asset we need to mock the enricher
+	appServices := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+		return item.Type == inventory.WebsitesAssetType
+	})
+	for _, as := range appServices {
+		mockProvider.EXPECT().
+			GetAppServiceAuthSettings(mock.Anything, as).
+			Return(nil, nil)
+		mockProvider.EXPECT().
+			GetAppServiceSiteConfig(mock.Anything, as).
+			Return(nil, nil)
+	}
+
 	// since we have sql server asset we need to mock the enricher
 	mockProvider.EXPECT().
 		ListSQLEncryptionProtector(mock.Anything, "subId", "rg", "name").
