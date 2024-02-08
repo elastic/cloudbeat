@@ -4,8 +4,6 @@ import json
 import time
 from typing import Union
 from functools import reduce
-import requests
-
 import allure
 from commonlib.io_utils import get_logs_from_stream, get_events_from_index
 from loguru import logger
@@ -303,30 +301,6 @@ def get_findings(elastic_client, config_timeout, query, sort, match_type):
         time.sleep(FINDINGS_BACKOFF_SECONDS)
 
     return result
-
-
-def get_telemetry(config):
-    """
-    This function create eAPI call to Kibana snapshot telemetry api and return is payload.
-    Example:
-    @param config: configuration object contains kibana host and auth
-    @return: Telemetry payload
-    """
-    method = "POST"
-    url = f"{config.kibana_url}/internal/telemetry/clusters/_stats"
-    headers = {
-        "Content-Type": "application/json",
-        "kbn-xsrf": "true",
-        "elastic-api-version": "2",
-        "x-elastic-internal-origin": "Kibana",
-    }
-    auth = config.basic_auth
-
-    response = requests.request(method=method, url=url, headers=headers, auth=auth, json={"unencrypted": "true"})
-    if response.status_code != 200:
-        raise Exception("Error in fetching telemetry data")
-
-    return response.json()
 
 
 def res_identifier(field_chain: str, case_identifier, eval_resource) -> bool:

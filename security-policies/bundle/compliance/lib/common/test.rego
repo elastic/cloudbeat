@@ -13,6 +13,66 @@ test_calculate_result_rule_evaluation_true if {
 	calculate_result(rule_evaluation) == "passed"
 }
 
+test_collect_evidence_keys if {
+	resource := {
+		"type": "escape-pod",
+		"contents": "no life-forms aboard",
+		"crew": ["R2-D2", "C-3PO"],
+	}
+	collect_evidence(resource, {"Type": "type", "Crew": "crew"}) == {
+		"Type": resource.type,
+		"Crew": resource.crew,
+	}
+}
+
+test_collect_evidence_nested_keys if {
+	resource := {"a": {"b": {"c": {"d": "nested_value"}}}}
+	collect_evidence(resource, {"D": ["a", "b", "c", "d"]}) == {"D": resource.a.b.c.d}
+}
+
+test_collect_evidence_array_element if {
+	resource := {
+		"type": "escape-pod",
+		"contents": "no life-forms aboard",
+		"crew": ["R2-D2", "C-3PO"],
+	}
+	collect_evidence(resource, {"Second Robot": ["crew", 1]}) == {"Second Robot": "C-3PO"}
+}
+
+test_collect_evidence_empty_keypaths if {
+	collect_evidence({}, {}) == {}
+}
+
+test_collect_evidence_self_referential_keypaths if {
+	resource := {"a": 1, "b": 2}
+	collect_evidence(resource, {"self": []}) == {"self": resource}
+}
+
+test_collect_evidence_blank_paths if {
+	resource := {"a": 1, "b": 2}
+	collect_evidence(resource, {"empty": ""}) == {"empty": resource}
+}
+
+test_collect_evidence_non_existent_key if {
+	resource := {"a": 1, "b": 2}
+	collect_evidence(resource, {"C": "c"}) == {"C": resource}
+}
+
+test_collect_evidence_non_existent_path_tail if {
+	resource := {"a": {"b": {"c": 42}}}
+	collect_evidence(resource, {"a.b.x": ["a", "b", "x"]}) == {"a.b.x": resource}
+}
+
+test_collect_evidence_non_existent_path_segment if {
+	resource := {"a": {"b": {"c": 42}}}
+	collect_evidence(resource, {"a.x.c": ["a", "x", "c"]}) == {"a.x.c": resource}
+}
+
+test_collect_evidence_with_out_of_bounds_array_index if {
+	resource := {"arr": [0, 1, 2, 3, 4]}
+	collect_evidence(resource, {"arr[99]": ["arr", 99]}) == {"arr[99]": resource}
+}
+
 test_ensure_array_empty if {
 	ensure_array([]) == []
 }

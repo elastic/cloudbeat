@@ -6,7 +6,7 @@ import future.keywords.if
 
 finding = result if {
 	# filter
-	data_adapter.is_postgresql_server_db
+	data_adapter.is_postgresql_single_server_db
 
 	# set result
 	result := common.generate_result_without_expected(
@@ -20,5 +20,5 @@ default log_retention_long_enough = false
 log_retention_long_enough if {
 	some i
 	data_adapter.resource.extension.psqlConfigurations[i].name == "log_retention_days"
-	to_number(data_adapter.resource.extension.psqlConfigurations[i].value) > 3
+	to_number(data_adapter.resource.extension.psqlConfigurations[i].properties.value) > 3
 }

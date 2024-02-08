@@ -28,7 +28,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
-  FLEET_API_DIR: fleet_api/src
+  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   TF_VAR_stack_version: ${{ inputs.target-elk-stack-version }}
   TF_VAR_ess_region: gcp-us-west2
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
@@ -111,9 +111,9 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
           poetry --version
 
-      - name: Install Fleet API dependencies
+      - name: Install Fleet API and Tests dependencies
         id: fleet-api-deps
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ./tests
         run: |
           poetry install
 
@@ -188,7 +188,6 @@ jobs:
           USE_K8S: false
           AGENT_VERSION: ${{ needs.init.outputs.base-stack-version }}
         run: |
-          poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Set Docker Image version
@@ -203,7 +202,7 @@ jobs:
           S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
         run: |
           aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
-          aws s3 cp "${{ env.S3_BUCKET }}/state_data.json" "${{ env.FLEET_API_DIR }}/state_data.json"
+          aws s3 cp "${{ env.S3_BUCKET }}/state_data.json" "../../${{ env.INTEGRATIONS_SETUP_DIR }}/state_data.json"
 
       - name: Upgrade KSPM Unmanaged agent
         run: |
@@ -220,7 +219,7 @@ jobs:
           kubectl rollout restart daemonset/elastic-agent -n kube-system
 
       - name: Upgrade Linux agents
-        working-directory: ${{ env.WORKING_DIR }}/${{ env.FLEET_API_DIR }}
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           CNVM_STACK_NAME: ${{ needs.deploy.outputs.cnvm-stack-name }}
           STACK_VERSION: ${{ needs.init.outputs.target-agent-version }}
@@ -234,5 +233,4 @@ jobs:
           AGENT_VERSION: ${{ needs.init.outputs.target-agent-version }}
           USE_K8S: false
         run: |
-          poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4

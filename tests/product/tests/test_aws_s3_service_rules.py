@@ -2,6 +2,7 @@
 CIS AWS S3 Service rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
+
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
@@ -49,7 +50,7 @@ register_params(
     test_aws_s3_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_s3_tc.cis_aws_s3_cases.values()],
-        ids=[*aws_s3_tc.cis_aws_s3_cases.keys()],
+        [*aws_s3_tc.test_cases.values()],
+        ids=[*aws_s3_tc.test_cases.keys()],
     ),
 )

@@ -8,9 +8,11 @@ repos:
       - id: check-added-large-files
       - id: check-yaml
         args: [--allow-multiple-documents, --unsafe]
-        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$
+        exclude: (^tests/test_environments/k8s-cloudbeat-tests/templates/.*)$
       - id: check-json
       - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+        exclude: (cloudbeat.yml|cloudbeat.reference.yml|security-policies/bundle/.*)
       - id: trailing-whitespace
         exclude: (cloudbeat.reference.yml|security-policies/bundle/.*)
 
@@ -33,8 +35,8 @@ repos:
     rev: 7.0.0
     hooks:
       - id: flake8
-        name: flake8 ./tests/ ./fleet_api/ ./.ci/scripts ./github/actions
-        files: ^(.ci/scripts|.github/actions|tests|deploy/test-environments/fleet_api)/
+        name: flake8 ./tests/ ./.ci/scripts ./github/actions
+        files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
     rev: v3.0.3
@@ -48,7 +50,7 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.1.1
     hooks:
       - id: black
 
@@ -65,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.83.8
+    rev: v0.85.0
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -76,7 +78,7 @@ repos:
       - id: shfmt
         args: ["-i", "4"]
       - id: shellcheck
-        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|dev-tools/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash)
+        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|scripts/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash)
 
   - repo: local
     hooks:
@@ -103,6 +105,12 @@ repos:
         entry: bash -c 'go mod tidy'
         language: system
         files: (go.mod|go.sum)
+        pass_filenames: false
+      - id: generate-arm-dev-templates
+        name: Generate ARM dev templates
+        entry: bash -c 'deploy/azure/generate_dev_template.py --template-type single-account && deploy/azure/generate_dev_template.py --template-type organization-account'
+        language: python
+        files: deploy/azure/.*
         pass_filenames: false
 
   - repo: local
@@ -140,7 +148,7 @@ repos:
         entry: poetry run -C security-policies python security-policies/dev/update_rule_status.py
         pass_filenames: false
         language: system
-        files: (\.rego)$
+        files: (.*\.rego|tests\/product\/.*\.py)$
 
       - id: update-rule-metadata
         name: Update rule metadata
@@ -152,7 +160,7 @@ repos:
         files: (\.rego)$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
+    rev: v0.39.0
     hooks:
       - id: markdownlint
         args: [ '--disable',

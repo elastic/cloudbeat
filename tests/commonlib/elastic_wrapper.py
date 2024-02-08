@@ -10,12 +10,16 @@ class ElasticWrapper:
     Wrapper that uses elasticsearch official package
     """
 
-    def __init__(self, url: str, basic_auth: tuple, index: str):
+    def __init__(self, url: str, basic_auth: tuple, index: str, use_ssl: bool = True):
         self.index = index
+        verify_certs = use_ssl
+        ssl_show_warn = use_ssl
         self.es_client = Elasticsearch(
             hosts=url,
             basic_auth=basic_auth,
             retry_on_timeout=True,
+            verify_certs=verify_certs,
+            ssl_show_warn=ssl_show_warn,
         )
 
     def get_index_data(

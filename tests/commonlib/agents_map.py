@@ -1,14 +1,12 @@
 """
 Generate agent parameterization for pytest.
 """
-import os
-import sys
+
 from loguru import logger
 from munch import Munch
 from configuration import elasticsearch, agent
+from fleet_api.agent_policy_api import get_agents
 
-sys.path.append(os.path.relpath("../deploy/test-environments/fleet_api/src"))
-from api.agent_policy_api import get_agents  # pylint: disable=wrong-import-position # noqa: E402
 
 CIS_AWS_COMPONENT = "cloudbeat/cis_aws"
 CIS_GCP_COMPONENT = "cloudbeat/cis_gcp"
@@ -28,6 +26,7 @@ class AgentExpectedMapping:
         }
         if agent.agentless:
             self.expected_map[CIS_AWS_COMPONENT] += 1
+            self.expected_map[CIS_AZURE_COMPONENT] += 1
 
 
 class AgentComponentMapping:

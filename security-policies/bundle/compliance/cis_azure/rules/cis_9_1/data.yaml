@@ -1,0 +1,72 @@
+metadata:
+  id: 88734e31-d055-58ba-bf70-7d40d0b4e707
+  name: Ensure App Service Authentication is set up for apps in Azure App Service
+  profile_applicability: '* Level 2'
+  description: |-
+    Azure App Service Authentication is a feature that can prevent anonymous HTTP requests from reaching a Web Application or authenticate those with tokens before they reach the app.
+    If an anonymous request is received from a browser, App Service will redirect to a logon page.
+    To handle the logon process, a choice from a set of identity providers can be made, or a custom authentication mechanism can be implemented.
+  rationale: |-
+    By Enabling App Service Authentication, every incoming HTTP request passes through it before being handled by the application code.
+    It also handles authentication of users with the specified provider (Azure Active Directory, Facebook, Google, Microsoft Account, and Twitter), validation, storing and refreshing of tokens, managing the authenticated sessions and injecting identity information into request headers.
+  audit: |-
+    **From Azure Portal**
+
+    1. Login to Azure Portal using https://portal.azure.com 
+    2. Go to `App Services`
+    3. Click on each App
+    4. Under `Setting` section, Click on `Authentication`
+    5. Ensure that `App Service authentication` set to `Enabled` (Will only appear once an Identity provider is set up/selected)
+
+    **From Azure CLI**
+
+    To check App Service Authentication status for an existing app, run the following command,
+
+    ```
+    az webapp auth show --resource-group <RESOURCE_GROUP_NAME> --name <APP_NAME> --query enabled
+    ```
+
+    The output should return `true` if App Service authentication is set to `On`.
+  remediation: |-
+    **From Azure Portal**
+
+    1. Login to Azure Portal using https://portal.azure.com 
+    2. Go to `App Services`
+    3. Click on each App
+    4. Under `Setting` section, click on `Authentication`
+    5. If no identity providers are set up, then click `Add identity provider`
+    6. Choose other parameters as per your requirements and click on `Add`
+
+    **From Azure CLI**
+
+    To set App Service Authentication for an existing app, run the following command:
+    ```
+    az webapp auth update --resource-group <RESOURCE_GROUP_NAME> --name <APP_NAME> --enabled true
+    ```
+    **Note**
+
+    In order to access `App Service authentication` settings for Web app using Microsoft API requires `Website contributor` permission at subscription level.
+    A custom role can be created in place of `Website contributor` to provide more specific permission and maintain the principle of least privileged access.
+  impact: |-
+    This is only required for App Services which require authentication. Enabling on site like a marketing or support website will prevent unauthenticated access which would be undesirable.
+
+    Adding Authentication requirement will increase cost of App Service and require additional security components to facilitate the authentication.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/app-service/app-service-authentication-overview
+    2. https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#website-contributor
+    3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-privileged-access#pa-5-automate-entitlement-management
+    4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-6-define-identity-and-privileged-access-strategy
+  section: AppService
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 9.1
+  - AppService
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: '9.1'
+    posture_type: cspm

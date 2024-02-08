@@ -9,58 +9,76 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [{
 		"name": "AllowAllWindowsAzureIps",
-		"startIPAddress": "196.203.255.0",
-		"endIPAddress": "196.203.255.254",
+		"properties": {
+			"startIPAddress": "196.203.255.0",
+			"endIPAddress": "196.203.255.254",
+		},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [{
 		"name": "AllowAllWindowsAzureIps",
-		"startIPAddress": "0.0.0.0",
-		"endIPAddress": "0.0.0.0",
+		"properties": {
+			"startIPAddress": "0.0.0.0",
+			"endIPAddress": "0.0.0.0",
+		},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [{
 		"name": "randomName",
-		"startIPAddress": "0.0.0.0",
-		"endIPAddress": "0.0.0.0",
+		"properties": {
+			"startIPAddress": "0.0.0.0",
+			"endIPAddress": "0.0.0.0",
+		},
 	}]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [
 		{
 			"name": "randomName",
-			"startIPAddress": "0.0.0.0",
-			"endIPAddress": "0.0.0.0",
+			"properties": {
+				"startIPAddress": "0.0.0.0",
+				"endIPAddress": "0.0.0.0",
+			},
 		},
 		{
 			"name": "randomName",
-			"startIPAddress": "196.203.255.0",
-			"endIPAddress": "196.203.255.254",
+			"properties": {
+				"startIPAddress": "196.203.255.0",
+				"endIPAddress": "196.203.255.254",
+			},
 		},
 	]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [
 		{
 			"name": "AllowAllWindowsAzureIps",
-			"startIPAddress": "0.0.0.0",
-			"endIPAddress": "0.0.0.0",
+			"properties": {
+				"startIPAddress": "0.0.0.0",
+				"endIPAddress": "0.0.0.0",
+			},
 		},
 		{
 			"name": "randomName",
-			"startIPAddress": "196.203.255.0",
-			"endIPAddress": "196.203.255.254",
+			"properties": {
+				"startIPAddress": "196.203.255.0",
+				"endIPAddress": "196.203.255.254",
+			},
 		},
 	]})
 
 	eval_fail with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [
 		{
 			"name": "randomName",
-			"startIPAddress": "196.203.253.0",
-			"endIPAddress": "196.203.253.254",
+			"properties": {
+				"startIPAddress": "196.203.253.0",
+				"endIPAddress": "196.203.253.254",
+			},
 		},
 		{
 			"name": "AllowAllWindowsAzureIps",
-			"startIPAddress": "196.203.255.0",
-			"endIPAddress": "196.203.255.254",
+			"properties": {
+				"startIPAddress": "196.203.255.0",
+				"endIPAddress": "196.203.255.254",
+			},
 		},
 	]})
 }
@@ -68,20 +86,26 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [{
 		"name": "randomName",
-		"startIPAddress": "196.203.255.0",
-		"endIPAddress": "196.203.255.254",
+		"properties": {
+			"startIPAddress": "196.203.255.0",
+			"endIPAddress": "196.203.255.254",
+		},
 	}]})
 
 	eval_pass with input as test_data.generate_postgresql_server_with_extension({"psqlFirewallRules": [
 		{
 			"name": "randomName",
-			"startIPAddress": "196.203.255.0",
-			"endIPAddress": "196.203.255.254",
+			"properties": {
+				"startIPAddress": "196.203.255.0",
+				"endIPAddress": "196.203.255.254",
+			},
 		},
 		{
 			"name": "randomName2",
-			"startIPAddress": "196.203.200.0",
-			"endIPAddress": "196.203.200.254",
+			"properties": {
+				"startIPAddress": "196.203.200.0",
+				"endIPAddress": "196.203.200.254",
+			},
 		},
 	]})
 

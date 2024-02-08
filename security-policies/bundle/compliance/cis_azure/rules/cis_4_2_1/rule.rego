@@ -22,6 +22,6 @@ is_defender_on if {
 	count(data_adapter.resource.extension.sqlAdvancedThreatProtectionSettings) > 0
 
 	every setting in data_adapter.resource.extension.sqlAdvancedThreatProtectionSettings {
-		setting.state == "Enabled"
+		setting.properties.state == "Enabled"
 	}
 }

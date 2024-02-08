@@ -4,13 +4,12 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 Virtual machine identification is performed by resource name.
 """
+
 from ..azure_test_case import AzureServiceCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_7_1 = "CIS 7.1"
-# Fail not working
 CIS_7_2 = "CIS 7.2"
-# No evaluation
 CIS_7_3 = "CIS 7.3"
 CIS_7_4 = "CIS 7.4"
 
@@ -40,7 +39,7 @@ cis_azure_7_2_pass = AzureServiceCase(
 
 cis_azure_7_2_fail = AzureServiceCase(
     rule_tag=CIS_7_2,
-    case_identifier="test-vm-fail",
+    case_identifier="test-vm-unmanaged",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -51,13 +50,13 @@ cis_azure_7_2 = {
 
 cis_azure_7_3_pass = AzureServiceCase(
     rule_tag=CIS_7_3,
-    case_identifier="test-vm-pass",
+    case_identifier="test-vm-pass_OsDisk_1_b4e314d6a75e461f999e0606c3430abc",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_7_3_fail = AzureServiceCase(
     rule_tag=CIS_7_3,
-    case_identifier="test-vm-fail",
+    case_identifier="test-vm-fail_OsDisk_1_46e55eb6839b46b0ade92115c8415a3b",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -87,9 +86,10 @@ cis_azure_7_4 = {
       with 'Customer Managed Key' (CMK) expect: failed""": cis_azure_7_4_fail,
 }
 
-cis_azure_virtual_machine_cases = {
+# The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
+test_cases = {
     **cis_azure_7_1,
-    # **cis_azure_7_2,
-    # **cis_azure_7_3,
+    **cis_azure_7_2,
+    **cis_azure_7_3,
     **cis_azure_7_4,
 }
