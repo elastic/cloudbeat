@@ -20,7 +20,7 @@ parse_expression(s) = expression if { # handle simple expression
 	is_simple_expression(s)
 
 	# Clean
-	clean_s = clean_full_expression(s)
+	clean_s = remove_trailing_brackets(s)
 
 	# Parse
 	expression = parse_simple_expression(clean_s)
@@ -51,12 +51,10 @@ parse_expression(s) = expression if { # handle complex 2 operator (&& as main op
 	is_complex_expression(s)
 	has_and_operator(s)
 	has_or_operator(s)
+	is_main_operator_and(s)
 
 	# Clean
-	clean_s = clean_full_expression(s)
-
-	# Filter once it's clean
-	is_main_operator_and(clean_s)
+	clean_s = remove_trailing_brackets(s)
 
 	# Process
 	expression = parse_two_operators_expression(clean_s, "&&")
@@ -67,15 +65,21 @@ parse_expression(s) = expression if { # handle complex 2 operator (|| as main op
 	is_complex_expression(s)
 	has_and_operator(s)
 	has_or_operator(s)
+	is_main_operator_or(s)
 
 	# Clean
-	clean_s = clean_full_expression(s)
-
-	# Filter once it's clean
-	is_main_operator_or(clean_s)
+	clean_s = remove_trailing_brackets(s)
 
 	# Process
 	expression = parse_two_operators_expression(clean_s, "||")
+}
+
+is_simple_expression(s) if {
+	find_complexity(s) == "SIMPLE"
+}
+
+is_complex_expression(s) if {
+	find_complexity(s) == "COMPLEX"
 }
 
 parse_two_operators_expression(clean_s, main_op) = expression if {
@@ -89,33 +93,6 @@ parse_two_operators_expression(clean_s, main_op) = expression if {
 	expression = complex_expression(main_op, expressions)
 }
 
-default is_main_operator_and(s) = false
-
-is_main_operator_and(s) if { # if it has no outer parenthesis every sub expression must be either simple or valid or
-	split(s, "")[0] != "("
-	sub_expressions = split(s, "&&")
-	every exp in sub_expressions {
-		is_sub_expression_simple_or_has_or_operator(exp)
-	}
-}
-
-is_main_operator_and(s) if { # if its has outer unwrap it and all sub expessions
-	split(s, "")[0] == "("
-	unwrapped = substring(s, 1, count(s) - 2)
-	is_parenthesis_balanced(unwrapped)
-	sub_expressions = split(unwrapped, "&&")
-	every exp in sub_expressions {
-		is_sub_expression_simple_or_has_or_operator(exp)
-	}
-}
-
-is_main_operator_and(s) if { # try to process with everything is good already in the first place
-	sub_expressions = split(s, "&&")
-	every exp in sub_expressions {
-		is_sub_expression_simple_or_has_or_operator(exp)
-	}
-}
-
 is_sub_expression_simple_or_has_or_operator(s) if {
 	is_parenthesis_balanced(s)
 	has_or_operator(s)
@@ -123,33 +100,6 @@ is_sub_expression_simple_or_has_or_operator(s) if {
 
 is_sub_expression_simple_or_has_or_operator(s) if {
 	is_simple_expression(s)
-}
-
-default is_main_operator_or(s) = false
-
-is_main_operator_or(s) if { # if it has no outer parenthesis every sub expression must be either simple or valid or
-	split(s, "")[0] != "("
-	sub_expressions = split(s, "||")
-	every exp in sub_expressions {
-		is_sub_expression_simple_or_has_and_operator(exp)
-	}
-}
-
-is_main_operator_or(s) if { # if its has outer unwrap it and all sub expessions
-	split(s, "")[0] == "("
-	unwrapped = substring(s, 1, count(s) - 2)
-	is_parenthesis_balanced(unwrapped)
-	sub_expressions = split(unwrapped, "||")
-	every exp in sub_expressions {
-		is_sub_expression_simple_or_has_and_operator(exp)
-	}
-}
-
-is_main_operator_or(s) if { # try to process with everything is good already in the first place
-	sub_expressions = split(s, "||")
-	every exp in sub_expressions {
-		is_sub_expression_simple_or_has_and_operator(exp)
-	}
 }
 
 is_sub_expression_simple_or_has_and_operator(s) if {
@@ -166,7 +116,7 @@ parse_second_level(s) = expression if {
 	is_simple_expression(s)
 
 	# Clean
-	clean_s = clean_full_expression(s)
+	clean_s = remove_trailing_brackets(s)
 
 	# Parse
 	expression = parse_simple_expression(clean_s)
@@ -197,7 +147,7 @@ parse_second_level(s) = expression if {
 	is_simple_expression(s)
 
 	# Clean
-	clean_s = clean_full_expression(s)
+	clean_s = remove_trailing_brackets(s)
 
 	# Parse
 	expression = parse_simple_expression(clean_s)
@@ -205,7 +155,7 @@ parse_second_level(s) = expression if {
 
 parse_one_level_one_operator_complex_expression(s, op) = expression if {
 	# Clean
-	clean_s = clean_full_expression(s)
+	clean_s = remove_trailing_brackets(s)
 
 	# Parse
 	subStrings = split(clean_s, op)
@@ -224,18 +174,6 @@ has_and_operator(s) if {
 
 has_or_operator(s) if {
 	contains(s, "||")
-}
-
-is_simple_expression(s) if {
-	not is_complex_expression(s)
-}
-
-is_complex_expression(s) if {
-	has_and_operator(s)
-}
-
-is_complex_expression(s) if {
-	has_or_operator(s)
 }
 
 parse_simple_expression(s) = expression if { # not equals
@@ -263,10 +201,6 @@ parse_simple_expression(s) = expression if { # not exists
 	expression := simple_expression(clean_left(parts[0]), op, "")
 }
 
-clean_full_expression(s) = clean if {
-	clean = remove_spaces_between_parenthesis(remove_trailing_brackets(s))
-}
-
 remove_trailing_brackets(s) = clean if {
 	no_space = trim_space(s)
 	no_left = trim_left(no_space, "{")
@@ -286,10 +220,6 @@ clean_right(s) = clean if {
 	clean = trim_space(no_parenthesis)
 }
 
-remove_spaces_between_parenthesis(s) = new_string if {
-	new_string = regex.replace(regex.replace(s, "\\)\\s+\\)", "))"), "\\(\\s+\\(", "((")
-} else = s
-
 complex_expression(op, expressions) = {
 	"operator": op,
 	"expressions": expressions,
@@ -301,6 +231,8 @@ simple_expression(left, op, right) = {
 	"right": right,
 }
 
+default count_parenthesis(l) = 0
+
 count_parenthesis(l) = val if {
 	l == "("
 	val = 1
@@ -311,11 +243,7 @@ count_parenthesis(l) = val if {
 	val = -1
 }
 
-count_parenthesis(l) = val if {
-	l != "("
-	l != ")"
-	val = 0
-}
+default is_parenthesis_balanced(s) = false
 
 is_parenthesis_balanced(s) if {
 	symbols = split(s, "")
@@ -342,4 +270,208 @@ is_parenthesis_balanced(s) if {
 	}
 
 	sum(values) == 0 # the total sum must be 0
-} else = false
+}
+
+count_parenthesis_levels(s) = levels if {
+	symbols = split(s, "")
+
+	# First convert everything to 1, 0 or -1
+	values = [vals |
+		symbol := symbols[_]
+		vals := count_parenthesis(symbol)
+	]
+
+	# Sum subsets of values to find the levels. e.g
+	# Given the symbols
+	#   [ (, a, =, b, ) ]
+	# This is converted to values
+	#   [ 1, 0, 0, 0, -1 ]
+	# When performing the sum for each index of values from 0 until the index, we get the array
+	#   [ 1, 1, 1, 1, 0 ]
+	# That because for each index the following sum is performed:
+	#   idx 0 -> sum([ 1 ]) = 1
+	#   idx 1 -> sum([ 1, 0 ]) = 1
+	#   idx 2 -> sum([ 1, 0, 0 ]) = 1
+	#   idx 3 -> sum([ 1, 0, 0, 0 ]) = 1
+	#   idx 4 -> sum([ 1, 0, 0, 0, -1 ]) = 0
+
+	subset = [sub |
+		values[i]
+		sub = sum(array.slice(values, 0, i + 1))
+	]
+
+	levels = max(subset)
+}
+
+default count_complexity_symbols(l) = 0
+
+# We use prime numbers to make sure that the complexity division won't have colisions
+# We won't ever get there, but good to know, if we ever get to 23 levels, colisions will exist
+
+and_complexity_score := 29 # prime number
+
+count_complexity_symbols(l) = val if {
+	l == "&"
+	val = and_complexity_score
+}
+
+or_complexity_score := 23 # prime number
+
+count_complexity_symbols(l) = val if {
+	l == "|"
+	val = or_complexity_score
+}
+
+get_leveled_operators(s) = leveled_operators if {
+	symbols = split(s, "")
+
+	# First grab parentehsis
+	parenthesis = [vals |
+		symbol := symbols[_]
+		vals := count_parenthesis(symbol)
+	]
+
+	# Reduce parenthesis to levels
+	levels = [sub |
+		parenthesis[i]
+		sub = sum(array.slice(parenthesis, 0, i + 1))
+	]
+
+	# Then find symbols times their level (in a set for efficiency since order don't matter here)
+	leveled_operators = {vals |
+		symbol := symbols[i]
+		vals := count_complexity_symbols(symbol) * (levels[i] + 1)
+	}
+}
+
+default find_complexity(s) = "INVALID"
+
+max_allowed_complexity := 2
+
+find_complexity(s) = complexity if {
+	# Filter
+	count_complexity_levels(s) <= max_allowed_complexity
+	is_parenthesis_balanced(s)
+
+	leveled_operators = get_leveled_operators(s)
+
+	# There are no symbol
+	leveled_operators = {0}
+	complexity = "SIMPLE"
+}
+
+find_complexity(s) = complexity if {
+	# Filter
+	count_complexity_levels(s) <= max_allowed_complexity
+	is_parenthesis_balanced(s)
+
+	leveled_operators = get_leveled_operators(s)
+
+	# There are symbols
+	leveled_operators != {0}
+
+	# If in any level we have symbols twice it's invalid
+	every level in numbers.range(1, count_parenthesis_levels(s) + 1) {
+		level_not_contains_double_operators(level, leveled_operators)
+	}
+
+	complexity = "COMPLEX"
+}
+
+default level_not_contains_double_operators(level, leveled_operators) = false
+
+# doesn't contain at all
+level_not_contains_double_operators(level, leveled_operators) if {
+	not leveled_operators[level * and_complexity_score]
+	not leveled_operators[level * or_complexity_score]
+}
+
+# doesn't contain only AND
+level_not_contains_double_operators(level, leveled_operators) if {
+	leveled_operators[level * and_complexity_score]
+	not leveled_operators[level * or_complexity_score]
+}
+
+# doesn't contain only OR
+level_not_contains_double_operators(level, leveled_operators) if {
+	leveled_operators[level * or_complexity_score]
+	not leveled_operators[level * and_complexity_score]
+}
+
+default is_main_operator_and(s) = false
+
+is_main_operator_and(s) if {
+	leveled_operators = get_leveled_operators(s)
+	levels = numbers.range(1, count_parenthesis_levels(s) + 1)
+
+	# Check what is the operator of each level
+	main_operator_per_level = [main |
+		level = levels[_]
+		main = main_operator_in_level(level, leveled_operators)
+	]
+
+	levels_with_and_as_main = [level |
+		op = main_operator_per_level[level]
+		op == "AND"
+	]
+
+	levels_with_or_as_main = [level |
+		op = main_operator_per_level[level]
+		op == "OR"
+	]
+
+	min(levels_with_and_as_main) < min(levels_with_or_as_main)
+}
+
+default is_main_operator_or(s) = false
+
+is_main_operator_or(s) if {
+	leveled_operators = get_leveled_operators(s)
+	levels = numbers.range(1, count_parenthesis_levels(s) + 1)
+
+	# Check what is the operator of each level
+	main_operator_per_level = [main |
+		level = levels[_]
+		main = main_operator_in_level(level, leveled_operators)
+	]
+
+	levels_with_and_as_main = [level |
+		op = main_operator_per_level[level]
+		op == "AND"
+	]
+
+	levels_with_or_as_main = [level |
+		op = main_operator_per_level[level]
+		op == "OR"
+	]
+
+	min(levels_with_and_as_main) > min(levels_with_or_as_main)
+}
+
+default main_operator_in_level(level, leveled_operators) = ""
+
+main_operator_in_level(level, leveled_operators) = main if {
+	leveled_operators[level * and_complexity_score]
+	not leveled_operators[level * or_complexity_score]
+	main = "AND"
+}
+
+main_operator_in_level(level, leveled_operators) = main if {
+	leveled_operators[level * or_complexity_score]
+	not leveled_operators[level * and_complexity_score]
+	main = "OR"
+}
+
+count_complexity_levels(s) = valid_levels if {
+	leveled_operators = get_leveled_operators(s)
+	levels = numbers.range(1, count_parenthesis_levels(s) + 1)
+
+	# Check what is the operator of each level
+	main_operator_per_level = [main |
+		level = levels[_]
+		main = main_operator_in_level(level, leveled_operators)
+		main != ""
+	]
+
+	valid_levels = count(main_operator_per_level)
+}
