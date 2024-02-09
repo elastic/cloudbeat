@@ -24,441 +24,188 @@ test_fail if {
 	get_filter_matched_to_pattern({"MetricFilters": []}, []) == ""
 }
 
+# regal ignore:rule-length
 test_expressions_equivalent if {
 	is_equal(
 		"TRUE simple expression equal", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy}",
-			"{$.eventName=DeleteGroupPolicy}",
+			simple_expression("a", "=", "b"),
+			simple_expression("a", "=", "b"),
+		),
+		true,
+	)
+
+	is_equal(
+		"TRUE NOT EXISTS equal", expressions_equivalent(
+			simple_expression("a", "NOT EXISTS", ""),
+			simple_expression("a", "NOT EXISTS", ""),
 		),
 		true,
 	)
 
 	is_equal(
 		"TRUE simple expression inverted", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy}",
-			"{DeleteGroupPolicy=$.eventName}",
-		),
-		true,
-	)
-
-	is_equal(
-		"TRUE simple expression different spacing", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy}",
-			"{ $.eventName = DeleteGroupPolicy }",
-		),
-		true,
-	)
-
-	is_equal(
-		"TRUE simple expression different parenthesis", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy}",
-			"{ (($.eventName = DeleteGroupPolicy)) }",
+			simple_expression("a", "=", "b"),
+			simple_expression("b", "=", "a"),
 		),
 		true,
 	)
 
 	is_equal(
 		"FALSE simple expression different left", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy}",
-			"{$.eventName=Different}",
+			simple_expression("a", "=", "b"),
+			simple_expression("b", "=", "f"),
 		),
 		false,
 	)
 
 	is_equal(
-		"FALSE simple expression different left", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy}",
-			"{$.eventType=DeleteGroupPolicy}",
+		"FALSE simple expression different right", expressions_equivalent(
+			simple_expression("a", "=", "b"),
+			simple_expression("c", "=", "b"),
 		),
 		false,
 	)
 
 	is_equal(
 		"FALSE simple expression different operator", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy}",
-			"{$.eventName!=DeleteGroupPolicy}",
+			simple_expression("a", "=", "b"),
+			simple_expression("b", "!=", "b"),
 		),
 		false,
 	)
 
 	is_equal(
 		"TRUE complex expression one level basic equal", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
-			"{ $.eventName = DeleteGroupPolicy || $.eventType = Type }",
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				simple_expression("d", "=", "e"),
+			]),
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				simple_expression("d", "=", "e"),
+			]),
 		),
 		true,
 	)
 
 	is_equal(
 		"TRUE complex expression one level basic inverted", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
-			"{ $.eventType = Type || $.eventName = DeleteGroupPolicy }",
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				simple_expression("d", "=", "e"),
+			]),
+			complex_expression("||", [
+				simple_expression("d", "=", "e"),
+				simple_expression("a", "=", "b"),
+			]),
 		),
 		true,
 	)
 
 	is_equal(
 		"TRUE complex expression one level basic inverted (also sub expressions)", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
-			"{ $.eventType = Type || DeleteGroupPolicy = $.eventName }",
-		),
-		true,
-	)
-
-	is_equal(
-		"TRUE complex expression one level global parenthesis", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
-			"{ ($.eventType = Type || DeleteGroupPolicy = $.eventName) }",
-		),
-		true,
-	)
-
-	is_equal(
-		"TRUE complex expression one level global and specific parenthesis", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
-			"{ (($.eventType = Type) || (DeleteGroupPolicy = $.eventName) ) }",
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				simple_expression("d", "=", "e"),
+			]),
+			complex_expression("||", [
+				simple_expression("d", "=", "e"),
+				simple_expression("b", "=", "a"),
+			]),
 		),
 		true,
 	)
 
 	is_equal(
 		"FALSE complex expression one level global different op", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy || $.eventType=Type}",
-			"{ (($.eventType = Type) && (DeleteGroupPolicy = $.eventName) ) }",
-		),
-		false,
-	)
-
-	is_equal(
-		"TRUE complex expression two levels global different op", expressions_equivalent(
-			"{$.eventName=DeleteGroupPolicy && (d =f || ($.eventType=Type))}",
-			"{ (($.eventType = Type) && (DeleteGroupPolicy = $.eventName || d= f) ) }",
-		),
-		false,
-	)
-	is_equal(
-		"Different Spaces", expressions_equivalent(
-			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
-			"{ ($.errorCode=\"*UnauthorizedOperation\")||($.errorCode=\"AccessDenied*\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\")||($.eventName!=\"HeadBucket\") }",
-		),
-		true,
-	)
-
-	is_equal(
-		"Different order of expressions", expressions_equivalent(
-			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
-			"{ ($.errorCode=\"AccessDenied*\")||($.eventName!=\"HeadBucket\")||($.errorCode=\"*UnauthorizedOperation\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") }",
-		),
-		true,
-	)
-
-	is_equal(
-		"Different logical operator", expressions_equivalent(
-			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
-			"{ ($.errorCode=\"AccessDenied*\")&&($.eventName!=\"HeadBucket\")||($.errorCode=\"*UnauthorizedOperation\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") }",
-		),
-		false,
-	)
-
-	is_equal(
-		"Different comparison operator", expressions_equivalent(
-			"{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }",
-			"{ ($.errorCode!=\"AccessDenied*\")||($.eventName!=\"HeadBucket\")||($.errorCode=\"*UnauthorizedOperation\")||($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") }",
-		),
-		false,
-	)
-
-	is_equal(
-		"Different nested order", expressions_equivalent(
-			"{ ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }",
-			"{ (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) && ($.eventSource = organizations.amazonaws.com)}",
-		),
-		true,
-	)
-}
-
-test_parse if {
-	is_equal(
-		"simple expression",
-		parse_expression("{$.eventName=DeleteGroupPolicy}"),
-		simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
-	)
-
-	is_equal(
-		"simple expression with spaces",
-		parse_expression("{   $.eventName = DeleteGroupPolicy   }"),
-		simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
-	)
-
-	is_equal(
-		"simple expression with spaces in the middle",
-		parse_expression("{   $. eventName = DeleteGroupPolicy   }"),
-		simple_expression("$. eventName", "=", "DeleteGroupPolicy"),
-	)
-
-	is_equal(
-		"simple expression with string",
-		parse_expression("{   $. eventName = \" String string string  \" }"),
-		simple_expression("$. eventName", "=", "\" String string string  \""),
-	)
-
-	is_equal(
-		"simple expression 'different' comparator",
-		parse_expression("{   $. eventName != \" String string string  \" }"),
-		simple_expression("$. eventName", "!=", "\" String string string  \""),
-	)
-
-	is_equal(
-		"simple expression 'notExists' comparator",
-		parse_expression("{   $.eventName NOT EXISTS }"),
-		simple_expression("$.eventName", "NOT EXISTS", ""),
-	)
-
-	is_equal(
-		"simple expression with parenthesis",
-		parse_expression("{($.eventName=DeleteGroupPolicy)}"),
-		simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
-	)
-
-	is_equal(
-		"simple expression with multiple parenthesis",
-		parse_expression("{(($.eventName=DeleteGroupPolicy))}"),
-		simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
-	)
-
-	is_equal(
-		"simple expression with parenthesis and spaces",
-		parse_expression("{   (   $.eventName  =   DeleteGroupPolicy )   }"),
-		simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
-	)
-
-	is_equal(
-		"complex expression 2 expressions AND operator",
-		parse_expression("{$.userIdentity.type = \"Root\" && $.userIdentity.invokedBy NOT EXISTS}"),
-		complex_expression("&&", [
-			simple_expression("$.userIdentity.type", "=", "\"Root\""),
-			simple_expression("$.userIdentity.invokedBy", "NOT EXISTS", ""),
-		]),
-	)
-
-	is_equal(
-		"complex expression 2 expressions OR operator",
-		parse_expression("{$.userIdentity.type = \"Root\" || $.userIdentity.invokedBy NOT EXISTS}"),
-		complex_expression("||", [
-			simple_expression("$.userIdentity.type", "=", "\"Root\""),
-			simple_expression("$.userIdentity.invokedBy", "NOT EXISTS", ""),
-		]),
-	)
-
-	is_equal(
-		"complex expression 2 expressions with outer parenthesis",
-		parse_expression("{($.userIdentity.type = \"Root\" && $.userIdentity.invokedBy NOT EXISTS)}"),
-		complex_expression("&&", [
-			simple_expression("$.userIdentity.type", "=", "\"Root\""),
-			simple_expression("$.userIdentity.invokedBy", "NOT EXISTS", ""),
-		]),
-	)
-
-	is_equal(
-		"complex expression with parenthesis per simple expression",
-		parse_expression("{($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"),
-		complex_expression("||", [
-			simple_expression("$.errorCode", "=", "\"*UnauthorizedOperation\""),
-			simple_expression("$.errorCode", "=", "\"AccessDenied*\""),
-			simple_expression("$.sourceIPAddress", "!=", "\"delivery.logs.amazonaws.com\""),
-			simple_expression("$.eventName", "!=", "\"HeadBucket\""),
-		]),
-	)
-
-	is_equal(
-		"complex expression 3 expressions",
-		parse_expression("{$.userIdentity.type = \"Root\" && $.userIdentity.invokedBy NOT EXISTS && $.eventType != \"AwsServiceEvent\" }"),
-		complex_expression("&&", [
-			simple_expression("$.userIdentity.type", "=", "\"Root\""),
-			simple_expression("$.userIdentity.invokedBy", "NOT EXISTS", ""),
-			simple_expression("$.eventType", "!=", "\"AwsServiceEvent\""),
-		]),
-	)
-
-	is_equal(
-		"complex expression 2 logical operators AND main OR sub",
-		parse_expression("{($.eventSource = kms.amazonaws.com) && (($.eventName=DisableKey)||($.eventName=ScheduleKeyDeletion)) }"),
-		complex_expression("&&", [
-			simple_expression("$.eventSource", "=", "kms.amazonaws.com"),
 			complex_expression("||", [
-				simple_expression("$.eventName", "=", "DisableKey"),
-				simple_expression("$.eventName", "=", "ScheduleKeyDeletion"),
+				simple_expression("a", "=", "b"),
+				simple_expression("d", "=", "e"),
 			]),
-		]),
-	)
-
-	is_equal(
-		"complex expression 2 logical operators || main OR sub",
-		parse_expression("{($.eventSource = kms.amazonaws.com) || (($.eventName=DisableKey)&&($.eventName=ScheduleKeyDeletion)) }"),
-		complex_expression("||", [
-			simple_expression("$.eventSource", "=", "kms.amazonaws.com"),
 			complex_expression("&&", [
-				simple_expression("$.eventName", "=", "DisableKey"),
-				simple_expression("$.eventName", "=", "ScheduleKeyDeletion"),
+				simple_expression("a", "=", "b"),
+				simple_expression("d", "=", "e"),
 			]),
-		]),
+		),
+		false,
 	)
 
 	is_equal(
-		"complex expression 2 logical operators AND main AND sub",
-		parse_expression("{($.eventSource = kms.amazonaws.com) && (($.eventName=DisableKey)&&($.eventName=ScheduleKeyDeletion)) }"),
-		complex_expression("&&", [
-			simple_expression("$.eventSource", "=", "kms.amazonaws.com"),
-			simple_expression("$.eventName", "=", "DisableKey"),
-			simple_expression("$.eventName", "=", "ScheduleKeyDeletion"),
-		]),
-	)
-
-	is_equal(
-		"sub expression first",
-		parse_expression("{ (($.eventName=DisableKey)||($.eventName=ScheduleKeyDeletion)) && ($.eventSource = kms.amazonaws.com) }"),
-		complex_expression("&&", [
+		"TRUE complex expression two levels equal", expressions_equivalent(
 			complex_expression("||", [
-				simple_expression("$.eventName", "=", "DisableKey"),
-				simple_expression("$.eventName", "=", "ScheduleKeyDeletion"),
+				simple_expression("a", "=", "b"),
+				complex_expression("&&", [
+					simple_expression("d", "=", "e"),
+					simple_expression("f", "=", "g"),
+				]),
 			]),
-			simple_expression("$.eventSource", "=", "kms.amazonaws.com"),
-		]),
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				complex_expression("&&", [
+					simple_expression("d", "=", "e"),
+					simple_expression("f", "=", "g"),
+				]),
+			]),
+		),
+		true,
 	)
 
 	is_equal(
-		"error on expression alternating logical operators",
-		parse_expression("{($.eventSource = kms.amazonaws.com) && ($.eventName=DisableKey) || ($.eventName=ScheduleKeyDeletion)}"),
-		{"error": "Could not parse expression"},
+		"TRUE complex expression two levels different orders", expressions_equivalent(
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				complex_expression("&&", [
+					simple_expression("d", "=", "e"),
+					simple_expression("f", "=", "g"),
+				]),
+			]),
+			complex_expression("||", [
+				complex_expression("&&", [
+					simple_expression("g", "=", "f"),
+					simple_expression("d", "=", "e"),
+				]),
+				simple_expression("b", "=", "a"),
+			]),
+		),
+		true,
 	)
 
 	is_equal(
-		"error on 4 layers deep expression",
-		parse_expression("{((a=b) && ((c=d) || ((e=f) && (g!=h || (i=j)))))}"),
-		{"error": "Could not parse expression"},
+		"FALSE complex expression two levels different comparisson", expressions_equivalent(
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				complex_expression("&&", [
+					simple_expression("d", "=", "DIFFERENT"),
+					simple_expression("f", "=", "g"),
+				]),
+			]),
+			complex_expression("||", [
+				complex_expression("&&", [
+					simple_expression("g", "=", "f"),
+					simple_expression("d", "=", "e"),
+				]),
+				simple_expression("b", "=", "a"),
+			]),
+		),
+		false,
 	)
 
 	is_equal(
-		"error on broken parenthesis and spaces",
-		parse_expression("{   (   $.eventName  =   DeleteGroupPolicy ))   }"),
-		{"error": "Could not parse expression"},
+		"FALSE complex expression two levels missing one sub expression", expressions_equivalent(
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				complex_expression("&&", [
+					simple_expression("d", "=", "e"),
+					simple_expression("f", "=", "g"),
+				]),
+			]),
+			complex_expression("||", [
+				simple_expression("a", "=", "b"),
+				complex_expression("&&", [simple_expression("f", "=", "g")]),
+			]),
+		),
+		false,
 	)
-
-	is_equal(
-		"error on double operators (double equals)",
-		parse_expression("{   $.eventName == a }"),
-		{"error": "Could not parse expression"},
-	)
-
-	is_equal(
-		"expect weird behaviour on double operators (different and equals)",
-		parse_expression("{   $.eventName !== a }"),
-		simple_expression("$.eventName", "!=", "= a"),
-	)
-
-	is_equal(
-		"error on double operators (after expression)",
-		parse_expression("{   $.eventName != a !=}"),
-		{"error": "Could not parse expression"},
-	)
-}
-
-test_is_parenthesis_balanced if {
-	is_equal("simple parenthesis", is_parenthesis_balanced("()"), true)
-	is_equal("broken parenthesis", is_parenthesis_balanced(")("), false)
-	is_equal("broken parenthesis 2", is_parenthesis_balanced("())"), false)
-	is_equal("broken parenthesis 3", is_parenthesis_balanced(")())"), false)
-	is_equal("simple parenthesis with content", is_parenthesis_balanced("(a=b)"), true)
-	is_equal("sub parenthesis", is_parenthesis_balanced("(a=b (sadasdasd))"), true)
-	is_equal("broken sub parenthesis", is_parenthesis_balanced("(a=b (sadasdasd) ))"), false)
-	is_equal("multiple expressions", is_parenthesis_balanced("()()()"), true)
-	is_equal("multiple sub expressions", is_parenthesis_balanced("(()()(()()(())))"), true)
-	is_equal("only opening", is_parenthesis_balanced("("), false)
-	is_equal("only closing", is_parenthesis_balanced(")"), false)
-}
-
-test_is_main_operator_and if {
-	is_equal("TRUE no parenthesis", is_main_operator_and("a=b && (c=d || e=f)"), true)
-	is_equal("TRUE with parenthesis", is_main_operator_and("(a=b && (c=d || e=f))"), true)
-	is_equal("TRUE with double parenthesis", is_main_operator_and("(a=b && ((c=d) || (e=f)))"), true)
-	is_equal("TRUE with double parenthesis twice", is_main_operator_and("((a=b) && ((c=d) || (e=f)))"), true)
-	is_equal("TRUE with expressions on both sides and double parenthesis", is_main_operator_and("((a=b) && ((c=d) || (e=f)) && (g=h))"), true)
-	is_equal("TRUE main operator on the other side", is_main_operator_and("((c=d || e=f) && (a=b))"), true)
-	is_equal("TRUE non wrapped expression", is_main_operator_and("(a = b) && ((c=d)||(e=f))"), true)
-	is_equal("FALSE no parenthesis", is_main_operator_and("a=b || (c=d && e=f)"), false)
-	is_equal("FALSE with parenthesis", is_main_operator_and("(a=b || (c=d && e=f))"), false)
-	is_equal("FALSE with double parenthesis", is_main_operator_and("(a=b || ((c=d) && (e=f)))"), false)
-	is_equal("FALSE with double parenthesis twice", is_main_operator_and("((a=b) || ((c=d) && (e=f)))"), false)
-	is_equal("FALSE with expressions on both sides", is_main_operator_and("((a=b) || ((c=d) && (e=f)) && g=h)"), false)
-	is_equal("FALSE with expressions on both sides and double parenthesis", is_main_operator_and("((a=b) || ((c=d) && (e=f)) && (g=h))"), false)
-	is_equal("FALSE main operator on the other side", is_main_operator_and("((c=d && e=f) || (a=b))"), false)
-	is_equal("FALSE non wrapped expression", is_main_operator_and("(a = b) || ((c=d)&&(e=f))"), false)
-}
-
-test_is_main_operator_or if {
-	is_equal("TRUE no parenthesis", is_main_operator_or("a=b || (c=d && e=f)"), true)
-	is_equal("TRUE with parenthesis", is_main_operator_or("(a=b || (c=d && e=f))"), true)
-	is_equal("TRUE with double parenthesis", is_main_operator_or("(a=b || ((c=d) && (e=f)))"), true)
-	is_equal("TRUE with double parenthesis twice", is_main_operator_or("((a=b) || ((c=d) && (e=f)))"), true)
-	is_equal("TRUE with expressions on both sides and double parenthesis", is_main_operator_or("((a=b) || ((c=d) && (e=f)) || (g=h))"), true)
-	is_equal("TRUE non wrapped expression", is_main_operator_or("(a = b) || ((c=d)&&(e=f))"), true)
-	is_equal("TRUE main operator on the other side", is_main_operator_or("((c=d && e=f) || (a=b))"), true)
-	is_equal("FALSE no parenthesis", is_main_operator_or("a=b && (c=d || e=f)"), false)
-	is_equal("FALSE with parenthesis", is_main_operator_or("(a=b && (c=d || e=f))"), false)
-	is_equal("FALSE with double parenthesis", is_main_operator_or("(a=b && ((c=d) || (e=f)))"), false)
-	is_equal("FALSE with double parenthesis twice", is_main_operator_or("((a=b) && ((c=d) || (e=f)))"), false)
-	is_equal("FALSE with expressions on both sides", is_main_operator_or("((a=b) && ((c=d) || (e=f)) && g=h)"), false)
-	is_equal("FALSE with expressions on both sides and double parenthesis", is_main_operator_or("((a=b) && ((c=d) || (e=f)) && (g=h))"), false)
-	is_equal("FALSE main operator on the other side", is_main_operator_or("((c=d || e=f) && (a=b))"), false)
-	is_equal("FALSE non wrapped expression", is_main_operator_or("(a = b) && ((c=d)||(e=f))"), false)
-}
-
-test_find_complexity if {
-	is_equal("Test simple expression", find_complexity("a = b"), "SIMPLE")
-	is_equal("Test simple expression parenthesis", find_complexity("(a = b)"), "SIMPLE")
-	is_equal("Test complex expression 1", find_complexity("a = b || b = c"), "COMPLEX")
-	is_equal("Test complex expression 2", find_complexity("a = b || (b = c)"), "COMPLEX")
-	is_equal("Test complex expression 3", find_complexity("(a = b || (b = c))"), "COMPLEX")
-	is_equal("Test complex expression 4", find_complexity("(a = b || (b = c) || (d = e))"), "COMPLEX")
-	is_equal("Test complex expression 5", find_complexity("(a = b || (b = c && e = f))"), "COMPLEX")
-	is_equal("Invalid no parenthesis", find_complexity("a = b || b = c && e = f"), "INVALID")
-	is_equal("Invalid with parenthesis", find_complexity("(a = b || b = c && e = f)"), "INVALID")
-	is_equal("Invalid with double parenthesis", find_complexity("(a = b || (b = c) && e = f)"), "INVALID")
-	is_equal("Invalid with valid sub expression", find_complexity("(a = b || (b = c && a = c) && e = f)"), "INVALID")
-	is_equal("Invalid with valid sub expression more parenthesis", find_complexity("((a=b) || ((c=d) && (e=f)) && g=h)"), "INVALID")
-}
-
-test_count_parenthesis_levels if {
-	is_equal("0 level simple", count_parenthesis_levels("a=b"), 0)
-	is_equal("0 level double", count_parenthesis_levels("a=b || c=d"), 0)
-	is_equal("1 level simple", count_parenthesis_levels("(a=b)"), 1)
-	is_equal("1 level double", count_parenthesis_levels("(a=b) || (c=d)"), 1)
-	is_equal("2 level simple", count_parenthesis_levels("((a=b))"), 2)
-	is_equal("2 level double", count_parenthesis_levels("((a=b) || (c=d))"), 2)
-	is_equal("3 level tripple", count_parenthesis_levels("((a=b) || ((c=d) && (e=d)))"), 3)
-}
-
-test_count_complexity_levels if {
-	is_equal("0 level simple", count_complexity_levels("a=b"), 0)
-	is_equal("0 level simple 1 parentehesis", count_complexity_levels("(a=b)"), 0)
-	is_equal("0 level simple 2 parentehesis", count_complexity_levels("((a=b))"), 0)
-	is_equal("0 level simple a lot of parentehesis", count_complexity_levels("(((((((((a=b)))))))))"), 0)
-
-	is_equal("1 level simple", count_complexity_levels("a=b && c=d"), 1)
-	is_equal("1 level simple 1 parentehesis", count_complexity_levels("(a=b && c=d)"), 1)
-	is_equal("1 level simple 1 parentehesis", count_complexity_levels("(a=b) && (c=d)"), 1)
-	is_equal("1 level simple 2 parentehesis", count_complexity_levels("((a=b) && (c=d))"), 1)
-	is_equal("1 level simple a lot of parentehesis", count_complexity_levels("(((((((((a=b) && (c=d) && (g=h)))))))))"), 1)
-
-	is_equal("2 level simple", count_complexity_levels("a=b && (c=d || e=f)"), 2)
-	is_equal("2 level simple 1 parentehesis", count_complexity_levels("(a=b && (c=d || e=f))"), 2)
-	is_equal("2 level simple 1 parentehesis", count_complexity_levels("(a=b) && ((c=d || e=f))"), 2)
-	is_equal("2 level simple 2 parentehesis", count_complexity_levels("((a=b) && ((c=d || e=f || (g=h))))"), 2)
-	is_equal("2 level simple a lot of parentehesis", count_complexity_levels("(((((((((a=b) && ((c=d || ((e=f))))))))))))"), 2)
-
-	is_equal("3 level simple", count_complexity_levels("a=b && (c=d || (e=f && (g=h)))"), 3)
-
-	is_equal("4 level", count_complexity_levels("((a=b) && ((c=d) || ((e=f) && (g!=h || (i=j)))))"), 4)
 }
 
 is_equal(_, actual, want) if {
@@ -467,8 +214,11 @@ is_equal(_, actual, want) if {
 
 is_equal(desc, actual, want) if {
 	actual != want
-	print("--- Test [", desc, "] failed because:")
-	print("WANT:    ", want)
-	print("ACTUAL:  ", actual)
-	false
+
+	print("--- Test [", desc, "] failed because:") # regal ignore:print-or-trace-call
+	print("WANT:    ", want) # regal ignore:print-or-trace-call
+	print("ACTUAL:  ", actual) # regal ignore:print-or-trace-call
+
+	# Force failure
+	actual == want
 }
