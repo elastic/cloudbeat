@@ -44,7 +44,6 @@ resource "random_string" "suffix" {
 
 provider "ec" {
   apikey = var.ec_api_key
-  url    = var.ec_url
 }
 
 provider "restapi" {
@@ -91,7 +90,7 @@ module "ec_project" {
   ec_apikey    = var.ec_api_key
   ec_url       = var.ec_url
   project_name = "${var.deployment_name}-${random_string.suffix.result}"
-  region_id    = "aws-us-east-1" # TODO: replace with var.ess_region when more regions are supported
+  region_id    = var.ess_region
 }
 
 module "eks" {
