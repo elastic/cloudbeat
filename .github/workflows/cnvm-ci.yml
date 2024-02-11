@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.12'
 
       - name: Install Poetry
         run: |
@@ -57,7 +57,6 @@ jobs:
           ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
 
       - name: Check for vulnerabilities
-        working-directory: ./tests
         env:
           USE_K8S: false
         run: |

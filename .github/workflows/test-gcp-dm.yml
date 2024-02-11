@@ -41,7 +41,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.12"
 
       - name: Install Poetry
         run: |
@@ -80,7 +80,6 @@ jobs:
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
-        working-directory: deploy/test-environments/fleet_api
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
@@ -97,7 +96,6 @@ jobs:
           . ./set_env.sh && ./deploy.sh
 
       - name: Check for findings
-        working-directory: ./tests
         env:
           USE_K8S: false
         run: |

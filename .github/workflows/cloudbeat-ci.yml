@@ -37,7 +37,6 @@ jobs:
       - name: Install poetry
         run: |
           pip3 install poetry
-          cd security-policies
           poetry install
 
       - name: Pre-commit Hooks

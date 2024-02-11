@@ -65,8 +65,8 @@ After forking the repo:
 
 ```shell
 git clone https://github.com/<yourname>/cloudbeat.git
-cd cloudbeat/tests
 poetry install
+cd cloudbeat/tests
 ```
 
 ### Running CSPM Tests from shell against local elastic
