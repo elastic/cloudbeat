@@ -34,15 +34,18 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Install poetry
+        run: |
+          pip3 install poetry
+          poetry --version
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'poetry'
 
-      - name: Install poetry
-        run: |
-          pip3 install poetry
-          poetry install
+      - name: Init Poetry environment
+        run: poetry install
 
       - name: Pre-commit Hooks
         env:

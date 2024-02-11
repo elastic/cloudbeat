@@ -38,16 +38,20 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+
+      - name: Install Poetry
+        run: |
+          pip3 install poetry
+          poetry --version
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: 'poetry'
 
-      - name: Install Poetry
-        run: |
-          pip3 install poetry
-          poetry --version
+      - name: Init Poetry environment
+        run: poetry install
 
       - id: google-auth
         name: Authenticate to Google Cloud
@@ -85,7 +89,6 @@ jobs:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
-          poetry install
           poetry run python src/install_cspm_gcp_integration.py
 
       - name: Deploy CSPM GCP agent
@@ -100,7 +103,6 @@ jobs:
         env:
           USE_K8S: false
         run: |
-          poetry install
           poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Destory EC deployment

@@ -26,16 +26,19 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Install Poetry
+        run: |
+          pip3 install poetry
+          poetry --version
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: 'poetry'
 
-      - name: Install Poetry
-        run: |
-          pip3 install poetry
-          poetry --version
+      - name: Init Poetry environment
+        run: poetry install
 
       - name: Build cloudbeat binary
         uses: magefile/mage-action@v3
@@ -72,7 +75,6 @@ jobs:
         env:
           USE_K8S: false
         run: |
-          poetry install
           poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
       - name: Print cloudbeat logs

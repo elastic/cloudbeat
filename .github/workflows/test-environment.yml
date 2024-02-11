@@ -189,21 +189,19 @@ jobs:
           echo "::add-mask::$enrollment_token"
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
 
+      - name: Install Poetry
+        run: |
+          pip3 install poetry
+          poetry --version
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'poetry'
 
-      - name: Install Poetry
-        run: |
-          pip3 install poetry
-          poetry --version
-
-      - name: Install Fleet & Tests Dependencies
-        id: fleet-and-tests-deps
-        run: |
-          poetry install
+      - name: Init Poetry environment
+        run: poetry install
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4.0.1
