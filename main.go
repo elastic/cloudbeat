@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/elastic/cloudbeat/cmd"
-	_ "github.com/elastic/cloudbeat/include"
+	_ "github.com/elastic/cloudbeat/internal/include"
 )
 
 func main() {

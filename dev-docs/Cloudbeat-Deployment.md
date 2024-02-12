@@ -133,7 +133,7 @@ This is useful for testing and development purposes.
     export STACK_VERSION=$(docker inspect -f '{{index .Config.Labels "org.label-schema.version"}}' $BASE_IMAGE)
     export VCS_REF=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vcs-ref"}}' $BASE_IMAGE)
     docker buildx build \
-        -f ./dev-tools/packaging/docker/elastic-agent/Dockerfile \
+        -f ./scripts/packaging/docker/elastic-agent/Dockerfile \
         --build-arg ELASTIC_AGENT_IMAGE=$BASE_IMAGE \
         --build-arg STACK_VERSION=$STACK_VERSION \
         --build-arg VCS_REF_SHORT=${VCS_REF:0:6} \
