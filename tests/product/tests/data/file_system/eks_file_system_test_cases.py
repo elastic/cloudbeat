@@ -113,4 +113,4 @@ cis_eks_all = {
     "test-eks-config-2": file_system_config_2,
 }
 
-cis_eks_file_system_cases = cis_eks_all[eks.current_config]
+cis_eks_file_system_cases = cis_eks_all.get(eks.current_config, {})
