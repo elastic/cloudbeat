@@ -113,7 +113,7 @@ func TestMultiRegionFetch(t *testing.T) {
 		{
 			name:    "Fetch resources from multiple regions",
 			clients: map[string]testClient{euRegion: &dummyTester{euRegion}, usRegion: &dummyTester{usRegion}},
-			fetcher: func(ctx context.Context, region string, c testClient) ([]AwsResource, error) {
+			fetcher: func(_ context.Context, _ string, c testClient) ([]AwsResource, error) {
 				return c.DummyFunc()
 			},
 			want:    []AwsResource{testAwsResource{resRegion: usRegion}, testAwsResource{resRegion: euRegion}},
@@ -122,7 +122,7 @@ func TestMultiRegionFetch(t *testing.T) {
 		{
 			name:    "Error from a single region",
 			clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
-			fetcher: func(ctx context.Context, region string, c testClient) ([]AwsResource, error) {
+			fetcher: func(_ context.Context, _ string, c testClient) ([]AwsResource, error) {
 				return c.DummyFunc()
 			},
 			want:    []AwsResource{testAwsResource{resRegion: usRegion}},
@@ -131,7 +131,7 @@ func TestMultiRegionFetch(t *testing.T) {
 		{
 			name:    "Error from all regions",
 			clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
-			fetcher: func(ctx context.Context, region string, c testClient) ([]AwsResource, error) {
+			fetcher: func(_ context.Context, _ string, _ testClient) ([]AwsResource, error) {
 				return nil, errors.New("service unavailable")
 			},
 			want:    nil,

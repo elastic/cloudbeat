@@ -31,14 +31,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type assetSingleConfigFn func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error)
-type assetFlexConfigFn func() ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error)
-type assetSingleFirewallRuleFn func() ([]armpostgresql.FirewallRulesClientListByServerResponse, error)
-type assetFlexFirewallRuleFn func() ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error)
+type (
+	assetSingleConfigFn       func() ([]armpostgresql.ConfigurationsClientListByServerResponse, error)
+	assetFlexConfigFn         func() ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error)
+	assetSingleFirewallRuleFn func() ([]armpostgresql.FirewallRulesClientListByServerResponse, error)
+	assetFlexFirewallRuleFn   func() ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error)
+)
 
 func mockAssetSinglePSQLConfiguration(f assetSingleConfigFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
-		AssetSingleServerConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
+		AssetSingleServerConfigurations: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
 			return f()
 		},
 	}
@@ -51,7 +53,7 @@ func mockAssetSinglePSQLConfiguration(f assetSingleConfigFn) PostgresqlProviderA
 
 func mockAssetFlexPSQLConfiguration(f assetFlexConfigFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
-		AssetFlexibleServerConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
+		AssetFlexibleServerConfigurations: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
 			return f()
 		},
 	}
@@ -64,7 +66,7 @@ func mockAssetFlexPSQLConfiguration(f assetFlexConfigFn) PostgresqlProviderAPI {
 
 func mockAssetSinglePSQLFirewallRule(f assetSingleFirewallRuleFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
-		AssetSingleServerFirewallRules: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.FirewallRulesClientListByServerOptions) ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
+		AssetSingleServerFirewallRules: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresql.FirewallRulesClientListByServerOptions) ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
 			return f()
 		},
 	}
@@ -77,7 +79,7 @@ func mockAssetSinglePSQLFirewallRule(f assetSingleFirewallRuleFn) PostgresqlProv
 
 func mockAssetFlexPSQLFirewallRule(f assetFlexFirewallRuleFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
-		AssetFlexibleServerFirewallRules: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresqlflexibleservers.FirewallRulesClientListByServerOptions) ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
+		AssetFlexibleServerFirewallRules: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresqlflexibleservers.FirewallRulesClientListByServerOptions) ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
 			return f()
 		},
 	}
@@ -351,7 +353,7 @@ func TestFlexibleSinglePostgresFirewallRules(t *testing.T) {
 }
 
 func wrapSinglePsqlConfigResponse(results ...armpostgresql.ConfigurationListResult) []armpostgresql.ConfigurationsClientListByServerResponse {
-	return lo.Map(results, func(r armpostgresql.ConfigurationListResult, index int) armpostgresql.ConfigurationsClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresql.ConfigurationListResult, _ int) armpostgresql.ConfigurationsClientListByServerResponse {
 		return armpostgresql.ConfigurationsClientListByServerResponse{
 			ConfigurationListResult: r,
 		}
@@ -403,7 +405,7 @@ func singlePsqlConfigAsset(id, name, value string) AzureAsset {
 }
 
 func wrapFlexPsqlConfigResponse(results ...armpostgresqlflexibleservers.ConfigurationListResult) []armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse {
-	return lo.Map(results, func(r armpostgresqlflexibleservers.ConfigurationListResult, index int) armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresqlflexibleservers.ConfigurationListResult, _ int) armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse {
 		return armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse{
 			ConfigurationListResult: r,
 		}
@@ -455,7 +457,7 @@ func flexPsqlConfigAsset(id, name, value string) AzureAsset {
 }
 
 func wrapSinglePsqlFirewallRulesResponse(results ...armpostgresql.FirewallRuleListResult) []armpostgresql.FirewallRulesClientListByServerResponse {
-	return lo.Map(results, func(r armpostgresql.FirewallRuleListResult, index int) armpostgresql.FirewallRulesClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresql.FirewallRuleListResult, _ int) armpostgresql.FirewallRulesClientListByServerResponse {
 		return armpostgresql.FirewallRulesClientListByServerResponse{
 			FirewallRuleListResult: r,
 		}
@@ -501,7 +503,7 @@ func singlePsqlFirewallConfigAsset(id, startIpAddr, endIpAddr string) AzureAsset
 }
 
 func wrapFlexPsqlFirewallRulesResponse(results ...armpostgresqlflexibleservers.FirewallRuleListResult) []armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
-	return lo.Map(results, func(r armpostgresqlflexibleservers.FirewallRuleListResult, index int) armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresqlflexibleservers.FirewallRuleListResult, _ int) armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
 		return armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse{
 			FirewallRuleListResult: r,
 		}
