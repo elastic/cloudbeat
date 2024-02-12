@@ -111,6 +111,7 @@ env:
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
   TF_VAR_ec_url: ${{ inputs.ec-url }}
 
 jobs:
@@ -161,11 +162,16 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
-        if: inputs.ec-api-key != ''
         run: |
-          ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
-          echo "::add-mask::$ec_api_key"
-          echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          if [[ inputs.ec-api-key != '' && inputs.ec-url == 'https://cloud.elastic.co']]; then
+            ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
+            echo "::add-mask::$ec_api_key"
+            echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          else
+            ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
+            echo "::add-mask::$ec_api_key"
+            echo "TF_VAR_qa_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          fi
 
       - name: Process Stack Version
         id: remove-commit-hash
