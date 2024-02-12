@@ -67,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.85.0
+    rev: v0.85.1
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -173,7 +173,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.15.0
+    rev: v0.16.0
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
