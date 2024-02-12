@@ -174,7 +174,7 @@ func TestCache_Lock(t *testing.T) {
 		defer wg.Done()
 
 		got, err := cache.GetValue(ctx, Metadata{Sequence: 1}, fetch)
-		assert.NoError(t, err) //nolint:testifylint // collision between `require-error` and `go-require`.
+		assert.NoError(t, err)
 		assert.Equal(t, 1, got)
 	}()
 

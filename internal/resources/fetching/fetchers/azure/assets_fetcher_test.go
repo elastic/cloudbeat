@@ -129,7 +129,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		ListStorageAccounts(mock.Anything, storageAccountsSubscriptionsIds).
 		Return(nil, nil)
 
-	vaults := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+	vaults := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, _ int) bool {
 		return item.Type == inventory.VaultAssetType
 	})
 	for _, v := range vaults {
