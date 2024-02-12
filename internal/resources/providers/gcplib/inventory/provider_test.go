@@ -82,10 +82,10 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, _ string) string {
 				return "ProjectName"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName"
 			},
 		},
@@ -128,13 +128,13 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, parent string) string {
 				if parent == "projects/1" {
 					return "ProjectName1"
 				}
 				return "ProjectName2"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName1"
 			},
 		},
@@ -213,10 +213,10 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, _ string) string {
 				return "ProjectName"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName"
 			},
 		},
@@ -317,7 +317,7 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 		log: logp.NewLogger("test"),
 		inventory: &AssetsInventoryWrapper{
 			Close: func() error { return nil },
-			ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+			ListAssets: func(_ context.Context, _ *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
 				return s.mockedIterator
 			},
 		},
@@ -326,13 +326,13 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, parent string) string {
 				if parent == "projects/1" {
 					return "ProjectName1"
 				}
 				return "ProjectName2"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName1"
 			},
 		},
@@ -403,7 +403,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 		log: logp.NewLogger("test"),
 		inventory: &AssetsInventoryWrapper{
 			Close: func() error { return nil },
-			ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+			ListAssets: func(_ context.Context, _ *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
 				return s.mockedIterator
 			},
 		},
@@ -412,7 +412,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, parent string) string {
 				if parent == "projects/1" {
 					return "ProjectName1"
 				}
@@ -423,7 +423,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 
 				return ""
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName1"
 			},
 		},
@@ -459,10 +459,10 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, _ string) string {
 				return "ProjectName"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName"
 			},
 		},

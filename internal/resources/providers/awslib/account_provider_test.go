@@ -268,7 +268,7 @@ func mockFromResultMap(
 	}
 
 	m.EXPECT().DescribeOrganizationalUnit(mock.Anything, mock.Anything).RunAndReturn(
-		func(ctx context.Context, input *organizations.DescribeOrganizationalUnitInput, f ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error) {
+		func(_ context.Context, input *organizations.DescribeOrganizationalUnitInput, _ ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error) {
 			if input.OrganizationalUnitId == nil {
 				return nil, errors.New("organizational unit id is nil")
 			}

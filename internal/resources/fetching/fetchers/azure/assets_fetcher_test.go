@@ -85,7 +85,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider := azurelib.NewMockProviderAPI(s.T())
 	mockProvider.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
-		RunAndReturn(func(ctx context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
+		RunAndReturn(func(_ context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
 			return mockAssetGroups[assetGroup], nil
 		})
 	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
@@ -107,10 +107,10 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{"subId"}).
 		Return(nil, nil).
 		Once()
-	storageAccounts := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+	storageAccounts := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, _ int) bool {
 		return item.Type == inventory.StorageAccountAssetType
 	})
-	storageAccountsSubscriptionsIds := lo.Uniq(lo.Map(storageAccounts, func(item inventory.AzureAsset, i int) string {
+	storageAccountsSubscriptionsIds := lo.Uniq(lo.Map(storageAccounts, func(item inventory.AzureAsset, _ int) string {
 		return item.SubscriptionId
 	}))
 	mockProvider.EXPECT().
@@ -142,7 +142,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	}
 
 	// since we have app service asset we need to mock the enricher
-	appServices := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, index int) bool {
+	appServices := lo.Filter(flatMockAssets, func(item inventory.AzureAsset, _ int) bool {
 		return item.Type == inventory.WebsitesAssetType
 	})
 	for _, as := range appServices {
