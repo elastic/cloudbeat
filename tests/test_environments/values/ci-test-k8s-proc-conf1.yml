@@ -14,3 +14,4 @@ testData:
   agentName: cloudbeat
   clusterType: vanilla
   markerCmd: -m
+  clusterConfig: test-k8s-config-1

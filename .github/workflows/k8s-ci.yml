@@ -114,24 +114,52 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-target:
-          [
-            file_system_rules,
-            k8s_object_rules,
-            process_scheduler_rules,
-            process_api_server_rules,
-            process_controller_manager_rules,
-            process_etcd_rules,
-            process_kubelet_rules,
-          ]
-        values_file: [ tests/test_environments/values/ci.yml ]
-        range: [ "0..4" ]
+        # test-target:
+        #   [
+        #     file_system_rules,
+        #     k8s_object_rules,
+        #     process_scheduler_rules,
+        #     process_api_server_rules,
+        #     process_controller_manager_rules,
+        #     process_etcd_rules,
+        #     process_kubelet_rules,
+        #   ]
+        # values_file: [ tests/test_environments/values/ci.yml ]
+        # range: [ "0..4" ]
+        # test-target:
+        #   [
+        #     k8s_process_rules
+        #   ]
+        # values_file:
+        #   [
+        #     tests/test_environments/values/ci-test-k8s-proc-conf1.yml,
+        #     tests/test_environments/values/ci-test-k8s-proc-conf2.yml,
+        #   ]
+        # range: ""
         include:
           - test-target: pre_merge_agent
             range: ''
             values_file: tests/test_environments/values/ci-sa-agent.yml
+            kind-config: kind-multi
           - test-target: pre_merge
             range: ""
+            kind-config: kind-multi
+          - test-target: k8s_file_system_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-files.yml
+            kind-config: kind-test-files
+          - test-target: k8s_object_psp_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-objects.yml
+            kind-config: kind-multi
+          - test-target: k8s_process_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
+            kind-config: kind-test-proc-conf1
+          - test-target: k8s_process_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
+            kind-config: kind-test-proc-conf2
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -152,7 +180,7 @@ jobs:
 
       - name: Create k8s Kind Cluster
         run: |
-          just create-kind-cluster
+          just create-kind-cluster ${{ matrix.kind-config }}
 
       - name: Cache docker images
         uses: actions/cache@v4
@@ -160,9 +188,14 @@ jobs:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
+      # - name: Load images to kind
+      #   run: |
+      #     ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+      #   shell: bash
+
       - name: Load images to kind
         run: |
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} ${{ matrix.kind-config }}
         shell: bash
 
       - name: Deploy tests Helm chart
