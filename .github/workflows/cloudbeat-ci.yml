@@ -46,7 +46,7 @@ jobs:
 
       - name: Init Poetry environment
         run: |
-          poetry install --without tests -v
+          poetry install --without tests -vvv
           poetry show
 
       - name: Pre-commit Hooks
