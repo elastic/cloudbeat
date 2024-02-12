@@ -32,9 +32,7 @@ jobs:
           go-version-file: .go-version
 
       - name: Init Hermit
-        run: |
-          ./bin/hermit env -r >> $GITHUB_ENV
-          hermit list
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Install poetry
         run: |
