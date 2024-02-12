@@ -149,7 +149,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCalls()
 
 			time.Sleep(time.Duration(i*5) * time.Millisecond)
 			result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.Assert().NoError(err) //nolint:testifylint // collision between `require-error` and `go-require`.
+			s.NoError(err)
 			s.Equal([]string{usRegion, euRegion}, result)
 		}(i)
 	}
@@ -169,7 +169,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCallsFa
 
 			time.Sleep(time.Duration(i*5) * time.Millisecond)
 			result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.Assert().Error(err) //nolint:testifylint // collision between `require-error` and `go-require`.
+			s.Error(err)
 			s.Empty(result)
 		}(i)
 	}
