@@ -163,7 +163,7 @@ jobs:
 
       - name: Mask Sensitive Data
         run: |
-          if [[ "${inputs.ec-api-key}" != '' && "${inputs.ec-url}"  == 'https://cloud.elastic.co']]; then
+          if [[ "${inputs.ec-api-key}" != '' && "${inputs.ec-url}"  == 'https://cloud.elastic.co' ]]; then
             ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
