@@ -32,7 +32,9 @@ jobs:
           go-version-file: .go-version
 
       - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+        run: |
+          ./bin/hermit env -r >> $GITHUB_ENV
+          hermit list
 
       - name: Install poetry
         run: |
@@ -45,7 +47,9 @@ jobs:
           cache: 'poetry'
 
       - name: Init Poetry environment
-        run: poetry install --without tests
+        run: |
+          poetry install --without tests -v
+          poetry show
 
       - name: Pre-commit Hooks
         env:
