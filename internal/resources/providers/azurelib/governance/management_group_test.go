@@ -110,7 +110,7 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 		m := inventory.NewMockResourceGraphProviderAPI(t)
 		m.EXPECT().
 			ListAllAssetTypesByName(mock.Anything, mock.Anything, mock.Anything).
-			RunAndReturn(func(ctx context.Context, s string, strings []string) ([]inventory.AzureAsset, error) {
+			RunAndReturn(func(_ context.Context, _ string, _ []string) ([]inventory.AzureAsset, error) {
 				if firstRun.CAS(false, true) {
 					time.Sleep(100 * time.Millisecond)
 					return assets, nil
@@ -126,7 +126,7 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 			defer wg.Done()
 
 			got, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
-			require.NoError(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, expectedSubscriptions, got)
 		}()
 

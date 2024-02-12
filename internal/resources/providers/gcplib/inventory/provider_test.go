@@ -54,7 +54,7 @@ func (s *ProviderTestSuite) SetupTest() {
 	s.mockedIterator = new(MockIterator)
 	s.mockedInventory = &AssetsInventoryWrapper{
 		Close: func() error { return nil },
-		ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+		ListAssets: func(_ context.Context, _ *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
 			return s.mockedIterator
 		},
 	}
@@ -82,10 +82,10 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, _ string) string {
 				return "ProjectName"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName"
 			},
 		},
@@ -128,13 +128,13 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, parent string) string {
 				if parent == "projects/1" {
 					return "ProjectName1"
 				}
 				return "ProjectName2"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName1"
 			},
 		},
@@ -193,7 +193,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AlertPolicy1", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: MonitoringAlertPolicyAssetType}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	var monitoringAssetTypes = map[string][]string{
+	monitoringAssetTypes := map[string][]string{
 		"LogMetric":   {MonitoringLogMetricAssetType},
 		"AlertPolicy": {MonitoringAlertPolicyAssetType},
 	}
@@ -213,10 +213,10 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, _ string) string {
 				return "ProjectName"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName"
 			},
 		},
@@ -225,10 +225,12 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 
 	assets := []*ExtendedGcpAsset{
 		{
-			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-1",
+			Asset: &assetpb.Asset{
+				Name:      "//compute.googleapis.com/projects/test-project/global/networks/test-network-1",
 				AssetType: ComputeNetworkAssetType,
 				Resource:  &assetpb.Resource{Data: &structpb.Struct{Fields: map[string]*structpb.Value{}}},
-				Ancestors: []string{"projects/1", "organizations/1"}},
+				Ancestors: []string{"projects/1", "organizations/1"},
+			},
 		},
 		{
 			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-2", AssetType: ComputeNetworkAssetType, Resource: &assetpb.Resource{
@@ -315,7 +317,7 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 		log: logp.NewLogger("test"),
 		inventory: &AssetsInventoryWrapper{
 			Close: func() error { return nil },
-			ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+			ListAssets: func(_ context.Context, _ *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
 				return s.mockedIterator
 			},
 		},
@@ -324,13 +326,13 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, parent string) string {
 				if parent == "projects/1" {
 					return "ProjectName1"
 				}
 				return "ProjectName2"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName1"
 			},
 		},
@@ -356,24 +358,26 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 }
 
 func (s *ProviderTestSuite) TestListLoggingAssets() {
-	expected := []*LoggingAsset{{
-		Ecs: &fetching.EcsGcp{
-			Provider:         "gcp",
-			ProjectId:        "1",
-			ProjectName:      "ProjectName1",
-			OrganizationId:   "1",
-			OrganizationName: "OrganizationName1",
-		},
-		LogSinks: []*ExtendedGcpAsset{
-			{
-				Asset: &assetpb.Asset{Name: "LogSink1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
-				Ecs:   &fetching.EcsGcp{ProjectId: "1", ProjectName: "ProjectName1", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+	expected := []*LoggingAsset{
+		{
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        "1",
+				ProjectName:      "ProjectName1",
+				OrganizationId:   "1",
+				OrganizationName: "OrganizationName1",
 			},
-			{
-				Asset: &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
-				Ecs:   &fetching.EcsGcp{ProjectId: "", ProjectName: "", OrganizationId: "1", OrganizationName: "OrganizationName1"},
-			}},
-	},
+			LogSinks: []*ExtendedGcpAsset{
+				{
+					Asset: &assetpb.Asset{Name: "LogSink1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					Ecs:   &fetching.EcsGcp{ProjectId: "1", ProjectName: "ProjectName1", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+				},
+				{
+					Asset: &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					Ecs:   &fetching.EcsGcp{ProjectId: "", ProjectName: "", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+				},
+			},
+		},
 		{
 			Ecs: &fetching.EcsGcp{
 				Provider:         "gcp",
@@ -399,7 +403,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 		log: logp.NewLogger("test"),
 		inventory: &AssetsInventoryWrapper{
 			Close: func() error { return nil },
-			ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+			ListAssets: func(_ context.Context, _ *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
 				return s.mockedIterator
 			},
 		},
@@ -408,7 +412,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, parent string) string {
 				if parent == "projects/1" {
 					return "ProjectName1"
 				}
@@ -419,7 +423,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 
 				return ""
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName1"
 			},
 		},
@@ -455,10 +459,10 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: &ResourceManagerWrapper{
-			getProjectDisplayName: func(ctx context.Context, parent string) string {
+			getProjectDisplayName: func(_ context.Context, _ string) string {
 				return "ProjectName"
 			},
-			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			getOrganizationDisplayName: func(_ context.Context, _ string) string {
 				return "OrganizationName"
 			},
 		},

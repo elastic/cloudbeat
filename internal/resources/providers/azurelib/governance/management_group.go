@@ -123,7 +123,7 @@ func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
 }
 
 func typeFilter(tpe string) func(item inventory.AzureAsset, index int) bool {
-	return func(item inventory.AzureAsset, index int) bool {
+	return func(item inventory.AzureAsset, _ int) bool {
 		return item.Type == tpe
 	}
 }
