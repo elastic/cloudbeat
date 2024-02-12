@@ -11,6 +11,21 @@ nodes:
       kubeletExtraArgs:
         node-labels: "test-conf-1=fail"
   - |
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    authentication:
+      anonymous:
+        enabled: true
+    authorization:
+      mode: AlwaysAllow
+    readOnlyPort: 26492
+    makeIPTablesUtilChains: false
+    eventRecordQPS: 4
+    rotateCertificates: false
+    serverTLSBootstrap: false
+    featureGates:
+      RotateKubeletServerCertificate: false
+  - |
     apiVersion: kubeadm.k8s.io/v1beta3
     kind: ClusterConfiguration
     scheduler:
@@ -32,6 +47,10 @@ nodes:
         feature-gates: "RotateKubeletServerCertificate=false"
     apiServer:
       extraArgs:
+        enable-admission-plugins: "AlwaysAdmit"
+        disable-admission-plugins: "NamespaceLifecycle"
+        request-timeout: "59s"
+        service-account-lookup: "false"
   extraMounts:
   - hostPath: ./tests/allure/results
     containerPath: /tmp/data
@@ -47,3 +66,11 @@ nodes:
   extraMounts:
   - hostPath: ./tests/allure/results
     containerPath: /tmp/data
+kubeadmConfigPatchesJSON6902:
+- group: kubeadm.k8s.io
+  version: v1beta3
+  kind: ClusterConfiguration
+  patch: |
+    - op: add
+      path: /apiServer/extraArgs
+      value: {authorization-mode: RBAC,Node}

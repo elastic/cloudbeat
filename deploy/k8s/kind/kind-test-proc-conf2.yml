@@ -10,6 +10,15 @@ nodes:
     nodeRegistration:
       kubeletExtraArgs:
         node-labels: "test-conf-1=pass"
+  - |
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    readOnlyPort: 0
+    streamingConnectionIdleTimeout: "5m"
+    protectKernelDefaults: true
+    eventRecordQPS: 0
+    tlsCipherSuites: [TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+  - |
     apiVersion: kubeadm.k8s.io/v1beta3
     kind: ClusterConfiguration
     scheduler:
@@ -20,6 +29,14 @@ nodes:
       extraArgs:
         profiling: "false"
         feature-gates: "RotateKubeletServerCertificate=true"
+    apiServer:
+      extraArgs:
+        enable-admission-plugins: "AlwaysPullImages,SecurityContextDeny,NodeRestriction"
+        profiling: "false"
+        audit-log-maxage: "30"
+        audit-log-maxbackup: "10"
+        audit-log-maxsize: "100"
+        tls-cipher-suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
   extraMounts:
   - hostPath: ./tests/allure/results
     containerPath: /tmp/data
