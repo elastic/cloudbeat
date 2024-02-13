@@ -152,10 +152,10 @@ jobs:
           #   range: ''
           #   values_file: tests/test_environments/values/ci-test-k8s-objects.yml
           #   kind-config: kind-multi
-          # - test-target: k8s_process_rules
-          #   range: ''
-          #   values_file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
-          #   kind-config: kind-test-proc-conf1
+          - test-target: k8s_process_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
+            kind-config: kind-test-proc-conf1
           # - test-target: k8s_process_rules
           #   range: ''
           #   values_file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml

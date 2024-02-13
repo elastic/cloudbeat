@@ -21,7 +21,9 @@ nodes:
     readOnlyPort: 26492
     makeIPTablesUtilChains: false
     eventRecordQPS: 4
+    # rotateCertificates option is not configurable and still set to true
     rotateCertificates: false
+    # serverTLSBootstrap option is not configurable and does not appear in the kubelet config
     serverTLSBootstrap: false
     featureGates:
       RotateKubeletServerCertificate: false
@@ -66,11 +68,3 @@ nodes:
   extraMounts:
   - hostPath: ./tests/allure/results
     containerPath: /tmp/data
-kubeadmConfigPatchesJSON6902:
-- group: kubeadm.k8s.io
-  version: v1beta3
-  kind: ClusterConfiguration
-  patch: |
-    - op: add
-      path: /apiServer/extraArgs
-      value: {authorization-mode: RBAC,Node}
