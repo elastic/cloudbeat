@@ -114,17 +114,17 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 
 	accounts := make([]preset.AwsAccount, 0, len(accountIdentities))
 	for _, identity := range accountIdentities {
-		var memberCfg awssdk.Config
-		if identity.Account == rootIdentity.Account {
-			memberCfg = rootCfg
-		} else {
-			memberCfg = assumeRole(
-				stsClient,
-				rootCfg,
-				fmtIAMRole(identity.Account, memberRole),
-			)
-		}
-
+		// TODO(kuba): Add a comment explaining role assumption:
+		// - we're logged in into the main account, we use "cloudbeat-root" role
+		// - "cloudbeat-root" has limited permissions - account listing and role assumption
+		// - CF StackSets will install "cloudbeat-securityaudit" role where applicable
+		// - we try to assume "cloudbeat-securityaudit" to fetch resources
+		// - if there is no "cloudbeat-securityaudit", we fail silently
+		memberCfg := assumeRole(
+			stsClient,
+			rootCfg,
+			fmtIAMRole(identity.Account, memberRole),
+		)
 		accounts = append(accounts, preset.AwsAccount{
 			Identity: identity,
 			Config:   memberCfg,
