@@ -10,7 +10,6 @@ on:
 jobs:
   Run-CSPM-GCP-Tests:
     name: CIS GCP integration test
-    if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
@@ -52,6 +51,9 @@ jobs:
           stack-version: ${{ env.ELK_VERSION }}
           security-enabled: false
 
+      - name: Elasticsearch disable dynamic mapping for findings
+        run: ./.ci/scripts/disable_dynamic_mapping.sh
+
       - name: Run cloudbeat in background
         env:
           ES_HOST: http://localhost:9200
@@ -72,5 +74,6 @@ jobs:
 
       - name: Print cloudbeat logs
         if: always()
+        continue-on-error: true # Due to logs oversized this step can fail; Workflow run should not fail because of this step
         run: |
           cat logs/cloudbeat*

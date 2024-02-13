@@ -26,7 +26,7 @@ repos:
 
   ## Golang hooks
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.55.2
+    rev: v1.56.1
     hooks:
       - id: golangci-lint
 
@@ -78,7 +78,7 @@ repos:
       - id: shfmt
         args: ["-i", "4"]
       - id: shellcheck
-        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|dev-tools/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash)
+        exclude: (deploy/deployment-manager/deploy.sh|deploy/deployment-manager/set_env.sh|.buildkite/scripts/publish.sh|scripts/packaging/docker/elastic-agent/build.sh|scripts/common.sh|scripts/make/common.bash)
 
   - repo: local
     hooks:

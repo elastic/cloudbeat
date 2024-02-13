@@ -61,6 +61,14 @@ is_storage_account if {
 	input.subType == "azure-storage-account"
 }
 
+is_security_contacts if {
+	input.subType == "azure-security-contacts"
+}
+
+is_security_auto_provisioning_settings if {
+	input.subType == "azure-security-auto-provisioning-settings"
+}
+
 is_activity_log_alerts if {
 	input.subType == "azure-activity-log-alert"
 }

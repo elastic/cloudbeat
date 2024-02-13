@@ -15,7 +15,7 @@ resource "restapi_object" "ec_project" {
 }
 
 data "http" "project_credentials" {
-  url             = "${var.ec_url}/api/v1/serverless/projects/security/${restapi_object.ec_project.api_data.id}/_reset-credentials"
+  url             = "${var.ec_url}/api/v1/serverless/projects/security/${restapi_object.ec_project.api_data.id}/_reset-internal-credentials"
   method          = "POST"
   request_headers = local.ec_headers
 }
