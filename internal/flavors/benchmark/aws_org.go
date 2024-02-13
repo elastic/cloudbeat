@@ -107,6 +107,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 	)
 	stsClient := sts.NewFromConfig(rootCfg)
 
+	// accountIdentities array contains all the Accounts and Organizational Units, even if they are nested.
 	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, rootCfg)
 	if err != nil {
 		return nil, err
@@ -114,12 +115,14 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 
 	accounts := make([]preset.AwsAccount, 0, len(accountIdentities))
 	for _, identity := range accountIdentities {
-		// TODO(kuba): Add a comment explaining role assumption:
-		// - we're logged in into the main account, we use "cloudbeat-root" role
-		// - "cloudbeat-root" has limited permissions - account listing and role assumption
-		// - CF StackSets will install "cloudbeat-securityaudit" role where applicable
-		// - we try to assume "cloudbeat-securityaudit" to fetch resources
-		// - if there is no "cloudbeat-securityaudit", we fail silently
+		// Cloudbeat fetchers will attempt to assume memberRole
+		// ("cloudbeat-securityaudit") for all Accounts and OUs. The memberRole
+		// is only created by CloudFormation StackSets in OUs selected by the
+		// user.
+		// When Cloudbeat attempts to assume a member role that does not exist
+		// (because the user has not chosen an Account/OU), it will fail
+		// silently, and subsequently, it will be unable to retrieve any
+		// resources from the Account/OU.
 		memberCfg := assumeRole(
 			stsClient,
 			rootCfg,
