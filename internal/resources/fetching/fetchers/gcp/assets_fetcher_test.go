@@ -61,7 +61,7 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.EXPECT().ListAllAssetTypesByName(mock.Anything, mock.MatchedBy(func(assets []string) bool {
+	mockInventoryService.EXPECT().ListAllAssetTypesByName(mock.Anything, mock.MatchedBy(func(_ []string) bool {
 		return true
 	})).Return(
 		[]*inventory.ExtendedGcpAsset{

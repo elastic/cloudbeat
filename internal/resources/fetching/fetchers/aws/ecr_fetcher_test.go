@@ -69,7 +69,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 	privateRepoWithSlash := "build/cloudbeat"
 	repoArn := "arn:aws:ecr:us-west-2:012345678910:repository/ubuntu"
 
-	var tests = []struct {
+	tests := []struct {
 		identityAccount                     string
 		namespace                           string
 		containers                          []v1.Container
@@ -104,7 +104,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 			},
 			[]string{firstRepositoryName, secondRepositoryName},
@@ -136,7 +137,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 			},
 			[]string{privateRepoWithSlash, secondRepositoryName},
@@ -179,7 +181,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &firstRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 				"us-east-1": {
 					ExpectedRepositories: []string{"cloudbeat1"},
@@ -189,7 +192,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 			},
 			[]string{firstRepositoryName, secondRepositoryName},
@@ -220,14 +224,14 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		// Init private repositories provider
 
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything).Call.
-			Return(func(ctx context.Context, repoNames []string, region string) []types.Repository {
+			Return(func(_ context.Context, repoNames []string, region string) []types.Repository {
 				response, ok := test.privateRepositoriesResponseByRegion[region]
 				s.True(ok)
 				s.Equal(response.ExpectedRepositories, repoNames)
 
 				return response.EcrRepositories
 			},
-				func(ctx context.Context, repoNames []string, region string) error {
+				func(_ context.Context, _ []string, _ string) error {
 					return nil
 				})
 
@@ -271,7 +275,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 }
 
 func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
-	var tests = []struct {
+	tests := []struct {
 		identityAccount string
 		region          string
 		namespace       string

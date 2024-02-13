@@ -113,11 +113,11 @@ jobs:
           go-version-file: .go-version
           cache: false
 
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
       - name: Go linter
-        uses: golangci/golangci-lint-action@v3.7.0
-        with:
-          version: latest
-          args: --whole-files --verbose
+        run: golangci-lint run --whole-files --out-format github-actions
 
   dependency-review:
     runs-on: ubuntu-20.04

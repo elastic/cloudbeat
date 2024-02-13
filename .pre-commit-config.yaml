@@ -26,7 +26,7 @@ repos:
 
   ## Golang hooks
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.55.2
+    rev: v1.56.1
     hooks:
       - id: golangci-lint
 
