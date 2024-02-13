@@ -33,7 +33,7 @@ type flexibleConfigFn func(configName string) (armmysqlflexibleservers.Configura
 
 func mockAssetFlexibleConfigurationMysqlProvider(f flexibleConfigFn) MysqlProviderAPI {
 	wrapper := mysqlAzureClientWrapper{
-		AssetFlexibleConfiguration: func(ctx context.Context, subID, resourceGroup, serverName, configName string, clientOptions *arm.ClientOptions, options *armmysqlflexibleservers.ConfigurationsClientGetOptions) (armmysqlflexibleservers.ConfigurationsClientGetResponse, error) {
+		AssetFlexibleConfiguration: func(_ context.Context, _, _, _, configName string, _ *arm.ClientOptions, _ *armmysqlflexibleservers.ConfigurationsClientGetOptions) (armmysqlflexibleservers.ConfigurationsClientGetResponse, error) {
 			return f(configName)
 		},
 	}

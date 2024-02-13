@@ -181,7 +181,7 @@ func (p *securityContactsProvider) ListAutoProvisioningSettings(ctx context.Cont
 		return nil, fmt.Errorf("error while fetching security contacts: %w", err)
 	}
 
-	return lo.FlatMap(res, func(response armsecurity.AutoProvisioningSettingsClientListResponse, index int) []AzureAsset {
+	return lo.FlatMap(res, func(response armsecurity.AutoProvisioningSettingsClientListResponse, _ int) []AzureAsset {
 		return lo.FilterMap(response.Value, func(contract *armsecurity.AutoProvisioningSetting, _ int) (AzureAsset, bool) {
 			if contract == nil {
 				return AzureAsset{}, false

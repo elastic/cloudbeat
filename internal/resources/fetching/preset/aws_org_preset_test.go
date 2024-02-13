@@ -214,7 +214,7 @@ func TestNewCisAwsOrganizationFetchers_Cache(t *testing.T) {
 		},
 		cache,
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, _ chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
 				assert.Equal(t, "2", identity.Account)
 				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
 			},

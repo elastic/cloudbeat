@@ -47,7 +47,7 @@ func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.
 		errs = append(errs, err)
 	}
 
-	storageAccounts := lo.Filter(assets, func(item inventory.AzureAsset, index int) bool {
+	storageAccounts := lo.Filter(assets, func(item inventory.AzureAsset, _ int) bool {
 		return item.Type == inventory.StorageAccountAssetType
 	})
 
@@ -59,7 +59,7 @@ func (e storageAccountEnricher) Enrich(ctx context.Context, cycleMetadata cycle.
 		errs = append(errs, fmt.Errorf("storageAccountEnricher: error while getting services diagnostic settings: %w", err))
 	}
 
-	storageAccountsSubscriptionsIds := lo.Uniq(lo.Map(storageAccounts, func(item inventory.AzureAsset, i int) string {
+	storageAccountsSubscriptionsIds := lo.Uniq(lo.Map(storageAccounts, func(item inventory.AzureAsset, _ int) string {
 		return item.SubscriptionId
 	}))
 

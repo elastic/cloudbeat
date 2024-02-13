@@ -36,13 +36,13 @@ func TestStep(t *testing.T) {
 	}{
 		{
 			name:    "Should receive value from output channel",
-			fn:      func(context context.Context, i int) (float64, error) { return float64(i), nil },
+			fn:      func(_ context.Context, i int) (float64, error) { return float64(i), nil },
 			input:   1,
 			wantLen: 1,
 		},
 		{
 			name:    "Pipeline function returns error - no value received",
-			fn:      func(context context.Context, i int) (float64, error) { return 0, errors.New("some error") },
+			fn:      func(_ context.Context, _ int) (float64, error) { return 0, errors.New("some error") },
 			input:   2,
 			wantLen: 0,
 		},

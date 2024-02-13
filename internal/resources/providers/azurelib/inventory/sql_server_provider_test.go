@@ -31,11 +31,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type encryptionProtectorFn func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
-type auditingPoliciesFn func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
-type transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
-type databaseFn func() ([]armsql.DatabasesClientListByServerResponse, error)
-type threatProtectionFn func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
+type (
+	encryptionProtectorFn       func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
+	auditingPoliciesFn          func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
+	transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
+	databaseFn                  func() ([]armsql.DatabasesClientListByServerResponse, error)
+	threatProtectionFn          func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
+)
 
 func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
@@ -49,9 +51,10 @@ func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 		client: wrapper,
 	}
 }
+
 func mockAssetBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
-		AssetBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
+		AssetBlobAuditingPolicies: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
 			return f()
 		},
 	}
@@ -80,7 +83,7 @@ func mockAssetTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsF
 
 func mockAssetThreatProtection(f threatProtectionFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
-		AssetServerAdvancedThreatProtectionSettings: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
+		AssetServerAdvancedThreatProtectionSettings: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
 			return f()
 		},
 	}
@@ -375,7 +378,7 @@ func wrapEpResult(eps ...*armsql.EncryptionProtector) armsql.EncryptionProtector
 }
 
 func wrapEpResponse(results ...armsql.EncryptionProtectorListResult) []armsql.EncryptionProtectorsClientListByServerResponse {
-	return lo.Map(results, func(r armsql.EncryptionProtectorListResult, index int) armsql.EncryptionProtectorsClientListByServerResponse {
+	return lo.Map(results, func(r armsql.EncryptionProtectorListResult, _ int) armsql.EncryptionProtectorsClientListByServerResponse {
 		return armsql.EncryptionProtectorsClientListByServerResponse{
 			EncryptionProtectorListResult: r,
 		}
@@ -485,7 +488,7 @@ func tdeAsset(id, dbName, state string) AzureAsset {
 }
 
 func wrapThreatProtectionResponse(results ...armsql.LogicalServerAdvancedThreatProtectionListResult) []armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
-	return lo.Map(results, func(r armsql.LogicalServerAdvancedThreatProtectionListResult, index int) armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
+	return lo.Map(results, func(r armsql.LogicalServerAdvancedThreatProtectionListResult, _ int) armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
 		return armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse{
 			LogicalServerAdvancedThreatProtectionListResult: r,
 		}
