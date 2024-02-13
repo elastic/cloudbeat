@@ -107,7 +107,7 @@ jobs:
   k8s_functional_tests:
     # Run only selected tests on PRs
     if: github.event_name == 'pull_request'
-    name: ${{ matrix.test-target }}-tests
+    name: ${{ matrix.test-target }}-${{ matrix.kind-config }}
     needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
@@ -156,10 +156,10 @@ jobs:
             range: ''
             values_file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
             kind-config: kind-test-proc-conf1
-          # - test-target: k8s_process_rules
-          #   range: ''
-          #   values_file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
-          #   kind-config: kind-test-proc-conf2
+          - test-target: k8s_process_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
+            kind-config: kind-test-proc-conf2
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main

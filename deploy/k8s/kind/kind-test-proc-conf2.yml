@@ -13,7 +13,8 @@ nodes:
   - |
     apiVersion: kubelet.config.k8s.io/v1beta1
     kind: KubeletConfiguration
-    readOnlyPort: 0
+    # Configuration of readOnlyPort does not work
+    # readOnlyPort: 0
     streamingConnectionIdleTimeout: "5m"
     protectKernelDefaults: true
     eventRecordQPS: 0
@@ -31,7 +32,9 @@ nodes:
         feature-gates: "RotateKubeletServerCertificate=true"
     apiServer:
       extraArgs:
-        enable-admission-plugins: "AlwaysPullImages,SecurityContextDeny,NodeRestriction"
+        # SecurityContextDeny cannot be enabled - does not allow to deploy resources SecurityContext.as_user
+        # AlwaysPullImages - doesn't allow usage of loaded cloudbeat image
+        enable-admission-plugins: "NodeRestriction,NamespaceLifecycle"
         profiling: "false"
         audit-log-maxage: "30"
         audit-log-maxbackup: "10"
