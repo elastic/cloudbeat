@@ -168,7 +168,7 @@ jobs:
             ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-          elif [ $inputs.ec-api-key != '' && $inputs.ec-url == qa_ec_api_key  ];
+          elif [ $inputs.ec-api-key != '' && $inputs.ec-url == qa_ec_api_key  ]; then
             echo "TF_VAR_ec_api_key= ${{ secrets.QA_EC_API_KEY }}" >> $GITHUB_ENV
           else
             echo "error: Elastic Cloud API key is required from a valid ec url"
