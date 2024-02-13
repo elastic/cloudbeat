@@ -17,6 +17,12 @@ runs:
         poetry_tests="${{ hashFiles('./tests/poetry.lock', './tests/pyproject.toml') }}"
         pre_commit="${{ hashFiles('.pre-commit-config.yaml') }}"
         hash="$(echo "${bin_hashes} ${poetry_security_polices} ${poetry_tests} ${pre_commit}" | sha256sum | cut -d' ' -f1)"
+
+        echo "\$bin_hashes ${bin_hashes}"
+        echo "\$poetry_security_polices ${poetry_security_polices}"
+        echo "\$poetry_tests ${poetry_tests}"
+        echo "\$pre_commit ${pre_commit}"
+
         echo "hash=$hash" >> "$GITHUB_OUTPUT"
     - if: ${{ inputs.cache == 'true' }}
       uses: actions/cache@v4
