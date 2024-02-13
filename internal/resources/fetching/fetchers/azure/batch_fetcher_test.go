@@ -84,7 +84,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	mockProvider := azurelib.NewMockProviderAPI(s.T())
 	mockProvider.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
-		RunAndReturn(func(ctx context.Context, assetGroup string, types []string) ([]inventory.AzureAsset, error) {
+		RunAndReturn(func(_ context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
 			return mockAssetGroups[assetGroup], nil
 		})
 	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
@@ -192,7 +192,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 	mockProvider := azurelib.NewMockProviderAPI(s.T())
 	mockProvider.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
-		RunAndReturn(func(ctx context.Context, assetGroup string, types []string) ([]inventory.AzureAsset, error) {
+		RunAndReturn(func(_ context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
 			return mockAssetGroups[assetGroup], nil
 		})
 	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(subMap, nil).Once()

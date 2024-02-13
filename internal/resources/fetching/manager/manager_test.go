@@ -127,7 +127,7 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 	fetcherName := "timeout_fetcher"
 
 	s.registry.EXPECT().ShouldRun(mock.Anything).Return(true).Once()
-	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Call.Return(func(ctx context.Context, key string, metadata cycle.Metadata) {
+	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Call.Return(func(ctx context.Context, _ string, _ cycle.Metadata) {
 		select {
 		case <-ctx.Done():
 			return

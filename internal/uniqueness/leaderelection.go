@@ -134,7 +134,7 @@ func (m *LeaderelectionManager) buildConfig(ctx context.Context) (le.LeaderElect
 		RenewDeadline:   RenewDeadline,
 		RetryPeriod:     RetryPeriod,
 		Callbacks: le.LeaderCallbacks{
-			OnStartedLeading: func(ctx context.Context) {
+			OnStartedLeading: func(_ context.Context) {
 				m.log.Infof("Leader election lock GAINED, id: %v", id)
 			},
 			OnStoppedLeading: func() {

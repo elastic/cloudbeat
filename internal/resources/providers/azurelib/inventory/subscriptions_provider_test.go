@@ -33,7 +33,7 @@ type locationsFn func() ([]armsubscriptions.ClientListLocationsResponse, error)
 
 func mockLocationsAsset(fn locationsFn) SubscriptionProviderAPI {
 	wrapper := subscriptionAzureClientWrapper{
-		AssetLocations: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, options *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error) {
+		AssetLocations: func(_ context.Context, _ string, _ *arm.ClientOptions, _ *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error) {
 			return fn()
 		},
 	}

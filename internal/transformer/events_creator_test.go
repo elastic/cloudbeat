@@ -115,7 +115,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			bdpp: func() dataprovider.CommonDataProvider {
 				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
-				mockEnrichEvent := func(event *beat.Event, meta fetching.ResourceMetadata) {
+				mockEnrichEvent := func(event *beat.Event, _ fetching.ResourceMetadata) {
 					_, err := event.Fields.Put(enrichedKey, enrichedValue)
 					s.Require().NoError(err)
 				}

@@ -99,7 +99,7 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 
 func (s *ProviderTestSuite) SetupTest() {
 	s.mockedClient = &ResourceGraphAzureClientWrapper{
-		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
+		AssetQuery: func(_ context.Context, query armresourcegraph.QueryRequest, _ *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			if query.Options.SkipToken != nil && *query.Options.SkipToken != "" {
 				return armresourcegraph.ClientResourcesResponse{
 					QueryResponse: nonTruncatedResponse,

@@ -168,7 +168,7 @@ func (s *ListenerTestSuite) TestReloadAndStop() {
 				wg.Add(1)
 				go func(listener *Listener, update configUpdate) {
 					err := listener.Reload(update)
-					s.Require().NoError(err)
+					s.NoError(err)
 					wg.Done()
 				}(sut, val)
 
