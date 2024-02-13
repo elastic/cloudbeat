@@ -1,0 +1,38 @@
+name: 'Hermit Environment'
+description: 'Activate hermit environment'
+inputs:
+  cache:
+    description: 'Cache hermit files'
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - if: ${{ inputs.cache == 'true' }}
+      id: hermit-hash
+      shell: bash
+      run: |
+        bin_hashes="${{ hashFiles('./bin/*') }}"
+        poetry_security_polices="${{ hashFiles('./security-policies/poetry.lock', './security-policies/pyproject.toml') }}"
+        poetry_tests="${{ hashFiles('./tests/poetry.lock', './tests/pyproject.toml') }}"
+        pre_commit="${{ hashFiles('.pre-commit-config.yaml') }}"
+        hash="$(echo "${bin_hashes} ${poetry_security_polices} ${poetry_tests} ${pre_commit}" | sha256sum | cut -d' ' -f1)"
+        echo "hash=$hash" >> "$GITHUB_OUTPUT"
+    - if: ${{ inputs.cache == 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/hermit/pkg
+          ./.hermit
+          ~/.cache/go-build
+          ~/go/pkg/
+          ~/.cache/pre-commit
+        key: hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
+        restore-keys: |
+          hermit-env-${{ runner.os }}
+    - shell: bash
+      run: ./bin/hermit env --raw >> "$GITHUB_ENV"
+    - shell: bash
+      run: hermit install
+    - shell: bash
+      run: go env
