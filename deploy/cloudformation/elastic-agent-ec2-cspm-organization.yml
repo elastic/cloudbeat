@@ -86,6 +86,13 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - iam:ListAccountAliases
+                  - iam:ListGroup
+                  - iam:ListRoles
+                  - iam:ListUsers
+                Resource: '*'
+              - Effect: Allow
+                Action:
                   - organizations:List*
                   - organizations:Describe*
                 Resource: '*'
