@@ -23,24 +23,18 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.9"
-
-      - name: Install Poetry
+      - name: Install poetry
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          poetry --version
+          pip3 install poetry
+          cd tests
+          poetry install
 
       - name: Build cloudbeat binary
-        uses: magefile/mage-action@v3
-        with:
-          version: latest
-          args: build
+        shell: bash
+        run: mage build
 
       - name: Run Elasticsearch
         uses: elastic/elastic-github-actions/elasticsearch@master
@@ -72,7 +66,6 @@ jobs:
         env:
           USE_K8S: false
         run: |
-          poetry install
           poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
       - name: Print cloudbeat logs

@@ -26,15 +26,12 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Set up GO (with caching)
-        uses: magnetikonline/action-golang-cache@v4
-        with:
-          go-version-file: .go-version
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-      - name: Mage build bundle before unit tests
-        uses: magefile/mage-action@v3
-        with:
-          args: buildOpaBundle
+      - name: build cloudbeat binary
+        shell: bash
+        run: mage buildOpaBundle
 
       - name: Unit-Test
         run: |
@@ -57,8 +54,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
       - name: Install goveralls
         run: go install github.com/mattn/goveralls@latest
@@ -107,14 +104,8 @@ jobs:
           repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
           ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: .go-version
-          cache: false
-
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
       - name: Go linter
         run: golangci-lint run --whole-files --out-format github-actions
@@ -138,8 +129,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
       - name: Terraform fmt
         run: terraform fmt -check -recursive
