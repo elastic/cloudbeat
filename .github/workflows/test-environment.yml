@@ -111,6 +111,7 @@ env:
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
   TF_VAR_ec_url: ${{ inputs.ec-url }}
 
 jobs:
@@ -164,14 +165,13 @@ jobs:
         run: |
           ec_url='https://cloud.elastic.co'
           qa_ec_url='https://console.qa.cld.elstc.co'
-          qa_ec_api_key= "${{ secrets.EC_API_KEY }}"
 
           if [ $inputs.ec-api-key != '' && $inputs.ec-url == ec_url  ]; then
             ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
           elif [ $inputs.ec-url == qa_ec_url ]; then
-            echo "TF_VAR_ec_api_key= $qa_ec_api_key" >> $GITHUB_ENV
+            echo "TF_VAR_ec_api_key= $TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
             echo "error: Elastic Cloud API key is required from a valid ec url"
           fi
