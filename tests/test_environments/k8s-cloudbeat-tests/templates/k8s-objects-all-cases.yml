@@ -1,3 +1,4 @@
+{{- if .Values.k8sObjects.deploy -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -238,3 +239,4 @@ spec:
         - sleep
         - "3600"
 ---
+{{- end }}

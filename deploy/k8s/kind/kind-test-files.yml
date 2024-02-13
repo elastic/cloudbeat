@@ -1,6 +1,6 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-name: kind-test-file
+name: kind-test-files
 nodes:
 - role: control-plane
   image: kindest/node:v1.23.12

@@ -1,3 +1,4 @@
+{{- if .Values.k8sFiles.deploy -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -115,3 +116,4 @@ spec:
       - name: var-lib-kubelet
         hostPath:
           path: /var/lib/kubelet
+{{- end }}

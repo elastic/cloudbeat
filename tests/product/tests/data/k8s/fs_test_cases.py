@@ -49,16 +49,19 @@ KUBELET_SERVICE = "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf"
 KUBELET_CONF = "/hostfs/etc/kubernetes/kubelet.conf"
 KUBELET_CONFIG = "/hostfs/var/lib/kubelet/config.yaml"
 
+NODE_NAME_1 = "kind-test-files-control-plane"
+NODE_NAME_2 = "kind-test-files-control-plane2"
+
 cis_file_1_1_1_pass = FileTestCase(
     rule_tag=CIS_1_1_1,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBE_API_SERVER,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_1_fail = FileTestCase(
     rule_tag=CIS_1_1_1,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBE_API_SERVER,
     expected=RULE_FAIL_STATUS,
 )
@@ -70,14 +73,14 @@ cis_k8s_file_1_1_1 = {
 
 cis_file_1_1_2_pass = FileTestCase(
     rule_tag=CIS_1_1_2,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBE_API_SERVER,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_2_fail = FileTestCase(
     rule_tag=CIS_1_1_2,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBE_API_SERVER,
     expected=RULE_FAIL_STATUS,
 )
@@ -89,14 +92,14 @@ cis_k8s_file_1_1_2 = {
 
 cis_file_1_1_3_pass = FileTestCase(
     rule_tag=CIS_1_1_3,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=CONTROLLER_MANAGER,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_3_fail = FileTestCase(
     rule_tag=CIS_1_1_3,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=CONTROLLER_MANAGER,
     expected=RULE_FAIL_STATUS,
 )
@@ -108,14 +111,14 @@ cis_k8s_file_1_1_3 = {
 
 cis_file_1_1_4_pass = FileTestCase(
     rule_tag=CIS_1_1_4,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=CONTROLLER_MANAGER,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_4_fail = FileTestCase(
     rule_tag=CIS_1_1_4,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=CONTROLLER_MANAGER,
     expected=RULE_FAIL_STATUS,
 )
@@ -127,14 +130,14 @@ cis_k8s_file_1_1_4 = {
 
 cis_file_1_1_5_pass = FileTestCase(
     rule_tag=CIS_1_1_5,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBE_SCHEDULER,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_5_fail = FileTestCase(
     rule_tag=CIS_1_1_5,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBE_SCHEDULER,
     expected=RULE_FAIL_STATUS,
 )
@@ -146,14 +149,14 @@ cis_k8s_file_1_1_5 = {
 
 cis_file_1_1_6_pass = FileTestCase(
     rule_tag=CIS_1_1_6,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBE_SCHEDULER,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_6_fail = FileTestCase(
     rule_tag=CIS_1_1_6,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBE_SCHEDULER,
     expected=RULE_FAIL_STATUS,
 )
@@ -165,14 +168,14 @@ cis_k8s_file_1_1_6 = {
 
 cis_file_1_1_7_pass = FileTestCase(
     rule_tag=CIS_1_1_7,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=ETCD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_7_fail = FileTestCase(
     rule_tag=CIS_1_1_7,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=ETCD,
     expected=RULE_FAIL_STATUS,
 )
@@ -184,14 +187,14 @@ cis_k8s_file_1_1_7 = {
 
 cis_file_1_1_8_pass = FileTestCase(
     rule_tag=CIS_1_1_8,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=ETCD,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_8_fail = FileTestCase(
     rule_tag=CIS_1_1_8,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=ETCD,
     expected=RULE_FAIL_STATUS,
 )
@@ -203,14 +206,14 @@ cis_k8s_file_1_1_8 = {
 
 cis_file_1_1_11_pass = FileTestCase(
     rule_tag=CIS_1_1_1,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=ETCD_DATA_DIR,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_11_fail = FileTestCase(
     rule_tag=CIS_1_1_11,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=ETCD_DATA_DIR,
     expected=RULE_FAIL_STATUS,
 )
@@ -223,14 +226,14 @@ cis_k8s_file_1_1_11 = {
 
 cis_file_1_1_12_pass = FileTestCase(
     rule_tag=CIS_1_1_12,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=ETCD_DATA_DIR,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_12_fail = FileTestCase(
     rule_tag=CIS_1_1_12,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=ETCD_DATA_DIR,
     expected=RULE_FAIL_STATUS,
 )
@@ -243,14 +246,14 @@ cis_k8s_file_1_1_12 = {
 
 cis_file_1_1_13_pass = FileTestCase(
     rule_tag=CIS_1_1_13,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=ADMIN_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_13_fail = FileTestCase(
     rule_tag=CIS_1_1_13,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=ADMIN_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -262,14 +265,14 @@ cis_k8s_file_1_1_13 = {
 
 cis_file_1_1_14_pass = FileTestCase(
     rule_tag=CIS_1_1_14,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=ADMIN_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_14_fail = FileTestCase(
     rule_tag=CIS_1_1_14,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=ADMIN_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -281,14 +284,14 @@ cis_k8s_file_1_1_14 = {
 
 cis_file_1_1_15_pass = FileTestCase(
     rule_tag=CIS_1_1_15,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=SCHEDULER_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_15_fail = FileTestCase(
     rule_tag=CIS_1_1_15,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=SCHEDULER_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -300,14 +303,14 @@ cis_k8s_file_1_1_15 = {
 
 cis_file_1_1_16_pass = FileTestCase(
     rule_tag=CIS_1_1_16,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=SCHEDULER_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_16_fail = FileTestCase(
     rule_tag=CIS_1_1_16,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=SCHEDULER_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -319,14 +322,14 @@ cis_k8s_file_1_1_16 = {
 
 cis_file_1_1_17_pass = FileTestCase(
     rule_tag=CIS_1_1_17,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=CONTROLLER_MANAGER_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_17_fail = FileTestCase(
     rule_tag=CIS_1_1_17,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=CONTROLLER_MANAGER_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -338,14 +341,14 @@ cis_k8s_file_1_1_17 = {
 
 cis_file_1_1_18_pass = FileTestCase(
     rule_tag=CIS_1_1_18,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=CONTROLLER_MANAGER_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_18_fail = FileTestCase(
     rule_tag=CIS_1_1_18,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=CONTROLLER_MANAGER_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -357,14 +360,14 @@ cis_k8s_file_1_1_18 = {
 
 cis_file_1_1_19_pass = FileTestCase(
     rule_tag=CIS_1_1_19,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=PKI_DIR,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_19_fail = FileTestCase(
     rule_tag=CIS_1_1_19,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=PKI_DIR,
     expected=RULE_FAIL_STATUS,
 )
@@ -376,14 +379,14 @@ cis_k8s_file_1_1_19 = {
 
 cis_file_1_1_20_pass = FileTestCase(
     rule_tag=CIS_1_1_20,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=API_SERVER_CERT,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_20_fail = FileTestCase(
     rule_tag=CIS_1_1_20,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=API_SERVER_CERT,
     expected=RULE_FAIL_STATUS,
 )
@@ -395,14 +398,14 @@ cis_k8s_file_1_1_20 = {
 
 cis_file_1_1_21_pass = FileTestCase(
     rule_tag=CIS_1_1_21,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=API_SERVER_KEY,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_1_1_21_fail = FileTestCase(
     rule_tag=CIS_1_1_21,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=API_SERVER_KEY,
     expected=RULE_FAIL_STATUS,
 )
@@ -414,14 +417,14 @@ cis_k8s_file_1_1_21 = {
 
 cis_file_4_1_1_pass = FileTestCase(
     rule_tag=CIS_4_1_1,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBELET_SERVICE,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_4_1_1_fail = FileTestCase(
     rule_tag=CIS_4_1_1,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBELET_SERVICE,
     expected=RULE_FAIL_STATUS,
 )
@@ -433,14 +436,14 @@ cis_k8s_file_4_1_1 = {
 
 cis_file_4_1_2_pass = FileTestCase(
     rule_tag=CIS_4_1_2,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBELET_SERVICE,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_4_1_2_fail = FileTestCase(
     rule_tag=CIS_4_1_2,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBELET_SERVICE,
     expected=RULE_FAIL_STATUS,
 )
@@ -452,14 +455,14 @@ cis_k8s_file_4_1_2 = {
 
 cis_file_4_1_5_pass = FileTestCase(
     rule_tag=CIS_4_1_5,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBELET_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_4_1_5_fail = FileTestCase(
     rule_tag=CIS_4_1_5,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBELET_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -471,14 +474,14 @@ cis_k8s_file_4_1_5 = {
 
 cis_file_4_1_6_pass = FileTestCase(
     rule_tag=CIS_4_1_6,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBELET_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_4_1_6_fail = FileTestCase(
     rule_tag=CIS_4_1_6,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBELET_CONF,
     expected=RULE_FAIL_STATUS,
 )
@@ -490,14 +493,14 @@ cis_k8s_file_4_1_6 = {
 
 cis_file_4_1_9_pass = FileTestCase(
     rule_tag=CIS_4_1_9,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBELET_CONFIG,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_4_1_9_fail = FileTestCase(
     rule_tag=CIS_4_1_9,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBELET_CONFIG,
     expected=RULE_FAIL_STATUS,
 )
@@ -509,14 +512,14 @@ cis_k8s_file_4_1_9 = {
 
 cis_file_4_1_10_pass = FileTestCase(
     rule_tag=CIS_4_1_10,
-    node_hostname="kind-test-file-control-plane2",
+    node_hostname=NODE_NAME_2,
     resource_name=KUBELET_CONF,
     expected=RULE_PASS_STATUS,
 )
 
 cis_file_4_1_10_fail = FileTestCase(
     rule_tag=CIS_4_1_6,
-    node_hostname="kind-test-file-control-plane",
+    node_hostname=NODE_NAME_1,
     resource_name=KUBELET_CONF,
     expected=RULE_FAIL_STATUS,
 )
