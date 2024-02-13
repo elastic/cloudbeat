@@ -93,8 +93,6 @@ Resources:
                 Action:
                   - sts:AssumeRole
                 Resource: '*'
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/SecurityAudit
 
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
