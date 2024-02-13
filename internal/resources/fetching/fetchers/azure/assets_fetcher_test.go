@@ -139,6 +139,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		mockProvider.EXPECT().
 			ListKeyVaultSecrets(mock.Anything, v).
 			Return(nil, nil)
+		mockProvider.EXPECT().
+			ListKeyVaultDiagnosticSettings(mock.Anything, v).
+			Return(nil, nil)
 	}
 
 	// since we have app service asset we need to mock the enricher
