@@ -173,7 +173,7 @@ jobs:
           # QA elastic cloud url
           qa_ec_url='https://console.qa.cld.elstc.co'
 
-         # Handles setting API KEY for each deployment mode for  elastic cloud  environment
+          # Handles setting API KEY for each deployment mode for  elastic cloud  environment
           if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then;
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
