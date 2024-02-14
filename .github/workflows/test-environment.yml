@@ -163,10 +163,10 @@ jobs:
 
       - name: Mask Sensitive Data
         run: |
-          input_ec_url = ${{ inputs.ec-url }}
+          input_ec_url="${{ inputs.ec-url }}"
           ec_url='https://cloud.elastic.co'
           qa_ec_url='https://console.qa.cld.elstc.co'
-          input_ec_api_key=${{ inputs.ec-api-key }}
+          input_ec_api_key="${{ inputs.ec-api-key }}"
 
           if [[ $input_ec_api_key != '' && $input_ec_url == $ec_url ]]; then
             ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
