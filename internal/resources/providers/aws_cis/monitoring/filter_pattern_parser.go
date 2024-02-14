@@ -41,14 +41,14 @@ func listLogicalOperators() []logicalOperator {
 	return []logicalOperator{loAnd, loOr}
 }
 
-func listComparisonOperator() []comparisonOperator {
+func listComparisonOperators() []comparisonOperator {
 	// This order must be kept because we need to check first different and then equals
 	return []comparisonOperator{coNotExists, coNotEqual, coEqual}
 }
 
 // MetricFilterPattern is a union between simpleExpression and complexExpression
-//
-//	because it can be either one or the other
+// because a metric filter pattern it can be either one or the other.
+// The fields are never used in go layer, only in OPA layer, therefore the nolint comment
 type MetricFilterPattern struct {
 	simpleExpression  //nolint:unused
 	complexExpression //nolint:unused
@@ -92,9 +92,11 @@ func newComplexExpression(op logicalOperator, exps ...MetricFilterPattern) Metri
 // Known limitations:
 //   - It parses only 5 levels deep expressions. You can increase with maxDepth const. But we don't have that use case
 //   - It doesn't properly handle reserved characters (=, !=, NOT EXISTS, &&, ||) inside strings. We don't have that use case yet
+//   - It doesn't parse subsequent alternating Logical Operators. For example the expression `{a=b && c=d || e=f}` will
+//     return an error. The expected way to have this working is by wrapping one of the 'sub-expressions' in parentheses
+//     e.g `{(a=b && c=d) || e=f}` or `{a=b && (c=d || e=f)}`
 func parseFilterPattern(s string) (MetricFilterPattern, error) {
-	// remove trailing spaces and { }
-	cleanS := strings.TrimSpace(strings.TrimRight(strings.TrimLeft(strings.TrimSpace(s), "{"), "}"))
+	cleanS := cleanExpression(s)
 
 	if strings.Count(s, "(") != strings.Count(s, ")") {
 		return MetricFilterPattern{}, errors.New("broken parenthesis")
@@ -103,16 +105,31 @@ func parseFilterPattern(s string) (MetricFilterPattern, error) {
 	return safeParse(cleanS, 0)
 }
 
+// cleanExpression removes trailing  spaces and brackets from the expression
+// Receives full expression e.g ` { a = b } `
+// Returns clean expression e.g `a = b`
+func cleanExpression(s string) string {
+	// If receive for example the expression ` { a = b } `
+	firstSpace := strings.TrimSpace(s)              // Removes outer spaces `{ a = b }`
+	cleanLeft := strings.TrimLeft(firstSpace, "{")  // Removes left bracket ` a = b }`
+	cleanRight := strings.TrimRight(cleanLeft, "}") // Removes right bracket ` a = b `
+	totallyClean := strings.TrimSpace(cleanRight)   // Removes inner spaces `a = b`
+	return totallyClean
+}
+
+// safeParse adds a depth parameter to parse and creates a lock to not parse too long expressions
+// and prevent infinite loops
 func safeParse(s string, depth int) (MetricFilterPattern, error) {
 	if depth > maxDepth {
 		return MetricFilterPattern{}, errors.New("max depth reached, can't parse this expression")
 	}
 
 	var logicalOp logicalOperator
-	expressions := make([]MetricFilterPattern, 0, 10)
+	// Capacity is an estimate of a maximum average of expressions. This avoids resizing slices every time we add a new item
+	expressions := make([]MetricFilterPattern, 0, 20)
 
 	buf := strings.Builder{}
-	buf.Grow(len(s))
+	buf.Grow(len(s)) // grow buffer to max amount of runes it will have
 
 	pointer := 0
 	for len(s) > pointer {
@@ -173,7 +190,7 @@ func appendSimpleExpression(s string, expressions []MetricFilterPattern) ([]Metr
 	expStr := strings.TrimSpace(s)
 	// if the length is zero it means we had an already processed Complex Expressions (between parenthesis)
 	if len(expStr) > 0 {
-		exp, err := parseSimpleStatement(expStr)
+		exp, err := parseSimpleExpression(expStr)
 		if err != nil {
 			return nil, err
 		}
@@ -183,6 +200,9 @@ func appendSimpleExpression(s string, expressions []MetricFilterPattern) ([]Metr
 	return expressions, nil
 }
 
+// resolveParenthesis find the matching parenthesis and safeParse the expression inside the parenthesis
+// Returns the found MetricFilterPattern and closingParenthesisPos so the main algorithm
+// knows where to move the pointer too
 func resolveParenthesis(s string, depth int, i int) (MetricFilterPattern, int, error) {
 	closingParenthesisPos := matchingParenthesisPos(s[i:])
 	if closingParenthesisPos < 0 {
@@ -197,26 +217,28 @@ func resolveParenthesis(s string, depth int, i int) (MetricFilterPattern, int, e
 	return exp, closingParenthesisPos, nil
 }
 
+// matchingParenthesisPos find the closing parenthesis of the first opening parenthesis found in string
 func matchingParenthesisPos(s string) int {
-	parenthesisStack := 0
+	parenthesisCount := 0
 	for i, r := range s {
-		if r == '(' {
-			parenthesisStack++
-		}
-
-		if r == ')' {
-			parenthesisStack--
-		}
-
-		if parenthesisStack == 0 {
-			return i
+		switch r {
+		case '(': // If an opening parenthesis appear add 1 to the count
+			parenthesisCount++
+		case ')': // If a closing parenthesis appear remove 1 to the count
+			parenthesisCount--
+			if parenthesisCount == 0 { // if count is 0 it means that we  just found the closing parenthesis position
+				return i
+			}
+		default:
+			continue
 		}
 	}
 
 	return -1
 }
 
-func parseSimpleStatement(s string) (MetricFilterPattern, error) {
+// parseSimpleExpression receives a simple expression string e.g `a=b` and returns a simpleExpression
+func parseSimpleExpression(s string) (MetricFilterPattern, error) {
 	buf := strings.Builder{}
 	buf.Grow(len(s))
 
@@ -224,21 +246,25 @@ func parseSimpleStatement(s string) (MetricFilterPattern, error) {
 	var operator comparisonOperator
 	foundOp := false
 
-	for i, r := range s {
-		if buf.Len() == 0 && (r == ' ' || r == '(') { // ignore trailing spaces and (
+	for i, r := range s { // for each rune in string
+		if buf.Len() == 0 && (r == ' ') { // ignore trailing spaces
 			continue
 		}
 
+		// append the rune to the buffer
 		if _, err := buf.WriteRune(r); err != nil {
 			return MetricFilterPattern{}, fmt.Errorf("could not write rune %v", err)
 		}
 
 		tmpString := buf.String()
+		// If the current buffer value has a Comparison Operator as suffix, it means the right side of the expression
+		// is finished
 		if contains, op := hasSuffixComparisonOp(tmpString); contains {
-			if foundOp {
+			if foundOp { // if there was already a found operator for this simple expression, return error
 				return MetricFilterPattern{}, errors.New("got multiple comparison operators")
 			}
 
+			// Remove the operator suffix and trailing spaces
 			left = strings.TrimSpace(strings.TrimSuffix(tmpString, string(op)))
 			operator = op
 			foundOp = true
@@ -251,13 +277,13 @@ func parseSimpleStatement(s string) (MetricFilterPattern, error) {
 		return MetricFilterPattern{}, errors.New("could not find a Operator for this MetricFilterPattern")
 	}
 
-	// Trim trailing spaces and )
-	right := strings.TrimSpace(strings.TrimRight(strings.TrimSpace(buf.String()), ")"))
+	// Trim trailing spaces
+	right := strings.TrimSpace(buf.String())
 	return newSimpleExpression(left, operator, right), nil
 }
 
 func hasSuffixComparisonOp(s string) (bool, comparisonOperator) {
-	for _, op := range listComparisonOperator() {
+	for _, op := range listComparisonOperators() {
 		if strings.HasSuffix(s, string(op)) {
 			return true, op
 		}
