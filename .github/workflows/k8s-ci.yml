@@ -180,7 +180,8 @@ jobs:
 
       - name: Create k8s Kind Cluster
         run: |
-          df -h
+          just create-kind-cluster kind-mono
+          just delete-kind-cluster kind-mono
           just create-kind-cluster ${{ matrix.kind-config }}
 
       - name: Setup tmate session
