@@ -21,7 +21,7 @@ any_null_certificate if {
 # Verify that all listeners use https protocoal
 all_https if {
 	every description in data_adapter.listener_descriptions {
-		description.Listener.InstanceProtocol == "HTTPS"
+		description.Listener.Protocol == "HTTPS"
 	}
 }
 
