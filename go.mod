@@ -97,6 +97,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-git/go-git/v5 v5.11.0 // indirect
+	github.com/gobuffalo/here v0.6.7 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/moby/sys/user v0.1.0 // indirect
