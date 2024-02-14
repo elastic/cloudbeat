@@ -19,10 +19,10 @@ checkout_integration_repo() {
 
 get_next_integration_version() {
     current_version=$(yq '.[0].version' changelog.yml | tr -d '"')
-    version_number=$(echo "$current_version" | cut -d '.' -f 1-2)
-    minor_version=$(echo "$current_version" | cut -d '.' -f 3 | cut -d '-' -f 1)
-    next_minor_version=$((minor_version + 1))
-    NEXT_INTEGRATION_VERSION="$version_number.$(printf "%02d" $next_minor_version)-preview"
+    preview_number=$(echo "$current_version" | sed 's/.*-preview\([0-9]*\)$/\1/')
+    next_preview_number=$((preview_number + 1))
+    next_preview_number_formatted=$(printf "%02d" "$next_preview_number")
+    NEXT_INTEGRATION_VERSION=$(echo "$current_version" | sed "s/-preview$preview_number$/-preview$next_preview_number_formatted/")
     export NEXT_INTEGRATION_VERSION
 }
 
