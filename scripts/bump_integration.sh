@@ -22,7 +22,8 @@ get_next_integration_version() {
     version_number=$(echo "$current_version" | cut -d '.' -f 1-2)
     minor_version=$(echo "$current_version" | cut -d '.' -f 3 | cut -d '-' -f 1)
     next_minor_version=$((minor_version + 1))
-    export NEXT_INTEGRATION_VERSION="$version_number.$(printf "%02d" $next_minor_version)-preview"
+    NEXT_INTEGRATION_VERSION="$version_number.$(printf "%02d" $next_minor_version)-preview"
+    export NEXT_INTEGRATION_VERSION
 }
 
 update_manifest_version_vars() {
