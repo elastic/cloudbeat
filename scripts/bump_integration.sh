@@ -59,14 +59,13 @@ Bump integration version - \`$NEXT_INTEGRATION_VERSION\`
 EOF
 
     echo '• Create a PR to update integration'
-    PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
+    export PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
         --body-file pr_body \
         --base "main" \
         --head "$BRANCH" \
         --label "enhancement" \
         --label "Team:Cloud Security" \
         --repo "$INTEGRATION_REPO")"
-    echo "$PR_URL"
 }
 
 update_manifest_version() {
@@ -78,7 +77,6 @@ update_manifest_version() {
 }
 
 update_changelog_version() {
-    local PR_URL="$1"
     echo "• Update changelog version"
     yq -i ".[0].version = \"$NEXT_INTEGRATION_VERSION\"" $CHANGELOG_PATH
     # this line below requires single quotes and env(PR) to interpolate this env var
@@ -104,5 +102,5 @@ checkout_integration_repo
 get_next_integration_version
 update_manifest_version_vars
 update_manifest_version
-update_changelog_version "$(create_integrations_pr)"
+update_changelog_version
 update_changelog_version_map
