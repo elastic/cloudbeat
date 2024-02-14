@@ -24,7 +24,7 @@ jobs:
       - name: Setup Cloudbeat Versions
         run: |
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          next=$(echo $version | awk -F. '{$2+=1; print}' OFS='.')
+          next=$(echo $version | awk -F. '{$2+=1; print $1"."$2"."$3}')
           echo "current: $current"
           echo "next: $next"
           echo "CURRENT_CLOUDBEAT_VERSION=$current" >> $GITHUB_ENV
