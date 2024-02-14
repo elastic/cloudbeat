@@ -91,7 +91,7 @@ create_cloudbeat_versions_pr_for_release() {
     echo "• Create PR for cloudbeat release version"
     git add .
     git commit -m "Release cloudbeat $CURRENT_CLOUDBEAT_VERSION"
-    git push origin "$CURRENT_MINOR_VERSION"
+    git push origin "$RELEASE_CLOUDBEAT_BRANCH"
 
     cat <<EOF >cloudbeat_pr_body_release
 Release cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
