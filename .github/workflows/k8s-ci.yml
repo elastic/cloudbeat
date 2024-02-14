@@ -157,7 +157,7 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Kind Config2 Workaround
-        if: contains(matrix.test-target, 'conf2')
+        if: contains(matrix.kind-config, 'conf2')
         run: |
           # When running directly kind cluster creation for config2, it fails to launch control-plane (kubelet fails to start)
           # It was found that once any kind cluster creation is successful, afterwards, config2 cluster creation is successful
