@@ -114,48 +114,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # test-target:
-        #   [
-        #     file_system_rules,
-        #     k8s_object_rules,
-        #     process_scheduler_rules,
-        #     process_api_server_rules,
-        #     process_controller_manager_rules,
-        #     process_etcd_rules,
-        #     process_kubelet_rules,
-        #   ]
-        # values_file: [ tests/test_environments/values/ci.yml ]
-        # range: [ "0..4" ]
-        # test-target:
-        #   [
-        #     k8s_process_rules
-        #   ]
-        # values_file:
-        #   [
-        #     tests/test_environments/values/ci-test-k8s-proc-conf1.yml,
-        #     tests/test_environments/values/ci-test-k8s-proc-conf2.yml,
-        #   ]
-        # range: ""
         include:
-          # - test-target: pre_merge
-          #   range: ""
-          #   kind-config: kind-multi
-          # - test-target: pre_merge_agent
-          #   range: ''
-          #   values_file: tests/test_environments/values/ci-sa-agent.yml
-          #   kind-config: kind-multi
-          # - test-target: k8s_file_system_rules
-          #   range: ''
-          #   values_file: tests/test_environments/values/ci-test-k8s-files.yml
-          #   kind-config: kind-test-files
-          # - test-target: k8s_object_psp_rules
-          #   range: ''
-          #   values_file: tests/test_environments/values/ci-test-k8s-objects.yml
-          #   kind-config: kind-multi
-          # - test-target: k8s_process_rules
-          #   range: ''
-          #   values_file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
-          #   kind-config: kind-test-proc-conf1
+          - test-target: pre_merge
+            range: ""
+            kind-config: kind-multi
+          - test-target: pre_merge_agent
+            range: ''
+            values_file: tests/test_environments/values/ci-sa-agent.yml
+            kind-config: kind-multi
+          - test-target: k8s_file_system_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-files.yml
+            kind-config: kind-test-files
+          - test-target: k8s_object_psp_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-objects.yml
+            kind-config: kind-multi
+          - test-target: k8s_process_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
+            kind-config: kind-test-proc-conf1
           - test-target: k8s_process_rules
             range: ''
             values_file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
@@ -178,17 +156,18 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Create k8s Kind Cluster
+      - name: Kind Config2 Workaround
+        if: contains(matrix.test-target, 'conf2')
         run: |
+          # When running directly kind cluster creation for config2, it fails to launch control-plane (kubelet fails to start)
+          # It was found that once any kind cluster creation is successful, afterwards, config2 cluster creation is successful
+          # This is conditional step to create and delete kind-mono cluster before creating kind-test-proc-conf2 cluster
           just create-kind-cluster kind-mono
           just delete-kind-cluster kind-mono
-          just create-kind-cluster ${{ matrix.kind-config }}
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
+      - name: Create k8s Kind Cluster
+        run: |
+          just create-kind-cluster ${{ matrix.kind-config }}
 
       - name: Cache docker images
         uses: actions/cache@v4
