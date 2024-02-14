@@ -10,7 +10,7 @@ hermitActivationScript := "bin/activate-hermit"
 export LOCAL_GOARCH := `go env GOARCH`
 
 create-kind-cluster kind='kind-multi':
-  kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 90s
+  kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s -v 9
 
 linter-setup:
   source {{hermitActivationScript}} || true
