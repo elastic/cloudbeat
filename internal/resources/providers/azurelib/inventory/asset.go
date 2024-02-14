@@ -77,6 +77,7 @@ const (
 	ExtensionQueueDiagnosticSettings             = "queueDiagnosticSettings"
 	ExtensionKeyVaultKeys                        = "vaultKeys"
 	ExtensionKeyVaultSecrets                     = "vaultSecrets"
+	ExtensionKeyVaultDiagnosticSettings          = "vaultDiagnosticSettings"
 
 	// AssetLocation
 	assetLocationGlobal = "global"
