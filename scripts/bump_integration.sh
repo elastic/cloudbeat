@@ -17,18 +17,15 @@ checkout_integration_repo() {
     git checkout -b "$BRANCH" origin/main
 }
 
-# reads the last version from changelog.yml version map
-# and increments the minor version
 get_next_integration_version() {
-    echo "• Get next integration version"
-    input_line=$(sed -n '3p' $CHANGELOG_PATH) # last version is always on line 3
-    first_version=$(echo "$input_line" | cut -d' ' -f2)
-    major_minor=$(echo "$first_version" | cut -d'.' -f1-2)
-    major=$(echo "$major_minor" | cut -d'.' -f1)
-    minor=$(echo "$major_minor" | cut -d'.' -f2)
-    next_minor=$((minor + 1))
-    export NEXT_INTEGRATION_VERSION="$major.$next_minor.0"
-    echo "NEXT_INTEGRATION_VERSION: $NEXT_INTEGRATION_VERSION"
+    current_version=$(yq '.[0].version' changelog.yml | tr -d '"')
+    preview_number="${current_version##*-preview}"
+    preview_number="${preview_number##*(0)}" # Remove leading zeros
+    ((next_preview_number = preview_number + 1))
+    next_preview_number_formatted=$(printf "%02d" "$next_preview_number")
+    NEXT_INTEGRATION_VERSION="${current_version%-*}-preview${next_preview_number_formatted}"
+
+    export NEXT_INTEGRATION_VERSION
 }
 
 update_manifest_version_vars() {
@@ -87,21 +84,9 @@ update_changelog_version() {
     git push origin "$BRANCH"
 }
 
-update_changelog_version_map() {
-    echo "• Update changelog version map"
-    next_minor=$(echo "$NEXT_INTEGRATION_VERSION" | cut -d'.' -f1,2)
-    new_comment="# ${next_minor}.x - ${MAJOR_MINOR_CLOUDBEAT}.x"
-    new_file_content=$(awk -v var="$new_comment" 'NR==3 {print var} {print}' "$CHANGELOG_PATH")
-    echo -e "$new_file_content" >temp.yaml
-    mv temp.yaml "$CHANGELOG_PATH"
-    git add $CHANGELOG_PATH
-    git commit -m "Update changelog version map"
-    git push origin "$BRANCH"
-}
-
 checkout_integration_repo
 get_next_integration_version
 update_manifest_version_vars
 update_manifest_version
 update_changelog_version
-update_changelog_version_map
+create_integrations_pr
