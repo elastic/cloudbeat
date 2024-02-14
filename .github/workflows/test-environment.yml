@@ -168,7 +168,7 @@ jobs:
           qa_ec_url='https://console.qa.cld.elstc.co'
           input_ec_api_key=${{ inputs.ec-api-key }}
 
-          if [[ $input_ec_api_key != '' && $inputs_ec_url == $ec_url ]]; then
+          if [[ $input_ec_api_key != '' && $input_ec_url == $ec_url ]]; then
             ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
