@@ -66,7 +66,7 @@ EOF
         --label "enhancement" \
         --label "Team:Cloud Security" \
         --repo "$INTEGRATION_REPO")"
-    echo "$PR_URL"
+    export PR_URL
 }
 
 update_manifest_version() {
@@ -78,7 +78,6 @@ update_manifest_version() {
 }
 
 update_changelog_version() {
-    local PR_URL="$1"
     echo "• Update changelog version"
     yq -i ".[0].version = \"$NEXT_INTEGRATION_VERSION\"" $CHANGELOG_PATH
     # this line below requires single quotes and env(PR) to interpolate this env var
@@ -104,5 +103,5 @@ checkout_integration_repo
 get_next_integration_version
 update_manifest_version_vars
 update_manifest_version
-update_changelog_version "$(create_integrations_pr)"
+update_changelog_version
 update_changelog_version_map
