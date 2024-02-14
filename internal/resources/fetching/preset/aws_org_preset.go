@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type AwsAccount struct {
@@ -44,7 +45,7 @@ func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if err != nil {
 		return mdata, err
 	}
-	mdata.AccountName = w.identity.AccountAlias
+	mdata.AccountName = pointers.Deref(w.identity.AccountAlias)
 	mdata.AccountId = w.identity.Account
 	mdata.OrganisationId = w.identity.OrganizationId
 	mdata.OrganizationName = w.identity.OrganizationName

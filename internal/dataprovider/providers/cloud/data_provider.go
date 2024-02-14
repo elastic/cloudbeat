@@ -39,7 +39,7 @@ const (
 type Identity struct {
 	Provider         string
 	Account          string
-	AccountAlias     string
+	AccountAlias     *string
 	OrganizationId   string
 	OrganizationName string
 }

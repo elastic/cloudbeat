@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 var (
@@ -52,7 +53,7 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 			},
 			identity: Identity{
 				Account:      accountId,
-				AccountAlias: accountName,
+				AccountAlias: pointers.Ref(accountName),
 				Provider:     awsProvider,
 			},
 			expectedFields: map[string]string{
@@ -73,7 +74,7 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 			},
 			identity: Identity{
 				Account:      accountId,
-				AccountAlias: accountName,
+				AccountAlias: pointers.Ref(accountName),
 				Provider:     awsProvider,
 			},
 			expectedFields: map[string]string{
@@ -94,7 +95,7 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 			},
 			identity: Identity{
 				Account:      accountId,
-				AccountAlias: accountName,
+				AccountAlias: pointers.Ref(accountName),
 				Provider:     awsProvider,
 			},
 			expectedFields: map[string]string{
@@ -112,7 +113,7 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 			identity: Identity{
 				Provider:     gcpProvider,
 				Account:      gcpProjectId,
-				AccountAlias: gcpProjectName,
+				AccountAlias: pointers.Ref(gcpProjectName),
 			},
 			expectedFields: map[string]string{
 				cloudProviderField:    gcpProvider,

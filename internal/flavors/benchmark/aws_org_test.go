@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -121,11 +122,11 @@ func Test_getAwsAccounts(t *testing.T) {
 			accountProvider: mockAccountProviderWithIdentities([]cloud.Identity{
 				{
 					Account:      "123",
-					AccountAlias: "alias",
+					AccountAlias: pointers.Ref("alias"),
 				},
 				{
 					Account:      "456",
-					AccountAlias: "alias2",
+					AccountAlias: pointers.Ref("alias2"),
 				},
 			}),
 			rootIdentity: cloud.Identity{
@@ -134,11 +135,11 @@ func Test_getAwsAccounts(t *testing.T) {
 			want: []cloud.Identity{
 				{
 					Account:      "123",
-					AccountAlias: "alias",
+					AccountAlias: pointers.Ref("alias"),
 				},
 				{
 					Account:      "456",
-					AccountAlias: "alias2",
+					AccountAlias: pointers.Ref("alias2"),
 				},
 			},
 		},
@@ -172,11 +173,11 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 		on.Return([]cloud.Identity{
 			{
 				Account:      "123",
-				AccountAlias: "some-name",
+				AccountAlias: pointers.Ref("some-name"),
 			},
 			{
 				Account:      "456",
-				AccountAlias: "some-other-name",
+				AccountAlias: pointers.Ref("some-other-name"),
 			},
 		}, nil)
 	} else {

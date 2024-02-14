@@ -69,7 +69,7 @@ func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI
 			accounts = append(accounts, cloud.Identity{
 				Provider:         "aws",
 				Account:          *account.Id,
-				AccountAlias:     pointers.Deref(account.Name),
+				AccountAlias:     account.Name,
 				OrganizationId:   organization.id,
 				OrganizationName: organization.name,
 			})
