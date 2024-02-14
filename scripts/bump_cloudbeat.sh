@@ -158,7 +158,7 @@ run_version_changes_for_main() {
 # make changes for 'release' version
 run_version_changes_for_release_branch() {
     git fetch origin "$CURRENT_MINOR_VERSION"
-    git checkout -b "$RELEASE_CLOUDBEAT_BRANCH" origin/$CURRENT_MINOR_VERSION
+    git checkout -b "$RELEASE_CLOUDBEAT_BRANCH" origin/"$CURRENT_MINOR_VERSION"
     update_version_arm_template_file_uris
     create_cloudbeat_versions_pr_for_release
     upload_cloud_formation_templates

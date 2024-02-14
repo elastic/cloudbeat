@@ -59,13 +59,14 @@ Bump integration version - \`$NEXT_INTEGRATION_VERSION\`
 EOF
 
     echo '• Create a PR to update integration'
-    export PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
+    PR_URL="$(gh pr create --title "[Cloud Security] Bump integration" \
         --body-file pr_body \
         --base "main" \
         --head "$BRANCH" \
         --label "enhancement" \
         --label "Team:Cloud Security" \
         --repo "$INTEGRATION_REPO")"
+    export PR_URL
 }
 
 update_manifest_version() {
