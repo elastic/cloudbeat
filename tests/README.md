@@ -260,7 +260,7 @@ def test_aws_logging_rules(
 
 - Update markers section in `pyproject.toml` with newly created marker
 
-```python
+```toml
 [tool.pytest.ini_options]
 markers = [
     "pre_merge",
