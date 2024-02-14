@@ -163,17 +163,24 @@ jobs:
 
       - name: Mask Sensitive Data
         run: |
+          # Extract the EC API key and selected EC URL
           input_ec_url="${{ inputs.ec-url }}"
-          ec_url='https://cloud.elastic.co'
-          qa_ec_url='https://console.qa.cld.elstc.co'
-          input_ec_api_key="${{ inputs.ec-api-key }}"
+          ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
 
-          if [[ $input_ec_api_key != '' && $input_ec_url == $ec_url ]]; then
-            ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
+          # Production elastic cloud url
+          ec_url='https://cloud.elastic.co'
+
+          # QA elastic cloud url
+          qa_ec_url='https://console.qa.cld.elstc.co'
+
+         # Handles setting API KEY for each deployment mode for  elastic cloud  environment
+          if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then;
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-          elif [ $input_ec_url == $qa_ec_url ]; then
-            echo "TF_VAR_ec_api_key= $TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
+          elif [[ $ec_api_key == '' && $input_ec_url == $ec_url ]]; then
+            echo "TF_VAR_ec_api_key" >> $GITHUB_ENV
+          elif [[ $input_ec_url == $qa_ec_url ]]; then
+            echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
             echo "error: Elastic Cloud API key is required from a valid ec url"
             exit 1
