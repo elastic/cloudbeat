@@ -70,7 +70,7 @@ generate_ecr_input_with_one_repo(image_scan_on_push) = {
 }
 
 # regal ignore:rule-length
-generate_elb_input_with_two_load_balancers(first_instance_protocol, first_instance_ssl_cert, sec_instance_protocol, sec_instance_ssl_cert) = {
+generate_elb_input_with_two_load_balancers(first_protocol, first_ssl_cert, sec_protocol, sec_ssl_cert) = {
 	"resource": {
 		"AvailabilityZones": [
 			"us-east-2b",
@@ -96,20 +96,20 @@ generate_elb_input_with_two_load_balancers(first_instance_protocol, first_instan
 			{
 				"Listener": {
 					"InstancePort": 32177,
-					"InstanceProtocol": first_instance_protocol,
+					"InstanceProtocol": "HTTP",
 					"LoadBalancerPort": 443,
-					"Protocol": "TCP",
-					"SSLCertificateId": first_instance_ssl_cert,
+					"Protocol": first_protocol,
+					"SSLCertificateId": first_ssl_cert,
 				},
 				"PolicyNames": null,
 			},
 			{
 				"Listener": {
 					"InstancePort": 31829,
-					"InstanceProtocol": sec_instance_protocol,
+					"InstanceProtocol": "HTTP",
 					"LoadBalancerPort": 80,
-					"Protocol": "TCP",
-					"SSLCertificateId": sec_instance_ssl_cert,
+					"Protocol": sec_protocol,
+					"SSLCertificateId": sec_ssl_cert,
 				},
 				"PolicyNames": null,
 			},
