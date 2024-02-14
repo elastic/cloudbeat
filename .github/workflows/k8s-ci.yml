@@ -209,6 +209,7 @@ jobs:
         if: contains(matrix.test-target, 'object_psp')
         run: |
           just apply-k8s-test-objects
+          sleep 45 # wait for the objects to be created
 
       - name: Run Tests
         id: run_tests

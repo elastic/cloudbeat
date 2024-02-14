@@ -18,7 +18,7 @@ nodes:
     streamingConnectionIdleTimeout: "5m"
     protectKernelDefaults: true
     eventRecordQPS: 0
-    tlsCipherSuites: [TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+    # tlsCipherSuites: [TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
   - |
     apiVersion: kubeadm.k8s.io/v1beta3
     kind: ClusterConfiguration
