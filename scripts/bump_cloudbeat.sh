@@ -2,16 +2,11 @@
 set -euo pipefail
 
 export NEXT_CLOUDBEAT_BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
-NEXT_MINOR_VERSION=$(echo "$NEXT_CLOUDBEAT_VERSION" | cut -d '.' -f1,2)
 CURRENT_MINOR_VERSION=$(echo "$CURRENT_CLOUDBEAT_VERSION" | cut -d '.' -f1,2)
-
-export NEXT_MINOR_VERSION
 export CURRENT_MINOR_VERSION
-
 export RELEASE_CLOUDBEAT_BRANCH="release-$CURRENT_MINOR_VERSION"
 
 echo "NEXT_CLOUDBEAT_VERSION: $NEXT_CLOUDBEAT_VERSION"
-echo "NEXT_MINOR_VERSION: $NEXT_MINOR_VERSION"
 echo "CURRENT_CLOUDBEAT_VERSION: $CURRENT_CLOUDBEAT_VERSION"
 echo "CURRENT_MINOR_VERSION: $CURRENT_MINOR_VERSION"
 
@@ -54,8 +49,8 @@ update_version_arm_template_file_uris() {
     local organization_account_file="deploy/azure/ARM-for-organization-account.json"
 
     echo "• Replace fileUris git branch in ARM templates"
-    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$NEXT_MINOR_VERSION/g" $single_account_file
-    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$NEXT_MINOR_VERSION/g" $organization_account_file
+    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$CURRENT_MINOR_VERSION/g" $single_account_file
+    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$CURRENT_MINOR_VERSION/g" $organization_account_file
 
     echo "• Generate dev ARM templates"
     ./deploy/azure/generate_dev_template.py --template-type single-account
@@ -85,6 +80,7 @@ EOF
         --base "main" \
         --head "$NEXT_CLOUDBEAT_BRANCH" \
         --label "backport-skip"
+    rm -rf cloudbeat_pr_body
 }
 
 create_cloudbeat_versions_pr_for_release() {
@@ -105,24 +101,26 @@ EOF
         --base "$CURRENT_MINOR_VERSION" \
         --head "$RELEASE_CLOUDBEAT_BRANCH" \
         --label "backport-skip"
+
+    rm -rf cloudbeat_pr_body_release
 }
 
 # We need to bump hermit seperately because we need to wait for the snapshot build to be available
 bump_hermit() {
     echo "• Bump hermit cloudbeat version"
-    local BRANCH="bump-hermit-to-$NEXT_CLOUDBEAT_VERSION"
+    local BRANCH="bump-hermit-to-$CURRENT_CLOUDBEAT_VERSION"
     git checkout -b "$BRANCH" origin/main
 
-    sed -i'' -E "s/\"CLOUDBEAT_VERSION\": .*/\"CLOUDBEAT_VERSION\": \"$NEXT_CLOUDBEAT_VERSION\",/g" bin/hermit.hcl
+    sed -i'' -E "s/\"CLOUDBEAT_VERSION\": .*/\"CLOUDBEAT_VERSION\": \"$CURRENT_CLOUDBEAT_VERSION\",/g" bin/hermit.hcl
     git add bin/hermit.hcl
-    git commit -m "Bump cloudbeat to $NEXT_CLOUDBEAT_VERSION"
+    git commit -m "Bump cloudbeat to $CURRENT_CLOUDBEAT_VERSION"
     git push origin "$BRANCH"
 
     cat <<EOF >hermit_pr_body
-Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
+Bump cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
 
 > [!IMPORTANT]
-> to be merged after snapshot build for $NEXT_CLOUDBEAT_VERSION is available
+> to be merged after snapshot build for $CURRENT_CLOUDBEAT_VERSION is available
 
 > [!NOTE]
 > This is an automated PR
@@ -134,6 +132,8 @@ EOF
         --base "main" \
         --head "$BRANCH" \
         --label "backport-skip"
+
+    rm -rf hermit_pr_body
 }
 
 upload_cloud_formation_templates() {
