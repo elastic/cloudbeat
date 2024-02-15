@@ -113,6 +113,9 @@ env:
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
 
+variables:
+  qa_ec_url: "https://console.qa.cld.elstc.co"
+
 jobs:
   Deploy:
     runs-on: ubuntu-20.04
@@ -161,6 +164,7 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
+        if: inputs.ec-api-key != '' || variables.qa_ec_url == ${{ inputs.ec-url }}
         run: |
           # Extract the EC API key and selected EC URL
           input_ec_url="${{ inputs.ec-url }}"
@@ -170,14 +174,12 @@ jobs:
           ec_url='https://cloud.elastic.co'
 
           # QA elastic cloud url
-          qa_ec_url='https://console.qa.cld.elstc.co'
+          qa_ec_url="${{ variables.qa_ec_url}}"
 
           # Handles setting API KEY for each deployment mode for  elastic cloud  environment
           if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-          elif [[ $ec_api_key == '' && $input_ec_url == $ec_url ]]; then
-            echo "TF_VAR_ec_api_key" >> $GITHUB_ENV
           elif [[ $input_ec_url == $qa_ec_url ]]; then
             echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
