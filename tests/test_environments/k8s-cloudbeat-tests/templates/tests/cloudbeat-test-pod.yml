@@ -16,8 +16,7 @@ spec:
     - /bin/sh
     - -c
     - |
-      set -e
-      pytest -rA --disable-warnings ${MARKER_CMD} "${TEST_MARKER}" ${RANGE_FLAG} ${TEST_RANGE} --alluredir=/usr/src/app/report || (exit 0)
+      pytest -rA --disable-warnings ${MARKER_CMD} "${TEST_MARKER}" ${RANGE_FLAG} ${TEST_RANGE} --alluredir=/usr/src/app/report
       # When directly linking to mounted path,
       # INTERNALERROR> OSError: [Errno 16] Device or resource busy: '/usr/src/app/tests/report'
       # To workaround this, copy the report to a different path
