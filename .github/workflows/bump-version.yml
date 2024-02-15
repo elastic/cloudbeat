@@ -35,7 +35,9 @@ jobs:
           git config --global user.name "Cloud Security Machine"
 
       - name: Bump Cloudbeat
+        # bump_cloudbeat.sh will create multiple PRs with different HEAD branches
         run: scripts/bump_cloudbeat.sh
 
       - name: Bump Cloud Security Posture Integration
-        run: scripts/bump_integration.sh
+        # we need to run bump_integration.sh from the main branch
+        run: git checkout origin/main && scripts/bump_integration.sh
