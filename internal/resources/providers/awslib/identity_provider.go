@@ -47,18 +47,14 @@ func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*clo
 	}
 
 	alias, err := p.getAccountAlias(ctx, cfg)
-	var aliasPtr *string
-
-	if err == nil {
-		aliasPtr = &alias
-	} else {
-		p.Logger.Errorf("failed to get aliases: %w", err)
-		aliasPtr = nil
+	if err != nil {
+		p.Logger.Warnf("failed to get aliases: %v", err)
+		alias = ""
 	}
 
 	return &cloud.Identity{
 		Account:      *response.Account,
-		AccountAlias: aliasPtr,
+		AccountAlias: alias,
 		Provider:     provider,
 	}, nil
 }

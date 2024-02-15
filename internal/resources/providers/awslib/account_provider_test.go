@@ -116,7 +116,7 @@ func Test_listAccounts(t *testing.T) {
 				{
 					Provider:         "aws",
 					Account:          "1",
-					AccountAlias:     pointers.Ref("name"),
+					AccountAlias:     "name",
 					OrganizationId:   "ou-1",
 					OrganizationName: "ou-1-name",
 				},
@@ -173,21 +173,21 @@ func Test_listAccounts(t *testing.T) {
 				{
 					Provider:         "aws",
 					Account:          "1",
-					AccountAlias:     pointers.Ref("name"),
+					AccountAlias:     "name",
 					OrganizationId:   "ou-1",
 					OrganizationName: "ou-1-name",
 				},
 				{
 					Provider:         "aws",
 					Account:          "123",
-					AccountAlias:     nil,
+					AccountAlias:     "",
 					OrganizationId:   "ou-1",
 					OrganizationName: "ou-1-name",
 				},
 				{
 					Provider:         "aws",
 					Account:          "1000",
-					AccountAlias:     pointers.Ref("some name"),
+					AccountAlias:     "some name",
 					OrganizationId:   "",
 					OrganizationName: "",
 				},
@@ -216,7 +216,7 @@ func Test_listAccounts(t *testing.T) {
 				{
 					Provider:         "aws",
 					Account:          "1",
-					AccountAlias:     pointers.Ref("name"),
+					AccountAlias:     "name",
 					OrganizationId:   "ou-1",
 					OrganizationName: "",
 				},

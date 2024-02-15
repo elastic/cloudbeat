@@ -25,7 +25,3 @@ func Deref[T any](v *T) T {
 
 	return *v
 }
-
-func Ref[T any](v T) *T {
-	return &v
-}

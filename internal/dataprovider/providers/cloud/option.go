@@ -17,14 +17,12 @@
 
 package cloud
 
-import "github.com/elastic/cloudbeat/internal/resources/utils/pointers"
-
 type Option func(*DataProvider)
 
 func WithAccount(identity Identity) Option {
 	return func(dp *DataProvider) {
 		dp.accountId = identity.Account
-		dp.accountName = pointers.Deref(identity.AccountAlias)
+		dp.accountName = identity.AccountAlias
 		dp.providerName = identity.Provider
 	}
 }

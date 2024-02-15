@@ -34,7 +34,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -61,7 +60,7 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 		accounts = append(accounts, AwsAccount{
 			Identity: cloud.Identity{
 				Account:      fmt.Sprintf("account-%d", i),
-				AccountAlias: pointers.Ref(fmt.Sprintf("alias-%d", i)),
+				AccountAlias: fmt.Sprintf("alias-%d", i),
 			},
 		})
 	}
@@ -148,7 +147,7 @@ func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 		[]AwsAccount{{
 			Identity: cloud.Identity{
 				Account:      "1",
-				AccountAlias: pointers.Ref("account"),
+				AccountAlias: "account",
 			},
 		}},
 		nil,
@@ -177,7 +176,7 @@ func TestNewCisAwsOrganizationFetchers_CloseChannel(t *testing.T) {
 		[]AwsAccount{{
 			Identity: cloud.Identity{
 				Account:      "1",
-				AccountAlias: pointers.Ref("account"),
+				AccountAlias: "account",
 			},
 		}},
 		nil,
@@ -203,13 +202,13 @@ func TestNewCisAwsOrganizationFetchers_Cache(t *testing.T) {
 			{
 				Identity: cloud.Identity{
 					Account:      "1",
-					AccountAlias: pointers.Ref("account"),
+					AccountAlias: "account",
 				},
 			},
 			{
 				Identity: cloud.Identity{
 					Account:      "2",
-					AccountAlias: pointers.Ref("account2"),
+					AccountAlias: "account2",
 				},
 			},
 		},
