@@ -2,6 +2,7 @@ package compliance.cis_aws.rules.cis_4_2
 
 import data.cis_aws.test_data
 import data.compliance.cis_aws.data_adapter
+import data.compliance.policy.aws_cloudtrail.pattern
 import data.lib.test
 import future.keywords.if
 
@@ -12,7 +13,14 @@ test_pass if {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") }"}],
+		"MetricFilters": [{
+			"FilterName": "filter_1",
+			"FilterPattern": "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") }",
+			"ParsedFilterPattern": pattern.complex_expression("&&", [
+				pattern.simple_expression("$.additionalEventData.MFAUsed", "!=", "\"Yes\""),
+				pattern.simple_expression("$.eventName", "=", "\"ConsoleLogin\""),
+			]),
+		}],
 		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 
@@ -22,7 +30,16 @@ test_pass if {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") && ($.userIdentity.type = \"IAMUser\") && ($.responseElements.ConsoleLogin = \"Success\") }"}],
+		"MetricFilters": [{
+			"FilterName": "filter_1",
+			"FilterPattern": "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") && ($.userIdentity.type = \"IAMUser\") && ($.responseElements.ConsoleLogin = \"Success\") }",
+			"ParsedFilterPattern": pattern.complex_expression("&&", [
+				pattern.simple_expression("$.eventName", "=", "\"ConsoleLogin\""),
+				pattern.simple_expression("$.responseElements.ConsoleLogin", "=", "\"Success\""),
+				pattern.simple_expression("\"Yes\"", "!=", "$.additionalEventData.MFAUsed"),
+				pattern.simple_expression("$.userIdentity.type", "=", "\"IAMUser\""),
+			]),
+		}],
 		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 }
