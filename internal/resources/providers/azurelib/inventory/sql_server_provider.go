@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -37,6 +38,7 @@ type sqlAzureClientWrapper struct {
 	AssetTransparentDataEncryptions             func(ctx context.Context, subID, resourceGroup, serverName, dbName string, clientOptions *arm.ClientOptions, options *armsql.TransparentDataEncryptionsClientListByDatabaseOptions) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
 	AssetDatabases                              func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error)
 	AssetServerAdvancedThreatProtectionSettings func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
+	AssetServerFirewallRules                    func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, listOptions *armsql.FirewallRulesClientListByServerOptions) ([]armsql.FirewallRulesClientListByServerResponse, error)
 }
 
 type SQLProviderAPI interface {
@@ -44,6 +46,7 @@ type SQLProviderAPI interface {
 	ListSQLTransparentDataEncryptions(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 	GetSQLBlobAuditingPolicies(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 	ListSQLAdvancedThreatProtectionSettings(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
+	ListSQLFirewallRules(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error)
 }
 
 type sqlProvider struct {
@@ -88,6 +91,13 @@ func NewSQLProvider(log *logp.Logger, credentials azcore.TokenCredential) SQLPro
 				return nil, err
 			}
 			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, options))
+		},
+		AssetServerFirewallRules: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, listOptions *armsql.FirewallRulesClientListByServerOptions) ([]armsql.FirewallRulesClientListByServerResponse, error) {
+			cl, err := armsql.NewFirewallRulesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListByServerPager(resourceGroup, serverName, listOptions))
 		},
 	}
 
@@ -289,4 +299,41 @@ func convertAdvancedThreatProtectionSettings(s *armsql.ServerAdvancedThreatProte
 		TenantId:       "",
 		Type:           pointers.Deref(s.Type),
 	}
+}
+
+func (p *sqlProvider) ListSQLFirewallRules(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
+	responses, err := p.client.AssetServerFirewallRules(ctx, subID, resourceGroup, serverName, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var errs []error
+	return lo.FlatMap(responses, func(item armsql.FirewallRulesClientListByServerResponse, _ int) []AzureAsset {
+		return lo.FilterMap(item.Value, func(item *armsql.FirewallRule, _ int) (AzureAsset, bool) {
+			if item == nil {
+				return AzureAsset{}, false
+			}
+
+			return p.convertFirewallRule(item, subID, resourceGroup), true
+		})
+	}), errors.Join(errs...)
+}
+
+func (p *sqlProvider) convertFirewallRule(item *armsql.FirewallRule, subID, resourceGroup string) AzureAsset {
+	a := AzureAsset{
+		Id:             pointers.Deref(item.ID),
+		Name:           pointers.Deref(item.Name),
+		Type:           strings.ToLower(pointers.Deref(item.Type)),
+		SubscriptionId: subID,
+		ResourceGroup:  resourceGroup,
+	}
+
+	if item.Properties != nil {
+		a.Properties = map[string]any{
+			"startIpAddress": pointers.Deref(item.Properties.StartIPAddress),
+			"endIpAddress":   pointers.Deref(item.Properties.EndIPAddress),
+		}
+	}
+
+	return a
 }
