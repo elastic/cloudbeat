@@ -113,8 +113,6 @@ env:
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
 
-variables:
-  qa_ec_url: "https://console.qa.cld.elstc.co"
 
 jobs:
   Deploy:
@@ -132,6 +130,8 @@ jobs:
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
+      QA_EC_URL: "https://console.qa.cld.elstc.co"
+      PROD_EC_URL: "https://cloud.elastic.co"
     # Add "id-token" with the intended permissions.
     permissions:
       contents: "read"
@@ -164,17 +164,17 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
-        if: inputs.ec-api-key != '' || variables.qa_ec_url == ${{ inputs.ec-url }}
+        if: inputs.ec-api-key != '' || inputs.ec_url == ${{ env.QA_EC_URL }}
         run: |
           # Extract the EC API key and selected EC URL
           input_ec_url="${{ inputs.ec-url }}"
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
 
           # Production elastic cloud url
-          ec_url='https://cloud.elastic.co'
+          ec_url="${{ env.PROD_EC_URL }}"
 
           # QA elastic cloud url
-          qa_ec_url="${{ variables.qa_ec_url}}"
+          qa_ec_url="${{ env.QA_EC_URL }}"
 
           # Handles setting API KEY for each deployment mode for  elastic cloud  environment
           if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
