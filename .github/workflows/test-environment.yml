@@ -266,7 +266,6 @@ jobs:
           terraform apply --auto-approve \
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
-            -var="ec_url=${{ env.TF_VAR_ec_url }}" \
             -var="project=${{ github.actor }}" \
             -var="owner=${{ github.actor }}"
 
