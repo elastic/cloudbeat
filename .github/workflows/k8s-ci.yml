@@ -182,8 +182,6 @@ jobs:
 
       - name: Deploy tests Helm chart
         id: deploy_helm
-        env:
-          ELK_VERSION: ${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
