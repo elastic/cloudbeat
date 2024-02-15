@@ -4,6 +4,8 @@ kind: Job
 metadata:
   name: update-file-permissions
   namespace: kube-system
+  annotations:
+    "helm.sh/hook": "pre-install"
 spec:
   template:
     spec:
