@@ -164,7 +164,7 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
-        if: inputs.ec-api-key != '' || inputs.ec_url == ${{ env.QA_EC_URL }}
+        if: inputs.ec-api-key != '' || inputs.ec-url == ${{ env.QA_EC_URL }}
         run: |
           # Extract the EC API key and selected EC URL
           input_ec_url="${{ inputs.ec-url }}"
