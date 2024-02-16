@@ -164,7 +164,6 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
-        if: inputs.ec-api-key != '' || inputs.ec-url == ${{ env.QA_EC_URL }}
         run: |
           # Extract the EC API key and selected EC URL
           input_ec_url="${{ inputs.ec-url }}"
@@ -180,6 +179,8 @@ jobs:
           if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          elif [[ $input_ec_url == $ec_url ]]; then
+            echo "TF_VAR_ec_api_key=$TF_VAR_ec_api_key" >> $GITHUB_ENV
           elif [[ $input_ec_url == $qa_ec_url ]]; then
             echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
