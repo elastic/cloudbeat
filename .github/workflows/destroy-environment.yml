@@ -14,12 +14,12 @@ on:
         description: "Ignore all environments starting with `ignore-prefix`"
       ec-url:
         required: true
-        default: "https://cloud.elastic.co/"
+        default: "https://cloud.elastic.co"
         type: choice
         description: Select the Environment URL to delete
         options:
-          - https://cloud.elastic.co/
-          - https://console.qa.cld.elstc.co/
+          - https://cloud.elastic.co
+          - https://console.qa.cld.elstc.co
       ec-api-key:
         type: string
         description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
