@@ -33,6 +33,8 @@ env:
   ENV_IGNORE_PREFIX: ${{ inputs.ignore-prefix }}
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
+  QA_EC_URL: "https://console.qa.cld.elstc.co"
+  PROD_EC_URL: "https://cloud.elastic.co"
 
 jobs:
   Destroy:
@@ -72,7 +74,7 @@ jobs:
           elif [[ $input_ec_url == $qa_ec_url ]]; then
             echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
-            echo "error: Elastic Cloud API key igis required from a valid ec url"
+            echo "error: Elastic Cloud API key is required from a valid ec url"
             exit 1
           fi
 
