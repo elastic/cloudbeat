@@ -66,6 +66,7 @@ const (
 	ExtensionSQLBlobAuditPolicy                  = "sqlBlobAuditPolicy"
 	ExtensionSQLTransparentDataEncryptions       = "sqlTransparentDataEncryptions"
 	ExtensionSQLAdvancedThreatProtectionSettings = "sqlAdvancedThreatProtectionSettings"
+	ExtensionSQLFirewallRules                    = "sqlFirewallRules"
 	ExtensionMysqlConfigurations                 = "mysqlConfigurations"
 	ExtensionPostgresqlConfigurations            = "psqlConfigurations"
 	ExtensionPostgresqlFirewallRules             = "psqlFirewallRules"
