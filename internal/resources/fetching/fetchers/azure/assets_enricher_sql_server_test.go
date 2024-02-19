@@ -303,6 +303,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 					inventory.ExtensionSQLAdvancedThreatProtectionSettings: []inventory.AzureAsset{
 						mockThreatProtection("tde1", threatProtectionPros("Enabled")),
 					},
+					inventory.ExtensionSQLFirewallRules: []inventory.AzureAsset{
+						mockFirewallRule("id1", "name1"),
+					},
 				}),
 			},
 			epRes: map[string]enricherResponse{
@@ -318,7 +321,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": assetRes(mockThreatProtection("tde1", threatProtectionPros("Enabled"))),
 			},
 			firewallRulesRes: map[string]enricherResponse{
-				"serverName1": noRes(),
+				"serverName1": assetRes(mockFirewallRule("id1", "name1")),
 			},
 		},
 	}
@@ -406,6 +409,17 @@ func mockThreatProtection(id string, props map[string]any) inventory.AzureAsset 
 		Id:         id,
 		Type:       inventory.SQLServersAssetType + "/threatProtection",
 		Properties: props,
+	}
+}
+
+func mockFirewallRule(id, name string) inventory.AzureAsset {
+	return inventory.AzureAsset{
+		Id:   id,
+		Name: name,
+		Properties: map[string]any{
+			"startIpAddress": "0.0.0.0",
+			"endIpAddress":   "0.0.0.0",
+		},
 	}
 }
 

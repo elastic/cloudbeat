@@ -50,8 +50,9 @@ type SQLProviderAPI interface {
 }
 
 type sqlProvider struct {
-	client *sqlAzureClientWrapper
-	log    *logp.Logger //nolint:unused
+	client        *sqlAzureClientWrapper
+	log           *logp.Logger //nolint:unused
+	clientOptions *arm.ClientOptions
 }
 
 func NewSQLProvider(log *logp.Logger, credentials azcore.TokenCredential) SQLProviderAPI {
@@ -302,7 +303,7 @@ func convertAdvancedThreatProtectionSettings(s *armsql.ServerAdvancedThreatProte
 }
 
 func (p *sqlProvider) ListSQLFirewallRules(ctx context.Context, subID, resourceGroup, serverName string) ([]AzureAsset, error) {
-	responses, err := p.client.AssetServerFirewallRules(ctx, subID, resourceGroup, serverName, nil, nil)
+	responses, err := p.client.AssetServerFirewallRules(ctx, subID, resourceGroup, serverName, p.clientOptions, nil)
 	if err != nil {
 		return nil, err
 	}
