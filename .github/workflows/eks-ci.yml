@@ -9,6 +9,13 @@ on:
         description: "Specify test markers to run"
         default: '["eks"]'
 
+  # Added to check EKS tests run on PR
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [ opened, synchronize, reopened ]
+
   # On post-merge execution running eks tests
   # push:
   #   branches:
