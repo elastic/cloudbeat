@@ -38,6 +38,7 @@ func (s sqlServerEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets 
 		s.enrichSQLBlobAuditPolicy,
 		s.enrichTransparentDataEncryption,
 		s.enrichAdvancedThreatProtectionSettings,
+		s.enrichFirewallRules,
 	}
 
 	for i, a := range assets {
@@ -110,5 +111,19 @@ func (s sqlServerEnricher) enrichAdvancedThreatProtectionSettings(ctx context.Co
 	}
 
 	a.AddExtension(inventory.ExtensionSQLAdvancedThreatProtectionSettings, settings)
+	return nil
+}
+
+func (s sqlServerEnricher) enrichFirewallRules(ctx context.Context, a *inventory.AzureAsset) error {
+	rules, err := s.provider.ListSQLFirewallRules(ctx, a.SubscriptionId, a.ResourceGroup, a.Name)
+	if err != nil {
+		return err
+	}
+
+	if len(rules) == 0 {
+		return nil
+	}
+
+	a.AddExtension(inventory.ExtensionSQLFirewallRules, rules)
 	return nil
 }
