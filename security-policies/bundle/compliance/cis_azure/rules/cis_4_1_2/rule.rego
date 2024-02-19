@@ -2,6 +2,7 @@ package compliance.cis_azure.rules.cis_4_1_2
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import future.keywords.every
 import future.keywords.if
 
 finding = result if {
@@ -15,6 +16,19 @@ finding = result if {
 	)
 }
 
+default sql_access_config_is_permissive = false
+
+sql_access_config_is_permissive if {
+	lower(data_adapter.properties.publicNetworkAccess) == "enabled"
+}
+
+sql_access_config_is_permissive if {
+	some i
+	data_adapter.resource.extension.sqlFirewallRules[i].properties.startIpAddress == "0.0.0.0"
+}
+
+default is_public_access_disabled = false
+
 is_public_access_disabled if {
-	data_adapter.properties.publicNetworkAccess == "Disabled"
-} else = false
+	not sql_access_config_is_permissive
+}
