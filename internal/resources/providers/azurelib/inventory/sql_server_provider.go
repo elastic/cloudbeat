@@ -308,7 +308,6 @@ func (p *sqlProvider) ListSQLFirewallRules(ctx context.Context, subID, resourceG
 		return nil, err
 	}
 
-	var errs []error
 	return lo.FlatMap(responses, func(item armsql.FirewallRulesClientListByServerResponse, _ int) []AzureAsset {
 		return lo.FilterMap(item.Value, func(item *armsql.FirewallRule, _ int) (AzureAsset, bool) {
 			if item == nil {
@@ -317,7 +316,7 @@ func (p *sqlProvider) ListSQLFirewallRules(ctx context.Context, subID, resourceG
 
 			return p.convertFirewallRule(item, subID, resourceGroup), true
 		})
-	}), errors.Join(errs...)
+	}), nil
 }
 
 func (p *sqlProvider) convertFirewallRule(item *armsql.FirewallRule, subID, resourceGroup string) AzureAsset {

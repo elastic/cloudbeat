@@ -23,7 +23,6 @@ sql_access_config_is_permissive if {
 }
 
 sql_access_config_is_permissive if {
-	_ = data_adapter.resource.extension.sqlFirewallRules
 	some i
 	data_adapter.resource.extension.sqlFirewallRules[i].properties.startIpAddress == "0.0.0.0"
 }
