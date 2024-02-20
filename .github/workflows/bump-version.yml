@@ -2,14 +2,9 @@ name: Bump Cloudbeat version
 
 on:
   workflow_dispatch:
-    inputs:
-      cloudbeat_version:
-        description: "New cloudbeat major.minor version (e.g. 8.13)"
-        required: true
 
 env:
   GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
-  NEXT_CLOUDBEAT_VERSION: ${{ inputs.cloudbeat_version }}
   AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
 
@@ -25,9 +20,14 @@ jobs:
 
       - name: Setup Cloudbeat Versions
         run: |
-          echo "CURRENT_CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")" >> $GITHUB_ENV
-          echo "NEXT_CLOUDBEAT_VERSION=$NEXT_CLOUDBEAT_VERSION.0" >> $GITHUB_ENV
-          echo "Bumping $CURRENT_CLOUDBEAT_VERSION to $NEXT_CLOUDBEAT_VERSION"
+          current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
+          IFS='.' read -r major minor patch <<< "$current"
+          ((minor++))
+          next="$major.$minor.$patch"
+          echo "current: $current"
+          echo "next: $next"
+          echo "CURRENT_CLOUDBEAT_VERSION=$current" >> $GITHUB_ENV
+          echo "NEXT_CLOUDBEAT_VERSION=$next" >> $GITHUB_ENV
 
       - name: Setup Git User
         run: |
@@ -35,7 +35,9 @@ jobs:
           git config --global user.name "Cloud Security Machine"
 
       - name: Bump Cloudbeat
+        # bump_cloudbeat.sh will create multiple PRs with different HEAD branches
         run: scripts/bump_cloudbeat.sh
 
       - name: Bump Cloud Security Posture Integration
-        run: scripts/bump_integration.sh
+        # we need to run bump_integration.sh from the main branch
+        run: git checkout origin/main && scripts/bump_integration.sh

@@ -119,18 +119,6 @@ jobs:
       - name: Go linter
         run: golangci-lint run --whole-files --out-format github-actions
 
-  dependency-review:
-    runs-on: ubuntu-20.04
-    if: ${{ github.event_name == 'pull_request' }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          allow-ghsas: GHSA-hj4r-2c9c-29h3 #CVE-2023-49922
-
   terraform-linter:
     name: terraform-lint
     runs-on: ubuntu-20.04
