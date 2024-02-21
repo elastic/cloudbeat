@@ -19,13 +19,13 @@ CIS_5_1_4 = "CIS 5.1.4"
 
 cis_azure_5_1_4_pass = AzureServiceCase(
     rule_tag=CIS_5_1_4,
-    case_identifier="test-key-vault-pass",
+    case_identifier="testsapass",
     expected=RULE_PASS_STATUS,
 )
 
 cis_azure_5_1_4_fail = AzureServiceCase(
     rule_tag=CIS_5_1_4,
-    case_identifier="test-key-vault-fail-arm",
+    case_identifier="testsafail",
     expected=RULE_FAIL_STATUS,
 )
 
