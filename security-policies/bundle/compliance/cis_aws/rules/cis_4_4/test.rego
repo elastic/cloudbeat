@@ -18,7 +18,7 @@ test_violation if {
 		},
 		"MetricFilters": [{
 			"FilterPattern": "{($.eventName=DeleteGroupPolicy)||($.eventName=DeleteRolePolicy)||($.eventName=DeleteUserPolicy)||($.eventName=PutGroupPolicy)||($.eventName=PutRolePolicy)||($.eventName=PutUserPolicy)||($.eventName=CreatePolicy)||($.eventName=DeletePolicy)||($.event Name=CreatePolicyVersion)||($.eventName=DeletePolicyVersion)||($.eventName=AttachRolePolicy)||($.eventName=DetachRolePolicy)||($.eventName=AttachUserPolicy)||($.eventName=DetachUserPolicy)||($.eventName=AttachGroupPolicy)}",
-			"ParsedFilterPattern": pattern.complex_expression("&&", [
+			"ParsedFilterPattern": pattern.complex_expression("||", [
 				pattern.simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
 				pattern.simple_expression("$.eventName", "=", "DeleteRolePolicy"),
 				pattern.simple_expression("$.eventName", "=", "DeleteUserPolicy"),
@@ -51,7 +51,7 @@ test_pass if {
 		"MetricFilters": [{
 			"FilterName": "filter_1",
 			"FilterPattern": "{($.eventName=DeleteGroupPolicy)||($.eventName=DeleteRolePolicy)||($.eventName=DeleteUserPolicy)||($.eventName=PutGroupPolicy)||($.eventName=PutRolePolicy)||($.eventName=PutUserPolicy)||($.eventName=CreatePolicy)||($.eventName=DeletePolicy)||($.eventName=CreatePolicyVersion)||($.eventName=DeletePolicyVersion)||($.eventName=AttachRolePolicy)||($.eventName=DetachRolePolicy)||($.eventName=AttachUserPolicy)||($.eventName=DetachUserPolicy)||($.eventName=AttachGroupPolicy)||($.eventName=DetachGroupPolicy)}",
-			"ParsedFilterPattern": pattern.complex_expression("&&", [
+			"ParsedFilterPattern": pattern.complex_expression("||", [
 				pattern.simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
 				pattern.simple_expression("$.eventName", "=", "DeleteRolePolicy"),
 				pattern.simple_expression("$.eventName", "=", "DeleteUserPolicy"),
