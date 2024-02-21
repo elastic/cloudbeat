@@ -17,7 +17,7 @@ finding = result if {
 }
 
 is_customer_managed_key_encrypted if {
-	data_adapter.resource.extension.storageAccount.properties.encryption.keySource == "Microsoft.KeyVault"
+	data_adapter.resource.extension.storageAccount.properties.encryption.keySource == "Microsoft.Keyvault"
 	data_adapter.resource.extension.storageAccount.properties.encryption.keyvaultproperties != null
 } else = false
 
