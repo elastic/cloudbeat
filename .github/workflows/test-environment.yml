@@ -130,8 +130,7 @@ jobs:
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
-      QA_EC_URL: "https://console.qa.cld.elstc.co"
-      PROD_EC_URL: "https://cloud.elastic.co"
+      TF_VAR_ec_url: ${{inputs.ec-url}}
     # Add "id-token" with the intended permissions.
     permissions:
       contents: "read"
@@ -164,10 +163,14 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
+        env:
+          QA_EC_URL: "https://console.qa.cld.elstc.co"
+          PROD_EC_URL: "https://cloud.elastic.co"
         run: |
           # Extract the EC API key and selected EC URL
-          input_ec_url="${{ inputs.ec-url }}"
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
+
+          $input_ec_url=${{ TF_VAR_ec_url }}
 
           # Production elastic cloud url
           ec_url="${{ env.PROD_EC_URL }}"
