@@ -112,7 +112,6 @@ env:
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
-  TF_VAR_ec_url: ${{ inputs.ec-url }}
 
 
 jobs:
@@ -131,6 +130,7 @@ jobs:
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
+      TF_VAR_ec_url: ${{ inputs.ec-url }}
     # Add "id-token" with the intended permissions.
     permissions:
       contents: "read"
