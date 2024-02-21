@@ -20,7 +20,7 @@ spec:
       # When directly linking to mounted path,
       # INTERNALERROR> OSError: [Errno 16] Device or resource busy: '/usr/src/app/tests/report'
       # To workaround this, copy the report to a different path
-      cp -r /usr/src/app/report/* /usr/src/app/tests/report
+      cp -r /usr/src/app/report/* /usr/src/app/tests/report || exit $?
 
       exit $pytest_exit_status
     envFrom:
