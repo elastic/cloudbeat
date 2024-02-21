@@ -30,9 +30,11 @@ cis_azure_5_1_4_fail = AzureServiceCase(
 )
 
 cis_azure_5_1_4 = {
-    """5.1.4 Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key
+    """5.1.4 Ensure the storage account containing the container with activity logs is encrypted
+      with Customer Managed Key
       expect: passed""": cis_azure_5_1_4_pass,
-    """5.1.4 Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key
+    """5.1.4 Ensure the storage account containing the container with activity logs is encrypted
+      with Customer Managed Key
       expect: failed""": cis_azure_5_1_4_fail,
 }
 
