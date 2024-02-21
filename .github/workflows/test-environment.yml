@@ -170,7 +170,7 @@ jobs:
           # Extract the EC API key and selected EC URL
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
 
-          $input_ec_url=${{ env.TF_VAR_ec_url }}
+          $input_ec_url="${{ env.TF_VAR_ec_url }}"
 
           # Production elastic cloud url
           ec_url="${{ env.PROD_EC_URL }}"
