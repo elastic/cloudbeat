@@ -178,6 +178,7 @@ jobs:
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
             exit 0
+          fi
 
           # For QA environments, sets Elastic Cloud env API Key with QA cloud API Key
           if [[ $input_ec_url == $qa_ec_url ]]; then
