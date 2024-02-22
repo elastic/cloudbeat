@@ -165,6 +165,7 @@ jobs:
       - name: Mask Sensitive Data
         env:
           QA_EC_URL: "https://console.qa.cld.elstc.co"
+          EC_URL: "https://cloud.elastic.co"
         run: |
           # Extract the EC API key and selected EC URL
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
@@ -172,16 +173,15 @@ jobs:
           input_ec_url="${{ env.TF_VAR_ec_url }}"
 
           qa_ec_url="${{ env.QA_EC_URL }}"
+          ec_url="${{ env.EC_URL }}"
 
           # When user stores input ec api key, update Elastic Cloud env API KEY
           if [[ $ec_api_key != '']]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-            exit 0
-          fi
-
-          # For QA environments, sets Elastic Cloud env API Key with QA cloud API Key
-          if [[ $input_ec_url == $qa_ec_url ]]; then
+          elif [[ $input_ec_url == $ec_url ]]; then
+            echo "TF_VAR_ec_api_key=$TF_VAR_ec_api_key" >> $GITHUB_ENV
+          elif [[ $input_ec_url == $qa_ec_url ]]; then
             echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
             echo "error: Elastic Cloud API key is required from a valid ec url"
