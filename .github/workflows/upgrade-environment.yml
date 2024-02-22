@@ -73,8 +73,8 @@ jobs:
     needs: init
     # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
     permissions:
-      contents: "read"
-      id-token: "write"
+      contents: 'read'
+      id-token: 'write'
     with:
       deployment_name: ${{ inputs.deployment_name }}
       elk-stack-version: ${{ needs.init.outputs.base-stack-version }}
@@ -90,8 +90,8 @@ jobs:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     permissions:
-      contents: "read"
-      id-token: "write"
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -103,7 +103,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: '3.9'
 
       - name: Install Poetry
         run: |
@@ -192,7 +192,7 @@ jobs:
       - name: Set Docker Image version
         if: ${{ ! inputs.docker-image-override }}
         env:
-          VERSION: "docker.elastic.co/beats/elastic-agent:${{ inputs.target-elk-stack-version }}"
+          VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.target-elk-stack-version }}'
         run: |
           echo "DOCKER_IMAGE=${{ env.VERSION }}" >> $GITHUB_ENV
 

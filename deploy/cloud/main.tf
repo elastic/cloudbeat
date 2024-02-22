@@ -4,7 +4,7 @@ provider "ec" {
 
 module "ec_deployment" {
   source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
-  
+
   region        = var.ess_region
   stack_version = var.stack_version
 

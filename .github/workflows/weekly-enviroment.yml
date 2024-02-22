@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy"
+        description: 'Environment to deploy'
         type: choice
         options:
           - weekly environment
       logLevel:
-        description: "Log level"
+        description: 'Log level'
         required: true
-        default: "INFO"
+        default: 'INFO'
         type: choice
         options:
           - TRACE
