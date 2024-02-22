@@ -55,35 +55,35 @@ type MetricFilterPattern struct {
 }
 
 type simpleExpression struct {
-	Simple   bool
-	Left     string
-	Operator comparisonOperator
-	Right    string
+	Simple             bool
+	Left               string
+	ComparisonOperator comparisonOperator
+	Right              string
 }
 
 func newSimpleExpression(left string, op comparisonOperator, right string) MetricFilterPattern {
 	return MetricFilterPattern{
 		simpleExpression: simpleExpression{
-			Simple:   true,
-			Left:     left,
-			Operator: op,
-			Right:    right,
+			Simple:             true,
+			Left:               left,
+			ComparisonOperator: op,
+			Right:              right,
 		},
 	}
 }
 
 type complexExpression struct {
-	Complex     bool
-	Operator    logicalOperator
-	Expressions []MetricFilterPattern
+	Complex         bool
+	LogicalOperator logicalOperator
+	Expressions     []MetricFilterPattern
 }
 
 func newComplexExpression(op logicalOperator, exps ...MetricFilterPattern) MetricFilterPattern {
 	return MetricFilterPattern{
 		complexExpression: complexExpression{
-			Complex:     true,
-			Operator:    op,
-			Expressions: exps,
+			Complex:         true,
+			LogicalOperator: op,
+			Expressions:     exps,
 		},
 	}
 }
@@ -153,7 +153,7 @@ func safeParse(s string, depth int) (MetricFilterPattern, error) {
 
 		tmpString := buf.String()
 		if contains, op := hasSuffixLogicalOp(tmpString); contains { // && or || marks the end of a Simple MetricFilterPattern
-			if logicalOp == "" { // set the Operator of the MetricFilterPattern without overriding it
+			if logicalOp == "" { // set the LogicalOperator of the MetricFilterPattern without overriding it
 				logicalOp = op
 			}
 
@@ -257,7 +257,7 @@ func parseSimpleExpression(s string) (MetricFilterPattern, error) {
 		}
 
 		tmpString := buf.String()
-		// If the current buffer value has a Comparison Operator as suffix, it means the right side of the expression
+		// If the current buffer value has a Comparison ComparisonOperator as suffix, it means the right side of the expression
 		// is finished
 		if contains, op := hasSuffixComparisonOp(tmpString); contains {
 			if foundOp { // if there was already a found operator for this simple expression, return error
@@ -274,7 +274,7 @@ func parseSimpleExpression(s string) (MetricFilterPattern, error) {
 	}
 
 	if !foundOp {
-		return MetricFilterPattern{}, errors.New("could not find a Operator for this MetricFilterPattern")
+		return MetricFilterPattern{}, errors.New("could not find a ComparisonOperator for this MetricFilterPattern")
 	}
 
 	// Trim trailing spaces
