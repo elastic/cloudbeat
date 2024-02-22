@@ -112,8 +112,6 @@ env:
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
-  TF_VAR_ec_url: ${{ inputs.ec-url }}
-
 
 
 jobs:
@@ -132,6 +130,7 @@ jobs:
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
+      TF_VAR_ec_url: ${{ inputs.ec-url }}
     # Add "id-token" with the intended permissions.
     permissions:
       contents: "read"
@@ -166,26 +165,22 @@ jobs:
       - name: Mask Sensitive Data
         env:
           QA_EC_URL: "https://console.qa.cld.elstc.co"
-          PROD_EC_URL: "https://cloud.elastic.co"
         run: |
           # Extract the EC API key and selected EC URL
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
 
-          input_ec_url="${{ env.TF_VAR_ec_url }}"
+          $input_ec_url="${{ env.TF_VAR_ec_url }}"
 
-          # Production elastic cloud url
-          ec_url="${{ env.PROD_EC_URL }}"
-
-          # QA elastic cloud url
           qa_ec_url="${{ env.QA_EC_URL }}"
 
-          # Handles setting API KEY for each deployment mode for  elastic cloud  environment
-          if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
+          # When user stores input ec api key, update Elastic Cloud env API KEY
+          if [[ $ec_api_key != '']]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-          elif [[ $input_ec_url == $ec_url ]]; then
-            echo "TF_VAR_ec_api_key=$TF_VAR_ec_api_key" >> $GITHUB_ENV
-          elif [[ $input_ec_url == $qa_ec_url ]]; then
+            exit 0
+
+         # For QA environments, sets Elastic Cloud env API Key with QA cloud API Key
+          if [[ $input_ec_url == $qa_ec_url ]]; then
             echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
             echo "error: Elastic Cloud API key is required from a valid ec url"
