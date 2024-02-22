@@ -175,7 +175,7 @@ jobs:
           qa_ec_url="${{ env.QA_EC_URL }}"
           ec_url="${{ env.EC_URL }}"
 
-          # When user stores input ec api key, update Elastic Cloud env API KEY
+          # When user stores input ec api key then update Elastic Cloud env API KEY
           if [[ $ec_api_key != '']]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
