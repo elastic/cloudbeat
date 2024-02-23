@@ -50,7 +50,8 @@
     },
     "variables": {
         "resourceGroupDeployment": "[concat('resource-group-deployment-', deployment().location)]",
-        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]"
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]",
+        "roleGUID": "[guid(subscription().subscriptionId)]"
     },
     "resources": [
         {
@@ -135,26 +136,13 @@
                             }
                         },
                         {
-                            "type": "Microsoft.Authorization/roleDefinitions",
+                            "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name)]",
                             "properties": {
-                                "assignableScopes": [
-                                    "/"
-                                ],
-                                "description": "Additional read permissions for cloudbeatVM",
-                                "permissions": [
-                                    {
-                                        "actions": [
-                                            "Microsoft.Web/sites/*/read"
-                                        ],
-                                        "dataActions": [],
-                                        "notActions": [],
-                                        "notDataActions": []
-                                    }
-                                ],
-                                "roleName": "cloudbeatVM additional permissions",
-                                "type": "Microsoft.Authorization/roleDefinitions"
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', variables('roleGUID'))]",
+                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
                             }
                         }
                     ]
@@ -301,6 +289,29 @@
                                 "settings": {
                                     "port": 50342
                                 }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleDefinitions",
+                            "apiVersion": "2022-04-01",
+                            "name": "[variables('roleGUID')]",
+                            "properties": {
+                                "assignableScopes": [
+                                    "/"
+                                ],
+                                "description": "Additional read permissions for cloudbeatVM",
+                                "permissions": [
+                                    {
+                                        "actions": [
+                                            "Microsoft.Web/sites/*/read"
+                                        ],
+                                        "dataActions": [],
+                                        "notActions": [],
+                                        "notDataActions": []
+                                    }
+                                ],
+                                "roleName": "cloudbeatVM additional permissions",
+                                "type": "Microsoft.Authorization/roleDefinitions"
                             }
                         },
                         {
