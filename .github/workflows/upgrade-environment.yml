@@ -12,8 +12,8 @@ on:
         required: true
       target-elk-stack-version:
         required: true
-        description: "Target version of the ELK stack: For BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.11.0"
+        description: "Target version of the ELK stack: For BC use version without hash 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        default: "8.13.0"
         type: string
       base-elk-stack-version:
         type: string
