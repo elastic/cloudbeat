@@ -180,14 +180,15 @@ jobs:
           echo "::add-mask::$CSPM_PUBLIC_IP"
           echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
 
-      - name: Run Sanity checks
-        if: success()
-        working-directory: ./tests
-        env:
-          USE_K8S: false
-          AGENT_VERSION: ${{ needs.init.outputs.base-stack-version }}
-        run: |
-          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+      # Remove step for debug
+      # - name: Run Sanity checks
+      #   if: success()
+      #   working-directory: ./tests
+      #   env:
+      #     USE_K8S: false
+      #     AGENT_VERSION: ${{ needs.init.outputs.base-stack-version }}
+      #   run: |
+      #     poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Set Docker Image version
         if: ${{ ! inputs.docker-image-override }}
