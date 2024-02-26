@@ -26,7 +26,7 @@ repos:
 
   ## Golang hooks
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.56.1
+    rev: v1.56.2
     hooks:
       - id: golangci-lint
 
@@ -39,7 +39,7 @@ repos:
         files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.0.3
+    rev: v3.1.0
     hooks:
       - id: pylint
         args: [
@@ -50,7 +50,7 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/psf/black
-    rev: 24.1.1
+    rev: 24.2.0
     hooks:
       - id: black
 
@@ -67,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.85.0
+    rev: v0.85.2
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -173,7 +173,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.15.0
+    rev: v0.17.0
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
