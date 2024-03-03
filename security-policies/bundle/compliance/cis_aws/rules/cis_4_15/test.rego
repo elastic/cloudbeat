@@ -16,7 +16,7 @@ test_pass if {
 		"MetricFilters": [{
 			"FilterName": "filter_1",
 			"FilterPattern": "{ ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }",
-			"ParsedFilterPattern": pattern.complex_expression("&", [
+			"ParsedFilterPattern": pattern.complex_expression("&&", [
 				pattern.complex_expression("||", [
 					pattern.simple_expression("$.eventName", "=", "\"CreateAccount\""),
 					pattern.simple_expression("$.eventName", "=", "\"DeleteOrganizationalUnit\""),

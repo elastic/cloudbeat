@@ -14,16 +14,23 @@ get_filter_matched_to_pattern(trail, patterns) = name if {
 } else = ""
 
 complex_expression(op, expressions) = {
+	"ComparisonOperator": "",
 	"Complex": true,
-	"Operator": op,
 	"Expressions": expressions,
+	"Left": "",
+	"LogicalOperator": op,
+	"Right": "",
+	"Simple": false,
 }
 
 simple_expression(left, op, right) = {
-	"Simple": true,
+	"ComparisonOperator": op,
+	"Complex": false,
+	"Expressions": null,
 	"Left": left,
-	"Operator": op,
+	"LogicalOperator": "",
 	"Right": right,
+	"Simple": true,
 }
 
 # Known limitations on checking expressions equivalence:
@@ -42,7 +49,7 @@ compare_simple_expressions(exp1, exp2) if {
 	exp1.Simple
 	exp2.Simple
 	exp1.Left == exp2.Left
-	exp1.Operator == exp2.Operator
+	exp1.ComparisonOperator == exp2.ComparisonOperator
 	exp1.Right == exp2.Right
 }
 
@@ -50,14 +57,14 @@ compare_simple_expressions(exp1, exp2) if {
 	exp1.Simple
 	exp2.Simple
 	exp1.Left == exp2.Right
-	exp1.Operator == exp2.Operator
+	exp1.ComparisonOperator == exp2.ComparisonOperator
 	exp1.Right == exp2.Left
 }
 
 compare_complex_expressions(exp1, exp2) if {
 	exp1.Complex
 	exp2.Complex
-	exp1.Operator == exp2.Operator
+	exp1.LogicalOperator == exp2.LogicalOperator
 	count(exp1.Expressions) == count(exp2.Expressions)
 
 	every subExp1 in exp1.Expressions {
@@ -77,7 +84,7 @@ compare_expressions_second_level(exp1, exp2) if {
 compare_complex_expressions_second_level(exp1, exp2) if {
 	exp1.Complex
 	exp2.Complex
-	exp1.Operator == exp2.Operator
+	exp1.LogicalOperator == exp2.LogicalOperator
 	count(exp1.Expressions) == count(exp2.Expressions)
 
 	every subExp1 in exp1.Expressions {
