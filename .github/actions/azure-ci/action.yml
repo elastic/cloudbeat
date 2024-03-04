@@ -1,0 +1,75 @@
+name: 'Azure CI'
+description: 'Azure integration tests'
+inputs:
+  elk-version:
+    description: 'ELK version'
+    required: true
+  azure-client-id:
+    description: 'Azure client id'
+    required: true
+  azure-tenant-id:
+    description: 'Azure tenant id'
+    required: true
+  azure-client-secret:
+    description: 'Azure client secret'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Run elasticsearch
+      uses: elastic/elastic-github-actions/elasticsearch@master
+      with:
+        stack-version: ${{ inputs.elk-version }}
+        security-enabled: false
+
+    - name: Elasticsearch disable dynamic mapping for findings
+      shell: bash
+      run: ./.ci/scripts/disable_dynamic_mapping.sh
+
+    - name: Run cloudbeat in background
+      env:
+        ES_HOST: http://localhost:9200
+        ES_USERNAME: elastic
+        ES_PASSWORD: changeme
+        AZURE_ACCOUNT_TYPE: single-account
+        AZURE_CREDENTIALS_TYPE: service_principal_with_client_secret
+        AZURE_CLIENT_ID: ${{ inputs.azure-client-id }}
+        AZURE_TENANT_ID: ${{ inputs.azure-tenant-id }}
+        AZURE_CLIENT_SECRET: ${{ inputs.azure-client-secret }}
+      shell: bash
+      run: |
+        ./cloudbeat -c deploy/azure/cloudbeat-azure.yml -d '*' &
+
+    - name: Wait for cloudbeat to send events
+      shell: bash
+      run: sleep 264
+
+    - name: Stop cloudbeat
+      shell: bash
+      run: pkill -15 cloudbeat
+
+    - name: Check for findings
+      working-directory: ./tests
+      env:
+        USE_K8S: false
+      shell: bash
+      run: |
+        poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-ci-azure
+        path: tests/allure/results/
+
+    # - name: Print cloudbeat logs
+    #   if: always()
+    #   run: |
+    #     cat logs/cloudbeat*
+    # - name: Upload cloudbeat logs
+    #   if: always()
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: cloubeat-logs-ci-azure
+    #     path: logs/
