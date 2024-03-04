@@ -16,11 +16,13 @@ spec:
     - /bin/sh
     - -c
     - |
-      pytest -rA --disable-warnings ${MARKER_CMD} "${TEST_MARKER}" ${RANGE_FLAG} ${TEST_RANGE} --alluredir=/usr/src/app/report
+      pytest -rA --disable-warnings ${MARKER_CMD} "${TEST_MARKER}" ${RANGE_FLAG} ${TEST_RANGE} --alluredir=/usr/src/app/report; pytest_exit_status=$?
       # When directly linking to mounted path,
       # INTERNALERROR> OSError: [Errno 16] Device or resource busy: '/usr/src/app/tests/report'
       # To workaround this, copy the report to a different path
-      cp -r /usr/src/app/report/* /usr/src/app/tests/report
+      cp -r /usr/src/app/report/* /usr/src/app/tests/report || exit $?
+
+      exit $pytest_exit_status
     envFrom:
       - configMapRef:
           name: {{ .Values.serviceAccount.name }}-configmap
