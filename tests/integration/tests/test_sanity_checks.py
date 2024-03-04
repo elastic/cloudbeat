@@ -48,13 +48,12 @@ tests_data = {
         "data-processing",
     ],
     "cis_azure": [
-        "cloud-compute",
         "cloud-storage",
         "cloud-database",
         "key-management",
         "monitoring",
         "cloud-dns",
-    ],  # Azure environment is not static, so we can't guarantee findings of all types.
+    ],  # Exclude "cloud-compute", Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": [
         "process",
