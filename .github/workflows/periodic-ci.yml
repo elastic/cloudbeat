@@ -148,10 +148,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - uses: azure/setup-helm@v3
+      - uses: azure/setup-helm@v4
         id: install
 
-      - uses: extractions/setup-just@v1
+      - uses: extractions/setup-just@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
