@@ -1,0 +1,59 @@
+name: 'Hermit Environment'
+description: 'Activate hermit environment'
+inputs:
+  cache:
+    description: 'Cache hermit files'
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - if: ${{ inputs.cache == 'true' }}
+      id: hermit-hash
+      shell: bash
+      run: |
+        bin_hashes="$(find ./bin ! -type d | sort | xargs openssl sha256 | openssl sha256 -r | cut -d' ' -f1)"
+        poetry_security_polices="${{ hashFiles('./security-policies/poetry.lock', './security-policies/pyproject.toml') }}"
+        poetry_tests="${{ hashFiles('./tests/poetry.lock', './tests/pyproject.toml') }}"
+        pre_commit="${{ hashFiles('.pre-commit-config.yaml') }}"
+        action_hash="${{ hashFiles('.github/actions/hermit/action.yml') }}"
+        hash="$(echo "${bin_hashes} ${poetry_security_polices} ${poetry_tests} ${pre_commit} ${action_hash}" | sha256sum | cut -d' ' -f1)"
+        echo "hash=$hash" >> "$GITHUB_OUTPUT"
+
+    - if: ${{ inputs.cache == 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/hermit/pkg
+          ./.hermit
+          ~/.cache/pypoetry
+          ~/go/pkg/
+          ~/.cache/pre-commit
+        key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
+        restore-keys: |
+          ci-hermit-env-${{ runner.os }}
+
+    - name: Initialize hermit
+      shell: bash
+      run: ./bin/hermit env --raw >> "$GITHUB_ENV"
+
+    - name: Install hermit packages
+      shell: bash
+      run: hermit install
+    - name: Install poetry
+      shell: bash
+      run: pip3 install poetry
+    - name: Install tests poetry dependencies
+      shell: bash
+      run: cd ./tests && poetry install --no-root
+    - name: Install security-policies poetry dependencies
+      shell: bash
+      run: cd ./security-policies && poetry install --no-root
+    - name: Install pre-commit repos
+      shell: bash
+      run: pre-commit || true
+
+    - shell: bash
+      run: go mod download
+    - shell: bash
+      run: go env
