@@ -223,7 +223,7 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 	configMap := make(map[string]any)
 	for _, argument := range processConfig.ConfigFileArguments {
 		// The regex extracts the cmd line flag(argument) value
-		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
+		regex := fmt.Sprintf(CMDArgumentMatcher, regexp.QuoteMeta(argument))
 		matcher := regexp.MustCompile(regex)
 		if !matcher.MatchString(cmd) {
 			f.log.Infof("Couldn't find a configuration file associated with flag %s for process %s from cmd %s", argument, processName, cmd)
