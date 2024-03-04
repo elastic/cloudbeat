@@ -156,12 +156,11 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Kind Config2 Workaround
+      - name: Prepare Kind Cluster for Process Tests
         if: contains(matrix.kind-config, 'conf2')
         run: |
-          # When running directly kind cluster creation for config2, it fails to launch control-plane (kubelet fails to start)
-          # It was found that once any kind cluster creation is successful, afterwards, config2 cluster creation is successful
-          # This is conditional step to create and delete kind-mono cluster before creating kind-test-proc-conf2 cluster
+          # Workaround: Direct creation of a Kind cluster for config2 fails to start control-plane (kubelet fails)
+          # Creating and deleting a kind-mono cluster as a preparation for configuring Kind for process tests
           just create-kind-cluster kind-mono
           just delete-kind-cluster kind-mono
 
@@ -189,7 +188,6 @@ jobs:
         if: contains(matrix.test-target, 'object_psp')
         run: |
           just apply-k8s-test-objects
-          sleep 45 # wait for the objects to be created
 
       - name: Run Tests
         id: run_tests

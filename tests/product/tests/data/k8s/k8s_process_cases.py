@@ -738,4 +738,7 @@ cis_k8s_process_all = {
 }
 
 # The name of this variable needs to be `tests_cases` in order to CIS Rules coverage stats to be generated
-test_cases = cis_k8s_process_all.get(kubernetes.current_config, {})
+test_cases = {**k8s_process_config_1, **k8s_process_config_2}
+
+# Get the test cases for the provided configuration
+test_cases_by_config = cis_k8s_process_all.get(kubernetes.current_config, {})

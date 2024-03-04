@@ -49,7 +49,7 @@ register_params(
     test_k8s_object_rules,
     Parameters(
         ("rule_tag", "resource_name", "expected"),
-        [*k8s_process_tc.test_cases.values()],
-        ids=[*k8s_process_tc.test_cases.keys()],
+        [*k8s_process_tc.test_cases_by_config.values()],
+        ids=[*k8s_process_tc.test_cases_by_config.keys()],
     ),
 )

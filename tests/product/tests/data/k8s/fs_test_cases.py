@@ -335,8 +335,8 @@ cis_file_1_1_17_fail = FileTestCase(
 )
 
 cis_k8s_file_1_1_17 = {
-    "1.1.17 Ensure controller-manager.conf file permissions are set to 644 expected: passed": cis_file_1_1_16_pass,
-    "1.1.17 Ensure controller-manager.conf file permissions are set to 700 expected: failed": cis_file_1_1_16_fail,
+    "1.1.17 Ensure controller-manager.conf file permissions are set to 644 expected: passed": cis_file_1_1_17_pass,
+    "1.1.17 Ensure controller-manager.conf file permissions are set to 700 expected: failed": cis_file_1_1_17_fail,
 }
 
 cis_file_1_1_18_pass = FileTestCase(
