@@ -65,8 +65,8 @@ After forking the repo:
 
 ```shell
 git clone https://github.com/<yourname>/cloudbeat.git
-cd cloudbeat/tests
 poetry install
+cd cloudbeat/tests
 ```
 
 ### Running CSPM Tests from shell against local elastic
@@ -260,7 +260,7 @@ def test_aws_logging_rules(
 
 - Update markers section in `pyproject.toml` with newly created marker
 
-```python
+```toml
 [tool.pytest.ini_options]
 markers = [
     "pre_merge",

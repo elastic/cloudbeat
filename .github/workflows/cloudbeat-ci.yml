@@ -36,9 +36,18 @@ jobs:
 
       - name: Install poetry
         run: |
-          pip3 install poetry
-          cd security-policies
-          poetry install
+          pipx install poetry
+          poetry --version
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'poetry'
+
+      - name: Init Poetry environment
+        run: |
+          poetry install --without tests -vvv
+          poetry show
 
       - name: Pre-commit Hooks
         env:

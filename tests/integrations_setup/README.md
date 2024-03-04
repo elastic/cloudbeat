@@ -24,18 +24,17 @@ Make sure to set these variables with the appropriate values based on your speci
 
 Follow these steps to install the dependencies and execute the different scripts:
 
-1. Open your terminal and navigate to the directory `tests` using the following command:
-
-    ```bash
-    cd tests
-    ```
-
-2. Install the dependencies using Poetry by running the command:
+1. Install the dependencies using Poetry by running the command:
 
     ``` bash
     poetry install
     ```
 
+2. Open your terminal and navigate to the directory `tests` using the following command:
+
+    ```bash
+    cd tests
+    ```
 3. To execute the KSPM unmanaged integration, use the following command:
 
     ``` bash

@@ -22,15 +22,19 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Install Poetry
+        run: |
+          pip3 install poetry
+          poetry --version
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.12'
+          cache: 'poetry'
 
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          poetry --version
+      - name: Init Poetry environment
+        run: poetry install --without security-policies
 
       - id: google-auth
         name: Authenticate to Google Cloud
@@ -65,11 +69,9 @@ jobs:
           ./cloudbeat -c deploy/gcp/cloudbeat-gcp.yml -d '*' &
 
       - name: Check for findings
-        working-directory: ./tests
         env:
           USE_K8S: false
         run: |
-          poetry install
           poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Print cloudbeat logs
