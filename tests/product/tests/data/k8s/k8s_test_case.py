@@ -2,7 +2,7 @@
 This module provides k8s test case definition
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 
 
 @dataclass
@@ -16,6 +16,12 @@ class FileTestCase:
     resource_name: str
     expected: str
 
+    def __iter__(self):
+        return iter(astuple(self))
+
+    def __len__(self):
+        return len(astuple(self))
+
 
 @dataclass
 class K8sTestCase:
@@ -26,3 +32,9 @@ class K8sTestCase:
     rule_tag: str
     resource_name: str
     expected: str
+
+    def __iter__(self):
+        return iter(astuple(self))
+
+    def __len__(self):
+        return len(astuple(self))
