@@ -518,7 +518,7 @@ cis_file_4_1_10_pass = FileTestCase(
 )
 
 cis_file_4_1_10_fail = FileTestCase(
-    rule_tag=CIS_4_1_6,
+    rule_tag=CIS_4_1_10,
     node_hostname=NODE_NAME_1,
     resource_name=KUBELET_CONF,
     expected=RULE_FAIL_STATUS,

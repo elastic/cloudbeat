@@ -16,7 +16,7 @@
 
 #### Manual rules: 19/51 (37%)
 
-#### Integration Tests Coverage: 144/250 (58%)
+#### Integration Tests Coverage: 145/250 (58%)
 
 <details><summary><h3>Full Table 📋</h3></summary>
 
@@ -95,7 +95,7 @@
 |                        3.2.1                         | Logging                                | Ensure that a minimal audit policy is created                                                            |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                        3.2.2                         | Logging                                | Ensure that the audit policy covers key security concerns                                                |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |  [4.1.1](bundle/compliance/cis_k8s/rules/cis_4_1_1)  | Worker Node Configuration Files        | Ensure that the kubelet service file permissions are set to 644 or more restrictive                      | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
-| [4.1.10](bundle/compliance/cis_k8s/rules/cis_4_1_10) | Worker Node Configuration Files        | Ensure that the kubelet --config configuration file ownership is set to root:root                        | :white_check_mark: |        Passed :white_check_mark: / Failed :x:         | Automated |
+| [4.1.10](bundle/compliance/cis_k8s/rules/cis_4_1_10) | Worker Node Configuration Files        | Ensure that the kubelet --config configuration file ownership is set to root:root                        | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
 |  [4.1.2](bundle/compliance/cis_k8s/rules/cis_4_1_2)  | Worker Node Configuration Files        | Ensure that the kubelet service file ownership is set to root:root                                       | :white_check_mark: | Passed :white_check_mark: / Failed :white_check_mark: | Automated |
 |                        4.1.3                         | Worker Node Configuration Files        | If proxy kubeconfig file exists ensure permissions are set to 644 or more restrictive                    |        :x:         |                Passed :x: / Failed :x:                | Manual    |
 |                        4.1.4                         | Worker Node Configuration Files        | If proxy kubeconfig file exists ensure ownership is set to root:root                                     |        :x:         |                Passed :x: / Failed :x:                | Manual    |
