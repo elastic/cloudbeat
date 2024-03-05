@@ -21,13 +21,13 @@ runs:
         echo "hash=$hash" >> "$GITHUB_OUTPUT"
 
     - if: ${{ inputs.cache == 'true' }}
+      id: cache-tools
       uses: actions/cache@v4
       with:
         path: |
           ~/.cache/hermit/pkg
           ./.hermit
           ~/.cache/pypoetry
-          ~/go/pkg/
           ~/.cache/pre-commit
         key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
         restore-keys: |
@@ -37,6 +37,12 @@ runs:
       shell: bash
       run: ./bin/hermit env --raw >> "$GITHUB_ENV"
 
+    # in case of cache miss, an older instance of cache could be selected (with restore-keys).
+    # Clean hermit packages to avoid continuously size increment of folder ~/.cache/hermit/pkg.
+    - name: Clean hermit packages
+      if: steps.cache-tools.outputs.cache-hit != 'true'
+      shell: bash
+      run: hermit clean --transient
     - name: Install hermit packages
       shell: bash
       run: hermit install
@@ -53,7 +59,5 @@ runs:
       shell: bash
       run: pre-commit || true
 
-    - shell: bash
-      run: go mod download
     - shell: bash
       run: go env

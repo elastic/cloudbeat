@@ -54,7 +54,7 @@ jobs:
     needs: [ init-hermit ]
     name: Integration Tests CNVM
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
