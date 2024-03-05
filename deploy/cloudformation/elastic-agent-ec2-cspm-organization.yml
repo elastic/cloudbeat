@@ -11,6 +11,18 @@ Parameters:
     Type: CommaDelimitedList
     AllowedPattern: ^(ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}|r-[0-9a-z]{4,32})$
 
+  ScanManagementAccount:
+    Type: String
+    AllowedValues:
+      - "Yes"
+      - "No"
+    Default: "Yes"
+    Description: |
+      When set to "Yes", the Management Account resources will be scanned,
+      regardless of selected Organizational Unit IDs. Likewise, when set to
+      "No", the Management Account resources will not be scanned, even if the
+      Management Account belongs to a selected Organizational Unit.
+
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-arm64
@@ -64,6 +76,9 @@ Resources:
     Properties:
       RoleName: cloudbeat-root
       Description: Role that cloudbeat uses to assume roles in other accounts
+      Tags:
+         - Key: cloudbeat_scan_management_account
+           Value: !Ref ScanManagementAccount
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -212,6 +227,25 @@ Resources:
               Path: /
               ManagedPolicyArns:
                 - arn:aws:iam::aws:policy/SecurityAudit
+
+  "Fn::!If":
+    - !Equals [!Ref ScanManagementAccount, "Yes"]
+    - CloudbeatManagementAccountAuditRole:
+        Type: 'AWS::IAM::Role'
+        Properties:
+          RoleName: cloudbeat-securityaudit
+          AssumeRolePolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Principal:
+                  AWS: !Ref RootRoleArn
+                Action:
+                  - sts:AssumeRole
+          Path: /
+          ManagedPolicyArns:
+            - arn:aws:iam::aws:policy/SecurityAudit
+    - CloudbeatManagementAccountAuditRole: {}
 
 Outputs:
   CloudbeatRootRoleArn:

@@ -36,9 +36,11 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 )
 
 type AWSOrg struct {
+	IAMProvider      iam.Provider
 	IdentityProvider awslib.IdentityProviderGetter
 	AccountProvider  awslib.AccountProviderAPI
 }
@@ -66,6 +68,8 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
+
+	a.IAMProvider = *iam.NewIAMProvider(log, awsConfig, nil)
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
@@ -123,6 +127,17 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 		// (because the user has not chosen an Account/OU), it will fail
 		// silently, and subsequently, it will be unable to retrieve any
 		// resources from the Account/OU.
+		if identity.Account == rootIdentity.Account {
+			// Look for tags on cloudbeat-root role.
+			r, err := a.IAMProvider.GetIAMRole(ctx, rootRole)
+			if err != nil {
+				log.Errorf("error getting root role: %w", err)
+				continue
+			}
+
+			// TODO(kuba): Find the new tag in r.Tags. Looking for "cloudbeat_scan_management_account".
+		}
+
 		memberCfg := assumeRole(
 			stsClient,
 			rootCfg,
@@ -137,6 +152,9 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 }
 
 func (a *AWSOrg) checkDependencies() error {
+	if a.IAMProvider == nil {
+		return errors.New("aws iam provider is uninitialized")
+	}
 	if a.IdentityProvider == nil {
 		return errors.New("aws identity provider is uninitialized")
 	}
