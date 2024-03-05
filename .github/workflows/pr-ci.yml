@@ -49,3 +49,27 @@ jobs:
           azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
           azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
           azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+
+  ci-cnvm:
+    needs: [ init-hermit ]
+    name: Integration Tests CNVM
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Build cloudbeat binary
+        shell: bash
+        run: mage build
+
+      - name: Run CNVM integration tests
+        uses: ./.github/actions/cnvm-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-2'
