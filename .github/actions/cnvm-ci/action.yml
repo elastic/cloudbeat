@@ -42,13 +42,13 @@ runs:
       run: |
         ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
 
-    - name: Wait for cloudbeat to send events
-      shell: bash
-      run: sleep 20
+    # - name: Wait for cloudbeat to send events
+    #   shell: bash
+    #   run: sleep 20
 
-    - name: Stop cloudbeat
-      shell: bash
-      run: pkill -15 cloudbeat
+    # - name: Stop cloudbeat
+    #   shell: bash
+    #   run: pkill -15 cloudbeat
 
     - name: Check for findings
       working-directory: ./tests

@@ -40,7 +40,7 @@ jobs:
 
       - name: Build cloudbeat binary
         shell: bash
-        run: mage build
+        run: mage -v build
 
       - name: Run Azure integration tests
         uses: ./.github/actions/azure-ci
@@ -64,7 +64,7 @@ jobs:
 
       - name: Build cloudbeat binary
         shell: bash
-        run: mage build
+        run: mage -v build
 
       - name: Run CNVM integration tests
         uses: ./.github/actions/cnvm-ci
