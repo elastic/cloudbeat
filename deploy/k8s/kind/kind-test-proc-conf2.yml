@@ -1,0 +1,57 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: kind-test-proc-conf2
+nodes:
+- role: control-plane
+  image: kindest/node:v1.23.12
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "test-conf-1=pass"
+  - |
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    # Configuration of readOnlyPort does not work
+    # readOnlyPort: 0
+    streamingConnectionIdleTimeout: "5m"
+    protectKernelDefaults: true
+    eventRecordQPS: 0
+    tlsCipherSuites: [TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+  - |
+    apiVersion: kubeadm.k8s.io/v1beta3
+    kind: ClusterConfiguration
+    scheduler:
+      extraArgs:
+        profiling: "false"
+        bind-address: "127.0.0.1"
+    controllerManager:
+      extraArgs:
+        profiling: "false"
+        feature-gates: "RotateKubeletServerCertificate=true"
+    apiServer:
+      extraArgs:
+        # SecurityContextDeny cannot be enabled - does not allow to deploy resources SecurityContext.as_user
+        # AlwaysPullImages - doesn't allow usage of loaded cloudbeat image
+        enable-admission-plugins: "NodeRestriction,NamespaceLifecycle"
+        profiling: "false"
+        audit-log-maxage: "30"
+        audit-log-maxbackup: "10"
+        audit-log-maxsize: "100"
+        tls-cipher-suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+  extraMounts:
+  - hostPath: ./tests/allure/results
+    containerPath: /tmp/data
+  extraPortMappings:
+  - containerPort: 9200
+    hostPort: 9200
+    listenAddress: "127.0.0.1"
+  - containerPort: 5601
+    hostPort: 5601
+    listenAddress: "127.0.0.1"
+- role: worker
+  image: kindest/node:v1.23.12
+  extraMounts:
+  - hostPath: ./tests/allure/results
+    containerPath: /tmp/data

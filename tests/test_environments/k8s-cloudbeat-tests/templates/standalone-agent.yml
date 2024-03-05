@@ -1,4 +1,4 @@
-{{- if .Values.standaloneAgent.test_environments -}}
+{{- if .Values.standaloneAgent.deploy -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
