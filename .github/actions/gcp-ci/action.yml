@@ -41,19 +41,20 @@ runs:
         service_account: ${{ inputs.service-account }}
 
     - name: Run cloudbeat in background
-        env:
-          ES_HOST: http://localhost:9200
-          ES_USERNAME: elastic
-          ES_PASSWORD: changeme
-          GCP_PROJECT_ID: ${{ inputs.gcp-project-id }}
-          GCP_ACCOUNT_TYPE: ${{ inputs.gcp-account-type }}
-        run: |
-          ./cloudbeat -c deploy/gcp/cloudbeat-gcp.yml -d '*' &
+      env:
+        ES_HOST: http://localhost:9200
+        ES_USERNAME: elastic
+        ES_PASSWORD: changeme
+        GCP_PROJECT_ID: ${{ inputs.gcp-project-id }}
+        GCP_ACCOUNT_TYPE: ${{ inputs.gcp-account-type }}
+      shell: bash
+      run: ./cloudbeat -c deploy/gcp/cloudbeat-gcp.yml -d '*' &
 
     - name: Check for findings
       working-directory: ./tests
       env:
-        USE_K8S: false
+        USE_K8S: "false"
+      shell: bash
       run: |
         poetry install
         poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
@@ -64,3 +65,15 @@ runs:
       with:
         name: allure-results-ci-gcp
         path: tests/allure/results/
+
+    # - name: Print cloudbeat logs
+    #   if: always()
+    #   shell: bash
+    #   run: |
+    #     cat logs/cloudbeat*
+    # - name: Upload cloudbeat logs
+    #   if: always()
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: cloubeat-logs-ci-cnvm
+    #     path: logs/

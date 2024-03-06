@@ -43,8 +43,7 @@ runs:
         ES_USERNAME: elastic
         ES_PASSWORD: changeme
       shell: bash
-      run: |
-        ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
+      run: ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
 
     # - name: Wait for cloudbeat to send events
     #   shell: bash

@@ -57,8 +57,7 @@ runs:
       env:
         USE_K8S: "false"
       shell: bash
-      run: |
-        poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
+      run: poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
     - name: Upload test results
       if: always()

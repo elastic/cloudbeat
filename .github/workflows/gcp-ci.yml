@@ -9,6 +9,7 @@ on:
 
 jobs:
   Run-CSPM-GCP-Tests:
+    if: ${{ false }}
     name: CIS GCP integration test
     runs-on: ubuntu-22.04
     timeout-minutes: 60

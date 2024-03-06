@@ -68,7 +68,7 @@ jobs:
 
   ci-gcp:
     needs: [ init-hermit ]
-    name: Integration Tests CNVM
+    name: Integration Tests GCP
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
