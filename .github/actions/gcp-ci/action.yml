@@ -1,0 +1,66 @@
+name: 'GCP CI'
+description: 'GCP integration tests'
+inputs:
+  elk-version:
+    description: 'ELK version'
+    required: true
+  workload-identity-provider:
+    description: 'workload identity provider'
+    required: true
+  service-account:
+    description: 'workload identity provider'
+    required: true
+  gcp-project-id:
+    description: 'gcp project id'
+    required: true
+  gcp-account-type:
+    description: 'gcp account type'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Build cloudbeat binary
+      shell: bash
+      run: mage -v build
+
+    - name: Run elasticsearch
+      uses: elastic/elastic-github-actions/elasticsearch@master
+      with:
+        stack-version: ${{ inputs.elk-version }}
+        security-enabled: false
+
+    - name: Elasticsearch disable dynamic mapping for findings
+      shell: bash
+      run: ./.ci/scripts/disable_dynamic_mapping.sh
+
+    - id: google-auth
+      name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ inputs.workload-identity-provider }}
+        service_account: ${{ inputs.service-account }}
+
+    - name: Run cloudbeat in background
+        env:
+          ES_HOST: http://localhost:9200
+          ES_USERNAME: elastic
+          ES_PASSWORD: changeme
+          GCP_PROJECT_ID: ${{ inputs.gcp-project-id }}
+          GCP_ACCOUNT_TYPE: ${{ inputs.gcp-account-type }}
+        run: |
+          ./cloudbeat -c deploy/gcp/cloudbeat-gcp.yml -d '*' &
+
+    - name: Check for findings
+      working-directory: ./tests
+      env:
+        USE_K8S: false
+      run: |
+        poetry install
+        poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-ci-gcp
+        path: tests/allure/results/

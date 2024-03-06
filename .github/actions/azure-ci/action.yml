@@ -16,6 +16,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Build cloudbeat binary
+      shell: bash
+      run: mage -v build
+
     - name: Run elasticsearch
       uses: elastic/elastic-github-actions/elasticsearch@master
       with:
@@ -51,7 +55,7 @@ runs:
     - name: Check for findings
       working-directory: ./tests
       env:
-        USE_K8S: false
+        USE_K8S: "false"
       shell: bash
       run: |
         poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
