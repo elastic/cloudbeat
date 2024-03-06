@@ -98,3 +98,21 @@ jobs:
     name: Upload integration tests results
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: allure-results-ci-gcp
+          path: tests/allure/results/
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: allure-results-ci-cnvm
+          path: tests/allure/results/
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: allure-results-ci-azure
+          path: tests/allure/results/
+          merge-multiple: true
+      - name: log
+        run: ls -laR
