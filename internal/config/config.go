@@ -63,8 +63,9 @@ type CloudConfig struct {
 }
 
 type AwsConfig struct {
-	Cred        aws.ConfigAWS `config:"credentials"`
-	AccountType string        `config:"account_type"`
+	Cred                 aws.ConfigAWS `config:"credentials"`
+	AccountType          string        `config:"account_type"`
+	RunAssetInventoryPoc bool          `config:"run_asset_inventory_poc"`
 }
 
 type GcpConfig struct {
