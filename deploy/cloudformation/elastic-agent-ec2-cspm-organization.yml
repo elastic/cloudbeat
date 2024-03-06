@@ -15,13 +15,13 @@ Parameters:
     Description: |
       When set to "Yes", the Management Account resources will be scanned,
       regardless of selected Organizational Unit IDs. Likewise, when set to
-      "No", the Management Account resources will not be scanned, even if the
-      Management Account belongs to a selected Organizational Unit.
+      "No", the Management Account resources will not be scanned, even if
+      the Management Account belongs to a selected Organizational Unit.
     Type: String
     AllowedValues:
-      - Yes
-      - No
-    Default: Yes
+      - "Yes"
+      - "No"
+    Default: "Yes"
     ConstraintDescription: Must specify "Yes" or "No"
 
   LatestAmiId:
@@ -53,6 +53,11 @@ Parameters:
   ElasticAgentVersion:
     Description: The version of elastic-agent to install
     Type: String
+
+Conditions:
+  ScanManagementAccountEnabled: !Equals
+    - !Ref ScanManagementAccount
+    - "Yes"
 
 Resources:
 
@@ -102,6 +107,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - iam:GetRole
                   - iam:ListAccountAliases
                   - iam:ListGroup
                   - iam:ListRoles
@@ -231,6 +237,7 @@ Resources:
 
   CloudbeatManagementAccountAuditRole:
     Type: AWS::IAM::Role
+    Condition: ScanManagementAccountEnabled
     Properties:
       RoleName: cloudbeat-securityaudit
       AssumeRolePolicyDocument:
@@ -238,16 +245,12 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Ref RootRoleArn
+              AWS: !GetAtt CloudbeatRootRole.Arn
             Action:
               - sts:AssumeRole
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
-    Condition:
-      ScanManagementAccountEnabled: !Equals
-        - !Ref ScanManagementAccount
-        - Yes
 
 Outputs:
   CloudbeatRootRoleArn:
