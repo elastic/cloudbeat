@@ -37,10 +37,11 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type AWSOrg struct {
-	IAMProvider      iam.Provider
+	IAMProvider      *iam.Provider
 	IdentityProvider awslib.IdentityProviderGetter
 	AccountProvider  awslib.AccountProviderAPI
 }
@@ -69,7 +70,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	a.IAMProvider = *iam.NewIAMProvider(log, awsConfig, nil)
+	a.IAMProvider = iam.NewIAMProvider(log, awsConfig, nil)
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
@@ -100,8 +101,10 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
 	const (
-		rootRole   = "cloudbeat-root"
-		memberRole = "cloudbeat-securityaudit"
+		rootRole            = "cloudbeat-root"
+		memberRole          = "cloudbeat-securityaudit"
+		scanSettingTagKey   = "cloudbeat_scan_management_account"
+		scanSettingTagValue = "Yes"
 	)
 
 	rootCfg := assumeRole(
@@ -121,28 +124,68 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 	for _, identity := range accountIdentities {
 		// Cloudbeat fetchers will attempt to assume memberRole
 		// ("cloudbeat-securityaudit") for all Accounts and OUs. The memberRole
-		// is only created by CloudFormation StackSets in OUs selected by the
-		// user.
+		// is only created by CloudFormation in OUs selected by the user.
 		// When Cloudbeat attempts to assume a member role that does not exist
 		// (because the user has not chosen an Account/OU), it will fail
 		// silently, and subsequently, it will be unable to retrieve any
 		// resources from the Account/OU.
+		var memberCfg awssdk.Config
 		if identity.Account == rootIdentity.Account {
-			// Look for tags on cloudbeat-root role.
+			// This identity.Account is the Management Account. If the
+			// "cloudbeat_scan_management_account" tag on "cloudbeat-root" role
+			// is set to "Yes", the user chose to scan it and there should be a
+			// "cloudbeat-securityaudit" role enabling this. If it is set to
+			// "No", we will still try to use "cloudbeat-securityaudit", but it
+			// is non-existent, so we will fail silently and not get any data
+			// from Management Account.
+			// If the tag is missing altogether, we will try to be backwards
+			// compatible and use "cloudbeat-root" role to scan the Management
+			// Account. In previous CF templates, "cloudbeat-root" had the
+			// built-in SecurityAudit policy attached.
 			r, err := a.IAMProvider.GetIAMRole(ctx, rootRole)
 			if err != nil {
-				log.Errorf("error getting root role: %w", err)
+				log.Errorf("error getting root role: %s", err)
 				continue
 			}
 
-			// TODO(kuba): Find the new tag in r.Tags. Looking for "cloudbeat_scan_management_account".
+			foundTagValue := ""
+			for _, tag := range r.Tags {
+				if pointers.Deref(tag.Key) == scanSettingTagKey {
+					foundTagValue = pointers.Deref(tag.Value)
+					break
+				}
+			}
+
+			if foundTagValue == "" {
+				// Legacy. Use 'cloudbeat-root' role for compliance reasons.
+				log.Debugf("%q tag not found, using 'cloudbeat-root' role for backwards compatibility", scanSettingTagKey)
+				memberCfg = rootCfg
+			} else {
+				if foundTagValue == scanSettingTagValue {
+					_, err := a.IAMProvider.GetIAMRole(ctx, memberRole)
+					if err != nil {
+						// Log an error if 'cloudbeat-securityaudit' does not exist in
+						// the Management Account. This should not happen! We log and
+						// continue without exiting function, since we want to scan
+						// other selected accounts, but at least the error will be
+						// visible in the logs.
+						log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, memberRole, err)
+					}
+				}
+				memberCfg = assumeRole(
+					stsClient,
+					rootCfg,
+					fmtIAMRole(identity.Account, memberRole),
+				)
+			}
+		} else {
+			memberCfg = assumeRole(
+				stsClient,
+				rootCfg,
+				fmtIAMRole(identity.Account, memberRole),
+			)
 		}
 
-		memberCfg := assumeRole(
-			stsClient,
-			rootCfg,
-			fmtIAMRole(identity.Account, memberRole),
-		)
 		accounts = append(accounts, preset.AwsAccount{
 			Identity: identity,
 			Config:   memberCfg,

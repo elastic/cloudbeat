@@ -44,7 +44,7 @@ func GetStrategy(cfg *config.Config) (Strategy, error) {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
 			return &AWSOrg{
-				IAMProvider:      iam.Provider{},
+				IAMProvider:      &iam.Provider{},
 				IdentityProvider: awslib.IdentityProvider{},
 				AccountProvider:  awslib.AccountProvider{},
 			}, nil
