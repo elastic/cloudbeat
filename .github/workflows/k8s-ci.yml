@@ -213,6 +213,8 @@ jobs:
     needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
+    env:
+      KIND_CONFIG: kind-multi
     strategy:
       fail-fast: false
       matrix:
@@ -223,9 +225,6 @@ jobs:
           - test-target: pre_merge
             range: ""
             values_file: tests/test_environments/values/ci.yml
-          - test-target: 'aws and not aws_s3'
-            range: ""
-            values_file: tests/test_environments/values/ci-aws-services.yml
           - test-target: file_system_rules
             range: "0..5"
             values_file: tests/test_environments/values/ci.yml
@@ -387,15 +386,6 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Set Kind Configuration
-        run: |
-          echo "KIND_CONFIG=kind-multi" >> $GITHUB_ENV
-          if [[ $VAR == *"aws"* ]]; then
-            echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
-          fi
-        env:
-          VAR: ${{ matrix.test-target }}
-
       - name: Create k8s Kind Cluster
         run: |
           just create-kind-cluster ${{ env.KIND_CONFIG }}
@@ -416,25 +406,10 @@ jobs:
         run: |
           just deploy-tests-helm '${{ matrix.test-target }}' ${{ matrix.values_file }} ${{ matrix.range }}
 
-      - name: Deploy cloudbeat aws
-        if: contains(matrix.test-target, 'aws')
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
-        run: |
-          just deploy-cloudbeat-aws
-          sleep 300
-
       - name: Run Tests
         id: run_tests
         run: |
           just run-tests '${{ matrix.test-target }}' kind-${{ env.KIND_CONFIG }}
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
 
       - name: Upload Test Results
         if: always()
