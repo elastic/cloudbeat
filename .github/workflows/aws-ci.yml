@@ -64,7 +64,7 @@ jobs:
           ./cloudbeat -c deploy/aws/cloudbeat-aws.yml -d '*' &
 
       - name: Wait for cloudbeat to send events
-        run: sleep 264env
+        run: sleep 264
 
       - name: Check for findings
         working-directory: ./tests
