@@ -41,7 +41,7 @@ import (
 )
 
 type AWSOrg struct {
-	IAMProvider      *iam.Provider
+	IAMProvider      iam.RoleGetter
 	IdentityProvider awslib.IdentityProviderGetter
 	AccountProvider  awslib.AccountProviderAPI
 }
@@ -160,7 +160,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 		// had the built-in SecurityAudit policy attached.
 		var foundTagValue string
 		{
-			r, err := a.IAMProvider.GetIAMRole(ctx, rootRole)
+			r, err := a.IAMProvider.GetRole(ctx, rootRole)
 			if err != nil {
 				log.Errorf("error getting root role: %s", err)
 				continue
@@ -184,7 +184,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 			// without exiting function, since we want to scan other selected
 			// accounts, but at least the error will be visible in the logs.
 			if foundTagValue == scanSettingTagValue {
-				_, err := a.IAMProvider.GetIAMRole(ctx, memberRole)
+				_, err := a.IAMProvider.GetRole(ctx, memberRole)
 				if err != nil {
 					log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, memberRole, err)
 				}

@@ -24,7 +24,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 )
 
-func (p Provider) GetIAMRole(ctx context.Context, roleName string) (*Role, error) {
+type RoleGetter interface {
+	GetRole(ctx context.Context, roleName string) (*Role, error)
+}
+
+func (p Provider) GetRole(ctx context.Context, roleName string) (*Role, error) {
 	input := &iam.GetRoleInput{
 		RoleName: &roleName,
 	}

@@ -23,6 +23,8 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -31,6 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -39,6 +42,7 @@ func TestAWSOrg_Initialize(t *testing.T) {
 
 	tests := []struct {
 		name             string
+		iamProvider      iam.RoleGetter
 		identityProvider awslib.IdentityProviderGetter
 		accountProvider  awslib.AccountProviderAPI
 		cfg              config.Config
@@ -47,28 +51,32 @@ func TestAWSOrg_Initialize(t *testing.T) {
 	}{
 		{
 			name:    "nothing initialized",
-			wantErr: "aws identity provider is uninitialized",
+			wantErr: "aws iam provider is uninitialized",
 		},
 		{
 			name:             "account provider uninitialized",
+			iamProvider:      mockIAMProviderWithTags(nil, nil),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  nil,
 			wantErr:          "account provider is uninitialized",
 		},
 		{
 			name:             "identity provider error",
+			iamProvider:      mockIAMProviderWithTags(nil, nil),
 			identityProvider: mockAwsIdentityProvider(errors.New("some error")),
 			accountProvider:  mockAccountProvider(errors.New("not this error")),
 			wantErr:          "some error",
 		},
 		{
 			name:             "account provider error",
+			iamProvider:      mockIAMProviderWithTags(nil, nil),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  mockAccountProvider(errors.New("some error")),
 			want:             []string{},
 		},
 		{
 			name:             "no error",
+			iamProvider:      mockIAMProviderWithTags(nil, nil),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  mockAccountProvider(nil),
 			want: []string{
@@ -95,6 +103,7 @@ func TestAWSOrg_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &AWSOrg{
+				IAMProvider:      tt.iamProvider,
 				IdentityProvider: tt.identityProvider,
 				AccountProvider:  tt.accountProvider,
 			}, &tt.cfg, tt.wantErr, tt.want)
@@ -146,10 +155,12 @@ func Test_getAwsAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
+				IAMProvider:      mockIAMProviderWithTags(nil, nil),
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
 			}
-			got, err := a.getAwsAccounts(context.Background(), nil, aws.Config{}, &tt.rootIdentity)
+			log := logp.NewLogger("test")
+			got, err := a.getAwsAccounts(context.Background(), log, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
 				return
@@ -189,4 +200,24 @@ func mockAccountProviderWithIdentities(identities []cloud.Identity) *awslib.Mock
 	provider := awslib.MockAccountProviderAPI{}
 	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything, mock.Anything).Return(identities, nil)
 	return &provider
+}
+
+func mockIAMProviderWithTags(err error, tags []types.Tag) iam.RoleGetter {
+	iamProvider := &iam.MockRoleGetter{}
+	on := iamProvider.EXPECT().GetRole(mock.Anything, mock.AnythingOfType("string"))
+	if err == nil {
+		arn := "arn:aws:iam::123456789012/mock-role"
+		name := "mock-role"
+		role := &iam.Role{
+			Role: types.Role{
+				Arn:      &arn,
+				RoleName: &name,
+				Tags:     tags,
+			},
+		}
+		on.Return(role, nil)
+	} else {
+		on.Return(nil, err)
+	}
+	return iamProvider
 }
