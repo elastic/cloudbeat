@@ -55,28 +55,28 @@ func TestAWSOrg_Initialize(t *testing.T) {
 		},
 		{
 			name:             "account provider uninitialized",
-			iamProvider:      mockIAMProviderWithTags(nil, nil),
+			iamProvider:      mockIAMProvider(),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  nil,
 			wantErr:          "account provider is uninitialized",
 		},
 		{
 			name:             "identity provider error",
-			iamProvider:      mockIAMProviderWithTags(nil, nil),
+			iamProvider:      mockIAMProvider(),
 			identityProvider: mockAwsIdentityProvider(errors.New("some error")),
 			accountProvider:  mockAccountProvider(errors.New("not this error")),
 			wantErr:          "some error",
 		},
 		{
 			name:             "account provider error",
-			iamProvider:      mockIAMProviderWithTags(nil, nil),
+			iamProvider:      mockIAMProvider(),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  mockAccountProvider(errors.New("some error")),
 			want:             []string{},
 		},
 		{
 			name:             "no error",
-			iamProvider:      mockIAMProviderWithTags(nil, nil),
+			iamProvider:      mockIAMProvider(),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  mockAccountProvider(nil),
 			want: []string{
@@ -155,7 +155,7 @@ func Test_getAwsAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				IAMProvider:      mockIAMProviderWithTags(nil, nil),
+				IAMProvider:      mockIAMProvider(),
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
 			}
@@ -202,22 +202,17 @@ func mockAccountProviderWithIdentities(identities []cloud.Identity) *awslib.Mock
 	return &provider
 }
 
-func mockIAMProviderWithTags(err error, tags []types.Tag) iam.RoleGetter {
+func mockIAMProvider() iam.RoleGetter {
 	iamProvider := &iam.MockRoleGetter{}
 	on := iamProvider.EXPECT().GetRole(mock.Anything, mock.AnythingOfType("string"))
-	if err == nil {
-		arn := "arn:aws:iam::123456789012/mock-role"
-		name := "mock-role"
-		role := &iam.Role{
-			Role: types.Role{
-				Arn:      &arn,
-				RoleName: &name,
-				Tags:     tags,
-			},
-		}
-		on.Return(role, nil)
-	} else {
-		on.Return(nil, err)
+	arn := "arn:aws:iam::123456789012/mock-role"
+	name := "mock-role"
+	role := &iam.Role{
+		Role: types.Role{
+			Arn:      &arn,
+			RoleName: &name,
+		},
 	}
+	on.Return(role, nil)
 	return iamProvider
 }
