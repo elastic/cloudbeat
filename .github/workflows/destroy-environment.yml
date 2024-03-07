@@ -24,6 +24,7 @@ env:
   ENV_PREFIX: ${{ inputs.prefix }}
   ENV_IGNORE_PREFIX: ${{ inputs.ignore-prefix }}
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
 
 jobs:
   Destroy:
