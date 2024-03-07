@@ -124,12 +124,12 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 	accounts := make([]preset.AwsAccount, 0, len(accountIdentities))
 	for _, identity := range accountIdentities {
 		// Cloudbeat fetchers will try to assume memberRole
-		// ("cloudbeat-securityaudit") for all Accounts and OUs. However, Cloud
-		// Formation only creates the memberRole in the OUs chosen by the user.
-		// If Cloudbeat tries to assume a member role that doesn't exist
-		// (because the user hasn't selected an Account/OU), it will fail
-		// silently and will be unable to retrieve any resources from the
-		// Account/OU afterward.
+		// ("cloudbeat-securityaudit") for all Accounts and OUs excet for the
+		// Management Account. However, Cloud Formation only creates the
+		// memberRole in the OUs chosen by the user. If Cloudbeat tries to
+		// assume a member role that doesn't exist (because the user hasn't
+		// selected an Account/OU), it will fail silently and will be unable to
+		// retrieve any resources from the Account/OU afterward.
 		var memberCfg awssdk.Config
 
 		// Flow for non-management accounts. Try to assume "cloudbeat-security"
