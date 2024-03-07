@@ -86,6 +86,7 @@ EOF
         --base "main" \
         --head "$NEXT_CLOUDBEAT_BRANCH" \
         --label "backport-skip"
+    # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to main]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
 
@@ -103,6 +104,7 @@ EOF
         --base "$CURRENT_MINOR_VERSION" \
         --head "$RELEASE_CLOUDBEAT_BRANCH" \
         --label "backport-skip")
+    # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to release branch]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
 
@@ -130,6 +132,7 @@ EOF
         --base "main" \
         --head "$NEXT_CLOUDBEAT_HERMIT_BRANCH" \
         --label "backport-skip")
+    # shellcheck disable=SC2086
     echo "[Cloudbeat Hermit PR]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
 
