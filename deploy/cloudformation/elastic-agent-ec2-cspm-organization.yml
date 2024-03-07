@@ -19,9 +19,9 @@ Parameters:
       the Management Account belongs to a selected Organizational Unit.
     Type: String
     AllowedValues:
-      - "Yes"
-      - "No"
-    Default: "Yes"
+      - Yes
+      - No
+    Default: Yes
     ConstraintDescription: Must specify "Yes" or "No"
 
   LatestAmiId:
@@ -57,7 +57,7 @@ Parameters:
 Conditions:
   ScanManagementAccountEnabled: !Equals
     - !Ref ScanManagementAccount
-    - "Yes"
+    - Yes
 
 Resources:
 
@@ -237,7 +237,6 @@ Resources:
 
   CloudbeatManagementAccountAuditRole:
     Type: AWS::IAM::Role
-    Condition: ScanManagementAccountEnabled
     Properties:
       RoleName: cloudbeat-securityaudit
       AssumeRolePolicyDocument:
@@ -251,6 +250,7 @@ Resources:
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
+    Condition: ScanManagementAccountEnabled
 
 Outputs:
   CloudbeatRootRoleArn:
