@@ -81,11 +81,11 @@ Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
 > [!NOTE]
 > This is an automated PR
 EOF
-    gh pr create --title "Bump cloudbeat version" \
+    pr_url="$(gh pr create --title "Bump cloudbeat version" \
         --body-file cloudbeat_pr_body \
         --base "main" \
         --head "$NEXT_CLOUDBEAT_BRANCH" \
-        --label "backport-skip"
+        --label "backport-skip")"
     # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to main]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
@@ -99,11 +99,11 @@ Release cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
 > [!NOTE]
 > This is an automated PR
 EOF
-    pr_url=$(gh pr create --title "Release cloudbeat version" \
+    pr_url="$(gh pr create --title "Release cloudbeat version" \
         --body-file cloudbeat_pr_body_release \
         --base "$CURRENT_MINOR_VERSION" \
         --head "$RELEASE_CLOUDBEAT_BRANCH" \
-        --label "backport-skip")
+        --label "backport-skip")"
     # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to release branch]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
@@ -127,11 +127,11 @@ Bump cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
 EOF
 
     echo "• Create a PR for cloudbeat hermit version"
-    pr_url=$(gh pr create --title "Bump hermit cloudbeat version" \
+    pr_url="$(gh pr create --title "Bump hermit cloudbeat version" \
         --body-file hermit_pr_body \
         --base "main" \
         --head "$NEXT_CLOUDBEAT_HERMIT_BRANCH" \
-        --label "backport-skip")
+        --label "backport-skip")"
     # shellcheck disable=SC2086
     echo "[Cloudbeat Hermit PR]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
