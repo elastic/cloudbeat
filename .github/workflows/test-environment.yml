@@ -32,10 +32,10 @@ on:
         required: true
         description: "Elastic Cloud deployment region"
         default: "gcp-us-west2"
+        type: choice
         options:
           - gcp-us-west2
           - aws-eu-west-1
-        type: string
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
@@ -179,7 +179,7 @@ jobs:
           if [[ $ec_api_key != '' ]]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-          exit 0
+            exit 0
           fi
 
           if [[ $input_ec_url == $qa_ec_url ]]; then

@@ -10,7 +10,6 @@ locals {
     project  = "${var.project}"
     owner    = "${var.owner}"
   }
-  ec_url = "${var.ec_url}"
   ec_headers = {
     Content-type  = "application/json"
     Authorization = "ApiKey ${var.ec_api_key}"
