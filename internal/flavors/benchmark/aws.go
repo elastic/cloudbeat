@@ -21,9 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/elastic/cloudbeat/internal/inventory"
-	awsinventory "github.com/elastic/cloudbeat/internal/inventory/aws"
-
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -48,10 +45,6 @@ func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		return nil, err
-	}
-
-	if cfg.CloudConfig.Aws.RunAssetInventoryPoc {
-		a.initializeAssetInventoryPoc(ctx, log, cfg)
 	}
 
 	return builder.New(
@@ -87,20 +80,4 @@ func (a *AWS) checkDependencies() error {
 		return errors.New("aws identity provider is uninitialized")
 	}
 	return nil
-}
-
-func (a *AWS) initializeAssetInventoryPoc(ctx context.Context, log *logp.Logger, cfg *config.Config) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
-	if err != nil {
-		log.Errorf("Error initializing aws config %v", err)
-		return
-	}
-
-	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
-	if err != nil {
-		log.Errorf("Error initializing aws identity %v", err)
-		return
-	}
-
-	inventory.NewAssetInventory(log, awsinventory.AwsFetchers(log, awsIdentity, awsConfig))
 }

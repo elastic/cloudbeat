@@ -36,6 +36,7 @@ import (
 const (
 	DefaultNamespace             = "default"
 	VulnerabilityType            = "vuln_mgmt"
+	AssetInventoryType           = "asset_inventory"
 	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 )
 

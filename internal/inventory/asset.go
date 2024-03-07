@@ -34,13 +34,15 @@ type AssetClassification struct {
 
 type Asset struct {
 	Id         string `json:"id"`
+	Name       string `json:"name"`
 	ResourceId string `json:"resourceId"`
 	AssetClassification
 }
 
-func NewAsset(c AssetClassification, resourceId string) Asset {
+func NewAsset(c AssetClassification, resourceId string, name string) Asset {
 	return Asset{
 		Id:                  generateUniqueId(c, resourceId),
+		Name:                name,
 		ResourceId:          resourceId,
 		AssetClassification: c,
 	}

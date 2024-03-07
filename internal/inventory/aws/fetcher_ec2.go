@@ -41,6 +41,10 @@ func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	}
 
 	for _, instance := range instances {
-		assetChannel <- inventory.NewAsset(e.ec2Classification, pointers.Deref(instance.InstanceId))
+		assetChannel <- inventory.NewAsset(
+			e.ec2Classification,
+			pointers.Deref(instance.InstanceId),
+			instance.GetResourceName(),
+		)
 	}
 }
