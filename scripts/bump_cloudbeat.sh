@@ -86,6 +86,7 @@ EOF
         --base "main" \
         --head "$NEXT_CLOUDBEAT_BRANCH" \
         --label "backport-skip"
+    echo "[Cloudbeat Version PR to main]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
 
 create_cloudbeat_versions_pr_for_release() {
@@ -97,11 +98,12 @@ Release cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
 > [!NOTE]
 > This is an automated PR
 EOF
-    gh pr create --title "Release cloudbeat version" \
+    pr_url=$(gh pr create --title "Release cloudbeat version" \
         --body-file cloudbeat_pr_body_release \
         --base "$CURRENT_MINOR_VERSION" \
         --head "$RELEASE_CLOUDBEAT_BRANCH" \
-        --label "backport-skip"
+        --label "backport-skip")
+    echo "[Cloudbeat Version PR to release branch]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
 
 # We need to bump hermit seperately because we need to wait for the snapshot build to be available
@@ -123,11 +125,12 @@ Bump cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
 EOF
 
     echo "• Create a PR for cloudbeat hermit version"
-    gh pr create --title "Bump hermit cloudbeat version" \
+    pr_url=$(gh pr create --title "Bump hermit cloudbeat version" \
         --body-file hermit_pr_body \
         --base "main" \
         --head "$NEXT_CLOUDBEAT_HERMIT_BRANCH" \
-        --label "backport-skip"
+        --label "backport-skip")
+    echo "[Cloudbeat Hermit PR]($pr_url)" >>$GITHUB_STEP_SUMMARY
 }
 
 upload_cloud_formation_templates() {

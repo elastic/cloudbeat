@@ -62,6 +62,7 @@ EOF
         --label "enhancement" \
         --label "Team:Cloud Security" \
         --repo "$INTEGRATION_REPO")"
+    echo "[Integrations PR]($PR_URL)" >>$GITHUB_STEP_SUMMARY
     export PR_URL
 }
 
