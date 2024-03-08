@@ -159,7 +159,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 
 // pickManagementAccountRole selects role used to fetch resources from the
 // Management Account (and decides if they should be fetched at all).
-func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger, stsClient *sts.Client, rootCfg awssdk.Config, identity cloud.Identity) (awssdk.Config, error) {
+func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger, stsClient stscreds.AssumeRoleAPIClient, rootCfg awssdk.Config, identity cloud.Identity) (awssdk.Config, error) {
 	// We will check for a tag on 'cloudbeat-root' role. If it is missing, we
 	// will try to be backward compatible and use the "cloudbeat-root" role to
 	// scan the Management Account. In previous CF templates, "cloudbeat-root"
@@ -181,7 +181,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger
 
 	if foundTagValue == "" {
 		// Legacy. Use 'cloudbeat-root' role for compliance reasons.
-		log.Infof("%q tag not found, using 'cloudbeat-root' role for backwards compatibility", scanSettingTagKey)
+		log.Infof("%q tag not found, using '%s' role for backward compatibility", scanSettingTagKey, rootRole)
 		return rootCfg, nil
 	}
 
@@ -202,6 +202,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger
 	// will still try to use "cloudbeat-securityaudit", but it is non-existent,
 	// so we will fail silently and not get any data from the Management
 	// Account.
+	log.Debugf("assuming '%s' role for Account %s", memberRole, identity.Account)
 	config := assumeRole(
 		stsClient,
 		rootCfg,
@@ -223,7 +224,7 @@ func (a *AWSOrg) checkDependencies() error {
 	return nil
 }
 
-func assumeRole(client *sts.Client, cfg awssdk.Config, arn string) awssdk.Config {
+func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {
 	cfg.Credentials = awssdk.NewCredentialsCache(stscreds.NewAssumeRoleProvider(client, arn))
 	return cfg
 }
