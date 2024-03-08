@@ -3,12 +3,13 @@ package inventory
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/samber/lo"
-	"time"
 )
 
 type AssetInventory struct {

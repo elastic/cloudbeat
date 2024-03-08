@@ -48,7 +48,7 @@ type Asset struct {
 	Name string `json:"name"`
 	AssetClassification
 	Tags map[string]string `json:"tags"`
-	Raw  interface{}       `json:"raw"`
+	Raw  any               `json:"raw"`
 }
 
 // AssetNetwork contains network information
@@ -102,7 +102,7 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 	return a
 }
 
-func WithRawAsset(raw interface{}) AssetEnricher {
+func WithRawAsset(raw any) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Asset.Raw = &raw
 	}
@@ -147,7 +147,7 @@ func EmptyEnricher() AssetEnricher {
 func generateUniqueId(c AssetClassification, resourceId string) string {
 	hasher := sha256.New()
 	toBeHashed := fmt.Sprintf("%s-%s-%s-%s-%s", resourceId, c.Category, c.SubCategory, c.Type, c.SubStype)
-	hasher.Write([]byte(toBeHashed))
+	hasher.Write([]byte(toBeHashed)) //nolint:revive
 	hash := hasher.Sum(nil)
 	encoded := base64.StdEncoding.EncodeToString(hash)
 	return encoded

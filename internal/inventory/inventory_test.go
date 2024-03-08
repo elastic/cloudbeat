@@ -2,15 +2,17 @@ package inventory
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type mockAssetPublisher struct {

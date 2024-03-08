@@ -2,13 +2,15 @@ package aws
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Ec2Fetcher struct {

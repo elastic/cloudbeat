@@ -3,15 +3,17 @@ package flavors
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	awsbeat "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	awsinventory "github.com/elastic/cloudbeat/internal/inventory/aws"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"time"
 )
 
 type assetInventory struct {
@@ -45,7 +47,7 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 		return nil, fmt.Errorf("failed to init client: %w", err)
 	}
 
-	now := func() time.Time { return time.Now() }
+	now := func() time.Time { return time.Now() } //nolint:gocritic
 	newAssetInventory := inventory.NewAssetInventory(logger, awsFetchers, publisherClient, now)
 	if err != nil {
 		cancel()

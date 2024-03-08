@@ -2,14 +2,16 @@ package aws
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/elastic/cloudbeat/internal/inventory"
 	ec2beat "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 type mockInstancesProvider struct {
@@ -129,13 +131,12 @@ func TestFetch(t *testing.T) {
 	for len(expected) != len(received) {
 		select {
 		case <-ctx.Done():
-			break
+			assert.ElementsMatch(t, expected, received)
+			return
 		case event := <-ch:
 			received = append(received, event)
-			break
 		}
 	}
 
 	assert.ElementsMatch(t, expected, received)
-
 }
