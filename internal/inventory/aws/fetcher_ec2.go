@@ -12,9 +12,19 @@ import (
 )
 
 type Ec2Fetcher struct {
-	logger            *logp.Logger
-	provider          *ec2.Provider
-	ec2Classification inventory.AssetClassification
+	logger   *logp.Logger
+	provider instancesProvider
+}
+
+type instancesProvider interface {
+	DescribeInstances(ctx context.Context) ([]*ec2.Ec2Instance, error)
+}
+
+var ec2Classification = inventory.AssetClassification{
+	Category:    inventory.CategoryInfrastructure,
+	SubCategory: inventory.SubCategoryCompute,
+	Type:        inventory.TypeVirtualMachine,
+	SubStype:    inventory.SubTypeEC2,
 }
 
 func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
@@ -22,12 +32,6 @@ func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config
 	return &Ec2Fetcher{
 		logger:   logger,
 		provider: provider,
-		ec2Classification: inventory.AssetClassification{
-			Category:    inventory.CategoryInfrastructure,
-			SubCategory: inventory.SubCategoryCompute,
-			Type:        inventory.TypeVirtualMachine,
-			SubStype:    inventory.SubTypeEC2,
-		},
 	}
 }
 
@@ -61,7 +65,7 @@ func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 		}
 
 		assetChannel <- inventory.NewAssetEvent(
-			e.ec2Classification,
+			ec2Classification,
 			instance.GetResourceArn(),
 			instance.GetResourceName(),
 

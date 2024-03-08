@@ -18,6 +18,7 @@ type AssetInventory struct {
 	bufferMaxSize       int
 	logger              *logp.Logger
 	assetCh             chan AssetEvent
+	now                 func() time.Time
 }
 
 type AssetFetcher interface {
@@ -28,7 +29,7 @@ type AssetPublisher interface {
 	PublishAll([]beat.Event)
 }
 
-func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher AssetPublisher) AssetInventory {
+func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time) AssetInventory {
 	logger.Info("Initializing Asset Inventory POC")
 	return AssetInventory{
 		logger:    logger,
@@ -38,6 +39,7 @@ func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher A
 		bufferFlushInterval: 15 * time.Second,
 		bufferMaxSize:       100,
 		assetCh:             make(chan AssetEvent),
+		now:                 now,
 	}
 }
 
@@ -80,16 +82,16 @@ func (a *AssetInventory) Run(ctx context.Context) {
 }
 
 func (a *AssetInventory) publish(assets []AssetEvent) {
-	events := lo.Map(assets, func(a AssetEvent, _ int) beat.Event {
+	events := lo.Map(assets, func(e AssetEvent, _ int) beat.Event {
 		return beat.Event{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(a.Asset)},
-			Timestamp: time.Now(),
+			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Asset)},
+			Timestamp: a.now(),
 			Fields: mapstr.M{
-				"asset":   a.Asset,
-				"cloud":   a.Cloud,
-				"host":    a.Host,
-				"network": a.Network,
-				"iam":     a.IAM,
+				"asset":   e.Asset,
+				"cloud":   e.Cloud,
+				"host":    e.Host,
+				"network": e.Network,
+				"iam":     e.IAM,
 			},
 		}
 	})

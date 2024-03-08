@@ -11,6 +11,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"time"
 )
 
 type assetInventory struct {
@@ -44,7 +45,8 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 		return nil, fmt.Errorf("failed to init client: %w", err)
 	}
 
-	newAssetInventory := inventory.NewAssetInventory(logger, awsFetchers, publisherClient)
+	now := func() time.Time { return time.Now() }
+	newAssetInventory := inventory.NewAssetInventory(logger, awsFetchers, publisherClient, now)
 	if err != nil {
 		cancel()
 		return nil, err
