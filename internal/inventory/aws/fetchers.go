@@ -7,7 +7,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func AwsFetchers(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
+func Fetchers(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
 	return []inventory.AssetFetcher{
 		newEc2Fetcher(logger, identity, cfg),
 	}

@@ -76,7 +76,7 @@ func initAwsFetchers(ctx context.Context, cfg *config.Config, logger *logp.Logge
 		return nil, err
 	}
 
-	return awsinventory.AwsFetchers(logger, awsIdentity, awsConfig), nil
+	return awsinventory.Fetchers(logger, awsIdentity, awsConfig), nil
 }
 
 func (bt *assetInventory) Run(*beat.Beat) error {

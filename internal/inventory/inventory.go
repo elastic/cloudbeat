@@ -17,11 +17,11 @@ type AssetInventory struct {
 	bufferFlushInterval time.Duration
 	bufferMaxSize       int
 	logger              *logp.Logger
-	assetCh             chan Asset
+	assetCh             chan AssetEvent
 }
 
 type AssetFetcher interface {
-	Fetch(ctx context.Context, assetChannel chan<- Asset)
+	Fetch(ctx context.Context, assetChannel chan<- AssetEvent)
 }
 
 type AssetPublisher interface {
@@ -36,8 +36,8 @@ func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher A
 		publisher: publisher,
 		// move to a configuration parameter
 		bufferFlushInterval: 15 * time.Second,
-		bufferMaxSize:       50,
-		assetCh:             make(chan Asset),
+		bufferMaxSize:       100,
+		assetCh:             make(chan AssetEvent),
 	}
 }
 
@@ -48,7 +48,7 @@ func (a *AssetInventory) Run(ctx context.Context) {
 		}(fetcher)
 	}
 
-	assetsBuffer := make([]Asset, 0, a.bufferMaxSize)
+	assetsBuffer := make([]AssetEvent, 0, a.bufferMaxSize)
 	flushTicker := time.NewTicker(a.bufferFlushInterval)
 	for {
 		select {
@@ -79,13 +79,17 @@ func (a *AssetInventory) Run(ctx context.Context) {
 	}
 }
 
-func (a *AssetInventory) publish(assets []Asset) {
-	events := lo.Map(assets, func(a Asset, _ int) beat.Event {
+func (a *AssetInventory) publish(assets []AssetEvent) {
+	events := lo.Map(assets, func(a AssetEvent, _ int) beat.Event {
 		return beat.Event{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(a)},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(a.Asset)},
 			Timestamp: time.Now(),
 			Fields: mapstr.M{
-				"asset": a,
+				"asset":   a.Asset,
+				"cloud":   a.Cloud,
+				"host":    a.Host,
+				"network": a.Network,
+				"iam":     a.IAM,
 			},
 		}
 	})
