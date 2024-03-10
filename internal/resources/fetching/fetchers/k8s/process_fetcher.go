@@ -134,7 +134,7 @@ func (f *ProcessesFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata
 
 	pids, err := proc.ListFS(f.Fs)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to list processes: %w", err)
 	}
 
 	// If errors occur during read, then return what we have till now
@@ -142,14 +142,14 @@ func (f *ProcessesFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata
 	for _, p := range pids {
 		stat, err := proc.ReadStatFS(f.Fs, p)
 		if err != nil {
-			f.log.Errorf("error while reading /proc/<pid>/stat: %s", err.Error())
+			f.log.Errorf("error while reading /proc/<pid>/stat for process %s: %s", p, err.Error())
 			continue
 		}
 
 		// Get the full command line name and not the /proc/pid/status one which might be silently truncated.
 		cmd, err := proc.ReadCmdLineFS(f.Fs, p)
 		if err != nil {
-			f.log.Error("error while reading /proc/<pid>/cmdline: %s", err.Error())
+			f.log.Error("error while reading /proc/<pid>/cmdline for process %s: %s", p, err.Error())
 			continue
 		}
 		name := extractCommandName(cmd)
