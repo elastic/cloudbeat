@@ -45,13 +45,9 @@ runs:
       shell: bash
       run: ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
 
-    # - name: Wait for cloudbeat to send events
+    # - name: Wait for cloudbeat to send some events
     #   shell: bash
     #   run: sleep 20
-
-    # - name: Stop cloudbeat
-    #   shell: bash
-    #   run: pkill -15 cloudbeat
 
     - name: Check for findings
       working-directory: ./tests
@@ -60,6 +56,10 @@ runs:
       shell: bash
       run: |
         poetry run pytest -k "cnvm" --alluredir=./allure/results/ --clean-alluredir
+
+    - name: Stop cloudbeat
+      shell: bash
+      run: pkill -15 cloudbeat
 
     - name: Upload test results
       if: always()

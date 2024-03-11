@@ -43,9 +43,9 @@ runs:
       run: |
         ./cloudbeat -c deploy/aws/cloudbeat-aws.yml -d '*' &
 
-    - name: Wait for cloudbeat to send events
-      shell: bash
-      run: sleep 20
+    # - name: Wait for cloudbeat to send some events
+    #   shell: bash
+    #   run: sleep 10
 
     - name: Check for findings
       working-directory: ./tests

@@ -59,6 +59,10 @@ runs:
         poetry install
         poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
+    - name: Stop cloudbeat
+      shell: bash
+      run: pkill -15 cloudbeat
+
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
