@@ -25,20 +25,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
 	ec2beat "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
-
-type mockInstancesProvider struct {
-	instances []*ec2beat.Ec2Instance
-	err       error
-}
-
-func (m *mockInstancesProvider) DescribeInstances(_ context.Context) ([]*ec2beat.Ec2Instance, error) {
-	return m.instances, m.err
-}
 
 func TestFetch(t *testing.T) {
 	instance1 := &ec2beat.Ec2Instance{
@@ -130,11 +122,12 @@ func TestFetch(t *testing.T) {
 	}
 
 	logger := logp.NewLogger("test_fetcher_ec2")
+	provider := newMockInstancesProvider(t)
+	provider.EXPECT().DescribeInstances(mock.Anything).Return(in, nil)
+
 	fetcher := Ec2Fetcher{
-		logger: logger,
-		provider: &mockInstancesProvider{
-			instances: in,
-		},
+		logger:   logger,
+		provider: provider,
 	}
 
 	ch := make(chan inventory.AssetEvent)

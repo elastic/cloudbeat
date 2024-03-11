@@ -28,27 +28,10 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
-
-type mockAssetPublisher struct {
-	mockF func(events []beat.Event)
-}
-
-func (m mockAssetPublisher) PublishAll(events []beat.Event) {
-	m.mockF(events)
-}
-
-type mockAssetFetcher struct {
-	eventsToPublish []AssetEvent
-}
-
-func (m mockAssetFetcher) Fetch(_ context.Context, assetChannel chan<- AssetEvent) {
-	for _, e := range m.eventsToPublish {
-		assetChannel <- e
-	}
-}
 
 func TestAssetInventory_Run(t *testing.T) {
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
@@ -98,58 +81,54 @@ func TestAssetInventory_Run(t *testing.T) {
 	}
 
 	publishedCh := make(chan []beat.Event)
-	publisher := mockAssetPublisher{
-		mockF: func(e []beat.Event) {
-			publishedCh <- e
-		},
-	}
+	publisher := NewMockAssetPublisher(t)
+	publisher.EXPECT().PublishAll(mock.Anything).Run(func(e []beat.Event) {
+		publishedCh <- e
+	})
 
-	fetchers := []AssetFetcher{
-		mockAssetFetcher{
-			eventsToPublish: []AssetEvent{
-				NewAssetEvent(
-					AssetClassification{
-						Category:    CategoryInfrastructure,
-						SubCategory: SubCategoryCompute,
-						Type:        TypeVirtualMachine,
-						SubStype:    SubTypeEC2,
-					},
-					"arn:aws:ec2:us-east::ec2/234567890",
-					"test-server",
-					WithTags(map[string]string{"Name": "test-server", "key": "value"}),
-					WithCloud(AssetCloud{
-						Provider: AwsCloudProvider,
-						Region:   "us-east",
-					}),
-					WithHost(AssetHost{
-						Architecture:    string(types.ArchitectureValuesX8664),
-						ImageId:         pointers.Ref("image-id"),
-						InstanceType:    "instance-type",
-						Platform:        "linux",
-						PlatformDetails: pointers.Ref("ubuntu"),
-					}),
-					WithIAM(AssetIAM{
-						Id:  pointers.Ref("a123123"),
-						Arn: pointers.Ref("123123:123123:123123"),
-					}),
-					WithNetwork(AssetNetwork{
-						NetworkId:        pointers.Ref("vpc-id"),
-						SubnetId:         pointers.Ref("subnetId"),
-						Ipv6Address:      pointers.Ref("ipv6"),
-						PublicIpAddress:  pointers.Ref("public-ip-addr"),
-						PrivateIpAddress: pointers.Ref("private-ip-addre"),
-						PublicDnsName:    pointers.Ref("public-dns"),
-						PrivateDnsName:   pointers.Ref("private-dns"),
-					}),
-				),
+	fetcher := NewMockAssetFetcher(t)
+	fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, assetChannel chan<- AssetEvent) {
+		assetChannel <- NewAssetEvent(
+			AssetClassification{
+				Category:    CategoryInfrastructure,
+				SubCategory: SubCategoryCompute,
+				Type:        TypeVirtualMachine,
+				SubStype:    SubTypeEC2,
 			},
-		},
-	}
+			"arn:aws:ec2:us-east::ec2/234567890",
+			"test-server",
+			WithTags(map[string]string{"Name": "test-server", "key": "value"}),
+			WithCloud(AssetCloud{
+				Provider: AwsCloudProvider,
+				Region:   "us-east",
+			}),
+			WithHost(AssetHost{
+				Architecture:    string(types.ArchitectureValuesX8664),
+				ImageId:         pointers.Ref("image-id"),
+				InstanceType:    "instance-type",
+				Platform:        "linux",
+				PlatformDetails: pointers.Ref("ubuntu"),
+			}),
+			WithIAM(AssetIAM{
+				Id:  pointers.Ref("a123123"),
+				Arn: pointers.Ref("123123:123123:123123"),
+			}),
+			WithNetwork(AssetNetwork{
+				NetworkId:        pointers.Ref("vpc-id"),
+				SubnetId:         pointers.Ref("subnetId"),
+				Ipv6Address:      pointers.Ref("ipv6"),
+				PublicIpAddress:  pointers.Ref("public-ip-addr"),
+				PrivateIpAddress: pointers.Ref("private-ip-addre"),
+				PublicDnsName:    pointers.Ref("public-dns"),
+				PrivateDnsName:   pointers.Ref("private-dns"),
+			}),
+		)
+	})
 
 	logger := logp.NewLogger("test_run")
 	inventory := AssetInventory{
 		logger:              logger,
-		fetchers:            fetchers,
+		fetchers:            []AssetFetcher{fetcher},
 		publisher:           publisher,
 		bufferFlushInterval: 10 * time.Millisecond,
 		bufferMaxSize:       1,
