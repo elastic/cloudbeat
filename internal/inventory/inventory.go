@@ -79,7 +79,7 @@ func (a *AssetInventory) Run(ctx context.Context) {
 
 		case <-flushTicker.C:
 			if len(assetsBuffer) == 0 {
-				a.logger.Infof("Interval reached without events")
+				a.logger.Debugf("Interval reached without events")
 				continue
 			}
 

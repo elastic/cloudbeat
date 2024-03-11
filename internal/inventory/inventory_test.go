@@ -97,12 +97,10 @@ func TestAssetInventory_Run(t *testing.T) {
 		},
 	}
 
-	received := make([]beat.Event, 0, 1)
-	done := make(chan bool)
+	publishedCh := make(chan []beat.Event)
 	publisher := mockAssetPublisher{
 		mockF: func(e []beat.Event) {
-			received = append(received, e...)
-			done <- true
+			publishedCh <- e
 		},
 	}
 
@@ -168,7 +166,8 @@ func TestAssetInventory_Run(t *testing.T) {
 
 	select {
 	case <-ctx.Done():
-	case <-done:
+		t.Errorf("Context done without receiving any events")
+	case received := <-publishedCh:
 		inventory.Stop()
 		assert.ElementsMatch(t, received, expected)
 	}
