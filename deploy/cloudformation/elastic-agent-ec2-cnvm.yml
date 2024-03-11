@@ -46,7 +46,7 @@ Resources:
             - 2
             - !Split
               - /
-              - !Ref "AWS::StackId"
+              - !Ref AWS::StackId
       GroupDescription: Block incoming traffic
       SecurityGroupIngress: []
 
@@ -110,10 +110,10 @@ Resources:
             - 2
             - !Split
               - /
-              - !Ref "AWS::StackId"
+              - !Ref AWS::StackId
       Path: /
       Roles:
-        - !Ref "ElasticAgentRole"
+        - !Ref ElasticAgentRole
 
   # EC2 Instance to run elastic-agent
   ElasticAgentEc2Instance:
@@ -131,7 +131,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
         - Key: Task
           Value: Vulnerability Management Scanner
       ImageId: !Ref LatestAmiId

@@ -459,6 +459,76 @@ func (_c *MockClient_GetPolicyVersion_Call) RunAndReturn(run func(context.Contex
 	return _c
 }
 
+// GetRole provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) GetRole(ctx context.Context, params *serviceiam.GetRoleInput, optFns ...func(*serviceiam.Options)) (*serviceiam.GetRoleOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceiam.GetRoleOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.GetRoleInput, ...func(*serviceiam.Options)) (*serviceiam.GetRoleOutput, error)); ok {
+		return rf(ctx, params, optFns...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.GetRoleInput, ...func(*serviceiam.Options)) *serviceiam.GetRoleOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceiam.GetRoleOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceiam.GetRoleInput, ...func(*serviceiam.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_GetRole_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRole'
+type MockClient_GetRole_Call struct {
+	*mock.Call
+}
+
+// GetRole is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceiam.GetRoleInput
+//   - optFns ...func(*serviceiam.Options)
+func (_e *MockClient_Expecter) GetRole(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetRole_Call {
+	return &MockClient_GetRole_Call{Call: _e.mock.On("GetRole",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_GetRole_Call) Run(run func(ctx context.Context, params *serviceiam.GetRoleInput, optFns ...func(*serviceiam.Options))) *MockClient_GetRole_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceiam.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceiam.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceiam.GetRoleInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_GetRole_Call) Return(_a0 *serviceiam.GetRoleOutput, _a1 error) *MockClient_GetRole_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_GetRole_Call) RunAndReturn(run func(context.Context, *serviceiam.GetRoleInput, ...func(*serviceiam.Options)) (*serviceiam.GetRoleOutput, error)) *MockClient_GetRole_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetRolePolicy provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) GetRolePolicy(ctx context.Context, params *serviceiam.GetRolePolicyInput, optFns ...func(*serviceiam.Options)) (*serviceiam.GetRolePolicyOutput, error) {
 	_va := make([]interface{}, len(optFns))
