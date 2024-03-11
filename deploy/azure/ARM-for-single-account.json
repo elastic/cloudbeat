@@ -48,6 +48,9 @@
                 "parameters": {
                     "ResourceGroupName": {
                         "value": "[resourceGroup().name]"
+                    },
+                    "AdditionalRoleGUID": {
+                        "value": "[variables('roleGUID')]"
                     }
                 },
                 "template": {
@@ -55,6 +58,9 @@
                     "contentVersion": "1.0.0.0",
                     "parameters": {
                         "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "AdditionalRoleGUID": {
                             "type": "string"
                         }
                     },
@@ -74,7 +80,7 @@
                             "apiVersion": "2022-04-01",
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
                             "properties": {
-                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', variables('roleGUID'))]",
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('AdditionalRoleGUID'))]",
                                 "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
@@ -94,10 +100,20 @@
                 "expressionEvaluationOptions": {
                     "scope": "inner"
                 },
+                "parameters": {
+                    "AdditionalRoleGUID": {
+                        "value": "[variables('roleGUID')]"
+                    }
+                },
                 "mode": "Incremental",
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "AdditionalRoleGUID": {
+                            "type": "string"
+                        }
+                    },
                     "resources": [
                         {
                             "type": "Microsoft.Compute/virtualMachines",
@@ -230,7 +246,7 @@
                         {
                             "type": "Microsoft.Authorization/roleDefinitions",
                             "apiVersion": "2022-04-01",
-                            "name": "[variables('roleGUID')]",
+                            "name": "[parameters('AdditionalRoleGUID')]",
                             "properties": {
                                 "assignableScopes": [
                                     "/"
