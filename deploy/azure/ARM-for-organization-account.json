@@ -44,7 +44,7 @@
     },
     "variables": {
         "resourceGroupDeployment": "[concat('resource-group-deployment-', deployment().location)]",
-        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]",
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().name)]",
         "roleGUID": "[guid(subscription().subscriptionId)]"
     },
     "resources": [
