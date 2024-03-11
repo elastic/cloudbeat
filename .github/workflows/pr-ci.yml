@@ -125,28 +125,28 @@ jobs:
     if: always()
     steps:
       - uses: actions/download-artifact@v4
-        if: ${{ needs.ci-azure.outputs.job_status=='success' }}
+        if: always()
         with:
           name: allure-results-ci-azure
           path: tests/allure/results/
           merge-multiple: true
 
       - uses: actions/download-artifact@v4
-        if: ${{ needs.ci-aws.outputs.job_status=='success' }}
+        if: always()
         with:
           name: allure-results-ci-aws
           path: tests/allure/results/
           merge-multiple: true
 
       - uses: actions/download-artifact@v4
-        if: ${{ needs.ci-gcp.outputs.job_status=='success' }}
+        if: always()
         with:
           name: allure-results-ci-gcp
           path: tests/allure/results/
           merge-multiple: true
 
       - uses: actions/download-artifact@v4
-        if: ${{ needs.ci-cnvm.outputs.job_status=='success' }}
+        if: always()
         with:
           name: allure-results-ci-cnvm
           path: tests/allure/results/
