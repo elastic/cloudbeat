@@ -176,3 +176,4 @@ jobs:
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/ci/${{ github.event.number }}
           ignoreMissingResults: true
+          debug: true
