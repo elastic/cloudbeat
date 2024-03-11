@@ -66,11 +66,6 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 
 	now := func() time.Time { return time.Now() } //nolint:gocritic
 	newAssetInventory := inventory.NewAssetInventory(logger, awsFetchers, publisherClient, now)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
 	publisher := NewPublisher(logger, flushInterval, eventsThreshold, publisherClient)
 
 	return &assetInventory{
