@@ -145,3 +145,23 @@ jobs:
           merge-multiple: true
       - name: log
         run: ls -laR
+
+      - name: Publish allure report
+        if: always()
+        uses: andrcuns/allure-publish-action@v2
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_REGION: eu-west-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: "tests/allure/results"
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
+          bucket: csp-allure-reports
+          prefix: allure_reports/cloudbeat/${{ github.ref_name }}
+          ignoreMissingResults: true
