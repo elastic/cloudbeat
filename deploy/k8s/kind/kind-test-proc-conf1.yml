@@ -1,0 +1,70 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: kind-test-proc-conf1
+nodes:
+- role: control-plane
+  image: kindest/node:v1.23.12
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "test-conf-1=fail"
+  - |
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    authentication:
+      anonymous:
+        enabled: true
+    authorization:
+      mode: AlwaysAllow
+    readOnlyPort: 26492
+    makeIPTablesUtilChains: false
+    eventRecordQPS: 4
+    # rotateCertificates option is not configurable and still set to true
+    rotateCertificates: false
+    # serverTLSBootstrap option is not configurable and does not appear in the kubelet config
+    serverTLSBootstrap: false
+    featureGates:
+      RotateKubeletServerCertificate: false
+  - |
+    apiVersion: kubeadm.k8s.io/v1beta3
+    kind: ClusterConfiguration
+    scheduler:
+      extraArgs:
+        profiling: "true"
+        bind-address: "0.0.0.0"
+    etcd:
+      local:
+        extraArgs:
+          client-cert-auth: "false"
+          auto-tls: "true"
+          peer-client-cert-auth: "false"
+          peer-auto-tls: "true"
+    controllerManager:
+      extraArgs:
+        profiling: "true"
+        # use-service-account-credentials: "false"
+        bind-address: "0.0.0.0"
+        feature-gates: "RotateKubeletServerCertificate=false"
+    apiServer:
+      extraArgs:
+        enable-admission-plugins: "AlwaysAdmit"
+        disable-admission-plugins: "NamespaceLifecycle"
+        request-timeout: "59s"
+        service-account-lookup: "false"
+  extraMounts:
+  - hostPath: ./tests/allure/results
+    containerPath: /tmp/data
+  extraPortMappings:
+  - containerPort: 9200
+    hostPort: 9200
+    listenAddress: "127.0.0.1"
+  - containerPort: 5601
+    hostPort: 5601
+    listenAddress: "127.0.0.1"
+- role: worker
+  image: kindest/node:v1.23.12
+  extraMounts:
+  - hostPath: ./tests/allure/results
+    containerPath: /tmp/data

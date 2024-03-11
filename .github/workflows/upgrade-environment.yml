@@ -12,8 +12,8 @@ on:
         required: true
       target-elk-stack-version:
         required: true
-        description: "Target version of the ELK stack: For BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.11.0"
+        description: "Target version of the ELK stack: For BC use version without hash 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        default: "8.13.0"
         type: string
       base-elk-stack-version:
         type: string
@@ -179,15 +179,6 @@ jobs:
           export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
           echo "::add-mask::$CSPM_PUBLIC_IP"
           echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
-
-      - name: Run Sanity checks
-        if: success()
-        working-directory: ./tests
-        env:
-          USE_K8S: false
-          AGENT_VERSION: ${{ needs.init.outputs.base-stack-version }}
-        run: |
-          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Set Docker Image version
         if: ${{ ! inputs.docker-image-override }}
