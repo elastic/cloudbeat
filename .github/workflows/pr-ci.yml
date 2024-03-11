@@ -46,6 +46,29 @@ jobs:
           azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
           azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
 
+  ci-aws:
+    needs: [ init-hermit ]
+    name: Integrations Tests CIS AWS
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run AWS integration tests
+        uses: ./.github/actions/aws-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+          aws-account-type: single-account
+
   ci-cnvm:
     needs: [ init-hermit ]
     name: Integration Tests CNVM
@@ -68,7 +91,7 @@ jobs:
 
   ci-gcp:
     needs: [ init-hermit ]
-    name: Integration Tests GCP
+    name: Integration Tests CIS GCP
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
@@ -95,6 +118,7 @@ jobs:
       - ci-azure
       - ci-cnvm
       - ci-gcp
+      - ci-aws
     name: Upload integration tests results
     runs-on: ubuntu-22.04
     timeout-minutes: 60
@@ -112,6 +136,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: allure-results-ci-azure
+          path: tests/allure/results/
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: allure-results-ci-aws
           path: tests/allure/results/
           merge-multiple: true
       - name: log
