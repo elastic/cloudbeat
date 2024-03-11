@@ -174,5 +174,5 @@ jobs:
           summaryTableType: markdown
           copyLatest: true
           bucket: csp-allure-reports
-          prefix: allure_reports/cloudbeat/${{ github.ref_name }}
+          prefix: allure_reports/cloudbeat/ci/${{ env.PR_NUMBER }}
           ignoreMissingResults: true
