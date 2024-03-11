@@ -30,7 +30,7 @@
         }
     },
     "variables": {
-        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().location)]",
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().name)]",
         "roleGUID": "[guid(subscription().subscriptionId)]"
     },
     "resources": [
@@ -101,6 +101,9 @@
                     "scope": "inner"
                 },
                 "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[resourceGroup().name]"
+                    },
                     "AdditionalRoleGUID": {
                         "value": "[variables('roleGUID')]"
                     }
@@ -110,6 +113,9 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
                         "AdditionalRoleGUID": {
                             "type": "string"
                         }
@@ -249,7 +255,8 @@
                             "name": "[parameters('AdditionalRoleGUID')]",
                             "properties": {
                                 "assignableScopes": [
-                                    "/"
+                                    "[concat('/subscriptions/', subscription().subscriptionId)]",
+                                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', parameters('ResourceGroupName'))]"
                                 ],
                                 "description": "Additional read permissions for cloudbeatVM",
                                 "permissions": [
@@ -263,7 +270,7 @@
                                     }
                                 ],
                                 "roleName": "cloudbeatVM additional permissions",
-                                "type": "Microsoft.Authorization/roleDefinitions"
+                                "type": "CustomRole"
                             }
                         }
                     ]
