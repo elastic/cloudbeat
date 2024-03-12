@@ -36,7 +36,7 @@
         }
     },
     "variables": {
-        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().location)]",
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().name)]",
         "roleGUID": "[guid(subscription().subscriptionId)]"
     },
     "resources": [
@@ -54,6 +54,9 @@
                 "parameters": {
                     "ResourceGroupName": {
                         "value": "[resourceGroup().name]"
+                    },
+                    "AdditionalRoleGUID": {
+                        "value": "[variables('roleGUID')]"
                     }
                 },
                 "template": {
@@ -62,13 +65,16 @@
                     "parameters": {
                         "ResourceGroupName": {
                             "type": "string"
+                        },
+                        "AdditionalRoleGUID": {
+                            "type": "string"
                         }
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
-                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name)]",
+                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
                             "properties": {
                                 "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
                                 "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
@@ -78,9 +84,9 @@
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
-                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name)]",
+                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
                             "properties": {
-                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', variables('roleGUID'))]",
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('AdditionalRoleGUID'))]",
                                 "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
@@ -100,10 +106,20 @@
                 "expressionEvaluationOptions": {
                     "scope": "inner"
                 },
+                "parameters": {
+                    "PublicKeyDevOnly": {
+                        "value": "[parameters('PublicKeyDevOnly')]"
+                    }
+                },
                 "mode": "Incremental",
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "PublicKeyDevOnly": {
+                            "type": "string"
+                        }
+                    },
                     "resources": [
                         {
                             "type": "Microsoft.Compute/virtualMachines",
@@ -231,10 +247,11 @@
                         {
                             "type": "Microsoft.Authorization/roleDefinitions",
                             "apiVersion": "2022-04-01",
-                            "name": "[variables('roleGUID')]",
+                            "name": "[parameters('AdditionalRoleGUID')]",
                             "properties": {
                                 "assignableScopes": [
-                                    "/"
+                                    "[concat('/subscriptions/', subscription().subscriptionId)]",
+                                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', parameters('ResourceGroupName'))]"
                                 ],
                                 "description": "Additional read permissions for cloudbeatVM",
                                 "permissions": [
@@ -248,7 +265,7 @@
                                     }
                                 ],
                                 "roleName": "cloudbeatVM additional permissions",
-                                "type": "Microsoft.Authorization/roleDefinitions"
+                                "type": "CustomRole"
                             }
                         },
                         {
@@ -283,17 +300,7 @@
                                 ]
                             }
                         }
-                    ],
-                    "parameters": {
-                        "PublicKeyDevOnly": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "parameters": {
-                    "PublicKeyDevOnly": {
-                        "value": "[parameters('PublicKeyDevOnly')]"
-                    }
+                    ]
                 }
             }
         },
