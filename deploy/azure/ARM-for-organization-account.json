@@ -103,6 +103,9 @@
                     "AdditionalRoleGUID": {
                         "value": "[variables('roleGUID')]"
                     },
+                    "ManagementGroupID": {
+                        "value": "[managementGroup().id]"
+                    },
                     "ResourceGroupName": {
                         "value": "[parameters('ResourceGroupName')]"
                     },
@@ -117,6 +120,9 @@
                         "AdditionalRoleGUID": {
                             "type": "string"
                         },
+                        "ManagementGroupID": {
+                            "type": "string"
+                        },
                         "ResourceGroupName": {
                             "type": "string"
                         },
@@ -128,7 +134,7 @@
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
-                            "name": "[guid(managementGroup().id, parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
+                            "name": "[guid(parameters('ManagementGroupID'), parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
                             "properties": {
                                 "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
                                 "principalId": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
@@ -167,6 +173,9 @@
                     "AdditionalRoleGUID": {
                         "value": "[variables('roleGUID')]"
                     },
+                    "ManagementGroupID": {
+                        "value": "[managementGroup().id]"
+                    },
                     "ResourceGroupName": {
                         "value": "[parameters('ResourceGroupName')]"
                     },
@@ -180,6 +189,9 @@
                     "contentVersion": "1.0.0.0",
                     "parameters": {
                         "AdditionalRoleGUID": {
+                            "type": "string"
+                        },
+                        "ManagementGroupID": {
                             "type": "string"
                         },
                         "ResourceGroupName": {
@@ -324,7 +336,7 @@
                             "name": "[parameters('AdditionalRoleGUID')]",
                             "properties": {
                                 "assignableScopes": [
-                                    "[managementGroup().id]",
+                                    "[parameters('ManagementGroupID')]",
                                     "[concat('/subscriptions/', parameters('SubscriptionId'))]",
                                     "[concat('/subscriptions/', parameters('SubscriptionId'), '/resourcegroups/', parameters('ResourceGroupName'))]"
                                 ],
