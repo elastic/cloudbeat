@@ -45,7 +45,7 @@
     "variables": {
         "resourceGroupDeployment": "[concat('resource-group-deployment-', deployment().location)]",
         "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]",
-        "roleGUID": "[guid(subscription().subscriptionId)]"
+        "roleGUID": "[guid(parameters('SubscriptionId'))]"
     },
     "resources": [
         {
@@ -138,10 +138,10 @@
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
-                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
+                            "name": "[guid(parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
                             "properties": {
                                 "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('AdditionalRoleGUID'))]",
-                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
+                                "principalId": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
                         }
@@ -308,8 +308,8 @@
                             "properties": {
                                 "assignableScopes": [
                                     "[managementGroup().id]",
-                                    "[concat('/subscriptions/', subscription().subscriptionId)]",
-                                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', parameters('ResourceGroupName'))]"
+                                    "[concat('/subscriptions/', parameters('SubscriptionId')]",
+                                    "[concat('/subscriptions/', parameters('SubscriptionId'), '/resourcegroups/', parameters('ResourceGroupName'))]"
                                 ],
                                 "description": "Additional read permissions for cloudbeatVM",
                                 "permissions": [
