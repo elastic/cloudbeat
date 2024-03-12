@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
@@ -43,6 +44,7 @@ func GetStrategy(cfg *config.Config) (Strategy, error) {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
 			return &AWSOrg{
+				IAMProvider:      &iam.Provider{},
 				IdentityProvider: awslib.IdentityProvider{},
 				AccountProvider:  awslib.AccountProvider{},
 			}, nil

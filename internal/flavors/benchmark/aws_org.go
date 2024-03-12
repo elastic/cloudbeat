@@ -36,9 +36,19 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+)
+
+const (
+	rootRole            = "cloudbeat-root"
+	memberRole          = "cloudbeat-securityaudit"
+	scanSettingTagKey   = "cloudbeat_scan_management_account"
+	scanSettingTagValue = "Yes"
 )
 
 type AWSOrg struct {
+	IAMProvider      iam.RoleGetter
 	IdentityProvider awslib.IdentityProviderGetter
 	AccountProvider  awslib.AccountProviderAPI
 }
@@ -66,6 +76,8 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
+
+	a.IAMProvider = iam.NewIAMProvider(log, awsConfig, nil)
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
@@ -95,11 +107,6 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
-	const (
-		rootRole   = "cloudbeat-root"
-		memberRole = "cloudbeat-securityaudit"
-	)
-
 	rootCfg := assumeRole(
 		sts.NewFromConfig(initialCfg),
 		initialCfg,
@@ -107,6 +114,8 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 	)
 	stsClient := sts.NewFromConfig(rootCfg)
 
+	// accountIdentities array contains all the Accounts and Organizational
+	// Units, even if they are nested.
 	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, rootCfg)
 	if err != nil {
 		return nil, err
@@ -114,11 +123,26 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 
 	accounts := make([]preset.AwsAccount, 0, len(accountIdentities))
 	for _, identity := range accountIdentities {
-		var memberCfg awssdk.Config
+		// Cloudbeat fetchers will try to assume memberRole
+		// ("cloudbeat-securityaudit") for all Accounts and OUs except for the
+		// Management Account. However, Cloud Formation only creates the
+		// memberRole in the OUs chosen by the user. If Cloudbeat tries to
+		// assume a member role that doesn't exist (because the user hasn't
+		// selected an Account/OU), it will fail silently and will be unable to
+		// retrieve any resources from the Account/OU afterward.
+		var awsConfig awssdk.Config
+
 		if identity.Account == rootIdentity.Account {
-			memberCfg = rootCfg
+			cfg, err := a.pickManagementAccountRole(ctx, log, stsClient, rootCfg, identity)
+			if err != nil {
+				log.Errorf("error picking roles for account %s: %s", identity.Account, err)
+				continue
+			}
+			awsConfig = cfg
 		} else {
-			memberCfg = assumeRole(
+			// Try to assume "cloudbeat-security" and fail silently if it does
+			// not exist.
+			awsConfig = assumeRole(
 				stsClient,
 				rootCfg,
 				fmtIAMRole(identity.Account, memberRole),
@@ -127,13 +151,70 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 
 		accounts = append(accounts, preset.AwsAccount{
 			Identity: identity,
-			Config:   memberCfg,
+			Config:   awsConfig,
 		})
 	}
 	return accounts, nil
 }
 
+// pickManagementAccountRole selects role used to fetch resources from the
+// Management Account (and decides if they should be fetched at all).
+func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger, stsClient stscreds.AssumeRoleAPIClient, rootCfg awssdk.Config, identity cloud.Identity) (awssdk.Config, error) {
+	// We will check for a tag on 'cloudbeat-root' role. If it is missing, we
+	// will try to be backward compatible and use the "cloudbeat-root" role to
+	// scan the Management Account. In previous CF templates, "cloudbeat-root"
+	// had the built-in SecurityAudit policy attached.
+	var foundTagValue string
+	{
+		r, err := a.IAMProvider.GetRole(ctx, rootRole)
+		if err != nil {
+			return awssdk.Config{}, fmt.Errorf("error getting root role: %w", err)
+		}
+
+		for _, tag := range r.Tags {
+			if pointers.Deref(tag.Key) == scanSettingTagKey {
+				foundTagValue = pointers.Deref(tag.Value)
+				break
+			}
+		}
+	}
+
+	if foundTagValue == "" {
+		// Legacy. Use 'cloudbeat-root' role for compliance reasons.
+		log.Infof("%q tag not found, using '%s' role for backward compatibility", scanSettingTagKey, rootRole)
+		return rootCfg, nil
+	}
+
+	// Log an error if 'cloudbeat-securityaudit' does not exist in the
+	// Management Account. This should not happen! We log and continue
+	// without exiting function, since we want to scan other selected
+	// accounts, but at least the error will be visible in the logs.
+	if foundTagValue == scanSettingTagValue {
+		_, err := a.IAMProvider.GetRole(ctx, memberRole)
+		if err != nil {
+			log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, memberRole, err)
+		}
+	}
+
+	// If the "cloudbeat_scan_management_account" tag on the "cloudbeat-root"
+	// role is set to "Yes", the user chose to scan it, and there should be a
+	// "cloudbeat-securityaudit" role enabling this. If it is set to "No" we
+	// will still try to use "cloudbeat-securityaudit", but it is non-existent,
+	// so we will fail silently and not get any data from the Management
+	// Account.
+	log.Debugf("assuming '%s' role for Account %s", memberRole, identity.Account)
+	config := assumeRole(
+		stsClient,
+		rootCfg,
+		fmtIAMRole(identity.Account, memberRole),
+	)
+	return config, nil
+}
+
 func (a *AWSOrg) checkDependencies() error {
+	if a.IAMProvider == nil {
+		return errors.New("aws iam provider is uninitialized")
+	}
 	if a.IdentityProvider == nil {
 		return errors.New("aws identity provider is uninitialized")
 	}
@@ -143,7 +224,7 @@ func (a *AWSOrg) checkDependencies() error {
 	return nil
 }
 
-func assumeRole(client *sts.Client, cfg awssdk.Config, arn string) awssdk.Config {
+func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {
 	cfg.Credentials = awssdk.NewCredentialsCache(stscreds.NewAssumeRoleProvider(client, arn))
 	return cfg
 }
