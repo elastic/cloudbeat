@@ -110,8 +110,8 @@ env:
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
-  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
-  TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
+  # TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  # TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
   TF_VAR_ec_url: ${{ inputs.ec-url }}
 
 
@@ -166,6 +166,8 @@ jobs:
         env:
           QA_EC_URL: "https://console.qa.cld.elstc.co"
           EC_URL: "https://cloud.elastic.co"
+          local_ec_api_key: ${{ secrets.EC_API_KEY }}
+          local_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
         run: |
           # Extract the EC API key and selected EC URL
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
@@ -181,7 +183,9 @@ jobs:
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
           else
             if [[ $input_ec_url == $qa_ec_url ]]; then
-              echo "TF_VAR_ec_api_key=${{env.TF_VAR_qa_ec_api_key}}" >> $GITHUB_ENV
+              echo "TF_VAR_ec_api_key=${{env.local_qa_ec_api_key}}" >> $GITHUB_ENV
+            elif [[ $input_ec_url == $ec_url ]]; then
+              echo "TF_VAR_ec_api_key=${{env.local_ec_api_key}}" >> $GITHUB_ENV
             else
               echo "error: Elastic Cloud API key is required from a valid ec url"
               exit 1
