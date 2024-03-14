@@ -1,0 +1,97 @@
+name: 'K8S CI'
+description: 'K8s integration tests'
+inputs:
+  elk-version:
+    description: 'ELK version'
+    required: true
+  kind-config:
+    description: 'KIND configuration'
+    required: true
+  container-image-suffix:
+    description: 'Container image suffix'
+    required: true
+  elastic-agent-docker-image:
+    description: 'Elastic-Agent docker image'
+    required: true
+  elastic-agent-docker-image-tag:
+    description: 'Elastic-Agent docker image tag'
+    required: true
+
+  test-target:
+    description: 'Test target'
+    required: true
+  test-range:
+    description: 'Test range'
+    required: false
+    default: ''
+  values-file:
+    description: 'Helm values file'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false
+        docker-images: true
+        swap-storage: true
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Cache docker images
+      uses: actions/cache@v4
+      with:
+        path: /tmp/docker-images/
+        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ inputs.container-image-suffix }}
+
+    - name: Prepare Kind Cluster for Process Tests
+      if: ${{ contains(inputs.kind-config, 'conf2') }}
+      shell: bash
+      run: |
+        # Workaround: Direct creation of a Kind cluster for config2 fails to start control-plane (kubelet fails)
+        # Creating and deleting a kind-mono cluster as a preparation for configuring Kind for process tests
+        just create-kind-cluster kind-mono
+        just delete-kind-cluster kind-mono
+
+    - name: Create k8s Kind Cluster
+      shell: bash
+      run: just create-kind-cluster ${{ inputs.kind-config }}
+
+    # - name: Load images to kind
+    #   shell: bash
+    #   run: ./.ci/scripts/kind-images.sh '${{ inputs.container-image-suffix }}' '${{ inputs.kind-config }}'
+    - name: Load images to kind
+      shell: bash
+      run: |
+        ls -lahR /tmp/docker-images/
+        kind load image-archive /tmp/docker-images/cloudbeat-${{ inputs.container-image-suffix }}.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive /tmp/docker-images/pytest-${{ inputs.container-image-suffix }}.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive /tmp/docker-images/elastic-agent-${{ inputs.container-image-suffix }}.tar --name='${{ inputs.kind-config }}'
+
+    - name: Deploy tests Helm chart
+      id: deploy_helm
+      shell: bash
+      run: just deploy-tests-helm ${{ inputs.test-target }} ${{ inputs.values-file }} ${{ inputs.test-range }}
+
+    - name: Deploy K8s Objects
+      if: ${{ contains(inputs.test-target, 'object_psp') }}
+      shell: bash
+      run: just apply-k8s-test-objects
+
+    - name: Run Tests
+      id: run_tests
+      shell: bash
+      run: just run-tests ${{ inputs.test-target }} kind-${{ inputs.kind-config }}
+
+    - name: Upload Test Results
+      if: ${{ success() || failure() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-ci-k8s-${{ inputs.test-target }}-${{ inputs.kind-config }}
+        path: tests/allure/results/

@@ -1,0 +1,100 @@
+name: 'Docker Images'
+description: 'Build docker images'
+inputs:
+  elk-version:
+    description: 'ELK version'
+    required: true
+  container-image-suffix:
+    description: 'Container image suffix'
+    required: true
+  elastic-agent-docker-image:
+    description: 'Elastic-Agent docker image'
+    required: true
+  elastic-agent-docker-image-tag:
+    description: 'Elastic-Agent docker image tag'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false
+        docker-images: true
+        swap-storage: true
+
+    - name: Init directories
+      shell: bash
+      run: |
+        mkdir -p /tmp/.buildx-cache/
+        mkdir -p /tmp/.buildx-cache-new/
+        mkdir -p /tmp/docker-images/
+
+    - name: Build cloudbeat binary
+      shell: bash
+      run: |
+        mage -v build
+        ldd cloudbeat
+        file cloudbeat
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Cache docker build cache
+      uses: actions/cache@v4
+      with:
+        path: /tmp/.buildx-cache
+        key: ci-buildx-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}
+
+    - name: Cache docker images
+      uses: actions/cache@v4
+      with:
+        path: /tmp/docker-images/
+        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ inputs.container-image-suffix }}
+
+    - name: Build cloudbeat-docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./deploy/Dockerfile
+        push: false
+        tags: cloudbeat:latest
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new
+        outputs: type=docker,dest=/tmp/docker-images/cloudbeat-${{ inputs.container-image-suffix }}.tar
+
+    - name: Build elastic-agent
+      uses: docker/build-push-action@v5
+      env:
+        GOOS: linux
+        GOARCH: amd64
+      with:
+        context: .
+        file: ./scripts/packaging/docker/elastic-agent/Dockerfile
+        push: false
+        pull: true
+        tags: ${{ inputs.elastic-agent-docker-image }}:${{ inputs.elastic-agent-docker-image-tag }}
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new
+        outputs: type=docker,dest=/tmp/docker-images/elastic-agent-${{ inputs.container-image-suffix }}.tar
+        build-args: ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:${{ inputs.elastic-agent-docker-image-tag }}
+
+    - name: Build pytest-docker
+      uses: docker/build-push-action@v5
+      with:
+        context: ./tests/.
+        push: false
+        tags: cloudbeat-test:latest
+        cache-from: type=local,mode=max,src=/tmp/.buildx-cache
+        cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+        outputs: type=docker,dest=/tmp/docker-images/pytest-${{ inputs.container-image-suffix }}.tar
+
+    - name: Rotate cache
+      shell: bash
+      run: |
+        ls -lahR /tmp/ || true
+        [[ -d /tmp/.buildx-cache-new ]] && rm -rf /tmp/.buildx-cache && mv /tmp/.buildx-cache-new /tmp/.buildx-cache

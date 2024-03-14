@@ -45,7 +45,7 @@ runs:
 
     - name: Wait for cloudbeat to send some events
       shell: bash
-      run: sleep 10
+      run: sleep 20
 
     - name: Check for findings
       working-directory: ./tests
@@ -55,7 +55,7 @@ runs:
       run: poetry run pytest -k "aws" --alluredir=./allure/results/ --clean-alluredir
 
     - name: Upload test results
-      if: always()
+      if: ${{ success() || failure() }}
       uses: actions/upload-artifact@v4
       with:
         name: allure-results-ci-aws
