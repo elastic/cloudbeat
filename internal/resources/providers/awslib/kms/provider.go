@@ -70,6 +70,10 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 				continue
 			}
 
+			if keyInfo.KeyMetadata.KeyManager != types.KeyManagerTypeCustomer {
+				continue
+			}
+
 			rotationStatus, err := c.GetKeyRotationStatus(ctx, &kmsClient.GetKeyRotationStatusInput{
 				KeyId: keyEntry.KeyId,
 			})
