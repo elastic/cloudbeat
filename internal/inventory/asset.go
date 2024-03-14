@@ -23,21 +23,37 @@ import (
 	"fmt"
 )
 
+// assetCategory is used to build the document index. Use only numbers, letters and dashes (-)
 type assetCategory string
-type assetSubCategory string
-type assetType string
-type assetSubType string
-type assetCloudProvider string
 
 const (
 	CategoryInfrastructure assetCategory = "infrastructure"
+)
 
+// assetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
+type assetSubCategory string
+
+const (
 	SubCategoryCompute assetSubCategory = "compute"
+)
 
+// assetType is used to build the document index. Use only numbers, letters and dashes (-)
+type assetType string
+
+const (
 	TypeVirtualMachine assetType = "virtual-machine"
+)
 
+// assetSubType is used to build the document index. Use only numbers, letters and dashes (-)
+type assetSubType string
+
+const (
 	SubTypeEC2 assetSubType = "ec2"
+)
 
+type assetCloudProvider string
+
+const (
 	AwsCloudProvider assetCloudProvider = "aws"
 )
 

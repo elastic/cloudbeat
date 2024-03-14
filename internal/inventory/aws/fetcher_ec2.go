@@ -57,7 +57,7 @@ func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config
 func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	instances, err := e.provider.DescribeInstances(ctx)
 	if err != nil {
-		e.logger.Errorf("Could not list ec2 instances (%v)", err)
+		e.logger.Errorf("Could not list ec2 instances: %v", err)
 		return
 	}
 
