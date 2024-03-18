@@ -22,6 +22,8 @@ import (
 	"errors"
 	"fmt"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -59,21 +61,43 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, nil, err
 	}
 
+	var (
+		awsConfig   *awssdk.Config
+		awsIdentity *cloud.Identity
+		err         error
+	)
+
+	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
+		log.Warn("failed to initialize; checking if running in AWSGov")
+		cfg.CloudConfig.Aws.Cred.DefaultRegion = endpoints.UsGovEast1RegionID
+		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	}
+
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to get AWS Identity: %w", err)
+	}
+	log.Info("successfully retrieved AWS Identity")
+
+	return registry.NewRegistry(
+		log,
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, *awsConfig, ch, awsIdentity)),
+	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
+}
+
+func (a *AWS) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	return registry.NewRegistry(
-		log,
-		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
-	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
+	return &awsConfig, awsIdentity, nil
 }
 
 func (a *AWS) checkDependencies() error {
