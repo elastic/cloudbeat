@@ -32,7 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-func TestFetch(t *testing.T) {
+func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 	instance1 := &ec2beat.Ec2Instance{
 		Instance: types.Instance{
 			IamInstanceProfile: &types.IamInstanceProfile{
@@ -75,7 +75,7 @@ func TestFetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			ec2Classification,
+			ec2InstanceClassification,
 			"arn:aws:ec2:us-east::ec2/234567890",
 			"test-server",
 			inventory.WithRawAsset(instance1),
@@ -107,7 +107,7 @@ func TestFetch(t *testing.T) {
 		),
 
 		inventory.NewAssetEvent(
-			ec2Classification,
+			ec2InstanceClassification,
 			"",
 			"",
 			inventory.WithRawAsset(instance2),
@@ -122,10 +122,10 @@ func TestFetch(t *testing.T) {
 	}
 
 	logger := logp.NewLogger("test_fetcher_ec2")
-	provider := newMockInstancesProvider(t)
+	provider := newMockEc2InstancesProvider(t)
 	provider.EXPECT().DescribeInstances(mock.Anything).Return(in, nil)
 
-	fetcher := Ec2Fetcher{
+	fetcher := Ec2InstanceFetcher{
 		logger:   logger,
 		provider: provider,
 	}

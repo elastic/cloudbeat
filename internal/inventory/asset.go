@@ -35,6 +35,7 @@ type assetSubCategory string
 
 const (
 	SubCategoryCompute assetSubCategory = "compute"
+	SubCategoryStorage assetSubCategory = "storage"
 )
 
 // assetType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -42,6 +43,7 @@ type assetType string
 
 const (
 	TypeVirtualMachine assetType = "virtual-machine"
+	TypeObjectStorage  assetType = "object-storage"
 )
 
 // assetSubType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -49,6 +51,7 @@ type assetSubType string
 
 const (
 	SubTypeEC2 assetSubType = "ec2"
+	SubTypeS3  assetSubType = "s3"
 )
 
 type assetCloudProvider string

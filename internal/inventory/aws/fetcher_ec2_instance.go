@@ -30,16 +30,16 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type Ec2Fetcher struct {
+type Ec2InstanceFetcher struct {
 	logger   *logp.Logger
-	provider instancesProvider
+	provider ec2InstancesProvider
 }
 
-type instancesProvider interface {
+type ec2InstancesProvider interface {
 	DescribeInstances(ctx context.Context) ([]*ec2.Ec2Instance, error)
 }
 
-var ec2Classification = inventory.AssetClassification{
+var ec2InstanceClassification = inventory.AssetClassification{
 	Category:    inventory.CategoryInfrastructure,
 	SubCategory: inventory.SubCategoryCompute,
 	Type:        inventory.TypeVirtualMachine,
@@ -48,13 +48,13 @@ var ec2Classification = inventory.AssetClassification{
 
 func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
 	provider := ec2.NewEC2Provider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
-	return &Ec2Fetcher{
+	return &Ec2InstanceFetcher{
 		logger:   logger,
 		provider: provider,
 	}
 }
 
-func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (e *Ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	instances, err := e.provider.DescribeInstances(ctx)
 	if err != nil {
 		e.logger.Errorf("Could not list ec2 instances: %v", err)
@@ -84,7 +84,7 @@ func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 		}
 
 		assetChannel <- inventory.NewAssetEvent(
-			ec2Classification,
+			ec2InstanceClassification,
 			instance.GetResourceArn(),
 			instance.GetResourceName(),
 
