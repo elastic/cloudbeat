@@ -12,7 +12,7 @@ The upgrade process comprises the following main steps:
 2. Upgrade the ELK stack version.
 3. Upgrade CSPM/KSPM integration versions:
    - If the integration has a `preview` version, the workflow will execute a script to update the integration to the latest `preview` version.
-   - If the latest version is a `released` version, the integration upgrade will be automatically performed after the stack upgrade.
+   - If the latest version is released (no `preview` suffix), the integration upgrade will be automatically performed after the stack upgrade.
 4. Upgrade KSPM agents by reapplying Kubernetes manifests with the latest image versions.
 5. Upgrade Linux-type agents (CSPM/CNVM) by using the Fleet upgrade API.
 
