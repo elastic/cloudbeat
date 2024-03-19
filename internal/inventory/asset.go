@@ -54,10 +54,8 @@ const (
 	SubTypeS3  assetSubType = "s3"
 )
 
-type assetCloudProvider string
-
 const (
-	AwsCloudProvider assetCloudProvider = "aws"
+	AwsCloudProvider = "aws"
 )
 
 // AssetEvent holds the whole asset
@@ -100,8 +98,37 @@ type AssetNetwork struct {
 
 // AssetCloud contains information about the cloud provider
 type AssetCloud struct {
-	Provider assetCloudProvider `json:"provider"`
-	Region   string             `json:"region"`
+	AvailabilityZone *string             `json:"availability_zone,omitempty"`
+	Provider         string              `json:"provider,omitempty"`
+	Region           string              `json:"region,omitempty"`
+	Account          AssetCloudAccount   `json:"account"`
+	Instance         *AssetCloudInstance `json:"instance,omitempty"`
+	Machine          *AssetCloudMachine  `json:"machine,omitempty"`
+	Project          *AssetCloudProject  `json:"project,omitempty"`
+	Service          *AssetCloudService  `json:"service,omitempty"`
+}
+
+type AssetCloudAccount struct {
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type AssetCloudInstance struct {
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type AssetCloudMachine struct {
+	MachineType string `json:"machineType,omitempty"`
+}
+
+type AssetCloudProject struct {
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type AssetCloudService struct {
+	Name string `json:"name,omitempty"`
 }
 
 // AssetHost contains information of the asset in case it is a host

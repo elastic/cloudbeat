@@ -31,8 +31,10 @@ import (
 )
 
 type S3BucketFetcher struct {
-	logger   *logp.Logger
-	provider s3BucketProvider
+	logger      *logp.Logger
+	provider    s3BucketProvider
+	AccountId   string
+	AccountName string
 }
 
 var s3BucketClassification = inventory.AssetClassification{
@@ -49,8 +51,10 @@ type s3BucketProvider interface {
 func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
 	provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 	return &S3BucketFetcher{
-		logger:   logger,
-		provider: provider,
+		logger:      logger,
+		provider:    provider,
+		AccountId:   identity.Account,
+		AccountName: identity.AccountAlias,
 	}
 }
 
@@ -76,7 +80,14 @@ func (s S3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 			inventory.WithRawAsset(bucket),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
-				Region:   bucket.GetRegion(),
+				Region:   bucket.Region,
+				Account: inventory.AssetCloudAccount{
+					Id:   s.AccountId,
+					Name: s.AccountName,
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS S3",
+				},
 			}),
 		)
 	}

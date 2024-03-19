@@ -54,8 +54,8 @@ func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher A
 		fetchers:  fetchers,
 		publisher: publisher,
 		// move to a configuration parameter
-		bufferFlushInterval: 15 * time.Second,
-		bufferMaxSize:       100,
+		bufferFlushInterval: 10 * time.Second,
+		bufferMaxSize:       1600,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
 	}

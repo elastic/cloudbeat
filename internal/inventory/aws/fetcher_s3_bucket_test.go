@@ -79,6 +79,13 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   "europe-west-1",
+				Account: inventory.AssetCloudAccount{
+					Id:   "123",
+					Name: "alias",
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS S3",
+				},
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -89,6 +96,13 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   "europe-west-1",
+				Account: inventory.AssetCloudAccount{
+					Id:   "123",
+					Name: "alias",
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS S3",
+				},
 			}),
 		),
 	}
@@ -98,8 +112,10 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 
 	fetcher := S3BucketFetcher{
-		logger:   logger,
-		provider: provider,
+		logger:      logger,
+		provider:    provider,
+		AccountId:   "123",
+		AccountName: "alias",
 	}
 
 	ch := make(chan inventory.AssetEvent)

@@ -62,6 +62,9 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			PrivateIpAddress: pointers.Ref("private-ip-addre"),
 			PublicDnsName:    pointers.Ref("public-dns"),
 			PrivateDnsName:   pointers.Ref("private-dns"),
+			Placement: &types.Placement{
+				AvailabilityZone: pointers.Ref("1a"),
+			},
 		},
 		Region: "us-east",
 	}
@@ -81,8 +84,23 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(instance1),
 			inventory.WithTags(map[string]string{"Name": "test-server", "key": "value"}),
 			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "us-east",
+				Provider:         inventory.AwsCloudProvider,
+				Region:           "us-east",
+				AvailabilityZone: pointers.Ref("1a"),
+				Account: inventory.AssetCloudAccount{
+					Id:   "123",
+					Name: "alias",
+				},
+				Instance: &inventory.AssetCloudInstance{
+					Id:   "234567890",
+					Name: "test-server",
+				},
+				Machine: &inventory.AssetCloudMachine{
+					MachineType: "instance-type",
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS EC2",
+				},
 			}),
 			inventory.WithHost(inventory.AssetHost{
 				Architecture:    string(types.ArchitectureValuesX8664),
@@ -115,6 +133,20 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   "us-east",
+				Account: inventory.AssetCloudAccount{
+					Id:   "123",
+					Name: "alias",
+				},
+				Instance: &inventory.AssetCloudInstance{
+					Id:   "",
+					Name: "",
+				},
+				Machine: &inventory.AssetCloudMachine{
+					MachineType: "",
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS EC2",
+				},
 			}),
 			inventory.WithHost(inventory.AssetHost{}),
 			inventory.WithNetwork(inventory.AssetNetwork{}),
@@ -126,8 +158,10 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 	provider.EXPECT().DescribeInstances(mock.Anything).Return(in, nil)
 
 	fetcher := Ec2InstanceFetcher{
-		logger:   logger,
-		provider: provider,
+		logger:      logger,
+		provider:    provider,
+		AccountId:   "123",
+		AccountName: "alias",
 	}
 
 	ch := make(chan inventory.AssetEvent)
