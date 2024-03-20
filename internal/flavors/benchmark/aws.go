@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -68,9 +67,11 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	)
 
 	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	// TODO(kuba): Ask when the DefaultRegion is empty. Is there a chance it is
+	// set, but incorrectly - e.g. "us-east-1"?
 	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
 		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
-		cfg.CloudConfig.Aws.Cred.DefaultRegion = endpoints.UsGovEast1RegionID
+		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
 		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
 	}
 
