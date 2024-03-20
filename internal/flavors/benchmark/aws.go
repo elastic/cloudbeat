@@ -69,7 +69,7 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
 	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
-		log.Warn("failed to initialize; checking if running in AWSGov")
+		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
 		cfg.CloudConfig.Aws.Cred.DefaultRegion = endpoints.UsGovEast1RegionID
 		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
 	}
@@ -77,7 +77,7 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get AWS Identity: %w", err)
 	}
-	log.Info("successfully retrieved AWS Identity")
+	log.Infof("successfully retrieved AWS Identity: %+v", awsIdentity)
 
 	return registry.NewRegistry(
 		log,
