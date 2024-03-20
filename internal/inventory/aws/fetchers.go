@@ -15,17 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package pointers
+package aws
 
-func Deref[T any](v *T) T {
-	if v == nil {
-		var zero T
-		return zero
+import (
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/inventory"
+)
+
+func Fetchers(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
+	return []inventory.AssetFetcher{
+		newEc2Fetcher(logger, identity, cfg),
 	}
-
-	return *v
-}
-
-func Ref[T any](v T) *T {
-	return &v
 }

@@ -15,17 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package pointers
+package iam
 
-func Deref[T any](v *T) T {
-	if v == nil {
-		var zero T
-		return zero
-	}
+import (
+	"context"
+	"fmt"
 
-	return *v
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+)
+
+type RoleGetter interface {
+	GetRole(ctx context.Context, roleName string) (*Role, error)
 }
 
-func Ref[T any](v T) *T {
-	return &v
+func (p Provider) GetRole(ctx context.Context, roleName string) (*Role, error) {
+	input := &iam.GetRoleInput{
+		RoleName: &roleName,
+	}
+
+	response, err := p.client.GetRole(ctx, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get role %s - %w", roleName, err)
+	}
+
+	r := &Role{
+		Role: *response.Role,
+	}
+
+	return r, nil
 }
