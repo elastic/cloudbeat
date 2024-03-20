@@ -45,7 +45,7 @@ var ec2InstanceClassification = inventory.AssetClassification{
 	Category:    inventory.CategoryInfrastructure,
 	SubCategory: inventory.SubCategoryCompute,
 	Type:        inventory.TypeVirtualMachine,
-	SubStype:    inventory.SubTypeEC2,
+	SubType:     inventory.SubTypeEC2,
 }
 
 func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {

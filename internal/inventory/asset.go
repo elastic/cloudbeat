@@ -60,19 +60,20 @@ const (
 
 // AssetEvent holds the whole asset
 type AssetEvent struct {
-	Asset   Asset
-	Network *AssetNetwork
-	Cloud   *AssetCloud
-	Host    *AssetHost
-	IAM     *AssetIAM
+	Asset            Asset
+	Network          *AssetNetwork
+	Cloud            *AssetCloud
+	Host             *AssetHost
+	IAM              *AssetIAM
+	ResourcePolicies []AssetResourcePolicy
 }
 
 // AssetClassification holds the taxonomy of an asset
 type AssetClassification struct {
 	Category    assetCategory    `json:"category"`
-	SubCategory assetSubCategory `json:"subCategory"`
+	SubCategory assetSubCategory `json:"sub_category"`
 	Type        assetType        `json:"type"`
-	SubStype    assetSubType     `json:"subStype"`
+	SubType     assetSubType     `json:"sub_type"`
 }
 
 // Asset contains the identifiers of the asset
@@ -87,13 +88,13 @@ type Asset struct {
 
 // AssetNetwork contains network information
 type AssetNetwork struct {
-	NetworkId        *string `json:"networkId"`
-	SubnetId         *string `json:"subnetId"`
-	Ipv6Address      *string `json:"ipv6Address"`
-	PublicIpAddress  *string `json:"publicIpAddress"`
-	PrivateIpAddress *string `json:"privateIpAddress"`
-	PublicDnsName    *string `json:"publicDnsName"`
-	PrivateDnsName   *string `json:"privateDnsName"`
+	NetworkId        *string `json:"network_id"`
+	SubnetId         *string `json:"subnet_id"`
+	Ipv6Address      *string `json:"ipv6_address"`
+	PublicIpAddress  *string `json:"public_ip_address"`
+	PrivateIpAddress *string `json:"private_ip_address"`
+	PublicDnsName    *string `json:"public_dns_name"`
+	PrivateDnsName   *string `json:"private_dns_name"`
 }
 
 // AssetCloud contains information about the cloud provider
@@ -119,7 +120,7 @@ type AssetCloudInstance struct {
 }
 
 type AssetCloudMachine struct {
-	MachineType string `json:"machineType,omitempty"`
+	MachineType string `json:"machine_type,omitempty"`
 }
 
 type AssetCloudProject struct {
@@ -135,14 +136,27 @@ type AssetCloudService struct {
 type AssetHost struct {
 	Architecture    string  `json:"architecture"`
 	ImageId         *string `json:"imageId"`
-	InstanceType    string  `json:"instanceType"`
+	InstanceType    string  `json:"instance_type"`
 	Platform        string  `json:"platform"`
-	PlatformDetails *string `json:"platformDetails"`
+	PlatformDetails *string `json:"platform_details"`
 }
 
 type AssetIAM struct {
 	Id  *string `json:"id"`
 	Arn *string `json:"arn"`
+}
+
+// AssetResourcePolicy maps security policies applied directly on resources
+type AssetResourcePolicy struct {
+	Version    *string        `json:"version,omitempty"`
+	Id         *string        `json:"id,omitempty"`
+	Effect     string         `json:"effect,omitempty"`
+	Principal  map[string]any `json:"principal,omitempty"`
+	Action     []string       `json:"action,omitempty"`
+	NotAction  []string       `json:"notAction,omitempty"`
+	Resource   []string       `json:"resource,omitempty"`
+	NoResource []string       `json:"noResource,omitempty"`
+	Condition  map[string]any `json:"condition,omitempty"`
 }
 
 // AssetEnricher functional builder function
@@ -201,13 +215,19 @@ func WithIAM(iam AssetIAM) AssetEnricher {
 	}
 }
 
+func WithResourcePolicies(policies ...AssetResourcePolicy) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.ResourcePolicies = policies
+	}
+}
+
 func EmptyEnricher() AssetEnricher {
 	return func(_ *AssetEvent) {}
 }
 
 func generateUniqueId(c AssetClassification, resourceId string) string {
 	hasher := sha256.New()
-	toBeHashed := fmt.Sprintf("%s-%s-%s-%s-%s", resourceId, c.Category, c.SubCategory, c.Type, c.SubStype)
+	toBeHashed := fmt.Sprintf("%s-%s-%s-%s-%s", resourceId, c.Category, c.SubCategory, c.Type, c.SubType)
 	hasher.Write([]byte(toBeHashed)) //nolint:revive
 	hash := hasher.Sum(nil)
 	encoded := base64.StdEncoding.EncodeToString(hash)

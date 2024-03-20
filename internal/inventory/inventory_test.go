@@ -48,7 +48,7 @@ func TestAssetInventory_Run(t *testing.T) {
 						Category:    CategoryInfrastructure,
 						SubCategory: SubCategoryCompute,
 						Type:        TypeVirtualMachine,
-						SubStype:    SubTypeEC2,
+						SubType:     SubTypeEC2,
 					},
 					Tags: map[string]string{"Name": "test-server", "key": "value"},
 				},
@@ -76,6 +76,16 @@ func TestAssetInventory_Run(t *testing.T) {
 					Id:  pointers.Ref("a123123"),
 					Arn: pointers.Ref("123123:123123:123123"),
 				},
+				"resource_policies": []AssetResourcePolicy{
+					{
+						Version:   pointers.Ref("2012-10-17"),
+						Id:        pointers.Ref("Test 1"),
+						Effect:    "Allow",
+						Principal: map[string]any{"*": "*"},
+						Action:    []string{"read"},
+						Resource:  []string{"s3/bucket"},
+					},
+				},
 			},
 		},
 	}
@@ -93,7 +103,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				Category:    CategoryInfrastructure,
 				SubCategory: SubCategoryCompute,
 				Type:        TypeVirtualMachine,
-				SubStype:    SubTypeEC2,
+				SubType:     SubTypeEC2,
 			},
 			"arn:aws:ec2:us-east::ec2/234567890",
 			"test-server",
@@ -121,6 +131,14 @@ func TestAssetInventory_Run(t *testing.T) {
 				PrivateIpAddress: pointers.Ref("private-ip-addre"),
 				PublicDnsName:    pointers.Ref("public-dns"),
 				PrivateDnsName:   pointers.Ref("private-dns"),
+			}),
+			WithResourcePolicies(AssetResourcePolicy{
+				Version:   pointers.Ref("2012-10-17"),
+				Id:        pointers.Ref("Test 1"),
+				Effect:    "Allow",
+				Principal: map[string]any{"*": "*"},
+				Action:    []string{"read"},
+				Resource:  []string{"s3/bucket"},
 			}),
 		)
 	})

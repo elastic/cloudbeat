@@ -38,7 +38,30 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	bucket1 := s3.BucketDescription{
 		Name:         "bucket-1",
 		SSEAlgorithm: nil,
-		BucketPolicy: nil,
+		BucketPolicy: map[string]any{
+			"Version": "2012-10-17",
+			"Statement": []map[string]any{
+				{
+					"Sid":    "Test 1",
+					"Effect": "Allow",
+					"Principal": map[string]any{
+						"AWS":     "dima",
+						"service": "aws.com",
+					},
+					"Action":   []string{"read", "update", "delete"},
+					"Resource": []string{"s3/bucket", "s3/bucket/*"},
+				},
+				{
+					"Sid":    "Test 2",
+					"Effect": "Deny",
+					"Principal": map[string]any{
+						"AWS": "romulo",
+					},
+					"Action":   []string{"delete"},
+					"Resource": []string{"s3/bucket"},
+				},
+			},
+		},
 		BucketVersioning: &s3.BucketVersioning{
 			Enabled:   true,
 			MfaDelete: true,
@@ -55,7 +78,16 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	bucket2 := s3.BucketDescription{
 		Name:         "bucket-2",
 		SSEAlgorithm: nil,
-		BucketPolicy: nil,
+		BucketPolicy: map[string]any{
+			"Version": "2012-10-17",
+			"Statement": map[string]any{
+				"Sid":       "Test 1",
+				"Effect":    "Allow",
+				"Principal": "*",
+				"Action":    "read",
+				"Resource":  "s3/bucket",
+			},
+		},
 		BucketVersioning: &s3.BucketVersioning{
 			Enabled:   false,
 			MfaDelete: false,
@@ -87,6 +119,24 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 					Name: "AWS S3",
 				},
 			}),
+			inventory.WithResourcePolicies(inventory.AssetResourcePolicy{
+				Version: pointers.Ref("2012-10-17"),
+				Id:      pointers.Ref("Test 1"),
+				Effect:  "Allow",
+				Principal: map[string]any{
+					"AWS":     "dima",
+					"service": "aws.com",
+				},
+				Action:   []string{"read", "update", "delete"},
+				Resource: []string{"s3/bucket", "s3/bucket/*"},
+			}, inventory.AssetResourcePolicy{
+				Version:   pointers.Ref("2012-10-17"),
+				Id:        pointers.Ref("Test 2"),
+				Effect:    "Deny",
+				Principal: map[string]any{"AWS": "romulo"},
+				Action:    []string{"delete"},
+				Resource:  []string{"s3/bucket"},
+			}),
 		),
 		inventory.NewAssetEvent(
 			s3BucketClassification,
@@ -103,6 +153,14 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 				Service: &inventory.AssetCloudService{
 					Name: "AWS S3",
 				},
+			}),
+			inventory.WithResourcePolicies(inventory.AssetResourcePolicy{
+				Version:   pointers.Ref("2012-10-17"),
+				Id:        pointers.Ref("Test 1"),
+				Effect:    "Allow",
+				Principal: map[string]any{"*": "*"},
+				Action:    []string{"read"},
+				Resource:  []string{"s3/bucket"},
 			}),
 		),
 	}

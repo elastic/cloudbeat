@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type S3BucketFetcher struct {
@@ -41,7 +42,7 @@ var s3BucketClassification = inventory.AssetClassification{
 	Category:    inventory.CategoryInfrastructure,
 	SubCategory: inventory.SubCategoryStorage,
 	Type:        inventory.TypeObjectStorage,
-	SubStype:    inventory.SubTypeS3,
+	SubType:     inventory.SubTypeS3,
 }
 
 type s3BucketProvider interface {
@@ -89,6 +90,99 @@ func (s S3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 					Name: "AWS S3",
 				},
 			}),
+			inventory.WithResourcePolicies(getBucketPolicies(bucket)...),
 		)
 	}
+}
+
+func getBucketPolicies(bucket s3.BucketDescription) []inventory.AssetResourcePolicy {
+	if len(bucket.BucketPolicy) == 0 {
+		return nil
+	}
+
+	version, hasVersion := bucket.BucketPolicy["Version"].(string)
+	if !hasVersion {
+		version = ""
+	}
+
+	switch statements := bucket.BucketPolicy["Statement"].(type) {
+	case []map[string]any:
+		return convertStatements(statements, version)
+	case []any:
+		return convertAnyStatements(statements, version)
+	case map[string]any:
+		return []inventory.AssetResourcePolicy{convertStatement(statements, &version)}
+	}
+	return nil
+}
+
+func convertAnyStatements(statements []any, version string) []inventory.AssetResourcePolicy {
+	policies := make([]inventory.AssetResourcePolicy, 0, len(statements))
+	for _, statement := range statements {
+		policies = append(policies, convertStatement(statement.(map[string]any), &version))
+	}
+	return policies
+}
+
+func convertStatements(statements []map[string]any, version string) []inventory.AssetResourcePolicy {
+	policies := make([]inventory.AssetResourcePolicy, 0, len(statements))
+	for _, statement := range statements {
+		policies = append(policies, convertStatement(statement, &version))
+	}
+	return policies
+}
+
+func convertStatement(statement map[string]any, version *string) inventory.AssetResourcePolicy {
+	p := inventory.AssetResourcePolicy{}
+	p.Version = version
+
+	if sid, ok := statement["Sid"]; ok {
+		p.Id = pointers.Ref(sid.(string))
+	}
+
+	if effect, ok := statement["Effect"]; ok {
+		p.Effect = effect.(string)
+	}
+
+	if anyPrincipal, ok := statement["Principal"]; ok {
+		switch principal := anyPrincipal.(type) {
+		case string:
+			p.Principal = map[string]any{principal: principal}
+		case map[string]any:
+			p.Principal = principal
+		}
+	}
+
+	if action, ok := statement["Action"]; ok {
+		p.Action = anyToSliceString(action)
+	}
+
+	if notAction, ok := statement["NotAction"]; ok {
+		p.NotAction = anyToSliceString(notAction)
+	}
+
+	if resource, ok := statement["Resource"]; ok {
+		p.Resource = anyToSliceString(resource)
+	}
+
+	if noResource, ok := statement["NoResource"]; ok {
+		p.NoResource = anyToSliceString(noResource)
+	}
+
+	if condition, ok := statement["Condition"]; ok {
+		p.Condition = condition.(map[string]any)
+	}
+
+	return p
+}
+
+func anyToSliceString(anyString any) []string {
+	switch s := anyString.(type) {
+	case string:
+		return []string{s}
+	case []string:
+		return s
+	}
+
+	return nil
 }
