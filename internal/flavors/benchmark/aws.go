@@ -78,7 +78,7 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get AWS Identity: %w", err)
 	}
-	log.Infof("successfully retrieved AWS Identity: %+v", awsIdentity)
+	log.Info("successfully retrieved AWS Identity")
 
 	return registry.NewRegistry(
 		log,
