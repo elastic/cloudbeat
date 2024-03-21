@@ -108,7 +108,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 				BucketVersioning:                      bucketVersioning,
 				PublicAccessBlockConfiguration:        publicAccessBlockConfiguration,
 				AccountPublicAccessBlockConfiguration: accountPublicAccessBlockConfig,
-				region:                                region,
+				Region:                                region,
 			})
 		}
 	}
@@ -184,7 +184,7 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 	bucketsRegionMap := make(map[string][]types.Bucket, 0)
 	for _, clientBucket := range buckets {
 		region, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
-		// If we could not get the region for a bucket, additional API calls for resources will probably fail, we should
+		// If we could not get the Region for a bucket, additional API calls for resources will probably fail, we should
 		//	not describe this bucket.
 		if regionErr != nil {
 			p.log.Errorf("Could not get bucket location for bucket %s. Not describing this bucket. Error: %v", *clientBucket.Name, regionErr)
@@ -323,5 +323,5 @@ func (b BucketDescription) GetResourceType() string {
 }
 
 func (b BucketDescription) GetRegion() string {
-	return b.region
+	return b.Region
 }

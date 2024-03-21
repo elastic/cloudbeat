@@ -28,5 +28,6 @@ import (
 func Fetchers(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
 	return []inventory.AssetFetcher{
 		newEc2Fetcher(logger, identity, cfg),
+		NewS3BucketFetcher(logger, identity, cfg),
 	}
 }
