@@ -271,7 +271,8 @@ jobs:
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
             -var="project=${{ github.actor }}" \
-            -var="owner=${{ github.actor }}"
+            -var="owner=${{ github.actor }}" \
+            -var="ec_url=${{ env.TF_VAR_ec_url }}" 
 
       - name: Set Environment Output
         id: env-output
