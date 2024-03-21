@@ -28,6 +28,7 @@ type assetCategory string
 
 const (
 	CategoryInfrastructure assetCategory = "infrastructure"
+	CategoryIdentity       assetCategory = "identity"
 )
 
 // assetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
@@ -36,6 +37,8 @@ type assetSubCategory string
 const (
 	SubCategoryCompute assetSubCategory = "compute"
 	SubCategoryStorage assetSubCategory = "storage"
+
+	SubCategoryCloudProviderAccount assetSubCategory = "cloud-provider-account"
 )
 
 // assetType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -44,6 +47,8 @@ type assetType string
 const (
 	TypeVirtualMachine assetType = "virtual-machine"
 	TypeObjectStorage  assetType = "object-storage"
+
+	TypeUser assetType = "user"
 )
 
 // assetSubType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -52,6 +57,7 @@ type assetSubType string
 const (
 	SubTypeEC2 assetSubType = "ec2"
 	SubTypeS3  assetSubType = "s3"
+	SubTypeIAM assetSubType = "iam"
 )
 
 const (

@@ -48,7 +48,7 @@ var ec2InstanceClassification = inventory.AssetClassification{
 	SubType:     inventory.SubTypeEC2,
 }
 
-func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
+func newEc2InstancesFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
 	provider := ec2.NewEC2Provider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
 	return &Ec2InstanceFetcher{
 		logger:      logger,
@@ -59,6 +59,9 @@ func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config
 }
 
 func (e *Ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+	e.logger.Info("Fetching EC2 Instances")
+	defer e.logger.Info("Fetching EC2 Instances - Finished")
+
 	instances, err := e.provider.DescribeInstances(ctx)
 	if err != nil {
 		e.logger.Errorf("Could not list ec2 instances: %v", err)

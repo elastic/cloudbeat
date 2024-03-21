@@ -60,6 +60,9 @@ func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.C
 }
 
 func (s S3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+	s.logger.Info("Fetching S3 Bucket")
+	defer s.logger.Info("Fetching S3 Bucket - Finished")
+
 	awsBuckets, err := s.provider.DescribeBuckets(ctx)
 	if err != nil {
 		s.logger.Errorf("Could not list s3 buckets: %v", err)
