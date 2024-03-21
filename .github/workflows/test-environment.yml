@@ -181,11 +181,10 @@ jobs:
           if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-          elif [[ $ec_api_key == '' && $input_ec_url == $qa_ec_url ]]; then
+          elif [[ $input_ec_url == $ec_url ]]; then
+            echo "TF_VAR_ec_api_key=$TF_VAR_ec_api_key" >> $GITHUB_ENV
+          elif [[ $input_ec_url == $qa_ec_url ]]; then
             echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
-          elif [[ $ec_api_key != '' && $input_ec_url == $qa_ec_url ]]; then
-            echo "::add-mask::$ec_api_key"
-            echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
           else
             echo "error: Elastic Cloud API key is required from a valid ec url"
             exit 1
@@ -272,7 +271,7 @@ jobs:
             -var="region=${{ env.AWS_REGION }}" \
             -var="project=${{ github.actor }}" \
             -var="owner=${{ github.actor }}" \
-            -var="ec_url=${{ env.TF_VAR_ec_url }}" 
+
 
       - name: Set Environment Output
         id: env-output
