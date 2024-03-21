@@ -7,7 +7,7 @@ inputs:
   kind-config:
     description: 'KIND configuration'
     required: true
-  container-image-suffix:
+  container-image-suffix: # todo: remove
     description: 'Container image suffix'
     required: true
   elastic-agent-docker-image:
@@ -48,7 +48,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: /tmp/docker-images/
-        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ inputs.container-image-suffix }}
+        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
 
     - name: Prepare Kind Cluster for Process Tests
       if: ${{ contains(inputs.kind-config, 'conf2') }}
@@ -63,16 +63,13 @@ runs:
       shell: bash
       run: just create-kind-cluster ${{ inputs.kind-config }}
 
-    # - name: Load images to kind
-    #   shell: bash
-    #   run: ./.ci/scripts/kind-images.sh '${{ inputs.container-image-suffix }}' '${{ inputs.kind-config }}'
     - name: Load images to kind
       shell: bash
       run: |
         ls -lahR /tmp/docker-images/
-        kind load image-archive /tmp/docker-images/cloudbeat-${{ inputs.container-image-suffix }}.tar --name='${{ inputs.kind-config }}'
-        kind load image-archive /tmp/docker-images/pytest-${{ inputs.container-image-suffix }}.tar --name='${{ inputs.kind-config }}'
-        kind load image-archive /tmp/docker-images/elastic-agent-${{ inputs.container-image-suffix }}.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive /tmp/docker-images/cloudbeat.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive /tmp/docker-images/pytest.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive /tmp/docker-images/elastic-agent.tar --name='${{ inputs.kind-config }}'
 
     - name: Deploy tests Helm chart
       id: deploy_helm

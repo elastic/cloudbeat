@@ -54,7 +54,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: /tmp/docker-images/
-        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ inputs.container-image-suffix }}
+        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
 
     - name: Build cloudbeat-docker image
       uses: docker/build-push-action@v5
@@ -65,7 +65,8 @@ runs:
         tags: cloudbeat:latest
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new
-        outputs: type=docker,dest=/tmp/docker-images/cloudbeat-${{ inputs.container-image-suffix }}.tar
+        outputs: type=docker,dest=/tmp/docker-images/cloudbeat.tar
+        no-cache: false
 
     - name: Build elastic-agent
       uses: docker/build-push-action@v5
@@ -80,8 +81,9 @@ runs:
         tags: ${{ inputs.elastic-agent-docker-image }}:${{ inputs.elastic-agent-docker-image-tag }}
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new
-        outputs: type=docker,dest=/tmp/docker-images/elastic-agent-${{ inputs.container-image-suffix }}.tar
+        outputs: type=docker,dest=/tmp/docker-images/elastic-agent.tar
         build-args: ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:${{ inputs.elastic-agent-docker-image-tag }}
+        no-cache: false
 
     - name: Build pytest-docker
       uses: docker/build-push-action@v5
@@ -91,7 +93,8 @@ runs:
         tags: cloudbeat-test:latest
         cache-from: type=local,mode=max,src=/tmp/.buildx-cache
         cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-        outputs: type=docker,dest=/tmp/docker-images/pytest-${{ inputs.container-image-suffix }}.tar
+        outputs: type=docker,dest=/tmp/docker-images/pytest.tar
+        no-cache: false
 
     - name: Rotate cache
       shell: bash

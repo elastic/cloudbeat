@@ -286,8 +286,17 @@ jobs:
     name: Upload integration tests results
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    permissions:
+      pull-requests: write
     if: ${{ success() || failure() }}
+    env:
+      AWS_REGION: "eu-west-1"
+      ALLURE_S3_BUCKET: "s3://csp-allure-reports/allure_reports/cloudbeat/ci"
+      S3_BUCKET_ALLURE_REPORT_AP: "http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/ci"
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         if: ${{ success() || failure() }}
         with:
@@ -306,7 +315,7 @@ jobs:
         uses: andrcuns/allure-publish-action@v2.6.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_REGION: eu-west-1
+          AWS_REGION: ${{ env.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         with:
@@ -320,4 +329,34 @@ jobs:
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/ci/${{ github.event.number }}
           ignoreMissingResults: true
-          debug: true
+          debug: false
+
+      - name: Allure Summary
+        if: ${{ success() && github.event_name == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail --show-error --location '${{ env.S3_BUCKET_ALLURE_REPORT_AP }}/${{ github.event.number }}/history/history-trend.json' --output ./history-trend.json
+          allure_result=./history-trend.json
+          allure_url=${{ env.S3_BUCKET_ALLURE_REPORT_AP }}/${{ github.event.number }}/index.html
+
+          ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
+          allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
+          # posting result into job summary
+          echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
+
+          # saving result into env variable (with multiline handling)
+          echo "ALLURE_SUMMARY<<EOF" >> $GITHUB_ENV
+          echo "$allure_summary" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Comment test success result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ success() && github.event_name == 'pull_request' }}
+        with:
+          header: CI Test Results
+          number: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ${{ env.ALLURE_SUMMARY }}
