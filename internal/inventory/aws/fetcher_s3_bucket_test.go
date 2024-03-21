@@ -18,14 +18,11 @@
 package aws
 
 import (
-	"context"
 	"testing"
-	"time"
 
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	s3ctrltypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -169,30 +166,12 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	provider := newMockS3BucketProvider(t)
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 
-	fetcher := S3BucketFetcher{
+	fetcher := &S3BucketFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   "123",
 		AccountName: "alias",
 	}
 
-	ch := make(chan inventory.AssetEvent)
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-	defer cancel()
-	go func() {
-		fetcher.Fetch(ctx, ch)
-	}()
-
-	received := make([]inventory.AssetEvent, 0, len(expected))
-	for len(expected) != len(received) {
-		select {
-		case <-ctx.Done():
-			assert.ElementsMatch(t, expected, received)
-			return
-		case event := <-ch:
-			received = append(received, event)
-		}
-	}
-
-	assert.ElementsMatch(t, expected, received)
+	collectResourcesAndMatch(t, fetcher, expected)
 }

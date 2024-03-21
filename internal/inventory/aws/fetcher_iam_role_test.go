@@ -26,67 +26,53 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-func TestIAMUserFetcher_Fetch(t *testing.T) {
+func TestIAMRoleFetcher_Fetch(t *testing.T) {
 	now := time.Now()
 
-	user1 := iam.User{
-		Name:                "user-1",
-		Arn:                 "arn:aws:iam::000:user/user-1",
-		LastAccess:          "2023-03-28T12:27:26+00:00",
-		PasswordEnabled:     true,
-		MfaActive:           true,
-		PasswordLastChanged: "2023-03-28T12:27:26+00:00",
-		AccessKeys: []iam.AccessKey{
-			{
-				Active:       true,
-				HasUsed:      true,
-				LastAccess:   "2023-03-28T12:27:26+00:00",
-				RotationDate: "2023-03-28T12:27:26+00:00",
-			},
-		},
-		MFADevices: []iam.AuthDevice{
-			{
-				IsVirtual: true,
-				MFADevice: types.MFADevice{
-					EnableDate:   &now,
-					SerialNumber: pointers.Ref("123"),
-					UserName:     pointers.Ref("user-1"),
-				},
-			},
-		},
-		InlinePolicies: []iam.PolicyDocument{
-			{
-				PolicyName: "inline-policy",
-				Policy:     "policy",
-			},
-		},
-		AttachedPolicies: []types.AttachedPolicy{
-			{
-				PolicyArn:  pointers.Ref("arn:aws:iam:1321312:policy/att-policy"),
-				PolicyName: pointers.Ref("att-policy"),
-			},
+	role1 := iam.Role{
+		Role: types.Role{
+			RoleName:                 pointers.Ref("role-name-1"),
+			Arn:                      pointers.Ref("arn:aws:iam::0000:role/role-name-1"),
+			RoleLastUsed:             nil,
+			Tags:                     nil,
+			CreateDate:               &now,
+			MaxSessionDuration:       pointers.Ref(int32(3600)),
+			PermissionsBoundary:      nil,
+			AssumeRolePolicyDocument: pointers.Ref("document"),
+			Description:              pointers.Ref("EKS managed node group IAM role"),
+			Path:                     pointers.Ref("/"),
+			RoleId:                   pointers.Ref("17823618723"),
 		},
 	}
 
-	user2 := iam.User{
-		Name:       "user-2",
-		Arn:        "arn:aws:iam::000:user/user-2",
-		LastAccess: "2023-03-28T12:27:26+00:00",
+	role2 := iam.Role{
+		Role: types.Role{
+			RoleName:                 pointers.Ref("role-name-2"),
+			Arn:                      pointers.Ref("arn:aws:iam::0000:role/role-name-2"),
+			RoleLastUsed:             nil,
+			Tags:                     nil,
+			CreateDate:               &now,
+			MaxSessionDuration:       pointers.Ref(int32(3600)),
+			PermissionsBoundary:      nil,
+			AssumeRolePolicyDocument: pointers.Ref("document"),
+			Description:              pointers.Ref("EKS managed node group IAM role"),
+			Path:                     pointers.Ref("/"),
+			RoleId:                   pointers.Ref("17823618723"),
+		},
 	}
 
-	in := []awslib.AwsResource{user1, user2}
+	in := []*iam.Role{&role1, nil, &role2}
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			iamUserClassification,
-			"arn:aws:iam::000:user/user-1",
-			"user-1",
-			inventory.WithRawAsset(user1),
+			iamRoleClassification,
+			"arn:aws:iam::0000:role/role-name-1",
+			"role-name-1",
+			inventory.WithRawAsset(role1),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   "global",
@@ -101,10 +87,10 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 		),
 
 		inventory.NewAssetEvent(
-			iamUserClassification,
-			"arn:aws:iam::000:user/user-2",
-			"user-2",
-			inventory.WithRawAsset(user2),
+			iamRoleClassification,
+			"arn:aws:iam::0000:role/role-name-2",
+			"role-name-2",
+			inventory.WithRawAsset(role2),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   "global",
@@ -119,11 +105,11 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_iam_user")
-	provider := NewMockIamUserProvider(t)
-	provider.EXPECT().GetUsers(mock.Anything).Return(in, nil)
+	logger := logp.NewLogger("test_fetcher_iam_role")
+	provider := NewMockIamRoleProvider(t)
+	provider.EXPECT().ListRoles(mock.Anything).Return(in, nil)
 
-	fetcher := &IamUserFetcher{
+	fetcher := &IamRoleFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   "123",

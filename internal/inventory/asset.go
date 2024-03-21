@@ -48,7 +48,8 @@ const (
 	TypeVirtualMachine assetType = "virtual-machine"
 	TypeObjectStorage  assetType = "object-storage"
 
-	TypeUser assetType = "user"
+	TypeUser           assetType = "user"
+	TypeServiceAccount assetType = "service-account"
 )
 
 // assetSubType is used to build the document index. Use only numbers, letters and dashes (-)

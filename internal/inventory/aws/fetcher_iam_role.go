@@ -27,29 +27,30 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type IamUserFetcher struct {
+type IamRoleFetcher struct {
 	logger      *logp.Logger
-	provider    IamUserProvider
+	provider    IamRoleProvider
 	AccountId   string
 	AccountName string
 }
 
-type IamUserProvider interface {
-	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
+type IamRoleProvider interface {
+	ListRoles(ctx context.Context) ([]*iam.Role, error)
 }
 
-var iamUserClassification = inventory.AssetClassification{
+var iamRoleClassification = inventory.AssetClassification{
 	Category:    inventory.CategoryIdentity,
 	SubCategory: inventory.SubCategoryCloudProviderAccount,
-	Type:        inventory.TypeUser,
+	Type:        inventory.TypeServiceAccount,
 	SubType:     inventory.SubTypeIAM,
 }
 
-func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
+func newIamRoleFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
 	provider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
-	return &IamUserFetcher{
+	return &IamRoleFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -57,34 +58,32 @@ func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Co
 	}
 }
 
-func (i *IamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
-	i.logger.Info("Fetching IAM Users")
-	defer i.logger.Info("Fetching IAM Users - Finished")
+func (i *IamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+	i.logger.Info("Fetching IAM Roles")
+	defer i.logger.Info("Fetching IAM Roles - Finished")
 
-	users, err := i.provider.GetUsers(ctx)
+	users, err := i.provider.ListRoles(ctx)
 	if err != nil {
-		i.logger.Errorf("Could not list users: %v", err)
+		i.logger.Errorf("Could not list roles: %v", err)
 		if len(users) == 0 {
 			return
 		}
 	}
 
-	for _, resource := range users {
-		user, ok := resource.(iam.User)
-		if !ok {
-			i.logger.Errorf("Could not get info about  user: %v", resource.GetResourceArn())
+	for _, role := range users {
+		if role == nil {
 			continue
 		}
 
 		assetChannel <- inventory.NewAssetEvent(
-			iamUserClassification,
-			user.GetResourceArn(),
-			user.GetResourceName(),
+			iamRoleClassification,
+			pointers.Deref(role.Arn),
+			pointers.Deref(role.RoleName),
 
-			inventory.WithRawAsset(user),
+			inventory.WithRawAsset(*role),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
-				Region:   user.GetRegion(),
+				Region:   awslib.GlobalRegion,
 				Account: inventory.AssetCloudAccount{
 					Id:   i.AccountId,
 					Name: i.AccountName,

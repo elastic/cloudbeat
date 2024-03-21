@@ -18,18 +18,35 @@
 package aws
 
 import (
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"context"
+	"testing"
+	"time"
 
-	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/elastic/cloudbeat/internal/inventory"
 )
 
-func Fetchers(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
-	return []inventory.AssetFetcher{
-		newEc2InstancesFetcher(logger, identity, cfg),
-		NewS3BucketFetcher(logger, identity, cfg),
-		newIamUserFetcher(logger, identity, cfg),
-		newIamRoleFetcher(logger, identity, cfg),
+func collectResourcesAndMatch(t *testing.T, fetcher inventory.AssetFetcher, expected []inventory.AssetEvent) {
+	t.Helper()
+
+	ch := make(chan inventory.AssetEvent)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+	go func() {
+		fetcher.Fetch(ctx, ch)
+	}()
+
+	received := make([]inventory.AssetEvent, 0, len(expected))
+	for len(expected) != len(received) {
+		select {
+		case <-ctx.Done():
+			assert.ElementsMatch(t, expected, received)
+			return
+		case event := <-ch:
+			received = append(received, event)
+		}
 	}
+
+	assert.ElementsMatch(t, expected, received)
 }
