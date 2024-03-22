@@ -121,7 +121,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 	}
 
 	logger := logp.NewLogger("test_fetcher_iam_user")
-	provider := NewMockIamUserProvider(t)
+	provider := newMockIamUserProvider(t)
 	provider.EXPECT().GetUsers(mock.Anything).Return(in, nil)
 
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}

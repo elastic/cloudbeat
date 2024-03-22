@@ -107,7 +107,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 	}
 
 	logger := logp.NewLogger("test_fetcher_iam_role")
-	provider := NewMockIamRoleProvider(t)
+	provider := newMockIamRoleProvider(t)
 	provider.EXPECT().ListRoles(mock.Anything).Return(in, nil)
 
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}

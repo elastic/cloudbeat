@@ -164,7 +164,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 	}
 
 	logger := logp.NewLogger("test_fetcher_iam_role")
-	provider := NewMockIamPolicyProvider(t)
+	provider := newMockIamPolicyProvider(t)
 	provider.EXPECT().GetPolicies(mock.Anything).Return(in, nil)
 
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
