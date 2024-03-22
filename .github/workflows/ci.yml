@@ -26,6 +26,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
+        with:
+          init-tools: 'true'
 
   lint:
     needs: [ init-hermit ]
