@@ -1,20 +1,8 @@
 name: 'K8S CI'
 description: 'K8s integration tests'
 inputs:
-  elk-version:
-    description: 'ELK version'
-    required: true
   kind-config:
     description: 'KIND configuration'
-    required: true
-  container-image-suffix: # todo: remove
-    description: 'Container image suffix'
-    required: true
-  elastic-agent-docker-image:
-    description: 'Elastic-Agent docker image'
-    required: true
-  elastic-agent-docker-image-tag:
-    description: 'Elastic-Agent docker image tag'
     required: true
 
   test-target:
@@ -27,28 +15,16 @@ inputs:
   values-file:
     description: 'Helm values file'
     required: true
+
+  docker-images-folder:
+    description: 'Docker build cache folder'
+    required: false
+    default: '/tmp/.docker-images'
 runs:
   using: composite
   steps:
-    - name: Free Disk Space (Ubuntu)
-      uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: false
-        docker-images: true
-        swap-storage: true
-
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-
-    - name: Cache docker images
-      uses: actions/cache@v4
-      with:
-        path: /tmp/docker-images/
-        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
 
     - name: Prepare Kind Cluster for Process Tests
       if: ${{ contains(inputs.kind-config, 'conf2') }}
@@ -66,10 +42,10 @@ runs:
     - name: Load images to kind
       shell: bash
       run: |
-        ls -lahR /tmp/docker-images/
-        kind load image-archive /tmp/docker-images/cloudbeat.tar --name='${{ inputs.kind-config }}'
-        kind load image-archive /tmp/docker-images/pytest.tar --name='${{ inputs.kind-config }}'
-        kind load image-archive /tmp/docker-images/elastic-agent.tar --name='${{ inputs.kind-config }}'
+        ls -lahR ${{ inputs.docker-images-folder }}
+        kind load image-archive ${{ inputs.docker-images-folder }}/cloudbeat.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive ${{ inputs.docker-images-folder }}/pytest.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive ${{ inputs.docker-images-folder }}/elastic-agent.tar --name='${{ inputs.kind-config }}'
 
     - name: Deploy tests Helm chart
       id: deploy_helm

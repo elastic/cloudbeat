@@ -202,11 +202,18 @@ jobs:
     # docker run --interactive --tty --rm --entrypoint bash docker.elastic.co/elastic-agent/elastic-agent-complete:8.14.0-SNAPSHOT -c 'cat /etc/os-release'
     runs-on: ubuntu-20.04
     timeout-minutes: 40
-    env:
-      CONTAINER_SUFFIX: ${{ github.run_id }}
-      CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
-      CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Check out the repo
         uses: actions/checkout@v4
 
@@ -216,10 +223,7 @@ jobs:
       - name: Build docker images
         uses: ./.github/actions/docker-images
         with:
-          elk-version: ${{ env.ELK_VERSION }}
-          container-image-suffix: ${{ github.run_id }}
-          elastic-agent-docker-image: ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }}
-          elastic-agent-docker-image-tag: ${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+          build-docker-images: 'true'
 
   ci-k8s:
     needs: [ init-hermit, docker-images ]
@@ -248,27 +252,37 @@ jobs:
           - test-target: k8s_process_rules
             kind-config: kind-test-proc-conf2
             values-file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
-    env:
-      CONTAINER_SUFFIX: ${{ github.run_id }}
-      CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
-      CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Check out the repo
         uses: actions/checkout@v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
 
+      - name: Build docker images
+        uses: ./.github/actions/docker-images
+        with:
+          build-docker-images: 'false'
+          docker-images-folder: '/tmp/.docker-images'
+
       - name: Run k8s integration tests
         uses: ./.github/actions/k8s-ci
         with:
-          elk-version: ${{ env.ELK_VERSION }}
           kind-config: ${{ matrix.kind-config }}
-          container-image-suffix: ${{ github.run_id }}
-          elastic-agent-docker-image: ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }}
-          elastic-agent-docker-image-tag: ${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
           test-target: ${{ matrix.test-target }}
           values-file: ${{ matrix.values-file }}
+          docker-images-folder: '/tmp/.docker-images'
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v3
