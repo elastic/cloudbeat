@@ -20,7 +20,6 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
@@ -48,8 +47,7 @@ type s3BucketProvider interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
-	provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
+func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
 	return &S3BucketFetcher{
 		logger:      logger,
 		provider:    provider,

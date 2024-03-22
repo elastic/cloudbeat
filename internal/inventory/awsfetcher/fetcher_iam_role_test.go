@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -109,12 +110,8 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 	provider := NewMockIamRoleProvider(t)
 	provider.EXPECT().ListRoles(mock.Anything).Return(in, nil)
 
-	fetcher := &IamRoleFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   "123",
-		AccountName: "alias",
-	}
+	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
+	fetcher := newIamRoleFetcher(logger, identity, provider)
 
 	collectResourcesAndMatch(t, fetcher, expected)
 }

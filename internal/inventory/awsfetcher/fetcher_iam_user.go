@@ -20,7 +20,6 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -47,8 +46,7 @@ var iamUserClassification = inventory.AssetClassification{
 	SubType:     inventory.SubTypeIAM,
 }
 
-func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
-	provider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
+func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, provider IamUserProvider) inventory.AssetFetcher {
 	return &IamUserFetcher{
 		logger:      logger,
 		provider:    provider,

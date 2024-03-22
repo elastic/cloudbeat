@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	ec2beat "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -154,12 +155,8 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 	provider := newMockEc2InstancesProvider(t)
 	provider.EXPECT().DescribeInstances(mock.Anything).Return(in, nil)
 
-	fetcher := &Ec2InstanceFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   "123",
-		AccountName: "alias",
-	}
+	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
+	fetcher := newEc2InstancesFetcher(logger, identity, provider)
 
 	collectResourcesAndMatch(t, fetcher, expected)
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
@@ -123,12 +124,8 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 	provider := NewMockIamUserProvider(t)
 	provider.EXPECT().GetUsers(mock.Anything).Return(in, nil)
 
-	fetcher := &IamUserFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   "123",
-		AccountName: "alias",
-	}
+	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
+	fetcher := newIamUserFetcher(logger, identity, provider)
 
 	collectResourcesAndMatch(t, fetcher, expected)
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
@@ -166,12 +167,8 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	provider := newMockS3BucketProvider(t)
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 
-	fetcher := &S3BucketFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   "123",
-		AccountName: "alias",
-	}
+	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
+	fetcher := NewS3BucketFetcher(logger, identity, provider)
 
 	collectResourcesAndMatch(t, fetcher, expected)
 }

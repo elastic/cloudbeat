@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
@@ -100,7 +101,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 
 	in := []awslib.AwsResource{policy1, nil, policy2, policy3}
 
-	cloud := inventory.AssetCloud{
+	cloudField := inventory.AssetCloud{
 		Provider: inventory.AwsCloudProvider,
 		Region:   "global",
 		Account: inventory.AssetCloudAccount{
@@ -118,7 +119,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::0000:policy/policy-1",
 			"policy-1",
 			inventory.WithRawAsset(policy1),
-			inventory.WithCloud(cloud),
+			inventory.WithCloud(cloudField),
 			inventory.WithTags(map[string]string{
 				"key-1": "value-1",
 				"key-2": "value-2",
@@ -141,7 +142,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::0000:policy/policy-2",
 			"policy-2",
 			inventory.WithRawAsset(policy2),
-			inventory.WithCloud(cloud),
+			inventory.WithCloud(cloudField),
 			inventory.WithTags(map[string]string{
 				"key-1": "value-1",
 			}),
@@ -158,7 +159,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::0000:policy/policy-3",
 			"policy-3",
 			inventory.WithRawAsset(policy3),
-			inventory.WithCloud(cloud),
+			inventory.WithCloud(cloudField),
 		),
 	}
 
@@ -166,12 +167,8 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 	provider := NewMockIamPolicyProvider(t)
 	provider.EXPECT().GetPolicies(mock.Anything).Return(in, nil)
 
-	fetcher := &IamPolicyFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   "123",
-		AccountName: "alias",
-	}
+	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
+	fetcher := newIamPolicyFetcher(logger, identity, provider)
 
 	collectResourcesAndMatch(t, fetcher, expected)
 }
