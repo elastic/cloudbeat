@@ -272,7 +272,7 @@ jobs:
       - name: Hermit Environment
         uses: ./.github/actions/hermit
 
-      - name: Build docker images
+      - name: Get docker images
         uses: ./.github/actions/docker-images
         with:
           build-docker-images: 'false'
