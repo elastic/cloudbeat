@@ -50,6 +50,7 @@ const (
 
 	TypeUser           assetType = "user"
 	TypeServiceAccount assetType = "service-account"
+	TypePermissions    assetType = "permissions"
 )
 
 // assetSubType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -194,6 +195,10 @@ func WithRawAsset(raw any) AssetEnricher {
 
 func WithTags(tags map[string]string) AssetEnricher {
 	return func(a *AssetEvent) {
+		if len(tags) == 0 {
+			return
+		}
+
 		a.Asset.Tags = tags
 	}
 }
@@ -224,6 +229,10 @@ func WithIAM(iam AssetIAM) AssetEnricher {
 
 func WithResourcePolicies(policies ...AssetResourcePolicy) AssetEnricher {
 	return func(a *AssetEvent) {
+		if len(policies) == 0 {
+			return
+		}
+
 		a.ResourcePolicies = policies
 	}
 }

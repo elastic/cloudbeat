@@ -62,15 +62,15 @@ func (i *IamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 	i.logger.Info("Fetching IAM Roles")
 	defer i.logger.Info("Fetching IAM Roles - Finished")
 
-	users, err := i.provider.ListRoles(ctx)
+	roles, err := i.provider.ListRoles(ctx)
 	if err != nil {
 		i.logger.Errorf("Could not list roles: %v", err)
-		if len(users) == 0 {
+		if len(roles) == 0 {
 			return
 		}
 	}
 
-	for _, role := range users {
+	for _, role := range roles {
 		if role == nil {
 			continue
 		}

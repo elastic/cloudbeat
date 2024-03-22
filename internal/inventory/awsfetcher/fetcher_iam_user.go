@@ -70,9 +70,13 @@ func (i *IamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 	}
 
 	for _, resource := range users {
+		if resource == nil {
+			continue
+		}
+
 		user, ok := resource.(iam.User)
 		if !ok {
-			i.logger.Errorf("Could not get info about  user: %v", resource.GetResourceArn())
+			i.logger.Errorf("Could not get info about user: %s", resource.GetResourceArn())
 			continue
 		}
 

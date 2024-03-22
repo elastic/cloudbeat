@@ -25,11 +25,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 )
 
-func Fetchers(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
+func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
 	return []inventory.AssetFetcher{
 		newEc2InstancesFetcher(logger, identity, cfg),
 		NewS3BucketFetcher(logger, identity, cfg),
 		newIamUserFetcher(logger, identity, cfg),
 		newIamRoleFetcher(logger, identity, cfg),
+		newIamPolicyFetcher(logger, identity, cfg),
 	}
 }
