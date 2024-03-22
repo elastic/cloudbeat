@@ -29,14 +29,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type IamPolicyFetcher struct {
+type iamPolicyFetcher struct {
 	logger      *logp.Logger
-	provider    IamPolicyProvider
+	provider    iamPolicyProvider
 	AccountId   string
 	AccountName string
 }
 
-type IamPolicyProvider interface {
+type iamPolicyProvider interface {
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
@@ -47,8 +47,8 @@ var iamPolicyClassification = inventory.AssetClassification{
 	SubType:     inventory.SubTypeIAM,
 }
 
-func newIamPolicyFetcher(logger *logp.Logger, identity *cloud.Identity, provider IamPolicyProvider) inventory.AssetFetcher {
-	return &IamPolicyFetcher{
+func newIamPolicyFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamPolicyProvider) inventory.AssetFetcher {
+	return &iamPolicyFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -56,7 +56,7 @@ func newIamPolicyFetcher(logger *logp.Logger, identity *cloud.Identity, provider
 	}
 }
 
-func (i *IamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	i.logger.Info("Fetching IAM Policies")
 	defer i.logger.Info("Fetching IAM Policies - Finished")
 
@@ -102,7 +102,7 @@ func (i *IamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 	}
 }
 
-func (i *IamPolicyFetcher) getTags(policy iam.Policy) map[string]string {
+func (i *iamPolicyFetcher) getTags(policy iam.Policy) map[string]string {
 	tags := make(map[string]string, len(policy.Tags))
 
 	for _, tag := range policy.Tags {

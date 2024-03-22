@@ -29,14 +29,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type IamRoleFetcher struct {
+type iamRoleFetcher struct {
 	logger      *logp.Logger
-	provider    IamRoleProvider
+	provider    iamRoleProvider
 	AccountId   string
 	AccountName string
 }
 
-type IamRoleProvider interface {
+type iamRoleProvider interface {
 	ListRoles(ctx context.Context) ([]*iam.Role, error)
 }
 
@@ -47,8 +47,8 @@ var iamRoleClassification = inventory.AssetClassification{
 	SubType:     inventory.SubTypeIAM,
 }
 
-func newIamRoleFetcher(logger *logp.Logger, identity *cloud.Identity, provider IamRoleProvider) inventory.AssetFetcher {
-	return &IamRoleFetcher{
+func newIamRoleFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamRoleProvider) inventory.AssetFetcher {
+	return &iamRoleFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -56,7 +56,7 @@ func newIamRoleFetcher(logger *logp.Logger, identity *cloud.Identity, provider I
 	}
 }
 
-func (i *IamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	i.logger.Info("Fetching IAM Roles")
 	defer i.logger.Info("Fetching IAM Roles - Finished")
 

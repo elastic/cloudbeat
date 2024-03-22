@@ -29,7 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 )
 
-type S3BucketFetcher struct {
+type s3BucketFetcher struct {
 	logger      *logp.Logger
 	provider    s3BucketProvider
 	AccountId   string
@@ -47,8 +47,8 @@ type s3BucketProvider interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
-	return &S3BucketFetcher{
+func newS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
+	return &s3BucketFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -56,7 +56,7 @@ func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, provider 
 	}
 }
 
-func (s *S3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	s.logger.Info("Fetching S3 Bucket")
 	defer s.logger.Info("Fetching S3 Bucket - Finished")
 

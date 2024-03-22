@@ -36,7 +36,7 @@ func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []invent
 
 	return []inventory.AssetFetcher{
 		newEc2InstancesFetcher(logger, identity, ec2Provider),
-		NewS3BucketFetcher(logger, identity, s3Provider),
+		newS3BucketFetcher(logger, identity, s3Provider),
 		newIamUserFetcher(logger, identity, iamProvider),
 		newIamRoleFetcher(logger, identity, iamProvider),
 		newIamPolicyFetcher(logger, identity, iamProvider),

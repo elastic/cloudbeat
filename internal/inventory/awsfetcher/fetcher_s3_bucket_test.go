@@ -168,7 +168,7 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := NewS3BucketFetcher(logger, identity, provider)
+	fetcher := newS3BucketFetcher(logger, identity, provider)
 
 	collectResourcesAndMatch(t, fetcher, expected)
 }

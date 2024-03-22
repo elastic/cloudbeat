@@ -28,14 +28,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 )
 
-type IamUserFetcher struct {
+type iamUserFetcher struct {
 	logger      *logp.Logger
-	provider    IamUserProvider
+	provider    iamUserProvider
 	AccountId   string
 	AccountName string
 }
 
-type IamUserProvider interface {
+type iamUserProvider interface {
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
@@ -46,8 +46,8 @@ var iamUserClassification = inventory.AssetClassification{
 	SubType:     inventory.SubTypeIAM,
 }
 
-func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, provider IamUserProvider) inventory.AssetFetcher {
-	return &IamUserFetcher{
+func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamUserProvider) inventory.AssetFetcher {
+	return &iamUserFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -55,7 +55,7 @@ func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, provider I
 	}
 }
 
-func (i *IamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	i.logger.Info("Fetching IAM Users")
 	defer i.logger.Info("Fetching IAM Users - Finished")
 

@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type Ec2InstanceFetcher struct {
+type ec2InstanceFetcher struct {
 	logger      *logp.Logger
 	provider    ec2InstancesProvider
 	AccountId   string
@@ -47,7 +47,7 @@ var ec2InstanceClassification = inventory.AssetClassification{
 }
 
 func newEc2InstancesFetcher(logger *logp.Logger, identity *cloud.Identity, provider ec2InstancesProvider) inventory.AssetFetcher {
-	return &Ec2InstanceFetcher{
+	return &ec2InstanceFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -55,7 +55,7 @@ func newEc2InstancesFetcher(logger *logp.Logger, identity *cloud.Identity, provi
 	}
 }
 
-func (e *Ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	e.logger.Info("Fetching EC2 Instances")
 	defer e.logger.Info("Fetching EC2 Instances - Finished")
 
@@ -125,7 +125,7 @@ func (e *Ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 	}
 }
 
-func (e *Ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]string {
+func (e *ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]string {
 	tags := make(map[string]string, len(instance.Tags))
 	for _, t := range instance.Tags {
 		if t.Key == nil {
@@ -137,7 +137,7 @@ func (e *Ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]strin
 	return tags
 }
 
-func (e *Ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) *string {
+func (e *ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) *string {
 	if instance.Placement == nil {
 		return nil
 	}
