@@ -36,7 +36,7 @@ type BucketDescription struct {
 	BucketVersioning                      *BucketVersioning                              `json:"bucket_versioning,omitempty"`
 	PublicAccessBlockConfiguration        *types.PublicAccessBlockConfiguration          `json:"public_access_block_configuration"`
 	AccountPublicAccessBlockConfiguration *s3ContorlTypes.PublicAccessBlockConfiguration `json:"account_public_access_block_configuration"`
-	region                                string
+	Region                                string
 }
 
 // TODO: This can be better typed, but this is a complex object. See this library for example: https://github.com/liamg/iamgo/

@@ -15,24 +15,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package awsfetcher
 
 import (
-	"context"
 	"testing"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	ec2beat "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-func TestFetch(t *testing.T) {
+func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 	instance1 := &ec2beat.Ec2Instance{
 		Instance: types.Instance{
 			IamInstanceProfile: &types.IamInstanceProfile{
@@ -62,6 +60,9 @@ func TestFetch(t *testing.T) {
 			PrivateIpAddress: pointers.Ref("private-ip-addre"),
 			PublicDnsName:    pointers.Ref("public-dns"),
 			PrivateDnsName:   pointers.Ref("private-dns"),
+			Placement: &types.Placement{
+				AvailabilityZone: pointers.Ref("1a"),
+			},
 		},
 		Region: "us-east",
 	}
@@ -75,14 +76,29 @@ func TestFetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			ec2Classification,
+			ec2InstanceClassification,
 			"arn:aws:ec2:us-east::ec2/234567890",
 			"test-server",
 			inventory.WithRawAsset(instance1),
 			inventory.WithTags(map[string]string{"Name": "test-server", "key": "value"}),
 			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "us-east",
+				Provider:         inventory.AwsCloudProvider,
+				Region:           "us-east",
+				AvailabilityZone: pointers.Ref("1a"),
+				Account: inventory.AssetCloudAccount{
+					Id:   "123",
+					Name: "alias",
+				},
+				Instance: &inventory.AssetCloudInstance{
+					Id:   "234567890",
+					Name: "test-server",
+				},
+				Machine: &inventory.AssetCloudMachine{
+					MachineType: "instance-type",
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS EC2",
+				},
 			}),
 			inventory.WithHost(inventory.AssetHost{
 				Architecture:    string(types.ArchitectureValuesX8664),
@@ -107,7 +123,7 @@ func TestFetch(t *testing.T) {
 		),
 
 		inventory.NewAssetEvent(
-			ec2Classification,
+			ec2InstanceClassification,
 			"",
 			"",
 			inventory.WithRawAsset(instance2),
@@ -115,6 +131,20 @@ func TestFetch(t *testing.T) {
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   "us-east",
+				Account: inventory.AssetCloudAccount{
+					Id:   "123",
+					Name: "alias",
+				},
+				Instance: &inventory.AssetCloudInstance{
+					Id:   "",
+					Name: "",
+				},
+				Machine: &inventory.AssetCloudMachine{
+					MachineType: "",
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS EC2",
+				},
 			}),
 			inventory.WithHost(inventory.AssetHost{}),
 			inventory.WithNetwork(inventory.AssetNetwork{}),
@@ -122,31 +152,11 @@ func TestFetch(t *testing.T) {
 	}
 
 	logger := logp.NewLogger("test_fetcher_ec2")
-	provider := newMockInstancesProvider(t)
+	provider := newMockEc2InstancesProvider(t)
 	provider.EXPECT().DescribeInstances(mock.Anything).Return(in, nil)
 
-	fetcher := Ec2Fetcher{
-		logger:   logger,
-		provider: provider,
-	}
+	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
+	fetcher := newEc2InstancesFetcher(logger, identity, provider)
 
-	ch := make(chan inventory.AssetEvent)
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-	defer cancel()
-	go func() {
-		fetcher.Fetch(ctx, ch)
-	}()
-
-	received := make([]inventory.AssetEvent, 0, len(expected))
-	for len(expected) != len(received) {
-		select {
-		case <-ctx.Done():
-			assert.ElementsMatch(t, expected, received)
-			return
-		case event := <-ch:
-			received = append(received, event)
-		}
-	}
-
-	assert.ElementsMatch(t, expected, received)
+	collectResourcesAndMatch(t, fetcher, expected)
 }

@@ -15,46 +15,50 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package awsfetcher
 
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type Ec2Fetcher struct {
-	logger   *logp.Logger
-	provider instancesProvider
+type ec2InstanceFetcher struct {
+	logger      *logp.Logger
+	provider    ec2InstancesProvider
+	AccountId   string
+	AccountName string
 }
 
-type instancesProvider interface {
+type ec2InstancesProvider interface {
 	DescribeInstances(ctx context.Context) ([]*ec2.Ec2Instance, error)
 }
 
-var ec2Classification = inventory.AssetClassification{
+var ec2InstanceClassification = inventory.AssetClassification{
 	Category:    inventory.CategoryInfrastructure,
 	SubCategory: inventory.SubCategoryCompute,
 	Type:        inventory.TypeVirtualMachine,
-	SubStype:    inventory.SubTypeEC2,
+	SubType:     inventory.SubTypeEC2,
 }
 
-func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
-	provider := ec2.NewEC2Provider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
-	return &Ec2Fetcher{
-		logger:   logger,
-		provider: provider,
+func newEc2InstancesFetcher(logger *logp.Logger, identity *cloud.Identity, provider ec2InstancesProvider) inventory.AssetFetcher {
+	return &ec2InstanceFetcher{
+		logger:      logger,
+		provider:    provider,
+		AccountId:   identity.Account,
+		AccountName: identity.AccountAlias,
 	}
 }
 
-func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+	e.logger.Info("Fetching EC2 Instances")
+	defer e.logger.Info("Fetching EC2 Instances - Finished")
+
 	instances, err := e.provider.DescribeInstances(ctx)
 	if err != nil {
 		e.logger.Errorf("Could not list ec2 instances: %v", err)
@@ -74,25 +78,31 @@ func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 			})
 		}
 
-		tags := make(map[string]string, len(instance.Tags))
-		for _, t := range instance.Tags {
-			if t.Key == nil {
-				continue
-			}
-
-			tags[*t.Key] = pointers.Deref(t.Value)
-		}
-
 		assetChannel <- inventory.NewAssetEvent(
-			ec2Classification,
+			ec2InstanceClassification,
 			instance.GetResourceArn(),
 			instance.GetResourceName(),
 
 			inventory.WithRawAsset(instance),
-			inventory.WithTags(tags),
+			inventory.WithTags(e.getTags(instance)),
 			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   instance.Region,
+				Provider:         inventory.AwsCloudProvider,
+				Region:           instance.Region,
+				AvailabilityZone: e.getAvailabilityZone(instance),
+				Account: inventory.AssetCloudAccount{
+					Id:   e.AccountId,
+					Name: e.AccountName,
+				},
+				Instance: &inventory.AssetCloudInstance{
+					Id:   pointers.Deref(instance.InstanceId),
+					Name: instance.GetResourceName(),
+				},
+				Machine: &inventory.AssetCloudMachine{
+					MachineType: string(instance.InstanceType),
+				},
+				Service: &inventory.AssetCloudService{
+					Name: "AWS EC2",
+				},
 			}),
 			inventory.WithHost(inventory.AssetHost{
 				Architecture:    string(instance.Architecture),
@@ -113,4 +123,24 @@ func (e *Ec2Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 			}),
 		)
 	}
+}
+
+func (e *ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]string {
+	tags := make(map[string]string, len(instance.Tags))
+	for _, t := range instance.Tags {
+		if t.Key == nil {
+			continue
+		}
+
+		tags[*t.Key] = pointers.Deref(t.Value)
+	}
+	return tags
+}
+
+func (e *ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) *string {
+	if instance.Placement == nil {
+		return nil
+	}
+
+	return instance.Placement.AvailabilityZone
 }
