@@ -49,11 +49,11 @@ require (
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240122153931-afbba842e18b
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
-	github.com/elastic/elastic-agent-autodiscover v0.6.8
-	github.com/elastic/elastic-agent-client/v7 v7.6.0
-	github.com/elastic/elastic-agent-libs v0.7.5
+	github.com/elastic/elastic-agent-autodiscover v0.6.10
+	github.com/elastic/elastic-agent-client/v7 v7.8.1
+	github.com/elastic/elastic-agent-libs v0.8.0
 	github.com/elastic/go-licenser v0.4.1
-	github.com/elastic/go-ucfg v0.8.6
+	github.com/elastic/go-ucfg v0.8.8
 	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.12.2
