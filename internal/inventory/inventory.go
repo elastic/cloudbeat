@@ -54,8 +54,8 @@ func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher A
 		fetchers:  fetchers,
 		publisher: publisher,
 		// move to a configuration parameter
-		bufferFlushInterval: 15 * time.Second,
-		bufferMaxSize:       100,
+		bufferFlushInterval: 10 * time.Second,
+		bufferMaxSize:       1600,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
 	}
@@ -105,11 +105,12 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Asset)},
 			Timestamp: a.now(),
 			Fields: mapstr.M{
-				"asset":   e.Asset,
-				"cloud":   e.Cloud,
-				"host":    e.Host,
-				"network": e.Network,
-				"iam":     e.IAM,
+				"asset":             e.Asset,
+				"cloud":             e.Cloud,
+				"host":              e.Host,
+				"network":           e.Network,
+				"iam":               e.IAM,
+				"resource_policies": e.ResourcePolicies,
 			},
 		}
 	})
@@ -118,7 +119,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 }
 
 func generateIndex(a Asset) string {
-	return fmt.Sprintf("asset_inventory_%s_%s_%s_%s", a.Category, a.SubCategory, a.Type, a.SubStype)
+	return fmt.Sprintf("asset_inventory_%s_%s_%s_%s", a.Category, a.SubCategory, a.Type, a.SubType)
 }
 
 func (a *AssetInventory) Stop() {

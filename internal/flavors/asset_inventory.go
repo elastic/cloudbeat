@@ -29,7 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
-	awsinventory "github.com/elastic/cloudbeat/internal/inventory/aws"
+	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
@@ -92,7 +92,7 @@ func initAwsFetchers(ctx context.Context, cfg *config.Config, logger *logp.Logge
 		return nil, err
 	}
 
-	return awsinventory.Fetchers(logger, awsIdentity, awsConfig), nil
+	return awsfetcher.New(logger, awsIdentity, awsConfig), nil
 }
 
 func (bt *assetInventory) Run(*beat.Beat) error {
