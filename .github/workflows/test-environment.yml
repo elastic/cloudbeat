@@ -36,6 +36,7 @@ on:
         options:
           - gcp-us-west2
           - aws-eu-west-1
+          - aws-us-east-1
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
@@ -166,8 +167,6 @@ jobs:
         env:
           QA_EC_URL: "https://console.qa.cld.elstc.co"
           EC_URL: "https://cloud.elastic.co"
-          local_ec_api_key: ${{ secrets.EC_API_KEY }}
-          local_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
         run: |
           # Extract the EC API key and selected EC URL
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
