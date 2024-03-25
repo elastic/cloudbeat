@@ -15,19 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package awsfetcher
 
 import (
-	"context"
 	"testing"
-	"time"
 
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	s3ctrltypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
@@ -169,30 +167,8 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	provider := newMockS3BucketProvider(t)
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 
-	fetcher := S3BucketFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   "123",
-		AccountName: "alias",
-	}
+	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
+	fetcher := newS3BucketFetcher(logger, identity, provider)
 
-	ch := make(chan inventory.AssetEvent)
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-	defer cancel()
-	go func() {
-		fetcher.Fetch(ctx, ch)
-	}()
-
-	received := make([]inventory.AssetEvent, 0, len(expected))
-	for len(expected) != len(received) {
-		select {
-		case <-ctx.Done():
-			assert.ElementsMatch(t, expected, received)
-			return
-		case event := <-ch:
-			received = append(received, event)
-		}
-	}
-
-	assert.ElementsMatch(t, expected, received)
+	collectResourcesAndMatch(t, fetcher, expected)
 }

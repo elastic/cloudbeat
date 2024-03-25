@@ -15,43 +15,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package awsfetcher
 
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type S3BucketFetcher struct {
+type iamPolicyFetcher struct {
 	logger      *logp.Logger
-	provider    s3BucketProvider
+	provider    iamPolicyProvider
 	AccountId   string
 	AccountName string
 }
 
-var s3BucketClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryInfrastructure,
-	SubCategory: inventory.SubCategoryStorage,
-	Type:        inventory.TypeObjectStorage,
-	SubType:     inventory.SubTypeS3,
+type iamPolicyProvider interface {
+	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-type s3BucketProvider interface {
-	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
+var iamPolicyClassification = inventory.AssetClassification{
+	Category:    inventory.CategoryIdentity,
+	SubCategory: inventory.SubCategoryCloudProviderAccount,
+	Type:        inventory.TypePermissions,
+	SubType:     inventory.SubTypeIAM,
 }
 
-func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
-	provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
-	return &S3BucketFetcher{
+func newIamPolicyFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamPolicyProvider) inventory.AssetFetcher {
+	return &iamPolicyFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -59,53 +56,73 @@ func NewS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.C
 	}
 }
 
-func (s S3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
-	awsBuckets, err := s.provider.DescribeBuckets(ctx)
+func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+	i.logger.Info("Fetching IAM Policies")
+	defer i.logger.Info("Fetching IAM Policies - Finished")
+
+	policies, err := i.provider.GetPolicies(ctx)
 	if err != nil {
-		s.logger.Errorf("Could not list s3 buckets: %v", err)
-		if len(awsBuckets) == 0 {
+		i.logger.Errorf("Could not list policies: %v", err)
+		if len(policies) == 0 {
 			return
 		}
 	}
 
-	buckets := lo.Map(awsBuckets, func(item awslib.AwsResource, _ int) s3.BucketDescription {
-		return item.(s3.BucketDescription)
-	})
+	for _, resource := range policies {
+		if resource == nil {
+			continue
+		}
 
-	for _, bucket := range buckets {
+		policy, ok := resource.(iam.Policy)
+		if !ok {
+			i.logger.Errorf("Could not get info about policy: %s", resource.GetResourceArn())
+			continue
+		}
+
 		assetChannel <- inventory.NewAssetEvent(
-			s3BucketClassification,
-			bucket.GetResourceArn(),
-			bucket.GetResourceName(),
+			iamPolicyClassification,
+			policy.GetResourceArn(),
+			resource.GetResourceName(),
 
-			inventory.WithRawAsset(bucket),
+			inventory.WithRawAsset(policy),
+			inventory.WithResourcePolicies(convertPolicy(policy.Document)...),
+			inventory.WithTags(i.getTags(policy)),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
-				Region:   bucket.Region,
+				Region:   awslib.GlobalRegion,
 				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
+					Id:   i.AccountId,
+					Name: i.AccountName,
 				},
 				Service: &inventory.AssetCloudService{
-					Name: "AWS S3",
+					Name: "AWS IAM",
 				},
 			}),
-			inventory.WithResourcePolicies(getBucketPolicies(bucket)...),
 		)
 	}
 }
 
-func getBucketPolicies(bucket s3.BucketDescription) []inventory.AssetResourcePolicy {
-	if len(bucket.BucketPolicy) == 0 {
+func (i *iamPolicyFetcher) getTags(policy iam.Policy) map[string]string {
+	tags := make(map[string]string, len(policy.Tags))
+
+	for _, tag := range policy.Tags {
+		tags[pointers.Deref(tag.Key)] = pointers.Deref(tag.Value)
+	}
+
+	return tags
+}
+
+func convertPolicy(policy map[string]any) []inventory.AssetResourcePolicy {
+	if len(policy) == 0 {
 		return nil
 	}
 
-	version, hasVersion := bucket.BucketPolicy["Version"].(string)
+	version, hasVersion := policy["Version"].(string)
 	if !hasVersion {
 		version = ""
 	}
 
-	switch statements := bucket.BucketPolicy["Statement"].(type) {
+	switch statements := policy["Statement"].(type) {
 	case []map[string]any:
 		return convertStatements(statements, version)
 	case []any:
