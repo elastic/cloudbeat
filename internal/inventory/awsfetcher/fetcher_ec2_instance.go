@@ -15,22 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package awsfetcher
 
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type Ec2InstanceFetcher struct {
+type ec2InstanceFetcher struct {
 	logger      *logp.Logger
 	provider    ec2InstancesProvider
 	AccountId   string
@@ -48,9 +46,8 @@ var ec2InstanceClassification = inventory.AssetClassification{
 	SubType:     inventory.SubTypeEC2,
 }
 
-func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) inventory.AssetFetcher {
-	provider := ec2.NewEC2Provider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
-	return &Ec2InstanceFetcher{
+func newEc2InstancesFetcher(logger *logp.Logger, identity *cloud.Identity, provider ec2InstancesProvider) inventory.AssetFetcher {
+	return &ec2InstanceFetcher{
 		logger:      logger,
 		provider:    provider,
 		AccountId:   identity.Account,
@@ -58,7 +55,10 @@ func newEc2Fetcher(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config
 	}
 }
 
-func (e *Ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
+	e.logger.Info("Fetching EC2 Instances")
+	defer e.logger.Info("Fetching EC2 Instances - Finished")
+
 	instances, err := e.provider.DescribeInstances(ctx)
 	if err != nil {
 		e.logger.Errorf("Could not list ec2 instances: %v", err)
@@ -125,7 +125,7 @@ func (e *Ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 	}
 }
 
-func (e *Ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]string {
+func (e *ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]string {
 	tags := make(map[string]string, len(instance.Tags))
 	for _, t := range instance.Tags {
 		if t.Key == nil {
@@ -137,7 +137,7 @@ func (e *Ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]strin
 	return tags
 }
 
-func (e *Ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) *string {
+func (e *ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) *string {
 	if instance.Placement == nil {
 		return nil
 	}
