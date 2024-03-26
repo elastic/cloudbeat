@@ -27,6 +27,19 @@ inputs:
     description: 'Docker build cache folder'
     required: false
     default: '/tmp/.docker-images'
+
+  goos:
+    description: 'GOOS environment variable'
+    required: false
+    default: 'linux'
+  goarch:
+    description: 'GOARCH environment variable'
+    required: false
+    default: 'amd64'
+  docker-build-platforms:
+    description: 'Docker build platforms'
+    required: false
+    default: 'linux/amd64'
 runs:
   using: composite
   steps:
@@ -72,13 +85,14 @@ runs:
         cache-to: type=local,mode=max,dest=${{ inputs.docker-build-cache-folder }}-new/cloudbeat
         outputs: type=docker,dest=${{ inputs.docker-images-folder }}/cloudbeat.tar
         no-cache: false
+        platforms: ${{ inputs.docker-build-platforms }}
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Build elastic-agent
       uses: docker/build-push-action@v5
       env:
-        GOOS: linux
-        GOARCH: amd64
+        GOOS: ${{ inputs.goos }}
+        GOARCH: ${{ inputs.goarch }}
       with:
         context: .
         file: ./scripts/packaging/docker/elastic-agent/Dockerfile
@@ -91,6 +105,7 @@ runs:
         build-args: |
           ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:${{ inputs.elastic-agent-docker-image-tag }}
         no-cache: false
+        platforms: ${{ inputs.docker-build-platforms }}
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Build pytest-docker
@@ -103,6 +118,7 @@ runs:
         cache-to: type=local,mode=max,dest=${{ inputs.docker-build-cache-folder }}-new/pytest
         outputs: type=docker,dest=${{ inputs.docker-images-folder }}/pytest.tar
         no-cache: false
+        platforms: ${{ inputs.docker-build-platforms }}
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Rotate cache
