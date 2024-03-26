@@ -47,6 +47,7 @@ type Provider struct {
 	inventory *AssetsInventoryWrapper
 	crm       *ResourceManagerWrapper
 	crmCache  map[string]*fetching.EcsGcp
+	projects  []string
 }
 
 type AssetsInventoryWrapper struct {
@@ -169,14 +170,22 @@ func (rl *AssetsInventoryRateLimiter) getRateLimiter(req any, method string) *ra
 	}
 
 	parent := req.(*assetpb.ListAssetsRequest).Parent
+	fmt.Println("method", method)
+	fmt.Println("parent", parent)
 	if !isProject(parent) {
 		return nil
 	}
 
-	projectLimiter := rl.projects[parent][method]
+	projectRateLimitersMap := rl.projects[parent]
+	if projectRateLimitersMap == nil {
+		rl.projects[parent] = make(map[string]*rate.Limiter)
+		projectRateLimitersMap = rl.projects[parent]
+	}
+
+	projectLimiter := projectRateLimitersMap[method]
 	if projectLimiter == nil {
 		projectLimiter = rateLimiterCreator()
-		rl.projects[parent][method] = projectLimiter
+		projectRateLimitersMap[method] = projectLimiter
 	}
 
 	return projectLimiter
@@ -203,12 +212,15 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 	if err != nil {
 		return nil, err
 	}
+
+	ListAssets := func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+		return client.ListAssets(ctx, req, append(opts, RetryOnResourceExhausted)...)
+	}
+
 	// wrap the assets inventory client for mocking
 	assetsInventoryWrapper := &AssetsInventoryWrapper{
-		Close: client.Close,
-		ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
-			return client.ListAssets(ctx, req, append(opts, RetryOnResourceExhausted)...)
-		},
+		Close:      client.Close,
+		ListAssets: ListAssets,
 	}
 
 	// initialize GCP resource manager client
@@ -244,55 +256,34 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 		inventory: assetsInventoryWrapper,
 		crm:       crmServiceWrapper,
 		crmCache:  make(map[string]*fetching.EcsGcp),
+		projects:  getAllProjects(ctx, log, gcpConfig.Parent, ListAssets),
 	}, nil
+}
+
+func (p *Provider) getParentsAssets(ctx context.Context, parents []string, assetTypes []string, contentType assetpb.ContentType) []*assetpb.Asset {
+	wg := sync.WaitGroup{}
+	var assets []*assetpb.Asset
+	for _, pa := range parents {
+		wg.Add(1)
+		go func(parent string) {
+			request := &assetpb.ListAssetsRequest{
+				Parent:      parent,
+				AssetTypes:  assetTypes,
+				ContentType: contentType,
+			}
+			assets = append(assets, getAllAssets(p.log, p.inventory.ListAssets(ctx, request))...)
+			wg.Done()
+		}(pa)
+	}
+	wg.Wait()
+	return assets
 }
 
 func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []string) ([]*ExtendedGcpAsset, error) {
 	p.log.Infof("Listing GCP asset types: %v in %v", assetTypes, p.config.Parent)
 
-	wg := sync.WaitGroup{}
-	var resourceAssets []*assetpb.Asset
-	var policyAssets []*assetpb.Asset
-
-	// List all projects of an organization so we can send per-project rate-limited requests
-	var projects []string
-	if isOrg(p.config.Parent) {
-		projects = lo.Map(getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
-			Parent:      p.config.Parent,
-			AssetTypes:  []string{"compute.googleapis.com/Project"},
-			ContentType: assetpb.ContentType_RESOURCE,
-		})), func(asset *assetpb.Asset, _ int) string {
-			return fmt.Sprintf("projects/%s", getProjectId(asset.Ancestors))
-		})
-
-	} else if isProject(p.config.Parent) {
-		projects = []string{p.config.Parent}
-	}
-
-	for _, project := range projects {
-		wg.Add(1)
-		go func(parent string) {
-			request := &assetpb.ListAssetsRequest{
-				Parent:      parent,
-				AssetTypes:  assetTypes,
-				ContentType: assetpb.ContentType_RESOURCE,
-			}
-			resourceAssets = append(resourceAssets, getAllAssets(p.log, p.inventory.ListAssets(ctx, request))...)
-			wg.Done()
-		}(project)
-		wg.Add(1)
-		go func(parent string) {
-			request := &assetpb.ListAssetsRequest{
-				Parent:      parent,
-				AssetTypes:  assetTypes,
-				ContentType: assetpb.ContentType_IAM_POLICY,
-			}
-			policyAssets = append(policyAssets, getAllAssets(p.log, p.inventory.ListAssets(ctx, request))...)
-			wg.Done()
-		}(project)
-	}
-
-	wg.Wait()
+	resourceAssets := p.getParentsAssets(ctx, p.projects, assetTypes, assetpb.ContentType_RESOURCE)
+	policyAssets := p.getParentsAssets(ctx, p.projects, assetTypes, assetpb.ContentType_IAM_POLICY)
 
 	var assets []*assetpb.Asset
 	assets = append(append(assets, resourceAssets...), policyAssets...)
@@ -300,7 +291,6 @@ func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []str
 	extendedAssets := extendWithECS(ctx, p.crm, p.crmCache, mergedAssets)
 	// Enrich network assets with dns policy
 	p.enrichNetworkAssets(ctx, extendedAssets)
-
 	return extendedAssets, nil
 }
 
@@ -397,12 +387,7 @@ func (p *Provider) enrichNetworkAssets(ctx context.Context, assets []*ExtendedGc
 		return
 	}
 
-	dnsPolicyAssets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
-		Parent:      p.config.Parent,
-		AssetTypes:  []string{DnsPolicyAssetType},
-		ContentType: assetpb.ContentType_RESOURCE,
-	}))
-
+	dnsPolicyAssets := p.getParentsAssets(ctx, p.projects, []string{DnsPolicyAssetType}, assetpb.ContentType_RESOURCE)
 	if len(dnsPolicyAssets) == 0 {
 		p.log.Infof("no %s assets were listed, return original assets", DnsPolicyAssetType)
 		return
@@ -554,12 +539,7 @@ func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[s
 }
 
 func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error) {
-	projects := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
-		ContentType: assetpb.ContentType_IAM_POLICY,
-		Parent:      p.config.Parent,
-		AssetTypes:  []string{CrmProjectAssetType},
-	}))
-
+	projects := p.getParentsAssets(ctx, p.projects, []string{CrmProjectAssetType}, assetpb.ContentType_IAM_POLICY)
 	return lo.Map(projects, func(project *assetpb.Asset, _ int) *ProjectPoliciesAsset {
 		projectAsset := extendWithECS(ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
 		// Skip first ancestor it as we already got it
@@ -569,6 +549,7 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*Projec
 }
 
 func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []*ExtendedGcpAsset {
+	fmt.Println("getAncestorsAssets", ancestors)
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
 		var assetType string
 		if isFolder(parent) {
@@ -577,11 +558,7 @@ func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []
 		if isOrg(parent) {
 			assetType = CrmOrgAssetType
 		}
-		assets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
-			ContentType: assetpb.ContentType_IAM_POLICY,
-			Parent:      parent,
-			AssetTypes:  []string{assetType},
-		}))
+		assets := p.getParentsAssets(ctx, []string{parent}, []string{assetType}, assetpb.ContentType_IAM_POLICY)
 		return extendWithECS(ctx, p.crm, p.crmCache, assets)
 	}))
 }
@@ -659,4 +636,23 @@ func isProject(parent string) bool {
 
 func isFolder(parent string) bool {
 	return strings.HasPrefix(parent, "folders/")
+}
+
+// get all projects of an organization so we can send per-project rate-limited requests
+func getAllProjects(ctx context.Context, log *logp.Logger, parent string, ListAssets func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator) []string {
+	var projects []string
+	if isOrg(parent) {
+		projects = lo.Map(getAllAssets(log, ListAssets(ctx, &assetpb.ListAssetsRequest{
+			Parent:      parent,
+			AssetTypes:  []string{"compute.googleapis.com/Project"},
+			ContentType: assetpb.ContentType_RESOURCE,
+		})), func(asset *assetpb.Asset, _ int) string {
+			return fmt.Sprintf("projects/%s", getProjectId(asset.Ancestors))
+		})
+
+	} else if isProject(parent) {
+		projects = []string{parent}
+	}
+	fmt.Println("projects", projects)
+	return projects
 }
