@@ -51,10 +51,6 @@ runs:
       shell: bash
       run: poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
-    - name: Stop cloudbeat
-      shell: bash
-      run: pkill -15 cloudbeat
-
     - name: Upload test results
       if: ${{ success() || failure() }}
       uses: actions/upload-artifact@v4
