@@ -10,6 +10,7 @@ locals {
     project  = "${var.project}"
     owner    = "${var.owner}"
   }
+  deployment_name = replace(var.deployment_name, "keep-", "keep_")
   ec_headers = {
     Content-type  = "application/json"
     Authorization = "ApiKey ${var.ec_api_key}"
@@ -63,7 +64,7 @@ module "ec_deployment" {
   tags          = local.common_tags
 
   deployment_template    = var.deployment_template
-  deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
+  deployment_name_prefix = "${local.deployment_name}-${random_string.suffix.result}"
 
   elasticsearch_autoscale  = true
   elasticsearch_size       = var.elasticsearch_size
@@ -88,7 +89,7 @@ module "ec_project" {
   source       = "../cloud/modules/serverless"
   ec_apikey    = var.ec_api_key
   ec_url       = var.ec_url
-  project_name = "${var.deployment_name}-${random_string.suffix.result}"
+  project_name = "${local.deployment_name}-${random_string.suffix.result}"
   region_id    = var.ess_region
 }
 
