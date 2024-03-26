@@ -22,6 +22,8 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/samber/lo"
 )
 
 type RoleGetter interface {
@@ -43,4 +45,30 @@ func (p Provider) GetRole(ctx context.Context, roleName string) (*Role, error) {
 	}
 
 	return r, nil
+}
+
+func (p Provider) ListRoles(ctx context.Context) ([]*Role, error) {
+	input := &iam.ListRolesInput{}
+
+	roles := make([]types.Role, 0)
+	for {
+		nativeRoles, err := p.client.ListRoles(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+
+		roles = append(roles, nativeRoles.Roles...)
+
+		if !nativeRoles.IsTruncated {
+			break
+		}
+
+		input.Marker = nativeRoles.Marker
+	}
+
+	return lo.Map(roles, func(role types.Role, _ int) *Role {
+		return &Role{
+			Role: role,
+		}
+	}), nil
 }
