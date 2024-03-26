@@ -67,12 +67,6 @@ runs:
         path: ${{ inputs.docker-build-cache-folder }}
         key: ci-buildx-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}
 
-    - name: Cache docker images
-      uses: actions/cache@v4
-      with:
-        path: ${{ inputs.docker-images-folder }}
-        key: ci-docker-images-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
-
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Build cloudbeat-docker image
       uses: docker/build-push-action@v5
@@ -126,3 +120,17 @@ runs:
       run: |
         ls -lahR /tmp/ || true
         [[ -d ${{ inputs.docker-build-cache-folder }}-new ]] && rm -rf ${{ inputs.docker-build-cache-folder }} && mv ${{ inputs.docker-build-cache-folder }}-new ${{ inputs.docker-build-cache-folder }}
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Upload docker images
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-images
+        path: ${{ inputs.docker-images-folder }}
+
+    - if: ${{ inputs.build-docker-images == 'false' }}
+      name: Download docker images
+      uses: actions/download-artifact@v4
+      with:
+        name: docker-images
+        path: ${{ inputs.docker-images-folder }}

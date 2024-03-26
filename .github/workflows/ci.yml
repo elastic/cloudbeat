@@ -310,6 +310,7 @@ jobs:
       - uses: actions/download-artifact@v4
         if: ${{ success() || failure() }}
         with:
+          pattern: allure-results-ci-*
           path: tests/allure/results/
           merge-multiple: true
 
@@ -370,3 +371,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ${{ env.ALLURE_SUMMARY }}
+
+      - if: ${{ always() }}
+        name: Cleanup docker image artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: docker-images
+          failOnError: false
