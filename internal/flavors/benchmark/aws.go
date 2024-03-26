@@ -67,8 +67,6 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	)
 
 	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
-	// TODO(kuba): Ask when the DefaultRegion is empty. Is there a chance it is
-	// set, but incorrectly - e.g. "us-east-1"?
 	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
 		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
 		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
@@ -87,7 +85,6 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 }
 
 func (a *AWS) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
-	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)

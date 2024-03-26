@@ -219,7 +219,6 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger
 }
 
 func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
-	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
