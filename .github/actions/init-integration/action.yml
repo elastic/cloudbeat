@@ -20,4 +20,3 @@ runs:
     - name: Elasticsearch disable dynamic mapping for findings
       shell: bash
       run: ./.ci/scripts/disable_dynamic_mapping.sh
-

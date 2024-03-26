@@ -13,6 +13,11 @@ inputs:
   aws-region:
     description: 'AWS region'
     required: true
+
+  debug:
+    description: 'debug'
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -59,14 +64,9 @@ runs:
         name: allure-results-ci-cnvm
         path: tests/allure/results/
 
-    # - name: Print cloudbeat logs
-    #   if: always()
-    #   shell: bash
-    #   run: |
-    #     cat logs/cloudbeat*
-    # - name: Upload cloudbeat logs
-    #   if: always()
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: cloubeat-logs-ci-cnvm
-    #     path: logs/
+    - if: ${{ (success() || failure()) && inputs.debug == 'true' }}
+      name: Upload cloudbeat logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloubeat-logs-ci-cnvm
+        path: logs/
