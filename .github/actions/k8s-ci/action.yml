@@ -23,9 +23,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
     - name: Prepare Kind Cluster for Process Tests
       if: ${{ contains(inputs.kind-config, 'conf2') }}
       shell: bash
