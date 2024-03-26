@@ -143,24 +143,50 @@ var RetryOnResourceExhausted = gax.WithRetry(func() gax.Retryer {
 
 // https://cloud.google.com/asset-inventory/docs/quota
 type AssetsInventoryRateLimiter struct {
-	methods map[string]*rate.Limiter
-	log     *logp.Logger
+	// creates a rate limiter for each method
+	methods map[string]func() *rate.Limiter
+	// keeps method rate limiters for each project
+	projects map[string]map[string]*rate.Limiter
+	log      *logp.Logger
 }
 
 func NewAssetsInventoryRateLimiter(log *logp.Logger) *AssetsInventoryRateLimiter {
 	return &AssetsInventoryRateLimiter{
-		methods: map[string]*rate.Limiter{
-			"/google.cloud.asset.v1.AssetService/ListAssets": rate.NewLimiter(rate.Every(time.Minute/100), 1),
+		log:      log,
+		projects: make(map[string]map[string]*rate.Limiter),
+		methods: map[string]func() *rate.Limiter{
+			"/google.cloud.asset.v1.AssetService/ListAssets": func() *rate.Limiter {
+				return rate.NewLimiter(rate.Every(time.Minute/100), 1)
+			},
 		},
-		log: log,
 	}
+}
+
+func (rl *AssetsInventoryRateLimiter) getRateLimiter(req any, method string) *rate.Limiter {
+	rateLimiterCreator := rl.methods[method]
+	if rateLimiterCreator == nil {
+		return nil
+	}
+
+	parent := req.(*assetpb.ListAssetsRequest).Parent
+	if !isProject(parent) {
+		return nil
+	}
+
+	projectLimiter := rl.projects[parent][method]
+	if projectLimiter == nil {
+		projectLimiter = rateLimiterCreator()
+		rl.projects[parent][method] = projectLimiter
+	}
+
+	return projectLimiter
 }
 
 func (rl *AssetsInventoryRateLimiter) GetInterceptorDialOption() grpc.DialOption {
 	return grpc.WithUnaryInterceptor(func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		limiter := rl.methods[method]
-		if limiter != nil {
-			err := limiter.Wait(ctx)
+		projectLimiter := rl.getRateLimiter(req, method)
+		if projectLimiter != nil {
+			err := projectLimiter.Wait(ctx)
 			if err != nil {
 				rl.log.Errorf("Failed to wait for %s, error: %v", method, err)
 			}
@@ -228,26 +254,43 @@ func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []str
 	var resourceAssets []*assetpb.Asset
 	var policyAssets []*assetpb.Asset
 
-	wg.Add(1)
-	go func() {
-		request := &assetpb.ListAssetsRequest{
+	// List all projects of an organization so we can send per-project rate-limited requests
+	var projects []string
+	if isOrg(p.config.Parent) {
+		projects = lo.Map(getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
 			Parent:      p.config.Parent,
-			AssetTypes:  assetTypes,
+			AssetTypes:  []string{"compute.googleapis.com/Project"},
 			ContentType: assetpb.ContentType_RESOURCE,
-		}
-		resourceAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
-		wg.Done()
-	}()
-	wg.Add(1)
-	go func() {
-		request := &assetpb.ListAssetsRequest{
-			Parent:      p.config.Parent,
-			AssetTypes:  assetTypes,
-			ContentType: assetpb.ContentType_IAM_POLICY,
-		}
-		policyAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
-		wg.Done()
-	}()
+		})), func(asset *assetpb.Asset, _ int) string {
+			return fmt.Sprintf("projects/%s", getProjectId(asset.Ancestors))
+		})
+
+	} else if isProject(p.config.Parent) {
+		projects = []string{p.config.Parent}
+	}
+
+	for _, project := range projects {
+		wg.Add(1)
+		go func(parent string) {
+			request := &assetpb.ListAssetsRequest{
+				Parent:      parent,
+				AssetTypes:  assetTypes,
+				ContentType: assetpb.ContentType_RESOURCE,
+			}
+			resourceAssets = append(resourceAssets, getAllAssets(p.log, p.inventory.ListAssets(ctx, request))...)
+			wg.Done()
+		}(project)
+		wg.Add(1)
+		go func(parent string) {
+			request := &assetpb.ListAssetsRequest{
+				Parent:      parent,
+				AssetTypes:  assetTypes,
+				ContentType: assetpb.ContentType_IAM_POLICY,
+			}
+			policyAssets = append(policyAssets, getAllAssets(p.log, p.inventory.ListAssets(ctx, request))...)
+			wg.Done()
+		}(project)
+	}
 
 	wg.Wait()
 
@@ -528,10 +571,10 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*Projec
 func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []*ExtendedGcpAsset {
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
 		var assetType string
-		if strings.HasPrefix(parent, "folders") {
+		if isFolder(parent) {
 			assetType = CrmFolderAssetType
 		}
-		if strings.HasPrefix(parent, "organizations") {
+		if isOrg(parent) {
 			assetType = CrmOrgAssetType
 		}
 		assets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
@@ -604,4 +647,16 @@ func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*Ext
 	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {
 		return asset.AssetType == assetType
 	})
+}
+
+func isOrg(parent string) bool {
+	return strings.HasPrefix(parent, "organizations/")
+}
+
+func isProject(parent string) bool {
+	return strings.HasPrefix(parent, "projects/")
+}
+
+func isFolder(parent string) bool {
+	return strings.HasPrefix(parent, "folders/")
 }
