@@ -16,19 +16,10 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Build cloudbeat binary
-      shell: bash
-      run: mage -v build
-
-    - name: Run elasticsearch
-      uses: elastic/elastic-github-actions/elasticsearch@master
+    - name: Init Integration
+      uses: ./.github/actions/init-integration
       with:
-        stack-version: ${{ inputs.elk-version }}
-        security-enabled: false
-
-    - name: Elasticsearch disable dynamic mapping for findings
-      shell: bash
-      run: ./.ci/scripts/disable_dynamic_mapping.sh
+        elk-version: ${{ inputs.elk-version }}
 
     - name: Run cloudbeat in background
       env:

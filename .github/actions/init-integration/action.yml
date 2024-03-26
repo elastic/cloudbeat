@@ -1,0 +1,23 @@
+name: 'Init Integration Test'
+description: 'Init integration test'
+inputs:
+  elk-version:
+    description: 'ELK version'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Build cloudbeat binary
+      shell: bash
+      run: mage -v build
+
+    - name: Run elasticsearch
+      uses: elastic/elastic-github-actions/elasticsearch@master
+      with:
+        stack-version: ${{ inputs.elk-version }}
+        security-enabled: false
+
+    - name: Elasticsearch disable dynamic mapping for findings
+      shell: bash
+      run: ./.ci/scripts/disable_dynamic_mapping.sh
+
