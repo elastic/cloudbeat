@@ -149,6 +149,7 @@ type AssetsInventoryRateLimiter struct {
 	// keeps method rate limiters for each project
 	projects map[string]map[string]*rate.Limiter
 	log      *logp.Logger
+	mu       sync.Mutex
 }
 
 func NewAssetsInventoryRateLimiter(log *logp.Logger) *AssetsInventoryRateLimiter {
@@ -164,14 +165,17 @@ func NewAssetsInventoryRateLimiter(log *logp.Logger) *AssetsInventoryRateLimiter
 }
 
 func (rl *AssetsInventoryRateLimiter) getRateLimiter(req any, method string) *rate.Limiter {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
 	rateLimiterCreator := rl.methods[method]
 	if rateLimiterCreator == nil {
 		return nil
 	}
 
 	parent := req.(*assetpb.ListAssetsRequest).Parent
-	fmt.Println("method", method)
-	fmt.Println("parent", parent)
+	// fmt.Println("method", method)
+	// fmt.Println("parent", parent)
 	if !isProject(parent) {
 		return nil
 	}
@@ -549,7 +553,7 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*Projec
 }
 
 func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []*ExtendedGcpAsset {
-	fmt.Println("getAncestorsAssets", ancestors)
+	// fmt.Println("getAncestorsAssets", ancestors)
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
 		var assetType string
 		if isFolder(parent) {
@@ -643,8 +647,9 @@ func getAllProjects(ctx context.Context, log *logp.Logger, parent string, ListAs
 	var projects []string
 	if isOrg(parent) {
 		projects = lo.Map(getAllAssets(log, ListAssets(ctx, &assetpb.ListAssetsRequest{
-			Parent:      parent,
-			AssetTypes:  []string{"compute.googleapis.com/Project"},
+			Parent:     parent,
+			AssetTypes: []string{"compute.googleapis.com/Project"},
+			// AssetTypes:  []string{CrmProjectAssetType},
 			ContentType: assetpb.ContentType_RESOURCE,
 		})), func(asset *assetpb.Asset, _ int) string {
 			return fmt.Sprintf("projects/%s", getProjectId(asset.Ancestors))
@@ -653,6 +658,6 @@ func getAllProjects(ctx context.Context, log *logp.Logger, parent string, ListAs
 	} else if isProject(parent) {
 		projects = []string{parent}
 	}
-	fmt.Println("projects", projects)
+	// fmt.Println("projects", projects)
 	return projects
 }
