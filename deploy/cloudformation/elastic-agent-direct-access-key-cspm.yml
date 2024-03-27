@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates elastic-agent cspm user, role, and access key, and outputs the access key
+
+Parameters: {}
+
+Resources:
+  ElasticCSPMUser:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "elasticagent-cspm"
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/SecurityAudit'
+
+  ElasticCSPMAccessKey:
+    Type: "AWS::IAM::AccessKey"
+    Properties:
+      UserName: !Ref ElasticCSPMUser
+
+Outputs:
+  AccessKeyId:
+    Description: "Access Key ID"
+    Value: !Ref ElasticCSPMAccessKey
+    Export:
+      Name: "AccessKeyId"
+
+  SecretAccessKey:
+    Description: "Secret Access Key"
+    Value: !GetAtt ElasticCSPMAccessKey.SecretAccessKey
+    Export:
+      Name: "SecretAccessKey"
+
