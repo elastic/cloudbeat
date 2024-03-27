@@ -32,11 +32,7 @@ on:
         required: true
         description: "Elastic Cloud deployment region"
         default: "gcp-us-west2"
-        type: choice
-        options:
-          - gcp-us-west2
-          - aws-eu-west-1
-          - aws-us-east-1
+        type: string
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
@@ -177,7 +173,7 @@ jobs:
           ec_url="${{ env.EC_URL }}"
 
           # When user stores input ec api key then update Elastic Cloud env API KEY
-          if [[ $ec_api_key != '' ]]; then
+          if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
           elif [[ $input_ec_url == $ec_url ]]; then
