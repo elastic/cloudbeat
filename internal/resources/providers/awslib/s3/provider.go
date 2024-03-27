@@ -59,7 +59,11 @@ func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFac
 }
 
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
-	clientBuckets, err := p.clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
+	defaultClient, err := awslib.GetDefaultClient(p.clients)
+	if err != nil {
+		return nil, fmt.Errorf("could not select default region client: %w", err)
+	}
+	clientBuckets, err := defaultClient.ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
 		p.log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
@@ -225,15 +229,23 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 }
 
 func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
-	location, err := p.clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
+	defaultClient, err := awslib.GetDefaultClient(p.clients)
+	if err != nil {
+		return "", fmt.Errorf("could not select default region client: %w", err)
+	}
+	location, err := defaultClient.GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
 	if err != nil {
 		return "", err
 	}
 
 	region := string(location.LocationConstraint)
-	// Region us-east-1 have a LocationConstraint of null.
+	// Region us-east-1 have a LocationConstraint of null...
 	if region == "" {
-		region = "us-east-1"
+		region = awslib.DefaultRegion
+		// ...but check if it's not the AWS GovCloud partition
+		if _, ok := p.clients[awslib.DefaultRegion]; !ok {
+			region = awslib.DefaultGovRegion
+		}
 	}
 
 	return region, nil

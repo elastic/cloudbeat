@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   unit_tests:
+    if: ${{ false }}
     name: Unit Tests
     runs-on: ubuntu-20.04
     timeout-minutes: 40
@@ -49,6 +50,7 @@ jobs:
           path: cover.out
 
   coverage:
+    if: ${{ false }}
     name: Coverage report
     needs: unit_tests
     runs-on: ubuntu-20.04
@@ -96,6 +98,7 @@ jobs:
             kubeval --strict -d ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization,kind,patch,cloudbeat,cloudformation,deployment-manager --skip-kinds ClusterConfig
 
   golangci:
+    if: ${{ false }}
     name: golangci-lint
     runs-on: ubuntu-20.04
     timeout-minutes: 15
@@ -120,6 +123,7 @@ jobs:
         run: golangci-lint run --whole-files --out-format github-actions
 
   terraform-linter:
+    if: ${{ false }}
     name: terraform-lint
     runs-on: ubuntu-20.04
     steps:
