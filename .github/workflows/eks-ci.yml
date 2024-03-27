@@ -194,12 +194,6 @@ jobs:
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
-
       - name: Execute tests
         id: run_tests
         if: success()
