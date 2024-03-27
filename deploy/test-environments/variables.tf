@@ -18,6 +18,12 @@ variable "ami_map" {
 
 # Elastic Cloud variables
 # ===========================================
+variable "ec_url" {
+  default     = "https://cloud.elastic.co"
+  description = "Optional Elastic Cloud Environment URL, use export TF_VAR_ec_url={URL}, it defaults to https://cloud.elastic.co"
+  type        = string
+}
+
 variable "ec_api_key" {
   description = "Provide Elastic Cloud API key or use export TF_VAR_ec_api_key={TOKEN}"
   type        = string

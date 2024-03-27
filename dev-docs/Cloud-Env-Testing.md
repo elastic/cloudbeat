@@ -20,15 +20,19 @@ Follow these steps to run the workflow:
 
     - **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For
       instance: `john-8-7-2-June01`.
+    - **`serverless_mode`**: Set to `true` to enable serverless mode. Default: `false`.
 
     - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
       version. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
       For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
       For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
 
+    - **`ec_url`**: Indicate the Elastic Cloud URL. The default value is `https://cloud.elastic.co`. For QA environments,
+      use `https://console.qa.cld.elstc.co/`.
+
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
       supports
-      snapshot and build candidate (BC) versions. Specify a different region only if necessary.
+      snapshot and build candidate (BC) versions. However, for  QA environments, use `aws-eu-west-1`. Specify a different region only if necessary.
 
    ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
