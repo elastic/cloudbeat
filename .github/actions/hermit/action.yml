@@ -1,0 +1,80 @@
+name: 'Hermit Environment'
+description: 'Activate hermit environment'
+inputs:
+  init-tools:
+    description: 'Init tools'
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - id: hermit-hash
+      shell: bash
+      run: |
+        bin_hashes="$(find ./bin ! -type d | sort | xargs openssl sha256 | openssl sha256 -r | cut -d' ' -f1)"
+        poetry_security_polices="${{ hashFiles('./security-policies/poetry.lock', './security-policies/pyproject.toml') }}"
+        poetry_tests="${{ hashFiles('./tests/poetry.lock', './tests/pyproject.toml') }}"
+        pre_commit="${{ hashFiles('.pre-commit-config.yaml') }}"
+        action_hash="${{ hashFiles('.github/actions/hermit/action.yml') }}"
+        hash="$(echo "${bin_hashes} ${poetry_security_polices} ${poetry_tests} ${pre_commit} ${action_hash}" | sha256sum | cut -d' ' -f1)"
+        echo "hash=$hash" >> "$GITHUB_OUTPUT"
+
+    - id: cache-tools
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/hermit/pkg
+          ./.hermit
+          ~/.cache/pypoetry
+          ~/.cache/pre-commit
+        key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
+        restore-keys: |
+          ci-hermit-env-${{ runner.os }}
+
+    - id: cache-go-deps
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/go/pkg/
+        key: ci-go-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
+        restore-keys: |
+          ci-go-deps-${{ runner.os }}-${{ runner.arch }}
+
+    - name: Initialize hermit
+      shell: bash
+      run: ./bin/hermit env --raw >> "$GITHUB_ENV"
+
+    # in case of cache miss, an older instance of cache could be selected (with restore-keys).
+    # Clean hermit packages to avoid continuously size increment of folder ~/.cache/hermit/pkg.
+    - name: Clean hermit packages
+      if: steps.cache-tools.outputs.cache-hit != 'true'
+      shell: bash
+      run: hermit clean --transient
+
+    - if: ${{ inputs.init-tools == 'true' }}
+      name: Install hermit packages
+      shell: bash
+      run: hermit install
+    - if: ${{ inputs.init-tools == 'true' }}
+      name: Install poetry
+      shell: bash
+      run: pip3 install poetry
+    - if: ${{ inputs.init-tools == 'true' }}
+      name: Install tests poetry dependencies
+      shell: bash
+      run: cd ./tests && poetry install --no-root
+    - if: ${{ inputs.init-tools == 'true' }}
+      name: Install security-policies poetry dependencies
+      shell: bash
+      run: cd ./security-policies && poetry install --no-root
+    - if: ${{ inputs.init-tools == 'true' }}
+      name: Install pre-commit repos
+      shell: bash
+      run: pre-commit || true
+    - if: ${{ inputs.init-tools == 'true' }}
+      name: Download go dependencies
+      shell: bash
+      run: go mod download
+
+    - shell: bash
+      run: go env

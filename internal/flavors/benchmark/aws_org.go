@@ -71,23 +71,30 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, nil, nil, err
 	}
 
-	// TODO: make this mock-able
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+	var (
+		awsConfig   *awssdk.Config
+		awsIdentity *cloud.Identity
+		err         error
+	)
+
+	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
+		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
+		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
+		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
 	}
 
-	a.IAMProvider = iam.NewIAMProvider(log, awsConfig, nil)
-
-	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS Identity: %w", err)
 	}
+	log.Info("successfully retrieved AWS Identity")
+
+	a.IAMProvider = iam.NewIAMProvider(log, *awsConfig, nil)
 
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
 		func() (registry.FetchersMap, error) {
-			accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
+			accounts, err := a.getAwsAccounts(ctx, log, *awsConfig, awsIdentity)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 			}
@@ -209,6 +216,20 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger
 		fmtIAMRole(identity.Account, memberRole),
 	)
 	return config, nil
+}
+
+func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
+	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+	}
+
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+	}
+
+	return &awsConfig, awsIdentity, nil
 }
 
 func (a *AWSOrg) checkDependencies() error {
