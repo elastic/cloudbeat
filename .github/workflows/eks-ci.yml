@@ -188,17 +188,17 @@ jobs:
           kubectl config use-context ${{ matrix.k8s_context }}
           kubectl config set-context --current --namespace=${{ env.KUBE_NAMESPACE }}
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
-
       - name: Deploy tests Helm chart
         id: deploy_helm
         if: success()
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
 
       - name: Execute tests
         id: run_tests
