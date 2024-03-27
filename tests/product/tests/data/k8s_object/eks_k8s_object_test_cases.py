@@ -190,4 +190,4 @@ cis_eks_all = {
     "test-eks-config-2": k8s_object_config_2,
 }
 
-cis_eks_k8s_object_cases = cis_eks_all[eks.current_config]
+cis_eks_k8s_object_cases = cis_eks_all.get(eks.current_config, {})

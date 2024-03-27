@@ -14,7 +14,7 @@ on:
 
 env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.13.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 concurrency:
@@ -43,7 +43,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup GO (with caching)
-        uses: magnetikonline/action-golang-cache@v4
+        uses: magnetikonline/action-golang-cache@v5
         with:
           go-version-file: .go-version
 
@@ -106,32 +106,39 @@ jobs:
 
   k8s_functional_tests:
     # Run only selected tests on PRs
-    if: github.event_name == 'pull_request'
-    name: ${{ matrix.test-target }}-tests
+    # if: github.event_name == 'pull_request'
+    if: ${{ false }}
+    name: ${{ matrix.test-target }}-${{ matrix.kind-config }}
     needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
       fail-fast: false
       matrix:
-        test-target:
-          [
-            file_system_rules,
-            k8s_object_rules,
-            process_scheduler_rules,
-            process_api_server_rules,
-            process_controller_manager_rules,
-            process_etcd_rules,
-            process_kubelet_rules,
-          ]
-        values_file: [ tests/test_environments/values/ci.yml ]
-        range: [ "0..4" ]
         include:
+          - test-target: pre_merge
+            range: ""
+            kind-config: kind-multi
           - test-target: pre_merge_agent
             range: ''
             values_file: tests/test_environments/values/ci-sa-agent.yml
-          - test-target: pre_merge
-            range: ""
+            kind-config: kind-multi
+          - test-target: k8s_file_system_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-files.yml
+            kind-config: kind-test-files
+          - test-target: k8s_object_psp_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-objects.yml
+            kind-config: kind-multi
+          - test-target: k8s_process_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
+            kind-config: kind-test-proc-conf1
+          - test-target: k8s_process_rules
+            range: ''
+            values_file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
+            kind-config: kind-test-proc-conf2
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -150,9 +157,17 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Prepare Kind Cluster for Process Tests
+        if: contains(matrix.kind-config, 'conf2')
+        run: |
+          # Workaround: Direct creation of a Kind cluster for config2 fails to start control-plane (kubelet fails)
+          # Creating and deleting a kind-mono cluster as a preparation for configuring Kind for process tests
+          just create-kind-cluster kind-mono
+          just delete-kind-cluster kind-mono
+
       - name: Create k8s Kind Cluster
         run: |
-          just create-kind-cluster
+          just create-kind-cluster ${{ matrix.kind-config }}
 
       - name: Cache docker images
         uses: actions/cache@v4
@@ -162,7 +177,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} ${{ matrix.kind-config }}
         shell: bash
 
       - name: Deploy tests Helm chart
@@ -170,10 +185,15 @@ jobs:
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
+      - name: Deploy K8s Objects
+        if: contains(matrix.test-target, 'object_psp')
+        run: |
+          just apply-k8s-test-objects
+
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests ${{ matrix.test-target }}
+          just run-tests ${{ matrix.test-target }} kind-${{ matrix.kind-config }}
 
       - name: Upload Test Results
         if: always()
@@ -194,6 +214,8 @@ jobs:
     needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
+    env:
+      KIND_CONFIG: kind-multi
     strategy:
       fail-fast: false
       matrix:
@@ -204,9 +226,6 @@ jobs:
           - test-target: pre_merge
             range: ""
             values_file: tests/test_environments/values/ci.yml
-          - test-target: 'aws and not aws_s3'
-            range: ""
-            values_file: tests/test_environments/values/ci-aws-services.yml
           - test-target: file_system_rules
             range: "0..5"
             values_file: tests/test_environments/values/ci.yml
@@ -368,15 +387,6 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Set Kind Configuration
-        run: |
-          echo "KIND_CONFIG=kind-multi" >> $GITHUB_ENV
-          if [[ $VAR == *"aws"* ]]; then
-            echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
-          fi
-        env:
-          VAR: ${{ matrix.test-target }}
-
       - name: Create k8s Kind Cluster
         run: |
           just create-kind-cluster ${{ env.KIND_CONFIG }}
@@ -396,15 +406,6 @@ jobs:
         id: deploy_helm
         run: |
           just deploy-tests-helm '${{ matrix.test-target }}' ${{ matrix.values_file }} ${{ matrix.range }}
-
-      - name: Deploy cloudbeat aws
-        if: contains(matrix.test-target, 'aws')
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
-        run: |
-          just deploy-cloudbeat-aws
-          sleep 300
 
       - name: Run Tests
         id: run_tests

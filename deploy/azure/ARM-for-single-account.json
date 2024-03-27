@@ -14,7 +14,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "8.13.0"
+            "defaultValue": "8.14.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -30,7 +30,8 @@
         }
     },
     "variables": {
-        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().location)]"
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().name)]",
+        "roleGUID": "[guid(subscription().subscriptionId)]"
     },
     "resources": [
         {
@@ -47,6 +48,9 @@
                 "parameters": {
                     "ResourceGroupName": {
                         "value": "[resourceGroup().name]"
+                    },
+                    "AdditionalRoleGUID": {
+                        "value": "[variables('roleGUID')]"
                     }
                 },
                 "template": {
@@ -55,15 +59,28 @@
                     "parameters": {
                         "ResourceGroupName": {
                             "type": "string"
+                        },
+                        "AdditionalRoleGUID": {
+                            "type": "string"
                         }
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
-                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name)]",
+                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
                             "properties": {
                                 "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('AdditionalRoleGUID'))]",
                                 "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
@@ -83,10 +100,26 @@
                 "expressionEvaluationOptions": {
                     "scope": "inner"
                 },
+                "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "AdditionalRoleGUID": {
+                        "value": "[variables('roleGUID')]"
+                    }
+                },
                 "mode": "Incremental",
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "AdditionalRoleGUID": {
+                            "type": "string"
+                        }
+                    },
                     "resources": [
                         {
                             "type": "Microsoft.Compute/virtualMachines",
@@ -214,6 +247,32 @@
                                 "retentionInterval": "P1D",
                                 "scriptContent": "#/bin/bash -e\nyes | ssh-keygen -f sshkey -N ''\necho \"{\\\"public_key\\\":\\\"$(cat sshkey.pub)\\\"}\" > $AZ_SCRIPTS_OUTPUT_PATH",
                                 "timeout": "PT30M"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleDefinitions",
+                            "apiVersion": "2022-04-01",
+                            "name": "[parameters('AdditionalRoleGUID')]",
+                            "properties": {
+                                "assignableScopes": [
+                                    "[concat('/subscriptions/', subscription().subscriptionId)]",
+                                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', parameters('ResourceGroupName'))]"
+                                ],
+                                "description": "Additional read permissions for cloudbeatVM",
+                                "permissions": [
+                                    {
+                                        "actions": [
+                                            "Microsoft.Web/sites/*/read",
+                                            "Microsoft.Web/sites/config/Read",
+                                            "Microsoft.Web/sites/config/list/Action"
+                                        ],
+                                        "dataActions": [],
+                                        "notActions": [],
+                                        "notDataActions": []
+                                    }
+                                ],
+                                "roleName": "cloudbeatVM additional permissions",
+                                "type": "CustomRole"
                             }
                         }
                     ]

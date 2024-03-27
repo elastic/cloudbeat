@@ -45,6 +45,7 @@ from fleet_api.common_api import (
     bulk_upgrade_agents,
     wait_for_action_status,
     get_package_version,
+    update_package_version,
 )
 from fleet_api.package_policy_api import get_package_policy_by_id
 from state_file_manager import state_manager, HostType
@@ -146,6 +147,12 @@ def main():
     """
     Main linux agents upgrade flow
     """
+    # If the version is not released, the package version should be updated manually
+    update_package_version(
+        cfg=cnfg.elk_config,
+        package_name="cloud_security_posture",
+        package_version=get_package_version(cfg=cnfg.elk_config),
+    )
     # Ensure that all packages are on the latest version
     wait_for_packages_upgrade()
 

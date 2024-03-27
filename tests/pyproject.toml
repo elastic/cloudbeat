@@ -43,6 +43,9 @@ markers = [
     "sanity",
     # test target markers
     "file_system_rules",
+    "k8s_file_system_rules",
+    "k8s_object_psp_rules",
+    "k8s_process_rules",
     "k8s_object_rules",
     "process_api_server_rules",
     "process_controller_manager_rules",
@@ -69,4 +72,5 @@ markers = [
     "azure_networking_rules",
     "azure_storage_account_rules",
     "azure_virtual_machine_rules",
+    "azure_microsoft_defender_rules",
 ]

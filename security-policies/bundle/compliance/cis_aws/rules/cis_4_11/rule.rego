@@ -2,6 +2,7 @@ package compliance.cis_aws.rules.cis_4_11
 
 import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
+import data.compliance.policy.aws_cloudtrail.pattern
 import data.compliance.policy.aws_cloudtrail.trail
 import future.keywords.if
 
@@ -18,6 +19,14 @@ finding = result if {
 	)
 }
 
-required_patterns = ["{ ($.eventName = CreateNetworkAcl) || ($.eventName = CreateNetworkAclEntry) || ($.eventName = DeleteNetworkAcl) || ($.eventName = DeleteNetworkAclEntry) || ($.eventName = ReplaceNetworkAclEntry) || ($.eventName = ReplaceNetworkAclAssociation) }"]
+# { ($.eventName = CreateNetworkAcl) || ($.eventName = CreateNetworkAclEntry) || ($.eventName = DeleteNetworkAcl) || ($.eventName = DeleteNetworkAclEntry) || ($.eventName = ReplaceNetworkAclEntry) || ($.eventName = ReplaceNetworkAclAssociation) }
+required_patterns = [pattern.complex_expression("||", [
+	pattern.simple_expression("$.eventName", "=", "CreateNetworkAcl"),
+	pattern.simple_expression("$.eventName", "=", "CreateNetworkAclEntry"),
+	pattern.simple_expression("$.eventName", "=", "DeleteNetworkAcl"),
+	pattern.simple_expression("$.eventName", "=", "DeleteNetworkAclEntry"),
+	pattern.simple_expression("$.eventName", "=", "ReplaceNetworkAclEntry"),
+	pattern.simple_expression("$.eventName", "=", "ReplaceNetworkAclAssociation"),
+])]
 
 rule_evaluation = trail.at_least_one_trail_satisfied(required_patterns)

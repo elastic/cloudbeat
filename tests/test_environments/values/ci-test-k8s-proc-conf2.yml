@@ -1,0 +1,17 @@
+cloudbeat:
+  deploy: true
+
+
+standaloneAgent:
+  deploy: false
+
+kindNode:
+  # Node to be used for the test pod deployment
+  name: kind-test-proc-conf2-control-plane
+
+testData:
+  marker: k8s_process_rules
+  agentName: cloudbeat
+  clusterType: vanilla
+  markerCmd: -m
+  clusterConfig: test-k8s-config-2

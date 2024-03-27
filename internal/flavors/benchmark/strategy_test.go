@@ -147,7 +147,7 @@ func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {
 	awsCfg.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
 		Call.
 		Return(
-			func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
+			func(_ context.Context, config aws.ConfigAWS) *awssdk.Config {
 				if err != nil {
 					return nil
 				}
@@ -165,7 +165,7 @@ func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {
 				awsConfig.Region = "us1-east"
 				return awsConfig
 			},
-			func(ctx context.Context, config aws.ConfigAWS) error {
+			func(_ context.Context, _ aws.ConfigAWS) error {
 				return err
 			},
 		)

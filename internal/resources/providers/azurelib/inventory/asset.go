@@ -66,6 +66,7 @@ const (
 	ExtensionSQLBlobAuditPolicy                  = "sqlBlobAuditPolicy"
 	ExtensionSQLTransparentDataEncryptions       = "sqlTransparentDataEncryptions"
 	ExtensionSQLAdvancedThreatProtectionSettings = "sqlAdvancedThreatProtectionSettings"
+	ExtensionSQLFirewallRules                    = "sqlFirewallRules"
 	ExtensionMysqlConfigurations                 = "mysqlConfigurations"
 	ExtensionPostgresqlConfigurations            = "psqlConfigurations"
 	ExtensionPostgresqlFirewallRules             = "psqlFirewallRules"
@@ -77,6 +78,7 @@ const (
 	ExtensionQueueDiagnosticSettings             = "queueDiagnosticSettings"
 	ExtensionKeyVaultKeys                        = "vaultKeys"
 	ExtensionKeyVaultSecrets                     = "vaultSecrets"
+	ExtensionKeyVaultDiagnosticSettings          = "vaultDiagnosticSettings"
 
 	// AssetLocation
 	assetLocationGlobal = "global"

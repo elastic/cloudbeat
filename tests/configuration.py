@@ -15,7 +15,7 @@ VULNERABILITIES_INDEX_PATTERN = "*cloud_security_posture.vulnerabilities*"
 agent = Munch()
 agent.name = os.getenv("AGENT_NAME", "cloudbeat")
 agent.namespace = os.getenv("AGENT_NAMESPACE", "kube-system")
-agent.findings_timeout = 500
+agent.findings_timeout = 120
 agent.eks_findings_timeout = 120
 agent.aws_findings_timeout = 10
 agent.azure_findings_timeout = 10
@@ -33,10 +33,13 @@ kubernetes.is_in_cluster_config = bool(
 kubernetes.use_kubernetes = bool(
     os.getenv("USE_K8S", "true") == "true",
 )
+kubernetes.current_config = os.getenv("CLUSTER_CONFIG", "test-k8s-config-1")
+kubernetes.config_1 = os.getenv("K8S_CONFIG_1", "test-k8s-config-1")
+kubernetes.config_2 = os.getenv("K8S_CONFIG_2", "test-k8s-config-2")
 
 # --- AWS EKS ---------------------------------------------
 eks = Munch()
-eks.current_config = os.getenv("EKS_CONFIG", "test-eks-config-1")
+eks.current_config = os.getenv("CLUSTER_CONFIG", "test-eks-config-1")
 eks.config_1 = os.getenv("EKS_CONFIG_1", "test-eks-config-1")
 eks.config_1_node_1 = os.getenv(
     "EKS_CONFIG_1_NODE_1",

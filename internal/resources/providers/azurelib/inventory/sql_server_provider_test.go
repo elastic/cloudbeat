@@ -20,22 +20,30 @@ package inventory
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql/fake"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
-type encryptionProtectorFn func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
-type auditingPoliciesFn func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
-type transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
-type databaseFn func() ([]armsql.DatabasesClientListByServerResponse, error)
-type threatProtectionFn func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
+type (
+	encryptionProtectorFn       func() ([]armsql.EncryptionProtectorsClientListByServerResponse, error)
+	auditingPoliciesFn          func() (armsql.ServerBlobAuditingPoliciesClientGetResponse, error)
+	transparentDataEncryptionFn func(dbName string) ([]armsql.TransparentDataEncryptionsClientListByDatabaseResponse, error)
+	databaseFn                  func() ([]armsql.DatabasesClientListByServerResponse, error)
+	threatProtectionFn          func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
+)
 
 func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
@@ -49,9 +57,10 @@ func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 		client: wrapper,
 	}
 }
+
 func mockAssetBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
-		AssetBlobAuditingPolicies: func(ctx context.Context, subID, resourceGroup, sqlServerName string, clientOptions *arm.ClientOptions, options *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
+		AssetBlobAuditingPolicies: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
 			return f()
 		},
 	}
@@ -80,7 +89,7 @@ func mockAssetTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsF
 
 func mockAssetThreatProtection(f threatProtectionFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
-		AssetServerAdvancedThreatProtectionSettings: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
+		AssetServerAdvancedThreatProtectionSettings: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
 			return f()
 		},
 	}
@@ -375,7 +384,7 @@ func wrapEpResult(eps ...*armsql.EncryptionProtector) armsql.EncryptionProtector
 }
 
 func wrapEpResponse(results ...armsql.EncryptionProtectorListResult) []armsql.EncryptionProtectorsClientListByServerResponse {
-	return lo.Map(results, func(r armsql.EncryptionProtectorListResult, index int) armsql.EncryptionProtectorsClientListByServerResponse {
+	return lo.Map(results, func(r armsql.EncryptionProtectorListResult, _ int) armsql.EncryptionProtectorsClientListByServerResponse {
 		return armsql.EncryptionProtectorsClientListByServerResponse{
 			EncryptionProtectorListResult: r,
 		}
@@ -485,7 +494,7 @@ func tdeAsset(id, dbName, state string) AzureAsset {
 }
 
 func wrapThreatProtectionResponse(results ...armsql.LogicalServerAdvancedThreatProtectionListResult) []armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
-	return lo.Map(results, func(r armsql.LogicalServerAdvancedThreatProtectionListResult, index int) armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
+	return lo.Map(results, func(r armsql.LogicalServerAdvancedThreatProtectionListResult, _ int) armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse {
 		return armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse{
 			LogicalServerAdvancedThreatProtectionListResult: r,
 		}
@@ -529,5 +538,129 @@ func threatProtectionAsset(id, state string) AzureAsset {
 			"creationTime": creationTime,
 		},
 		Extension: nil,
+	}
+}
+
+func TestListSQLFirewallRules(t *testing.T) {
+	subID := "11111111-aaaa-bbbb-cccc-dddddddddddd"
+	resourceGroup := "rg"
+	srv := "srv"
+
+	tests := map[string]struct {
+		mockPages [][]*armsql.FirewallRule
+		expected  []AzureAsset
+	}{
+		"single page": {
+			mockPages: [][]*armsql.FirewallRule{
+				{
+					{
+						Name: to.Ptr("name1"),
+					},
+					{
+						Name: to.Ptr("name2"),
+						Properties: &armsql.ServerFirewallRuleProperties{
+							StartIPAddress: to.Ptr("0.0.0.0"),
+							EndIPAddress:   to.Ptr("0.0.0.0"),
+						},
+					},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Name:           "name1",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+				},
+				{
+					Name:           "name2",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+					Properties: map[string]any{
+						"startIpAddress": "0.0.0.0",
+						"endIpAddress":   "0.0.0.0",
+					},
+				},
+			},
+		},
+		"two pages": {
+			mockPages: [][]*armsql.FirewallRule{
+				{
+					{
+						Name: to.Ptr("name1"),
+					},
+					{
+						Name: to.Ptr("name2"),
+						Properties: &armsql.ServerFirewallRuleProperties{
+							StartIPAddress: to.Ptr("0.0.0.0"),
+							EndIPAddress:   to.Ptr("0.0.0.0"),
+						},
+					},
+				},
+				{
+					{
+						Name: to.Ptr("name3"),
+						Properties: &armsql.ServerFirewallRuleProperties{
+							StartIPAddress: to.Ptr("0.0.0.0"),
+							EndIPAddress:   to.Ptr("0.0.0.0"),
+						},
+					},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Name:           "name1",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+				},
+				{
+					Name:           "name2",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+					Properties: map[string]any{
+						"startIpAddress": "0.0.0.0",
+						"endIpAddress":   "0.0.0.0",
+					},
+				},
+				{
+					Name:           "name3",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+					Properties: map[string]any{
+						"startIpAddress": "0.0.0.0",
+						"endIpAddress":   "0.0.0.0",
+					},
+				},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			fakeSrv := &fake.FirewallRulesServer{}
+			fakeSrv.NewListByServerPager = func(_, _ string, _ *armsql.FirewallRulesClientListByServerOptions) azfake.PagerResponder[armsql.FirewallRulesClientListByServerResponse] {
+				pager := azfake.PagerResponder[armsql.FirewallRulesClientListByServerResponse]{}
+
+				for _, p := range tc.mockPages {
+					page := armsql.FirewallRulesClientListByServerResponse{
+						FirewallRuleListResult: armsql.FirewallRuleListResult{
+							Value: p,
+						},
+					}
+					pager.AddPage(http.StatusOK, page, nil)
+				}
+
+				return pager
+			}
+			fakeTransport := fake.NewFirewallRulesServerTransport(fakeSrv)
+
+			provider := NewSQLProvider(testhelper.NewLogger(t), nil).(*sqlProvider)
+			provider.clientOptions = &arm.ClientOptions{}
+			provider.clientOptions.Transport = fakeTransport
+
+			rules, err := provider.ListSQLFirewallRules(context.Background(), subID, resourceGroup, srv)
+			require.NoError(t, err)
+			assert.ElementsMatch(t, tc.expected, rules)
+		})
 	}
 }

@@ -354,4 +354,4 @@ cis_eks_all = {
     "test-eks-config-2": eks_process_config_2,
 }
 
-cis_eks_kubelet_cases = cis_eks_all[eks.current_config]
+cis_eks_kubelet_cases = cis_eks_all.get(eks.current_config, {})

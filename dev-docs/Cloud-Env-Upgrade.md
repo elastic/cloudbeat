@@ -4,6 +4,18 @@ The [`Test Upgrade Environment`](https://github.com/elastic/cloudbeat/actions/wo
 It also facilitates the upgrade of the environment to a new version of the ELK stack and all installed agents, while also performing checks for findings retrieval. For example, if the target ELK version is 8.12.0 and the base version was not selected, the workflow will automatically calculate the previously released version (e.g., 8.11.3), install that version, and then proceed to upgrade to the specified target version (8.12.0). Essentially, this workflow is designed to test the upgrade feature on upcoming versions that are currently in development or will be release candidates (BC).
 
 
+## Overview of the Upgrade Process
+
+The upgrade process comprises the following main steps:
+
+1. Install the released version, including all integrations (CSPM/KSPM), and deploy their agents.
+2. Upgrade the ELK stack version.
+3. Upgrade CSPM/KSPM integration versions:
+   - If the integration has a `preview` version, the workflow will execute a script to update the integration to the latest `preview` version.
+   - If the latest version is released (no `preview` suffix), the integration upgrade will be automatically performed after the stack upgrade.
+4. Upgrade KSPM agents by reapplying Kubernetes manifests with the latest image versions.
+5. Upgrade Linux-type agents (CSPM/CNVM) by using the Fleet upgrade API.
+
 ## How to Run the Workflow
 
 Follow these steps to run the workflow:
