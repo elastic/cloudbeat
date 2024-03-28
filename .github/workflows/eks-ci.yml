@@ -24,7 +24,7 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.13.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
@@ -191,6 +191,8 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         if: success()
+        env:
+          ELK_VERSION: 8.13.0-SNAPSHOT
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
