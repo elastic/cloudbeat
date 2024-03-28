@@ -31,21 +31,21 @@ import (
 var RetryOnResourceExhausted = gax.WithRetry(func() gax.Retryer {
 	return gax.OnCodes([]codes.Code{codes.ResourceExhausted}, gax.Backoff{
 		Initial:    1 * time.Second,
-		Max:        10 * time.Second,
+		Max:        1 * time.Minute,
 		Multiplier: 1.2,
 	})
 })
 
 type AssetsInventoryRateLimiter struct {
-	// methods is a map of method name to rate limiter based on the methods's per-project quota.
-	// we do this because when requests are made on the org level (parent: org/123), we can't tell the project id
-	// so we fetch by the more restrictive per-project quota, making sure even at the org level we don't exceed the limit
 	methods map[string]*rate.Limiter
 	log     *logp.Logger
 }
 
 // https://cloud.google.com/asset-inventory/docs/quota
 var methods = map[string]*rate.Limiter{
+	// In both 'single-account' and 'organization-account' cases, we always need to pace by project because of the consumer project (quota_project_id)
+	// Which is the one effectively consuming the quota
+	// the organization quota would be relevant if we manually send multiple requests with diff quota_project_id, which we don't do
 	"/google.cloud.asset.v1.AssetService/ListAssets": rate.NewLimiter(rate.Every(time.Minute/100), 1),
 }
 
@@ -61,9 +61,10 @@ func (rl *AssetsInventoryRateLimiter) Wait(ctx context.Context, method string) {
 	if limiter != nil {
 		err := limiter.Wait(ctx)
 		if err != nil {
-			rl.log.Errorf("Failed to wait for %s, error: %v", method, err)
+			rl.log.Errorf("Failed to wait for project quota on method %s, error: %w", method, err)
 		}
 	}
+
 }
 
 func (rl *AssetsInventoryRateLimiter) GetInterceptorDialOption() grpc.DialOption {

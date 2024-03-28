@@ -45,22 +45,22 @@ func (s *RateLimiterTestSuite) SetupTest() {
 
 func (s *RateLimiterTestSuite) TestRateLimiterWait() {
 	ctx := context.Background()
+	duration := time.Millisecond
 	s.rateLimiter.methods = map[string]*rate.Limiter{
-		"foo": rate.NewLimiter(rate.Every(time.Second/1), 1), // 1 request per second
+		"someMethod": rate.NewLimiter(rate.Every(duration/1), 1), // 1 request per second
 	}
 
 	totalRequests := 5
 	startTime := time.Now()
 
 	for i := 0; i < totalRequests; i++ {
-		s.rateLimiter.Wait(ctx, "foo")
+		s.rateLimiter.Wait(ctx, "someMethod")
 	}
 
 	endTime := time.Now()
-	duration := endTime.Sub(startTime)
-
-	// expected duration is (totalRequests-1) seconds
-	// 1st request goes instantly, 2nd and above wait 1 second each
-	expectedDuration := time.Second * time.Duration((totalRequests - 1))
-	s.Assert().True(duration >= expectedDuration, fmt.Sprintf("expected %v, actual %v", expectedDuration, duration))
+	actualDuration := endTime.Sub(startTime)
+	// expected duration is (totalRequests-1) duration
+	// 1st request goes instantly, 2nd and above wait 1duration each
+	expectedDuration := duration * time.Duration((totalRequests - 1))
+	s.Assert().True(actualDuration >= expectedDuration, fmt.Sprintf("expected %v to be greater or equal than %v", actualDuration, expectedDuration))
 }
