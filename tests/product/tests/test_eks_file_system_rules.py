@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import pytest
 from commonlib.utils import get_ES_evaluation
 
-from product.tests.data.file_system import eks_file_system_test_cases as eks_fs_tc
+from product.tests.data.eks import eks_file_system_test_cases as eks_fs_tc
 from product.tests.parameters import register_params, Parameters
 
 
