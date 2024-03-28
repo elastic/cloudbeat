@@ -320,7 +320,6 @@ jobs:
         shell: bash
         run: |
           ls -lahR tests/allure/results/ || true
-          echo "event_name: ${{ github.event_name }}"
 
       - name: Publish allure report
         if: ${{ success() || failure() }}
