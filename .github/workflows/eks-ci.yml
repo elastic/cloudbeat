@@ -191,6 +191,8 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         if: success()
+        env:
+          ELK_VERSION: 8.13.0-SNAPSHOT
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
