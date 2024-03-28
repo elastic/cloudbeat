@@ -130,8 +130,9 @@ type ProviderInitializerAPI interface {
 }
 
 func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
+	limiter := NewAssetsInventoryRateLimiter(log)
 	// initialize GCP assets inventory client
-	client, err := asset.NewClient(ctx, gcpConfig.ClientOpts...)
+	client, err := asset.NewClient(ctx, append(gcpConfig.ClientOpts, option.WithGRPCDialOption(limiter.GetInterceptorDialOption()))...)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 	assetsInventoryWrapper := &AssetsInventoryWrapper{
 		Close: client.Close,
 		ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
-			return client.ListAssets(ctx, req, opts...)
+			return client.ListAssets(ctx, req, append(opts, RetryOnResourceExhausted)...)
 		},
 	}
 
@@ -180,8 +181,6 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 }
 
 func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []string) ([]*ExtendedGcpAsset, error) {
-	p.log.Infof("Listing GCP asset types: %v in %v", assetTypes, p.config.Parent)
-
 	wg := sync.WaitGroup{}
 	var resourceAssets []*assetpb.Asset
 	var policyAssets []*assetpb.Asset
@@ -193,6 +192,7 @@ func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []str
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_RESOURCE,
 		}
+		p.log.Infof("Listing GCP resources for asset types: %v in %v", assetTypes, p.config.Parent)
 		resourceAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
 		wg.Done()
 	}()
@@ -203,6 +203,7 @@ func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []str
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_IAM_POLICY,
 		}
+		p.log.Infof("Listing GCP policies for asset types: %v in %v", assetTypes, p.config.Parent)
 		policyAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
 		wg.Done()
 	}()
@@ -311,7 +312,7 @@ func (p *Provider) enrichNetworkAssets(ctx context.Context, assets []*ExtendedGc
 		p.log.Infof("no %s assets were listed", ComputeNetworkAssetType)
 		return
 	}
-
+	p.log.Infof("Listing GCP dns policies for %v", p.config.Parent)
 	dnsPolicyAssets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
 		Parent:      p.config.Parent,
 		AssetTypes:  []string{DnsPolicyAssetType},
@@ -469,6 +470,7 @@ func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[s
 }
 
 func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error) {
+	p.log.Infof("Listing GCP project policies for %v", p.config.Parent)
 	projects := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
 		ContentType: assetpb.ContentType_IAM_POLICY,
 		Parent:      p.config.Parent,
@@ -492,6 +494,7 @@ func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []
 		if strings.HasPrefix(parent, "organizations") {
 			assetType = CrmOrgAssetType
 		}
+		p.log.Infof("Listing GCP ancestor policies for %v", parent)
 		assets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
 			ContentType: assetpb.ContentType_IAM_POLICY,
 			Parent:      parent,
