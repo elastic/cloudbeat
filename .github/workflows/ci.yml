@@ -298,6 +298,7 @@ jobs:
     timeout-minutes: 60
     permissions:
       pull-requests: write
+      checks: write
     if: ${{ success() || failure() }}
     env:
       AWS_REGION: "eu-west-1"
@@ -318,8 +319,8 @@ jobs:
         if: ${{ success() || failure() }}
         shell: bash
         run: |
-          ls -lahR || true
-          rm -f tests/allure/results/cover.out || true
+          ls -lahR tests/allure/results/ || true
+          echo "event_name: ${{ github.event_name }}"
 
       - name: Publish allure report
         if: ${{ success() || failure() }}
@@ -343,7 +344,7 @@ jobs:
           debug: false
 
       - name: Allure Summary
-        if: ${{ success() && github.event_name == 'pull_request' }}
+        if: ${{ success() && github.event_name != 'push' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -354,8 +355,6 @@ jobs:
 
           ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
           allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
-          # posting result into job summary
-          echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
 
           # saving result into env variable (with multiline handling)
           echo "ALLURE_SUMMARY<<EOF" >> $GITHUB_ENV
@@ -364,7 +363,7 @@ jobs:
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
-        if: ${{ success() && github.event_name == 'pull_request' }}
+        if: ${{ success() && github.event_name != 'push' }}
         with:
           header: CI Test Results
           number: ${{ github.event.number }}
