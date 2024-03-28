@@ -298,7 +298,6 @@ jobs:
     timeout-minutes: 60
     permissions:
       pull-requests: write
-      checks: write
     if: ${{ success() || failure() }}
     env:
       AWS_REGION: "eu-west-1"
