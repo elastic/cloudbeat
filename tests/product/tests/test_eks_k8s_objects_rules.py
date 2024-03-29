@@ -9,7 +9,7 @@ import pytest
 from loguru import logger
 from commonlib.utils import get_ES_evaluation
 
-from product.tests.data.k8s_object import eks_k8s_object_test_cases as eks_k8s_object_tc
+from product.tests.data.eks import eks_k8s_object_test_cases as eks_k8s_object_tc
 from product.tests.parameters import register_params, Parameters
 
 
