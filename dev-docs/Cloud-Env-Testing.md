@@ -34,8 +34,8 @@ Follow these steps to run the workflow:
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
       supports
       snapshot and build candidate (BC) versions. However, for  QA environments, use `aws-eu-west-1`. Specify a different region only if necessary.
+      <img width="310" alt="Screenshot 2024-04-01 at 1 35 27 PM" src="https://github.com/elastic/cloudbeat/assets/17135495/7e32cafa-5a31-47b4-978b-bccb45771e24">
 
-   ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
 4. Optionally, modify other parameters if required:
 
