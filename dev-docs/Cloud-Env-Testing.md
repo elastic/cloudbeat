@@ -34,8 +34,8 @@ Follow these steps to run the workflow:
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
       supports
       snapshot and build candidate (BC) versions. However, for  QA environments, use `aws-eu-west-1`. Specify a different region only if necessary.
+      <img width="310" alt="Screenshot 2024-04-01 at 1 35 27 PM" src="https://github.com/elastic/cloudbeat/assets/17135495/7e32cafa-5a31-47b4-978b-bccb45771e24">
 
-   ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
 4. Optionally, modify other parameters if required:
 
@@ -70,11 +70,13 @@ Follow these steps to run the workflow:
 
 For qa environments, to avoid [automatic deployment deletion](https://docs.elastic.dev/serverless/qa)  be sure to update the deployment name with the prefix `keep_`.
 
-1. Go to [`Projects > Project-Deployment Name`](https://console.qa.cld.elstc.co/)
-   ![Screenshot 2024-04-01 at 12.24.25 PM.png](..%2F..%2F..%2FDesktop%2FScreenshot%202024-04-01%20at%2012.24.25%E2%80%AFPM.png)
+
+1. Go to [`Projects > Project > "Project Deployment Name"`](https://console.qa.cld.elstc.co/)
+   
+   <img width="1419" alt="Screenshot 2024-04-01 at 12 24 25 PM" src="https://github.com/elastic/cloudbeat/assets/17135495/4c23b11a-3bda-49ec-85f4-421f6b872b2e">
 
 2. Update the *Project name* field value with the prefix `keep_`
-![Screenshot 2024-04-01 at 12.24.25 PM.png](..%2F..%2F..%2FDesktop%2FScreenshot%202024-04-01%20at%2012.24.25%E2%80%AFPM.png)
+<img width="1393" alt="Screenshot 2024-04-01 at 12 24 54 PM" src="https://github.com/elastic/cloudbeat/assets/17135495/7a394522-3d66-44ef-935a-5ab4ccbff81e">
 
 Note that when you go to  destroy the environment, be sure to remove `keep_` from the deployment name.
 
@@ -147,7 +149,7 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
    ```kubectl get po -n kube-system```
 
-   This command should list the pods in the kube-system namespace, confirming that you have successfully connected to your EKS cluster.
+   This command should list the pods in the kube-system namespace, confirming that you have successfully connected to your EKS cluster. 
 
 
 ## Cleanup Procedure
