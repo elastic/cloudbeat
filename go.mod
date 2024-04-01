@@ -526,5 +526,4 @@ replace (
 	github.com/golang/glog => github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
 	github.com/lestrrat-go/jwx => github.com/lestrrat-go/jwx v1.2.27
-	go.opentelemetry.io/otel/metric v0.38.0 => go.opentelemetry.io/otel/metric v0.34.0
 )
