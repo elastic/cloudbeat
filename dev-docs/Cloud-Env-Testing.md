@@ -20,6 +20,7 @@ Follow these steps to run the workflow:
 
     - **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For
       instance: `john-8-7-2-June01`.
+
     - **`serverless_mode`**: Set to `true` to enable serverless mode. Default: `false`.
 
     - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
@@ -27,7 +28,7 @@ Follow these steps to run the workflow:
       For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
       For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
 
-    - **`ec_url`**: Indicate the Elastic Cloud URL. The default value is `https://cloud.elastic.co`. For QA environments,
+    - **`ec_url`**: Indicate the Elastic Cloud URL. The default value is `https://cloud.elastic.co` for production environments. For QA environments,
       use `https://console.qa.cld.elstc.co/`.
 
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
@@ -65,6 +66,17 @@ Follow these steps to run the workflow:
 
    ![Run Workflow](https://github.com/oren-zohar/cloudbeat/assets/85433724/7b05bf58-cc0b-4ec9-8e49-55d117673df8)
 
+## Manual QA Environments Updates
+
+For qa environments, to avoid [automatic deployment deletion](https://docs.elastic.dev/serverless/qa)  be sure to update the deployment name with the prefix `keep_`.
+
+1. Go to [`Projects > Project-Deployment Name`](https://console.qa.cld.elstc.co/)
+   ![Screenshot 2024-04-01 at 12.24.25 PM.png](..%2F..%2F..%2FDesktop%2FScreenshot%202024-04-01%20at%2012.24.25%E2%80%AFPM.png)
+
+2. Update the *Project name* field value with the prefix `keep_`
+![Screenshot 2024-04-01 at 12.24.25 PM.png](..%2F..%2F..%2FDesktop%2FScreenshot%202024-04-01%20at%2012.24.25%E2%80%AFPM.png)
+
+Note that when you go to  destroy the environment, be sure to remove `keep_` from the deployment name.
 
 ## Tracking Workflow Execution
 
