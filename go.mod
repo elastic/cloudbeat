@@ -96,6 +96,7 @@ require (
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bitnami/go-version v0.0.0-20231130084017-bb00604d650c // indirect
 	github.com/containerd/log v0.1.0 // indirect
+	github.com/distribution/reference v0.6.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-git/go-git/v5 v5.11.0 // indirect
 	github.com/gobuffalo/here v0.6.7 // indirect
@@ -214,7 +215,6 @@ require (
 	github.com/containerd/fifo v1.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.14.3 // indirect
 	github.com/containerd/ttrpc v1.2.2 // indirect
-	github.com/containerd/typeurl v1.0.2 // indirect
 	github.com/containerd/typeurl/v2 v2.1.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -223,11 +223,11 @@ require (
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
-	github.com/docker/cli v24.0.5+incompatible // indirect
-	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/docker/docker v24.0.9+incompatible // indirect
+	github.com/docker/cli v25.0.5+incompatible // indirect
+	github.com/docker/distribution v2.8.3+incompatible // indirect
+	github.com/docker/docker v25.0.5+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -373,7 +373,7 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/moby/buildkit v0.11.6 // indirect
+	github.com/moby/buildkit v0.12.5 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/spdystream v0.2.0 // indirect
 	github.com/moby/sys/mountinfo v0.6.2 // indirect
@@ -383,7 +383,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
-	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
@@ -508,7 +507,7 @@ require (
 	modernc.org/memory v1.7.2 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
-	oras.land/oras-go v1.2.3 // indirect
+	oras.land/oras-go v1.2.5 // indirect
 	oras.land/oras-go/v2 v2.4.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/kustomize/api v0.13.5-0.20230601165947-6ce0bf390ce3 // indirect
@@ -528,5 +527,4 @@ replace (
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
 	github.com/lestrrat-go/jwx => github.com/lestrrat-go/jwx v1.2.27
 	go.opentelemetry.io/otel/metric v0.38.0 => go.opentelemetry.io/otel/metric v0.34.0
-	oras.land/oras-go => oras.land/oras-go v1.2.4-0.20230801060855-932dd06d38af
 )
