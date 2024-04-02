@@ -19,7 +19,6 @@ package inventory
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -54,11 +53,10 @@ func (s *RateLimiterTestSuite) TestRateLimiterWait() {
 	startTime := time.Now()
 	for i := 0; i < totalRequests; i++ {
 		s.rateLimiter.Wait(ctx, "someMethod", nil)
-		fmt.Println("request", i)
 	}
 	endTime := time.Now()
 
 	actualDuration := endTime.Sub(startTime)
 	minDuration := duration * time.Duration((totalRequests - 1)) // 1st request is instant, 2nd and above wait 1duration each
-	s.Assert().True(actualDuration >= minDuration, fmt.Sprintf("expected %v to be greater or equal than %v", actualDuration, minDuration))
+	s.GreaterOrEqual(actualDuration, minDuration)
 }
