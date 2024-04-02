@@ -6,7 +6,7 @@ outputs:
     allow_older_versions: true
     hosts:
       - >-
-        http://localhost:9200
+        '${ES_HOST}'
     username: '${ES_USERNAME}'
     password: '${ES_PASSWORD}'
     preset: balanced
