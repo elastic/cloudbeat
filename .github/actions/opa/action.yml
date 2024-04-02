@@ -1,0 +1,39 @@
+name: 'OPA CI'
+description: 'OPA lint and tests'
+inputs:
+  working-directory:
+    description: 'working directory'
+    required: false
+    default: './security-policies'
+runs:
+  using: composite
+  steps:
+    - name: OPA format
+      shell: bash
+      run: opa fmt ./bundle --fail=true --diff
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: OPA format list failed files
+      shell: bash
+      run: opa fmt ./bundle --list
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: OPA build
+      shell: bash
+      run: opa build -b ./bundle -e ./bundle/compliance
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: OPA test
+      shell: bash
+      run: opa test -b ./bundle -v
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: OPA check -strict
+      shell: bash
+      run: opa check --strict --bundle ./bundle
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Lint Rego
+      shell: bash
+      run: regal lint --format github bundle
+      working-directory: ${{ inputs.working-directory }}
