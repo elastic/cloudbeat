@@ -3,10 +3,9 @@ revision: 2
 outputs:
   default:
     type: elasticsearch
-    allow_older_versions: true
     hosts:
       - >-
-        '${ES_HOST}'
+        http://localhost:9200
     username: '${ES_USERNAME}'
     password: '${ES_PASSWORD}'
     preset: balanced
@@ -498,4 +497,3 @@ inputs:
                 type: direct_access_keys
                 access_key_id: '${AWS_ACCESS_KEY_ID}'
                 secret_access_key: '${AWS_SECRET_ACCESS_KEY}'
-secret_references: []
