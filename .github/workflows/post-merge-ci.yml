@@ -21,8 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - agent-version: ['8.13.0', '8.12'] # TODO: add agent versions
+        agent-version: ['8.13.0'] # TODO: add agent versions
     # permissions:
     #   contents: "read"
     #   id-token: "write"
@@ -49,7 +48,7 @@ jobs:
           ES_PASSWORD: changeme
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
-        run: ./.ci/scripts/run_agent.sh ${{ matrix.agent-version }}
+        run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }}
 
       # TODO: Remove tmate action after finishing the implementation
       - name: Setup tmate session
