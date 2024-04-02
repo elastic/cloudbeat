@@ -130,8 +130,9 @@ type ProviderInitializerAPI interface {
 }
 
 func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
+	limiter := NewAssetsInventoryRateLimiter(log)
 	// initialize GCP assets inventory client
-	client, err := asset.NewClient(ctx, gcpConfig.ClientOpts...)
+	client, err := asset.NewClient(ctx, append(gcpConfig.ClientOpts, option.WithGRPCDialOption(limiter.GetInterceptorDialOption()))...)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 	assetsInventoryWrapper := &AssetsInventoryWrapper{
 		Close: client.Close,
 		ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
-			return client.ListAssets(ctx, req, opts...)
+			return client.ListAssets(ctx, req, append(opts, RetryOnResourceExhausted)...)
 		},
 	}
 
@@ -180,30 +181,26 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 }
 
 func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []string) ([]*ExtendedGcpAsset, error) {
-	p.log.Infof("Listing GCP asset types: %v in %v", assetTypes, p.config.Parent)
-
 	wg := sync.WaitGroup{}
 	var resourceAssets []*assetpb.Asset
 	var policyAssets []*assetpb.Asset
 
 	wg.Add(1)
 	go func() {
-		request := &assetpb.ListAssetsRequest{
+		resourceAssets = p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
 			Parent:      p.config.Parent,
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_RESOURCE,
-		}
-		resourceAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
+		})
 		wg.Done()
 	}()
 	wg.Add(1)
 	go func() {
-		request := &assetpb.ListAssetsRequest{
+		policyAssets = p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
 			Parent:      p.config.Parent,
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_IAM_POLICY,
-		}
-		policyAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
+		})
 		wg.Done()
 	}()
 
@@ -308,18 +305,16 @@ func (p *Provider) enrichNetworkAssets(ctx context.Context, assets []*ExtendedGc
 		p.log.Infof("no %s assets were listed", ComputeNetworkAssetType)
 		return
 	}
-
-	dnsPolicyAssets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
+	dnsPolicyAssets := p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
 		Parent:      p.config.Parent,
 		AssetTypes:  []string{DnsPolicyAssetType},
 		ContentType: assetpb.ContentType_RESOURCE,
-	}))
+	})
 
 	if len(dnsPolicyAssets) == 0 {
 		p.log.Infof("no %s assets were listed, return original assets", DnsPolicyAssetType)
 		return
 	}
-
 	dnsPolicies := decodeDnsPolicies(dnsPolicyAssets)
 
 	p.log.Infof("attempting to enrich %d %s assets with dns policy", len(assets), ComputeNetworkAssetType)
@@ -402,19 +397,21 @@ func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *logp.Logger, f T
 	return enrichedAssets
 }
 
-func getAllAssets(log *logp.Logger, it Iterator) []*assetpb.Asset {
+func (p *Provider) getAllAssets(ctx context.Context, request *assetpb.ListAssetsRequest) []*assetpb.Asset {
+	p.log.Infof("Listing asset types: %v of type %v for %v", request.AssetTypes, request.ContentType, request.Parent)
 	results := make([]*assetpb.Asset, 0)
+	it := p.inventory.ListAssets(ctx, request)
 	for {
 		response, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			log.Errorf("Error fetching GCP Asset: %s", err)
-			return nil
+			p.log.Errorf("Error fetching GCP Asset: %s", err)
+			return results
 		}
 
-		log.Debugf("Fetched GCP Asset: %+v", response.Name)
+		p.log.Debugf("Fetched GCP Asset: %+v", response.Name)
 		results = append(results, response)
 	}
 	return results
@@ -466,22 +463,26 @@ func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[s
 }
 
 func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error) {
-	projects := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
+	projects := p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
 		ContentType: assetpb.ContentType_IAM_POLICY,
 		Parent:      p.config.Parent,
 		AssetTypes:  []string{CrmProjectAssetType},
-	}))
-
+	})
+	p.log.Infof("Listed %d GCP projects", len(projects))
+	ancestorsPolicies := map[string][]*ExtendedGcpAsset{}
 	return lo.Map(projects, func(project *assetpb.Asset, _ int) *ProjectPoliciesAsset {
 		projectAsset := extendWithECS(ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
 		// Skip first ancestor it as we already got it
-		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(ctx, p, project.Ancestors[1:])...)
+		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(ctx, ancestorsPolicies, p, project.Ancestors[1:])...)
 		return &ProjectPoliciesAsset{CloudAccount: projectAsset.CloudAccount, Policies: policiesAssets}
 	}), nil
 }
 
-func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []*ExtendedGcpAsset {
+func getAncestorsAssets(ctx context.Context, ancestorsPolicies map[string][]*ExtendedGcpAsset, p *Provider, ancestors []string) []*ExtendedGcpAsset {
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
+		if ancestorsPolicies[parent] != nil {
+			return ancestorsPolicies[parent]
+		}
 		var assetType string
 		if strings.HasPrefix(parent, "folders") {
 			assetType = CrmFolderAssetType
@@ -489,12 +490,15 @@ func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []
 		if strings.HasPrefix(parent, "organizations") {
 			assetType = CrmOrgAssetType
 		}
-		assets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
+
+		assets := p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
 			ContentType: assetpb.ContentType_IAM_POLICY,
 			Parent:      parent,
 			AssetTypes:  []string{assetType},
-		}))
-		return extendWithECS(ctx, p.crm, p.crmCache, assets)
+		})
+		extendedAssets := extendWithECS(ctx, p.crm, p.crmCache, assets)
+		ancestorsPolicies[parent] = extendedAssets
+		return extendedAssets
 	}))
 }
 
