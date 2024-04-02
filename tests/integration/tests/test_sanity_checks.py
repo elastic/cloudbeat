@@ -35,6 +35,9 @@ tests_data = {
         "cloud-audit",
         "cloud-database",
         "cloud-config",
+        # DEBUG(kuba): Trying out the disabled tests
+        "cloud-compute",
+        "cloud-storage",
     ],  # Exclude "cloud-compute", "cloud-storage" due to lack of fetcher control and potential delays.
     "cis_gcp": [
         "cloud-compute",
@@ -56,6 +59,7 @@ tests_data = {
     ],  # Exclude "cloud-compute", Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": [
+        "file",
         "process",
         "k8s_object",
     ],  # Optimize search findings by excluding 'file'.
