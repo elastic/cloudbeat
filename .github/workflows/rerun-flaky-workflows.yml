@@ -2,7 +2,7 @@ name: Rerun Flaky Workflows
 
 on:
   workflow_run:
-    workflows: ["K8s-CI", "CNVM-CI"]
+    workflows: ["K8s-CI", "CNVM-CI", "Tests"]
     types: [completed]
 
 jobs:
