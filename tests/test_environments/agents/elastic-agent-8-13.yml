@@ -3,8 +3,7 @@ revision: 2
 outputs:
   default:
     type: elasticsearch
-    hosts:
-      - '${ES_HOST}'
+    hosts: ["127.0.0.1:9200"]
     username: '${ES_USERNAME}'
     password: '${ES_PASSWORD}'
     preset: balanced
