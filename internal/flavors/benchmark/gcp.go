@@ -74,7 +74,9 @@ func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	}
 
 	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
-		cloud.NewDataProvider(),
+		cloud.NewDataProvider(cloud.WithAccount(cloud.Identity{
+			Provider: "gcp",
+		})),
 		nil,
 		nil
 }
