@@ -4,7 +4,7 @@ outputs:
   default:
     type: elasticsearch
     hosts:
-      - '{ES_HOST}'
+      - '${ES_HOST}'
     username: '${ES_USERNAME}'
     password: '${ES_PASSWORD}'
     preset: balanced
