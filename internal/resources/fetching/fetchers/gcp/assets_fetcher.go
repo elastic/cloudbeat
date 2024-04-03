@@ -138,28 +138,17 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}
 
 	return fetching.ResourceMetadata{
-		ID:      r.ExtendedAsset.Name,
-		Type:    r.Type,
-		SubType: r.SubType,
-		Name:    getAssetResourceName(r.ExtendedAsset),
-		Region:  region,
+		ID:                   r.ExtendedAsset.Name,
+		Type:                 r.Type,
+		SubType:              r.SubType,
+		Name:                 getAssetResourceName(r.ExtendedAsset),
+		Region:               region,
+		CloudAccountMetadata: *r.ExtendedAsset.CloudAccount,
 	}, nil
 }
 
 func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
-		"cloud": map[string]any{
-			"provider": "gcp",
-			"account": map[string]any{
-				"id":   r.ExtendedAsset.Ecs.ProjectId,
-				"name": r.ExtendedAsset.Ecs.ProjectName,
-			},
-			"Organization": map[string]any{
-				"id":   r.ExtendedAsset.Ecs.OrganizationId,
-				"name": r.ExtendedAsset.Ecs.OrganizationName,
-			},
-		},
-	}, nil
+	return nil, nil
 }
 
 // try to retrieve the resource name from the asset data fields (name or displayName), in case it is not set
