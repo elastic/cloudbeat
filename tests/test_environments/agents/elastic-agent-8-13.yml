@@ -4,8 +4,7 @@ outputs:
   default:
     type: elasticsearch
     hosts:
-      - >-
-        http://localhost:9200
+      - '{ES_HOST}'
     username: '${ES_USERNAME}'
     password: '${ES_PASSWORD}'
     preset: balanced
