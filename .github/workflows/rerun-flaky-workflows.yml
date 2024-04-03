@@ -2,7 +2,7 @@ name: Rerun Flaky Workflows
 
 on:
   workflow_run:
-    workflows: ["K8s-CI", "CNVM-CI"]
+    workflows: ["Tests"]
     types: [completed]
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Slack Notification
         uses: ./.github/actions/slack-notification
-        if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
+        if: ${{ !cancelled() && failure() && github.event_name != 'pull_request' }} # Run only if the previous step failed
         continue-on-error: true
         env:
           BREAKING_COMMIT: "${{ github.event.workflow_run.head_sha }}"
