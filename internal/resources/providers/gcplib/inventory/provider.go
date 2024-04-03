@@ -387,16 +387,16 @@ func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *logp.Logger, f T
 			continue
 		}
 
-		c := projectAssets[0].CloudAccount
+		cloudAccount := projectAssets[0].CloudAccount
 
 		// add folder and org level log sinks for each project
 		projectAssets = append(projectAssets, assetsByProject[""]...)
 		enrichedAssets = append(enrichedAssets, f(
 			projectAssets,
 			projectId,
-			c.AccountName,
-			c.OrganisationId,
-			c.OrganizationName,
+			cloudAccount.AccountName,
+			cloudAccount.OrganisationId,
+			cloudAccount.OrganizationName,
 		))
 	}
 	return enrichedAssets
