@@ -19,7 +19,7 @@ GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
 
 # The timeout and backoff for waiting all agents are running the specified component.
-COMPONENTS_TIMEOUT = 180
+COMPONENTS_TIMEOUT = 300
 COMPONENTS_BACKOFF = 10
 
 AGENT_VERSION = elasticsearch.agent_version
