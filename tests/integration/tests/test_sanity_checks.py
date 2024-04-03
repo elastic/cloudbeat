@@ -35,10 +35,9 @@ tests_data = {
         "cloud-audit",
         "cloud-database",
         "cloud-config",
-        # DEBUG(kuba): Trying out the disabled tests
         "cloud-compute",
         "cloud-storage",
-    ],  # Exclude "cloud-compute", "cloud-storage" due to lack of fetcher control and potential delays.
+    ],
     "cis_gcp": [
         "cloud-compute",
         "cloud-database",
@@ -62,7 +61,7 @@ tests_data = {
         "file",
         "process",
         "k8s_object",
-    ],  # Optimize search findings by excluding 'file'.
+    ],
     "cnvm": ["vulnerability"],
 }
 
