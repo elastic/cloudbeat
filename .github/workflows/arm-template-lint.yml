@@ -3,11 +3,12 @@ name: Lint ARM Templates
 on:
   pull_request:
     paths:
-      - ./deploy/azure/*.json
+      - "deploy/azure/*.json"
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
-      - ./deploy/azure/*.json
+      - "deploy/azure/*.json"
 
 jobs:
   lint-arm-ttk:
