@@ -37,6 +37,10 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'push' && github.ref || format('refs/pull/{0}/merge', github.event.number) }}
+          # If the event is push to branch use the default ref.
+          # If the event is pull request (`pull_request_target` in our case) use merge commit as ref to run lint over the PR's code.
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -77,6 +81,10 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'push' && github.ref || format('refs/pull/{0}/merge', github.event.number) }}
+          # If the event is push to branch use the default ref.
+          # If the event is pull request (`pull_request_target` in our case) use merge commit as ref to run unit tests over the PR's code.
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
