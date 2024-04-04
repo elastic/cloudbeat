@@ -2,16 +2,15 @@ name: Lint ARM Templates
 
 on:
   pull_request:
-#    paths:
-#      - ./deploy/azure/*.json
+    paths:
+      - ./deploy/azure/*.json
   push:
     branches: [ main ]
-#    paths:
-#      - ./deploy/azure/*.json
+    paths:
+      - ./deploy/azure/*.json
 
 jobs:
   lint-arm-ttk:
-    name: Lint ARM templates
     runs-on: ubuntu-latest
     strategy:
       matrix:
