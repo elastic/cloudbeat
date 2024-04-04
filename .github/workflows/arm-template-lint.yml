@@ -1,4 +1,4 @@
-name: Lint ARM Templates
+name: ARM Templates
 
 on:
   pull_request:
@@ -12,6 +12,7 @@ on:
 
 jobs:
   lint-arm-ttk:
+    name: Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:

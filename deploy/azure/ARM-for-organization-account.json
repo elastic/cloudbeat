@@ -2,7 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-
         "ResourceGroupName": {
             "type": "string",
             "defaultValue": "[concat('cloudbeat-resource-group-', dateTimeToEpoch(utcNow('u')))]",
