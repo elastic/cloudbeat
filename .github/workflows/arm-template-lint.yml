@@ -1,0 +1,23 @@
+name: Lint ARM Templates
+
+on:
+  pull_request:
+    paths:
+      - ./deploy/azure/*.json
+  push:
+    branches: [ main ]
+    paths:
+      - ./deploy/azure/*.json
+
+jobs:
+  lint-arm-ttk:
+    name: Lint ARM templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/action-armttk@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          # Change reviewdog reporter if you need [github-pr-check,github-check,github-pr-review].
+          reporter: github-pr-review
+          glob_pattern: "./deploy/azure/*.json"
