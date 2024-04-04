@@ -20,4 +20,5 @@ jobs:
           github_token: ${{ secrets.github_token }}
           # Change reviewdog reporter if you need [github-pr-check,github-check,github-pr-review].
           reporter: github-pr-review
-          glob_pattern: "./deploy/azure/*.json"
+          workdir: "./deploy/azure/"
+          glob_pattern: "*.json"
