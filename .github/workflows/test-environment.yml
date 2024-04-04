@@ -154,8 +154,8 @@ jobs:
           fi
 
           # Check pattern required for cloud deployment
-          if ! [[ $deployment_name =~ ([a-z][-a-z0-9]*)$ ]]; then
-            echo "error: Deployment name doesn't match the required pattern regular env [a-z][-a-z0-9]*"
+          if ! [[ $deployment_name =~ ^[a-z][-a-z0-9]*$ ]]; then
+            echo "error: Deployment name doesn't match the required pattern [a-z][-a-z0-9]*"
             exit 1
           fi
 
@@ -174,11 +174,14 @@ jobs:
 
           # When user stores input ec api key then update Elastic Cloud env API KEY
           if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
+            echo "Set TF_VAR_ec_api_key from the input ec api key"
             echo "::add-mask::$ec_api_key"
             echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
           elif [[ $input_ec_url == $ec_url ]]; then
+            echo "Set TF_VAR_ec_api_key from the PROD github secret api key"
             echo "TF_VAR_ec_api_key=$TF_VAR_ec_api_key" >> $GITHUB_ENV
           elif [[ $input_ec_url == $qa_ec_url ]]; then
+            echo "Set TF_VAR_ec_api_key from the QA github secret api key"
             echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
           else
             echo "error: Elastic Cloud API key is required from a valid ec url"

@@ -33,7 +33,7 @@ function delete_environment() {
         terraform state rm -state "$tfstate" "$(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth")" || true
         echo "KIBANA_URL=$(terraform output -raw kibana_url)"
         if [[ "$KIBANA_URL" == *"qa.elastic"* ]]; then
-            echo "TF_VAR_ec_api_key QA Elastic Cloud API Key"
+            echo "Set TF_VAR_ec_api_key with QA Elastic Cloud API Key"
             export TF_VAR_ec_api_key="$TF_VAR_qa_ec_api_key"
         fi
         # Destroy environment and remove environment data from S3
