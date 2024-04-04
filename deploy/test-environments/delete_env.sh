@@ -32,9 +32,7 @@ function delete_environment() {
         # Check if the resource aws_auth exists in the local state file and remove it
         terraform state rm -state "$tfstate" "$(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth")" || true
         echo "KIBANA_URL=$(terraform output -raw kibana_url)"
-        if [[ "$KIBANA_URL" == *"qa.elastic"* ]]; then
-            echo TF_VAR_ec_api_key = "$TF_VAR_qa_ec_api_key"
-        fi
+        
         # Destroy environment and remove environment data from S3
         if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve &&
             aws s3 rm "$BUCKET/$ENV" --recursive; then
