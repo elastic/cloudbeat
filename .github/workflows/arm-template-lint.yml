@@ -24,7 +24,7 @@ jobs:
         # The only way to skip lint checks is by deleting files
         # https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#customize-tests
       - name: remove unwanted rules
-        run: ls ~/
+        run: ls ./arm-ttk/arm-ttk/
 
         # Copy files to its own folder because it's what the official ARM-TTK action expects
         # Docs https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#test-parameters
