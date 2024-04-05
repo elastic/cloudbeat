@@ -303,6 +303,24 @@
                             }
                         },
                         {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "apiVersion": "2023-09-01",
+                            "name": "cloudbeatVM/EnableMSIExtension",
+                            "location": "[parameters('ResourceGroupLocation')]",
+                            "dependsOn": [
+                                "cloudbeatVM"
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.ManagedIdentity",
+                                "type": "ManagedIdentityExtensionForLinux",
+                                "typeHandlerVersion": "1.0",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "port": 50342
+                                }
+                            }
+                        },
+                        {
                             "type": "Microsoft.Authorization/roleDefinitions",
                             "apiVersion": "2022-04-01",
                             "name": "[parameters('AdditionalRoleGUID')]",
