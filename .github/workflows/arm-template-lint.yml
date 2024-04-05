@@ -52,7 +52,7 @@ jobs:
           Remove-Item ./arm-ttk/arm-ttk/testcases/deploymentTemplate/ManagedIdentityExtension-must-not-be-used.test.ps1
 
           Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
-          echo "Test-AzTemplate -TemplateF ${{ matrix.template }} -Pester -Skip Secure-Params-In-Nested-Deployments" | Out-File -FilePath ./armttk.ps1
+          echo "Test-AzTemplate -TemplatePath ${{ matrix.template }} -Pester -Skip Secure-Params-In-Nested-Deployments" | Out-File -FilePath ./armttk.ps1
           Invoke-Pester -Script ./armttk.ps1 -EnableExit -OutputFormat NUnitXml -OutputFile ./armttk.xml
 
 #      - uses: microsoft/action-armttk@v1
