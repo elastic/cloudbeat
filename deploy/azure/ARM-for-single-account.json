@@ -132,6 +132,10 @@
                             "metadata": {
                                 "description": "VM Size"
                             }
+                        },
+                        "ResourceGroupLocation": {
+                            "type": "string",
+                            "defaultValue": "[resourceGroup().location]"
                         }
                     },
                     "resources": [
