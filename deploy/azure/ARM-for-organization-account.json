@@ -90,7 +90,7 @@
                             "type": "Microsoft.Resources/resourceGroups",
                             "apiVersion": "2022-09-01",
                             "name": "[parameters('ResourceGroupName')]",
-                            "location": "[parameters('Location')]"
+                            "location": "[parameters('DeploymentLocation')]"
                         }
                     ]
                 }
