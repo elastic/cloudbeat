@@ -21,19 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-        # The only way to skip lint checks is by deleting files
-        # https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#customize-tests
-#      - name: remove unwanted rules
-#        run: ls ./arm-ttk/arm-ttk/
-
-#        # Copy files to its own folder because it's what the official ARM-TTK action expects
-#        # Docs https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#test-parameters
-#      - name: copy file
-#        working-directory: ./deploy/azure
-#        run: |
-#          mkdir ${{ matrix.template }}
-#          cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
-
       # Based on https://github.com/microsoft/action-armttk/blob/main/action.yml#L56
       #
       # Not used the official MS ARM TTK Action because we need to ignore some rules
@@ -43,20 +30,22 @@ jobs:
         working-directory: ./deploy/azure
         shell: pwsh
         run: |
+          # Install Dependencies
           Install-Module -Name Pester -RequiredVersion 4.10.1 -Force
           Import-Module -Name Pester -RequiredVersion 4.10.1 -Force
           Invoke-WebRequest -Uri 'aka.ms/arm-ttk-latest'  -OutFile arm-template-toolkit.zip
           Expand-Archive -LiteralPath arm-template-toolkit.zip -DestinationPath arm-ttk
 
           # Delete Unwanted rules
+
+          # Deleting ManagedIdentityExtension-must-not-be-used.test.ps1
+          # Under VMs release notes of May 7, 2018 https://learn.microsoft.com/en-us/cli/azure/release-notes-azure-cli#vm-27
+          # ManagedIdentityExtension is not recommended to be used anymore ([BREAKING CHANGE] Do not use VM 'ManagedIdentityExtension' for MSI support)
+          # But no alternative was found and even it's possible to find official MS docs using ManagedIdentityExtension for MSI still
+          # Therefore, let's just skip this rule
           Remove-Item ./arm-ttk/arm-ttk/testcases/deploymentTemplate/ManagedIdentityExtension-must-not-be-used.test.ps1
 
+          # Load and run test
           Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
           echo "Test-AzTemplate -TemplatePath ${{ matrix.template }} -Pester -Skip Secure-Params-In-Nested-Deployments" | Out-File -FilePath ./armttk.ps1
           Invoke-Pester -Script ./armttk.ps1 -EnableExit -OutputFormat NUnitXml -OutputFile ./armttk.xml
-
-#      - uses: microsoft/action-armttk@v1
-#        name: lint ${{ matrix.template }}
-#        with:
-#          github_token: ${{ secrets.github_token }}
-#          workdir: "./deploy/azure/${{ matrix.template }}"
