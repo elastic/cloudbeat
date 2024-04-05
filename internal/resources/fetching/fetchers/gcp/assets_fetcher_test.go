@@ -66,11 +66,10 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	})).Return(
 		[]*inventory.ExtendedGcpAsset{
 			{
-				Ecs: &fetching.EcsGcp{
-					Provider:         "gcp",
-					ProjectId:        "prjId",
-					ProjectName:      "prjName",
-					OrganizationId:   "orgId",
+				CloudAccount: &fetching.CloudAccountMetadata{
+					AccountId:        "prjId",
+					AccountName:      "prjName",
+					OrganisationId:   "orgId",
 					OrganizationName: "orgName",
 				},
 				Asset: &assetpb.Asset{
@@ -87,16 +86,13 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Equal(len(GcpAssetTypes), len(results))
 
 	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
-		ecs, err := r.Resource.GetElasticCommonData()
+		metadata, err := r.Resource.GetMetadata()
 		s.Require().NoError(err)
-		cloud := ecs["cloud"].(map[string]any)
-		account := cloud["account"].(map[string]any)
-		org := cloud["Organization"].(map[string]any)
+		cloudAccountMetadata := metadata.CloudAccountMetadata
 
-		s.Equal("prjName", account["name"])
-		s.Equal("prjId", account["id"])
-		s.Equal("orgId", org["id"])
-		s.Equal("orgName", org["name"])
-		s.Equal("gcp", cloud["provider"])
+		s.Equal("prjName", cloudAccountMetadata.AccountName)
+		s.Equal("prjId", cloudAccountMetadata.AccountId)
+		s.Equal("orgId", cloudAccountMetadata.OrganisationId)
+		s.Equal("orgName", cloudAccountMetadata.OrganizationName)
 	})
 }
