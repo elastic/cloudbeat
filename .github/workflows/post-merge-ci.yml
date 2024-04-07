@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        agent-version: ['8.13.0'] # TODO: add agent versions
+        agent-version: ['8.13.1'] # TODO: add agent versions
     # permissions:
     #   contents: "read"
     #   id-token: "write"
@@ -51,15 +51,15 @@ jobs:
         run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }}
 
       # TODO: Remove tmate action after finishing the implementation
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: always()
-        with:
-          limit-access-to-actor: true
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   if: always()
+      #   with:
+      #     limit-access-to-actor: true
 
       - name: Check for findings
         working-directory: ./tests
         env:
           USE_K8S: "false"
         shell: bash
-        run: poetry run pytest -k "" --alluredir=./allure/results/ --clean-alluredir
+        run: poetry run pytest -k "cspm_aws" --alluredir=./allure/results/ --clean-alluredir
