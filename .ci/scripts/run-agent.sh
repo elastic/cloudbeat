@@ -11,8 +11,8 @@ cp "elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64/elastic-agent.yml" "elas
 cp ./tests/test_environments/agents/elastic-agent-8-13.yml "elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64/elastic-agent.yml"
 
 # Array of placeholders and corresponding environment variable names
-placeholders=("ES_HOST" "ES_USERNAME" "ES_PASSWORD" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY")
-env_variables=("$ES_HOST" "$ES_USERNAME" "$ES_PASSWORD" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY")
+placeholders=("ES_HOST" "ES_USERNAME" "ES_PASSWORD" "AWS_ACCESS_KEY_ID" "AWS_SECRET_ACCESS_KEY" "GOOGLE_APPLICATION_CREDENTIALS" "AZURE_CLIENT_ID" "AZURE_TENANT_ID" "AZURE_CLIENT_SECRET")
+env_variables=("$ES_HOST" "$ES_USERNAME" "$ES_PASSWORD" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$GOOGLE_APPLICATION_CREDENTIALS" "$AZURE_CLIENT_ID" "$AZURE_TENANT_ID" "$AZURE_CLIENT_SECRET")
 
 agent_config="./elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64/elastic-agent.yml"
 # Iterate through each placeholder and replace it with the corresponding environment variable value

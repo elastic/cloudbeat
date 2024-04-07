@@ -245,6 +245,20 @@ output_permissions:
           privileges:
             - auto_configure
             - create_doc
+    b444a94d-58a3-4edb-9fb8-505c4c23d48e:
+      indices:
+        - names:
+            - logs-cloud_security_posture.findings-default
+          privileges:
+            - auto_configure
+            - create_doc
+    b9dced11-9f2f-4813-89f8-a385bf38b29b:
+      indices:
+        - names:
+            - logs-cloud_security_posture.findings-default
+          privileges:
+            - auto_configure
+            - create_doc
 agent:
   download:
     sourceURI: 'https://artifacts.elastic.co/downloads/'
@@ -461,7 +475,7 @@ inputs:
           - uptime
         period: 10s
   - id: cloudbeat/cis_aws-cspm-8c598ab6-cb43-4393-9eac-59bcda8d5a4c
-    name: cspm-1
+    name: cspm-aws
     revision: 1
     type: cloudbeat/cis_aws
     use_output: default
@@ -497,3 +511,64 @@ inputs:
                 type: direct_access_keys
                 access_key_id: '${AWS_ACCESS_KEY_ID}'
                 secret_access_key: '${AWS_SECRET_ACCESS_KEY}'
+  - id: cloudbeat/cis_gcp-cspm-b444a94d-58a3-4edb-9fb8-505c4c23d48e
+    name: cspm-gcp
+    revision: 1
+    type: cloudbeat/cis_gcp
+    use_output: default
+    meta:
+      package:
+        name: cloud_security_posture
+        version: 1.8.1
+    data_stream:
+      namespace: default
+    package_policy_id: b444a94d-58a3-4edb-9fb8-505c4c23d48e
+    streams:
+      - id: >-
+          cloudbeat/cis_gcp-cloud_security_posture.findings-b444a94d-58a3-4edb-9fb8-505c4c23d48e
+        data_stream:
+          dataset: cloud_security_posture.findings
+          type: logs
+        period: 24h
+        config:
+          v1:
+            type: cspm
+            deployment: gcp
+            benchmark: cis_gcp
+            gcp:
+              project_id: elastic-security-test
+              account_type: single-account
+              credentials:
+                credentials_file_path: '${GOOGLE_APPLICATION_CREDENTIALS}'
+  - id: cloudbeat/cis_azure-cspm-b9dced11-9f2f-4813-89f8-a385bf38b29b
+    name: cspm-azure
+    revision: 1
+    type: cloudbeat/cis_azure
+    use_output: default
+    meta:
+      package:
+        name: cloud_security_posture
+        version: 1.8.1
+    data_stream:
+      namespace: default
+    package_policy_id: b9dced11-9f2f-4813-89f8-a385bf38b29b
+    streams:
+      - id: >-
+          cloudbeat/cis_azure-cloud_security_posture.findings-b9dced11-9f2f-4813-89f8-a385bf38b29b
+        data_stream:
+          dataset: cloud_security_posture.findings
+          type: logs
+        period: 24h
+        fetchers: null
+        config:
+          v1:
+            type: cspm
+            deployment: azure
+            benchmark: cis_azure
+            azure:
+              account_type: single-account
+              credentials:
+                type: service_principal_with_client_secret
+                client_id: '${AZURE_CLIENT_ID}'
+                tenant_id: '${AZURE_TENANT_ID}'
+                client_secret: '${AZURE_CLIENT_SECRET}'
