@@ -19,7 +19,7 @@ GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
 
 # The timeout and backoff for waiting all agents are running the specified component.
-COMPONENTS_TIMEOUT = 180
+COMPONENTS_TIMEOUT = 300
 COMPONENTS_BACKOFF = 10
 
 AGENT_VERSION = elasticsearch.agent_version
@@ -35,7 +35,9 @@ tests_data = {
         "cloud-audit",
         "cloud-database",
         "cloud-config",
-    ],  # Exclude "cloud-compute", "cloud-storage" due to lack of fetcher control and potential delays.
+        "cloud-compute",
+        "cloud-storage",
+    ],
     "cis_gcp": [
         "cloud-compute",
         "cloud-database",
@@ -56,9 +58,10 @@ tests_data = {
     ],  # Exclude "cloud-compute", Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": [
+        "file",
         "process",
         "k8s_object",
-    ],  # Optimize search findings by excluding 'file'.
+    ],
     "cnvm": ["vulnerability"],
 }
 
