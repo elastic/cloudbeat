@@ -35,7 +35,7 @@ Resources:
     Properties:
       UserName: !Join
         - '-'
-        - - "elasticagent-user-cspm"
+        - - 'elasticagent-user-cspm'
           - !Select
             - 2
             - !Split
