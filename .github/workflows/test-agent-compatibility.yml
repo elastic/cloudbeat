@@ -70,6 +70,12 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
         run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: always()
+        with:
+          limit-access-to-actor: true
+
       - name: Wait for cloudbeat to send some events
         shell: bash
         run: sleep 264
