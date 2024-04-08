@@ -60,8 +60,9 @@ runs:
       run: just run-tests ${{ inputs.test-target }} kind-${{ inputs.kind-config }}
 
     - name: Upload Test Results
-      if: ${{ success() || failure() }}
+      if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
         name: allure-results-ci-k8s-${{ inputs.test-target }}-${{ inputs.kind-config }}
         path: tests/allure/results/
+        overwrite: true

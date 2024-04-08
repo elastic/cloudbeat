@@ -56,15 +56,19 @@ runs:
         poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
     - name: Upload test results
-      if: ${{ success() || failure() }}
+      if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
         name: allure-results-ci-gcp
         path: tests/allure/results/
+        overwrite: true
 
-    - if: ${{ (success() || failure()) && inputs.debug == 'true' }}
+    - if: ${{ failure() || cancelled() || inputs.debug == 'true' }}
       name: Upload cloudbeat logs
       uses: actions/upload-artifact@v4
       with:
         name: cloubeat-logs-ci-gcp
         path: logs/
+        if-no-files-found: warn
+        retention-days: 1
+        overwrite: true
