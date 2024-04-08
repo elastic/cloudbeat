@@ -66,5 +66,5 @@ runs:
         name: cloubeat-logs-ci-azure
         path: logs/
         if-no-files-found: warn
-        retention-days: 5
+        retention-days: 1
         overwrite: true

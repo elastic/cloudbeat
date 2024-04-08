@@ -68,5 +68,5 @@ runs:
         name: cloubeat-logs-ci-cnvm
         path: logs/
         if-no-files-found: warn
-        retention-days: 5
+        retention-days: 1
         overwrite: true
