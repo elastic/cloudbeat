@@ -149,6 +149,23 @@ jobs:
           aws cloudformation create-stack --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --template-body file://${{ env.CF_FILE }} --capabilities CAPABILITY_NAMED_IAM
           aws cloudformation wait stack-create-complete --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
 
+      - name: Get Direct Keys
+        shell: bash
+        run: |
+          BODY="$(aws cloudformation describe-stacks --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --query 'Stacks[0].Outputs' --output json)"
+          NEW_ACCESS_KEY_ID="$(echo "${BODY}" | jq '.[] | select(.OutputKey | test("AccessKeyId")) | .OutputValue')"
+          NEW_SECRET_ACCESS_KEY="$(echo "${BODY}" | jq '.[] | select(.OutputKey | test("SecretAccessKey")) | .OutputValue')"
+          echo "NEW_ACCESS_KEY_ID=${NEW_ACCESS_KEY_ID}" >> $GITHUB_ENV
+          echo "NEW_SECRET_ACCESS_KEY=${NEW_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
+
+      - name: Run AWS integration tests
+        uses: ./.github/actions/aws-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          aws-access-key-id: ${{ env.NEW_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.NEW_SECRET_ACCESS_KEY }}
+          aws-account-type: single-account
+
       - name: Cleanup Environment
         if: always()
         run: |
