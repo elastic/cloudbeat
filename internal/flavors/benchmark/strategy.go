@@ -43,12 +43,7 @@ func GetStrategy(cfg *config.Config, log *logp.Logger) (Strategy, error) {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
 			return &AWSOrg{
-<<<<<<< HEAD
-				IdentityProvider: awslib.IdentityProvider{},
-=======
-				IAMProvider:      &iam.Provider{},
 				IdentityProvider: awslib.IdentityProvider{Logger: log},
->>>>>>> 6bf970af (fix panic due to missing logger of aws IdentityProvider (#2095))
 				AccountProvider:  awslib.AccountProvider{},
 			}, nil
 		}
