@@ -70,12 +70,9 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
         run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
 
-      # TODO: Remove tmate action after finishing the implementation
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   if: always()
-      #   with:
-      #     limit-access-to-actor: true
+      - name: Wait for cloudbeat to send some events
+        shell: bash
+        run: sleep 60
 
       - name: Check for findings
         working-directory: ./tests
