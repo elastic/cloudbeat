@@ -18,12 +18,14 @@ jobs:
     name: Agent Compatibility Test
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    matrix:
-      include:
-        - agent-version: '8.13.1'
-          package-version: '1.8.1'
-        - agent-version: '8.12.2'
-          package-version: '1.7.4'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - agent-version: '8.13.1'
+            package-version: '1.8.1'
+          - agent-version: '8.12.2'
+            package-version: '1.7.4'
     # strategy:
     #   fail-fast: false
     #   matrix:
