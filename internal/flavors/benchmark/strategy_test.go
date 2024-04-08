@@ -93,7 +93,7 @@ func TestGetStrategy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%T", tt.wantType), func(t *testing.T) {
-			got, err := GetStrategy(&tt.cfg)
+			got, err := GetStrategy(&tt.cfg, testhelper.NewLogger(t))
 			if tt.wantErr {
 				require.Error(t, err)
 				return
