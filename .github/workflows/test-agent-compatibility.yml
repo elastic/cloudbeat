@@ -26,6 +26,8 @@ jobs:
             package-version: '1.8.1'
           - agent-version: '8.12.2'
             package-version: '1.7.4'
+          - agent-version: '8.11.4'
+            package-version: '1.6.5'
     # strategy:
     #   fail-fast: false
     #   matrix:
