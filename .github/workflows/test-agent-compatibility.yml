@@ -22,16 +22,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - agent-version: '8.13.1'
-          #   package-version: '1.8.1'
-          # - agent-version: '8.12.2'
-          #   package-version: '1.7.4'
+          - agent-version: '8.13.1'
+            package-version: '1.8.1'
+          - agent-version: '8.12.2'
+            package-version: '1.7.4'
           - agent-version: '8.11.4'
             package-version: '1.6.5'
-    # strategy:
-    #   fail-fast: false
-    #   matrix:
-    #     agent-version: ['8.13.1'] # TODO: add agent versions
     permissions:
       contents: "read"
       id-token: "write"
@@ -70,19 +66,19 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
         run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: always()
-        with:
-          limit-access-to-actor: true
-
       - name: Wait for cloudbeat to send some events
         shell: bash
-        run: sleep 264
+        run: sleep 60
 
       - name: Check for findings
         working-directory: ./tests
         env:
           USE_K8S: "false"
         shell: bash
-        run: poetry run pytest -k "cspm" --alluredir=./allure/results/ --clean-alluredir --maxfail=2
+        run: |
+          testmarker="cspm"
+          # Azure manual credentials are not supported in 8.11
+          if [[ "${{ matrix.agent-version }}" == *"8.11"* ]]; then
+            testmarker="cspm and not azure"
+          fi
+          poetry run pytest -k "$testmarker" --alluredir=./allure/results/ --clean-alluredir --maxfail=2
