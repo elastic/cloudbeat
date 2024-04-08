@@ -482,7 +482,7 @@ inputs:
     meta:
       package:
         name: cloud_security_posture
-        version: 1.8.1
+        version: '${PACKAGE_VERSION}'
     data_stream:
       namespace: default
     package_policy_id: 8c598ab6-cb43-4393-9eac-59bcda8d5a4c
@@ -519,7 +519,7 @@ inputs:
     meta:
       package:
         name: cloud_security_posture
-        version: 1.8.1
+        version: '${PACKAGE_VERSION}'
     data_stream:
       namespace: default
     package_policy_id: b444a94d-58a3-4edb-9fb8-505c4c23d48e
@@ -548,7 +548,7 @@ inputs:
     meta:
       package:
         name: cloud_security_posture
-        version: 1.8.1
+        version: '${PACKAGE_VERSION}'
     data_stream:
       namespace: default
     package_policy_id: b9dced11-9f2f-4813-89f8-a385bf38b29b

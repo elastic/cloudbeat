@@ -1,4 +1,4 @@
-name: POST-MERGE-CI
+name: Test Agent Compatibility
 
 on:
   # TODO: Remove after finishing the implementation
@@ -18,10 +18,16 @@ jobs:
     name: Agent Compatibility Test
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        agent-version: ['8.13.1'] # TODO: add agent versions
+    matrix:
+      include:
+        - agent-version: '8.13.1'
+          package-version: '1.8.1'
+        - agent-version: '8.12.2'
+          package-version: '1.7.4'
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+    #     agent-version: ['8.13.1'] # TODO: add agent versions
     permissions:
       contents: "read"
       id-token: "write"
@@ -58,7 +64,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
           AZURE_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
           AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-        run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }}
+        run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
 
       # TODO: Remove tmate action after finishing the implementation
       # - name: Setup tmate session
