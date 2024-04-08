@@ -2,7 +2,7 @@ exclude: (bin/(activate-)?hermit)|(scripts/make/gimme/.*)
 repos:
   ## General
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -67,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.86.1
+    rev: v0.86.2
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
