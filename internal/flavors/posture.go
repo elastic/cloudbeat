@@ -51,7 +51,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	strategy, err := benchmark.GetStrategy(cfg)
+	strategy, err := benchmark.GetStrategy(cfg, log)
 	if err != nil {
 		cancel()
 		return nil, err
