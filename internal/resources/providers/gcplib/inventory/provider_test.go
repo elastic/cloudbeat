@@ -89,7 +89,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 				return "OrganizationName"
 			},
 		},
-		crmCache: make(map[string]*fetching.CloudAccountMetadata),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
@@ -138,7 +138,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 				return "OrganizationName1"
 			},
 		},
-		crmCache: make(map[string]*fetching.CloudAccountMetadata),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	expected := []*MonitoringAsset{
@@ -218,7 +218,7 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 				return "OrganizationName"
 			},
 		},
-		crmCache: make(map[string]*fetching.CloudAccountMetadata),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	assets := []*ExtendedGcpAsset{
@@ -332,7 +332,7 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 				return "OrganizationName1"
 			},
 		},
-		crmCache: make(map[string]*fetching.CloudAccountMetadata),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	// asset's resource
@@ -421,7 +421,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 				return "OrganizationName1"
 			},
 		},
-		crmCache: make(map[string]*fetching.CloudAccountMetadata),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	// asset's resource
@@ -460,7 +460,7 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 				return "OrganizationName"
 			},
 		},
-		crmCache: make(map[string]*fetching.CloudAccountMetadata),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName1", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()

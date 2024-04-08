@@ -38,11 +38,11 @@ import (
 )
 
 type Provider struct {
-	log       *logp.Logger
-	config    auth.GcpFactoryConfig
-	inventory *AssetsInventoryWrapper
-	crm       *ResourceManagerWrapper
-	crmCache  map[string]*fetching.CloudAccountMetadata
+	log                       *logp.Logger
+	config                    auth.GcpFactoryConfig
+	inventory                 *AssetsInventoryWrapper
+	crm                       *ResourceManagerWrapper
+	cloudAccountMetadataCache *MapCache[*fetching.CloudAccountMetadata]
 }
 
 type AssetsInventoryWrapper struct {
@@ -85,13 +85,6 @@ type ExtendedGcpAsset struct {
 }
 
 type ProviderInitializer struct{}
-
-type GcpAssetIDs struct {
-	orgId         string
-	projectId     string
-	parentProject string
-	parentOrg     string
-}
 
 type dnsPolicyFields struct {
 	networks      []string
@@ -151,32 +144,38 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 	if err != nil {
 		return nil, err
 	}
+
+	displayNamesCache := NewMapCache[string]()
 	// wrap the resource manager client for mocking
 	crmServiceWrapper := &ResourceManagerWrapper{
 		getProjectDisplayName: func(ctx context.Context, parent string) string {
-			prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
-			if err != nil {
-				log.Errorf("error fetching GCP Project: %s, error: %s", parent, err)
-				return ""
-			}
-			return prj.DisplayName
+			return displayNamesCache.Get(func() string {
+				prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
+				if err != nil {
+					log.Errorf("error fetching GCP Project: %s, error: %s", parent, err)
+					return ""
+				}
+				return prj.DisplayName
+			}, parent)
 		},
 		getOrganizationDisplayName: func(ctx context.Context, parent string) string {
-			org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
-			if err != nil {
-				log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
-				return ""
-			}
-			return org.DisplayName
+			return displayNamesCache.Get(func() string {
+				org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
+				if err != nil {
+					log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
+					return ""
+				}
+				return org.DisplayName
+			}, parent)
 		},
 	}
 
 	return &Provider{
-		config:    gcpConfig,
-		log:       log,
-		inventory: assetsInventoryWrapper,
-		crm:       crmServiceWrapper,
-		crmCache:  make(map[string]*fetching.CloudAccountMetadata),
+		config:                    gcpConfig,
+		log:                       log,
+		inventory:                 assetsInventoryWrapper,
+		crm:                       crmServiceWrapper,
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}, nil
 }
 
@@ -209,7 +208,7 @@ func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []str
 	var assets []*assetpb.Asset
 	assets = append(append(assets, resourceAssets...), policyAssets...)
 	mergedAssets := mergeAssetContentType(assets)
-	extendedAssets := extendWithECS(ctx, p.crm, p.crmCache, mergedAssets)
+	extendedAssets := p.extendWithCloudMetadata(ctx, mergedAssets)
 	// Enrich network assets with dns policy
 	p.enrichNetworkAssets(ctx, extendedAssets)
 
@@ -441,22 +440,18 @@ func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
 }
 
 // extends the assets with the project and organization display name
-func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[string]*fetching.CloudAccountMetadata, assets []*assetpb.Asset) []*ExtendedGcpAsset {
+func (p *Provider) extendWithCloudMetadata(ctx context.Context, assets []*assetpb.Asset) []*ExtendedGcpAsset {
 	extendedAssets := make([]*ExtendedGcpAsset, 0, len(assets))
 	for _, asset := range assets {
-		keys := getAssetIds(asset)
-		cacheKey := fmt.Sprintf("%s/%s", keys.parentProject, keys.parentOrg)
-		if cloudAccount, ok := cache[cacheKey]; ok {
-			extendedAssets = append(extendedAssets, &ExtendedGcpAsset{
-				Asset:        asset,
-				CloudAccount: cloudAccount,
-			})
-			continue
-		}
-		cache[cacheKey] = getCloudAccountMetadata(ctx, crm, keys)
+		orgId := getOrganizationId(asset.Ancestors)
+		projectId := getProjectId(asset.Ancestors)
+		cacheKey := fmt.Sprintf("%s/%s", projectId, orgId)
+		cloudAccount := p.cloudAccountMetadataCache.Get(func() *fetching.CloudAccountMetadata {
+			return p.getCloudAccountMetadata(ctx, projectId, orgId)
+		}, cacheKey)
 		extendedAssets = append(extendedAssets, &ExtendedGcpAsset{
 			Asset:        asset,
-			CloudAccount: cache[cacheKey],
+			CloudAccount: cloudAccount,
 		})
 	}
 	return extendedAssets
@@ -469,71 +464,57 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*Projec
 		AssetTypes:  []string{CrmProjectAssetType},
 	})
 	p.log.Infof("Listed %d GCP projects", len(projects))
-	ancestorsPolicies := map[string][]*ExtendedGcpAsset{}
+	ancestorsPoliciesCache := NewMapCache[[]*ExtendedGcpAsset]()
 	return lo.Map(projects, func(project *assetpb.Asset, _ int) *ProjectPoliciesAsset {
-		projectAsset := extendWithECS(ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
+		projectAsset := p.extendWithCloudMetadata(ctx, []*assetpb.Asset{project})[0]
 		// Skip first ancestor it as we already got it
-		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(ctx, ancestorsPolicies, p, project.Ancestors[1:])...)
+		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(ctx, ancestorsPoliciesCache, p, project.Ancestors[1:])...)
 		return &ProjectPoliciesAsset{CloudAccount: projectAsset.CloudAccount, Policies: policiesAssets}
 	}), nil
 }
 
-func getAncestorsAssets(ctx context.Context, ancestorsPolicies map[string][]*ExtendedGcpAsset, p *Provider, ancestors []string) []*ExtendedGcpAsset {
+func getAncestorsAssets(ctx context.Context, ancestorsPoliciesCache *MapCache[[]*ExtendedGcpAsset], p *Provider, ancestors []string) []*ExtendedGcpAsset {
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
-		if ancestorsPolicies[parent] != nil {
-			return ancestorsPolicies[parent]
-		}
-		var assetType string
-		if strings.HasPrefix(parent, "folders") {
-			assetType = CrmFolderAssetType
-		}
-		if strings.HasPrefix(parent, "organizations") {
-			assetType = CrmOrgAssetType
-		}
-
-		assets := p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
-			ContentType: assetpb.ContentType_IAM_POLICY,
-			Parent:      parent,
-			AssetTypes:  []string{assetType},
-		})
-		extendedAssets := extendWithECS(ctx, p.crm, p.crmCache, assets)
-		ancestorsPolicies[parent] = extendedAssets
+		extendedAssets := ancestorsPoliciesCache.Get(func() []*ExtendedGcpAsset {
+			var assetType string
+			if strings.HasPrefix(parent, "folders") {
+				assetType = CrmFolderAssetType
+			}
+			if strings.HasPrefix(parent, "organizations") {
+				assetType = CrmOrgAssetType
+			}
+			return p.extendWithCloudMetadata(ctx, p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
+				ContentType: assetpb.ContentType_IAM_POLICY,
+				Parent:      parent,
+				AssetTypes:  []string{assetType},
+			}))
+		}, parent)
 		return extendedAssets
 	}))
 }
 
-func getAssetIds(asset *assetpb.Asset) GcpAssetIDs {
-	orgId := getOrganizationId(asset.Ancestors)
-	projectId := getProjectId(asset.Ancestors)
-	parentProject := fmt.Sprintf("projects/%s", projectId)
-	parentOrg := fmt.Sprintf("organizations/%s", orgId)
-	return GcpAssetIDs{
-		orgId:         orgId,
-		projectId:     projectId,
-		parentProject: parentProject,
-		parentOrg:     parentOrg,
-	}
-}
-
-func getCloudAccountMetadata(ctx context.Context, crm *ResourceManagerWrapper, keys GcpAssetIDs) *fetching.CloudAccountMetadata {
+func (p *Provider) getCloudAccountMetadata(ctx context.Context, projectId string, orgId string) *fetching.CloudAccountMetadata {
 	var orgName string
 	var projectName string
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		orgName = crm.getOrganizationDisplayName(ctx, keys.parentOrg)
+		orgName = p.crm.getOrganizationDisplayName(ctx, fmt.Sprintf("organizations/%s", orgId))
 		wg.Done()
 	}()
 	wg.Add(1)
 	go func() {
-		projectName = crm.getProjectDisplayName(ctx, keys.parentProject)
+		// some assets are not associated with a project
+		if projectId != "" {
+			projectName = p.crm.getProjectDisplayName(ctx, fmt.Sprintf("projects/%s", projectId))
+		}
 		wg.Done()
 	}()
 	wg.Wait()
 	return &fetching.CloudAccountMetadata{
-		AccountId:        keys.projectId,
+		AccountId:        projectId,
 		AccountName:      projectName,
-		OrganisationId:   keys.orgId,
+		OrganisationId:   orgId,
 		OrganizationName: orgName,
 	}
 }
