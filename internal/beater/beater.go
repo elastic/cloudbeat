@@ -47,9 +47,12 @@ func NewBeater(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	if err != nil {
 		return nil, fmt.Errorf("NewBeater: could not parse configuration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
 	}
+
 	switch c.Type {
 	case config.VulnerabilityType:
 		return flavors.NewVulnerability(b, cfg)
+	case config.AssetInventoryType:
+		return flavors.NewAssetInventory(b, cfg)
 	default:
 		return flavors.NewPosture(b, cfg)
 	}

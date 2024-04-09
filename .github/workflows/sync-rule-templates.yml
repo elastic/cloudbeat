@@ -1,0 +1,53 @@
+name: Sync CIS Rule Templates
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "security-policies/bundle/compliance/**/rules/**/data.yaml"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+
+jobs:
+  Sync-Templates:
+    name: Sync CIS Rule Templates
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout Integrations repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+          repository: elastic/integrations
+          path: integrations
+
+      - name: Checkout Cloudbeat repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+          path: cloudbeat
+
+      - name: Init Hermit
+        working-directory: cloudbeat
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Poetry
+        working-directory: cloudbeat
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
+
+      - name: Install dependencies
+        working-directory: cloudbeat/security-policies
+        run: poetry install
+
+      - name: Sync CIS Rules with integrations repo
+        working-directory: cloudbeat
+        run: scripts/sync_rule_templates.sh

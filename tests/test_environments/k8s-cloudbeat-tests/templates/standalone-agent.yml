@@ -1,4 +1,4 @@
-{{- if .Values.standaloneAgent.test_environments -}}
+{{- if .Values.standaloneAgent.deploy -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -487,7 +487,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
-          image: docker.elastic.co/beats/elastic-agent:8.4.0-SNAPSHOT
+          image: docker.elastic.co/beats/elastic-agent:8.14.0-SNAPSHOT
           args: [
             "-c", "/etc/agent.yml",
             "-e",

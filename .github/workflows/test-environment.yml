@@ -337,7 +337,7 @@ jobs:
 
       - id: azure-auth
         name: Azure login
-        uses: azure/login@v1.6.1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 

@@ -1,0 +1,69 @@
+name: 'AWS CI'
+description: 'AWS integration tests'
+inputs:
+  elk-version:
+    description: 'ELK version'
+    required: true
+  aws-access-key-id:
+    description: 'AWS access key id'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS secret access key'
+    required: true
+  aws-account-type:
+    description: 'AWS account type'
+    required: false
+    default: single-account
+
+  debug:
+    description: 'debug'
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: Init Integration
+      uses: ./.github/actions/init-integration
+      with:
+        elk-version: ${{ inputs.elk-version }}
+
+    - name: Run cloudbeat in background
+      env:
+        ES_HOST: http://localhost:9200
+        ES_USERNAME: elastic
+        ES_PASSWORD: changeme
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
+        AWS_ACCOUNT_TYPE: ${{ inputs.aws-account-type }}
+      shell: bash
+      run: |
+        ./cloudbeat -c deploy/aws/cloudbeat-aws.yml -d '*' &
+
+    - name: Wait for cloudbeat to send some events
+      shell: bash
+      run: sleep 20
+
+    - name: Check for findings
+      working-directory: ./tests
+      env:
+        USE_K8S: "false"
+      shell: bash
+      run: poetry run pytest -k "aws" --alluredir=./allure/results/ --clean-alluredir
+
+    - name: Upload test results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-ci-aws
+        path: tests/allure/results/
+        overwrite: true
+
+    - if: ${{ failure() || cancelled() || inputs.debug == 'true' }}
+      name: Upload cloudbeat logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloubeat-logs-ci-aws
+        path: logs/
+        if-no-files-found: warn
+        retention-days: 1
+        overwrite: true

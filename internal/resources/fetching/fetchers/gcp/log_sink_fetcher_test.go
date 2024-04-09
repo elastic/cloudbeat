@@ -68,11 +68,10 @@ func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
 	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(
 		[]*inventory.LoggingAsset{
 			{
-				Ecs: &fetching.EcsGcp{
-					Provider:         "gcp",
-					ProjectId:        "a",
-					ProjectName:      "a",
-					OrganizationId:   "a",
+				CloudAccount: &fetching.CloudAccountMetadata{
+					AccountId:        "a",
+					AccountName:      "a",
+					OrganisationId:   "a",
 					OrganizationName: "a",
 				},
 				LogSinks: []*inventory.ExtendedGcpAsset{
@@ -118,10 +117,10 @@ func TestLoggingAsset_GetMetadata(t *testing.T) {
 				Type:    fetching.LoggingIdentity,
 				subType: fetching.GcpLoggingType,
 				Asset: &inventory.LoggingAsset{
-					Ecs: &fetching.EcsGcp{
-						ProjectId:        projectId,
-						ProjectName:      "a",
-						OrganizationId:   "a",
+					CloudAccount: &fetching.CloudAccountMetadata{
+						AccountId:        projectId,
+						AccountName:      "a",
+						OrganisationId:   "a",
 						OrganizationName: "a",
 					},
 					LogSinks: []*inventory.ExtendedGcpAsset{},
@@ -133,6 +132,12 @@ func TestLoggingAsset_GetMetadata(t *testing.T) {
 				Type:    fetching.LoggingIdentity,
 				SubType: fetching.GcpLoggingType,
 				Region:  gcplib.GlobalRegion,
+				CloudAccountMetadata: fetching.CloudAccountMetadata{
+					AccountId:        projectId,
+					AccountName:      "a",
+					OrganisationId:   "a",
+					OrganizationName: "a",
+				},
 			},
 		},
 	}
@@ -142,65 +147,6 @@ func TestLoggingAsset_GetMetadata(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestGcpLoggingAsset_GetElasticCommonData(t *testing.T) {
-	type fields struct {
-		Type    string
-		subType string
-		Asset   *inventory.LoggingAsset
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   map[string]any
-	}{
-		{
-			name: "verify elastic common data",
-			fields: fields{
-				Type:    fetching.LoggingIdentity,
-				subType: fetching.GcpLoggingType,
-				Asset: &inventory.LoggingAsset{
-					Ecs: &fetching.EcsGcp{
-						ProjectId:        projectId,
-						ProjectName:      "a",
-						OrganizationId:   "a",
-						OrganizationName: "a",
-					},
-					LogSinks: []*inventory.ExtendedGcpAsset{
-						{Asset: &assetpb.Asset{Name: "a", AssetType: inventory.LogSinkAssetType}},
-					},
-				},
-			},
-			want: map[string]any{
-				"cloud": map[string]any{
-					"provider": "gcp",
-					"account": map[string]any{
-						"id":   projectId,
-						"name": "a",
-					},
-					"Organization": map[string]any{
-						"id":   "a",
-						"name": "a",
-					},
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := &GcpLoggingAsset{
-				Type:    tt.fields.Type,
-				subType: tt.fields.subType,
-				Asset:   tt.fields.Asset,
-			}
-
-			got, err := g.GetElasticCommonData()
-
-			require.NoError(t, err)
-			assert.Equalf(t, tt.want, got, "GetElasticCommonData()")
 		})
 	}
 }

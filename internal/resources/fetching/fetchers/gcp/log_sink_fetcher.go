@@ -82,13 +82,14 @@ func (f *GcpLogSinkFetcher) Stop() {
 }
 
 func (g *GcpLoggingAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.Ecs.ProjectId)
+	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
 	return fetching.ResourceMetadata{
-		ID:      id,
-		Type:    g.Type,
-		SubType: g.subType,
-		Name:    id,
-		Region:  gcplib.GlobalRegion,
+		ID:                   id,
+		Type:                 g.Type,
+		SubType:              g.subType,
+		Name:                 id,
+		Region:               gcplib.GlobalRegion,
+		CloudAccountMetadata: *g.Asset.CloudAccount,
 	}, nil
 }
 
@@ -97,17 +98,5 @@ func (g *GcpLoggingAsset) GetData() any {
 }
 
 func (g *GcpLoggingAsset) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
-		"cloud": map[string]any{
-			"provider": "gcp",
-			"account": map[string]any{
-				"id":   g.Asset.Ecs.ProjectId,
-				"name": g.Asset.Ecs.ProjectName,
-			},
-			"Organization": map[string]any{
-				"id":   g.Asset.Ecs.OrganizationId,
-				"name": g.Asset.Ecs.OrganizationName,
-			},
-		},
-	}, nil
+	return nil, nil
 }

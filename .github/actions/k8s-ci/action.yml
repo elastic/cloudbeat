@@ -1,0 +1,68 @@
+name: 'K8S CI'
+description: 'K8s integration tests'
+inputs:
+  kind-config:
+    description: 'KIND configuration'
+    required: true
+
+  test-target:
+    description: 'Test target'
+    required: true
+  test-range:
+    description: 'Test range'
+    required: false
+    default: ''
+  values-file:
+    description: 'Helm values file'
+    required: true
+
+  docker-images-folder:
+    description: 'Docker build cache folder'
+    required: false
+    default: '/tmp/.docker-images'
+runs:
+  using: composite
+  steps:
+    - name: Prepare Kind Cluster for Process Tests
+      if: ${{ contains(inputs.kind-config, 'conf2') }}
+      shell: bash
+      run: |
+        # Workaround: Direct creation of a Kind cluster for config2 fails to start control-plane (kubelet fails)
+        # Creating and deleting a kind-mono cluster as a preparation for configuring Kind for process tests
+        just create-kind-cluster kind-mono
+        just delete-kind-cluster kind-mono
+
+    - name: Create k8s Kind Cluster
+      shell: bash
+      run: just create-kind-cluster ${{ inputs.kind-config }}
+
+    - name: Load images to kind
+      shell: bash
+      run: |
+        ls -lahR ${{ inputs.docker-images-folder }}
+        kind load image-archive ${{ inputs.docker-images-folder }}/cloudbeat.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive ${{ inputs.docker-images-folder }}/pytest.tar --name='${{ inputs.kind-config }}'
+        kind load image-archive ${{ inputs.docker-images-folder }}/elastic-agent.tar --name='${{ inputs.kind-config }}'
+
+    - name: Deploy tests Helm chart
+      id: deploy_helm
+      shell: bash
+      run: just deploy-tests-helm ${{ inputs.test-target }} ${{ inputs.values-file }} ${{ inputs.test-range }}
+
+    - name: Deploy K8s Objects
+      if: ${{ contains(inputs.test-target, 'object_psp') }}
+      shell: bash
+      run: just apply-k8s-test-objects
+
+    - name: Run Tests
+      id: run_tests
+      shell: bash
+      run: just run-tests ${{ inputs.test-target }} kind-${{ inputs.kind-config }}
+
+    - name: Upload Test Results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-ci-k8s-${{ inputs.test-target }}-${{ inputs.kind-config }}
+        path: tests/allure/results/
+        overwrite: true

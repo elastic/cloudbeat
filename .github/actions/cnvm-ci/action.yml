@@ -1,0 +1,72 @@
+name: 'CNVM CI'
+description: 'CNVM integration tests'
+inputs:
+  elk-version:
+    description: 'ELK version'
+    required: true
+  aws-access-key-id:
+    description: 'AWS access key id'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS secret access key'
+    required: true
+  aws-region:
+    description: 'AWS region'
+    required: true
+
+  debug:
+    description: 'debug'
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: Init Integration
+      uses: ./.github/actions/init-integration
+      with:
+        elk-version: ${{ inputs.elk-version }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Run cloudbeat in background
+      env:
+        ES_HOST: http://localhost:9200
+        ES_USERNAME: elastic
+        ES_PASSWORD: changeme
+      shell: bash
+      run: ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
+
+    - name: Wait for cloudbeat to send some events
+      shell: bash
+      run: sleep 10
+
+    - name: Check for findings
+      working-directory: ./tests
+      env:
+        USE_K8S: "false"
+      shell: bash
+      run: |
+        poetry run pytest -k "cnvm" --alluredir=./allure/results/ --clean-alluredir
+
+    - name: Upload test results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-ci-cnvm
+        path: tests/allure/results/
+        overwrite: true
+
+    - if: ${{ failure() || cancelled() || inputs.debug == 'true' }}
+      name: Upload cloudbeat logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloubeat-logs-ci-cnvm
+        path: logs/
+        if-no-files-found: warn
+        retention-days: 1
+        overwrite: true
