@@ -127,6 +127,9 @@ runs:
       with:
         name: docker-images
         path: ${{ inputs.docker-images-folder }}
+        if-no-files-found: error
+        retention-days: 2
+        overwrite: true
 
     - if: ${{ inputs.build-docker-images == 'false' }}
       name: Download docker images
