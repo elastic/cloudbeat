@@ -31,11 +31,11 @@ Conditions:
 
 Resources:
   ElasticCSPMUser:
-    Type: "AWS::IAM::User"
+    Type: AWS::IAM::User
     Properties:
       UserName: !Join
         - '-'
-        - - 'elasticagent-user-cspm'
+        - - elasticagent-user-cspm
           - !Select
             - 2
             - !Split
@@ -155,21 +155,19 @@ Resources:
     Condition: ScanManagementAccountEnabled
 
   ElasticCSPMAccessKey:
-    Type: "AWS::IAM::AccessKey"
+    Type: AWS::IAM::AccessKey
     Properties:
       UserName: !Ref ElasticCSPMUser
 
-
 Outputs:
   AccessKeyId:
-    Description: "Access Key ID"
+    Description: Access Key ID
     Value: !Ref ElasticCSPMAccessKey
     Export:
-      Name: "AccessKeyId"
+      Name: AccessKeyId
 
   SecretAccessKey:
-    Description: "Secret Access Key"
+    Description: Secret Access Key
     Value: !GetAtt ElasticCSPMAccessKey.SecretAccessKey
     Export:
-      Name: "SecretAccessKey"
-
+      Name: SecretAccessKey
