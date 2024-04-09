@@ -125,9 +125,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-        working-directory: ./
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: 'true'
 
       - name: Set up unique deployment names
         run: |
@@ -153,8 +154,8 @@ jobs:
         shell: bash
         run: |
           BODY="$(aws cloudformation describe-stacks --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --query 'Stacks[0].Outputs' --output json)"
-          NEW_ACCESS_KEY_ID="$(echo "${BODY}" | jq '.[] | select(.OutputKey | test("AccessKeyId")) | .OutputValue')"
-          NEW_SECRET_ACCESS_KEY="$(echo "${BODY}" | jq '.[] | select(.OutputKey | test("SecretAccessKey")) | .OutputValue')"
+          NEW_ACCESS_KEY_ID="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("AccessKeyId")) | .OutputValue')"
+          NEW_SECRET_ACCESS_KEY="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("SecretAccessKey")) | .OutputValue')"
           echo "NEW_ACCESS_KEY_ID=${NEW_ACCESS_KEY_ID}" >> $GITHUB_ENV
           echo "NEW_SECRET_ACCESS_KEY=${NEW_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
 
