@@ -92,8 +92,6 @@ jobs:
         shell: bash
         run: |
           ./bin/hermit env --raw >> "$GITHUB_ENV"
-          pip3 install poetry
-          (cd security-policies && poetry install --no-root)
 
       - name: Build opa bundle
         shell: bash
