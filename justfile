@@ -126,7 +126,7 @@ deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
 deploy-dm:
-  .deploy/deployment-manager/deploy.sh
+  .deploy/deployment-manager/deploy_compute.sh
 
 delete-dm name:
   gcloud deployment-manager deployments delete {{name}} -q

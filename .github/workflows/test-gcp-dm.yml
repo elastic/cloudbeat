@@ -9,7 +9,7 @@ on:
     paths:
       - "deploy/deployment-manager/compute_engine.py"
       - "deploy/deployment-manager/compute_engine.py.schema"
-      - "deploy/deployment-manager/deploy.sh"
+      - "deploy/deployment-manager/deploy_compute.sh"
       - "deploy/deployment-manager/set_env.sh"
 
 env:
@@ -94,7 +94,7 @@ jobs:
         env:
           DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
         run: |
-          . ./set_env.sh && ./deploy.sh
+          . ./set_env.sh && ./deploy_compute.sh
 
       - name: Check for findings
         working-directory: ./tests

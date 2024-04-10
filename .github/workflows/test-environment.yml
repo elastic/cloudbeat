@@ -327,7 +327,7 @@ jobs:
         env:
           DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
         run: |
-          . ./set_env.sh && ./deploy.sh
+          . ./set_env.sh && ./deploy_compute.sh
 
       - name: Install CSPM Azure integration
         id: cspm-azure-integration
