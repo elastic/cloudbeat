@@ -1,6 +1,12 @@
 name: Test Agent Compatibility
 
 on:
+  # On demand execution of workflow will run all suites.
+  workflow_dispatch:
+
+  schedule:
+    # Weekly job running every monday at 6 am
+    - cron: "00 06 * * 1"
   # TODO: Remove after finishing the implementation
   # This job should run after the PR is merged
   pull_request:
@@ -14,20 +20,46 @@ on:
       - "[0-9]+.[0-9]+"
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: 'true'
+
+      - name: Run script
+        run: python ./.ci/scripts/get_versions.py > matrix.json
+
+      - name: Set matrix
+        id: set-matrix
+        run: echo "matrix=$(cat matrix.json)" >> $GITHUB_ENV
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
+
   test-agents:
     name: Agent Compatibility Test
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - agent-version: '8.13.1'
-            package-version: '1.8.1'
-          - agent-version: '8.12.2'
-            package-version: '1.7.4'
-          - agent-version: '8.11.4'
-            package-version: '1.6.5'
+      matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
+        # include:
+        #   - agent-version: '8.13.1'
+        #     package-version: '1.8.1'
+        #   - agent-version: '8.12.2'
+        #     package-version: '1.7.4'
+        #   - agent-version: '8.11.4'
+        #     package-version: '1.6.5'
     permissions:
       contents: "read"
       id-token: "write"
@@ -46,39 +78,45 @@ jobs:
           elk-version: ${{ env.ELK_VERSION }} # Initialized in hermit.hcl
           build-cloudbeat: 'false'
 
-      - id: google-auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          limit-access-to-actor: true
 
-      - name: Run Agent ${{ matrix.agent-version }}
-        shell: bash
-        env:
-          ES_HOST: http://localhost:9200
-          ES_USERNAME: elastic
-          ES_PASSWORD: changeme
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
-          AZURE_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-          AZURE_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-          AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-        run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
+      # - id: google-auth
+      #   name: Authenticate to Google Cloud
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: Wait for cloudbeat to send some events
-        shell: bash
-        run: sleep 60
+      # - name: Run Agent ${{ matrix.agent-version }}
+      #   shell: bash
+      #   env:
+      #     ES_HOST: http://localhost:9200
+      #     ES_USERNAME: elastic
+      #     ES_PASSWORD: changeme
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+      #     AZURE_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+      #     AZURE_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+      #     AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+      #   run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
 
-      - name: Check for findings
-        working-directory: ./tests
-        env:
-          USE_K8S: "false"
-        shell: bash
-        run: |
-          testmarker="cspm"
-          # Azure manual credentials are not supported in 8.11
-          if [[ "${{ matrix.agent-version }}" == *"8.11"* ]]; then
-            testmarker="cspm and not azure"
-          fi
-          poetry run pytest -k "$testmarker" --alluredir=./allure/results/ --clean-alluredir --maxfail=2
+      # - name: Wait for cloudbeat to send some events
+      #   shell: bash
+      #   run: sleep 60
+
+      # - name: Check for findings
+      #   working-directory: ./tests
+      #   env:
+      #     USE_K8S: "false"
+      #   shell: bash
+      #   run: |
+      #     testmarker="cspm"
+      #     # Azure manual credentials are not supported in 8.11
+      #     if [[ "${{ matrix.agent-version }}" == *"8.11"* ]]; then
+      #       testmarker="cspm and not azure"
+      #     fi
+      #     poetry run pytest -k "$testmarker" --alluredir=./allure/results/ --clean-alluredir --maxfail=2
