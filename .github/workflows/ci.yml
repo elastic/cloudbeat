@@ -30,7 +30,6 @@ jobs:
           init-tools: 'true'
 
   lint:
-    #needs: [ init-hermit ]
     name: Lint
     runs-on: ubuntu-22.04
     timeout-minutes: 60
@@ -78,7 +77,6 @@ jobs:
         run: terraform fmt -check -recursive
 
   unit-test:
-    #needs: [ init-hermit ]
     name: Unit Test
     runs-on: ubuntu-22.04
     timeout-minutes: 60
