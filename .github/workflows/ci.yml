@@ -45,6 +45,10 @@ jobs:
         shell: bash
         run: |
           ./bin/hermit env --raw >> "$GITHUB_ENV"
+
+      - name: Initialize poetry
+        shell: bash
+        run: |
           pip3 install poetry
           (cd security-policies && poetry install --no-root)
 
