@@ -28,19 +28,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      # - name: Hermit Environment
-      #   uses: ./.github/actions/hermit
-      #   with:
-      #     init-tools: 'true'
-
       - name: Run script and set matrix
         run: python ./.ci/scripts/get_versions.py
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: always()
-        with:
-          limit-access-to-actor: true
 
   test-agents:
     name: Agent Compatibility Test
