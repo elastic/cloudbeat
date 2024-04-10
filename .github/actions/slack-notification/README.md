@@ -82,13 +82,13 @@ jobs:
 
 Following inputs can be used as `step.with` keys:
 
-| Name             | Type     | Required | Description                                                 |
-|------------------|----------|----------|-------------------------------------------------------------|
-| `vault-role-id`  | String   | yes      | The Vault role id.                                          |
-| `vault-secret-id`| String   | yes      | The Vault secret id.                                        |
-| `vault-url`      | String   | yes      | The Vault URL to connect to.                                |
-| `slack-channel`  | String   | no       | Slack channel id or channel name. Default: #csp-qa-alerts   |
-| `slack-message`  | String   | no       | Posting a simple plain text message.                        |
-| `slack-payload`  | String   | no       | Posting a rich message using Block Kit.                     |
-| `mask-secrets`   | String   | no       | Masking secrets in the logs. Default: 'true'                |
-| `url-encoded`    | String   | no       | URL-encoded message. Default: 'true'                        |
+| Name             | Type     | Required | Description                                                       |
+|------------------|----------|----------|-------------------------------------------------------------------|
+| `vault-role-id`  | String   | yes      | The Vault role id.                                                |
+| `vault-secret-id`| String   | yes      | The Vault secret id.                                              |
+| `vault-url`      | String   | yes      | The Vault URL to connect to.                                      |
+| `slack-channel`  | String   | no       | Slack channel id or channel name. Default: #cloud-sec-qa-alerts   |
+| `slack-message`  | String   | no       | Posting a simple plain text message.                              |
+| `slack-payload`  | String   | no       | Posting a rich message using Block Kit.                           |
+| `mask-secrets`   | String   | no       | Masking secrets in the logs. Default: 'true'                      |
+| `url-encoded`    | String   | no       | URL-encoded message. Default: 'true'                              |
