@@ -25,19 +25,21 @@
 
 DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm-user}
-ROLE="roles/resourcemanager.projectIamAdmin"
 
 # Set environment variables with the name and number of your project.
-export PROJECT_NAME=$(gcloud config get-value core/project)
-export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+PROJECT_NAME="$(gcloud config get-value core/project)"
+PROJECT_NUMBER="$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")"
+
+export PROJECT_NAME
+export PROJECT_NUMBER
 
 # Function to run a gcloud command and check its exit code
 run_command() {
-    eval $1
+    eval "$1"
     local status=$?
-    if [ $status -ne 0 ]; then
+    if [ "$status" -ne 0 ]; then
         echo "Error: Command \"$1\" failed with exit code $status. Exiting..."
-        exit $status
+        exit "$status"
     fi
 }
 

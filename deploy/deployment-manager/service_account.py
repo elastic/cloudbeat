@@ -10,6 +10,7 @@ def generate_config(context):
     roles = ["roles/cloudasset.viewer", "roles/browser"]
     sa_name = f"{deployment_name}-sa"
 
+    # pylint: disable=duplicate-code
     service_account = {
         "name": sa_name,
         "type": "iam.v1.serviceAccount",
@@ -20,6 +21,7 @@ def generate_config(context):
         },
     }
 
+    # pylint: disable=duplicate-code
     bindings = []
     for role in roles:
         bindings.append(
