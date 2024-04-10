@@ -19,12 +19,13 @@ Functions:
 """
 import os
 import json
+import argparse
 import requests
 
 
 def get_available_versions():
     """
-    Fetches the available versions of Elastic Agent from the Elastic website.
+    Fetches the available versions of Elastic Agent from the Elastic API.
 
     Returns:
         list: A list of the latest versions of Elastic Agent.
@@ -44,13 +45,8 @@ def get_available_versions():
         for item in json_body[0]:
             title = item.get("title", "")
             version_number = item.get("version_number", "")
-            if (
-                "Elastic Agent" in title
-                and
-                # version_number.startswith("8.") and
-                # version_number.count(".") == 2 and
-                not any(char.isalpha() for char in version_number)
-            ):
+            # Filter out versions with no alphabetic characters in the version number
+            if "Elastic Agent" in title and not any(char.isalpha() for char in version_number):
                 major_minor = ".".join(version_number.split(".")[:2])
                 versions_dict[major_minor] = max(versions_dict.get(major_minor, ""), version_number)
 
@@ -63,9 +59,7 @@ def get_available_versions():
 
         return versions
     except requests.exceptions.RequestException as e:
-        print("Failed to fetch versions list")
-        print(e)
-        return []
+        raise requests.exceptions.RequestException("Failed to fetch versions list") from e
 
 
 def parse_version(version):
@@ -98,8 +92,6 @@ def filter_versions(versions, prefix=None, after=None):
         list: A filtered list of versions.
 
     """
-    # parsed_versions = [parse_version(version) for version in versions]
-
     if prefix:
         return [version for version in versions if version.startswith(prefix)]
 
@@ -130,8 +122,7 @@ def get_package_version(kibana_version: str):
         data = response.json()
         return data[0]["version"]
     except requests.exceptions.RequestException as e:
-        print(f"Failed to retrieve package version. Error: {e}")
-        return ""
+        raise requests.exceptions.RequestException("Failed to retrieve package version") from e
 
 
 def generate_job_matrix(versions):
@@ -151,10 +142,10 @@ def generate_job_matrix(versions):
     job_matrix = []
     for version in versions:
         package_version = get_package_version(version)
-        if package_version:
-            job_matrix.append({"agent-version": version, "package-version": package_version})
-        else:
-            print(f"Package version not found for Kibana version {version}")
+        if not package_version:
+            raise ValueError(f"Package version not found for Kibana version {version}")
+        job_matrix.append({"agent-version": version, "package-version": package_version})
+
     return json.dumps({"include": job_matrix})
 
 
@@ -163,16 +154,22 @@ def main():
     Retrieve available versions of Elastic Agent.
 
     This function retrieves a specified number of available versions of Elastic Agent
-    and prints them as a space-separated string.
+    and generates a job matrix based on the versions.
 
     Returns:
         None
     """
+    parser = argparse.ArgumentParser(description="Retrieve available versions of Elastic Agent.")
+    parser.add_argument(
+        "--after",
+        type=str,
+        default="8.11",
+        help="Only include versions that are greater than this version.",
+    )
+    args = parser.parse_args()
+
     available_versions = get_available_versions()
-    filtered_versions = filter_versions(available_versions, after="8.11")
-    # print(" ".join(available_versions))
-    # print(" ".join(filtered_versions))
-    # print(generate_job_matrix(filtered_versions))
+    filtered_versions = filter_versions(available_versions, after=args.after)
     with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
         print(f"matrix={generate_job_matrix(filtered_versions)}", file=fh)
 
