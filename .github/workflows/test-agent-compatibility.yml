@@ -35,6 +35,7 @@ jobs:
     name: Agent Compatibility Test
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    needs: ["generate-matrix"]
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
