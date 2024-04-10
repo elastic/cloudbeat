@@ -17,7 +17,7 @@ Functions:
 - main:
     Retrieves available versions of Elastic Agent and performs operations on them.
 """
-
+import os
 import json
 import requests
 
@@ -173,6 +173,8 @@ def main():
     # print(" ".join(available_versions))
     # print(" ".join(filtered_versions))
     print(generate_job_matrix(filtered_versions))
+    with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+        print("matrix=generate_job_matrix(filtered_versions)", file=fh)
 
 
 if __name__ == "__main__":

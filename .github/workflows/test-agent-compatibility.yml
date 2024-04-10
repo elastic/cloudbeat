@@ -33,12 +33,8 @@ jobs:
       #   with:
       #     init-tools: 'true'
 
-      - name: Run script
-        run: python ./.ci/scripts/get_versions.py > matrix.json
-
-      - name: Set matrix
-        id: set-matrix
-        run: echo "matrix=$(cat matrix.json)" >> $GITHUB_ENV
+      - name: Run script and set matrix
+        run: python ./.ci/scripts/get_versions.py
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
