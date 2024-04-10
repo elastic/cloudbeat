@@ -78,3 +78,7 @@ runs:
 
     - shell: bash
       run: go env
+
+    - shell: bash
+      run: date '+%d/%m/%Y %H:%M:%S'
+
