@@ -61,12 +61,6 @@ jobs:
           elk-version: ${{ env.ELK_VERSION }} # Initialized in hermit.hcl
           build-cloudbeat: 'false'
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
-
       - id: google-auth
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
