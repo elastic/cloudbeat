@@ -30,7 +30,6 @@ jobs:
           init-tools: 'true'
 
   lint:
-    needs: [ init-hermit ]
     name: Lint
     runs-on: ubuntu-22.04
     timeout-minutes: 60
@@ -42,8 +41,16 @@ jobs:
           # If the event is push to branch use the default ref.
           # If the event is pull request (`pull_request_target` in our case) use merge commit as ref to run lint over the PR's code.
 
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
+      - name: Initialize poetry
+        shell: bash
+        run: |
+          pip3 install poetry
+          (cd security-policies && poetry install --no-root)
 
       - name: Pre-commit Hooks
         env:
@@ -74,7 +81,6 @@ jobs:
         run: terraform fmt -check -recursive
 
   unit-test:
-    needs: [ init-hermit ]
     name: Unit Test
     runs-on: ubuntu-22.04
     timeout-minutes: 60
@@ -86,8 +92,10 @@ jobs:
           # If the event is push to branch use the default ref.
           # If the event is pull request (`pull_request_target` in our case) use merge commit as ref to run unit tests over the PR's code.
 
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
 
       - name: Build opa bundle
         shell: bash
@@ -189,7 +197,7 @@ jobs:
     needs: [ init-hermit ]
     name: CNVM CI
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
