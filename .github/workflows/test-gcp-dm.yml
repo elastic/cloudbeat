@@ -15,7 +15,7 @@ on:
 
 env:
   WORKING_DIR: deploy/test-environments
-  INTEGRATIONS_SETUP_DIR: ${{ env.INTEGRATIONS_SETUP_DIR }}
+  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
 
@@ -82,7 +82,7 @@ jobs:
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
-        working-directory: tests/integrations_setup
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
