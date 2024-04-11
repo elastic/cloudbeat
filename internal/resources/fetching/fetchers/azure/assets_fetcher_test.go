@@ -220,7 +220,11 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 
 			ecs, err := result.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Empty(ecs)
+			if expected.Type == inventory.VirtualMachineAssetType {
+				s.Contains(ecs, "host.name")
+			} else {
+				s.Empty(ecs)
+			}
 		})
 	}
 }
