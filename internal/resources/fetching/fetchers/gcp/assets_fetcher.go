@@ -148,6 +148,22 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
+	if r.Type == fetching.CloudCompute && r.SubType == inventory.ComputeInstanceAssetType {
+		m := map[string]any{}
+		data := r.ExtendedAsset.Resource.Data
+		if data == nil {
+			return nil, nil
+		}
+		name := data.Fields["name"].GetStringValue()
+		if name != "" {
+			m["host.name"] = name
+		}
+		hostname := data.Fields["hostname"].GetStringValue()
+		if hostname != "" {
+			m["host.hostname"] = hostname
+		}
+		return m, nil
+	}
 	return nil, nil
 }
 
