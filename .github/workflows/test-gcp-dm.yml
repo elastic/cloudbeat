@@ -80,13 +80,13 @@ jobs:
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
-        working-directory: deploy/test-environments/fleet_api
+        working-directory: ./tests
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
           poetry install
-          poetry run python src/install_cspm_gcp_integration.py
+          poetry run python tests/integrations_setup/install_cspm_gcp_integration.py
 
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
