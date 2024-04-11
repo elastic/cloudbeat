@@ -151,20 +151,23 @@ jobs:
           aws cloudformation wait stack-create-complete --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
 
       - name: Get Direct Keys
+        id: direct-keys
         shell: bash
         run: |
           BODY="$(aws cloudformation describe-stacks --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --query 'Stacks[0].Outputs' --output json)"
           NEW_ACCESS_KEY_ID="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("AccessKeyId")) | .OutputValue')"
+          echo "::add-mask::$NEW_ACCESS_KEY_ID"
           NEW_SECRET_ACCESS_KEY="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("SecretAccessKey")) | .OutputValue')"
-          echo "NEW_ACCESS_KEY_ID=${NEW_ACCESS_KEY_ID}" >> $GITHUB_ENV
-          echo "NEW_SECRET_ACCESS_KEY=${NEW_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
+          echo "::add-mask::$NEW_SECRET_ACCESS_KEY"
+          echo "NEW_ACCESS_KEY_ID=${NEW_ACCESS_KEY_ID}" >> $GITHUB_OUTPUT
+          echo "NEW_SECRET_ACCESS_KEY=${NEW_SECRET_ACCESS_KEY}" >> $GITHUB_OUTPUT
 
       - name: Run AWS integration tests
         uses: ./.github/actions/aws-ci
         with:
           elk-version: ${{ env.ELK_VERSION }}
-          aws-access-key-id: ${{ env.NEW_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.NEW_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ steps.direct-keys.outputs.NEW_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ steps.direct-keys.outputs.NEW_SECRET_ACCESS_KEY }}
           aws-account-type: single-account
 
       - name: Cleanup Environment
