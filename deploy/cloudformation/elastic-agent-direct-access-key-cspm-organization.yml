@@ -41,6 +41,7 @@ Resources:
             - !Split
               - /
               - !Ref AWS::StackId
+      Path: /
 
   CloudbeatRootRole:
     Type: AWS::IAM::Role

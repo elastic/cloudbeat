@@ -4,7 +4,7 @@ inputs:
   elk-version:
     description: 'ELK version'
     required: true
-  aws-access-key-id:
+  -access-awskey-id:
     description: 'AWS access key id'
     required: true
   aws-secret-access-key:

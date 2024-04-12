@@ -18,6 +18,7 @@ Resources:
               - !Ref AWS::StackId
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
+      Path: /
 
   ElasticCSPMAccessKey:
     Type: AWS::IAM::AccessKey
