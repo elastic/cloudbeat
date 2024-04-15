@@ -38,7 +38,7 @@ func TestMapCacheGet(t *testing.T) {
 	cache := NewMapCache[int]()
 
 	// Test getting existing value from cache
-	cache.results["key1"] = 42
+	cache.results.Store("key1", 42)
 	mockFunction := new(MockFunction)
 	result := cache.Get(mockFunction.GetSomeValue, "key1")
 	mockFunction.AssertNotCalled(t, "GetSomeValue")

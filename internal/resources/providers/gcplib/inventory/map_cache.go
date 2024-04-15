@@ -22,25 +22,19 @@ import (
 )
 
 type MapCache[T any] struct {
-	results map[string]T
-	mu      sync.Mutex
+	results sync.Map
 }
 
 func (c *MapCache[T]) Get(fn func() T, key string) T {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	if value, ok := c.results[key]; ok {
-		return value
+	if value, ok := c.results.Load(key); ok {
+		return value.(T)
 	}
 
 	value := fn()
-	c.results[key] = value
+	c.results.Store(key, value)
 	return value
 }
 
 func NewMapCache[T any]() *MapCache[T] {
-	return &MapCache[T]{
-		results: make(map[string]T),
-	}
+	return &MapCache[T]{}
 }
