@@ -50,7 +50,7 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 24.4.0
     hooks:
       - id: black
 
@@ -173,7 +173,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.19.0
+    rev: v0.20.1
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
