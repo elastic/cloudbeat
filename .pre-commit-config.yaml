@@ -24,11 +24,14 @@ repos:
     hooks:
       - id: add-trailing-comma
 
-  ## Golang hooks
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.57.2
+  - repo: local
     hooks:
       - id: golangci-lint
+        name: Run golangci-lint
+        entry: bash -c 'golangci-lint run'
+        language: system
+        files: .*.go
+        pass_filenames: false
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
