@@ -24,7 +24,7 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/huandu/xstrings"
-	structpb "google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
