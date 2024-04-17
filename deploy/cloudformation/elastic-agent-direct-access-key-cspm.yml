@@ -1,5 +1,4 @@
 AWSTemplateFormatVersion: "2010-09-09"
-
 Description: Creates elastic-agent cspm user, role, and access key, and outputs the access key
 
 Parameters: {}
