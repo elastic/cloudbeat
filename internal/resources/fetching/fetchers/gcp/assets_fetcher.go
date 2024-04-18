@@ -155,12 +155,16 @@ func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
 			return nil, nil
 		}
 		nameField, ok := data.Fields["name"]
-		if ok && nameField.GetStringValue() != "" {
-			m["host.name"] = nameField.GetStringValue()
+		if ok {
+			if name := nameField.GetStringValue(); name != "" {
+				m["host.name"] = name
+			}
 		}
 		hostnameField, ok := data.Fields["hostname"]
-		if ok && hostnameField.GetStringValue() != "" {
-			m["host.hostname"] = hostnameField.GetStringValue()
+		if ok {
+			if hostname := hostnameField.GetStringValue(); hostname != "" {
+				m["host.hostname"] = hostname
+			}
 		}
 		return m, nil
 	}
