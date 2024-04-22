@@ -202,6 +202,11 @@ def test_cnvm_findings(cnvm_client, match_type):
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
+    # Check every finding has host section
+    for finding in results["hits"]["hits"]:
+        resource = finding["_source"]
+        assert "host" in resource, f"Resource '{match_type}' is missing 'host' section"
+        assert "name" in resource["host"], f"Resource '{match_type}' is missing 'host.name'"
 
 
 @pytest.mark.sanity
