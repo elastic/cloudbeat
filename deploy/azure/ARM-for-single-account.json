@@ -34,13 +34,6 @@
             "metadata": {
                 "description": "Resource Group location"
             }
-        },
-        "AdminUsername": {
-            "type": "string",
-            "defaultValue": "cloudbeat",
-            "metadata": {
-                "description": "Admin username for the OS profile of the VM (Don't change)"
-            }
         }
     },
     "variables": {
@@ -143,6 +136,13 @@
                         "ResourceGroupLocation": {
                             "type": "string",
                             "defaultValue": "[resourceGroup().location]"
+                        },
+                        "AdminUsername": {
+                            "type": "string",
+                            "defaultValue": "cloudbeat",
+                            "metadata": {
+                                "description": "Admin username for the OS profile (Don't change)"
+                            }
                         }
                     },
                     "resources": [
@@ -171,13 +171,6 @@
                                         "offer": "0001-com-ubuntu-server-jammy",
                                         "sku": "22_04-lts-gen2",
                                         "version": "latest"
-                                    },
-                                    "AdminUsername": {
-                                        "type": "string",
-                                        "defaultValue": "cloudbeat",
-                                        "metadata": {
-                                            "description": "Admin username for the OS profile (Don't change)"
-                                        }
                                     }
                                 },
                                 "osProfile": {
