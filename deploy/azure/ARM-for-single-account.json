@@ -34,6 +34,13 @@
             "metadata": {
                 "description": "Resource Group location"
             }
+        },
+        "AdminUsername": {
+            "type": "string",
+            "defaultValue": "cloudbeat",
+            "metadata": {
+                "description": "Admin username for the OS profile of the VM (Don't change)"
+            }
         }
     },
     "variables": {
