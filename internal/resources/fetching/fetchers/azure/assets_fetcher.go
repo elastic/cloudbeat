@@ -201,7 +201,7 @@ func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
 			}
 			m["host.hostname"] = computerName
 		}
-	case fetching.AzureRoleDefinitionType:
+	case inventory.RoleDefinitionsType:
 		{
 			m["user.effective.id"] = r.Asset.Id
 			m["user.effective.name"] = r.Asset.Name
