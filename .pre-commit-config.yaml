@@ -67,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.86.2
+    rev: v0.86.3
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
