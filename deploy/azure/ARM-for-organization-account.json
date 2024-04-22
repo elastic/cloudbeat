@@ -69,6 +69,9 @@
                 "parameters": {
                     "ResourceGroupName": {
                         "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "DeploymentLocation": {
+                        "value": "[parameters('DeploymentLocation')]"
                     }
                 },
                 "template": {
@@ -76,6 +79,9 @@
                     "contentVersion": "1.0.0.0",
                     "parameters": {
                         "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "DeploymentLocation": {
                             "type": "string"
                         }
                     },
