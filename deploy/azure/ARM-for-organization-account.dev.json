@@ -76,7 +76,7 @@
                     "ResourceGroupName": {
                         "value": "[parameters('ResourceGroupName')]"
                     },
-                    "Location": {
+                    "DeploymentLocation": {
                         "value": "[parameters('DeploymentLocation')]"
                     }
                 },
