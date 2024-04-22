@@ -23,6 +23,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/cmd"
 	"github.com/elastic/beats/v7/libbeat/cmd/instance"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
+	"github.com/elastic/beats/v7/libbeat/publisher/processing"
 	_ "github.com/elastic/beats/v7/x-pack/libbeat/include"
 	"github.com/elastic/beats/v7/x-pack/libbeat/management"
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
@@ -36,7 +37,16 @@ import (
 var Name = "cloudbeat"
 
 // RootCmd to handle beats cli
-var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name, Version: version.CloudbeatSemanticVersion()})
+var RootCmd = cmd.GenRootCmdWithSettings(
+	beater.New,
+	instance.Settings{
+		Name:    Name,
+		Version: version.CloudbeatSemanticVersion(),
+		// Supply our own processing pipeline. Same as processing.MakeDefaultBeatSupport, but without
+		// `processing.WithHost`.
+		Processing: processing.MakeDefaultSupport(true, nil, processing.WithECS, processing.WithAgentMeta()),
+	},
+)
 
 func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) ([]*reload.ConfigWithMeta, error) {
 	modules, err := management.CreateInputsFromStreams(rawIn, "logs", agentInfo)
