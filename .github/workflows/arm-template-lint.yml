@@ -19,7 +19,7 @@ jobs:
       matrix:
         template: [ "ARM-for-organization-account.json", "ARM-for-single-account.json" ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Based on https://github.com/microsoft/action-armttk/blob/main/action.yml#L56
       #
