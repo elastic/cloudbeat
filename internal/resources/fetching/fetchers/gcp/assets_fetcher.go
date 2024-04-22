@@ -148,7 +148,7 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
-	if r.Type == fetching.CloudCompute && r.SubType == inventory.ComputeInstanceAssetType {
+	if r.Type == fetching.CloudCompute && r.ExtendedAsset.AssetType == inventory.ComputeInstanceAssetType {
 		m := map[string]any{}
 		data := r.ExtendedAsset.Resource.Data
 		if data == nil {
