@@ -338,6 +338,9 @@
                     },
                     "ElasticAgentVersion": {
                         "value": "[parameters('ElasticAgentVersion')]"
+                    },
+                    "ResourceGroupLocation": {
+                        "value": "[parameters('ResourceGroupLocation')]"
                     }
                 },
                 "template": {
@@ -354,6 +357,9 @@
                             "type": "string"
                         },
                         "ElasticAgentVersion": {
+                            "type": "string"
+                        },
+                        "ResourceGroupLocation": {
                             "type": "string"
                         }
                     },
