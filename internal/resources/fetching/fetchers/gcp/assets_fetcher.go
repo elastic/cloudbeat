@@ -156,7 +156,7 @@ func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
 		m["user.effective.name"] = getAssetResourceName(r.ExtendedAsset)
 	}
 
-	if r.Type == fetching.CloudCompute && r.SubType == inventory.ComputeInstanceAssetType {
+	if r.Type == fetching.CloudCompute && r.ExtendedAsset.AssetType == inventory.ComputeInstanceAssetType {
 		fields := getAssetDataFields(r.ExtendedAsset)
 		if fields == nil {
 			return m, nil
