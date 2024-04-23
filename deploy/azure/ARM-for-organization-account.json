@@ -52,7 +52,7 @@
     "variables": {
         "resourceGroupDeployment": "[concat('resource-group-deployment-', parameters('DeploymentLocation'))]",
         "roleAssignmentDeployment": "[concat('role-assignment-deployment-', parameters('DeploymentLocation'))]",
-        "roleGUID": "[guid(parameters('SubscriptionId'))]"
+        "roleGUID": "[guid(parameters('SubscriptionId'), parameters('ResourceGroupName'))]"
     },
     "resources": [
         {
@@ -327,24 +327,6 @@
                             }
                         },
                         {
-                            "type": "Microsoft.Compute/virtualMachines/extensions",
-                            "apiVersion": "2023-09-01",
-                                "name": "cloudbeatVM/EnableMSIExtension",
-                            "location": "[parameters('ResourceGroupLocation')]",
-                            "dependsOn": [
-                                "cloudbeatVM"
-                            ],
-                            "properties": {
-                                "publisher": "Microsoft.ManagedIdentity",
-                                "type": "ManagedIdentityExtensionForLinux",
-                                "typeHandlerVersion": "1.0",
-                                "autoUpgradeMinorVersion": true,
-                                "settings": {
-                                    "port": 50342
-                                }
-                            }
-                        },
-                        {
                             "type": "Microsoft.Resources/deploymentScripts",
                             "apiVersion": "2023-08-01",
                             "name": "cloudbeatGenerateKeypair",
@@ -368,7 +350,7 @@
                                     "[concat('/subscriptions/', parameters('SubscriptionId'))]",
                                     "[concat('/subscriptions/', parameters('SubscriptionId'), '/resourcegroups/', parameters('ResourceGroupName'))]"
                                 ],
-                                "description": "Additional read permissions for cloudbeatVM",
+                                "description": "Additional read permissions for cloudbeatVM (edit)",
                                 "permissions": [
                                     {
                                         "actions": [
@@ -378,7 +360,7 @@
                                         ]
                                     }
                                 ],
-                                "roleName": "cloudbeatVM additional permissions",
+                                "roleName": "[concat('cloudbeatVM additional permissions ', parameters('ResourceGroupName'))]",
                                 "type": "CustomRole"
                             }
                         }

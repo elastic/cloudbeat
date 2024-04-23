@@ -23,8 +23,7 @@ jobs:
 
       # Based on https://github.com/microsoft/action-armttk/blob/main/action.yml#L56
       #
-      # Not used the official MS ARM TTK Action because we need to ignore some rules
-      # which must be done by deleting `.ps1` files https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#customize-tests
+      # Not used the official MS ARM TTK Action because we don't follow the standard file naming convertion
       # The ARM TTK Action didn't give us such flexibility
       - name: Run ARM-TTK ${{ matrix.template }}
         working-directory: ./deploy/azure
@@ -35,15 +34,6 @@ jobs:
           Import-Module -Name Pester -RequiredVersion 4.10.1 -Force
           Invoke-WebRequest -Uri 'aka.ms/arm-ttk-latest'  -OutFile arm-template-toolkit.zip
           Expand-Archive -LiteralPath arm-template-toolkit.zip -DestinationPath arm-ttk
-
-          # Delete Unwanted rules
-
-          # Deleting ManagedIdentityExtension-must-not-be-used.test.ps1
-          # Under VMs release notes of May 7, 2018 https://learn.microsoft.com/en-us/cli/azure/release-notes-azure-cli#vm-27
-          # ManagedIdentityExtension is not recommended to be used anymore ([BREAKING CHANGE] Do not use VM 'ManagedIdentityExtension' for MSI support)
-          # But no alternative was found and even it's possible to find official MS docs using ManagedIdentityExtension for MSI still
-          # Therefore, let's just skip this rule
-          Remove-Item ./arm-ttk/arm-ttk/testcases/deploymentTemplate/ManagedIdentityExtension-must-not-be-used.test.ps1
 
           # Load and run test
           Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
