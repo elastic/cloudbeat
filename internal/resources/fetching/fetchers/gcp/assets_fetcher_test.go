@@ -95,6 +95,11 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		s.Equal("prjId", cloudAccountMetadata.AccountId)
 		s.Equal("orgId", cloudAccountMetadata.OrganisationId)
 		s.Equal("orgName", cloudAccountMetadata.OrganizationName)
+		if metadata.Type == fetching.CloudIdentity {
+			m, err := r.GetElasticCommonData()
+			s.Require().NoError(err, "error getting Elastic Common Data")
+			s.Len(m, 2)
+		}
 	})
 }
 

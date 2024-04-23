@@ -220,9 +220,19 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 
 			ecs, err := result.GetElasticCommonData()
 			s.Require().NoError(err)
-			if expected.Type == inventory.VirtualMachineAssetType {
-				s.Contains(ecs, "host.name")
-			} else {
+			switch expected.Type {
+			case inventory.VirtualMachineAssetType:
+				{
+					s.GreaterOrEqual(len(ecs), 1)
+					s.Contains(ecs, "host.name")
+				}
+			case inventory.RoleDefinitionsType:
+				{
+					s.Len(ecs, 2)
+					s.Contains(ecs, "user.effective.id")
+					s.Contains(ecs, "user.effective.name")
+				}
+			default:
 				s.Empty(ecs)
 			}
 		})

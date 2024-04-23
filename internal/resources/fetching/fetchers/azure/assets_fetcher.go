@@ -175,30 +175,38 @@ func (r *AzureResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
-	if r.Asset.Type == inventory.VirtualMachineAssetType {
-		m := map[string]any{
-			"host.name": r.Asset.Name,
-		}
+	m := map[string]any{}
 
-		// "host.hostname" = "properties.osProfile.computerName" if it exists
-		osProfileRaw, ok := r.Asset.Properties["osProfile"]
-		if !ok {
-			return m, nil
+	switch r.Asset.Type {
+	case inventory.VirtualMachineAssetType:
+		{
+			m["host.name"] = r.Asset.Name
+
+			// "host.hostname" = "properties.osProfile.computerName" if it exists
+			osProfileRaw, ok := r.Asset.Properties["osProfile"]
+			if !ok {
+				break
+			}
+			osProfile, ok := osProfileRaw.(map[string]any)
+			if !ok {
+				break
+			}
+			computerNameRaw, ok := osProfile["computerName"]
+			if !ok {
+				break
+			}
+			computerName, ok := computerNameRaw.(string)
+			if !ok {
+				break
+			}
+			m["host.hostname"] = computerName
 		}
-		osProfile, ok := osProfileRaw.(map[string]any)
-		if !ok {
-			return m, nil
+	case inventory.RoleDefinitionsType:
+		{
+			m["user.effective.id"] = r.Asset.Id
+			m["user.effective.name"] = r.Asset.Name
 		}
-		computerNameRaw, ok := osProfile["computerName"]
-		if !ok {
-			return m, nil
-		}
-		computerName, ok := computerNameRaw.(string)
-		if !ok {
-			return m, nil
-		}
-		m["host.hostname"] = computerName
-		return m, nil
 	}
-	return nil, nil
+
+	return m, nil
 }
