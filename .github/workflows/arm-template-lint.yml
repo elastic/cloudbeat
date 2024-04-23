@@ -17,25 +17,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        template: [ "ARM-for-organization-account.json", "ARM-for-single-account.json" ]
+        template: [ "ARM-for-organization-account", "ARM-for-single-account" ]
     steps:
       - uses: actions/checkout@v4
 
-      # Based on https://github.com/microsoft/action-armttk/blob/main/action.yml#L56
-      #
-      # Not used the official MS ARM TTK Action because we don't follow the standard file naming convertion
-      # The ARM TTK Action didn't give us such flexibility
-      - name: Run ARM-TTK ${{ matrix.template }}
+        # Copy files to its own folder because it's what the official ARM-TTK action expects
+        # Docs https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#test-parameters
+      - name: copy file
         working-directory: ./deploy/azure
-        shell: pwsh
         run: |
-          # Install Dependencies
-          Install-Module -Name Pester -RequiredVersion 4.10.1 -Force
-          Import-Module -Name Pester -RequiredVersion 4.10.1 -Force
-          Invoke-WebRequest -Uri 'aka.ms/arm-ttk-latest'  -OutFile arm-template-toolkit.zip
-          Expand-Archive -LiteralPath arm-template-toolkit.zip -DestinationPath arm-ttk
+          mkdir ${{ matrix.template }}
+          cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
 
-          # Load and run test
-          Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
-          echo "Test-AzTemplate -TemplatePath ${{ matrix.template }} -Pester -Skip Secure-Params-In-Nested-Deployments" | Out-File -FilePath ./armttk.ps1
-          Invoke-Pester -Script ./armttk.ps1 -EnableExit -OutputFormat NUnitXml -OutputFile ./armttk.xml
+      - uses: microsoft/action-armttk@v1
+        name: lint ${{ matrix.template }}
+        with:
+          github_token: ${{ secrets.github_token }}
+          workdir: "./deploy/azure/${{ matrix.template }}"
