@@ -135,9 +135,10 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_ElasticCommonData() {
 
 		asset := &GcpAsset{
 			Type:    fetching.CloudCompute,
-			SubType: inventory.ComputeInstanceAssetType,
+			SubType: "gcp-compute-instance",
 			ExtendedAsset: &inventory.ExtendedGcpAsset{
 				Asset: &assetpb.Asset{
+					AssetType: inventory.ComputeInstanceAssetType,
 					Resource: &assetpb.Resource{
 						Data: dataStruct,
 					},
