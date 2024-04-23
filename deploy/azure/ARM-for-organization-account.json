@@ -350,7 +350,7 @@
                                     "[concat('/subscriptions/', parameters('SubscriptionId'))]",
                                     "[concat('/subscriptions/', parameters('SubscriptionId'), '/resourcegroups/', parameters('ResourceGroupName'))]"
                                 ],
-                                "description": "Additional read permissions for cloudbeatVM (edit)",
+                                "description": "Additional read permissions for cloudbeatVM",
                                 "permissions": [
                                     {
                                         "actions": [
