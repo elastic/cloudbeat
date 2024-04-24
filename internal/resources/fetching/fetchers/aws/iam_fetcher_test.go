@@ -367,7 +367,12 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 
 			m, err := iamResource.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Len(m, 1)
+			switch iamResource.GetResourceType() {
+			case fetching.IAMUserType, fetching.PolicyType:
+				s.Len(m, 3)
+			default:
+				s.Len(m, 1)
+			}
 			s.Contains(m, "cloud.service.name")
 		})
 	}

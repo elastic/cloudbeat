@@ -25,6 +25,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -94,5 +95,64 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		s.Equal("prjId", cloudAccountMetadata.AccountId)
 		s.Equal("orgId", cloudAccountMetadata.OrganisationId)
 		s.Equal("orgName", cloudAccountMetadata.OrganizationName)
+		if metadata.Type == fetching.CloudIdentity {
+			m, err := r.GetElasticCommonData()
+			s.Require().NoError(err, "error getting Elastic Common Data")
+			s.Len(m, 2)
+		}
 	})
+}
+
+func (s *GcpAssetsFetcherTestSuite) TestFetcher_ElasticCommonData() {
+	cases := []struct {
+		resourceData map[string]any
+		expectedECS  map[string]any
+	}{
+		{
+			resourceData: map[string]any{},
+			expectedECS:  map[string]any{},
+		},
+		{
+			resourceData: map[string]any{"name": ""},
+			expectedECS:  map[string]any{},
+		},
+		{
+			resourceData: map[string]any{"name": "henrys-vm"},
+			expectedECS:  map[string]any{"host.name": "henrys-vm"},
+		},
+		{
+			resourceData: map[string]any{"hostname": ""},
+			expectedECS:  map[string]any{},
+		},
+		{
+			resourceData: map[string]any{"hostname": "henrys-vm"},
+			expectedECS:  map[string]any{"host.hostname": "henrys-vm"},
+		},
+		{
+			resourceData: map[string]any{"name": "x", "hostname": "y"},
+			expectedECS:  map[string]any{"host.name": "x", "host.hostname": "y"},
+		},
+	}
+
+	for _, tc := range cases {
+		dataStruct, err := structpb.NewStruct(tc.resourceData)
+		s.Require().NoError(err)
+
+		asset := &GcpAsset{
+			Type:    fetching.CloudCompute,
+			SubType: "gcp-compute-instance",
+			ExtendedAsset: &inventory.ExtendedGcpAsset{
+				Asset: &assetpb.Asset{
+					AssetType: inventory.ComputeInstanceAssetType,
+					Resource: &assetpb.Resource{
+						Data: dataStruct,
+					},
+				},
+			},
+		}
+
+		ecs, err := asset.GetElasticCommonData()
+		s.Require().NoError(err)
+		s.Equal(tc.expectedECS, ecs)
+	}
 }

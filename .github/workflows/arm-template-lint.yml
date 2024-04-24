@@ -1,0 +1,36 @@
+name: ARM Templates
+
+on:
+  pull_request:
+    paths:
+      - "deploy/azure/*.json"
+  push:
+    branches:
+      - main
+    paths:
+      - "deploy/azure/*.json"
+
+jobs:
+  lint-arm-ttk:
+    name: Lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [ "ARM-for-organization-account", "ARM-for-single-account" ]
+    steps:
+      - uses: actions/checkout@v4
+
+        # Copy files to its own folder because it's what the official ARM-TTK action expects
+        # Docs https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#test-parameters
+      - name: copy file
+        working-directory: ./deploy/azure
+        run: |
+          mkdir ${{ matrix.template }}
+          cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
+
+      - uses: microsoft/action-armttk@v1
+        name: lint ${{ matrix.template }}
+        with:
+          github_token: ${{ secrets.github_token }}
+          workdir: "./deploy/azure/${{ matrix.template }}"
