@@ -42,14 +42,9 @@ markers = [
     "pre_merge_agent",
     "sanity",
     # test target markers
-    "file_system_rules",
-    "k8s_object_rules",
-    "process_api_server_rules",
-    "process_controller_manager_rules",
-    "process_etcd_rules",
-    "process_api_server_rules",
-    "process_scheduler_rules",
-    "process_kubelet_rules",
+    "k8s_file_system_rules",
+    "k8s_object_psp_rules",
+    "k8s_process_rules",
     "eks_file_system_rules",
     "eks_process_rules",
     "eks_k8s_objects_rules",
@@ -69,4 +64,5 @@ markers = [
     "azure_networking_rules",
     "azure_storage_account_rules",
     "azure_virtual_machine_rules",
+    "azure_microsoft_defender_rules",
 ]
