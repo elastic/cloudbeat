@@ -50,7 +50,7 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/psf/black
-    rev: 24.4.0
+    rev: 24.4.2
     hooks:
       - id: black
 
@@ -67,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.86.3
+    rev: v0.86.4
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -173,7 +173,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.20.1
+    rev: v0.21.3
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
