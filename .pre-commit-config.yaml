@@ -26,7 +26,7 @@ repos:
 
   ## Golang hooks
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.57.2
+    rev: v1.58.0
     hooks:
       - id: golangci-lint
 
@@ -67,7 +67,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.86.4
+    rev: 1.2.5.a8
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -160,7 +160,7 @@ repos:
         files: (\.rego)$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.39.0
+    rev: v0.40.0
     hooks:
       - id: markdownlint
         args: [ '--disable',
