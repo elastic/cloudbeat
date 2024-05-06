@@ -8,11 +8,23 @@ rules:
     prefer-package-imports:
       level: ignore
     use-rego-v1:
-      level: warning
+      level: ignore
+    unresolved-import:
+      level: error
+      # list of paths that should be ignored
+      # these may be paths to data, or rules that may
+      # not be present at the time of linting
+      except-imports:
+        - data.benchmark_data_adapter
+  performance:
+    with-outside-test-context:
+      level: ignore
   style:
     avoid-get-and-list-prefix:
       level: ignore
     default-over-else:
+      level: ignore
+    rule-name-repeats-package:
       level: ignore
     external-reference:
       level: ignore
