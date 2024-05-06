@@ -2,7 +2,7 @@ exclude: (bin/(activate-)?hermit)|(scripts/make/gimme/.*)
 repos:
   ## General
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -53,7 +53,7 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 24.4.2
     hooks:
       - id: black
 
@@ -70,7 +70,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.86.2
+    rev: 1.2.5.a8
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -163,7 +163,7 @@ repos:
         files: (\.rego)$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.39.0
+    rev: v0.40.0
     hooks:
       - id: markdownlint
         args: [ '--disable',
@@ -176,7 +176,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.15.0
+    rev: v0.21.3
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
