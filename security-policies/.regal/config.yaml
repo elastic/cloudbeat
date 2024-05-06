@@ -7,6 +7,8 @@ rules:
   imports:
     prefer-package-imports:
       level: ignore
+    use-rego-v1:
+      level: warning
   style:
     avoid-get-and-list-prefix:
       level: ignore
