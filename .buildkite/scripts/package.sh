@@ -19,6 +19,15 @@ mage package
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"
 
+echo "-------------"
+echo
+ls -la .
+echo "---"
+ls -la build
+find ./build | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-\1/"
+echo
+echo "-------------"
+
 echo "Generating $CSV_FILE.csv"
 $PYTHON ./.buildkite/scripts/generate_notice.py --csv "$CSV_FILE.csv"
 cp build/dependencies-*.csv build/distributions/.
