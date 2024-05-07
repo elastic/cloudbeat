@@ -49,6 +49,7 @@ func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
+		builder.WithManagerTimeout(cfg.Period),
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
