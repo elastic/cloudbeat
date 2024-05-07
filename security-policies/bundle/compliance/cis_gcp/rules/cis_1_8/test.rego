@@ -45,6 +45,24 @@ test_pass if {
 			},
 		]},
 	)
+	eval_pass with input as test_data.generate_gcp_asset(
+		type,
+		subtype,
+		{},
+		{"bindings": [{
+			"role": "roles/iam.serviceAccountAdmin",
+			"members": ["user:a", "user:b"],
+		}]},
+	)
+	eval_pass with input as test_data.generate_gcp_asset(
+		type,
+		subtype,
+		{},
+		{"bindings": [{
+			"role": "roles/iam.serviceAccountUser",
+			"members": ["user:c", "user:d"],
+		}]},
+	)
 }
 
 test_not_evaluated if {
