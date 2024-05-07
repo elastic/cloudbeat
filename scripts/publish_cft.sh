@@ -18,3 +18,5 @@ version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
 upload_file deploy/cloudformation/elastic-agent-ec2-cnvm.yml "cloudformation-cnvm" "$version"
 upload_file deploy/cloudformation/elastic-agent-ec2-cspm.yml "cloudformation-cspm-single-account" "$version"
 upload_file deploy/cloudformation/elastic-agent-ec2-cspm-organization.yml "cloudformation-cspm-organization-account" "$version"
+upload_file deploy/cloudformation/elastic-agent-direct-access-key-cspm.yml "cloudformation-cspm-direct-access-key-single-account" "$version"
+upload_file deploy/cloudformation/elastic-agent-direct-access-key-cspm-organization.yml "cloudformation-cspm-direct-access-key-organization-account" "$version"

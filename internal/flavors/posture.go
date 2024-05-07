@@ -64,6 +64,12 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 		return nil, err
 	}
 
+	err = ensureHostProcessor(log, cfg)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
 	client, err := NewClient(b.Publisher, cfg.Processors)
 	if err != nil {
 		cancel()
@@ -107,4 +113,19 @@ func (bt *posture) Stop() {
 	}
 
 	bt.cancel()
+}
+
+// ensureAdditionalProcessors modifies cfg.Processors list to ensure 'host'
+// processor is present for K8s and EKS benchmarks.
+func ensureHostProcessor(log *logp.Logger, cfg *config.Config) error {
+	if cfg.Benchmark != config.CIS_EKS && cfg.Benchmark != config.CIS_K8S {
+		return nil
+	}
+	log.Info("Adding host processor config")
+	hostProcessor, err := agentconfig.NewConfigFrom("add_host_metadata: ~")
+	if err != nil {
+		return err
+	}
+	cfg.Processors = append(cfg.Processors, hostProcessor)
+	return nil
 }

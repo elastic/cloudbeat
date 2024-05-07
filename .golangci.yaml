@@ -4,10 +4,12 @@ run:
 
 linters:
   enable:
+    - canonicalheader
     - containedctx
     - contextcheck
     - exhaustruct
     - exportloopref
+    - fatcontext
     - gci
     - gocritic
     - gocyclo
@@ -15,6 +17,7 @@ linters:
     - gomodguard
     - misspell
     - nolintlint
+    - prealloc
     - reassign
     - revive
     - testifylint
@@ -22,7 +25,6 @@ linters:
     - unparam
     - unused
     - whitespace
-    - prealloc
 
 issues:
   exclude-rules:

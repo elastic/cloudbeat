@@ -7,8 +7,7 @@ default is_user_owner_or_editor = false
 
 is_user_owner_or_editor if {
 	# at least one member that starts with "user:"
-	some member
-	member = data_adapter.iam_policy.bindings[i].members[_]
+	member := data_adapter.iam_policy.bindings[i].members[_]
 	startswith(member, "user:")
 
 	# Ensure the role is not a service account managed by Google (iam.gserviceaccount.com suffix).

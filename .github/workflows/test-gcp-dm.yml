@@ -7,6 +7,7 @@ on:
       - "[0-9]+.[0-9]+"
     types: [opened, synchronize, reopened]
     paths:
+      - ".github/workflows/test-gcp-dm.yml"
       - "deploy/deployment-manager/compute_engine.py"
       - "deploy/deployment-manager/compute_engine.py.schema"
       - "deploy/deployment-manager/deploy.sh"
@@ -14,6 +15,7 @@ on:
 
 env:
   WORKING_DIR: deploy/test-environments
+  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
 
@@ -80,13 +82,13 @@ jobs:
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
-        working-directory: deploy/test-environments/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
           poetry install
-          poetry run python src/install_cspm_gcp_integration.py
+          poetry run python ./install_cspm_gcp_integration.py
 
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent

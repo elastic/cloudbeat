@@ -220,7 +220,21 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 
 			ecs, err := result.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Empty(ecs)
+			switch expected.Type {
+			case inventory.VirtualMachineAssetType:
+				{
+					s.GreaterOrEqual(len(ecs), 1)
+					s.Contains(ecs, "host.name")
+				}
+			case inventory.RoleDefinitionsType:
+				{
+					s.Len(ecs, 2)
+					s.Contains(ecs, "user.effective.id")
+					s.Contains(ecs, "user.effective.name")
+				}
+			default:
+				s.Empty(ecs)
+			}
 		})
 	}
 }
@@ -264,6 +278,143 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch_Errors() {
 			AccountId: "sub-id",
 		},
 	}, metadata)
+}
+
+func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch_VM_Hostname_Empty() {
+	mockAssetGroups := make(map[string][]inventory.AzureAsset)
+	totalMockAssets := 0
+	var flatMockAssets []inventory.AzureAsset
+	for _, assetGroup := range AzureAssetGroups {
+		var mockAssets []inventory.AzureAsset
+		propertyVariations := [](map[string]any){
+			map[string]any{"definitelyNotOsProfile": "nope"},
+			map[string]any{"osProfile": map[string]any{"notComputerName": "nope"}},
+			map[string]any{"osProfile": map[string]any{"computerName": 42}},
+		}
+		for _, properties := range propertyVariations {
+			mockAssets = append(mockAssets,
+				inventory.AzureAsset{
+					Id:             "id",
+					Name:           "name",
+					Location:       "location",
+					Properties:     properties,
+					ResourceGroup:  "rg",
+					SubscriptionId: "subId",
+					TenantId:       "tenantId",
+					Type:           inventory.VirtualMachineAssetType,
+					Sku:            map[string]any{"key": "value"},
+					Identity:       map[string]any{"key": "value"},
+				},
+			)
+		}
+		totalMockAssets += len(mockAssets)
+		mockAssetGroups[assetGroup] = mockAssets
+		flatMockAssets = append(flatMockAssets, mockAssets...)
+	}
+
+	mockProvider := azurelib.NewMockProviderAPI(s.T())
+	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
+		map[string]governance.Subscription{
+			"subId": {
+				FullyQualifiedID: "subId",
+				ShortID:          "subId",
+				DisplayName:      "subName",
+				ManagementGroup: governance.ManagementGroup{
+					FullyQualifiedID: "mgId",
+					DisplayName:      "mgName",
+				},
+			},
+		}, nil,
+	).Twice()
+	mockProvider.EXPECT().
+		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{"subId"}).
+		Return(nil, nil).
+		Once()
+	mockProvider.EXPECT().
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
+		RunAndReturn(func(_ context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
+			return mockAssetGroups[assetGroup], nil
+		})
+
+	results, err := s.fetch(mockProvider, totalMockAssets)
+	s.Require().NoError(err)
+	for index, result := range results {
+		expected := flatMockAssets[index]
+		s.Run(expected.Type, func() {
+			s.Equal(expected, result.GetData())
+
+			ecs, err := result.GetElasticCommonData()
+			s.Require().NoError(err)
+			s.Contains(ecs, "host.name")
+			s.NotContains(ecs, "host.hostname", "ECS data should not contain host.hostname for incomplete properties")
+		})
+	}
+}
+
+func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch_VM_Hostname_OK() {
+	mockAssetGroups := make(map[string][]inventory.AzureAsset)
+	totalMockAssets := 0
+	var flatMockAssets []inventory.AzureAsset
+	for _, assetGroup := range AzureAssetGroups {
+		var mockAssets []inventory.AzureAsset
+		mockAssets = append(mockAssets,
+			inventory.AzureAsset{
+				Id:             "id",
+				Name:           "name",
+				Location:       "location",
+				Properties:     map[string]any{"osProfile": map[string]any{"computerName": "hostname"}},
+				ResourceGroup:  "rg",
+				SubscriptionId: "subId",
+				TenantId:       "tenantId",
+				Type:           inventory.VirtualMachineAssetType,
+				Sku:            map[string]any{"key": "value"},
+				Identity:       map[string]any{"key": "value"},
+			},
+		)
+		totalMockAssets += len(mockAssets)
+		mockAssetGroups[assetGroup] = mockAssets
+		flatMockAssets = append(flatMockAssets, mockAssets...)
+	}
+
+	mockProvider := azurelib.NewMockProviderAPI(s.T())
+	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
+		map[string]governance.Subscription{
+			"subId": {
+				FullyQualifiedID: "subId",
+				ShortID:          "subId",
+				DisplayName:      "subName",
+				ManagementGroup: governance.ManagementGroup{
+					FullyQualifiedID: "mgId",
+					DisplayName:      "mgName",
+				},
+			},
+		}, nil,
+	).Twice()
+	mockProvider.EXPECT().
+		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{"subId"}).
+		Return(nil, nil).
+		Once()
+	mockProvider.EXPECT().
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
+		RunAndReturn(func(_ context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
+			return mockAssetGroups[assetGroup], nil
+		})
+
+	results, err := s.fetch(mockProvider, totalMockAssets)
+	s.Require().NoError(err)
+	for index, result := range results {
+		expected := flatMockAssets[index]
+		s.Run(expected.Type, func() {
+			s.Equal(expected, result.GetData())
+
+			ecs, err := result.GetElasticCommonData()
+			s.Require().NoError(err)
+			s.Contains(ecs, "host.name")
+			s.Equal("name", ecs["host.name"])
+			s.Contains(ecs, "host.hostname")
+			s.Equal("hostname", ecs["host.hostname"])
+		})
+	}
 }
 
 func (s *AzureAssetsFetcherTestSuite) fetch(provider *azurelib.MockProviderAPI, expectedLength int) ([]fetching.ResourceInfo, error) {
