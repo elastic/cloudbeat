@@ -79,14 +79,14 @@ def parse_version(version):
     return tuple(map(int, version.split(".")))
 
 
-def filter_versions(versions, prefix=None, after=None):
+def filter_versions(versions, prefix=None, min_version=None):
     """
     Filter a list of versions based on the given prefix or after a specific version.
 
     Args:
         versions (list): A list of versions to filter.
         prefix (str, optional): Only include versions that start with this prefix. Defaults to None.
-        after (str, optional): Only include versions that are greater than this version. Defaults to None.
+        min_version (str, optional): Only include versions that are greater than this version. Defaults to None.
 
     Returns:
         list: A filtered list of versions.
@@ -95,9 +95,9 @@ def filter_versions(versions, prefix=None, after=None):
     if prefix:
         return [version for version in versions if version.startswith(prefix)]
 
-    if after:
-        after_version = parse_version(after)
-        return [version for version in versions if parse_version(version) > after_version]
+    if min_version:
+        min_version_tuple = parse_version(min_version)
+        return [version for version in versions if parse_version(version) > min_version_tuple]
 
     return []
 
@@ -169,7 +169,7 @@ def main():
     args = parser.parse_args()
 
     available_versions = get_available_versions()
-    filtered_versions = filter_versions(available_versions, after=args.after)
+    filtered_versions = filter_versions(available_versions, min_version=args.after)
     with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
         print(f"matrix={generate_job_matrix(filtered_versions)}", file=fh)
 

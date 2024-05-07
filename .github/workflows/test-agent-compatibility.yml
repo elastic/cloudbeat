@@ -68,7 +68,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
           AZURE_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
           AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-        run: ./.ci/scripts/run-agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
+        run: ./.ci/scripts/run_agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
 
       - name: Wait for elastic agent to send some events
         shell: bash
