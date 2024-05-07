@@ -475,7 +475,7 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*Projec
 
 func getAncestorsAssets(ctx context.Context, ancestorsPoliciesCache *MapCache[[]*ExtendedGcpAsset], p *Provider, ancestors []string) []*ExtendedGcpAsset {
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
-		extendedAssets := ancestorsPoliciesCache.Get(func() []*ExtendedGcpAsset {
+		return ancestorsPoliciesCache.Get(func() []*ExtendedGcpAsset {
 			var assetType string
 			if strings.HasPrefix(parent, "folders") {
 				assetType = CrmFolderAssetType
@@ -489,7 +489,6 @@ func getAncestorsAssets(ctx context.Context, ancestorsPoliciesCache *MapCache[[]
 				AssetTypes:  []string{assetType},
 			}))
 		}, parent)
-		return extendedAssets
 	}))
 }
 
