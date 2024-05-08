@@ -159,7 +159,7 @@ jobs:
           if [[ $is_serverless_mode == "true" ]]; then
             # Stack version is not relevant for serverless deployments
             # Therefore, we set it to the latest snapshot version
-            stack_version= ${{ env.ELK_VERSION }}
+            stack_version="${{ env.ELK_VERSION }}"
           fi
 
           echo "TF_VAR_stack_version=$stack_version" >> $GITHUB_ENV
