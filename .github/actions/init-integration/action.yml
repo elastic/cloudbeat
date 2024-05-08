@@ -4,10 +4,15 @@ inputs:
   elk-version:
     description: 'ELK version'
     required: true
+  build-cloudbeat:
+    description: 'Build cloudbeat'
+    required: false
+    default: 'true'
 runs:
   using: composite
   steps:
     - name: Build cloudbeat binary
+      if: ${{ inputs.build-cloudbeat == 'true' }}
       shell: bash
       run: mage -v build
 

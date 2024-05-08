@@ -1,0 +1,88 @@
+name: Test Agent Compatibility
+
+on:
+  # On demand execution of workflow will run all suites.
+  workflow_dispatch:
+
+  schedule:
+    # Weekly job running every monday at 6 am
+    - cron: "00 06 * * 1"
+
+jobs:
+  generate-matrix:
+    name: Generate Agent Matrix
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Run script and set matrix
+        id: set-matrix
+        # This script will generate the matrix of agents and packages
+        # starting from the version 8.11
+        run: python ./.ci/scripts/get_versions.py
+
+  test-agents:
+    name: Agent Compatibility Test
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    needs: ["generate-matrix"]
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: 'true'
+
+      - name: Init Integration
+        uses: ./.github/actions/init-integration
+        with:
+          elk-version: ${{ env.ELK_VERSION }} # Initialized in hermit.hcl
+          build-cloudbeat: 'false'
+
+      - id: google-auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Run Agent ${{ matrix.agent-version }}
+        shell: bash
+        env:
+          ES_HOST: http://localhost:9200
+          ES_USERNAME: elastic
+          ES_PASSWORD: changeme
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+          AZURE_CLIENT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+          AZURE_TENANT_ID: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+          AZURE_CLIENT_SECRET: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+        run: ./.ci/scripts/run_agent.sh ${{ matrix.agent-version }} ${{ matrix.package-version }}
+
+      - name: Wait for elastic agent to send some events
+        shell: bash
+        run: sleep 120 # To ensure that the agent has sent some events
+
+      - name: Check for findings
+        working-directory: ./tests
+        env:
+          USE_K8S: "false"
+        shell: bash
+        run: |
+          testmarker="cspm"
+          # Azure manual credentials are not supported in 8.11
+          if [[ "${{ matrix.agent-version }}" == *"8.11"* ]]; then
+            testmarker="cspm and not azure"
+          fi
+          poetry run pytest -k "$testmarker" --alluredir=./allure/results/ --clean-alluredir --maxfail=2
