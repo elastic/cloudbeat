@@ -159,11 +159,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - test-target: eks
-            range: ""
-            values_file: tests/test_environments/values/ci-eks-config-1.yml
-            k8s_context: "test-eks-config-1"
-            label: "EKS functional tests: config 1"
+          # GitHub issue: https://github.com/elastic/cloudbeat/issues/2190
+          # - test-target: eks
+          #   range: ""
+          #   values_file: tests/test_environments/values/ci-eks-config-1.yml
+          #   k8s_context: "test-eks-config-1"
+          #   label: "EKS functional tests: config 1"
           - test-target: eks
             range: ""
             values_file: tests/test_environments/values/ci-eks-config-2.yml
