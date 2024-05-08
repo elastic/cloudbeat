@@ -58,7 +58,7 @@ used_active_access_keys contains access_key if {
 }
 
 unused_active_access_keys contains access_key if {
-	access_key = iam_user.access_keys[_]
+	access_key := iam_user.access_keys[_]
 	access_key.active
 	not access_key.has_used
 }

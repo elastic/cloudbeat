@@ -89,7 +89,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 				return "OrganizationName"
 			},
 		},
-		crmCache: make(map[string]*fetching.EcsGcp),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
@@ -111,12 +111,12 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	s.Len(value, 2)          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
 
 	// tests extending assets with display names for org/prj:
-	projectNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectName })
-	orgNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.OrganizationName })
+	projectNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.CloudAccount.AccountName })
+	orgNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.CloudAccount.OrganizationName })
 	s.Len(projectNames, 1)
-	s.Equal("ProjectName", projectNames[0].Ecs.ProjectName)
+	s.Equal("ProjectName", projectNames[0].CloudAccount.AccountName)
 	s.Len(orgNames, 1)
-	s.Equal("OrganizationName", orgNames[0].Ecs.OrganizationName)
+	s.Equal("OrganizationName", orgNames[0].CloudAccount.OrganizationName)
 }
 
 func (s *ProviderTestSuite) TestListMonitoringAssets() {
@@ -138,42 +138,40 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 				return "OrganizationName1"
 			},
 		},
-		crmCache: make(map[string]*fetching.EcsGcp),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	expected := []*MonitoringAsset{
 		{
 			LogMetrics: []*ExtendedGcpAsset{
 				{
-					Asset: &assetpb.Asset{Name: "LogMetric1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: MonitoringLogMetricAssetType},
-					Ecs:   &fetching.EcsGcp{ProjectId: "1", ProjectName: "ProjectName1", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+					Asset:        &assetpb.Asset{Name: "LogMetric1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: MonitoringLogMetricAssetType},
+					CloudAccount: &fetching.CloudAccountMetadata{AccountId: "1", AccountName: "ProjectName1", OrganisationId: "1", OrganizationName: "OrganizationName1"},
 				},
 			},
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        "1",
-				ProjectName:      "ProjectName1",
-				OrganizationId:   "1",
+			CloudAccount: &fetching.CloudAccountMetadata{
+				AccountId:        "1",
+				AccountName:      "ProjectName1",
+				OrganisationId:   "1",
 				OrganizationName: "OrganizationName1",
 			},
 			Alerts: make([]*ExtendedGcpAsset, 0, 1),
 		},
 		{
 			LogMetrics: make([]*ExtendedGcpAsset, 0, 1),
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        "2",
-				ProjectName:      "ProjectName2",
-				OrganizationId:   "1",
+			CloudAccount: &fetching.CloudAccountMetadata{
+				AccountId:        "2",
+				AccountName:      "ProjectName2",
+				OrganisationId:   "1",
 				OrganizationName: "OrganizationName1",
 			},
 			Alerts: []*ExtendedGcpAsset{
 				{
 					Asset: &assetpb.Asset{Name: "AlertPolicy1", Resource: nil, IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: MonitoringAlertPolicyAssetType},
-					Ecs: &fetching.EcsGcp{
-						ProjectId:        "2",
-						ProjectName:      "ProjectName2",
-						OrganizationId:   "1",
+					CloudAccount: &fetching.CloudAccountMetadata{
+						AccountId:        "2",
+						AccountName:      "ProjectName2",
+						OrganisationId:   "1",
 						OrganizationName: "OrganizationName1",
 					},
 				},
@@ -220,7 +218,7 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 				return "OrganizationName"
 			},
 		},
-		crmCache: make(map[string]*fetching.EcsGcp),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	assets := []*ExtendedGcpAsset{
@@ -286,29 +284,27 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 	expected := []*ServiceUsageAsset{
 		{
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        "1",
-				ProjectName:      "ProjectName1",
-				OrganizationId:   "1",
+			CloudAccount: &fetching.CloudAccountMetadata{
+				AccountId:        "1",
+				AccountName:      "ProjectName1",
+				OrganisationId:   "1",
 				OrganizationName: "OrganizationName1",
 			},
 			Services: []*ExtendedGcpAsset{{
-				Asset: &assetpb.Asset{Name: "ServiceUsage1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"},
-				Ecs:   &fetching.EcsGcp{ProjectId: "1", ProjectName: "ProjectName1", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+				Asset:        &assetpb.Asset{Name: "ServiceUsage1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"},
+				CloudAccount: &fetching.CloudAccountMetadata{AccountId: "1", AccountName: "ProjectName1", OrganisationId: "1", OrganizationName: "OrganizationName1"},
 			}},
 		},
 		{
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        "2",
-				ProjectName:      "ProjectName2",
-				OrganizationId:   "1",
+			CloudAccount: &fetching.CloudAccountMetadata{
+				AccountId:        "2",
+				AccountName:      "ProjectName2",
+				OrganisationId:   "1",
 				OrganizationName: "OrganizationName1",
 			},
 			Services: []*ExtendedGcpAsset{{
-				Asset: &assetpb.Asset{Name: "ServiceUsage2", Resource: nil, IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"},
-				Ecs:   &fetching.EcsGcp{ProjectId: "2", ProjectName: "ProjectName2", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+				Asset:        &assetpb.Asset{Name: "ServiceUsage2", Resource: nil, IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"},
+				CloudAccount: &fetching.CloudAccountMetadata{AccountId: "2", AccountName: "ProjectName2", OrganisationId: "1", OrganizationName: "OrganizationName1"},
 			}},
 		},
 	}
@@ -336,7 +332,7 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 				return "OrganizationName1"
 			},
 		},
-		crmCache: make(map[string]*fetching.EcsGcp),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	// asset's resource
@@ -360,40 +356,38 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 func (s *ProviderTestSuite) TestListLoggingAssets() {
 	expected := []*LoggingAsset{
 		{
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        "1",
-				ProjectName:      "ProjectName1",
-				OrganizationId:   "1",
+			CloudAccount: &fetching.CloudAccountMetadata{
+				AccountId:        "1",
+				AccountName:      "ProjectName1",
+				OrganisationId:   "1",
 				OrganizationName: "OrganizationName1",
 			},
 			LogSinks: []*ExtendedGcpAsset{
 				{
-					Asset: &assetpb.Asset{Name: "LogSink1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
-					Ecs:   &fetching.EcsGcp{ProjectId: "1", ProjectName: "ProjectName1", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+					Asset:        &assetpb.Asset{Name: "LogSink1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					CloudAccount: &fetching.CloudAccountMetadata{AccountId: "1", AccountName: "ProjectName1", OrganisationId: "1", OrganizationName: "OrganizationName1"},
 				},
 				{
-					Asset: &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
-					Ecs:   &fetching.EcsGcp{ProjectId: "", ProjectName: "", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+					Asset:        &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					CloudAccount: &fetching.CloudAccountMetadata{AccountId: "", AccountName: "", OrganisationId: "1", OrganizationName: "OrganizationName1"},
 				},
 			},
 		},
 		{
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        "2",
-				ProjectName:      "ProjectName2",
-				OrganizationId:   "1",
+			CloudAccount: &fetching.CloudAccountMetadata{
+				AccountId:        "2",
+				AccountName:      "ProjectName2",
+				OrganisationId:   "1",
 				OrganizationName: "OrganizationName1",
 			},
 			LogSinks: []*ExtendedGcpAsset{
 				{
-					Asset: &assetpb.Asset{Name: "LogSink2", Resource: nil, IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
-					Ecs:   &fetching.EcsGcp{ProjectId: "2", ProjectName: "ProjectName2", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+					Asset:        &assetpb.Asset{Name: "LogSink2", Resource: nil, IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					CloudAccount: &fetching.CloudAccountMetadata{AccountId: "2", AccountName: "ProjectName2", OrganisationId: "1", OrganizationName: "OrganizationName1"},
 				},
 				{
-					Asset: &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
-					Ecs:   &fetching.EcsGcp{ProjectId: "", ProjectName: "", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+					Asset:        &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					CloudAccount: &fetching.CloudAccountMetadata{AccountId: "", AccountName: "", OrganisationId: "1", OrganizationName: "OrganizationName1"},
 				},
 			},
 		},
@@ -427,7 +421,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 				return "OrganizationName1"
 			},
 		},
-		crmCache: make(map[string]*fetching.EcsGcp),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	// asset's resource
@@ -466,7 +460,7 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 				return "OrganizationName"
 			},
 		},
-		crmCache: make(map[string]*fetching.EcsGcp),
+		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}
 
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName1", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
@@ -479,8 +473,8 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 
 	s.Len(value, 1)             // single project
 	s.Len(value[0].Policies, 2) // multiple policies - project + org
-	s.Equal("ProjectName", value[0].Ecs.ProjectName)
-	s.Equal("OrganizationName", value[0].Ecs.OrganizationName)
+	s.Equal("ProjectName", value[0].CloudAccount.AccountName)
+	s.Equal("OrganizationName", value[0].CloudAccount.OrganizationName)
 	s.Equal("AssetName1", value[0].Policies[0].Name)
 	s.Equal("AssetName2", value[0].Policies[1].Name)
 }

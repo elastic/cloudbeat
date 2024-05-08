@@ -24,6 +24,7 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/huandu/xstrings"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -138,41 +139,58 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}
 
 	return fetching.ResourceMetadata{
-		ID:      r.ExtendedAsset.Name,
-		Type:    r.Type,
-		SubType: r.SubType,
-		Name:    getAssetResourceName(r.ExtendedAsset),
-		Region:  region,
+		ID:                   r.ExtendedAsset.Name,
+		Type:                 r.Type,
+		SubType:              r.SubType,
+		Name:                 getAssetResourceName(r.ExtendedAsset),
+		Region:               region,
+		CloudAccountMetadata: *r.ExtendedAsset.CloudAccount,
 	}, nil
 }
 
 func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
-		"cloud": map[string]any{
-			"provider": "gcp",
-			"account": map[string]any{
-				"id":   r.ExtendedAsset.Ecs.ProjectId,
-				"name": r.ExtendedAsset.Ecs.ProjectName,
-			},
-			"Organization": map[string]any{
-				"id":   r.ExtendedAsset.Ecs.OrganizationId,
-				"name": r.ExtendedAsset.Ecs.OrganizationName,
-			},
-		},
-	}, nil
+	m := map[string]any{}
+
+	if r.Type == fetching.CloudIdentity {
+		m["user.effective.id"] = r.ExtendedAsset.Name
+		m["user.effective.name"] = getAssetResourceName(r.ExtendedAsset)
+	}
+
+	if r.Type == fetching.CloudCompute && r.ExtendedAsset.AssetType == inventory.ComputeInstanceAssetType {
+		fields := getAssetDataFields(r.ExtendedAsset)
+		if fields == nil {
+			return m, nil
+		}
+		nameField, ok := fields["name"]
+		if ok {
+			if name := nameField.GetStringValue(); name != "" {
+				m["host.name"] = name
+			}
+		}
+		hostnameField, ok := fields["hostname"]
+		if ok {
+			if hostname := hostnameField.GetStringValue(); hostname != "" {
+				m["host.hostname"] = hostname
+			}
+		}
+	}
+
+	return m, nil
 }
 
 // try to retrieve the resource name from the asset data fields (name or displayName), in case it is not set
 // get the last part of the asset name (https://cloud.google.com/apis/design/resource_names#resource_id)
 func getAssetResourceName(asset *inventory.ExtendedGcpAsset) string {
-	if name, exist := asset.GetResource().GetData().GetFields()["displayName"]; exist && name.GetStringValue() != "" {
-		return name.GetStringValue()
-	}
+	fields := getAssetDataFields(asset)
+	if fields != nil {
+		if name, exist := fields["displayName"]; exist && name.GetStringValue() != "" {
+			return name.GetStringValue()
+		}
 
-	if name, exist := asset.GetResource().GetData().GetFields()["name"]; exist && name.GetStringValue() != "" {
-		return name.GetStringValue()
+		if name, exist := fields["name"]; exist && name.GetStringValue() != "" {
+			return name.GetStringValue()
+		}
 	}
-
 	parts := strings.Split(asset.Name, "/")
 	return parts[len(parts)-1]
 }
@@ -185,4 +203,18 @@ func getGcpSubType(assetType string) string {
 	suffix := assetType[slashIndex+1:]
 
 	return strings.ToLower(fmt.Sprintf("gcp-%s-%s", prefix, xstrings.ToKebabCase(suffix)))
+}
+
+// getAssetDataFields tries to retrieve asset.resource.data fields if possible.
+// Returns nil otherwise.
+func getAssetDataFields(asset *inventory.ExtendedGcpAsset) map[string]*structpb.Value {
+	resource := asset.GetResource()
+	if resource == nil {
+		return nil
+	}
+	data := resource.GetData()
+	if data == nil {
+		return nil
+	}
+	return data.GetFields()
 }

@@ -62,6 +62,8 @@ EOF
         --label "enhancement" \
         --label "Team:Cloud Security" \
         --repo "$INTEGRATION_REPO")"
+    # shellcheck disable=SC2086
+    echo "[Integrations PR]($PR_URL)" >>$GITHUB_STEP_SUMMARY
     export PR_URL
 }
 
@@ -76,7 +78,7 @@ update_manifest_version() {
 update_changelog_version() {
     echo "• Update changelog version"
     yq -i ".[0].version = \"$NEXT_INTEGRATION_VERSION\"" $CHANGELOG_PATH
-    # this line below requires single quotes and env(PR) to interpolate this env var
+    # PR_URL needs to be exported
     yq -i '.[0].changes += [{"description": "Bump version", "type": "enhancement", "link": env(PR_URL) }]' $CHANGELOG_PATH
     git add $CHANGELOG_PATH
     git commit -m "Update changelog version"

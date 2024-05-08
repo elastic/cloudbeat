@@ -14,7 +14,7 @@ if [ "$WORKFLOW" = "snapshot" ]; then
 fi
 
 mage pythonEnv
-mage package
+mage package -v
 
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"

@@ -49,6 +49,7 @@ func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
+		builder.WithManagerTimeout(cfg.Period),
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
@@ -74,7 +75,9 @@ func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	}
 
 	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
-		cloud.NewDataProvider(),
+		cloud.NewDataProvider(cloud.WithAccount(cloud.Identity{
+			Provider: "gcp",
+		})),
 		nil,
 		nil
 }

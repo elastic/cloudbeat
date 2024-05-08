@@ -86,7 +86,7 @@ func initAwsFetchers(ctx context.Context, cfg *config.Config, logger *logp.Logge
 		return nil, err
 	}
 
-	idProvider := awslib.IdentityProvider{}
+	idProvider := awslib.IdentityProvider{Logger: logger}
 	awsIdentity, err := idProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
 		return nil, err

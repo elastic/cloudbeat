@@ -171,9 +171,14 @@ echo "Failed to delete CloudFormation stacks (${#FAILED_STACKS[@]}):"
 printf "%s\n" "${FAILED_STACKS[@]}"
 
 # Delete GCP deployments
-PROJECT_NAME=$(gcloud config get-value core/project)
-PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
-./delete_gcp_env.sh "$PROJECT_NAME" "$PROJECT_NUMBER" "${ALL_GCP_DEPLOYMENTS[@]}"
+# Check if ALL_GCP_DEPLOYMENTS is empty
+if [ ${#ALL_GCP_DEPLOYMENTS[@]} -eq 0 ]; then
+    echo "No GCP deployments to delete."
+else
+    PROJECT_NAME=$(gcloud config get-value core/project)
+    PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+    ./delete_gcp_env.sh "$PROJECT_NAME" "$PROJECT_NUMBER" "${ALL_GCP_DEPLOYMENTS[@]}"
+fi
 
 # Delete Azure groups
 FAILED_AZURE_GROUPS=()

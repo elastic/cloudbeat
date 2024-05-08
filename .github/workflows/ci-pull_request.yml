@@ -1,0 +1,105 @@
+name: Unit Tests and Lints
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
+      - name: Initialize poetry
+        shell: bash
+        run: |
+          pip3 install poetry
+          (cd security-policies && poetry install --no-root)
+
+      - name: Pre-commit Hooks
+        env:
+          # Skipping golangci-lint as it's tested by golangci-lint
+          SKIP: golangci-lint
+        shell: bash
+        run: |
+          pre-commit run --all-files
+
+      - name: golangci-lint
+        shell: bash
+        run: golangci-lint run --out-format github-actions
+
+      - name: Mage Check
+        shell: bash
+        run: mage check
+
+      - name: Mage checkLicenseHeaders
+        shell: bash
+        run: mage checkLicenseHeaders
+
+      - name: Validate mocks
+        shell: bash
+        run: just validate-mocks
+
+      - name: Terraform fmt
+        shell: bash
+        run: terraform fmt -check -recursive
+
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
+      - name: Build opa bundle
+        shell: bash
+        run: mage buildOpaBundle
+
+      - name: Unit-Test
+        shell: bash
+        run: |
+          go install gotest.tools/gotestsum
+          GOOS=linux TEST_DIRECTORY=./... gotestsum --format pkgname -- -race -coverpkg=./... -coverprofile=cover.out.tmp
+          cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-file
+          path: cover.out
+          overwrite: true
+
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          go install github.com/mattn/goveralls@latest
+          goveralls -coverprofile=cover.out -service=github

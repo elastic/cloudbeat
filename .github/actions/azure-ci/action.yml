@@ -52,15 +52,19 @@ runs:
       run: poetry run pytest -k "azure" --alluredir=./allure/results/ --clean-alluredir
 
     - name: Upload test results
-      if: ${{ success() || failure() }}
+      if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
         name: allure-results-ci-azure
         path: tests/allure/results/
+        overwrite: true
 
-    - if: ${{ (success() || failure()) && inputs.debug == 'true' }}
+    - if: ${{ failure() || cancelled() || inputs.debug == 'true' }}
       name: Upload cloudbeat logs
       uses: actions/upload-artifact@v4
       with:
         name: cloubeat-logs-ci-azure
         path: logs/
+        if-no-files-found: warn
+        retention-days: 1
+        overwrite: true

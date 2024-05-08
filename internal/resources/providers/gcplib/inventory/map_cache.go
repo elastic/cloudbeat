@@ -15,19 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package inventory
 
-// name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
-const defaultBeatVersion = "8.15.0"
+import (
+	"sync"
+)
 
-// Version represents version information for a package
-type Version struct {
-	Version    string `mapstructure:"version,omitempty"`     // Version is the semantic version of the package
-	CommitHash string `mapstructure:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
-	CommitTime string `mapstructure:"commit_time,omitempty"` // CommitTime is the git commit time of the package
+type MapCache[T any] struct {
+	results sync.Map
 }
 
-type CloudbeatVersionInfo struct {
-	Version `mapstructure:",squash"` // Version info for cloudbeat
-	Policy  Version                  `mapstructure:"policy,omitempty"` // Policy version info for the rules policy
+func (c *MapCache[T]) Get(fn func() T, key string) T {
+	if value, ok := c.results.Load(key); ok {
+		return value.(T)
+	}
+
+	value := fn()
+	c.results.Store(key, value)
+	return value
+}
+
+func NewMapCache[T any]() *MapCache[T] {
+	return &MapCache[T]{}
 }
