@@ -18,7 +18,7 @@ on:
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.11.0"
+        default: "8.13.3"
         type: string
       ess-region:
         required: true
@@ -55,7 +55,7 @@ on:
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.10.0"
+        default: "8.13.3"
         type: string
       ess-region:
         required: true
@@ -155,6 +155,12 @@ jobs:
         run: |
           # Extract the stack version
           stack_version="${{ inputs.elk-stack-version }}"
+          is_serverless_mode="${{ inputs.serverless_mode }}"
+          if [[ $is_serverless_mode == "true" ]]; then
+            # Stack version is not relevant for serverless deployments
+            # Therefore, we set it to the latest snapshot version
+            stack_version="${{ env.ELK_VERSION }}"
+          fi
 
           echo "TF_VAR_stack_version=$stack_version" >> $GITHUB_ENV
           echo "STACK_VERSION=$stack_version" >> $GITHUB_ENV
