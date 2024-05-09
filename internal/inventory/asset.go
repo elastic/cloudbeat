@@ -35,8 +35,9 @@ const (
 type assetSubCategory string
 
 const (
-	SubCategoryCompute assetSubCategory = "compute"
-	SubCategoryStorage assetSubCategory = "storage"
+	SubCategoryCompute  assetSubCategory = "compute"
+	SubCategoryStorage  assetSubCategory = "storage"
+	SubCategoryDatabase assetSubCategory = "database"
 
 	SubCategoryCloudProviderAccount assetSubCategory = "cloud-provider-account"
 )
@@ -47,6 +48,7 @@ type assetType string
 const (
 	TypeVirtualMachine assetType = "virtual-machine"
 	TypeObjectStorage  assetType = "object-storage"
+	TypeDatabase       assetType = "database"
 
 	TypeUser           assetType = "user"
 	TypeServiceAccount assetType = "service-account"
@@ -60,6 +62,7 @@ const (
 	SubTypeEC2 assetSubType = "ec2"
 	SubTypeS3  assetSubType = "s3"
 	SubTypeIAM assetSubType = "iam"
+	SubTypeRDS assetSubType = "rds"
 )
 
 const (
