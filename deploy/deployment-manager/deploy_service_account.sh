@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# set -oe pipefail
 set -e
 
 # this script:
