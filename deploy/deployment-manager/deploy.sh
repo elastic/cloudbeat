@@ -38,6 +38,7 @@ ROLE="roles/resourcemanager.projectIamAdmin"
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER%/} # Remove trailing slash if present
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
 DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
+SERVICE_ACCOUNT_NAME=${SERVICE_ACCOUNT_NAME:-false}
 
 # Set environment variables with the name and number of your project.
 export PROJECT_NAME=$(gcloud config get-value core/project)
@@ -115,7 +116,7 @@ fi
 # Apply the deployment manager templates
 run_command "gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
     --template compute_engine.py \
-    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID}"
+    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID},serviceAccountName:${SERVICE_ACCOUNT_NAME}"
 
 ## Remove the role required to deploy the DM templates
 if [ "$ADD_ROLE" = "true" ]; then
