@@ -226,14 +226,12 @@ jobs:
           poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Destory EC deployment
-        # if: steps.deploy_ec.outcome == 'success'
         if: always()
         working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
           terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
 
       - name: Delete GCP Deployments
-        # if: steps.gcp_deploy.outcome == 'success'
         if: always()
         working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |

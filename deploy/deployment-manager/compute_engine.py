@@ -51,7 +51,6 @@ def generate_config(context):
             ),
             "serviceAccounts": [
                 {
-                    # "email": f"$(ref.{sa_name}.email)",
                     "email": get_service_account_email(sa_name, project),
                     "scopes": [
                         "https://www.googleapis.com/auth/cloud-platform",
@@ -79,7 +78,6 @@ def generate_config(context):
                 },
             ],
             "metadata": {
-                # "dependsOn": [sa_name],
                 "items": [
                     {
                         "key": "startup-script",
@@ -175,7 +173,6 @@ def get_service_account(sa_name, deployment_name, roles, scope, parent_id, proje
                 "properties": {
                     "resource": get_resource_name(scope, parent_id),
                     "role": role,
-                    # "member": f"serviceAccount:$(ref.{sa_name}.email)",
                     "member": f"serviceAccount:{get_service_account_email(sa_name, project_id)}",
                 },
                 "metadata": {
