@@ -58,5 +58,5 @@ gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" --format='ta
 
 echo "$key" | base64 -d >KEY_FILE.json
 
-echo -e "\n${GREEN}Run 'cat KEY_FILE.json' to view the service account key. Copy and paste it in the CIS GCP integration."
+echo -e "\n${GREEN}Run 'cat KEY_FILE.json' to view the service account key. Copy and paste it in the CSPM GCP integration."
 echo -e "\nYou should also save the key in a secure location for future use.${RESET}"
