@@ -26,6 +26,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 )
 
@@ -33,6 +34,7 @@ func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []invent
 	iamProvider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	ec2Provider := ec2.NewEC2Provider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
 	s3Provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
+	rdsProvider := rds.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
 
 	return []inventory.AssetFetcher{
 		newEc2InstancesFetcher(logger, identity, ec2Provider),
@@ -40,5 +42,6 @@ func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []invent
 		newIamUserFetcher(logger, identity, iamProvider),
 		newIamRoleFetcher(logger, identity, iamProvider),
 		newIamPolicyFetcher(logger, identity, iamProvider),
+		newRDSFetcher(logger, identity, rdsProvider),
 	}
 }
