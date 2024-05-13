@@ -52,11 +52,11 @@ def read_json_file(file_path):
     """Reads a json file and returns its content"""
     try:
         with open(file_path, "r") as json_file:
-            return json_file.read()
+            return json.load(json_file)
     except FileNotFoundError:
         logger.error(f"Error: File '{file_path}' not found.")
         sys.exit(1)
-    except IOError as e:
+    except json.JSONDecodeError as e:
         logger.error(f"Error reading file '{file_path}': {e}")
         sys.exit(1)
 

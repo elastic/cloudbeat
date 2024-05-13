@@ -13,40 +13,12 @@ PROJECT_NAME="$(gcloud config get-value core/project)"
 PROJECT_NUMBER="$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")"
 ROLE="roles/resourcemanager.projectIamAdmin"
 
-echo "DEPLOYMENT_NAME - $DEPLOYMENT_NAME"
-echo "SERVICE_ACCOUNT_NAME - $SERVICE_ACCOUNT_NAME"
-
 export PROJECT_NAME
 export PROJECT_NUMBER
 
-configure_scope() {
-    if [ -n "$ORG_ID" ]; then
-        SCOPE="organizations"
-        PARENT_ID="$ORG_ID"
-        ROLE="roles/resourcemanager.organizationAdmin"
-    fi
-
-    # If ORG_ID is not set, SCOPE defaults to "projects" and PARENT_ID defaults to PROJECT_NAME
-    SCOPE=${SCOPE:-"projects"}
-    PARENT_ID=${PARENT_ID:-"$PROJECT_NAME"}
-}
+source ./common.sh
 
 configure_scope
-
-is_role_not_assigned() {
-    local role_assigned
-    role_assigned=$(gcloud "${SCOPE}" get-iam-policy "${PARENT_ID}" \
-        --flatten="bindings[].members" --format="value(bindings.members)" \
-        --filter="bindings.role=${ROLE}" \
-        --format="table[no-heading](bindings.members)" |
-        grep "${PROJECT_NUMBER}@cloudservices.gserviceaccount.com")
-
-    if [ -n "${role_assigned}" ]; then
-        return 1 # Role is assigned
-    else
-        return 0 # Role is not assigned
-    fi
-}
 
 # Enable the Google Cloud APIs needed for misconfiguration scanning
 gcloud services enable \

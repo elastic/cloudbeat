@@ -44,6 +44,8 @@ SERVICE_ACCOUNT_NAME=${SERVICE_ACCOUNT_NAME:-false}
 export PROJECT_NAME=$(gcloud config get-value core/project)
 export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
 
+source ./common.sh
+
 # Function to check if an environment variable is not provided
 check_env_not_provided() {
     local var_name="$1"
@@ -61,34 +63,6 @@ run_command() {
     if [ $status -ne 0 ]; then
         echo "Error: Command \"$1\" failed with exit code $status. Exiting..."
         exit $status
-    fi
-}
-
-configure_scope() {
-    if [ -n "$ORG_ID" ]; then
-        SCOPE="organizations"
-        PARENT_ID="$ORG_ID"
-        ROLE="roles/resourcemanager.organizationAdmin"
-    fi
-
-    # If ORG_ID is not set, SCOPE defaults to "projects" and PARENT_ID defaults to PROJECT_NAME
-    SCOPE=${SCOPE:-"projects"}
-    PARENT_ID=${PARENT_ID:-"$PROJECT_NAME"}
-}
-
-# Function to check if a role is assigned to the service account
-is_role_not_assigned() {
-    local role_assigned
-    role_assigned=$(gcloud ${SCOPE} get-iam-policy "${PARENT_ID}" \
-        --flatten="bindings[].members" --format="value(bindings.members)" \
-        --filter="bindings.role=${ROLE}" \
-        --format="table[no-heading](bindings.members)" |
-        grep "${PROJECT_NUMBER}@cloudservices.gserviceaccount.com")
-
-    if [ -n "${role_assigned}" ]; then
-        return 1 # Role is assigned
-    else
-        return 0 # Role is not assigned
     fi
 }
 
