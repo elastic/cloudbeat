@@ -48,7 +48,7 @@ AGENT_INPUT = {
 }
 
 
-def read_json_file(file_path):
+def read_json_file(file_path: Path):
     """Reads a json file and returns its content"""
     try:
         with open(file_path, "r") as json_file:
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         }
         if cnfg.gcp_dm_config.service_account_json_path:
             logger.info("Using service account credentials json")
-            service_account_json = read_json_file(cnfg.gcp_dm_config.service_account_json_path)
+            service_account_json = read_json_file(Path(cnfg.gcp_dm_config.service_account_json_path))
             INTEGRATION_INPUT["vars"]["gcp.credentials.json"] = service_account_json
 
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
