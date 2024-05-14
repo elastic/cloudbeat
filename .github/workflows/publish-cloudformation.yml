@@ -9,6 +9,7 @@ on:
       - deploy/cloudformation/*.yml
       - scripts/publish_cft.sh
       - .github/workflows/publish-cloudformation.yml
+      - version/version.go
 
 jobs:
   publish_cloudformation:
