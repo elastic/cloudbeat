@@ -13,14 +13,6 @@ if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
 fi
 
-# Debugging commands
-echo "running docker info"
-docker info
-echo "running go env"
-go env
-echo "running env"
-env
-
 mage pythonEnv
 mage package -v
 
