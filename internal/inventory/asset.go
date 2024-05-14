@@ -46,9 +46,9 @@ const (
 type assetType string
 
 const (
-	TypeVirtualMachine assetType = "virtual-machine"
-	TypeObjectStorage  assetType = "object-storage"
-	TypeDatabase       assetType = "database"
+	TypeVirtualMachine     assetType = "virtual-machine"
+	TypeObjectStorage      assetType = "object-storage"
+	TypeRelationalDatabase assetType = "relational-database"
 
 	TypeUser           assetType = "user"
 	TypeServiceAccount assetType = "service-account"

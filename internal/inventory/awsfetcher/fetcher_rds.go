@@ -39,7 +39,7 @@ type rdsFetcher struct {
 var rdsClassification = inventory.AssetClassification{
 	Category:    inventory.CategoryInfrastructure,
 	SubCategory: inventory.SubCategoryDatabase,
-	Type:        inventory.TypeDatabase,
+	Type:        inventory.TypeRelationalDatabase,
 	SubType:     inventory.SubTypeRDS,
 }
 
