@@ -13,8 +13,11 @@ if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
 fi
 
+# debug command to verify
+ls -lah /proc/sys/fs/binfmt_misc/ || true
+
 mage pythonEnv
-mage package -v
+mage package
 
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"

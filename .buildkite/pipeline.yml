@@ -2,6 +2,7 @@ env:
   BRANCH: "${BUILDKITE_BRANCH}"
 agents:
   provider: "gcp" # needed for running docker commands
+  image: "family/platform-ingest-beats-ubuntu-2204"
 
 steps:
   - label: ":package: Package Cloudbeat - Snapshot"
