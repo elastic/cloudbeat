@@ -13,6 +13,7 @@ from pathlib import Path
 from munch import Munch
 from packaging import version
 import configuration_fleet as cnfg
+from fleet_api.utils import read_json
 from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.package_policy_api import create_cspm_integration
 from fleet_api.common_api import (
@@ -30,7 +31,6 @@ from package_policy import (
     generate_random_name,
     VERSION_MAP,
 )
-from tests.fleet_api.utils import read_json
 
 CSPM_GCP_EXPECTED_AGENTS = 1
 DEPLOYMENT_MANAGER_CONFIG = "../../deploy/deployment-manager/config.json"
