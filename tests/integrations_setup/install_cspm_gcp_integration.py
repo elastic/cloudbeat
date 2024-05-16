@@ -48,7 +48,6 @@ AGENT_INPUT = {
     "name": generate_random_name("cspm-gcp"),
 }
 
-
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config)
@@ -73,7 +72,7 @@ if __name__ == "__main__":
             logger.info("Using service account credentials json")
             json_path = Path(__file__).parent / cnfg.gcp_dm_config.service_account_json_path
             service_account_json = read_json(json_path)
-            INTEGRATION_INPUT["vars"]["gcp.credentials.json"] = service_account_json
+            INTEGRATION_INPUT["vars"]["gcp.credentials.json"] = json.dumps(service_account_json)
 
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
