@@ -38,13 +38,12 @@ jobs:
           docker-images: true
           swap-storage: true
 
+      - name: Init requirements
+        shell: bash
+        run: sudo apt-get install --assume-yes qemu-user-static binfmt-support
+
       - name: Check out the repo
         uses: actions/checkout@v4
-
-      - name: Setup GO (with caching)
-        uses: magnetikonline/action-golang-cache@v5
-        with:
-          go-version-file: .go-version
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
