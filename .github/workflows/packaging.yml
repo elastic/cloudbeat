@@ -54,3 +54,4 @@ jobs:
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
+          PLATFORMS: "linux/amd64,linux/arm64"
