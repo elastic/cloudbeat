@@ -30,6 +30,7 @@ from package_policy import (
     generate_random_name,
     VERSION_MAP,
 )
+from tests.fleet_api.utils import read_json
 
 CSPM_GCP_EXPECTED_AGENTS = 1
 DEPLOYMENT_MANAGER_CONFIG = "../../deploy/deployment-manager/config.json"
@@ -46,19 +47,6 @@ INTEGRATION_INPUT = {
 AGENT_INPUT = {
     "name": generate_random_name("cspm-gcp"),
 }
-
-
-def read_json_file(file_path):
-    """Reads a json file and returns its content"""
-    try:
-        with open(file_path, "r") as json_file:
-            return json_file.read()
-    except FileNotFoundError:
-        logger.error(f"Error: File '{file_path}' not found.")
-        sys.exit(1)
-    except IOError as e:
-        logger.error(f"Error reading file '{file_path}': {e}")
-        sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -83,7 +71,8 @@ if __name__ == "__main__":
         }
         if cnfg.gcp_dm_config.service_account_json_path:
             logger.info("Using service account credentials json")
-            service_account_json = read_json_file(cnfg.gcp_dm_config.service_account_json_path)
+            json_path = Path(__file__).parent / cnfg.gcp_dm_config.service_account_json_path
+            service_account_json = read_json(json_path)
             INTEGRATION_INPUT["vars"]["gcp.credentials.json"] = service_account_json
 
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
