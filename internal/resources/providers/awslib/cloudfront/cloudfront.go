@@ -29,12 +29,10 @@ import (
 
 type Distribution struct {
 	types.DistributionSummary
-	awsAccount string
 }
 
 type KeyValueStore struct {
 	types.KeyValueStore
-	awsAccount string
 }
 
 type Provider struct {

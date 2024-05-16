@@ -38,7 +38,7 @@ func NewProvider(log *logp.Logger, cfg aws.Config) *Provider {
 	}
 }
 
-func (p Provider) DescribeDistributions(ctx context.Context) ([]awslib.AwsResource, error) {
+func (p *Provider) DescribeDistributions(ctx context.Context) ([]awslib.AwsResource, error) {
 	p.log.Debug("CloudFrontProvider.DescribeDistributions")
 	var sdkDistributions []types.DistributionSummary
 	params := &cloudfront.ListDistributionsInput{}
@@ -57,11 +57,10 @@ func (p Provider) DescribeDistributions(ctx context.Context) ([]awslib.AwsResour
 	}
 
 	result := make([]awslib.AwsResource, len(sdkDistributions))
-	for _, distribution := range sdkDistributions {
-		result = append(result, Distribution{
+	for i, distribution := range sdkDistributions {
+		result[i] = Distribution{
 			DistributionSummary: distribution,
-			awsAccount:          accountFromARN(distribution.ARN),
-		})
+		}
 	}
 
 	p.log.Debug("CloudFrontProvider.DescribeDistributions got %d items", len(result))
@@ -85,7 +84,7 @@ func (d Distribution) GetResourceType() string {
 	return fetching.CloudFrontDistributionType
 }
 
-func (p Provider) DescribeKeyValueStores(ctx context.Context) ([]awslib.AwsResource, error) {
+func (p *Provider) DescribeKeyValueStores(ctx context.Context) ([]awslib.AwsResource, error) {
 	p.log.Debug("CloudFrontProvider.DescribeKeyValueStores")
 	var sdkKeyValueStores []types.KeyValueStore
 	params := &cloudfront.ListKeyValueStoresInput{}
@@ -104,11 +103,10 @@ func (p Provider) DescribeKeyValueStores(ctx context.Context) ([]awslib.AwsResou
 	}
 
 	result := make([]awslib.AwsResource, len(sdkKeyValueStores))
-	for _, distribution := range sdkKeyValueStores {
-		result = append(result, KeyValueStore{
-			KeyValueStore: distribution,
-			awsAccount:    accountFromARN(distribution.ARN),
-		})
+	for i, kvs := range sdkKeyValueStores {
+		result[i] = KeyValueStore{
+			KeyValueStore: kvs,
+		}
 	}
 
 	p.log.Debug("CloudFrontProvider.DescribeKeyValueStores got %d items", len(result))
@@ -130,19 +128,4 @@ func (d KeyValueStore) GetResourceName() string {
 
 func (d KeyValueStore) GetResourceType() string {
 	return fetching.CloudFrontKeyValueStoreType
-}
-
-func accountFromARN(arn *string) string {
-	if arn == nil {
-		return ""
-	}
-	arnString := pointers.Deref(arn)
-	if arnString == "" {
-		return ""
-	}
-	elements := strings.Split(arnString, ":")
-	if len(elements) != 6 {
-		return ""
-	}
-	return elements[4]
 }
