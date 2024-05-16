@@ -93,23 +93,87 @@ func Test_DescribeDistributions(t *testing.T) {
 	}
 }
 
+func Test_DescribeKeyValueStores(t *testing.T) {
+	var kvs = types.KeyValueStore{
+		Id:      pointers.Ref("E2L2S10R2365C3"),
+		ARN:     pointers.Ref("arn:aws:cloudfront::account_id:keyvaluestore/E2L2S10R2365C3"),
+		Comment: pointers.Ref("example kvs"),
+		Status:  pointers.Ref("Deployed"),
+	}
+
+	testCases := []struct {
+		name              string
+		resources         []types.KeyValueStore
+		expectedResources []awslib.AwsResource
+		expectedErr       bool
+	}{
+		{
+			name:              "case 1: should fail on fetch error",
+			resources:         []types.KeyValueStore{},
+			expectedResources: []awslib.AwsResource{},
+			expectedErr:       true,
+		},
+		{
+			name:      "case 2: should fetch correct resource",
+			resources: []types.KeyValueStore{kvs},
+			expectedResources: []awslib.AwsResource{
+				KeyValueStore{KeyValueStore: kvs},
+			},
+			expectedErr: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			provider := createMockProvider(t, testCase.resources, testCase.expectedErr)
+			result, err := provider.DescribeKeyValueStores(context.Background())
+
+			if testCase.expectedErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.Len(t, result, len(testCase.expectedResources))
+			for i, resource := range result {
+				assert.Equal(t, testCase.expectedResources[i], resource)
+			}
+		})
+	}
+}
+
 //nolint:revive
-func createMockProvider(t *testing.T, resources []types.DistributionSummary, expectedErr bool) *Provider {
+func createMockProvider(t *testing.T, resources any, expectedErr bool) *Provider {
 	var returnErr error
 	if expectedErr {
 		returnErr = fmt.Errorf("test error")
 	}
 
 	client := MockClient{}
-	client.On("ListDistributions", mock.Anything, mock.Anything).Return(
-		&cloudfront.ListDistributionsOutput{
-			DistributionList: &types.DistributionList{
-				Items:       resources,
-				IsTruncated: pointers.Ref(false),
+	switch items := resources.(type) {
+	case []types.DistributionSummary:
+		client.On("ListDistributions", mock.Anything, mock.Anything).Return(
+			&cloudfront.ListDistributionsOutput{
+				DistributionList: &types.DistributionList{
+					Items:       items,
+					IsTruncated: pointers.Ref(false),
+				},
 			},
-		},
-		returnErr,
-	).Once()
+			returnErr,
+		).Once()
+	case []types.KeyValueStore:
+		client.On("ListKeyValueStores", mock.Anything, mock.Anything).Return(
+			&cloudfront.ListKeyValueStoresOutput{
+				KeyValueStoreList: &types.KeyValueStoreList{
+					Items:      items,
+					NextMarker: nil,
+				},
+			},
+			returnErr,
+		).Once()
+	default:
+		panic("Unhandled type")
+	}
 
 	provider := &Provider{
 		log:    testhelper.NewLogger(t),
