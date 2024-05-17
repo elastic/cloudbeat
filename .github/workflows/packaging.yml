@@ -38,10 +38,6 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - name: Init requirements
-        shell: bash
-        run: sudo apt-get install --assume-yes qemu-user-static binfmt-support
-
       - name: Check out the repo
         uses: actions/checkout@v4
 
@@ -53,4 +49,3 @@ jobs:
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
-          PLATFORMS: "linux/amd64,linux/arm64"
