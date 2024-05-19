@@ -16,12 +16,13 @@ Import this module to utilize the provided functions for JSON file operations an
 """
 
 import json
-from typing import Union
+import sys
 from pathlib import Path
+from typing import Union
+
 import ruamel.yaml
 from jinja2 import Template
 from loguru import logger
-import sys
 
 
 def read_json(json_path: Path) -> dict:
