@@ -12,6 +12,9 @@ on:
       - "deploy/deployment-manager/compute_engine.py.schema"
       - "deploy/deployment-manager/deploy.sh"
       - "deploy/deployment-manager/set_env.sh"
+      - "deploy/deployment-manager/deploy_service_account.sh"
+      - "deploy/deployment-manager/service_account.py"
+      - "deploy/deployment-manager/service_account.py.schema"
 
 env:
   TEST_ENVS_DIR: deploy/test-environments
