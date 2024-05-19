@@ -15,6 +15,14 @@ on:
         type: boolean
         required: true
         default: false
+      ec-url:
+        required: true
+        default: "https://cloud.elastic.co"
+        type: choice
+        description: Select the Environment URL
+        options:
+          - https://cloud.elastic.co
+          - https://console.qa.cld.elstc.co
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
@@ -30,9 +38,9 @@ on:
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
       run-sanity-tests:
-          description: "Run sanity tests after provision"
-          default: false
-          type: boolean
+        description: "Run sanity tests after provision"
+        default: false
+        type: boolean
       cleanup-env:
         description: "Cleanup resources after provision"
         default: false
@@ -52,6 +60,11 @@ on:
         type: boolean
         required: true
         default: false
+      ec-url:
+        required: true
+        default: "https://cloud.elastic.co"
+        type: string
+        description: Environment URL
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
@@ -95,6 +108,9 @@ env:
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_qa_ec_api_key: ${{ secrets.QA_EC_API_KEY }}
+  TF_VAR_ec_url: ${{ inputs.ec-url }}
+
 
 jobs:
   Deploy:
@@ -114,8 +130,8 @@ jobs:
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
     # Add "id-token" with the intended permissions.
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     outputs:
       deploy-s3-bucket: ${{ steps.upload-state.outputs.s3-bucket-folder }}
       aws-cnvm-stack-name: ${{ steps.upload-state.outputs.aws-cnvm-stack }}
@@ -144,11 +160,33 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
-        if: inputs.ec-api-key != ''
+        env:
+          QA_EC_URL: "https://console.qa.cld.elstc.co"
+          EC_URL: "https://cloud.elastic.co"
         run: |
+          # Extract the EC API key and selected EC URL
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
-          echo "::add-mask::$ec_api_key"
-          echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+
+          input_ec_url="${{ env.TF_VAR_ec_url }}"
+
+          qa_ec_url="${{ env.QA_EC_URL }}"
+          ec_url="${{ env.EC_URL }}"
+
+          # When user stores input ec api key then update Elastic Cloud env API KEY
+          if [[ $ec_api_key != '' && $input_ec_url == $ec_url ]]; then
+            echo "Set TF_VAR_ec_api_key from the input ec api key"
+            echo "::add-mask::$ec_api_key"
+            echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          elif [[ $input_ec_url == $ec_url ]]; then
+            echo "Set TF_VAR_ec_api_key from the PROD github secret api key"
+            echo "TF_VAR_ec_api_key=$TF_VAR_ec_api_key" >> $GITHUB_ENV
+          elif [[ $input_ec_url == $qa_ec_url ]]; then
+            echo "Set TF_VAR_ec_api_key from the QA github secret api key"
+            echo "TF_VAR_ec_api_key=$TF_VAR_qa_ec_api_key" >> $GITHUB_ENV
+          else
+            echo "error: Elastic Cloud API key is required from a valid ec url"
+            exit 1
+          fi
 
       - name: Process Stack Version
         id: remove-commit-hash
@@ -198,7 +236,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install Poetry
         run: |
@@ -236,7 +274,8 @@ jobs:
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
             -var="project=${{ github.actor }}" \
-            -var="owner=${{ github.actor }}"
+            -var="owner=${{ github.actor }}" \
+
 
       - name: Set Environment Output
         id: env-output
