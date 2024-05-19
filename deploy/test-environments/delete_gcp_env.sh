@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [ "$#" -lt 3 ]; then
-    echo "Missing params. Usage: $0 PROJECT_NAME PROJECT_NUMBER DEPLOYMENT1,DEPLOYMENT2,..."
+    echo "Missing params. Usage: $0 PROJECT_NAME PROJECT_NUMBER DEPLOYMENT1 DEPLOYMENT2,..."
     exit 1
 fi
 

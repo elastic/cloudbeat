@@ -13,6 +13,7 @@ from pathlib import Path
 from munch import Munch
 from packaging import version
 import configuration_fleet as cnfg
+from fleet_api.utils import read_json
 from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.package_policy_api import create_cspm_integration
 from fleet_api.common_api import (
@@ -47,7 +48,6 @@ AGENT_INPUT = {
     "name": generate_random_name("cspm-gcp"),
 }
 
-
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config)
@@ -68,6 +68,12 @@ if __name__ == "__main__":
         INTEGRATION_INPUT["vars"] = {
             "gcp.account_type": "single-account",
         }
+        if cnfg.gcp_dm_config.service_account_json_path:
+            logger.info("Using service account credentials json")
+            json_path = Path(__file__).parent / cnfg.gcp_dm_config.service_account_json_path
+            service_account_json = read_json(json_path)
+            INTEGRATION_INPUT["vars"]["gcp.credentials.json"] = json.dumps(service_account_json)
+
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
