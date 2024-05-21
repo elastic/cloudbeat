@@ -38,12 +38,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Kibana Tests Action
-        uses: ./.github/actions/kibana-tests
+        uses: ./.github/actions/kibana-ftr
         with:
           ref_commit_sha: ${{ github.event.inputs.ref_commit_sha || 'main' }}
-          test_kibana_url: ${{ secrets.TEST_KIBANA_URL }}
-          test_es_url: ${{ secrets.TEST_ES_URL }}
-          es_version: 8.15.0-SNAPSHOT
+          test_kibana_url: ${{ secrets.TEST_KIBANA_URL }} # required
+          test_es_url: ${{ secrets.TEST_ES_URL }} # required
+          es_version: 8.15.0-SNAPSHOT # required
           test_browser_headless: '1'
           test_cloud: '1'
           es_security_enabled: '1'

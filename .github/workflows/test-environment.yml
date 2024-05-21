@@ -240,38 +240,8 @@ jobs:
 
       - name: Set Environment Output
         id: env-output
-        run: |
-          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
-          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
-
-          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
-
-          export EC2_CSPM=$(terraform output -raw ec2_cspm_ssh_cmd)
-          echo "::add-mask::$EC2_CSPM"
-          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
-
-          export EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
-          echo "::add-mask::$EC2_KSPM"
-          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
-
-          export EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
-          echo "::add-mask::$EC2_CSPM_KEY"
-          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
-
-          export EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
-          echo "::add-mask::$EC2_KSPM_KEY"
-          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
-
-          export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
-          echo "::add-mask::$KSPM_PUBLIC_IP"
-          echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
-
-          export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
-          echo "::add-mask::$CSPM_PUBLIC_IP"
-          echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+        working-directory: ./
+        run: ./.ci/scripts/set_environment_output.sh
 
       - name: Upload tf state
         id: upload-state
@@ -441,6 +411,18 @@ jobs:
         working-directory: ./tests
         run: |
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+      - name: Run UI Sanity checks
+        if: ${{ success() && inputs.run-sanity-tests == true }}
+        working-directory: ./
+        uses: ./.github/actions/kibana-ftr
+        with:
+          # TODO: Remove ref_commit_sha after the migration to the new action is completed
+          ref_commit_sha: 116e4efc3badfd2be685854a97942e4fa4b29ca5
+          test_kibana_url: ${{ env.TEST_KIBANA_URL }}
+          test_es_url: ${{ env.TEST_ES_URL }}
+          es_version: ${{ env.STACK_VERSION }}
+          config: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
 
       - name: Cleanup Environment
         if: ${{ !cancelled() && inputs.cleanup-env == true }}
