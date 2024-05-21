@@ -413,9 +413,8 @@ jobs:
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Run UI Sanity checks
-        if: ${{ success() && inputs.run-sanity-tests == true }}
-        working-directory: ./
         uses: ./.github/actions/kibana-ftr
+        if: ${{ success() && inputs.run-sanity-tests == true }}
         with:
           # TODO: Remove ref_commit_sha after the migration to the new action is completed
           ref_commit_sha: 116e4efc3badfd2be685854a97942e4fa4b29ca5
