@@ -112,6 +112,7 @@ func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.C
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
+	awslib.ExtendStandardRetryer(awsCfg)
 
 	identity, err := k.AWSIdentityProvider.GetIdentity(ctx, *awsCfg)
 	if err != nil {

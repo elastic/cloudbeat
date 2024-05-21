@@ -21,6 +21,7 @@ import (
 	"context"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 )
 
@@ -44,4 +45,16 @@ func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigA
 	awsConfig.Region = metadata.Region
 
 	return &awsConfig, nil
+}
+
+func ExtendStandardRetryer(cfg *awssdk.Config) {
+	cfg.Retryer = func() awssdk.Retryer {
+		return retry.NewStandard(func(o *retry.StandardOptions) {
+			o.Retryables = append(o.Retryables, retry.RetryableHTTPStatusCode{
+				Codes: map[int]struct{}{
+					429: {}, // Too Many Requests
+				},
+			})
+		})
+	}
 }

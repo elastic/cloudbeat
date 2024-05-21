@@ -223,6 +223,7 @@ func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.C
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
+	awslib.ExtendStandardRetryer(&awsConfig)
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
