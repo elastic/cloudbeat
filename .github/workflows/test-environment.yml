@@ -33,6 +33,10 @@ on:
           description: "Run sanity tests after provision"
           default: false
           type: boolean
+      run-ui-sanity-tests:
+          description: "Run UI sanity tests after provision"
+          default: false
+          type: boolean
       cleanup-env:
         description: "Cleanup resources after provision"
         default: false
@@ -75,6 +79,10 @@ on:
         description: "Run sanity tests after provision"
         default: false
         type: boolean
+      run-ui-sanity-tests:
+          description: "Run UI sanity tests after provision"
+          default: false
+          type: boolean
       cleanup-env:
         description: "Cleanup resources after provision"
         default: false
@@ -421,9 +429,9 @@ jobs:
         run: |
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-      - name: Run UI Sanity checks
+      - name: Run UI Sanity checks (Kibana)
         uses: ./.github/actions/kibana-ftr
-        if: ${{ success() && inputs.run-sanity-tests == true }}
+        if: ${{ success() && inputs.run-ui-sanity-tests == true }}
         with:
           test_kibana_url: ${{ env.TEST_KIBANA_URL }}
           test_es_url: ${{ env.TEST_ES_URL }}
