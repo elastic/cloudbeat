@@ -20,38 +20,38 @@ require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20231120074854-8322cc2242bf
 	github.com/aquasecurity/trivy v0.48.3
 	github.com/aquasecurity/trivy-db v0.0.0-20240220070059-88dc6466aa40
-	github.com/aws/aws-sdk-go v1.53.0
-	github.com/aws/aws-sdk-go-v2 v1.26.1
-	github.com/aws/aws-sdk-go-v2/config v1.27.13
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.13
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.1
-	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.29.3
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.40.6
-	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.50.1
-	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.39.3
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.38.1
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.35.2
-	github.com/aws/aws-sdk-go-v2/service/configservice v1.46.6
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.161.1
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.28.0
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.24.5
-	github.com/aws/aws-sdk-go-v2/service/iam v1.32.1
-	github.com/aws/aws-sdk-go-v2/service/kms v1.31.1
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.27.4
-	github.com/aws/aws-sdk-go-v2/service/rds v1.78.1
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.2
-	github.com/aws/aws-sdk-go-v2/service/s3control v1.44.7
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.48.1
-	github.com/aws/aws-sdk-go-v2/service/sns v1.29.5
-	github.com/aws/aws-sdk-go-v2/service/sts v1.28.7
+	github.com/aws/aws-sdk-go v1.53.5
+	github.com/aws/aws-sdk-go-v2 v1.27.0
+	github.com/aws/aws-sdk-go-v2/config v1.27.15
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.15
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.3
+	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.29.5
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.40.8
+	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.50.3
+	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.39.5
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.38.3
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.35.4
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.46.8
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.161.3
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.28.2
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.24.7
+	github.com/aws/aws-sdk-go-v2/service/iam v1.32.3
+	github.com/aws/aws-sdk-go-v2/service/kms v1.31.3
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.27.6
+	github.com/aws/aws-sdk-go-v2/service/rds v1.78.3
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.54.2
+	github.com/aws/aws-sdk-go-v2/service/s3control v1.44.9
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.48.3
+	github.com/aws/aws-sdk-go-v2/service/sns v1.29.7
+	github.com/aws/aws-sdk-go-v2/service/sts v1.28.9
 	github.com/aws/smithy-go v1.20.2
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240516110508-37105d7a09b8
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240520052629-0fd63999c524
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.14
 	github.com/elastic/elastic-agent-client/v7 v7.9.0
-	github.com/elastic/elastic-agent-libs v0.9.7
+	github.com/elastic/elastic-agent-libs v0.9.8
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
@@ -185,18 +185,18 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.5 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.5 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.7 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.7 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.5 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ebs v1.21.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.30.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.20.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.24.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.9 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.9 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.20.8 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.24.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.0 // indirect
@@ -240,7 +240,6 @@ require (
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/elastic-agent-shipper-client v0.5.1-0.20230228231646-f04347b666f3 // indirect
 	github.com/elastic/elastic-agent-system-metrics v0.9.2 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
