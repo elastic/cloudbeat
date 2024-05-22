@@ -422,6 +422,13 @@ jobs:
           es_version: ${{ env.STACK_VERSION }}
           config: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
 
+        # TODO: Remove this step after the migration to the new action is completed
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
+
       - name: Cleanup Environment
         if: ${{ !cancelled() && inputs.cleanup-env == true }}
         run: |

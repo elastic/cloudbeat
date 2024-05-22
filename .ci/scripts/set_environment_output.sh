@@ -1,10 +1,11 @@
 #!/bin/bash
 
-{
-    echo "KIBANA_URL=$(terraform output -raw kibana_url)"
-    echo "ES_URL=$(terraform output -raw elasticsearch_url)"
-    echo "ES_USER=$(terraform output -raw elasticsearch_username)"
-} >>"$GITHUB_ENV"
+KIBANA_URL="$(terraform output -raw kibana_url)"
+echo "KIBANA_URL=$KIBANA_URL" >>"$GITHUB_ENV"
+ES_URL="$(terraform output -raw elasticsearch_url)"
+echo "ES_URL=$ES_URL" >>"$GITHUB_ENV"
+ES_USER="$(terraform output -raw elasticsearch_username)"
+echo "ES_USER=$ES_USER" >>"$GITHUB_ENV"
 
 ES_PASSWORD=$(terraform output -raw elasticsearch_password)
 echo "::add-mask::$ES_PASSWORD"
