@@ -45,6 +45,10 @@ Follow these steps to run the workflow:
 
     - **`run-sanity-tests`** (**optional**): Set to `true` to run sanity tests after the environment is set up. Default: `false`
 
+    - **`run-ui-sanity-tests`** (**optional**): Set to `true` to run Kibana UI sanity tests after the environment is set up. Default: `false`
+
+    - **`ref_commit_sha`** (**optional**): Specifies the Kibana branch, tag, or commit SHA to check out for the UI sanity tests, which will be executed after the environment is set up. This should correspond to the version of the `elk-stack-version` provisioned by this workflow. Note that for the current version in development, use Kibana's `main` branch. Default: `main`
+
     - **`cleanup-env`** (**optional**): Set to `true` if you want the resources to automatically be cleaned up after
       provisioning - useful if you don't want to test the env manually after deployment.
       Default: `false`.
