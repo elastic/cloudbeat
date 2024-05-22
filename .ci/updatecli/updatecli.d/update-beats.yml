@@ -6,6 +6,7 @@ scms:
   default:
     kind: github
     spec:
+      user: '{{ requiredEnv "GIT_USER" }}'
       owner: "{{ .github.owner }}"
       repository: "{{ .github.repository }}"
       token: '{{ requiredEnv "GITHUB_TOKEN" }}'
