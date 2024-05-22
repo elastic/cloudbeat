@@ -37,15 +37,15 @@ on:
           description: "Run UI sanity tests after provision"
           default: false
           type: boolean
-      cleanup-env:
-        description: "Cleanup resources after provision"
-        default: false
-        type: boolean
       ref_commit_sha:
         description: "Kibana branch, tag or SHA to take the tests from"
         required: false
         default: "main"
         type: string
+      cleanup-env:
+        description: "Cleanup resources after provision"
+        default: false
+        type: boolean
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
@@ -83,15 +83,15 @@ on:
           description: "Run UI sanity tests after provision"
           default: false
           type: boolean
-      cleanup-env:
-        description: "Cleanup resources after provision"
-        default: false
-        type: boolean
       ref_commit_sha:
         description: "Kibana branch, tag or SHA to take the tests from"
         required: false
         default: "main"
         type: string
+      cleanup-env:
+        description: "Cleanup resources after provision"
+        default: false
+        type: boolean
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
