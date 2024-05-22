@@ -38,7 +38,7 @@ on:
           default: false
           type: boolean
       ref_commit_sha:
-        description: "Kibana branch, tag or SHA to take the tests from"
+        description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
         default: "main"
         type: string
@@ -84,7 +84,7 @@ on:
           default: false
           type: boolean
       ref_commit_sha:
-        description: "Kibana branch, tag or SHA to take the tests from"
+        description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
         default: "main"
         type: string
