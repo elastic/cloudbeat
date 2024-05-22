@@ -240,8 +240,7 @@ jobs:
 
       - name: Set Environment Output
         id: env-output
-        working-directory: ./
-        run: ./.ci/scripts/set_environment_output.sh
+        run: ../../.ci/scripts/set_environment_output.sh
 
       - name: Upload tf state
         id: upload-state
