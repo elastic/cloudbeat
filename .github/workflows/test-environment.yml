@@ -37,6 +37,11 @@ on:
         description: "Cleanup resources after provision"
         default: false
         type: boolean
+      ref_commit_sha:
+        description: "Kibana branch, tag or SHA to take the tests from"
+        required: false
+        default: "main"
+        type: string
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
@@ -74,6 +79,11 @@ on:
         description: "Cleanup resources after provision"
         default: false
         type: boolean
+      ref_commit_sha:
+        description: "Kibana branch, tag or SHA to take the tests from"
+        required: false
+        default: "main"
+        type: string
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
@@ -415,19 +425,11 @@ jobs:
         uses: ./.github/actions/kibana-ftr
         if: ${{ success() && inputs.run-sanity-tests == true }}
         with:
-          # TODO: Remove ref_commit_sha after the migration to the new action is completed
-          ref_commit_sha: 116e4efc3badfd2be685854a97942e4fa4b29ca5
           test_kibana_url: ${{ env.TEST_KIBANA_URL }}
           test_es_url: ${{ env.TEST_ES_URL }}
           es_version: ${{ env.STACK_VERSION }}
+          ref_commit_sha: ${{ inputs.ref_commit_sha }}
           config: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
-
-        # TODO: Remove this step after the migration to the new action is completed
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
 
       - name: Cleanup Environment
         if: ${{ !cancelled() && inputs.cleanup-env == true }}
