@@ -59,7 +59,7 @@ Follow these steps to run the workflow:
       [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
       step-by-step instructions on generating the token.
 
-   ![Optional Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/17933589-ee0e-4181-a244-f501f54bda6c)
+   ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/c3259dd8-0e63-429b-9738-e1374eb8309b)
 
 5. Click the `Run workflow` button to start.
 
