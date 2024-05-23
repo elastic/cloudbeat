@@ -18,43 +18,28 @@
 package awslib
 
 import (
-	"context"
+	"net/http"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 )
 
-type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error)
-}
-
-type ConfigProvider struct {
-	MetadataProvider MetadataProvider
-}
-
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg)
+func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
+	awsConfig, err := libbeataws.InitializeAWSConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
-	if err != nil {
-		return nil, err
-	}
-	awsConfig.Region = metadata.Region
 
-	return &awsConfig, nil
-}
-
-func ExtendStandardRetryer(cfg *awssdk.Config) {
-	cfg.Retryer = func() awssdk.Retryer {
+	awsConfig.Retryer = func() aws.Retryer {
 		return retry.NewStandard(func(o *retry.StandardOptions) {
 			o.Retryables = append(o.Retryables, retry.RetryableHTTPStatusCode{
 				Codes: map[int]struct{}{
-					429: {}, // Too Many Requests
+					http.StatusTooManyRequests: {},
 				},
 			})
 		})
 	}
+
+	return &awsConfig, nil
 }
