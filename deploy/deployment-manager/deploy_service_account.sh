@@ -37,7 +37,7 @@ result="$(gcloud deployment-manager deployments create --automatic-rollback-on-e
     --template service_account.py \
     --properties scope:"${SCOPE}",parentId:"${PARENT_ID}",serviceAccountName:"${SERVICE_ACCOUNT_NAME}")"
 
-key="$(echo "$result" | grep -o 'serviceAccountKey .*' | awk '{print $2}')"
+key="$(echo "$result" | awk '/serviceAccountKey/{getline; print}' | awk '{print $2}')"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
