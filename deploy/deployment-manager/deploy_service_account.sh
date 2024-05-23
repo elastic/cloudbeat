@@ -44,7 +44,7 @@ GREEN='\033[0;32m'
 RESET='\033[0m'
 
 if [ -z "$key" ]; then
-    echo "${RED}Error: Failed to deploy a service account. Exiting...${RESET}"
+    echo -e "${RED}Error: Failed to deploy a service account. Exiting...${RESET}"
     exit 1
 fi
 
