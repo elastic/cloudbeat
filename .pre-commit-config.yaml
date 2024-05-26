@@ -42,7 +42,7 @@ repos:
         files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.1.0
+    rev: v3.2.1
     hooks:
       - id: pylint
         args: [
@@ -70,7 +70,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/aws-cloudformation/cfn-lint
-    rev: v0.87.2
+    rev: v1.2.5a9
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
