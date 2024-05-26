@@ -37,7 +37,7 @@ on:
           description: "Run UI sanity tests after provision"
           default: false
           type: boolean
-      ref_commit_sha:
+      kibana_ref:
         description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
         default: "main"
@@ -83,7 +83,7 @@ on:
           description: "Run UI sanity tests after provision"
           default: false
           type: boolean
-      ref_commit_sha:
+      kibana_ref:
         description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
         default: "main"
@@ -258,7 +258,7 @@ jobs:
 
       - name: Set Environment Output
         id: env-output
-        run: ../../.ci/scripts/set_environment_output.sh
+        run: ../../.ci/scripts/set_cloud_env_params.sh
 
       - name: Upload tf state
         id: upload-state
@@ -436,8 +436,7 @@ jobs:
           test_kibana_url: ${{ env.TEST_KIBANA_URL }}
           test_es_url: ${{ env.TEST_ES_URL }}
           es_version: ${{ env.STACK_VERSION }}
-          ref_commit_sha: ${{ inputs.ref_commit_sha }}
-          config: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
+          kibana_ref: ${{ inputs.kibana_ref }}
 
       - name: Cleanup Environment
         if: ${{ !cancelled() && inputs.cleanup-env == true }}

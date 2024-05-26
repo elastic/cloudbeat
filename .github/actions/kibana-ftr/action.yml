@@ -11,30 +11,10 @@ inputs:
   es_version:
     description: 'Version of Elasticsearch to test against'
     required: true
-  ref_commit_sha:
+  kibana_ref:
     description: 'Kibana PR commit sha'
     required: false
     default: 'main'
-  test_browser_headless:
-    description: 'Whether to run tests in headless mode'
-    required: false
-    default: '1'
-  test_cloud:
-    description: 'Whether to enable cloud testing'
-    required: false
-    default: '1'
-  es_security_enabled:
-    description: 'Whether Elasticsearch security is enabled'
-    required: false
-    default: '1'
-  node_version_file:
-    description: 'Path to the Node.js version file'
-    required: false
-    default: 'package.json'
-  config:
-    description: 'Path to the test configuration file'
-    required: false
-    default: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
 
 runs:
   using: 'composite'
@@ -49,14 +29,14 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: elastic/kibana
-        ref: ${{ inputs.ref_commit_sha }}
+        ref: ${{ inputs.kibana_ref }}
         fetch-depth: 1
         path: ${{ steps.globals.outputs.KIBANA_DIR }}
 
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
-        node-version-file: ${{ steps.globals.outputs.KIBANA_DIR }}/${{ inputs.node_version_file }}
+        node-version-file: ${{ steps.globals.outputs.KIBANA_DIR }}/package.json
 
     - name: Bootstrap Kibana
       shell: bash
@@ -69,11 +49,12 @@ runs:
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       env:
-        TEST_BROWSER_HEADLESS: ${{ inputs.test_browser_headless }}
         TEST_KIBANA_URL: ${{ inputs.test_kibana_url }}
         TEST_ES_URL: ${{ inputs.test_es_url }}
-        TEST_CLOUD: ${{ inputs.test_cloud }}
-        ES_SECURITY_ENABLED: ${{ inputs.es_security_enabled }}
         ES_VERSION: ${{ inputs.es_version }}
+        TEST_CLOUD: '1'
+        ES_SECURITY_ENABLED: '1'
+        TEST_BROWSER_HEADLESS: '1'
+        TEST_CONFIG: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
       run: |
-        node scripts/functional_test_runner --config ${{ inputs.config }} --es-version ${{ env.ES_VERSION }}
+        node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"

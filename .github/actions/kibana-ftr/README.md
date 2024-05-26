@@ -9,12 +9,7 @@ This GitHub Action runs Kibana tests using the Functional Test Runner ([FTR](htt
 | `test_kibana_url`    | URL for the Kibana instance to test            | true     |                                                              |
 | `test_es_url`        | URL for the Elasticsearch instance to test     | true     |                                                              |
 | `es_version`         | Version of Elasticsearch to test against       | true     |                                                              |
-| `ref_commit_sha`     | Kibana PR commit sha                           | false    | `main`                                                       |
-| `test_browser_headless` | Whether to run tests in headless mode        | false    | `1`                                                          |
-| `test_cloud`         | Whether to enable cloud testing                | false    | `1`                                                          |
-| `es_security_enabled` | Whether Elasticsearch security is enabled     | false    | `1`                                                          |
-| `node_version_file`  | Path to the Node.js version file               | false    | `package.json`                                               |
-| `config`             | Path to the test configuration file            | false    | `x-pack/test/cloud_security_posture_functional/config.cloud.ts` |
+| `kibana_ref`     | Kibana PR commit sha                           | false    | `main`                                                       |
 
 ## Usage
 
@@ -24,7 +19,7 @@ name: Kibana UI Tests
 on:
   workflow_dispatch:
     inputs:
-      ref_commit_sha:
+      kibana_ref:
         type: string
         description: |
           Kibana PR commit sha
@@ -40,15 +35,10 @@ jobs:
       - name: Run Kibana Tests Action
         uses: ./.github/actions/kibana-ftr
         with:
-          ref_commit_sha: ${{ github.event.inputs.ref_commit_sha || 'main' }}
-          test_kibana_url: ${{ secrets.TEST_KIBANA_URL }} # required
-          test_es_url: ${{ secrets.TEST_ES_URL }} # required
-          es_version: 8.15.0-SNAPSHOT # required
-          test_browser_headless: '1'
-          test_cloud: '1'
-          es_security_enabled: '1'
-          node_version_file: 'package.json'
-          config: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
+          kibana_ref: ${{ github.event.inputs.kibana_ref || 'main' }}
+          test_kibana_url: ${{ secrets.TEST_KIBANA_URL }}
+          test_es_url: ${{ secrets.TEST_ES_URL }}
+          es_version: ${{ env.ES_VERSION }}
 ```
 
 ## Details
@@ -59,18 +49,18 @@ This action performs the following steps:
    - Sets the global variable `KIBANA_DIR` to `kibana`.
 
 2. **Checkout Kibana Repository**:
-   - Uses the `actions/checkout@v4` action to check out the Kibana repository at the specified `ref_commit_sha` or `main` to the `kibana` directory.
+   - Uses the `actions/checkout@v4` action to check out the Kibana repository at the specified `kibana_ref` or `main` to the `kibana` directory.
 
 3. **Setup Node**:
-   - Uses the `actions/setup-node@v4` action to set up the Node.js environment based on the specified `node_version_file`.
+   - Uses the `actions/setup-node@v4` action to set up the Node.js environment based on the `package.json`.
 
 4. **Bootstrap Kibana**:
    - Runs the `yarn kbn bootstrap` command in the `kibana` directory to bootstrap the Kibana environment.
 
 5. **Run FTR**:
-   - Runs the Functional Test Runner (FTR) with the specified configuration and environment variables.
+   - Runs the Functional Test Runner (FTR) using the `x-pack/test/cloud_security_posture_functional/config.cloud.ts` configuration and the necessary environment variables.
 
 ## Notes
 
 - Ensure that the `test_kibana_url` and `test_es_url` inputs are provided and valid. More information about these variables can be found [here](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_running_functional_tests).
-- The `ref_commit_sha` input can be omitted to default to the `main` branch.
+- The `kibana_ref` input can be omitted to default to the `main` branch.
