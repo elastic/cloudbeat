@@ -149,7 +149,7 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 	}
 }
 
-func TestProvider_DescribeVPCs(t *testing.T) {
+func TestProvider_DescribeVpcs(t *testing.T) {
 	tests := []struct {
 		name            string
 		client          func() Client
@@ -197,7 +197,7 @@ func TestProvider_DescribeVPCs(t *testing.T) {
 				clients: clients,
 			}
 
-			got, err := p.DescribeVPCs(context.Background())
+			got, err := p.DescribeVpcs(context.Background())
 			if tt.wantErr {
 				require.Error(t, err)
 				return

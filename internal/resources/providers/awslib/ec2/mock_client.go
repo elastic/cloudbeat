@@ -179,24 +179,24 @@ func (_c *MockClient_DeleteSnapshot_Call) RunAndReturn(run func(context.Context,
 	return _c
 }
 
-// DescribeFlowLogs provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeFlowLogs(ctx context.Context, params *serviceec2.DescribeFlowLogsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeFlowLogsOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeFlowLogs provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeFlowLogs(_a0 context.Context, _a1 *serviceec2.DescribeFlowLogsInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeFlowLogsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeFlowLogsOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeFlowLogsInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeFlowLogsOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeFlowLogsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeFlowLogsOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeFlowLogsOutput)
@@ -204,7 +204,7 @@ func (_m *MockClient) DescribeFlowLogs(ctx context.Context, params *serviceec2.D
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeFlowLogsInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -218,15 +218,15 @@ type MockClient_DescribeFlowLogs_Call struct {
 }
 
 // DescribeFlowLogs is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeFlowLogsInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeFlowLogs(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeFlowLogs_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeFlowLogsInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeFlowLogs(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeFlowLogs_Call {
 	return &MockClient_DescribeFlowLogs_Call{Call: _e.mock.On("DescribeFlowLogs",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeFlowLogs_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeFlowLogsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeFlowLogs_Call {
+func (_c *MockClient_DescribeFlowLogs_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeFlowLogsInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeFlowLogs_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -249,24 +249,24 @@ func (_c *MockClient_DescribeFlowLogs_Call) RunAndReturn(run func(context.Contex
 	return _c
 }
 
-// DescribeInstances provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeInstances(ctx context.Context, params *serviceec2.DescribeInstancesInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeInstancesOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeInstances provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeInstances(_a0 context.Context, _a1 *serviceec2.DescribeInstancesInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeInstancesOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeInstancesOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeInstancesInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeInstancesOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeInstancesInput, ...func(*serviceec2.Options)) *serviceec2.DescribeInstancesOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeInstancesOutput)
@@ -274,7 +274,7 @@ func (_m *MockClient) DescribeInstances(ctx context.Context, params *serviceec2.
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeInstancesInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -288,15 +288,15 @@ type MockClient_DescribeInstances_Call struct {
 }
 
 // DescribeInstances is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeInstancesInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeInstances(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeInstances_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeInstancesInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeInstances(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeInstances_Call {
 	return &MockClient_DescribeInstances_Call{Call: _e.mock.On("DescribeInstances",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeInstances_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeInstancesInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeInstances_Call {
+func (_c *MockClient_DescribeInstances_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeInstancesInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeInstances_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -319,24 +319,24 @@ func (_c *MockClient_DescribeInstances_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
-// DescribeNetworkAcls provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeNetworkAcls(ctx context.Context, params *serviceec2.DescribeNetworkAclsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeNetworkAclsOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeNetworkAcls provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeNetworkAcls(_a0 context.Context, _a1 *serviceec2.DescribeNetworkAclsInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeNetworkAclsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeNetworkAclsOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeNetworkAclsInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeNetworkAclsOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeNetworkAclsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeNetworkAclsOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeNetworkAclsOutput)
@@ -344,7 +344,7 @@ func (_m *MockClient) DescribeNetworkAcls(ctx context.Context, params *serviceec
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeNetworkAclsInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -358,15 +358,15 @@ type MockClient_DescribeNetworkAcls_Call struct {
 }
 
 // DescribeNetworkAcls is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeNetworkAclsInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeNetworkAcls(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeNetworkAcls_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeNetworkAclsInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeNetworkAcls(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeNetworkAcls_Call {
 	return &MockClient_DescribeNetworkAcls_Call{Call: _e.mock.On("DescribeNetworkAcls",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeNetworkAcls_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeNetworkAclsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeNetworkAcls_Call {
+func (_c *MockClient_DescribeNetworkAcls_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeNetworkAclsInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeNetworkAcls_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -389,24 +389,24 @@ func (_c *MockClient_DescribeNetworkAcls_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
-// DescribeRouteTables provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeRouteTables(ctx context.Context, params *serviceec2.DescribeRouteTablesInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeRouteTablesOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeRouteTables provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeRouteTables(_a0 context.Context, _a1 *serviceec2.DescribeRouteTablesInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeRouteTablesOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeRouteTablesOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeRouteTablesInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeRouteTablesOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeRouteTablesInput, ...func(*serviceec2.Options)) *serviceec2.DescribeRouteTablesOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeRouteTablesOutput)
@@ -414,7 +414,7 @@ func (_m *MockClient) DescribeRouteTables(ctx context.Context, params *serviceec
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeRouteTablesInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -428,15 +428,15 @@ type MockClient_DescribeRouteTables_Call struct {
 }
 
 // DescribeRouteTables is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeRouteTablesInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeRouteTables(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeRouteTables_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeRouteTablesInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeRouteTables(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeRouteTables_Call {
 	return &MockClient_DescribeRouteTables_Call{Call: _e.mock.On("DescribeRouteTables",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeRouteTables_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeRouteTablesInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeRouteTables_Call {
+func (_c *MockClient_DescribeRouteTables_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeRouteTablesInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeRouteTables_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -459,24 +459,24 @@ func (_c *MockClient_DescribeRouteTables_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
-// DescribeSecurityGroups provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeSecurityGroups(ctx context.Context, params *serviceec2.DescribeSecurityGroupsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeSecurityGroupsOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeSecurityGroups provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeSecurityGroups(_a0 context.Context, _a1 *serviceec2.DescribeSecurityGroupsInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeSecurityGroupsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeSecurityGroupsOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeSecurityGroupsInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeSecurityGroupsOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeSecurityGroupsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeSecurityGroupsOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeSecurityGroupsOutput)
@@ -484,7 +484,7 @@ func (_m *MockClient) DescribeSecurityGroups(ctx context.Context, params *servic
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeSecurityGroupsInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -498,15 +498,15 @@ type MockClient_DescribeSecurityGroups_Call struct {
 }
 
 // DescribeSecurityGroups is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeSecurityGroupsInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeSecurityGroups(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeSecurityGroups_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeSecurityGroupsInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeSecurityGroups(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeSecurityGroups_Call {
 	return &MockClient_DescribeSecurityGroups_Call{Call: _e.mock.On("DescribeSecurityGroups",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeSecurityGroups_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeSecurityGroupsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeSecurityGroups_Call {
+func (_c *MockClient_DescribeSecurityGroups_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeSecurityGroupsInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeSecurityGroups_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -529,24 +529,24 @@ func (_c *MockClient_DescribeSecurityGroups_Call) RunAndReturn(run func(context.
 	return _c
 }
 
-// DescribeSnapshots provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeSnapshots(ctx context.Context, params *serviceec2.DescribeSnapshotsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeSnapshotsOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeSnapshots provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeSnapshots(_a0 context.Context, _a1 *serviceec2.DescribeSnapshotsInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeSnapshotsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeSnapshotsOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeSnapshotsInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeSnapshotsOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeSnapshotsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeSnapshotsOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeSnapshotsOutput)
@@ -554,7 +554,7 @@ func (_m *MockClient) DescribeSnapshots(ctx context.Context, params *serviceec2.
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeSnapshotsInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -568,15 +568,15 @@ type MockClient_DescribeSnapshots_Call struct {
 }
 
 // DescribeSnapshots is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeSnapshotsInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeSnapshots(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeSnapshots_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeSnapshotsInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeSnapshots(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeSnapshots_Call {
 	return &MockClient_DescribeSnapshots_Call{Call: _e.mock.On("DescribeSnapshots",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeSnapshots_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeSnapshotsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeSnapshots_Call {
+func (_c *MockClient_DescribeSnapshots_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeSnapshotsInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeSnapshots_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -599,24 +599,24 @@ func (_c *MockClient_DescribeSnapshots_Call) RunAndReturn(run func(context.Conte
 	return _c
 }
 
-// DescribeVolumes provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeVolumes(ctx context.Context, params *serviceec2.DescribeVolumesInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeVolumesOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeVolumes provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeVolumes(_a0 context.Context, _a1 *serviceec2.DescribeVolumesInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeVolumesOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeVolumesOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeVolumesInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeVolumesOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeVolumesInput, ...func(*serviceec2.Options)) *serviceec2.DescribeVolumesOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeVolumesOutput)
@@ -624,7 +624,7 @@ func (_m *MockClient) DescribeVolumes(ctx context.Context, params *serviceec2.De
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeVolumesInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -638,15 +638,15 @@ type MockClient_DescribeVolumes_Call struct {
 }
 
 // DescribeVolumes is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeVolumesInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeVolumes(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeVolumes_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeVolumesInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeVolumes(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeVolumes_Call {
 	return &MockClient_DescribeVolumes_Call{Call: _e.mock.On("DescribeVolumes",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeVolumes_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeVolumesInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeVolumes_Call {
+func (_c *MockClient_DescribeVolumes_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeVolumesInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeVolumes_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -739,24 +739,24 @@ func (_c *MockClient_DescribeVpcPeeringConnections_Call) RunAndReturn(run func(c
 	return _c
 }
 
-// DescribeVpcs provides a mock function with given fields: ctx, params, optFns
-func (_m *MockClient) DescribeVpcs(ctx context.Context, params *serviceec2.DescribeVpcsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcsOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeVpcs provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeVpcs(_a0 context.Context, _a1 *serviceec2.DescribeVpcsInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *serviceec2.DescribeVpcsOutput
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeVpcsInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcsOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+		return rf(_a0, _a1, _a2...)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeVpcsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeVpcsOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceec2.DescribeVpcsOutput)
@@ -764,7 +764,7 @@ func (_m *MockClient) DescribeVpcs(ctx context.Context, params *serviceec2.Descr
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeVpcsInput, ...func(*serviceec2.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -778,15 +778,15 @@ type MockClient_DescribeVpcs_Call struct {
 }
 
 // DescribeVpcs is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *serviceec2.DescribeVpcsInput
-//   - optFns ...func(*serviceec2.Options)
-func (_e *MockClient_Expecter) DescribeVpcs(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeVpcs_Call {
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeVpcsInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeVpcs(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeVpcs_Call {
 	return &MockClient_DescribeVpcs_Call{Call: _e.mock.On("DescribeVpcs",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *MockClient_DescribeVpcs_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeVpcsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeVpcs_Call {
+func (_c *MockClient_DescribeVpcs_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeVpcsInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeVpcs_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
 		for i, a := range args[2:] {

@@ -43,18 +43,94 @@ type Provider struct {
 }
 
 type Client interface {
-	DescribeNetworkAcls(ctx context.Context, params *ec2.DescribeNetworkAclsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkAclsOutput, error)
-	DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
-	DescribeVpcs(ctx context.Context, params *ec2.DescribeVpcsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeVpcsOutput, error)
-	ec2.DescribeVpcPeeringConnectionsAPIClient
-	DescribeFlowLogs(ctx context.Context, params *ec2.DescribeFlowLogsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeFlowLogsOutput, error)
-	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
-	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 	CreateSnapshots(ctx context.Context, params *ec2.CreateSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.CreateSnapshotsOutput, error)
-	DescribeSnapshots(ctx context.Context, params *ec2.DescribeSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSnapshotsOutput, error)
 	DeleteSnapshot(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options)) (*ec2.DeleteSnapshotOutput, error)
-	DescribeRouteTables(ctx context.Context, params *ec2.DescribeRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRouteTablesOutput, error)
-	DescribeVolumes(ctx context.Context, params *ec2.DescribeVolumesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeVolumesOutput, error)
+	ec2.DescribeFlowLogsAPIClient
+	ec2.DescribeInstancesAPIClient
+	ec2.DescribeNetworkAclsAPIClient
+	ec2.DescribeRouteTablesAPIClient
+	ec2.DescribeSecurityGroupsAPIClient
+	ec2.DescribeSnapshotsAPIClient
+	ec2.DescribeVolumesAPIClient
+	ec2.DescribeVpcsAPIClient
+	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
+	ec2.DescribeVpcPeeringConnectionsAPIClient
+}
+
+func (p *Provider) CreateSnapshots(ctx context.Context, ins *Ec2Instance) ([]EBSSnapshot, error) {
+	client := p.clients[ins.Region]
+	if client == nil {
+		return nil, fmt.Errorf("error in CreateSnapshots no client for region %s", ins.Region)
+	}
+	input := &ec2.CreateSnapshotsInput{
+		InstanceSpecification: &types.InstanceSpecification{
+			InstanceId: ins.InstanceId,
+		},
+		Description: aws.String("Cloudbeat Vulnerability Snapshot."),
+		TagSpecifications: []types.TagSpecification{
+			{
+				ResourceType: "snapshot",
+				Tags: []types.Tag{
+					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("elastic-vulnerability-%s", *ins.InstanceId))},
+					{Key: aws.String("Workload"), Value: aws.String("Cloudbeat Vulnerability Snapshot")},
+				},
+			},
+		},
+	}
+	res, err := client.CreateSnapshots(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]EBSSnapshot, 0, len(res.Snapshots))
+	for _, snap := range res.Snapshots {
+		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID, *ins))
+	}
+	return result, nil
+}
+
+func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) error {
+	client, err := awslib.GetClient(aws.String(snapshot.Region), p.clients)
+	if err != nil {
+		return err
+	}
+	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
+	if err != nil {
+		return fmt.Errorf("error deleting snapshot %s: %w", snapshot.SnapshotId, err)
+	}
+
+	return nil
+}
+
+func (p *Provider) DescribeInstances(ctx context.Context) ([]*Ec2Instance, error) {
+	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*Ec2Instance, error) {
+		input := &ec2.DescribeInstancesInput{}
+		allInstances := []types.Instance{}
+		for {
+			output, err := c.DescribeInstances(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			for _, reservation := range output.Reservations {
+				allInstances = append(allInstances, reservation.Instances...)
+			}
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []*Ec2Instance
+		for _, instance := range allInstances {
+			result = append(result, &Ec2Instance{
+				Instance:   instance,
+				awsAccount: p.awsAccountID,
+				Region:     region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(insances), err
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -111,153 +187,6 @@ func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsReso
 	return lo.Flatten(securityGroups), err
 }
 
-func (p *Provider) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error) {
-	vpcs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
-		var all []types.Vpc
-		input := &ec2.DescribeVpcsInput{}
-		for {
-			output, err := c.DescribeVpcs(ctx, input)
-			if err != nil {
-				return nil, err
-			}
-			all = append(all, output.Vpcs...)
-			if output.NextToken == nil {
-				break
-			}
-			input.NextToken = output.NextToken
-		}
-
-		var result []awslib.AwsResource
-		for _, vpc := range all {
-			logs, err := c.DescribeFlowLogs(ctx, &ec2.DescribeFlowLogsInput{Filter: []types.Filter{
-				{
-					Name:   aws.String("resource-id"),
-					Values: []string{*vpc.VpcId},
-				},
-			}})
-			if err != nil {
-				p.log.Errorf("Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
-				continue
-			}
-
-			result = append(result, VpcInfo{
-				Vpc:        vpc,
-				FlowLogs:   logs.FlowLogs,
-				awsAccount: p.awsAccountID,
-				region:     region,
-			})
-		}
-		return result, nil
-	})
-	return lo.Flatten(vpcs), err
-}
-
-func (p *Provider) DescribeVpcPeeringConnections(ctx context.Context) ([]awslib.AwsResource, error) {
-	peerings, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
-		var all []types.VpcPeeringConnection
-		input := &ec2.DescribeVpcPeeringConnectionsInput{}
-		for {
-			output, err := c.DescribeVpcPeeringConnections(ctx, input)
-			if err != nil {
-				return nil, err
-			}
-			all = append(all, output.VpcPeeringConnections...)
-			if output.NextToken == nil {
-				break
-			}
-			input.NextToken = output.NextToken
-		}
-
-		var result []awslib.AwsResource
-		for _, peering := range all {
-			result = append(result, VpcPeeringConnectionInfo{
-				VpcPeeringConnection: peering,
-				awsAccount:           p.awsAccountID,
-				region:               region,
-			})
-		}
-		return result, nil
-	})
-	return lo.Flatten(peerings), err
-}
-
-func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error) {
-	return awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) (awslib.AwsResource, error) {
-		res, err := c.GetEbsEncryptionByDefault(ctx, &ec2.GetEbsEncryptionByDefaultInput{})
-		if err != nil {
-			return nil, err
-		}
-		return &EBSEncryption{
-			Enabled:    *res.EbsEncryptionByDefault,
-			region:     region,
-			awsAccount: p.awsAccountID,
-		}, nil
-	})
-}
-
-func (p *Provider) DescribeInstances(ctx context.Context) ([]*Ec2Instance, error) {
-	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*Ec2Instance, error) {
-		input := &ec2.DescribeInstancesInput{}
-		allInstances := []types.Instance{}
-		for {
-			output, err := c.DescribeInstances(ctx, input)
-			if err != nil {
-				return nil, err
-			}
-			for _, reservation := range output.Reservations {
-				allInstances = append(allInstances, reservation.Instances...)
-			}
-			if output.NextToken == nil {
-				break
-			}
-			input.NextToken = output.NextToken
-		}
-
-		var result []*Ec2Instance
-		for _, instance := range allInstances {
-			result = append(result, &Ec2Instance{
-				Instance:   instance,
-				awsAccount: p.awsAccountID,
-				Region:     region,
-			})
-		}
-		return result, nil
-	})
-	return lo.Flatten(insances), err
-}
-
-func (p *Provider) CreateSnapshots(ctx context.Context, ins *Ec2Instance) ([]EBSSnapshot, error) {
-	client := p.clients[ins.Region]
-	if client == nil {
-		return nil, fmt.Errorf("error in CreateSnapshots no client for region %s", ins.Region)
-	}
-	input := &ec2.CreateSnapshotsInput{
-		InstanceSpecification: &types.InstanceSpecification{
-			InstanceId: ins.InstanceId,
-		},
-		Description: aws.String("Cloudbeat Vulnerability Snapshot."),
-		TagSpecifications: []types.TagSpecification{
-			{
-				ResourceType: "snapshot",
-				Tags: []types.Tag{
-					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("elastic-vulnerability-%s", *ins.InstanceId))},
-					{Key: aws.String("Workload"), Value: aws.String("Cloudbeat Vulnerability Snapshot")},
-				},
-			},
-		},
-	}
-	res, err := client.CreateSnapshots(ctx, input)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]EBSSnapshot, 0, len(res.Snapshots))
-	for _, snap := range res.Snapshots {
-		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID, *ins))
-	}
-	return result, nil
-}
-
 // TODO: Maybe we should bulk request snapshots?
 // This will limit us scaling the pipeline
 func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) ([]EBSSnapshot, error) {
@@ -278,55 +207,6 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID, snapshot.Instance))
 	}
 	return result, nil
-}
-
-func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) error {
-	client, err := awslib.GetClient(aws.String(snapshot.Region), p.clients)
-	if err != nil {
-		return err
-	}
-	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
-	if err != nil {
-		return fmt.Errorf("error deleting snapshot %s: %w", snapshot.SnapshotId, err)
-	}
-
-	return nil
-}
-
-func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error) {
-	client, err := awslib.GetClient(&region, p.clients)
-	if err != nil {
-		return types.RouteTable{}, err
-	}
-
-	// Fetching route tables explicitly attached to the subnet
-	routeTables, err := client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{
-		Filters: []types.Filter{
-			{Name: &subnetAssociationIdFilterName, Values: []string{subnetId}},
-		},
-	})
-	if err != nil {
-		return types.RouteTable{}, err
-	}
-
-	// If there are no route tables explicitly attached to the subnet, it means the VPC main subnet is implicitly attached
-	if len(routeTables.RouteTables) == 0 {
-		routeTables, err = client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{Filters: []types.Filter{
-			{Name: &subnetMainAssociationFilterName, Values: []string{"true"}},
-			{Name: &subnetVpcIdFilterName, Values: []string{vpcId}},
-		}})
-
-		if err != nil {
-			return types.RouteTable{}, err
-		}
-	}
-
-	// A subnet should not have more than 1 attached route table
-	if len(routeTables.RouteTables) != 1 {
-		return types.RouteTable{}, fmt.Errorf("subnet %s has %d route tables", subnetId, len(routeTables.RouteTables))
-	}
-
-	return routeTables.RouteTables[0], nil
 }
 
 func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance) ([]*Volume, error) {
@@ -372,4 +252,124 @@ func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance
 		return result, nil
 	})
 	return lo.Flatten(volumes), err
+}
+
+func (p *Provider) DescribeVpcPeeringConnections(ctx context.Context) ([]awslib.AwsResource, error) {
+	peerings, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var all []types.VpcPeeringConnection
+		input := &ec2.DescribeVpcPeeringConnectionsInput{}
+		for {
+			output, err := c.DescribeVpcPeeringConnections(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.VpcPeeringConnections...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, peering := range all {
+			result = append(result, VpcPeeringConnectionInfo{
+				VpcPeeringConnection: peering,
+				awsAccount:           p.awsAccountID,
+				region:               region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(peerings), err
+}
+
+func (p *Provider) DescribeVpcs(ctx context.Context) ([]awslib.AwsResource, error) {
+	vpcs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var all []types.Vpc
+		input := &ec2.DescribeVpcsInput{}
+		for {
+			output, err := c.DescribeVpcs(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.Vpcs...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, vpc := range all {
+			logs, err := c.DescribeFlowLogs(ctx, &ec2.DescribeFlowLogsInput{Filter: []types.Filter{
+				{
+					Name:   aws.String("resource-id"),
+					Values: []string{*vpc.VpcId},
+				},
+			}})
+			if err != nil {
+				p.log.Errorf("Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
+				continue
+			}
+
+			result = append(result, VpcInfo{
+				Vpc:        vpc,
+				FlowLogs:   logs.FlowLogs,
+				awsAccount: p.awsAccountID,
+				region:     region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(vpcs), err
+}
+
+func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error) {
+	return awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) (awslib.AwsResource, error) {
+		res, err := c.GetEbsEncryptionByDefault(ctx, &ec2.GetEbsEncryptionByDefaultInput{})
+		if err != nil {
+			return nil, err
+		}
+		return &EBSEncryption{
+			Enabled:    *res.EbsEncryptionByDefault,
+			region:     region,
+			awsAccount: p.awsAccountID,
+		}, nil
+	})
+}
+
+func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error) {
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return types.RouteTable{}, err
+	}
+
+	// Fetching route tables explicitly attached to the subnet
+	routeTables, err := client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{
+		Filters: []types.Filter{
+			{Name: &subnetAssociationIdFilterName, Values: []string{subnetId}},
+		},
+	})
+	if err != nil {
+		return types.RouteTable{}, err
+	}
+
+	// If there are no route tables explicitly attached to the subnet, it means the VPC main subnet is implicitly attached
+	if len(routeTables.RouteTables) == 0 {
+		routeTables, err = client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{Filters: []types.Filter{
+			{Name: &subnetMainAssociationFilterName, Values: []string{"true"}},
+			{Name: &subnetVpcIdFilterName, Values: []string{vpcId}},
+		}})
+
+		if err != nil {
+			return types.RouteTable{}, err
+		}
+	}
+
+	// A subnet should not have more than 1 attached route table
+	if len(routeTables.RouteTables) != 1 {
+		return types.RouteTable{}, fmt.Errorf("subnet %s has %d route tables", subnetId, len(routeTables.RouteTables))
+	}
+
+	return routeTables.RouteTables[0], nil
 }
