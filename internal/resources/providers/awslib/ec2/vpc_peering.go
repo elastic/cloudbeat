@@ -27,7 +27,7 @@ import (
 )
 
 type VpcPeeringConnectionInfo struct {
-	VpcPeeringConnection types.VpcPeeringConnection `json:"vpc"`
+	VpcPeeringConnection types.VpcPeeringConnection `json:"vpc_peering_connection"`
 	awsAccount           string
 	region               string
 }
