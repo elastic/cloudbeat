@@ -54,6 +54,7 @@ const (
 	SecurityHubType           = "aws-securityhub"
 	TrailType                 = "aws-trail"
 	VpcType                   = "aws-vpc"
+	VpcPeeringConnectionType  = "aws-vpc-peering-connection"
 
 	// GCP subtypes
 	GcpLoggingType    = "gcp-logging"

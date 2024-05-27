@@ -46,6 +46,7 @@ type Client interface {
 	DescribeNetworkAcls(ctx context.Context, params *ec2.DescribeNetworkAclsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkAclsOutput, error)
 	DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
 	DescribeVpcs(ctx context.Context, params *ec2.DescribeVpcsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeVpcsOutput, error)
+	ec2.DescribeVpcPeeringConnectionsAPIClient
 	DescribeFlowLogs(ctx context.Context, params *ec2.DescribeFlowLogsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeFlowLogsOutput, error)
 	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
 	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
@@ -149,6 +150,35 @@ func (p *Provider) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, erro
 		return result, nil
 	})
 	return lo.Flatten(vpcs), err
+}
+
+func (p *Provider) DescribeVpcPeeringConnections(ctx context.Context) ([]awslib.AwsResource, error) {
+	peerings, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var all []types.VpcPeeringConnection
+		input := &ec2.DescribeVpcPeeringConnectionsInput{}
+		for {
+			output, err := c.DescribeVpcPeeringConnections(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.VpcPeeringConnections...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, peering := range all {
+			result = append(result, VpcPeeringConnectionInfo{
+				VpcPeeringConnection: peering,
+				awsAccount:           p.awsAccountID,
+				region:               region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(peerings), err
 }
 
 func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error) {

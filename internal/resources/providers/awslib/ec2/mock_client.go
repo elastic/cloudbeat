@@ -669,6 +669,76 @@ func (_c *MockClient_DescribeVolumes_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// DescribeVpcPeeringConnections provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeVpcPeeringConnections(_a0 context.Context, _a1 *serviceec2.DescribeVpcPeeringConnectionsInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcPeeringConnectionsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.DescribeVpcPeeringConnectionsOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeVpcPeeringConnectionsInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcPeeringConnectionsOutput, error)); ok {
+		return rf(_a0, _a1, _a2...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeVpcPeeringConnectionsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeVpcPeeringConnectionsOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.DescribeVpcPeeringConnectionsOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeVpcPeeringConnectionsInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_DescribeVpcPeeringConnections_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeVpcPeeringConnections'
+type MockClient_DescribeVpcPeeringConnections_Call struct {
+	*mock.Call
+}
+
+// DescribeVpcPeeringConnections is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeVpcPeeringConnectionsInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeVpcPeeringConnections(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeVpcPeeringConnections_Call {
+	return &MockClient_DescribeVpcPeeringConnections_Call{Call: _e.mock.On("DescribeVpcPeeringConnections",
+		append([]interface{}{_a0, _a1}, _a2...)...)}
+}
+
+func (_c *MockClient_DescribeVpcPeeringConnections_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeVpcPeeringConnectionsInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeVpcPeeringConnections_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.DescribeVpcPeeringConnectionsInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeVpcPeeringConnections_Call) Return(_a0 *serviceec2.DescribeVpcPeeringConnectionsOutput, _a1 error) *MockClient_DescribeVpcPeeringConnections_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_DescribeVpcPeeringConnections_Call) RunAndReturn(run func(context.Context, *serviceec2.DescribeVpcPeeringConnectionsInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcPeeringConnectionsOutput, error)) *MockClient_DescribeVpcPeeringConnections_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DescribeVpcs provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) DescribeVpcs(ctx context.Context, params *serviceec2.DescribeVpcsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcsOutput, error) {
 	_va := make([]interface{}, len(optFns))
