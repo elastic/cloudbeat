@@ -47,6 +47,7 @@ type Client interface {
 	DeleteSnapshot(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options)) (*ec2.DeleteSnapshotOutput, error)
 	ec2.DescribeFlowLogsAPIClient
 	ec2.DescribeInstancesAPIClient
+	ec2.DescribeNatGatewaysAPIClient
 	ec2.DescribeNetworkAclsAPIClient
 	ec2.DescribeRouteTablesAPIClient
 	ec2.DescribeSecurityGroupsAPIClient
@@ -131,6 +132,35 @@ func (p *Provider) DescribeInstances(ctx context.Context) ([]*Ec2Instance, error
 		return result, nil
 	})
 	return lo.Flatten(insances), err
+}
+
+func (p *Provider) DescribeNatGateways(ctx context.Context) ([]awslib.AwsResource, error) {
+	gateways, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		input := &ec2.DescribeNatGatewaysInput{}
+		all := []types.NatGateway{}
+		for {
+			output, err := c.DescribeNatGateways(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.NatGateways...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, item := range all {
+			result = append(result, NatGatewayInfo{
+				NatGateway: item,
+				awsAccount: p.awsAccountID,
+				region:     region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(gateways), err
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {

@@ -45,6 +45,7 @@ const (
 	IAMUserType               = "aws-iam-user"
 	KmsType                   = "aws-kms"
 	MultiTrailsType           = "aws-multi-trails"
+	NatGateway                = "aws-nat-gateway"
 	NetworkNACLType           = "aws-nacl"
 	PolicyType                = "aws-policy"
 	PwdPolicyType             = "aws-password-policy"
@@ -53,8 +54,8 @@ const (
 	SecurityGroupType         = "aws-security-group"
 	SecurityHubType           = "aws-securityhub"
 	TrailType                 = "aws-trail"
-	VpcType                   = "aws-vpc"
 	VpcPeeringConnectionType  = "aws-vpc-peering-connection"
+	VpcType                   = "aws-vpc"
 
 	// GCP subtypes
 	GcpLoggingType    = "gcp-logging"
