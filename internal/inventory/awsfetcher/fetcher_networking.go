@@ -43,7 +43,7 @@ var networkingClassification = inventory.AssetClassification{
 }
 
 type networkingProvider interface {
-	// Internet Gateway
+	DescribeInternetGateways(context.Context) ([]awslib.AwsResource, error)
 	DescribeNatGateways(context.Context) ([]awslib.AwsResource, error)
 	DescribeNetworkAcl(context.Context) ([]awslib.AwsResource, error)
 	DescribeNetworkInterfaces(context.Context) ([]awslib.AwsResource, error)
@@ -67,7 +67,7 @@ func newNetworkingFetcher(logger *logp.Logger, identity *cloud.Identity, provide
 func (s *networkingFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	// Type, SubType
 	fetchmap := map[string]fetchmapFunc{
-		// Internet Gateway
+		"Internet Gateways":           s.provider.DescribeInternetGateways,          // Virtual Network, Internet Gateway
 		"NAT Gateways":                s.provider.DescribeNatGateways,               // Virtual Network, NAT Gateway
 		"Network ACLs":                s.provider.DescribeNetworkAcl,                // Identity, Authorization, ACL, VPC ACL
 		"Network Interfaces":          s.provider.DescribeNetworkInterfaces,         // Interface, EC2 Network Interface
