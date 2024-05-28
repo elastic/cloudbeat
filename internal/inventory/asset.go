@@ -38,6 +38,7 @@ const (
 	SubCategoryCompute  assetSubCategory = "compute"
 	SubCategoryStorage  assetSubCategory = "storage"
 	SubCategoryDatabase assetSubCategory = "database"
+	SubCategoryNetwork  assetSubCategory = "network"
 
 	SubCategoryCloudProviderAccount assetSubCategory = "cloud-provider-account"
 )
