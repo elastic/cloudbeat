@@ -52,6 +52,7 @@ type Client interface {
 	ec2.DescribeRouteTablesAPIClient
 	ec2.DescribeSecurityGroupsAPIClient
 	ec2.DescribeSnapshotsAPIClient
+	ec2.DescribeTransitGatewayAttachmentsAPIClient
 	ec2.DescribeTransitGatewaysAPIClient
 	ec2.DescribeVolumesAPIClient
 	ec2.DescribeVpcsAPIClient
@@ -238,6 +239,35 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID, snapshot.Instance))
 	}
 	return result, nil
+}
+
+func (p *Provider) DescribeTransitGatewayAttachments(ctx context.Context) ([]awslib.AwsResource, error) {
+	attachments, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		input := &ec2.DescribeTransitGatewayAttachmentsInput{}
+		all := []types.TransitGatewayAttachment{}
+		for {
+			output, err := c.DescribeTransitGatewayAttachments(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.TransitGatewayAttachments...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, item := range all {
+			result = append(result, TransitGatewayAttachmentInfo{
+				TransitGatewayAttachment: item,
+				awsAccount:               p.awsAccountID,
+				region:                   region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(attachments), err
 }
 
 func (p *Provider) DescribeTransitGateways(ctx context.Context) ([]awslib.AwsResource, error) {
