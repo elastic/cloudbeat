@@ -28,17 +28,17 @@ import (
 
 type InternetGatewayInfo struct {
 	InternetGateway types.InternetGateway `json:"internet_gateway"`
-	awsAccount      string
 	region          string
 }
 
 func (v InternetGatewayInfo) GetResourceArn() string {
+	account := pointers.Deref(v.InternetGateway.OwnerId)
 	id := pointers.Deref(v.InternetGateway.InternetGatewayId)
-	if id == "" {
+	if account == "" || id == "" {
 		return ""
 	}
 	// TODO(kuba) find out the actual ARN format
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, v.awsAccount, id)
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, account, id)
 }
 
 func (v InternetGatewayInfo) GetResourceName() string {

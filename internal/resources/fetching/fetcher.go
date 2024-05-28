@@ -43,6 +43,7 @@ const (
 	IAMServerCertificateType  = "aws-iam-server-certificate"
 	IAMType                   = "aws-iam"
 	IAMUserType               = "aws-iam-user"
+	InternetGateway           = "aws-internet-gateway"
 	KmsType                   = "aws-kms"
 	MultiTrailsType           = "aws-multi-trails"
 	NatGateway                = "aws-nat-gateway"

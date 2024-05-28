@@ -159,8 +159,7 @@ func (p *Provider) DescribeInternetGateways(ctx context.Context) ([]awslib.AwsRe
 		for _, item := range all {
 			result = append(result, &InternetGatewayInfo{
 				InternetGateway: item,
-				awsAccount:      p.awsAccountID,
-				Region:          region,
+				region:          region,
 			})
 		}
 		return result, nil

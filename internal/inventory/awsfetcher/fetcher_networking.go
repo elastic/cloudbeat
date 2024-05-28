@@ -27,7 +27,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
-type describeFunc func(context.Context) ([]awslib.AwsResource, error)
 type networkingFetcher struct {
 	logger      *logp.Logger
 	provider    networkingProvider
@@ -35,6 +34,7 @@ type networkingFetcher struct {
 	AccountName string
 }
 
+type describeFunc func(context.Context) ([]awslib.AwsResource, error)
 type networkingProvider interface {
 	DescribeInternetGateways(context.Context) ([]awslib.AwsResource, error)
 	DescribeNatGateways(context.Context) ([]awslib.AwsResource, error)
