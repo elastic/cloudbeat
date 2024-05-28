@@ -52,6 +52,7 @@ type Client interface {
 	ec2.DescribeRouteTablesAPIClient
 	ec2.DescribeSecurityGroupsAPIClient
 	ec2.DescribeSnapshotsAPIClient
+	ec2.DescribeTransitGatewaysAPIClient
 	ec2.DescribeVolumesAPIClient
 	ec2.DescribeVpcsAPIClient
 	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
@@ -237,6 +238,34 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID, snapshot.Instance))
 	}
 	return result, nil
+}
+
+func (p *Provider) DescribeTransitGateways(ctx context.Context) ([]awslib.AwsResource, error) {
+	gateways, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		input := &ec2.DescribeTransitGatewaysInput{}
+		all := []types.TransitGateway{}
+		for {
+			output, err := c.DescribeTransitGateways(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.TransitGateways...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, item := range all {
+			result = append(result, TransitGatewayInfo{
+				TransitGateway: item,
+				region:         region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(gateways), err
 }
 
 func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance) ([]*Volume, error) {

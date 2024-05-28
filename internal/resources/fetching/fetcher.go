@@ -54,6 +54,7 @@ const (
 	SecurityGroupType         = "aws-security-group"
 	SecurityHubType           = "aws-securityhub"
 	TrailType                 = "aws-trail"
+	TransitGateway            = "aws-transit-gateway"
 	VpcPeeringConnectionType  = "aws-vpc-peering-connection"
 	VpcType                   = "aws-vpc"
 
