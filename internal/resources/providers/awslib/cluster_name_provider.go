@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
@@ -84,7 +85,7 @@ func (provider EKSClusterNameProvider) getClusterNameFromInstanceTags(ctx contex
 			for _, instance := range reservation.Instances {
 				if *instance.InstanceId == instanceId {
 					for _, tag := range instance.Tags {
-						if *tag.Key == clusterNameTag {
+						if strings.HasSuffix(*tag.Key, clusterNameTag) {
 							return *tag.Value, nil
 						}
 					}
