@@ -53,6 +53,7 @@ const (
 	S3Type                    = "aws-s3"
 	SecurityGroupType         = "aws-security-group"
 	SecurityHubType           = "aws-securityhub"
+	Subnet                    = "aws-subnet"
 	TrailType                 = "aws-trail"
 	TransitGateway            = "aws-transit-gateway"
 	TransitGatewayAttachment  = "aws-transit-gateway-attachment"
