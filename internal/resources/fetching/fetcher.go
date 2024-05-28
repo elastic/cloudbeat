@@ -47,6 +47,7 @@ const (
 	MultiTrailsType           = "aws-multi-trails"
 	NatGateway                = "aws-nat-gateway"
 	NetworkNACLType           = "aws-nacl"
+	NetworkInterface          = "aws-network-interface"
 	PolicyType                = "aws-policy"
 	PwdPolicyType             = "aws-password-policy"
 	RdsType                   = "aws-rds"

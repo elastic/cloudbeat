@@ -459,6 +459,76 @@ func (_c *MockClient_DescribeNetworkAcls_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// DescribeNetworkInterfaces provides a mock function with given fields: _a0, _a1, _a2
+func (_m *MockClient) DescribeNetworkInterfaces(_a0 context.Context, _a1 *serviceec2.DescribeNetworkInterfacesInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeNetworkInterfacesOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.DescribeNetworkInterfacesOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeNetworkInterfacesInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeNetworkInterfacesOutput, error)); ok {
+		return rf(_a0, _a1, _a2...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeNetworkInterfacesInput, ...func(*serviceec2.Options)) *serviceec2.DescribeNetworkInterfacesOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.DescribeNetworkInterfacesOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeNetworkInterfacesInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_DescribeNetworkInterfaces_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeNetworkInterfaces'
+type MockClient_DescribeNetworkInterfaces_Call struct {
+	*mock.Call
+}
+
+// DescribeNetworkInterfaces is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *serviceec2.DescribeNetworkInterfacesInput
+//   - _a2 ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeNetworkInterfaces(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *MockClient_DescribeNetworkInterfaces_Call {
+	return &MockClient_DescribeNetworkInterfaces_Call{Call: _e.mock.On("DescribeNetworkInterfaces",
+		append([]interface{}{_a0, _a1}, _a2...)...)}
+}
+
+func (_c *MockClient_DescribeNetworkInterfaces_Call) Run(run func(_a0 context.Context, _a1 *serviceec2.DescribeNetworkInterfacesInput, _a2 ...func(*serviceec2.Options))) *MockClient_DescribeNetworkInterfaces_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.DescribeNetworkInterfacesInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeNetworkInterfaces_Call) Return(_a0 *serviceec2.DescribeNetworkInterfacesOutput, _a1 error) *MockClient_DescribeNetworkInterfaces_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_DescribeNetworkInterfaces_Call) RunAndReturn(run func(context.Context, *serviceec2.DescribeNetworkInterfacesInput, ...func(*serviceec2.Options)) (*serviceec2.DescribeNetworkInterfacesOutput, error)) *MockClient_DescribeNetworkInterfaces_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DescribeRouteTables provides a mock function with given fields: _a0, _a1, _a2
 func (_m *MockClient) DescribeRouteTables(_a0 context.Context, _a1 *serviceec2.DescribeRouteTablesInput, _a2 ...func(*serviceec2.Options)) (*serviceec2.DescribeRouteTablesOutput, error) {
 	_va := make([]interface{}, len(_a2))

@@ -49,6 +49,7 @@ type Client interface {
 	ec2.DescribeInstancesAPIClient
 	ec2.DescribeNatGatewaysAPIClient
 	ec2.DescribeNetworkAclsAPIClient
+	ec2.DescribeNetworkInterfacesAPIClient
 	ec2.DescribeRouteTablesAPIClient
 	ec2.DescribeSecurityGroupsAPIClient
 	ec2.DescribeSnapshotsAPIClient
@@ -193,6 +194,34 @@ func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource
 		return result, nil
 	})
 	return lo.Flatten(nacl), err
+}
+
+func (p *Provider) DescribeNetworkInterfaces(ctx context.Context) ([]awslib.AwsResource, error) {
+	interfaces, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		input := &ec2.DescribeNetworkInterfacesInput{}
+		all := []types.NetworkInterface{}
+		for {
+			output, err := c.DescribeNetworkInterfaces(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.NetworkInterfaces...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, item := range all {
+			result = append(result, NetworkInterfaceInfo{
+				NetworkInterface: item,
+				region:           region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(interfaces), err
 }
 
 func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
