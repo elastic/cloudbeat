@@ -45,6 +45,13 @@ Follow these steps to run the workflow:
 
     - **`run-sanity-tests`** (**optional**): Set to `true` to run sanity tests after the environment is set up. Default: `false`
 
+    - **`run-ui-sanity-tests`** (**optional**): Set to `true` to run [Kibana UI sanity tests](/.github/actions/kibana-ftr/README.md) after the environment is set up. Default: `false`
+
+    - **`kibana_ref`** (**optional**): Specifies the Kibana branch, tag, or commit SHA to check out for the UI sanity tests, which will be executed after the environment is set up. This should correspond to the version of the `elk-stack-version` provisioned by this workflow. For the current version in development, use Kibana's `main` branch. Default: `main`. Examples of different inputs:
+      - Specifying Branch: `main`
+      - Specifying Tag: `v8.13.4`
+      - Specifying Commit SHA: `c776cf650e962f04330789a9f113bd4bbd6d7c61`
+
     - **`cleanup-env`** (**optional**): Set to `true` if you want the resources to automatically be cleaned up after
       provisioning - useful if you don't want to test the env manually after deployment.
       Default: `false`.
@@ -55,9 +62,9 @@ Follow these steps to run the workflow:
       [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
       step-by-step instructions on generating the token.
 
-   ![Optional Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/17933589-ee0e-4181-a244-f501f54bda6c)
+   ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/c3259dd8-0e63-429b-9738-e1374eb8309b)
 
-5. Click the `Run workflow` button to start.
+1. Click the `Run workflow` button to start.
 
    ![Run Workflow](https://github.com/oren-zohar/cloudbeat/assets/85433724/7b05bf58-cc0b-4ec9-8e49-55d117673df8)
 
@@ -160,14 +167,14 @@ Follow these steps to run the workflow:
 
     - `prefix` (required): The prefix used to identify the environments to be deleted.
 
-   <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91">
+   <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91" />
 
 4. Optionally, modify other input value if required:
 
     - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
     - `ec-api-key` (required): Use your own [Elastic Cloud](https://cloud.elastic.co/home) API key if you want to delete environments from your Elastic Cloud account.
 
-   <img width="411" alt="Optional Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/aa89ad4e-fd32-461d-ab2d-3fee28094a9d">
+   <img width="411" alt="Optional Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/aa89ad4e-fd32-461d-ab2d-3fee28094a9d" />
 
 5. Click the `Run workflow` button to start.
 

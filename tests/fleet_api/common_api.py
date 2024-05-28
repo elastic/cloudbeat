@@ -124,7 +124,6 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
@@ -158,7 +157,6 @@ def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def get_arm_template(url: str, template_path: str):
@@ -189,7 +187,6 @@ def get_arm_template(url: str, template_path: str):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def get_build_info(version: str) -> str:
