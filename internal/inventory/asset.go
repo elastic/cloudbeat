@@ -23,47 +23,64 @@ import (
 	"fmt"
 )
 
-// assetCategory is used to build the document index. Use only numbers, letters and dashes (-)
-type assetCategory string
+// AssetCategory is used to build the document index. Use only numbers, letters and dashes (-)
+type AssetCategory string
 
 const (
-	CategoryInfrastructure assetCategory = "infrastructure"
-	CategoryIdentity       assetCategory = "identity"
+	CategoryInfrastructure AssetCategory = "infrastructure"
+	CategoryIdentity       AssetCategory = "identity"
 )
 
-// assetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
-type assetSubCategory string
+// AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
+type AssetSubCategory string
 
 const (
-	SubCategoryCompute  assetSubCategory = "compute"
-	SubCategoryStorage  assetSubCategory = "storage"
-	SubCategoryDatabase assetSubCategory = "database"
-	SubCategoryNetwork  assetSubCategory = "network"
+	SubCategoryAuthorization AssetSubCategory = "authorization"
+	SubCategoryCompute       AssetSubCategory = "compute"
+	SubCategoryStorage       AssetSubCategory = "storage"
+	SubCategoryDatabase      AssetSubCategory = "database"
+	SubCategoryNetwork       AssetSubCategory = "network"
 
-	SubCategoryCloudProviderAccount assetSubCategory = "cloud-provider-account"
+	SubCategoryCloudProviderAccount AssetSubCategory = "cloud-provider-account"
 )
 
-// assetType is used to build the document index. Use only numbers, letters and dashes (-)
-type assetType string
+// AssetType is used to build the document index. Use only numbers, letters and dashes (-)
+type AssetType string
 
 const (
-	TypeVirtualMachine     assetType = "virtual-machine"
-	TypeObjectStorage      assetType = "object-storage"
-	TypeRelationalDatabase assetType = "relational-database"
+	TypeAcl                AssetType = "acl"
+	TypeFirewall           AssetType = "firewall"
+	TypeInterface          AssetType = "interface"
+	TypeObjectStorage      AssetType = "object-storage"
+	TypePeering            AssetType = "peering"
+	TypeRelationalDatabase AssetType = "relational-database"
+	TypeSubnet             AssetType = "subnet"
+	TypeVirtualMachine     AssetType = "virtual-machine"
+	TypeVirtualNetwork     AssetType = "virtual-network"
 
-	TypeUser           assetType = "user"
-	TypeServiceAccount assetType = "service-account"
-	TypePermissions    assetType = "permissions"
+	TypePermissions    AssetType = "permissions"
+	TypeServiceAccount AssetType = "service-account"
+	TypeUser           AssetType = "user"
 )
 
-// assetSubType is used to build the document index. Use only numbers, letters and dashes (-)
-type assetSubType string
+// AssetSubType is used to build the document index. Use only numbers, letters and dashes (-)
+type AssetSubType string
 
 const (
-	SubTypeEC2 assetSubType = "ec2"
-	SubTypeS3  assetSubType = "s3"
-	SubTypeIAM assetSubType = "iam"
-	SubTypeRDS assetSubType = "rds"
+	SubTypeEC2                      AssetSubType = "ec2"
+	SubTypeS3                       AssetSubType = "s3"
+	SubTypeIAM                      AssetSubType = "iam"
+	SubTypeRDS                      AssetSubType = "rds"
+	SubTypeEC2NetworkInterface      AssetSubType = "ec2-network-interface"
+	SubTypeEC2Subnet                AssetSubType = "ec2-subnet"
+	SubTypeInternetGateway          AssetSubType = "internet-gateway"
+	SubTypeNatGateway               AssetSubType = "nat-gateway"
+	SubTypeSecurityGroup            AssetSubType = "security-group"
+	SubTypeTransitGateway           AssetSubType = "transit-gateway"
+	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
+	SubTypeVpc                      AssetSubType = "vpc"
+	SubTypeVpcAcl                   AssetSubType = "vpc-acl"
+	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connections"
 )
 
 const (
@@ -82,10 +99,10 @@ type AssetEvent struct {
 
 // AssetClassification holds the taxonomy of an asset
 type AssetClassification struct {
-	Category    assetCategory    `json:"category"`
-	SubCategory assetSubCategory `json:"sub_category"`
-	Type        assetType        `json:"type"`
-	SubType     assetSubType     `json:"sub_type"`
+	Category    AssetCategory    `json:"category"`
+	SubCategory AssetSubCategory `json:"sub_category"`
+	Type        AssetType        `json:"type"`
+	SubType     AssetSubType     `json:"sub_type"`
 }
 
 // Asset contains the identifiers of the asset

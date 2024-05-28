@@ -27,19 +27,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
-type fetchmapFunc func(context.Context) ([]awslib.AwsResource, error)
+type describeFunc func(context.Context) ([]awslib.AwsResource, error)
 type networkingFetcher struct {
 	logger      *logp.Logger
 	provider    networkingProvider
 	AccountId   string
 	AccountName string
-}
-
-// TODO(kuba): dynamic classification
-var networkingClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryInfrastructure,
-	SubCategory: inventory.SubCategoryNetwork,
-	Type:        inventory.TypeRelationalDatabase,
 }
 
 type networkingProvider interface {
@@ -65,25 +58,33 @@ func newNetworkingFetcher(logger *logp.Logger, identity *cloud.Identity, provide
 }
 
 func (s *networkingFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
-	// Type, SubType
-	fetchmap := map[string]fetchmapFunc{
-		"Internet Gateways":           s.provider.DescribeInternetGateways,          // Virtual Network, Internet Gateway
-		"NAT Gateways":                s.provider.DescribeNatGateways,               // Virtual Network, NAT Gateway
-		"Network ACLs":                s.provider.DescribeNetworkAcl,                // Identity, Authorization, ACL, VPC ACL
-		"Network Interfaces":          s.provider.DescribeNetworkInterfaces,         // Interface, EC2 Network Interface
-		"Security Groups":             s.provider.DescribeSecurityGroups,            // Firewall, Security Group
-		"Subnets":                     s.provider.DescribeSubnets,                   // Subnet, EC2 Subnet
-		"Transit Gateways":            s.provider.DescribeTransitGateways,           // Virtual Network, Transit Gateway
-		"Transit Gateway Attachments": s.provider.DescribeTransitGatewayAttachments, // Virtual Network, Transit Gateway Attachment
-		"VPC Peering Connections":     s.provider.DescribeVpcPeeringConnections,     // Peering, VPC Peering Connection
-		"VPCs":                        s.provider.DescribeVpcs,                      // Virtual Network, VPC
+	resourcesToFetch := []struct {
+		name           string
+		function       describeFunc
+		classification inventory.AssetClassification
+	}{
+		{"Internet Gateways", s.provider.DescribeInternetGateways, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeInternetGateway)},
+		{"NAT Gateways", s.provider.DescribeNatGateways, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeNatGateway)},
+		{"Network ACLs", s.provider.DescribeNetworkAcl, inventory.AssetClassification{
+			Category:    inventory.CategoryIdentity,
+			SubCategory: inventory.SubCategoryAuthorization,
+			Type:        inventory.TypeAcl,
+			SubType:     inventory.SubTypeVpcAcl,
+		}},
+		{"Network Interfaces", s.provider.DescribeNetworkInterfaces, newNetworkClassification(inventory.TypeInterface, inventory.SubTypeEC2NetworkInterface)},
+		{"Security Groups", s.provider.DescribeSecurityGroups, newNetworkClassification(inventory.TypeFirewall, inventory.SubTypeSecurityGroup)},
+		{"Subnets", s.provider.DescribeSubnets, newNetworkClassification(inventory.TypeSubnet, inventory.SubTypeEC2Subnet)},
+		{"Transit Gateways", s.provider.DescribeTransitGateways, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeTransitGateway)},
+		{"Transit Gateway Attachments", s.provider.DescribeTransitGatewayAttachments, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeTransitGatewayAttachment)},
+		{"VPC Peering Connections", s.provider.DescribeVpcPeeringConnections, newNetworkClassification(inventory.TypePeering, inventory.SubTypeVpcPeeringConnection)},
+		{"VPCs", s.provider.DescribeVpcs, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeVpc)},
 	}
-	for resourceName, function := range fetchmap {
-		s.fetch(ctx, resourceName, function, assetChannel)
+	for _, r := range resourcesToFetch {
+		s.fetch(ctx, r.name, r.function, r.classification, assetChannel)
 	}
 }
 
-func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, function fetchmapFunc, assetChannel chan<- inventory.AssetEvent) {
+func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, function describeFunc, classification inventory.AssetClassification, assetChannel chan<- inventory.AssetEvent) {
 	s.logger.Infof("Fetching %s", resourceName)
 	defer s.logger.Infof("Fetching %s - Finished", resourceName)
 
@@ -92,10 +93,6 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 		s.logger.Errorf("Could not fetch %s: %v", resourceName, err)
 		return
 	}
-
-	classification := networkingClassification
-	// TODO
-	classification.SubType = "TODO(kuba)"
 
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
@@ -111,10 +108,18 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 					Name: s.AccountName,
 				},
 				Service: &inventory.AssetCloudService{
-					// TODO(kuba):
-					Name: "Networking",
+					Name: "AWS Networking",
 				},
 			}),
 		)
+	}
+}
+
+func newNetworkClassification(assetType inventory.AssetType, assetSubType inventory.AssetSubType) inventory.AssetClassification {
+	return inventory.AssetClassification{
+		Category:    inventory.CategoryInfrastructure,
+		SubCategory: inventory.SubCategoryNetwork,
+		Type:        assetType,
+		SubType:     assetSubType,
 	}
 }
