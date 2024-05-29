@@ -45,6 +45,7 @@ type Provider struct {
 type Client interface {
 	CreateSnapshots(ctx context.Context, params *ec2.CreateSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.CreateSnapshotsOutput, error)
 	DeleteSnapshot(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options)) (*ec2.DeleteSnapshotOutput, error)
+	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
 	ec2.DescribeFlowLogsAPIClient
 	ec2.DescribeInstancesAPIClient
 	ec2.DescribeInternetGatewaysAPIClient
@@ -59,7 +60,6 @@ type Client interface {
 	ec2.DescribeTransitGatewaysAPIClient
 	ec2.DescribeVolumesAPIClient
 	ec2.DescribeVpcsAPIClient
-	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
 	ec2.DescribeVpcPeeringConnectionsAPIClient
 }
 
