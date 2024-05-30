@@ -1,0 +1,60 @@
+name: 'Run Kibana FTR'
+description: 'Run Kibana tests using FTR'
+
+inputs:
+  test_kibana_url:
+    description: 'URL for the Kibana instance to test'
+    required: true
+  test_es_url:
+    description: 'URL for the ES instance'
+    required: true
+  es_version:
+    description: 'Version of Elasticsearch to test against'
+    required: true
+  kibana_ref:
+    description: 'Kibana PR commit sha'
+    required: false
+    default: 'main'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set global variables
+      id: globals
+      shell: bash
+      run: |
+        echo "KIBANA_DIR=kibana" >> "${GITHUB_OUTPUT}"
+
+    - name: Checkout Kibana Repository
+      uses: actions/checkout@v4
+      with:
+        repository: elastic/kibana
+        ref: ${{ inputs.kibana_ref }}
+        fetch-depth: 1
+        path: ${{ steps.globals.outputs.KIBANA_DIR }}
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: ${{ steps.globals.outputs.KIBANA_DIR }}/package.json
+
+    - name: Bootstrap Kibana
+      shell: bash
+      working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      run: |
+        yarn kbn bootstrap
+
+    - name: Run FTR
+      if: success()
+      shell: bash
+      working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      env:
+        TEST_KIBANA_URL: ${{ inputs.test_kibana_url }}
+        TEST_ES_URL: ${{ inputs.test_es_url }}
+        ES_VERSION: ${{ inputs.es_version }}
+        TEST_CLOUD: '1'
+        ES_SECURITY_ENABLED: '1'
+        TEST_BROWSER_HEADLESS: '1'
+        TEST_CONFIG: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
+      run: |
+        node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"

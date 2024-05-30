@@ -96,7 +96,6 @@ def delete_agent_policy(cfg: Munch, agent_policy_id: str):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def get_agent_policy_id_by_name(cfg: Munch, policy_name: str) -> str:
@@ -190,7 +189,6 @@ def unenroll_agents_from_policy(cfg: Munch, agents: list):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def create_agent_download_source(
