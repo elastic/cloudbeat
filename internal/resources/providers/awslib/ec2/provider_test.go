@@ -31,10 +31,74 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 var onlyDefaultRegion = []string{awslib.DefaultRegion}
+
+func TestProvider_DescribeInternetGateways(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeInternetGateways", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeInternetGateways", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeInternetGatewaysOutput{
+						InternetGateways: []types.InternetGateway{
+							{
+								Attachments: []types.InternetGatewayAttachment{
+									{State: "available", VpcId: pointers.Ref("vpc-0fda1d140c11370d4")},
+								},
+								InternetGatewayId: pointers.Ref("igw-0b5dba6f6aee1320c"),
+								OwnerId:           pointers.Ref("378890115541"),
+								Tags:              []types.Tag{},
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeInternetGateways(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
 
 func TestProvider_DescribeNetworkAcl(t *testing.T) {
 	tests := []struct {
