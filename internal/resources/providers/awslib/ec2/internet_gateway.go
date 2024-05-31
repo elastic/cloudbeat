@@ -37,8 +37,7 @@ func (v InternetGatewayInfo) GetResourceArn() string {
 	if account == "" || id == "" {
 		return ""
 	}
-	// TODO(kuba) find out the actual ARN format
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, account, id)
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:internet-gateway/%s", v.region, account, id)
 }
 
 func (v InternetGatewayInfo) GetResourceName() string {

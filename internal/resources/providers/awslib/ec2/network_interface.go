@@ -37,8 +37,7 @@ func (v NetworkInterfaceInfo) GetResourceArn() string {
 	if id == "" || account == "" {
 		return ""
 	}
-	// TODO(kuba) find out the actual ARN format
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, account, id)
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-interface/%s", v.region, account, id)
 }
 
 func (v NetworkInterfaceInfo) GetResourceName() string {

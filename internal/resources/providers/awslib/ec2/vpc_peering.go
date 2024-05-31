@@ -37,8 +37,7 @@ func (v VpcPeeringConnectionInfo) GetResourceArn() string {
 	if id == "" {
 		return ""
 	}
-	// TODO(kuba) find out the actual ARN format
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, v.awsAccount, id)
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc-peering-connection/%s", v.region, v.awsAccount, id)
 }
 
 func (v VpcPeeringConnectionInfo) GetResourceName() string {
