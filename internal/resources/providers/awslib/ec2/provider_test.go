@@ -445,10 +445,10 @@ func TestProvider_DescribeTransitGatewayAttachments(t *testing.T) {
 						TransitGatewayAttachments: []types.TransitGatewayAttachment{
 							{
 								CreationTime:               pointers.Ref(time.Now()),
-								ResourceId:                 pointers.Ref("subnet-0a8808bda599a731c"),
+								ResourceId:                 pointers.Ref("tgwa-0a8808bda599a731c"),
 								ResourceOwnerId:            pointers.Ref("378890115541"),
 								State:                      types.TransitGatewayAttachmentStateAvailable,
-								TransitGatewayAttachmentId: pointers.Ref("subnet-0a8808bda599a731c"),
+								TransitGatewayAttachmentId: pointers.Ref("tgwa-0a8808bda599a731c"),
 								TransitGatewayOwnerId:      pointers.Ref("378890115541"),
 							},
 						},
@@ -470,6 +470,68 @@ func TestProvider_DescribeTransitGatewayAttachments(t *testing.T) {
 				clients: clients,
 			}
 			got, err := p.DescribeTransitGatewayAttachments(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_DescribeTransitGateways(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeTransitGateways", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeTransitGateways", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeTransitGatewaysOutput{
+						TransitGateways: []types.TransitGateway{
+							{
+								CreationTime:      pointers.Ref(time.Now()),
+								Options:           &types.TransitGatewayOptions{},
+								State:             types.TransitGatewayStateAvailable,
+								TransitGatewayArn: pointers.Ref("arn:aws:ec2:eu-north-1:378890115541:transit-gateway/tgw-0a8808bda599a731c"),
+								TransitGatewayId:  pointers.Ref("tgw-0a8808bda599a731c"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeTransitGateways(context.Background())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
