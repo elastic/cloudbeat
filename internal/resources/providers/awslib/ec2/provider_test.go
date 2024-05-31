@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -89,6 +90,77 @@ func TestProvider_DescribeInternetGateways(t *testing.T) {
 				clients: clients,
 			}
 			got, err := p.DescribeInternetGateways(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_DescribeNatGateways(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeNatGateways", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeNatGateways", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeNatGatewaysOutput{
+						NatGateways: []types.NatGateway{
+							{
+								ConnectivityType: types.ConnectivityTypePrivate,
+								CreateTime:       pointers.Ref(time.Now()),
+								NatGatewayAddresses: []types.NatGatewayAddress{
+									{
+										IsPrimary:          pointers.Ref(true),
+										NetworkInterfaceId: pointers.Ref("if-abc"),
+										PrivateIp:          pointers.Ref("192.168.0.13"),
+										Status:             types.NatGatewayAddressStatusSucceeded,
+									},
+								},
+								NatGatewayId: pointers.Ref("ngw-0b5dba6f6aee1320c"),
+								State:        types.NatGatewayStateAvailable,
+								SubnetId:     pointers.Ref("subnet-0f3223435cc3222"),
+								VpcId:        pointers.Ref("vpc-0fda1d140c11370d4"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeNatGateways(context.Background())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
