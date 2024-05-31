@@ -347,6 +347,77 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 	}
 }
 
+func TestProvider_DescribeSubnets(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeSubnets", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeSubnets", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeSubnetsOutput{
+						Subnets: []types.Subnet{
+							{
+								AvailabilityZone:        pointers.Ref("eu-north-1b"),
+								AvailabilityZoneId:      pointers.Ref("eun1-az2"),
+								AvailableIpAddressCount: pointers.Ref(int32(4091)),
+								CidrBlock:               pointers.Ref("172.31.32.0/20"),
+								DefaultForAz:            pointers.Ref(true),
+								MapPublicIpOnLaunch:     pointers.Ref(true),
+								State:                   types.SubnetStateAvailable,
+								SubnetId:                pointers.Ref("subnet-0a8808bda599a731c"),
+								VpcId:                   pointers.Ref("vpc-0fda1d140c11370d4"),
+								OwnerId:                 pointers.Ref("378890115541"),
+								SubnetArn:               pointers.Ref("arn:aws:ec2:eu-north-1:378890115541:subnet/subnet-0a8808bda599a731c"),
+								PrivateDnsNameOptionsOnLaunch: &types.PrivateDnsNameOptionsOnLaunch{
+									HostnameType: types.HostnameTypeIpName,
+								},
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeSubnets(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
 func TestProvider_DescribeVpcs(t *testing.T) {
 	tests := []struct {
 		name            string
