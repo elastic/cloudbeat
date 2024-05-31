@@ -887,3 +887,65 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 		})
 	}
 }
+
+func TestProvider_DescribeVpcPeeringConnections(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeVpcPeeringConnections", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeVpcPeeringConnections", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeVpcPeeringConnectionsOutput{
+						VpcPeeringConnections: []types.VpcPeeringConnection{
+							{
+								AccepterVpcInfo:        &types.VpcPeeringConnectionVpcInfo{},
+								ExpirationTime:         pointers.Ref(time.Now()),
+								RequesterVpcInfo:       &types.VpcPeeringConnectionVpcInfo{},
+								Status:                 &types.VpcPeeringConnectionStateReason{},
+								VpcPeeringConnectionId: pointers.Ref("abc123"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeVpcPeeringConnections(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
