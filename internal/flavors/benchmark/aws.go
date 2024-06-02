@@ -23,7 +23,6 @@ import (
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
@@ -85,17 +84,17 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 }
 
 func (a *AWS) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	awsConfig, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, *awsConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	return &awsConfig, awsIdentity, nil
+	return awsConfig, awsIdentity, nil
 }
 
 func (a *AWS) checkDependencies() error {
