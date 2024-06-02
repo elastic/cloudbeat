@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -31,10 +32,145 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 var onlyDefaultRegion = []string{awslib.DefaultRegion}
+
+func TestProvider_DescribeInternetGateways(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeInternetGateways", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeInternetGateways", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeInternetGatewaysOutput{
+						InternetGateways: []types.InternetGateway{
+							{
+								Attachments: []types.InternetGatewayAttachment{
+									{State: "available", VpcId: pointers.Ref("vpc-0fda1d140c11370d4")},
+								},
+								InternetGatewayId: pointers.Ref("igw-0b5dba6f6aee1320c"),
+								OwnerId:           pointers.Ref("378890115541"),
+								Tags:              []types.Tag{},
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeInternetGateways(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_DescribeNatGateways(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeNatGateways", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeNatGateways", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeNatGatewaysOutput{
+						NatGateways: []types.NatGateway{
+							{
+								ConnectivityType: types.ConnectivityTypePrivate,
+								CreateTime:       pointers.Ref(time.Now()),
+								NatGatewayAddresses: []types.NatGatewayAddress{
+									{
+										IsPrimary:          pointers.Ref(true),
+										NetworkInterfaceId: pointers.Ref("if-abc"),
+										PrivateIp:          pointers.Ref("192.168.0.13"),
+										Status:             types.NatGatewayAddressStatusSucceeded,
+									},
+								},
+								NatGatewayId: pointers.Ref("ngw-0b5dba6f6aee1320c"),
+								State:        types.NatGatewayStateAvailable,
+								SubnetId:     pointers.Ref("subnet-0f3223435cc3222"),
+								VpcId:        pointers.Ref("vpc-0fda1d140c11370d4"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeNatGateways(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
 
 func TestProvider_DescribeNetworkAcl(t *testing.T) {
 	tests := []struct {
@@ -81,6 +217,68 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 				clients: clients,
 			}
 			got, err := p.DescribeNetworkAcl(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_DescribeNetworkInterfaces(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeNetworkInterfaces", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeNetworkInterfaces", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeNetworkInterfacesOutput{
+						NetworkInterfaces: []types.NetworkInterface{
+							{
+								Association:        &types.NetworkInterfaceAssociation{},
+								Attachment:         &types.NetworkInterfaceAttachment{},
+								NetworkInterfaceId: pointers.Ref("if-33289245489578947"),
+								SubnetId:           pointers.Ref("subnet-0f3223435cc3222"),
+								VpcId:              pointers.Ref("vpc-0fda1d140c11370d4"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeNetworkInterfaces(context.Background())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -149,7 +347,203 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 	}
 }
 
-func TestProvider_DescribeVPCs(t *testing.T) {
+func TestProvider_DescribeSubnets(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeSubnets", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeSubnets", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeSubnetsOutput{
+						Subnets: []types.Subnet{
+							{
+								AvailabilityZone:        pointers.Ref("eu-north-1b"),
+								AvailabilityZoneId:      pointers.Ref("eun1-az2"),
+								AvailableIpAddressCount: pointers.Ref(int32(4091)),
+								CidrBlock:               pointers.Ref("172.31.32.0/20"),
+								DefaultForAz:            pointers.Ref(true),
+								MapPublicIpOnLaunch:     pointers.Ref(true),
+								State:                   types.SubnetStateAvailable,
+								SubnetId:                pointers.Ref("subnet-0a8808bda599a731c"),
+								VpcId:                   pointers.Ref("vpc-0fda1d140c11370d4"),
+								OwnerId:                 pointers.Ref("378890115541"),
+								SubnetArn:               pointers.Ref("arn:aws:ec2:eu-north-1:378890115541:subnet/subnet-0a8808bda599a731c"),
+								PrivateDnsNameOptionsOnLaunch: &types.PrivateDnsNameOptionsOnLaunch{
+									HostnameType: types.HostnameTypeIpName,
+								},
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeSubnets(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_DescribeTransitGatewayAttachments(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeTransitGatewayAttachments", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeTransitGatewayAttachments", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeTransitGatewayAttachmentsOutput{
+						TransitGatewayAttachments: []types.TransitGatewayAttachment{
+							{
+								CreationTime:               pointers.Ref(time.Now()),
+								ResourceId:                 pointers.Ref("tgwa-0a8808bda599a731c"),
+								ResourceOwnerId:            pointers.Ref("378890115541"),
+								State:                      types.TransitGatewayAttachmentStateAvailable,
+								TransitGatewayAttachmentId: pointers.Ref("tgwa-0a8808bda599a731c"),
+								TransitGatewayOwnerId:      pointers.Ref("378890115541"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeTransitGatewayAttachments(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_DescribeTransitGateways(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeTransitGateways", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeTransitGateways", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeTransitGatewaysOutput{
+						TransitGateways: []types.TransitGateway{
+							{
+								CreationTime:      pointers.Ref(time.Now()),
+								Options:           &types.TransitGatewayOptions{},
+								State:             types.TransitGatewayStateAvailable,
+								TransitGatewayArn: pointers.Ref("arn:aws:ec2:eu-north-1:378890115541:transit-gateway/tgw-0a8808bda599a731c"),
+								TransitGatewayId:  pointers.Ref("tgw-0a8808bda599a731c"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeTransitGateways(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_DescribeVpcs(t *testing.T) {
 	tests := []struct {
 		name            string
 		client          func() Client
@@ -197,7 +591,7 @@ func TestProvider_DescribeVPCs(t *testing.T) {
 				clients: clients,
 			}
 
-			got, err := p.DescribeVPCs(context.Background())
+			got, err := p.DescribeVpcs(context.Background())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -490,6 +884,68 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestProvider_DescribeVpcPeeringConnections(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeVpcPeeringConnections", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeVpcPeeringConnections", mock.Anything, mock.Anything).
+					Return(&ec2.DescribeVpcPeeringConnectionsOutput{
+						VpcPeeringConnections: []types.VpcPeeringConnection{
+							{
+								AccepterVpcInfo:        &types.VpcPeeringConnectionVpcInfo{},
+								ExpirationTime:         pointers.Ref(time.Now()),
+								RequesterVpcInfo:       &types.VpcPeeringConnectionVpcInfo{},
+								Status:                 &types.VpcPeeringConnectionStateReason{},
+								VpcPeeringConnectionId: pointers.Ref("abc123"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     testhelper.NewLogger(t),
+				clients: clients,
+			}
+			got, err := p.DescribeVpcPeeringConnections(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
 		})
 	}
 }

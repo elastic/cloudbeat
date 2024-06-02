@@ -31,7 +31,7 @@ import (
 type ElasticCompute interface {
 	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
+	DescribeVpcs(ctx context.Context) ([]awslib.AwsResource, error)
 	GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error)
 	GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error)
 }
