@@ -25,13 +25,13 @@ jobs:
           AUTHOR_NAME: ${{ github.event.workflow_run.head_commit.author.name }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          echo "The Workflow Run ${{ env.WORKFLOW_RUN_NAME }} has failed! " >> $GITHUB_STEP_SUMMARY
-          echo "View the failed run attempt (#${{ env.WORKFLOW_RUN_ATTEMPT }}) here: ${{ env.WORKFLOW_RUN_HTML_URL }}" >> $GITHUB_STEP_SUMMARY
-          echo "Workflow Run ID: ${{ env.WORKFLOW_RUN_ID }}"
-          echo "Job ID: ${{ env.GITHUB_JOB }}"
-          echo "Current run: ${{ env.GITHUB_RUN_ATTEMPT }}"
-          echo "Author: ${{ env.AUTHOR_NAME }}"
-          echo "Actor: ${{ env.GITHUB_ACTOR }}"
+          echo "The Workflow Run $WORKFLOW_RUN_NAME has failed! " >> $GITHUB_STEP_SUMMARY
+          echo "View the failed run attempt ($WORKFLOW_RUN_ATTEMPT) here: WORKFLOW_RUN_HTML_URL" >> $GITHUB_STEP_SUMMARY
+          echo "Workflow Run ID: $WORKFLOW_RUN_ID"
+          echo "Job ID: $GITHUB_JOB"
+          echo "Current run: $GITHUB_RUN_ATTEMPT"
+          echo "Author: $AUTHOR_NAME"
+          echo "Actor: $GITHUB_ACTOR"
       - name: Rerun failed jobs in the current workflow
         env:
           GH_TOKEN: ${{ github.token }}
@@ -40,9 +40,9 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
           MAX_RUNS=2
-          CURRENT_RUN=${{ env.WORKFLOW_RUN_ATTEMPT }}
+          CURRENT_RUN="$WORKFLOW_RUN_ATTEMPT"
           if [ $CURRENT_RUN -lt $MAX_RUNS ]; then
-            gh run rerun ${{ env.WORKFLOW_RUN_ID }} --repo ${{ env.GITHUB_REPOSITORY }} --failed
+            gh run rerun "$WORKFLOW_RUN_ID" --repo "$GITHUB_REPOSITORY" --failed
           else
             exit 1
           fi
@@ -55,7 +55,7 @@ jobs:
         env:
           WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          commit_short=$(git rev-parse --short ${{ env.WORKFLOW_RUN_HEAD_SHA }})
+          commit_short="$(git rev-parse --short $WORKFLOW_RUN_HEAD_SHA)"
           echo "BREAKING_COMMIT_SHORT=$commit_short" >> $GITHUB_ENV
 
       - name: Slack Notification
