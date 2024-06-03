@@ -129,7 +129,7 @@ This is useful for testing and development purposes.
    - Enrollment token
 3. Build cloudbeat binary and opa bundle (inside `cloudbeat` folder)
    ```bash
-   GOOS=linux mage build
+    GOOS=linux mage build
    ```
 4. Build elastic agent docker image overwriting with the locally produced cloudbeat
    ```bash
