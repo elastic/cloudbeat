@@ -74,6 +74,8 @@ func MapItems(resources runtime.Object) []any {
 		return PtrMap(items)
 	case []rbacv1.Role:
 		return PtrMap(items)
+	case []policyv1beta1.PodSecurityPolicy:
+		return PtrMap(items)
 	default:
 		return nil
 	}
