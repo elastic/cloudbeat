@@ -25,6 +25,7 @@ import (
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
+	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -62,7 +63,7 @@ var (
 			allNamespaces,
 		},
 		{
-			&kubernetes.PodSecurityPolicy{},
+			&policyv1beta1.PodSecurityPolicy{},
 			allNamespaces,
 		},
 		{
