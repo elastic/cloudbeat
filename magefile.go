@@ -74,6 +74,12 @@ func Check() error {
 	return devtools.Check()
 }
 
+// Build builds the Beat binary.
+func Build() error {
+	mg.Deps(BuildOpaBundle)
+	return devtools.Build(devtools.DefaultBuildArgs())
+}
+
 // Clean cleans all generated files and build artifacts.
 func Clean() error {
 	return devtools.Clean()
