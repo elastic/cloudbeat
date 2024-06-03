@@ -12,6 +12,7 @@ scms:
       token: '{{ requiredEnv "GITHUB_TOKEN" }}'
       username: '{{ requiredEnv "GIT_USER" }}'
       branch: '{{ requiredEnv "GIT_BRANCH" }}'
+      email: 'cloudsecmachine@elastic.co'
 
 actions:
   cloudbeat:
