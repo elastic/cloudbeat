@@ -25,6 +25,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 	"k8s.io/api/core/v1"
+	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -177,11 +178,29 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 			},
 		},
 	}}
+	podSecurityPolicies := policyv1beta1.PodSecurityPolicyList{Items: []policyv1beta1.PodSecurityPolicy{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "PodSecurityPolicy",
+				APIVersion: policyv1beta1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-psp",
+				Namespace: "default",
+			},
+			Spec: policyv1beta1.PodSecurityPolicySpec{
+				RunAsUser: policyv1beta1.RunAsUserStrategyOptions{
+					Rule: policyv1beta1.RunAsUserStrategyMustRunAsNonRoot,
+				},
+			},
+		},
+	}}
 	tests := []runtime.Object{
 		&v1.PodList{},
 		&v1.PodList{Items: []v1.Pod{myPod}},
 		&threePods,
 		&threeRoles,
+		&podSecurityPolicies,
 	}
 
 	for i, tt := range tests {
