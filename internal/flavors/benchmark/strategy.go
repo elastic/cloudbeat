@@ -55,7 +55,6 @@ func GetStrategy(cfg *config.Config, log *logp.Logger) (Strategy, error) {
 		}, nil
 	case config.CIS_EKS:
 		return &EKS{
-			AWSCfgProvider:         awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 			AWSIdentityProvider:    awslib.IdentityProvider{Logger: log},
 			AWSMetadataProvider:    awslib.Ec2MetadataProvider{},
 			EKSClusterNameProvider: awslib.EKSClusterNameProvider{},

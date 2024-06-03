@@ -47,7 +47,6 @@ func TestEKS_Initialize(t *testing.T) {
 	tests := []struct {
 		name                   string
 		cfg                    config.Config
-		awsCfgProvider         awslib.ConfigProviderAPI
 		awsIdentityProvider    awslib.IdentityProviderGetter
 		awsMetadataProvider    awslib.MetadataProvider
 		eksClusterNameProvider awslib.EKSClusterNameProviderAPI
@@ -60,27 +59,10 @@ func TestEKS_Initialize(t *testing.T) {
 			wantErr: "uninitialized",
 		},
 		{
-			name:           "uninitialized aws provider",
-			clientProvider: mockKubeClient(nil),
-			cfg:            awsCfg,
-			wantErr:        "aws config provider is uninitialized",
-		},
-		{
-			name:                   "aws error",
-			awsCfgProvider:         mockAwsCfg(errors.New("some error")),
-			clientProvider:         mockKubeClient(nil),
-			awsIdentityProvider:    mockAwsIdentityProvider(errors.New("not this error")),    // ineffectual
-			awsMetadataProvider:    mockMetadataProvider(errors.New("not this error")),       // ignored
-			eksClusterNameProvider: mockEksClusterNameProvider(errors.New("not this error")), // ignored
-			cfg:                    awsCfg,
-			wantErr:                "some error",
-		},
-		{
 			name:                   "aws identity provider error",
-			awsCfgProvider:         mockAwsCfg(nil),
 			awsIdentityProvider:    mockAwsIdentityProvider(errors.New("some error")),
 			clientProvider:         mockKubeClient(nil),
-			awsMetadataProvider:    mockMetadataProvider(errors.New("not this error")),       // ignored
+			awsMetadataProvider:    mockMetadataProvider(nil),
 			eksClusterNameProvider: mockEksClusterNameProvider(errors.New("not this error")), // ignored
 			cfg:                    awsCfg,
 			wantErr:                "some error",
@@ -88,7 +70,6 @@ func TestEKS_Initialize(t *testing.T) {
 		{
 			// TODO
 			name:                   "kubernetes provider error",
-			awsCfgProvider:         mockAwsCfg(nil),
 			awsIdentityProvider:    mockAwsIdentityProvider(errors.New("not this error")), // ineffectual
 			clientProvider:         mockKubeClient(errors.New("some error")),
 			awsMetadataProvider:    mockMetadataProvider(errors.New("not this error")),       // ignored
@@ -97,7 +78,6 @@ func TestEKS_Initialize(t *testing.T) {
 		},
 		{
 			name:                   "no error without AWS-related fetchers",
-			awsCfgProvider:         mockAwsCfg(nil),
 			awsIdentityProvider:    mockAwsIdentityProvider(errors.New("some error")),    // ineffectual
 			awsMetadataProvider:    mockMetadataProvider(errors.New("some error")),       // ignored
 			eksClusterNameProvider: mockEksClusterNameProvider(errors.New("some error")), // ignored
@@ -111,7 +91,6 @@ func TestEKS_Initialize(t *testing.T) {
 		{
 			name:                   "no error with AWS-related fetchers",
 			cfg:                    awsCfg,
-			awsCfgProvider:         mockAwsCfg(nil),
 			awsIdentityProvider:    mockAwsIdentityProvider(nil),
 			awsMetadataProvider:    mockMetadataProvider(nil),
 			eksClusterNameProvider: mockEksClusterNameProvider(nil),
@@ -132,7 +111,6 @@ func TestEKS_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &EKS{
-				AWSCfgProvider:         tt.awsCfgProvider,
 				AWSIdentityProvider:    tt.awsIdentityProvider,
 				AWSMetadataProvider:    tt.awsMetadataProvider,
 				EKSClusterNameProvider: tt.eksClusterNameProvider,

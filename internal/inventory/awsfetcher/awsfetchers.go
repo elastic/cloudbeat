@@ -31,17 +31,18 @@ import (
 )
 
 func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
-	iamProvider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	ec2Provider := ec2.NewEC2Provider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
-	s3Provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
+	iamProvider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	rdsProvider := rds.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
+	s3Provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 
 	return []inventory.AssetFetcher{
 		newEc2InstancesFetcher(logger, identity, ec2Provider),
-		newS3BucketFetcher(logger, identity, s3Provider),
-		newIamUserFetcher(logger, identity, iamProvider),
-		newIamRoleFetcher(logger, identity, iamProvider),
 		newIamPolicyFetcher(logger, identity, iamProvider),
+		newIamRoleFetcher(logger, identity, iamProvider),
+		newIamUserFetcher(logger, identity, iamProvider),
+		newNetworkingFetcher(logger, identity, ec2Provider),
 		newRDSFetcher(logger, identity, rdsProvider),
+		newS3BucketFetcher(logger, identity, s3Provider),
 	}
 }
