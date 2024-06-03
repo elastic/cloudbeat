@@ -1,11 +1,16 @@
 # Cloudbeat Deployment
 
 ## Table of Contents
-- [Deploying Cloudbeat as a process](#deploying-cloudbeat-as-a-process)
-   - [Self-Managed Kubernetes](#self-managed-kubernetes)
-   - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
-- [Deploying Cloudbeat with managed Elastic Agent](#deploying-cloudbeat-with-managed-elastic-agent)
-- [Deploying Cloudbeat with standalone Elastic Agent](#deploying-cloudbeat-with-standalone-elastic-agent)
+- [Cloudbeat Deployment](#cloudbeat-deployment)
+  - [Table of Contents](#table-of-contents)
+  - [Deploying Cloudbeat as a process](#deploying-cloudbeat-as-a-process)
+    - [Self-Managed Kubernetes](#self-managed-kubernetes)
+      - [Cross-platform Builds](#cross-platform-builds)
+      - [Stopping / Restarting the local Elastic Stack](#stopping--restarting-the-local-elastic-stack)
+    - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
+  - [Deploying Cloudbeat with managed Elastic Agent](#deploying-cloudbeat-with-managed-elastic-agent)
+  - [Deploying Fleet enrolled Elastic Agent in a container](#deploying-fleet-enrolled-elastic-agent-in-a-container)
+  - [Deploying Fleet enrolled Elastic Agent in a container with custom cloudbeat binary (and optionally custom integration)](#deploying-fleet-enrolled-elastic-agent-in-a-container-with-custom-cloudbeat-binary-and-optionally-custom-integration)
 
 ## Deploying Cloudbeat as a process
 
