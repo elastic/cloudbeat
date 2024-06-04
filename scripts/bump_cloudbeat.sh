@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -xeuo pipefail
 
 # versions
 CURRENT_MINOR_VERSION=$(echo "$CURRENT_CLOUDBEAT_VERSION" | cut -d '.' -f1,2)
@@ -21,8 +21,16 @@ echo "NEXT_CLOUDBEAT_VERSION: $NEXT_CLOUDBEAT_VERSION"
 echo "CURRENT_CLOUDBEAT_VERSION: $CURRENT_CLOUDBEAT_VERSION"
 echo "CURRENT_MINOR_VERSION: $CURRENT_MINOR_VERSION"
 
+# clear branches if they exists
+branches=("$NEXT_CLOUDBEAT_BRANCH" "$NEXT_CLOUDBEAT_HERMIT_BRANCH" "$RELEASE_CLOUDBEAT_BRANCH")
+for branch in "${branches[@]}"; do
+    if git ls-remote --exit-code --heads origin "$branch"; then
+        git push origin --delete "$branch"
+    fi
+done
+
 update_version_mergify() {
-    echo "• Add a new entry to .mergify.yml"
+    echo "Add a new entry to .mergify.yml"
     cat <<EOF >>.mergify.yml
   - name: backport patches to $CURRENT_MINOR_VERSION branch
     conditions:
@@ -39,48 +47,62 @@ update_version_mergify() {
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
 EOF
     git add .mergify.yml
-    git commit -m "Update .mergify.yml"
-
-    gh label create "backport-v$CURRENT_CLOUDBEAT_VERSION"
+    if git diff --cached --quiet; then
+        echo "No changes to commit in .mergify.yml"
+    else
+        git commit -m "Update .mergify.yml"
+        gh label create "backport-v$CURRENT_CLOUDBEAT_VERSION" --force
+    fi
 }
 
 update_version_arm_template_default_value() {
-    echo "• Replace defaultValue for ElasticAgentVersion in ARM templates"
+    echo "Replace defaultValue for ElasticAgentVersion in ARM templates"
     jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"$NEXT_CLOUDBEAT_VERSION\"" $ARM_SINGLE_ACCOUNT_FILE >tmp.json && mv tmp.json $ARM_SINGLE_ACCOUNT_FILE
     jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"$NEXT_CLOUDBEAT_VERSION\"" $ARM_ORGANIZATION_ACCOUNT_FILE >tmp.json && mv tmp.json $ARM_ORGANIZATION_ACCOUNT_FILE
 
-    echo "• Generate dev ARM templates"
+    echo "Generate dev ARM templates"
     ./deploy/azure/generate_dev_template.py --template-type single-account
     ./deploy/azure/generate_dev_template.py --template-type organization-account
 
     git add $ARM_SINGLE_ACCOUNT_FILE $ARM_ORGANIZATION_ACCOUNT_FILE $ARM_SINGLE_ACCOUNT_FILE_DEV $ARM_ORGANIZATION_ACCOUNT_FILE_DEV
-    git commit -m "Update ARM templates"
+    if git diff --cached --quiet; then
+        echo "No changes to commit in ARM templates"
+    else
+        git commit -m "Update ARM templates"
+    fi
 }
 
 update_version_arm_template_file_uris() {
-    echo "• Replace fileUris git branch in ARM templates"
+    echo "Replace fileUris git branch in ARM templates"
     sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$CURRENT_MINOR_VERSION/g" $ARM_SINGLE_ACCOUNT_FILE
     sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$CURRENT_MINOR_VERSION/g" $ARM_ORGANIZATION_ACCOUNT_FILE
     git add $ARM_SINGLE_ACCOUNT_FILE $ARM_ORGANIZATION_ACCOUNT_FILE
-    git commit -m "Update ARM templates"
+    if git diff --cached --quiet; then
+        echo "No changes to commit in ARM templates"
+    else
+        git commit -m "Update ARM templates"
+    fi
 }
 
 update_version_beat() {
-    echo "• Update version/version.go with new version"
+    echo "Update version/version.go with new version"
     sed -i'' -E "s/const defaultBeatVersion = .*/const defaultBeatVersion = \"$NEXT_CLOUDBEAT_VERSION\"/g" version/version.go
     git add version/version.go
-    git commit -m "Update version.go"
+    if git diff --cached --quiet; then
+        echo "No changes to commit in version.go"
+    else
+        git commit -m "Update version.go"
+    fi
 }
 
 create_cloudbeat_versions_pr_for_main() {
-    echo "• Create PR for cloudbeat next version"
+    echo "Create PR for cloudbeat next version"
     git push origin "$NEXT_CLOUDBEAT_BRANCH"
     cat <<EOF >cloudbeat_pr_body
 Bump cloudbeat version - \`$NEXT_CLOUDBEAT_VERSION\`
 
-> [!NOTE]
-> This is an automated PR
 EOF
+
     pr_url="$(gh pr create --title "Bump cloudbeat version" \
         --body-file cloudbeat_pr_body \
         --base "main" \
@@ -88,16 +110,15 @@ EOF
         --label "backport-skip")"
     # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to main]($pr_url)" >>$GITHUB_STEP_SUMMARY
+    rm -rf cloudbeat_pr_body
 }
 
 create_cloudbeat_versions_pr_for_release() {
-    echo "• Create PR for cloudbeat release version"
+    echo "Create PR for cloudbeat release version"
     git push origin "$RELEASE_CLOUDBEAT_BRANCH"
     cat <<EOF >cloudbeat_pr_body_release
 Release cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
 
-> [!NOTE]
-> This is an automated PR
 EOF
     pr_url="$(gh pr create --title "Release cloudbeat version" \
         --body-file cloudbeat_pr_body_release \
@@ -106,38 +127,41 @@ EOF
         --label "backport-skip")"
     # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to release branch]($pr_url)" >>$GITHUB_STEP_SUMMARY
+    rm -rf cloudbeat_pr_body_release
 }
 
 # We need to bump hermit seperately because we need to wait for the snapshot build to be available
 bump_hermit() {
-    echo "• Bump hermit cloudbeat version"
+    echo "Bump hermit cloudbeat version"
     sed -i'' -E "s/\"CLOUDBEAT_VERSION\": .*/\"CLOUDBEAT_VERSION\": \"$CURRENT_CLOUDBEAT_VERSION\",/g" $HERMIT_FILE
     git add $HERMIT_FILE
-    git commit -m "Bump cloudbeat to $CURRENT_CLOUDBEAT_VERSION"
-    git push origin "$NEXT_CLOUDBEAT_HERMIT_BRANCH"
-
-    cat <<EOF >hermit_pr_body
+    if git diff --cached --quiet; then
+        echo "No changes to commit in $HERMIT_FILE"
+    else
+        git commit -m "Bump cloudbeat to $CURRENT_CLOUDBEAT_VERSION"
+        git push origin "$NEXT_CLOUDBEAT_HERMIT_BRANCH"
+        cat <<EOF >hermit_pr_body
 Bump cloudbeat version - \`$CURRENT_CLOUDBEAT_VERSION\`
 
 > [!IMPORTANT]
 > to be merged after snapshot build for $CURRENT_CLOUDBEAT_VERSION is available
 
-> [!NOTE]
-> This is an automated PR
 EOF
 
-    echo "• Create a PR for cloudbeat hermit version"
-    pr_url="$(gh pr create --title "Bump hermit cloudbeat version" \
-        --body-file hermit_pr_body \
-        --base "main" \
-        --head "$NEXT_CLOUDBEAT_HERMIT_BRANCH" \
-        --label "backport-skip")"
-    # shellcheck disable=SC2086
-    echo "[Cloudbeat Hermit PR]($pr_url)" >>$GITHUB_STEP_SUMMARY
+        echo "Create a PR for cloudbeat hermit version"
+        pr_url="$(gh pr create --title "Bump hermit cloudbeat version" \
+            --body-file hermit_pr_body \
+            --base "main" \
+            --head "$NEXT_CLOUDBEAT_HERMIT_BRANCH" \
+            --label "backport-skip")"
+        # shellcheck disable=SC2086
+        echo "[Cloudbeat Hermit PR]($pr_url)" >>$GITHUB_STEP_SUMMARY
+        rm -rf hermit_pr_body
+    fi
 }
 
 upload_cloud_formation_templates() {
-    echo "• Upload cloud formation templates for $CURRENT_CLOUDBEAT_VERSION"
+    echo "Upload cloud formation templates for $CURRENT_CLOUDBEAT_VERSION"
     aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
     aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
     aws configure set region us-east-2
@@ -156,7 +180,11 @@ run_version_changes_for_main() {
     update_version_arm_template_default_value
 
     # push
-    create_cloudbeat_versions_pr_for_main
+    if git diff origin/main..HEAD --quiet; then
+        echo "No commits to push to main $NEXT_CLOUDBEAT_BRANCH"
+    else
+        create_cloudbeat_versions_pr_for_main
+    fi
 
     # create, commit and push a separate PR for hermit
     git checkout -b "$NEXT_CLOUDBEAT_HERMIT_BRANCH" origin/main
@@ -173,7 +201,11 @@ run_version_changes_for_release_branch() {
     update_version_arm_template_file_uris
 
     # push
-    create_cloudbeat_versions_pr_for_release
+    if git diff origin/main..HEAD --quiet; then
+        echo "No commits to push to release $RELEASE_CLOUDBEAT_BRANCH"
+    else
+        create_cloudbeat_versions_pr_for_release
+    fi
 
     # upload cloud formation templates for the release version
     upload_cloud_formation_templates
