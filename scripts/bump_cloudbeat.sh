@@ -110,7 +110,7 @@ EOF
         --label "backport-skip")"
     # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to main]($pr_url)" >>$GITHUB_STEP_SUMMARY
-    rm -rf cloudbeat_pr_body
+    rm cloudbeat_pr_body
 }
 
 create_cloudbeat_versions_pr_for_release() {
@@ -127,7 +127,7 @@ EOF
         --label "backport-skip")"
     # shellcheck disable=SC2086
     echo "[Cloudbeat Version PR to release branch]($pr_url)" >>$GITHUB_STEP_SUMMARY
-    rm -rf cloudbeat_pr_body_release
+    rm cloudbeat_pr_body_release
 }
 
 # We need to bump hermit seperately because we need to wait for the snapshot build to be available
@@ -156,7 +156,7 @@ EOF
             --label "backport-skip")"
         # shellcheck disable=SC2086
         echo "[Cloudbeat Hermit PR]($pr_url)" >>$GITHUB_STEP_SUMMARY
-        rm -rf hermit_pr_body
+        rm hermit_pr_body
     fi
 }
 
