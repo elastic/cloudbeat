@@ -63,10 +63,6 @@ var (
 			allNamespaces,
 		},
 		{
-			&policyv1beta1.PodSecurityPolicy{},
-			allNamespaces,
-		},
-		{
 			&kubernetes.ServiceAccount{},
 			allNamespaces,
 		},
@@ -80,6 +76,16 @@ var (
 		// 	&kubernetes.NetworkPolicy{},
 		// 	allNamespaces,
 		// },
+	}
+
+	// optionalClusterResources are treated equally to vanillaClusterResources,
+	// but do NOT produce an error if they are not found. For example PSPs are
+	// deprecated for k8s >= v1.25.
+	optionalClusterResources = []requiredResource{
+		{
+			&policyv1beta1.PodSecurityPolicy{},
+			allNamespaces,
+		},
 	}
 )
 
@@ -147,6 +153,13 @@ func (f *KubeFetcher) initWatchers() error {
 		err := f.initWatcher(f.k8sProvider, r)
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, r := range optionalClusterResources {
+		err := f.initWatcher(f.k8sProvider, r)
+		if err != nil {
+			f.log.Warn(err.Error())
 		}
 	}
 
