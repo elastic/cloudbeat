@@ -65,7 +65,7 @@ func NewCisEksFetchers(log *logp.Logger, awsConfig aws.Config, ch chan fetching.
 		ecrFetcher := awsfetchers.NewEcrFetcher(log, ch, k8sClient, ecrPodDescriber)
 		m[fetching.EcrType] = registry.RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
 
-		elbProvider := elb.NewElbProvider(awsConfig)
+		elbProvider := elb.NewElbProvider(log, identity.Account, awsConfig, &awslib.MultiRegionClientFactory[elb.Client]{})
 		loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
 		elbFetcher := awsfetchers.NewElbFetcher(log, ch, k8sClient, elbProvider, identity, loadBalancerRegex)
 		m[fetching.ElbType] = registry.RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
