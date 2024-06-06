@@ -39,7 +39,7 @@ type LoadBalancerDescriber interface {
 
 type Provider struct {
 	log          *logp.Logger
-	client       *elb.Client
+	client       Client
 	clients      map[string]Client
 	awsAccountID string
 }
