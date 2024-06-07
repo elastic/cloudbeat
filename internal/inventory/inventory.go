@@ -29,6 +29,8 @@ import (
 	"github.com/samber/lo"
 )
 
+const indexTemplate = "logs-cloud_asset_inventory.asset_inventory-%s_%s_%s_%s-default"
+
 type AssetInventory struct {
 	fetchers            []AssetFetcher
 	publisher           AssetPublisher
@@ -119,7 +121,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 }
 
 func generateIndex(a Asset) string {
-	return fmt.Sprintf("asset_inventory_%s_%s_%s_%s", a.Category, a.SubCategory, a.Type, a.SubType)
+	return fmt.Sprintf(indexTemplate, a.Category, a.SubCategory, a.Type, a.SubType)
 }
 
 func (a *AssetInventory) Stop() {
