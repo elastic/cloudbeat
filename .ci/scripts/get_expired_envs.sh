@@ -5,7 +5,7 @@ file_exists() {
     local bucket_name="$1"
     local bucket_key="$2"
     # Check if the file exists in the bucket
-    if aws s3api head-object --bucket "$bucket_name" --key "$bucket_key" 2>/dev/null; then
+    if aws s3api head-object --bucket "$bucket_name" --key "$bucket_key" >/dev/null 2>&1; then
         return 0
     fi
     return 1
