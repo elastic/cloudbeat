@@ -85,7 +85,7 @@ jobs:
 
       - name: Destroy Environment
         run: |
-          just delete-cloud-env "$ENV_PREFIX" "$ENV_IGNORE_PREFIX" "false"
+          just delete-cloud-env "${ENV_PREFIX}" "${ENV_IGNORE_PREFIX}" "false"
 
       - name: Send Slack Notification
         uses: ./.github/actions/slack-notification
