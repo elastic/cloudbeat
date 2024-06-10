@@ -15,14 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package elb
+package elb_v2
 
 import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
-	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
+	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -30,29 +29,25 @@ import (
 
 type Client interface {
 	elb.DescribeLoadBalancersAPIClient
+	elb.DescribeListenersAPIClient
 }
 
 type LoadBalancerDescriber interface {
-	DescribeLoadBalancers(ctx context.Context, balancersNames []string) ([]types.LoadBalancerDescription, error)
-	DescribeAllLoadBalancers(context.Context) ([]awslib.AwsResource, error)
+	DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
 type Provider struct {
-	log          *logp.Logger
-	client       Client
-	clients      map[string]Client
-	awsAccountID string
+	log     *logp.Logger
+	clients map[string]Client
 }
 
-func NewElbProvider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewElbV2Provider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return elb.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
-		log:          log,
-		client:       elb.NewFromConfig(cfg),
-		clients:      m.GetMultiRegionsClientMap(),
-		awsAccountID: awsAccountID,
+		log:     log,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }
