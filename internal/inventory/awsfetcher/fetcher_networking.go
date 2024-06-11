@@ -25,6 +25,8 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type networkingFetcher struct {
@@ -95,6 +97,22 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 	}
 
 	for _, item := range awsResources {
+		var extraEnrichers []inventory.AssetEnricher
+
+		switch obj := item.(type) {
+		case ec2.InternetGatewayInfo:
+			vpcIds := []string{}
+			for _, attachment := range obj.InternetGateway.Attachments {
+				vpcId := pointers.Deref(attachment.VpcId)
+				if vpcId != nil {
+					vpcIds = append(vpcIds, vpcId)
+				}
+			}
+			extraEnrichers = append(extraEnrichers, inventory.WithNetwork(inventory.AssetNetwork{
+				VpcIds: vpcIds,
+			}))
+		}
+
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
 			item.GetResourceArn(),
