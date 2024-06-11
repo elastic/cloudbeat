@@ -97,82 +97,10 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 	}
 
 	for _, item := range awsResources {
-		var extraEnrichers []inventory.AssetEnricher
-
-		switch obj := item.(type) {
-		case ec2.InternetGatewayInfo:
-			vpcIds := []string{}
-			for _, attachment := range obj.InternetGateway.Attachments {
-				id := pointers.Deref(attachment.VpcId)
-				if id != "" {
-					vpcIds = append(vpcIds, id)
-				}
-			}
-			extraEnrichers = append(extraEnrichers, inventory.WithNetwork(inventory.AssetNetwork{
-				VpcIds: vpcIds,
-			}))
-		case ec2.NatGatewayInfo:
-			ifaceIds := []string{}
-			for _, iface := range obj.NatGateway.NatGatewayAddresses {
-				id := pointers.Deref(iface.NetworkInterfaceId)
-				if id != "" {
-					ifaceIds = append(ifaceIds, id)
-				}
-			}
-			extraEnrichers = append(extraEnrichers, inventory.WithNetwork(inventory.AssetNetwork{
-				NetworkInterfaceIds: ifaceIds,
-				SubnetIds:           []string{pointers.Deref(obj.NatGateway.SubnetId)},
-				VpcIds:              []string{pointers.Deref(obj.NatGateway.VpcId)},
-			}))
-		case ec2.NACLInfo:
-			subnetIds := []string{}
-			for _, association := range obj.NetworkAcl.Associations {
-				id := pointers.Deref(association.SubnetId)
-				if id != "" {
-					subnetIds = append(subnetIds, id)
-				}
-			}
-			extraEnrichers = append(extraEnrichers, inventory.WithNetwork(inventory.AssetNetwork{
-				SubnetIds: subnetIds,
-				VpcIds:    []string{pointers.Deref(obj.NetworkAcl.VpcId)},
-			}))
-		case ec2.NetworkInterfaceInfo:
-			secGroupIds := []string{}
-			for _, secGroup := range obj.NetworkInterface.Groups {
-				id := pointers.Deref(secGroup.GroupId)
-				secGroupIds = append(secGroupIds, id)
-			}
-			extraEnrichers = append(extraEnrichers, inventory.WithNetwork(inventory.AssetNetwork{
-				SecurityGroupIds: secGroupIds,
-				SubnetIds:        []string{pointers.Deref(obj.NetworkInterface.SubnetId)},
-				VpcIds:           []string{pointers.Deref(obj.NetworkInterface.VpcId)},
-			}))
-		case ec2.TransitGatewayAttachmentInfo:
-			routeTableId := ""
-			if obj.TransitGatewayAttachment.Association != nil {
-				routeTableId = pointers.Deref(obj.TransitGatewayAttachment.Association.TransitGatewayRouteTableId)
-			}
-			extraEnrichers = append(extraEnrichers, inventory.WithNetwork(inventory.AssetNetwork{
-				RouteTableIds:     []string{routeTableId},
-				TransitGatewayIds: []string{pointers.Deref(obj.TransitGatewayAttachment.TransitGatewayId)},
-			}))
-		case ec2.TransitGatewayInfo:
-			break
-		case ec2.VpcPeeringConnectionInfo:
-			extraEnrichers = append(extraEnrichers, inventory.WithNetwork(inventory.AssetNetwork{
-				VpcIds: []string{
-					pointers.Deref(obj.VpcPeeringConnection.AccepterVpcInfo.VpcId),
-					pointers.Deref(obj.VpcPeeringConnection.RequesterVpcInfo.VpcId),
-				},
-			}))
-		case ec2.VpcInfo:
-			break
-		default:
-			s.logger.Warnf("Unsupported Networking Fetcher type %T", obj)
-		}
-
-		extraEnrichers = append(
-			extraEnrichers,
+		assetChannel <- inventory.NewAssetEvent(
+			classification,
+			item.GetResourceArn(),
+			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
@@ -185,13 +113,7 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 					Name: "AWS Networking",
 				},
 			}),
-		)
-
-		assetChannel <- inventory.NewAssetEvent(
-			classification,
-			item.GetResourceArn(),
-			item.GetResourceName(),
-			extraEnrichers...,
+			s.networkEnricher(item),
 		)
 	}
 }
@@ -203,4 +125,79 @@ func newNetworkClassification(assetType inventory.AssetType, assetSubType invent
 		Type:        assetType,
 		SubType:     assetSubType,
 	}
+}
+
+//nolint:revive
+func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.AssetEnricher {
+	var enricher inventory.AssetEnricher
+
+	switch obj := item.(type) {
+	case ec2.InternetGatewayInfo:
+		vpcIds := []string{}
+		for _, attachment := range obj.InternetGateway.Attachments {
+			id := pointers.Deref(attachment.VpcId)
+			if id != "" {
+				vpcIds = append(vpcIds, id)
+			}
+		}
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			VpcIds: vpcIds,
+		})
+	case ec2.NatGatewayInfo:
+		ifaceIds := []string{}
+		for _, iface := range obj.NatGateway.NatGatewayAddresses {
+			id := pointers.Deref(iface.NetworkInterfaceId)
+			if id != "" {
+				ifaceIds = append(ifaceIds, id)
+			}
+		}
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			NetworkInterfaceIds: ifaceIds,
+			SubnetIds:           []string{pointers.Deref(obj.NatGateway.SubnetId)},
+			VpcIds:              []string{pointers.Deref(obj.NatGateway.VpcId)},
+		})
+	case ec2.NACLInfo:
+		subnetIds := []string{}
+		for _, association := range obj.NetworkAcl.Associations {
+			id := pointers.Deref(association.SubnetId)
+			if id != "" {
+				subnetIds = append(subnetIds, id)
+			}
+		}
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			SubnetIds: subnetIds,
+			VpcIds:    []string{pointers.Deref(obj.NetworkAcl.VpcId)},
+		})
+	case ec2.NetworkInterfaceInfo:
+		secGroupIds := []string{}
+		for _, secGroup := range obj.NetworkInterface.Groups {
+			id := pointers.Deref(secGroup.GroupId)
+			secGroupIds = append(secGroupIds, id)
+		}
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			SecurityGroupIds: secGroupIds,
+			SubnetIds:        []string{pointers.Deref(obj.NetworkInterface.SubnetId)},
+			VpcIds:           []string{pointers.Deref(obj.NetworkInterface.VpcId)},
+		})
+	case ec2.TransitGatewayAttachmentInfo:
+		routeTableId := ""
+		if obj.TransitGatewayAttachment.Association != nil {
+			routeTableId = pointers.Deref(obj.TransitGatewayAttachment.Association.TransitGatewayRouteTableId)
+		}
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			RouteTableIds:     []string{routeTableId},
+			TransitGatewayIds: []string{pointers.Deref(obj.TransitGatewayAttachment.TransitGatewayId)},
+		})
+	case ec2.VpcPeeringConnectionInfo:
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			VpcIds: []string{
+				pointers.Deref(obj.VpcPeeringConnection.AccepterVpcInfo.VpcId),
+				pointers.Deref(obj.VpcPeeringConnection.RequesterVpcInfo.VpcId),
+			},
+		})
+	default:
+		s.logger.Warnf("Unsupported Networking Fetcher type %T", obj)
+	}
+
+	return enricher
 }

@@ -113,7 +113,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			}),
 			inventory.WithNetwork(inventory.AssetNetwork{
 				NetworkId:        pointers.Ref("vpc-id"),
-				SubnetId:         pointers.Ref("subnetId"),
+				SubnetIds:        []string{"subnetId"},
 				Ipv6Address:      pointers.Ref("ipv6"),
 				PublicIpAddress:  pointers.Ref("public-ip-addr"),
 				PrivateIpAddress: pointers.Ref("private-ip-addre"),
@@ -147,7 +147,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				},
 			}),
 			inventory.WithHost(inventory.AssetHost{}),
-			inventory.WithNetwork(inventory.AssetNetwork{}),
+			inventory.WithNetwork(inventory.AssetNetwork{SubnetIds: []string{}}),
 		),
 	}
 
