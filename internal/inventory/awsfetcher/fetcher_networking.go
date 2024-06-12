@@ -34,7 +34,7 @@ type networkingFetcher struct {
 	AccountName string
 }
 
-type describeFunc func(context.Context) ([]awslib.AwsResource, error)
+type networkDescribeFunc func(context.Context) ([]awslib.AwsResource, error)
 type networkingProvider interface {
 	DescribeInternetGateways(context.Context) ([]awslib.AwsResource, error)
 	DescribeNatGateways(context.Context) ([]awslib.AwsResource, error)
@@ -60,7 +60,7 @@ func newNetworkingFetcher(logger *logp.Logger, identity *cloud.Identity, provide
 func (s *networkingFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.AssetEvent) {
 	resourcesToFetch := []struct {
 		name           string
-		function       describeFunc
+		function       networkDescribeFunc
 		classification inventory.AssetClassification
 	}{
 		{"Internet Gateways", s.provider.DescribeInternetGateways, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeInternetGateway)},
@@ -84,7 +84,7 @@ func (s *networkingFetcher) Fetch(ctx context.Context, assetChannel chan<- inven
 	}
 }
 
-func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, function describeFunc, classification inventory.AssetClassification, assetChannel chan<- inventory.AssetEvent) {
+func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, function networkDescribeFunc, classification inventory.AssetClassification, assetChannel chan<- inventory.AssetEvent) {
 	s.logger.Infof("Fetching %s", resourceName)
 	defer s.logger.Infof("Fetching %s - Finished", resourceName)
 
