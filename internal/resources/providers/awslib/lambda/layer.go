@@ -18,27 +18,29 @@
 package lambda
 
 import (
-	"context"
+	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/lambda"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type Lambda interface {
-	ListFunctions(context.Context) ([]awslib.AwsResource, error)
+type LayerInfo struct {
+	Layer  types.LayersListItem `json:"layer"`
+	region string
 }
 
-func NewLambdaProvider(log *logp.Logger, awsAccountId string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return lambda.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
-	return &Provider{
-		log:          log,
-		clients:      m.GetMultiRegionsClientMap(),
-		awsAccountId: awsAccountId,
-	}
+func (v LayerInfo) GetResourceArn() string {
+	return pointers.Deref(v.Layer.LayerArn)
+}
+
+func (v LayerInfo) GetResourceName() string {
+	return pointers.Deref(v.Layer.LayerName)
+}
+
+func (v LayerInfo) GetResourceType() string {
+	return fetching.LambdaLayerType
+}
+
+func (v LayerInfo) GetRegion() string {
+	return v.region
 }

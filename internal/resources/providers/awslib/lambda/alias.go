@@ -18,27 +18,29 @@
 package lambda
 
 import (
-	"context"
+	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/lambda"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type Lambda interface {
-	ListFunctions(context.Context) ([]awslib.AwsResource, error)
+type AliasInfo struct {
+	Alias  types.AliasConfiguration `json:"alias_configuration"`
+	region string
 }
 
-func NewLambdaProvider(log *logp.Logger, awsAccountId string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return lambda.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
-	return &Provider{
-		log:          log,
-		clients:      m.GetMultiRegionsClientMap(),
-		awsAccountId: awsAccountId,
-	}
+func (v AliasInfo) GetResourceArn() string {
+	return pointers.Deref(v.Alias.AliasArn)
+}
+
+func (v AliasInfo) GetResourceName() string {
+	return pointers.Deref(v.Alias.Name)
+}
+
+func (v AliasInfo) GetResourceType() string {
+	return fetching.LambdaAliasType
+}
+
+func (v AliasInfo) GetRegion() string {
+	return v.region
 }

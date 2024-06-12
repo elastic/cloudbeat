@@ -29,12 +29,16 @@ import (
 )
 
 type Provider struct {
-	log     *logp.Logger
-	clients map[string]Client
+	log          *logp.Logger
+	awsAccountId string
+	clients      map[string]Client
 }
 
 type Client interface {
+	lambda.ListAliasesAPIClient
+	lambda.ListEventSourceMappingsAPIClient
 	lambda.ListFunctionsAPIClient
+	lambda.ListLayersAPIClient
 }
 
 func (p *Provider) ListFunctions(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -67,6 +71,109 @@ func (p *Provider) ListFunctions(ctx context.Context) ([]awslib.AwsResource, err
 	result := lo.Flatten(funcs)
 	if err != nil {
 		p.log.Debugf("Fetched %d Lambda Functions", len(result))
+	}
+	return result, err
+}
+
+func (p *Provider) ListAliases(ctx context.Context) ([]awslib.AwsResource, error) {
+	p.log.Debug("Fetching Lambda Aliases")
+	funcs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		input := &lambda.ListAliasesInput{}
+		all := []types.AliasConfiguration{}
+		for {
+			output, err := c.ListAliases(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.Aliases...)
+			if output.NextMarker == nil {
+				break
+			}
+			input.Marker = output.NextMarker
+		}
+
+		var result []awslib.AwsResource
+		for _, item := range all {
+			f := &AliasInfo{
+				Alias:  item,
+				region: region,
+			}
+			result = append(result, f)
+		}
+		return result, nil
+	})
+	result := lo.Flatten(funcs)
+	if err != nil {
+		p.log.Debugf("Fetched %d Lambda Aliases", len(result))
+	}
+	return result, err
+}
+
+func (p *Provider) ListEventSourceMappings(ctx context.Context) ([]awslib.AwsResource, error) {
+	p.log.Debug("Fetching Lambda Event Source Mappings")
+	funcs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		input := &lambda.ListEventSourceMappingsInput{}
+		all := []types.EventSourceMappingConfiguration{}
+		for {
+			output, err := c.ListEventSourceMappings(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.EventSourceMappings...)
+			if output.NextMarker == nil {
+				break
+			}
+			input.Marker = output.NextMarker
+		}
+
+		var result []awslib.AwsResource
+		for _, item := range all {
+			f := &EventSourceMappingInfo{
+				EventSourceMapping: item,
+				awsAccount:         p.awsAccountId,
+				region:             region,
+			}
+			result = append(result, f)
+		}
+		return result, nil
+	})
+	result := lo.Flatten(funcs)
+	if err != nil {
+		p.log.Debugf("Fetched %d Lambda Event Source Mappings", len(result))
+	}
+	return result, err
+}
+
+func (p *Provider) ListLayers(ctx context.Context) ([]awslib.AwsResource, error) {
+	p.log.Debug("Fetching Lambda Layers")
+	funcs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		input := &lambda.ListLayersInput{}
+		all := []types.LayersListItem{}
+		for {
+			output, err := c.ListLayers(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.Layers...)
+			if output.NextMarker == nil {
+				break
+			}
+			input.Marker = output.NextMarker
+		}
+
+		var result []awslib.AwsResource
+		for _, item := range all {
+			f := &LayerInfo{
+				Layer:  item,
+				region: region,
+			}
+			result = append(result, f)
+		}
+		return result, nil
+	})
+	result := lo.Flatten(funcs)
+	if err != nil {
+		p.log.Debugf("Fetched %d Lambda Layers", len(result))
 	}
 	return result, err
 }
