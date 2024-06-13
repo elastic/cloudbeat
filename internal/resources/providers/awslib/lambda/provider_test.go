@@ -155,3 +155,133 @@ func TestProvider_ListFunctions_and_ListAliases(t *testing.T) {
 		})
 	}
 }
+
+func TestProvider_ListLayers(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("ListLayers", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("ListLayers", mock.Anything, mock.Anything).
+					Return(&lambda.ListLayersOutput{
+						Layers: []types.LayersListItem{
+							{
+								LatestMatchingVersion: &types.LayerVersionsListItem{
+									LayerVersionArn: pointers.Ref("arn:aws:lambda:us-east-1:378890115541:layer:kuba-jq:1"),
+									Version:         int64(1),
+									CreatedDate:     pointers.Ref("2024-06-13T11:34:25.613+0000"),
+									CompatibleArchitectures: []types.Architecture{
+										types.ArchitectureArm64,
+									},
+								},
+								LayerArn:  pointers.Ref("arn:aws:lambda:us-east-1:378890115541:layer:kuba-jq"),
+								LayerName: pointers.Ref("kuba-jq"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:          testhelper.NewLogger(t),
+				clients:      clients,
+				awsAccountId: "123",
+			}
+			got, err := p.ListLayers(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
+
+func TestProvider_ListEventSourceMappings(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("ListEventSourceMappings", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("ListEventSourceMappings", mock.Anything, mock.Anything).
+					Return(&lambda.ListEventSourceMappingsOutput{
+						EventSourceMappings: []types.EventSourceMappingConfiguration{
+							{
+								UUID:           pointers.Ref("a-b-c-d"),
+								FunctionArn:    pointers.Ref("arn:aws:lambda:us-east-1:378890115541:function:kuba-test-func"),
+								EventSourceArn: pointers.Ref("arn:aws:lambda:us-east-1:378890115541:function:kuba-test-func"),
+								State:          pointers.Ref("Enabling"),
+							},
+						},
+					}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:          testhelper.NewLogger(t),
+				clients:      clients,
+				awsAccountId: "123",
+			}
+			got, err := p.ListEventSourceMappings(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
+		})
+	}
+}
