@@ -19,6 +19,7 @@ package lambda
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
@@ -64,6 +65,12 @@ func (p *Provider) ListFunctions(ctx context.Context) ([]awslib.AwsResource, err
 				Function: item,
 				region:   region,
 			}
+			aliases, err := p.ListAliases(ctx, region, f.GetResourceArn())
+			if err != nil {
+				p.log.Warnf("error listing aliases: %s", err)
+			} else {
+				f.Aliases = aliases
+			}
 			result = append(result, f)
 		}
 		return result, nil
@@ -75,38 +82,38 @@ func (p *Provider) ListFunctions(ctx context.Context) ([]awslib.AwsResource, err
 	return result, err
 }
 
-func (p *Provider) ListAliases(ctx context.Context) ([]awslib.AwsResource, error) {
-	p.log.Debug("Fetching Lambda Aliases")
-	funcs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
-		input := &lambda.ListAliasesInput{}
-		all := []types.AliasConfiguration{}
-		for {
-			output, err := c.ListAliases(ctx, input)
-			if err != nil {
-				return nil, err
-			}
-			all = append(all, output.Aliases...)
-			if output.NextMarker == nil {
-				break
-			}
-			input.Marker = output.NextMarker
-		}
-
-		var result []awslib.AwsResource
-		for _, item := range all {
-			f := &AliasInfo{
-				Alias:  item,
-				region: region,
-			}
-			result = append(result, f)
-		}
-		return result, nil
-	})
-	result := lo.Flatten(funcs)
-	if err != nil {
-		p.log.Debugf("Fetched %d Lambda Aliases", len(result))
+func (p *Provider) ListAliases(ctx context.Context, region, functionName string) ([]awslib.AwsResource, error) {
+	p.log.Debugf("Fetching Lambda Aliases for %s function in %s", functionName, region)
+	c, ok := p.clients[region]
+	if !ok {
+		return nil, fmt.Errorf("failed to get a client for %s region", region)
 	}
-	return result, err
+	input := &lambda.ListAliasesInput{
+		FunctionName: &functionName,
+	}
+	all := []types.AliasConfiguration{}
+	for {
+		output, err := c.ListAliases(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, output.Aliases...)
+		if output.NextMarker == nil {
+			break
+		}
+		input.Marker = output.NextMarker
+	}
+
+	var result []awslib.AwsResource
+	for _, item := range all {
+		f := &AliasInfo{
+			Alias:  item,
+			region: region,
+		}
+		result = append(result, f)
+	}
+	p.log.Debugf("Fetched %d Lambda Aliases for %s in %s", len(result), functionName, region)
+	return result, nil
 }
 
 func (p *Provider) ListEventSourceMappings(ctx context.Context) ([]awslib.AwsResource, error) {

@@ -21,11 +21,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type FunctionInfo struct {
 	Function types.FunctionConfiguration `json:"function_configuration"`
+	Aliases  []awslib.AwsResource        `json:"alias_configurations"`
 	region   string
 }
 

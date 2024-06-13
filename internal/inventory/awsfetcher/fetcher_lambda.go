@@ -36,7 +36,7 @@ type lambdaFetcher struct {
 
 type lambdaDescribeFunc func(context.Context) ([]awslib.AwsResource, error)
 type lambdaProvider interface {
-	ListAliases(context.Context) ([]awslib.AwsResource, error)
+	ListAliases(context.Context, string, string) ([]awslib.AwsResource, error)
 	ListEventSourceMappings(context.Context) ([]awslib.AwsResource, error)
 	ListFunctions(context.Context) ([]awslib.AwsResource, error)
 	ListLayers(context.Context) ([]awslib.AwsResource, error)
@@ -57,7 +57,6 @@ func (s *lambdaFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory
 		function       lambdaDescribeFunc
 		classification inventory.AssetClassification
 	}{
-		{"Lambda Function Aliases", s.provider.ListAliases, newLambdaClassification(inventory.TypeServerless, inventory.SubTypeLambdaAlias)},
 		{"Lambda Event Source Mappings", s.provider.ListEventSourceMappings, inventory.AssetClassification{
 			Category:    inventory.CategoryInfrastructure,
 			SubCategory: inventory.SubCategoryIntegration,
