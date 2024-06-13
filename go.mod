@@ -20,7 +20,6 @@ require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20231120074854-8322cc2242bf
 	github.com/aquasecurity/trivy v0.48.3
 	github.com/aquasecurity/trivy-db v0.0.0-20240220070059-88dc6466aa40
-	github.com/aws/aws-sdk-go v1.53.5
 	github.com/aws/aws-sdk-go-v2 v1.27.2
 	github.com/aws/aws-sdk-go-v2/config v1.27.18
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.18
@@ -93,32 +92,8 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aquasecurity/trivy-iac v0.7.1 // indirect
 	github.com/aquasecurity/trivy-policies v0.6.1-0.20231120231532-f6f2330bf842 // indirect
+	github.com/aws/aws-sdk-go v1.48.4 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.24 // indirect
-	github.com/aws/aws-sdk-go-v2/service/apigateway v1.23.12 // indirect
-	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.20.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/athena v1.41.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/cloudfront v1.36.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/codebuild v1.37.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/costexplorer v1.38.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/docdb v1.34.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.32.8 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ecs v1.42.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/efs v1.28.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/eks v1.43.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/elasticache v1.38.8 // indirect
-	github.com/aws/aws-sdk-go-v2/service/elasticsearchservice v1.28.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/emr v1.39.11 // indirect
-	github.com/aws/aws-sdk-go-v2/service/health v1.24.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.9.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/kafka v1.33.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/kinesis v1.27.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/mq v1.22.11 // indirect
-	github.com/aws/aws-sdk-go-v2/service/neptune v1.31.13 // indirect
-	github.com/aws/aws-sdk-go-v2/service/redshift v1.44.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/resourcegroupstaggingapi v1.21.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.30.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.32.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/workspaces v1.39.6 // indirect
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bitnami/go-version v0.0.0-20231130084017-bb00604d650c // indirect
 	github.com/containerd/log v0.1.0 // indirect
