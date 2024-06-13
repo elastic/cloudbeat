@@ -28,7 +28,10 @@ import (
 )
 
 type Lambda interface {
+	ListAliases(context.Context) ([]awslib.AwsResource, error)
+	ListEventSourceMappings(context.Context) ([]awslib.AwsResource, error)
 	ListFunctions(context.Context) ([]awslib.AwsResource, error)
+	ListLayers(context.Context) ([]awslib.AwsResource, error)
 }
 
 func NewLambdaProvider(log *logp.Logger, awsAccountId string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
