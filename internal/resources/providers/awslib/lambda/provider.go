@@ -91,27 +91,26 @@ func (p *Provider) ListAliases(ctx context.Context, region, functionName string)
 	input := &lambda.ListAliasesInput{
 		FunctionName: &functionName,
 	}
-	all := []types.AliasConfiguration{}
+
+	var result []awslib.AwsResource
 	for {
 		output, err := c.ListAliases(ctx, input)
 		if err != nil {
 			return nil, err
 		}
-		all = append(all, output.Aliases...)
+		for _, item := range output.Aliases {
+			f := &AliasInfo{
+				Alias:  item,
+				region: region,
+			}
+			result = append(result, f)
+		}
 		if output.NextMarker == nil {
 			break
 		}
 		input.Marker = output.NextMarker
 	}
 
-	var result []awslib.AwsResource
-	for _, item := range all {
-		f := &AliasInfo{
-			Alias:  item,
-			region: region,
-		}
-		result = append(result, f)
-	}
 	p.log.Debugf("Fetched %d Lambda Aliases for %s in %s", len(result), functionName, region)
 	return result, nil
 }
