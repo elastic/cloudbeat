@@ -17,9 +17,10 @@ Functions:
 - main:
     Retrieves available versions of Elastic Agent and performs operations on them.
 """
-import os
-import json
 import argparse
+import json
+import os
+
 import requests
 
 

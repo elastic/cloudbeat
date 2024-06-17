@@ -2,16 +2,15 @@
 This module provides kubernetes functionality based on original kubernetes python library.
 """
 
+from pathlib import Path
 from subprocess import CalledProcessError
 from typing import Union
-from pathlib import Path
-
-from kubernetes import client, config, utils
-from kubernetes.client import ApiException
-from kubernetes.watch import watch
-from kubernetes.stream import stream
 
 from commonlib.io_utils import get_k8s_yaml_objects
+from kubernetes import client, config, utils
+from kubernetes.client import ApiException
+from kubernetes.stream import stream
+from kubernetes.watch import watch
 from loguru import logger
 
 RESOURCE_POD = "Pod"

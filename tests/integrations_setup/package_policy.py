@@ -6,11 +6,12 @@ and inputs based on provided data and templates.
 import copy
 import uuid
 from typing import Dict, Tuple
-from urllib.parse import urlparse, parse_qs, unquote
-from packaging import version
-from munch import Munch
-from loguru import logger
+from urllib.parse import parse_qs, unquote, urlparse
+
 from fleet_api.common_api import get_package
+from loguru import logger
+from munch import Munch
+from packaging import version
 
 # Constants
 CLOUD_SECURITY_POSTURE = "cloud_security_posture"

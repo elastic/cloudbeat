@@ -5,8 +5,8 @@ Each rule has one or more test cases.
 File rule identification is performed by node host and file names.
 """
 
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 from .k8s_test_case import FileTestCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_1_1_1 = "CIS 1.1.1"
 CIS_1_1_2 = "CIS 1.1.2"

@@ -5,8 +5,9 @@ and also mapping environment variables
 """
 
 import os
-from munch import Munch
+
 from loguru import logger
+from munch import Munch
 
 FINDINGS_INDEX_PATTERN = "*cloud_security_posture.findings*"
 VULNERABILITIES_INDEX_PATTERN = "*cloud_security_posture.vulnerabilities*"

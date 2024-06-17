@@ -6,7 +6,7 @@ Key vault identification is performed by resource name.
 """
 
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 
 CIS_8_5 = "CIS 8.5"
 CIS_5_1_5 = "CIS 5.1.5"
