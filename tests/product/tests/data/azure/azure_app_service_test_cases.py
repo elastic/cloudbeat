@@ -6,7 +6,7 @@ App service identification is performed by resource name.
 """
 
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 
 CIS_9_1 = "CIS 9.1"
 CIS_9_2 = "CIS 9.2"

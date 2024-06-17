@@ -5,11 +5,12 @@ This module verifies correctness of retrieved findings by manipulating audit act
 
 from datetime import datetime, timedelta
 from functools import partial
+
 import pytest
 from commonlib.utils import get_ES_evaluation, res_identifier
-
 from product.tests.data.aws import aws_iam_test_cases as aws_iam_tc
-from product.tests.parameters import register_params, Parameters
+from product.tests.parameters import Parameters, register_params
+
 from .data.constants import RES_NAME
 
 

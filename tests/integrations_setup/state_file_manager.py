@@ -4,8 +4,9 @@ Exports state_manager object as a singleton.
 """
 
 import json
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
+
 from fleet_api.utils import delete_file
 from loguru import logger
 

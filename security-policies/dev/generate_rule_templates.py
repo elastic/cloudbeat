@@ -1,9 +1,10 @@
 import argparse
-import os
-import yaml
 import json
-import common
+import os
 from pathlib import Path
+
+import common
+import yaml
 
 INTEGRATION_RULE_TEMPLATE_DIR = "../../../integrations/packages/cloud_security_posture/kibana/csp_rule_template/"
 
