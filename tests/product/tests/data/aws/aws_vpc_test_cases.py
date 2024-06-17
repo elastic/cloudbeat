@@ -5,8 +5,8 @@ Each rule has one or more test cases.
 VPC rules identification is performed by resource name.
 """
 
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 from ..eks_test_case import EksAwsServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_5_1 = "CIS 5.1"
 CIS_5_2 = "CIS 5.2"

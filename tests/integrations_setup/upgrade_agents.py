@@ -33,7 +33,7 @@ Example 'state_data.json':
 import sys
 import time
 from pathlib import Path
-from loguru import logger
+
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import (
     create_agent_download_source,
@@ -41,14 +41,15 @@ from fleet_api.agent_policy_api import (
     update_agent_policy,
 )
 from fleet_api.common_api import (
-    get_artifact_server,
     bulk_upgrade_agents,
-    wait_for_action_status,
+    get_artifact_server,
     get_package_version,
     update_package_version,
+    wait_for_action_status,
 )
 from fleet_api.package_policy_api import get_package_policy_by_id
-from state_file_manager import state_manager, HostType
+from loguru import logger
+from state_file_manager import HostType, state_manager
 
 STATE_DATA_PATH = Path(__file__).parent / "state_data.json"
 

@@ -6,9 +6,8 @@ Cloudbeat -> ElasticSearch
 """
 
 import pytest
-
-from commonlib.utils import get_findings
 from commonlib.io_utils import FsClient
+from commonlib.utils import get_findings
 from loguru import logger
 
 testdata = ["file", "process", "k8s_object"]

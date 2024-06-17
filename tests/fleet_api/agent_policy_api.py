@@ -3,9 +3,10 @@ This module contains API calls related to the agent policy API.
 """
 
 from typing import Optional
-from munch import Munch, munchify
-from loguru import logger
+
 from fleet_api.base_call_api import APICallException, perform_api_call
+from loguru import logger
+from munch import Munch, munchify
 
 
 def create_agent_policy(cfg: Munch, json_policy: dict) -> str:

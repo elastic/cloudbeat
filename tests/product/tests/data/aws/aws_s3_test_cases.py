@@ -5,9 +5,10 @@ Each rule has one or more test cases.
 S3 buckets identification is performed by resource name.
 """
 
-from commonlib.framework.reporting import skip_param_case, SkipReportData
+from commonlib.framework.reporting import SkipReportData, skip_param_case
+
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 from ..eks_test_case import EksAwsServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_2_1_1 = "CIS 2.1.1"
 CIS_2_1_2 = "CIS 2.1.2"

@@ -2,10 +2,11 @@
 import datetime
 import json
 import time
-from typing import Union
 from functools import reduce
+from typing import Union
+
 import allure
-from commonlib.io_utils import get_logs_from_stream, get_events_from_index
+from commonlib.io_utils import get_events_from_index, get_logs_from_stream
 from loguru import logger
 
 FINDINGS_BACKOFF_SECONDS = 5

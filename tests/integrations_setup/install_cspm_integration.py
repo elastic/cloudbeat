@@ -9,27 +9,28 @@ The following steps are performed:
 """
 import sys
 from pathlib import Path
-from munch import Munch
-from loguru import logger
+
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.package_policy_api import create_cspm_integration
 from fleet_api.common_api import (
+    get_artifact_server,
     get_enrollment_token,
     get_fleet_server_host,
-    get_artifact_server,
     get_package_version,
     update_package_version,
 )
+from fleet_api.package_policy_api import create_cspm_integration
 from fleet_api.utils import render_template
-from state_file_manager import state_manager, PolicyState, HostType
+from loguru import logger
+from munch import Munch
 from package_policy import (
-    load_data,
-    version_compatible,
-    generate_random_name,
-    patch_vars,
     VERSION_MAP,
+    generate_random_name,
+    load_data,
+    patch_vars,
+    version_compatible,
 )
+from state_file_manager import HostType, PolicyState, state_manager
 
 CSPM_EXPECTED_AGENTS = 1
 INTEGRATION_NAME = "CSPM AWS"

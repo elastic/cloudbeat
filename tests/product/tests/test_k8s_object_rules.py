@@ -5,11 +5,12 @@ This module verifies correctness of retrieved findings by manipulating audit and
 
 from datetime import datetime, timedelta
 from functools import partial
+
 import pytest
 from commonlib.utils import get_ES_evaluation, res_identifier
-
 from product.tests.data.k8s import k8s_object_cases as k8s_objects_tc
-from product.tests.parameters import register_params, Parameters
+from product.tests.parameters import Parameters, register_params
+
 from .data.constants import RES_NAME
 
 

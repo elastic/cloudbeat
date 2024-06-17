@@ -1,12 +1,10 @@
 import argparse
 import os
 import uuid
-
-import pandas as pd
+from dataclasses import asdict, dataclass
 
 import common
-from dataclasses import dataclass, asdict
-
+import pandas as pd
 from ruamel.yaml import YAML
 
 yml = YAML()

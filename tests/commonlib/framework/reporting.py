@@ -3,10 +3,12 @@ This module extends pytest basic report functionality using allure reporter
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
+
+import allure
 import pytest
 from allure_commons.types import LinkType
-import allure
 
 
 @dataclass

@@ -9,26 +9,26 @@ The following steps are performed:
 """
 import sys
 from pathlib import Path
-from munch import Munch
+
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.package_policy_api import create_kspm_unmanaged_integration
 from fleet_api.common_api import (
+    create_kubernetes_manifest,
     get_enrollment_token,
     get_fleet_server_host,
-    create_kubernetes_manifest,
     get_package_version,
     update_package_version,
 )
+from fleet_api.package_policy_api import create_kspm_unmanaged_integration
 from loguru import logger
-from state_file_manager import state_manager, PolicyState, HostType
+from munch import Munch
 from package_policy import (
+    VERSION_MAP,
+    generate_random_name,
     load_data,
     version_compatible,
-    generate_random_name,
-    VERSION_MAP,
 )
-
+from state_file_manager import HostType, PolicyState, state_manager
 
 KSPM_UNMANAGED_EXPECTED_AGENTS = 2
 INTEGRATION_NAME = "KSPM Self Managed"

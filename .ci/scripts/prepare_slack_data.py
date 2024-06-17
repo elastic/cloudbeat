@@ -4,9 +4,8 @@ This script is designed to be used in a GitHub Actions workflow to send Slack no
 It reads environment variables set by the GitHub Actions runtime, validates them, and
 constructs a Slack payload based on the workflow status.
 """
-import os
 import json
-
+import os
 
 color_by_job_status = {
     "success": "#36a64f",

@@ -6,8 +6,9 @@ To add new test cases, create a new configuration file and add it to the mapping
 """
 
 from configuration import kubernetes
+
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 from .k8s_test_case import K8sTestCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 K8S_CIS_1_2_2 = "CIS 1.2.2"
 K8S_CIS_1_2_3 = "CIS 1.2.3"

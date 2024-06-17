@@ -8,11 +8,17 @@ verifying that there are findings of 'resource.type' for each feature.
 """
 
 import time
+
 import pytest
-from loguru import logger
-from configuration import elasticsearch
+from commonlib.agents_map import (
+    CIS_AWS_COMPONENT,
+    CIS_AZURE_COMPONENT,
+    AgentComponentMapping,
+    AgentExpectedMapping,
+)
 from commonlib.utils import get_findings
-from commonlib.agents_map import CIS_AWS_COMPONENT, CIS_AZURE_COMPONENT, AgentExpectedMapping, AgentComponentMapping
+from configuration import elasticsearch
+from loguru import logger
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
