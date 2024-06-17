@@ -47,7 +47,7 @@ for folder in $folders; do
         # TODO: To consider if we want to log this message
         echo "Environment $deployment_name is expired."
         # Add deployment name to JSON object
-        expired_envs=$(echo "$expired_envs" | jq --arg value "$deployment_name" '. += [{"deployment_name": $value}]')
+        expired_envs=$(echo "$expired_envs" | jq --arg value "$deployment_name" '. += [$value]')
 
         # Set found to true
         expired_env_found=true
@@ -58,6 +58,6 @@ for folder in $folders; do
 done
 
 # Print the deployment names and found status to GITHUB_OUTPUT
-deployments_json=$(printf '%s\n' "${expired_envs[@]}" | jq -R . | jq -s .)
-echo "deployments=$deployments_json" >>"$GITHUB_OUTPUT"
+expired_envs_str=$(echo "$expired_envs" | jq -c .)
+echo "deployments=$expired_envs_str" >>"$GITHUB_OUTPUT"
 echo "expired_env_found=$expired_env_found" >>"$GITHUB_OUTPUT"

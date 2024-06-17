@@ -18,7 +18,7 @@ jobs:
   envs_to_destroy:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.get_expired_envs.outputs.deployments }}
+      matrix_deployments: ${{ steps.get_expired_envs.outputs.deployments }}
       env_found: ${{ steps.get_expired_envs.outputs.expired_env_found }}
     steps:
       - name: Checkout repository
@@ -60,7 +60,8 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 1 # Destroy environments one by one
-      matrix: ${{fromJson(needs.envs_to_destroy.outputs.matrix)}}
+      matrix:
+        deployment_name: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
     steps:
       - name: Print environment to destroy
         env:
