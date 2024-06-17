@@ -65,7 +65,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				},
 				"network": &AssetNetwork{
 					NetworkId:        pointers.Ref("vpc-id"),
-					SubnetId:         pointers.Ref("subnetId"),
+					SubnetIds:        []string{"subnetId"},
 					Ipv6Address:      pointers.Ref("ipv6"),
 					PublicIpAddress:  pointers.Ref("public-ip-addr"),
 					PrivateIpAddress: pointers.Ref("private-ip-addre"),
@@ -125,7 +125,7 @@ func TestAssetInventory_Run(t *testing.T) {
 			}),
 			WithNetwork(AssetNetwork{
 				NetworkId:        pointers.Ref("vpc-id"),
-				SubnetId:         pointers.Ref("subnetId"),
+				SubnetIds:        []string{"subnetId"},
 				Ipv6Address:      pointers.Ref("ipv6"),
 				PublicIpAddress:  pointers.Ref("public-ip-addr"),
 				PrivateIpAddress: pointers.Ref("private-ip-addre"),

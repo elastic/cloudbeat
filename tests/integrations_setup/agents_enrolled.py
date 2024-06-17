@@ -3,14 +3,15 @@ Wait for agents to be enrolled for a given policies
 If the expected number of agents is not enrolled within the timeout, the test will fail
 """
 
+import re
 import sys
 import time
-import re
 from dataclasses import dataclass
-from fleet_api.agent_policy_api import get_agents
+
 import configuration_fleet as cnfg
-from state_file_manager import state_manager
+from fleet_api.agent_policy_api import get_agents
 from loguru import logger
+from state_file_manager import state_manager
 
 TIMEOUT = 600
 

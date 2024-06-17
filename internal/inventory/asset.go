@@ -120,13 +120,18 @@ type Asset struct {
 
 // AssetNetwork contains network information
 type AssetNetwork struct {
-	NetworkId        *string `json:"network_id"`
-	SubnetId         *string `json:"subnet_id"`
-	Ipv6Address      *string `json:"ipv6_address"`
-	PublicIpAddress  *string `json:"public_ip_address"`
-	PrivateIpAddress *string `json:"private_ip_address"`
-	PublicDnsName    *string `json:"public_dns_name"`
-	PrivateDnsName   *string `json:"private_dns_name"`
+	Ipv6Address         *string  `json:"ipv6_address"`
+	NetworkId           *string  `json:"network_id"`
+	NetworkInterfaceIds []string `json:"network_interface_ids"`
+	PrivateDnsName      *string  `json:"private_dns_name"`
+	PrivateIpAddress    *string  `json:"private_ip_address"`
+	PublicDnsName       *string  `json:"public_dns_name"`
+	PublicIpAddress     *string  `json:"public_ip_address"`
+	RouteTableIds       []string `json:"route_table_ids"`
+	SecurityGroupIds    []string `json:"security_group_ids"`
+	SubnetIds           []string `json:"subnet_ids"`
+	TransitGatewayIds   []string `json:"transit_gateway_ids"`
+	VpcIds              []string `json:"vpc_ids"`
 }
 
 // AssetCloud contains information about the cloud provider

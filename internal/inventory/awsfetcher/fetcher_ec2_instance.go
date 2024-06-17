@@ -78,6 +78,10 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			})
 		}
 
+		subnetIds := []string{}
+		if id := pointers.Deref(instance.SubnetId); id != "" {
+			subnetIds = append(subnetIds, id)
+		}
 		assetChannel <- inventory.NewAssetEvent(
 			ec2InstanceClassification,
 			instance.GetResourceArn(),
@@ -114,7 +118,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			iamFetcher,
 			inventory.WithNetwork(inventory.AssetNetwork{
 				NetworkId:        instance.VpcId,
-				SubnetId:         instance.SubnetId,
+				SubnetIds:        subnetIds,
 				Ipv6Address:      instance.Ipv6Address,
 				PublicIpAddress:  instance.PublicIpAddress,
 				PrivateIpAddress: instance.PrivateIpAddress,

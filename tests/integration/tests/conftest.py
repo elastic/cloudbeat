@@ -2,8 +2,9 @@
 Integration tests setup configurations and fixtures
 """
 
-from pathlib import Path
 import time
+from pathlib import Path
+
 import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
 from commonlib.kubernetes import ApiException

@@ -7,31 +7,32 @@ The following steps are performed:
 2. Create a CNVM AWS integration.
 3. Create a deploy/cloudformation/config.json file to be used by the just deploy-cloudformation command.
 """
-import sys
 import json
+import sys
 from pathlib import Path
-from munch import Munch
+
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.package_policy_api import create_cnvm_integration
-from fleet_api.utils import rename_file_by_suffix
 from fleet_api.common_api import (
+    get_artifact_server,
+    get_cnvm_template,
     get_enrollment_token,
     get_fleet_server_host,
-    get_artifact_server,
     get_package_version,
-    get_cnvm_template,
 )
+from fleet_api.package_policy_api import create_cnvm_integration
+from fleet_api.utils import rename_file_by_suffix
 from loguru import logger
-from state_file_manager import state_manager, PolicyState, HostType
+from munch import Munch
 from package_policy import (
-    version_compatible,
     VERSION_MAP,
-    load_data,
+    extract_template_url,
     generate_random_name,
     get_package_default_url,
-    extract_template_url,
+    load_data,
+    version_compatible,
 )
+from state_file_manager import HostType, PolicyState, state_manager
 
 CNVM_EXPECTED_AGENTS = 1
 CNVM_CLOUDFORMATION_CONFIG = "../../deploy/cloudformation/config.json"

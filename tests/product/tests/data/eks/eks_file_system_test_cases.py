@@ -6,8 +6,8 @@ Each rule has one or more test cases.
 
 from configuration import eks
 
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 from ..eks_test_case import EksTestCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 config_1_node_1 = eks.config_1_node_1
 config_1_node_2 = eks.config_1_node_2

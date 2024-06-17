@@ -35,14 +35,14 @@ repos:
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.1.0
     hooks:
       - id: flake8
         name: flake8 ./tests/ ./.ci/scripts ./github/actions
         files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.2.2
+    rev: v3.2.3
     hooks:
       - id: pylint
         args: [
@@ -51,6 +51,12 @@ repos:
           ]
         # TODO: Apply pylint in security-policies
         exclude: security-policies.*
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
 
   - repo: https://github.com/psf/black
     rev: 24.4.2
@@ -70,7 +76,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/aws-cloudformation/cfn-lint
-    rev: v1.2.5a9
+    rev: v1.2.5.a10
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -176,7 +182,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.22.0
+    rev: v0.23.1
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
