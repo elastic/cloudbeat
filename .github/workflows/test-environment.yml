@@ -33,10 +33,11 @@ on:
           description: "Run sanity tests after provision"
           default: false
           type: boolean
-      run-ui-sanity-tests:
-          description: "Run UI sanity tests after provision"
-          default: false
-          type: boolean
+      # TODO: Reached max number of inputs. May be merged with run-sanity-tests
+      # run-ui-sanity-tests:
+      #     description: "Run UI sanity tests after provision"
+      #     default: false
+      #     type: boolean
       kibana_ref:
         description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
@@ -84,10 +85,11 @@ on:
         description: "Run sanity tests after provision"
         default: false
         type: boolean
-      run-ui-sanity-tests:
-          description: "Run UI sanity tests after provision"
-          default: false
-          type: boolean
+      # TODO: Reached max number of inputs. May be merged with run-sanity-tests
+      # run-ui-sanity-tests:
+      #     description: "Run UI sanity tests after provision"
+      #     default: false
+      #     type: boolean
       kibana_ref:
         description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
@@ -444,7 +446,9 @@ jobs:
 
       - name: Run UI Sanity checks (Kibana)
         uses: ./.github/actions/kibana-ftr
-        if: ${{ success() && inputs.run-ui-sanity-tests == true }}
+        # TODO: Reached max number of inputs. May be merged with run-sanity-tests
+        # if: ${{ success() && inputs.run-ui-sanity-tests == true }}
+        if: ${{ success() && inputs.run-sanity-tests == true }}
         with:
           test_kibana_url: ${{ env.TEST_KIBANA_URL }}
           test_es_url: ${{ env.TEST_ES_URL }}
