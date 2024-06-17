@@ -48,7 +48,8 @@ jobs:
     # strategy:
     #   fail-fast: false
     #   max-parallel: 1 # Destroy environments one by one
-    #   matrix: ${{fromJson(needs.envs_to_destroy.outputs.matrix)}}
+    #   matrix:
+    #   deployment_name: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
     # with:
     #   prefix: ${{ matrix.deployment_name }}
 
