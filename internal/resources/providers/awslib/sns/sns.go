@@ -29,6 +29,7 @@ import (
 )
 
 type SNS interface {
+	ListTopics(ctx context.Context) ([]types.Topic, error)
 	ListSubscriptionsByTopic(ctx context.Context, region *string, topic string) ([]types.Subscription, error)
 }
 
@@ -38,6 +39,7 @@ func NewSNSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegion
 	}
 	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
+		log:     log,
 		clients: m.GetMultiRegionsClientMap(),
 	}
 }

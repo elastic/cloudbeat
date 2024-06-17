@@ -23,16 +23,41 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
+	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
+	log     *logp.Logger
 	clients map[string]Client
 }
 
 type Client interface {
-	ListSubscriptionsByTopic(ctx context.Context, params *sns.ListSubscriptionsByTopicInput, optFns ...func(*sns.Options)) (*sns.ListSubscriptionsByTopicOutput, error)
+	sns.ListTopicsAPIClient
+	sns.ListSubscriptionsByTopicAPIClient
+}
+
+func (p *Provider) ListTopics(ctx context.Context) ([]types.Topic, error) {
+	topics, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.Topic, error) {
+		var all []types.Topic
+		input := &sns.ListTopicsInput{}
+
+		for {
+			output, err := c.ListTopics(ctx, input)
+			if err != nil {
+				p.log.Errorf("Could not list SNS Topics. Error: %s", err)
+			}
+			all = append(all, output.Topics...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+		return all, nil
+	})
+	return lo.Flatten(topics), err
 }
 
 func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, region *string, topic string) ([]types.Subscription, error) {
