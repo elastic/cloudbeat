@@ -35,7 +35,7 @@ repos:
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.1.0
     hooks:
       - id: flake8
         name: flake8 ./tests/ ./.ci/scripts ./github/actions
@@ -176,7 +176,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.23.0
+    rev: v0.23.1
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
