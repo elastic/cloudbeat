@@ -277,13 +277,13 @@ jobs:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
         run: |
-          python3 ../../.ci/scripts/create_env_config.py
-          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
           aws s3 cp "./terraform.tfstate" "${S3_BUCKET}/terraform.tfstate"
           aws s3 cp "${EC2_CSPM_KEY}" "${S3_BUCKET}/cspm.pem"
           aws s3 cp "${EC2_KSPM_KEY}" "${S3_BUCKET}/kspm.pem"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
+          python3 ../../.ci/scripts/create_env_config.py
+          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
 
       - name: Summary
         if: success()
