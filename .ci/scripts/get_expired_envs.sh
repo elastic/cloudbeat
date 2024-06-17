@@ -17,7 +17,7 @@ s3_bucket="tf-state-bucket-test-infra"
 folders=$(aws s3 ls "s3://${s3_bucket}" | awk '{print $2}')
 
 # JSON array to store deployment names
-deployments_json='[]'
+expired_envs='[]'
 
 # Boolean variable to track if an expired environment was found
 expired_env_found=false
@@ -47,7 +47,7 @@ for folder in $folders; do
         # TODO: To consider if we want to log this message
         echo "Environment $deployment_name is expired."
         # Add deployment name to JSON object
-        deployments_json=$(echo "$deployments_json" | jq --arg value "$deployment_name" '. += [{"deployment_name": $value}]')
+        expired_envs=$(echo "$expired_envs" | jq --arg value "$deployment_name" '. += [{"deployment_name": $value}]')
 
         # Set found to true
         expired_env_found=true
@@ -58,5 +58,6 @@ for folder in $folders; do
 done
 
 # Print the deployment names and found status to GITHUB_OUTPUT
-echo "deployments=$(echo "$deployments_json" | jq .)" >>"$GITHUB_OUTPUT"
+deployments_json=$(printf '%s\n' "${expired_envs[@]}" | jq -R . | jq -s .)
+echo "deployments=$deployments_json" >>"$GITHUB_OUTPUT"
 echo "expired_env_found=$expired_env_found" >>"$GITHUB_OUTPUT"
