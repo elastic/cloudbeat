@@ -26,13 +26,8 @@ expired_env_found=false
 for folder in $folders; do
     # Check if env_config.json file exists
     if ! file_exists "s3://${s3_bucket}/${folder}env_config.json"; then
-        # TODO: To consider if we want to log this message
-        # echo "env_config.json file does not exist in $folder"
         continue
     fi
-
-    # TODO: To consider if we want to log this message
-    # echo "Reading env_config.json file from $folder"
 
     file_content=$(aws s3 cp "s3://${s3_bucket}/${folder}env_config.json" -)
 
@@ -46,7 +41,6 @@ for folder in $folders; do
     if [ "$expiration_seconds" -le "$current_date_seconds" ]; then
         # Extract the deployment_name field using jq
         deployment_name=$(echo "$file_content" | jq -r '.deployment_name')
-        # TODO: To consider if we want to log this message
         echo "Environment $deployment_name is expired."
         # Add deployment name to JSON object
         expired_envs=$(echo "$expired_envs" | jq --arg value "$deployment_name" '. += [$value]')
@@ -54,7 +48,6 @@ for folder in $folders; do
         # Set found to true
         expired_env_found=true
     else
-        # TODO: To consider if we want to log this message
         echo "Environment $(echo "$file_content" | jq -r '.deployment_name') is not expired yet."
     fi
 done
