@@ -9,26 +9,26 @@ The following steps are performed:
 """
 import sys
 from pathlib import Path
-from munch import Munch
+
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy, get_agent_policy_id_by_name
-from fleet_api.package_policy_api import create_kspm_eks_integration
 from fleet_api.common_api import (
+    create_kubernetes_manifest,
     get_enrollment_token,
     get_fleet_server_host,
-    create_kubernetes_manifest,
     get_package_version,
     update_package_version,
 )
+from fleet_api.package_policy_api import create_kspm_eks_integration
 from loguru import logger
-from state_file_manager import state_manager, PolicyState, HostType
+from munch import Munch
 from package_policy import (
+    VERSION_MAP,
+    generate_random_name,
     load_data,
     version_compatible,
-    generate_random_name,
-    VERSION_MAP,
 )
-
+from state_file_manager import HostType, PolicyState, state_manager
 
 KSPM_EKS_EXPECTED_AGENTS = 2
 D4C_AGENT_POLICY_NAME = "tf-ap-d4c"

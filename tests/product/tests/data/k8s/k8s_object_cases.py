@@ -2,8 +2,8 @@
 This module defines k8s objects and psp test cases
 """
 
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 from .k8s_test_case import K8sTestCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 K8S_CIS_5_1_3 = "CIS 5.1.3"
 K8S_CIS_5_1_5 = "CIS 5.1.5"

@@ -4,11 +4,11 @@ This module verifies correctness of retrieved findings by manipulating audit and
 """
 
 from datetime import datetime, timedelta
+
 import pytest
 from commonlib.utils import get_ES_evaluation
-
 from product.tests.data.k8s import fs_test_cases as k8s_fs_tc
-from product.tests.parameters import register_params, Parameters
+from product.tests.parameters import Parameters, register_params
 
 
 @pytest.mark.k8s_file_system_rules

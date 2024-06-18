@@ -5,8 +5,8 @@ Each rule has one or more test cases.
 RDS rules identification is performed by resource name.
 """
 
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 from ..eks_test_case import EksAwsServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_2_3_1 = "CIS 2.3.1"
 CIS_2_3_2 = "CIS 2.3.2"

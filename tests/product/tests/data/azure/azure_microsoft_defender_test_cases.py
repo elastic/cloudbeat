@@ -6,7 +6,7 @@ Microsoft Defender identification is performed by resource name.
 """
 
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 
 CIS_2_1_15 = "CIS 2.1.15"
 CIS_2_1_18 = "CIS 2.1.18"
