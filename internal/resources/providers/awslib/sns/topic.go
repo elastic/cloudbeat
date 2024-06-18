@@ -38,6 +38,9 @@ func (v TopicInfo) GetResourceArn() string {
 
 func (v TopicInfo) GetResourceName() string {
 	elems := strings.Split(v.GetResourceArn(), ":")
+	if len(elems) < 1 {
+		return ""
+	}
 	return elems[len(elems)-1]
 }
 
