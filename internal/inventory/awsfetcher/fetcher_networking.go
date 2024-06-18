@@ -132,7 +132,7 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 	var enricher inventory.AssetEnricher
 
 	switch obj := item.(type) {
-	case ec2.InternetGatewayInfo:
+	case *ec2.InternetGatewayInfo:
 		vpcIds := []string{}
 		for _, attachment := range obj.InternetGateway.Attachments {
 			id := pointers.Deref(attachment.VpcId)
@@ -143,7 +143,7 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 		enricher = inventory.WithNetwork(inventory.AssetNetwork{
 			VpcIds: vpcIds,
 		})
-	case ec2.NatGatewayInfo:
+	case *ec2.NatGatewayInfo:
 		ifaceIds := []string{}
 		for _, iface := range obj.NatGateway.NatGatewayAddresses {
 			id := pointers.Deref(iface.NetworkInterfaceId)
@@ -156,7 +156,7 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 			SubnetIds:           []string{pointers.Deref(obj.NatGateway.SubnetId)},
 			VpcIds:              []string{pointers.Deref(obj.NatGateway.VpcId)},
 		})
-	case ec2.NACLInfo:
+	case *ec2.NACLInfo:
 		subnetIds := []string{}
 		for _, association := range obj.NetworkAcl.Associations {
 			id := pointers.Deref(association.SubnetId)
@@ -168,7 +168,7 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 			SubnetIds: subnetIds,
 			VpcIds:    []string{pointers.Deref(obj.NetworkAcl.VpcId)},
 		})
-	case ec2.NetworkInterfaceInfo:
+	case *ec2.NetworkInterfaceInfo:
 		secGroupIds := []string{}
 		for _, secGroup := range obj.NetworkInterface.Groups {
 			id := pointers.Deref(secGroup.GroupId)
@@ -179,7 +179,7 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 			SubnetIds:        []string{pointers.Deref(obj.NetworkInterface.SubnetId)},
 			VpcIds:           []string{pointers.Deref(obj.NetworkInterface.VpcId)},
 		})
-	case ec2.TransitGatewayAttachmentInfo:
+	case *ec2.TransitGatewayAttachmentInfo:
 		routeTableId := ""
 		if obj.TransitGatewayAttachment.Association != nil {
 			routeTableId = pointers.Deref(obj.TransitGatewayAttachment.Association.TransitGatewayRouteTableId)
@@ -188,7 +188,7 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 			RouteTableIds:     []string{routeTableId},
 			TransitGatewayIds: []string{pointers.Deref(obj.TransitGatewayAttachment.TransitGatewayId)},
 		})
-	case ec2.VpcPeeringConnectionInfo:
+	case *ec2.VpcPeeringConnectionInfo:
 		enricher = inventory.WithNetwork(inventory.AssetNetwork{
 			VpcIds: []string{
 				pointers.Deref(obj.VpcPeeringConnection.AccepterVpcInfo.VpcId),
