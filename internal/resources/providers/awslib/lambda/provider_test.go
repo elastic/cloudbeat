@@ -140,9 +140,8 @@ func TestProvider_ListFunctions_and_ListAliases(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:          testhelper.NewLogger(t),
-				clients:      clients,
-				awsAccountId: "123",
+				log:     testhelper.NewLogger(t),
+				clients: clients,
 			}
 			got, err := p.ListFunctions(context.Background())
 			if tt.wantErr {
@@ -208,9 +207,8 @@ func TestProvider_ListLayers(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:          testhelper.NewLogger(t),
-				clients:      clients,
-				awsAccountId: "123",
+				log:     testhelper.NewLogger(t),
+				clients: clients,
 			}
 			got, err := p.ListLayers(context.Background())
 			if tt.wantErr {
@@ -270,9 +268,8 @@ func TestProvider_ListEventSourceMappings(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:          testhelper.NewLogger(t),
-				clients:      clients,
-				awsAccountId: "123",
+				log:     testhelper.NewLogger(t),
+				clients: clients,
 			}
 			got, err := p.ListEventSourceMappings(context.Background())
 			if tt.wantErr {

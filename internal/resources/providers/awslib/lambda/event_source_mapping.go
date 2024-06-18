@@ -18,8 +18,6 @@
 package lambda
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -28,16 +26,11 @@ import (
 
 type EventSourceMappingInfo struct {
 	EventSourceMapping types.EventSourceMappingConfiguration `json:"event_source_mapping_configuration"`
-	awsAccount         string
 	region             string
 }
 
 func (v EventSourceMappingInfo) GetResourceArn() string {
-	id := pointers.Deref(v.EventSourceMapping.UUID)
-	if id == "" {
-		return ""
-	}
-	return fmt.Sprintf("arn:aws:lambda:%s:%s:eventSourceMapping/%s", v.region, v.awsAccount, id)
+	return ""
 }
 
 func (v EventSourceMappingInfo) GetResourceName() string {

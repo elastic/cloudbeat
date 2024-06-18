@@ -38,7 +38,7 @@ func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []invent
 	elbProvider := elb.NewElbProvider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[elb.Client]{})
 	elbv2Provider := elbv2.NewElbV2Provider(logger, cfg, &awslib.MultiRegionClientFactory[elbv2.Client]{})
 	iamProvider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
-	lambdaProvider := lambda.NewLambdaProvider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[lambda.Client]{})
+	lambdaProvider := lambda.NewLambdaProvider(logger, cfg, &awslib.MultiRegionClientFactory[lambda.Client]{})
 	rdsProvider := rds.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
 	s3Provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 

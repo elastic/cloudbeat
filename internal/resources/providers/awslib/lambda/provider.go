@@ -30,9 +30,8 @@ import (
 )
 
 type Provider struct {
-	log          *logp.Logger
-	awsAccountId string
-	clients      map[string]Client
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {
@@ -136,7 +135,6 @@ func (p *Provider) ListEventSourceMappings(ctx context.Context) ([]awslib.AwsRes
 		for _, item := range all {
 			f := &EventSourceMappingInfo{
 				EventSourceMapping: item,
-				awsAccount:         p.awsAccountId,
 				region:             region,
 			}
 			result = append(result, f)
