@@ -42,30 +42,29 @@ jobs:
           .ci/scripts/get_expired_envs.sh
 
   destroy_environment:
-    # TODO: Uncomment after debugging env_to_destroy action
-    # uses: ./.github/workflows/destroy-environment.yml
-    # needs: ["envs_to_destroy"]
-    # strategy:
-    #   fail-fast: false
-    #   max-parallel: 1 # Destroy environments one by one
-    #   matrix:
-    #   deployment_name: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
-    # with:
-    #   prefix: ${{ matrix.deployment_name }}
-
-    # TODO: Remove after debugging env_to_destroy action
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/destroy-environment.yml
     needs: ["envs_to_destroy"]
-    # Only run if there are environments to destroy
-    if: ${{ needs.envs_to_destroy.outputs.env_found == 'true' }}
     strategy:
       fail-fast: false
       max-parallel: 1 # Destroy environments one by one
       matrix:
         deployment_name: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
-    steps:
-      - name: Print environment to destroy
-        env:
-          DEPLOYMENT_TO_DESTROY: '${{ matrix.deployment_name }}'
-        run: |
-          echo "Destroying environment: ${DEPLOYMENT_TO_DESTROY}"
+    with:
+      prefix: ${{ matrix.deployment_name }}
+
+    # TODO: Remove after debugging env_to_destroy action
+    # runs-on: ubuntu-latest
+    # needs: ["envs_to_destroy"]
+    # # Only run if there are environments to destroy
+    # if: ${{ needs.envs_to_destroy.outputs.env_found == 'true' }}
+    # strategy:
+    #   fail-fast: false
+    #   max-parallel: 1 # Destroy environments one by one
+    #   matrix:
+    #     deployment_name: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
+    # steps:
+    #   - name: Print environment to destroy
+    #     env:
+    #       DEPLOYMENT_TO_DESTROY: '${{ matrix.deployment_name }}'
+    #     run: |
+    #       echo "Destroying environment: ${DEPLOYMENT_TO_DESTROY}"

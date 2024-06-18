@@ -38,10 +38,12 @@ for folder in $folders; do
 
     # Read expiration date from env_config.json
     expiration=$(echo "$file_content" | jq -r '.expiration')
+    expiration_seconds=$(date -d "$expiration" +%s)
     current_date=$(date +%Y-%m-%d)
+    current_date_seconds=$(date -d "$current_date" +%s)
 
     # Compare expiration date with current date
-    if [[ ! "$expiration" > "$current_date" ]]; then
+    if [ "$expiration_seconds" -le "$current_date_seconds" ]; then
         # Extract the deployment_name field using jq
         deployment_name=$(echo "$file_content" | jq -r '.deployment_name')
         # TODO: To consider if we want to log this message
