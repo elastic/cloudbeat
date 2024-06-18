@@ -4,11 +4,11 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 """
 
+from commonlib.framework.reporting import SkipReportData, skip_param_case
 from configuration import eks
-from commonlib.framework.reporting import skip_param_case, SkipReportData
-from ..eks_test_case import EksKubeObjectCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
+from ..eks_test_case import EksKubeObjectCase
 
 cis_eks_4_2_1_pass = EksKubeObjectCase(
     rule_tag="CIS 4.2.1",

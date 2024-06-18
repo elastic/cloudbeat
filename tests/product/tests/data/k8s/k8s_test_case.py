@@ -2,7 +2,7 @@
 This module provides k8s test case definition
 """
 
-from dataclasses import dataclass, astuple
+from dataclasses import astuple, dataclass
 
 
 @dataclass

@@ -7,13 +7,12 @@ import json
 import os
 import shutil
 import subprocess
-
 from datetime import datetime
 from pathlib import Path
 
 import yaml
-from munch import Munch, munchify
 from loguru import logger
+from munch import Munch, munchify
 
 
 def get_events_from_index(

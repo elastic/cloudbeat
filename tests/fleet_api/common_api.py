@@ -2,18 +2,15 @@
 This module contains API calls related to Fleet settings
 """
 
-import time
-import json
 import codecs
-from typing import Dict, Any, List
-from munch import Munch, munchify
-from loguru import logger
+import json
+import time
+from typing import Any, Dict, List
+
 from fleet_api.base_call_api import APICallException, perform_api_call
-from fleet_api.utils import (
-    replace_image_field,
-    add_capabilities,
-    add_tags,
-)
+from fleet_api.utils import add_capabilities, add_tags, replace_image_field
+from loguru import logger
+from munch import Munch, munchify
 
 AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 AGENT_ARTIFACT_SUFFIX_SHORT = "/downloads/"

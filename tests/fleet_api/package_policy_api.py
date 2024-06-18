@@ -2,10 +2,10 @@
 This module contains API calls related to the package policy API.
 """
 
-from munch import Munch, munchify
-from loguru import logger
 from fleet_api.base_call_api import APICallException, perform_api_call
-from fleet_api.utils import update_key, delete_key
+from fleet_api.utils import delete_key, update_key
+from loguru import logger
+from munch import Munch, munchify
 
 
 def create_kspm_unmanaged_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str) -> str:

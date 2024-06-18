@@ -2,19 +2,19 @@
 Global pytest file for fixtures and test configs
 """
 
+import functools
 import logging
 import sys
-import functools
 import time
 
-import pytest
 import configuration
-from commonlib.agents_map import AgentExpectedMapping, AgentComponentMapping
-from commonlib.kubernetes import KubernetesHelper
-from commonlib.elastic_wrapper import ElasticWrapper
-from commonlib.docker_wrapper import DockerWrapper
-from commonlib.io_utils import FsClient
+import pytest
 from _pytest.logging import LogCaptureFixture
+from commonlib.agents_map import AgentComponentMapping, AgentExpectedMapping
+from commonlib.docker_wrapper import DockerWrapper
+from commonlib.elastic_wrapper import ElasticWrapper
+from commonlib.io_utils import FsClient
+from commonlib.kubernetes import KubernetesHelper
 from loguru import logger
 
 

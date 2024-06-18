@@ -14,14 +14,14 @@ Usage:
     python purge_integrations.py
 
 """
-from loguru import logger
+import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import (
     delete_agent_policy,
     get_agents,
     unenroll_agents_from_policy,
 )
 from fleet_api.package_policy_api import delete_package_policy
-import configuration_fleet as cnfg
+from loguru import logger
 from state_file_manager import state_manager
 
 
