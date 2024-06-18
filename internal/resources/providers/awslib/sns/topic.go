@@ -18,29 +18,33 @@
 package sns
 
 import (
-	"context"
+	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type SNS interface {
-	ListTopics(ctx context.Context) ([]types.Topic, error)
-	ListSubscriptionsByTopic(ctx context.Context, region string, topic string) ([]types.Subscription, error)
-	ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.AwsResource, error)
+type TopicInfo struct {
+	Topic         types.Topic          `json:"topic"`
+	Subscriptions []types.Subscription `json:"subscriptions"`
+	region        string
 }
 
-func NewSNSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return sns.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
-	return &Provider{
-		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
-	}
+func (v TopicInfo) GetResourceArn() string {
+	return pointers.Deref(v.Topic.TopicArn)
+}
+
+func (v TopicInfo) GetResourceName() string {
+	elems := strings.Split(v.GetResourceArn(), ":")
+	return elems[len(elems)-1]
+}
+
+func (v TopicInfo) GetResourceType() string {
+	return fetching.SNSTopicType
+}
+
+func (v TopicInfo) GetRegion() string {
+	return v.region
 }

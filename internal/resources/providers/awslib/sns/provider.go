@@ -26,6 +26,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -40,7 +41,7 @@ type Client interface {
 }
 
 func (p *Provider) ListTopics(ctx context.Context) ([]types.Topic, error) {
-	topics, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.Topic, error) {
+	topics, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, _ string, c Client) ([]types.Topic, error) {
 		var all []types.Topic
 		input := &sns.ListTopicsInput{}
 
@@ -60,12 +61,12 @@ func (p *Provider) ListTopics(ctx context.Context) ([]types.Topic, error) {
 	return lo.Flatten(topics), err
 }
 
-func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, region *string, topic string) ([]types.Subscription, error) {
+func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, region string, topic string) ([]types.Subscription, error) {
 	input := sns.ListSubscriptionsByTopicInput{
 		TopicArn: aws.String(topic),
 	}
 	var all []types.Subscription
-	client, err := awslib.GetClient(region, p.clients)
+	client, err := awslib.GetClient(pointers.Ref(region), p.clients)
 	if err != nil {
 		return nil, err
 	}
@@ -81,4 +82,38 @@ func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, region *string,
 		input.NextToken = output.NextToken
 	}
 	return all, nil
+}
+
+func (p *Provider) ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.AwsResource, error) {
+	topicInfos, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var all []awslib.AwsResource
+		input := &sns.ListTopicsInput{}
+
+		for {
+			output, err := c.ListTopics(ctx, input)
+			if err != nil {
+				p.log.Errorf("Could not list SNS Topics. Error: %s", err)
+			}
+
+			for _, topic := range output.Topics {
+				topicInfo := &TopicInfo{
+					Topic:  topic,
+					region: region,
+				}
+				subscriptions, err := p.ListSubscriptionsByTopic(ctx, region, topicInfo.GetResourceArn())
+				if err != nil {
+					p.log.Errorf("Could not list SNS Subscriptions for Topic %q. Error: %s", topicInfo.GetResourceArn(), err)
+				} else {
+					topicInfo.Subscriptions = subscriptions
+				}
+				all = append(all, topicInfo)
+			}
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+		return all, nil
+	})
+	return lo.Flatten(topicInfos), err
 }

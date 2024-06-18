@@ -75,7 +75,7 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 			p := &Provider{
 				clients: createMockClients(c, regions),
 			}
-			got, err := p.ListSubscriptionsByTopic(context.Background(), &regions[0], tt.topic)
+			got, err := p.ListSubscriptionsByTopic(context.Background(), regions[0], tt.topic)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
