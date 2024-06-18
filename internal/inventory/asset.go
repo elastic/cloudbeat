@@ -27,8 +27,8 @@ import (
 type AssetCategory string
 
 const (
-	CategoryInfrastructure AssetCategory = "infrastructure"
 	CategoryIdentity       AssetCategory = "identity"
+	CategoryInfrastructure AssetCategory = "infrastructure"
 )
 
 // AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
@@ -37,9 +37,10 @@ type AssetSubCategory string
 const (
 	SubCategoryAuthorization AssetSubCategory = "authorization"
 	SubCategoryCompute       AssetSubCategory = "compute"
-	SubCategoryStorage       AssetSubCategory = "storage"
 	SubCategoryDatabase      AssetSubCategory = "database"
+	SubCategoryIntegration   AssetSubCategory = "integration"
 	SubCategoryNetwork       AssetSubCategory = "network"
+	SubCategoryStorage       AssetSubCategory = "storage"
 
 	SubCategoryCloudProviderAccount AssetSubCategory = "cloud-provider-account"
 )
@@ -48,16 +49,17 @@ const (
 type AssetType string
 
 const (
-	TypeAcl                AssetType = "acl"
-	TypeFirewall           AssetType = "firewall"
-	TypeInterface          AssetType = "interface"
-	TypeLoadBalancer       AssetType = "load-balancer"
-	TypeObjectStorage      AssetType = "object-storage"
-	TypePeering            AssetType = "peering"
-	TypeRelationalDatabase AssetType = "relational-database"
-	TypeSubnet             AssetType = "subnet"
-	TypeVirtualMachine     AssetType = "virtual-machine"
-	TypeVirtualNetwork     AssetType = "virtual-network"
+	TypeAcl                 AssetType = "acl"
+	TypeFirewall            AssetType = "firewall"
+	TypeInterface           AssetType = "interface"
+	TypeLoadBalancer        AssetType = "load-balancer"
+	TypeNotificationService AssetType = "notification-service"
+	TypeObjectStorage       AssetType = "object-storage"
+	TypePeering             AssetType = "peering"
+	TypeRelationalDatabase  AssetType = "relational-database"
+	TypeSubnet              AssetType = "subnet"
+	TypeVirtualMachine      AssetType = "virtual-machine"
+	TypeVirtualNetwork      AssetType = "virtual-network"
 
 	TypePermissions    AssetType = "permissions"
 	TypeServiceAccount AssetType = "service-account"
@@ -82,6 +84,7 @@ const (
 	SubTypeTransitGateway           AssetSubType = "transit-gateway"
 	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
 	SubTypeVpc                      AssetSubType = "vpc"
+	SubTypeSNSTopic                 AssetSubType = "sns-topic"
 	SubTypeVpcAcl                   AssetSubType = "vpc-acl"
 	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connections"
 )

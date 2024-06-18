@@ -30,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
 )
 
 func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
@@ -39,6 +40,7 @@ func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []invent
 	iamProvider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	rdsProvider := rds.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
 	s3Provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
+	snsProvider := sns.NewSNSProvider(logger, cfg, &awslib.MultiRegionClientFactory[sns.Client]{})
 
 	return []inventory.AssetFetcher{
 		newEc2InstancesFetcher(logger, identity, ec2Provider),
@@ -49,5 +51,6 @@ func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []invent
 		newNetworkingFetcher(logger, identity, ec2Provider),
 		newRDSFetcher(logger, identity, rdsProvider),
 		newS3BucketFetcher(logger, identity, s3Provider),
+		newSNSFetcher(logger, identity, snsProvider),
 	}
 }

@@ -57,12 +57,11 @@ func (s *snsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 		return
 	}
 
-	// TODO(kuba): introduce SNS classification
 	classification := inventory.AssetClassification{
 		Category:    inventory.CategoryInfrastructure,
-		SubCategory: inventory.SubCategoryCompute,
-		Type:        "",
-		SubType:     "",
+		SubCategory: inventory.SubCategoryIntegration,
+		Type:        inventory.TypeNotificationService,
+		SubType:     inventory.SubTypeSNSTopic,
 	}
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
