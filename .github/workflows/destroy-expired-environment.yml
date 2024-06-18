@@ -48,6 +48,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+    if: ${{ needs.envs_to_destroy.outputs.env_found == 'true' }}
     strategy:
       fail-fast: false
       max-parallel: 1 # Destroy environments one by one
