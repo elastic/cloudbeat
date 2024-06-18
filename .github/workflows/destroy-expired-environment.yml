@@ -44,6 +44,7 @@ jobs:
   destroy_environment:
     uses: ./.github/workflows/destroy-environment.yml
     needs: ["envs_to_destroy"]
+    secrets: inherit
     # Required for the 'Destroy' job in the 'destroy-environment.yml'
     permissions:
       contents: 'read'
