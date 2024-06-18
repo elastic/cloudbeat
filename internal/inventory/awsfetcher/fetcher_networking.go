@@ -197,6 +197,7 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 		})
 	default:
 		s.logger.Warnf("Unsupported Networking Fetcher type %T", obj)
+		enricher = inventory.EmptyEnricher()
 	}
 
 	return enricher
