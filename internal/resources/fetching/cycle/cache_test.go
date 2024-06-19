@@ -21,10 +21,10 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/atomic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -34,11 +34,11 @@ import (
 type helper struct {
 	value  int
 	err    error
-	called atomic.Int
+	called atomic.Int64
 }
 
 func (h *helper) cb(_ context.Context) (int, error) {
-	h.called.Inc()
+	h.called.Add(1)
 	return h.value, h.err
 }
 
@@ -140,7 +140,7 @@ func TestCache(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			expectedCalls := 0
+			var expectedCalls int64
 			if tt.wantCalled {
 				expectedCalls = 1
 			}
