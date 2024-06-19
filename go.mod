@@ -36,6 +36,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.24.10
 	github.com/aws/aws-sdk-go-v2/service/iam v1.32.6
 	github.com/aws/aws-sdk-go-v2/service/kms v1.33.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.54.6
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.27.9
 	github.com/aws/aws-sdk-go-v2/service/rds v1.79.6
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.55.1
@@ -91,8 +92,8 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aquasecurity/trivy-iac v0.7.1 // indirect
 	github.com/aquasecurity/trivy-policies v0.6.1-0.20231120231532-f6f2330bf842 // indirect
-	github.com/aws/aws-sdk-go v1.53.5 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15 // indirect
+	github.com/aws/aws-sdk-go v1.48.4 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.24 // indirect
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bitnami/go-version v0.0.0-20231130084017-bb00604d650c // indirect
 	github.com/containerd/log v0.1.0 // indirect
@@ -189,7 +190,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.9 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.9 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ebs v1.21.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10 // indirect
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.31.3
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.11 // indirect
