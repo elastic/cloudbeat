@@ -59,7 +59,7 @@ func (s *snsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 
 	classification := inventory.AssetClassification{
 		Category:    inventory.CategoryInfrastructure,
-		SubCategory: inventory.SubCategoryIntegration,
+		SubCategory: inventory.SubCategoryMessaging,
 		Type:        inventory.TypeNotificationService,
 		SubType:     inventory.SubTypeSNSTopic,
 	}

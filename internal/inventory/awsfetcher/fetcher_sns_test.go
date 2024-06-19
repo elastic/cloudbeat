@@ -45,7 +45,7 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 		inventory.NewAssetEvent(
 			inventory.AssetClassification{
 				Category:    inventory.CategoryInfrastructure,
-				SubCategory: inventory.SubCategoryIntegration,
+				SubCategory: inventory.SubCategoryMessaging,
 				Type:        inventory.TypeNotificationService,
 				SubType:     inventory.SubTypeSNSTopic,
 			},

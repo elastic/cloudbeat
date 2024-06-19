@@ -40,6 +40,7 @@ const (
 	SubCategoryCompute              AssetSubCategory = "compute"
 	SubCategoryDatabase             AssetSubCategory = "database"
 	SubCategoryIntegration          AssetSubCategory = "integration"
+	SubCategoryMessaging            AssetSubCategory = "messaging"
 	SubCategoryNetwork              AssetSubCategory = "network"
 	SubCategoryStorage              AssetSubCategory = "storage"
 )
