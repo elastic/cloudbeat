@@ -47,6 +47,8 @@ Follow these steps to run the workflow:
 
     - **`run-ui-sanity-tests`** (**optional**): Set to `true` to run [Kibana UI sanity tests](/.github/actions/kibana-ftr/README.md) after the environment is set up. Default: `false`
 
+    - **`expiration_days`** (**optional**): Specifies the number of days until the environment expires. Default: `14`
+
     - **`kibana_ref`** (**optional**): Specifies the Kibana branch, tag, or commit SHA to check out for the UI sanity tests, which will be executed after the environment is set up. This should correspond to the version of the `elk-stack-version` provisioned by this workflow. For the current version in development, use Kibana's `main` branch. Default: `main`. Examples of different inputs:
       - Specifying Branch: `main`
       - Specifying Tag: `v8.13.4`
@@ -199,3 +201,7 @@ Before running the script, ensure that:
 
 **Note**: The script will ask for confirmation before deleting each environment, unless you set the `interactive` flag
 to `false`.
+
+### Scheduled Environment Deletion
+
+A scheduled workflow runs daily at midnight to clean up expired environments. This workflow examines all deployed environments for their expiration dates, and if the expiration date is reached, the `Destroy Environment` workflow is executed. The expiration date is set when creating a new environment, with the default being 14 days. Note that there is no specific notification to the user before the environment is deleted. The expiration date is saved in the `env_config.json` file, which is stored in the S3 state bucket. To extend the expiration date, the user should download the `env_config.json` file from the S3 bucket, update the expiration field to the desired date, and then upload the file back to the S3 bucket.
