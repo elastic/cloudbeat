@@ -685,8 +685,8 @@ github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2/go.mod h1:W
 github.com/aws/aws-sdk-go v1.15.11/go.mod h1:mFuSZ37Z9YOHbQEwBWztmVzqXrEkub65tZoCYDt7FT0=
 github.com/aws/aws-sdk-go v1.43.16/go.mod h1:y4AeaBuwd2Lk+GepC1E9v0qOiTws0MIWAX4oIKwKHZo=
 github.com/aws/aws-sdk-go v1.44.122/go.mod h1:y4AeaBuwd2Lk+GepC1E9v0qOiTws0MIWAX4oIKwKHZo=
-github.com/aws/aws-sdk-go v1.53.5 h1:1OcVWMjGlwt7EU5OWmmEEXqaYfmX581EK317QJZXItM=
-github.com/aws/aws-sdk-go v1.53.5/go.mod h1:LF8svs817+Nz+DmiMQKTO3ubZ/6IaTpq3TjupRn3Eqk=
+github.com/aws/aws-sdk-go v1.48.4 h1:HS2L7ynVhkcRrQRro9CLJZ/xLRb4UOzDEfPzgevZwXM=
+github.com/aws/aws-sdk-go v1.48.4/go.mod h1:LF8svs817+Nz+DmiMQKTO3ubZ/6IaTpq3TjupRn3Eqk=
 github.com/aws/aws-sdk-go-v2 v1.27.2 h1:pLsTXqX93rimAOZG2FIYraDQstZaaGVVN4tNw65v0h8=
 github.com/aws/aws-sdk-go-v2 v1.27.2/go.mod h1:ffIFB97e2yNsv4aTSGkqtHnppsIJzw7G7BReUZ3jCXM=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 h1:x6xsQXGSmW6frevwDA+vi/wqhp1ct18mVXYN08/93to=
@@ -697,8 +697,8 @@ github.com/aws/aws-sdk-go-v2/credentials v1.17.18 h1:D/ALDWqK4JdY3OFgA2thcPO1c9a
 github.com/aws/aws-sdk-go-v2/credentials v1.17.18/go.mod h1:JuitCWq+F5QGUrmMPsk945rop6bB57jdscu+Glozdnc=
 github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.5 h1:dDgptDO9dxeFkXy+tEgVkzSClHZje/6JkPW5aZyEvrQ=
 github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.5/go.mod h1:gjvE2KBUgUQhcv89jqxrIxH9GaKs1JbZzWejj/DaHGA=
-github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15 h1:7Zwtt/lP3KNRkeZre7soMELMGNoBrutx8nobg1jKWmo=
-github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15/go.mod h1:436h2adoHb57yd+8W+gYPrrA9U/R/SuAuOO42Ushzhw=
+github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.24 h1:FzNwpVTZDCvm597Ty6mGYvxTolyC1oup0waaKntZI4E=
+github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.24/go.mod h1:wM9NElT/Wn6n3CT1eyVcXtfCy8lSVjjQXfdawQbSShc=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.9 h1:cy8ahBJuhtM8GTTSyOkfy6WVPV1IE+SS5/wfXUYuulw=
 github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.9/go.mod h1:CZBXGLaJnEZI6EVNcPd7a6B5IC5cA/GkRWtu9fp3S6Y=
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.9 h1:A4SYk07ef04+vxZToz9LWvAXl9LW0NClpPpMsi31cz0=
@@ -721,8 +721,8 @@ github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.35.7 h1:kG3A4w9GMub28Cn9k
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.35.7/go.mod h1:Ibm/16D/pKg0k9InRCkG6DATLfHGMRWJ0QVS06ppVjs=
 github.com/aws/aws-sdk-go-v2/service/configservice v1.46.11 h1:oEpDPoRfF7H8kuRT3LiQ7cfXVAgvTSIcxkxxTllNpvQ=
 github.com/aws/aws-sdk-go-v2/service/configservice v1.46.11/go.mod h1:9iyVzn5BgTmy78KTlYJPMqP9ZPm6ripPx9DlM0f3PDY=
-github.com/aws/aws-sdk-go-v2/service/ebs v1.21.7 h1:CRzzXjmgx9p362yO39D6hbZULdMI23gaKqSxijJCXHM=
-github.com/aws/aws-sdk-go-v2/service/ebs v1.21.7/go.mod h1:wnsHqpi3RgDwklS5SPHUgjcUUpontGPKJ+GJYOdV7pY=
+github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10 h1:E32txvrH8iV3IEk6fU9uj4Ryp3VdauHHl/1LoWeIaYo=
+github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10/go.mod h1:NjSslvHZ7oYBz7foWl/cuDEailjdmp16Auy6pHz3R+g=
 github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.1 h1:5A8xg0TsosvGeXZunZrBDDCcrbShR8rAkeqHMJS/mqU=
 github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.1/go.mod h1:gYk1NtyvkH1SxPcndDtfro3lwbiE5t0tW4eRki5YnOQ=
 github.com/aws/aws-sdk-go-v2/service/ecr v1.28.5 h1:dvvTFXpWSv9+8lTNPl1EPNZL6BCUV6MgVckEMvXaOgk=
@@ -743,6 +743,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.9 h1:TE2i0A9ErH1YfR
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.9/go.mod h1:9TzXX3MehQNGPwCZ3ka4CpwQsoAMWSF48/b+De9rfVM=
 github.com/aws/aws-sdk-go-v2/service/kms v1.33.0 h1:VFbLMhXy61mHzCjgBaJFnGOhOvcwZWnYemtAiXiQEh0=
 github.com/aws/aws-sdk-go-v2/service/kms v1.33.0/go.mod h1:uQiZ8PiSsPZuVC+hYKe/bSDZEhejdQW8GRemyUp0hio=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.54.6 h1:UMu5aeSubjM9geSuPCGOgBAZa0JvsXxJBFXmKgUuisM=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.54.6/go.mod h1:fWbFM4/v+IgUW+p4TooAXuhmiQyC5qxMV5gUqxDII2g=
 github.com/aws/aws-sdk-go-v2/service/organizations v1.27.9 h1:KNXacqpLvkK4oAMqSNhG2ETQzrVK4mKETAeNeo+dWyk=
 github.com/aws/aws-sdk-go-v2/service/organizations v1.27.9/go.mod h1:hcr6lPG6K2l0WiKyu2ag/JrHbiIOUMg3tdNPtpTe+PM=
 github.com/aws/aws-sdk-go-v2/service/rds v1.79.6 h1:NX0OiCFYFc/p1Ufimr+kJkXCCFZe9FnUoQmG5mMrYfg=

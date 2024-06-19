@@ -20,7 +20,7 @@ package sns
 import (
 	"testing"
 
-	types "github.com/aws/aws-sdk-go-v2/service/sns/types"
+	"github.com/aws/aws-sdk-go-v2/service/sns/types"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -59,8 +59,8 @@ func TestSNS_TopicInfo(t *testing.T) {
 			gotName := tt.resource.GetResourceName()
 			gotArn := tt.resource.GetResourceArn()
 
-			assert.Equal(t, gotName, tt.expectedName)
-			assert.Equal(t, gotArn, tt.expectedArn)
+			assert.Equal(t, tt.expectedName, gotName)
+			assert.Equal(t, tt.expectedArn, gotArn)
 		})
 	}
 }

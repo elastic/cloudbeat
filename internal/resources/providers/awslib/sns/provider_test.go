@@ -24,11 +24,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type (
