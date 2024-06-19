@@ -140,7 +140,7 @@ func TestCache(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			var expectedCalls int64 = 0
+			var expectedCalls int64
 			if tt.wantCalled {
 				expectedCalls = 1
 			}
