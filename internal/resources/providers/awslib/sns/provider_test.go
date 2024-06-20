@@ -27,6 +27,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type (
@@ -35,6 +38,56 @@ type (
 )
 
 var regions = []string{"us-east-1"}
+
+func TestProvider_ListTopics(t *testing.T) {
+	tests := []struct {
+		name    string
+		mocks   clientMocks
+		topic   string
+		want    []types.Topic
+		wantErr bool
+	}{
+		{
+			name: "with results",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{&sns.ListTopicsOutput{
+						Topics: []types.Topic{
+							{
+								TopicArn: aws.String("topic-arn"),
+							},
+						},
+					}, nil},
+				},
+			},
+			want: []types.Topic{
+				{
+					TopicArn: aws.String("topic-arn"),
+				},
+			},
+			topic: "topic-arn",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &MockClient{}
+			for name, call := range tt.mocks {
+				c.On(name, call[0]...).Return(call[1]...)
+			}
+			p := &Provider{
+				clients: createMockClients(c, regions),
+			}
+			got, err := p.ListTopics(context.Background())
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
 
 func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 	tests := []struct {
@@ -75,7 +128,74 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 			p := &Provider{
 				clients: createMockClients(c, regions),
 			}
-			got, err := p.ListSubscriptionsByTopic(context.Background(), &regions[0], tt.topic)
+			got, err := p.ListSubscriptionsByTopic(context.Background(), regions[0], tt.topic)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestProvider_ListTopicsWithSubscriptions(t *testing.T) {
+	tests := []struct {
+		name    string
+		mocks   clientMocks
+		topic   string
+		want    []awslib.AwsResource
+		wantErr bool
+	}{
+		{
+			name: "with results",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{&sns.ListTopicsOutput{
+						Topics: []types.Topic{
+							{
+								TopicArn: aws.String("topic-arn"),
+							},
+						},
+					}, nil},
+				},
+				"ListSubscriptionsByTopic": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{&sns.ListSubscriptionsByTopicOutput{
+						Subscriptions: []types.Subscription{
+							{
+								TopicArn: aws.String("topic-arn"),
+							},
+						},
+					}, nil},
+				},
+			},
+			want: []awslib.AwsResource{
+				&TopicInfo{
+					Topic: types.Topic{
+						TopicArn: pointers.Ref("topic-arn"),
+					},
+					Subscriptions: []types.Subscription{
+						{
+							TopicArn: pointers.Ref("topic-arn"),
+						},
+					},
+					region: "us-east-1",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &MockClient{}
+			for name, call := range tt.mocks {
+				c.On(name, call[0]...).Return(call[1]...)
+			}
+			p := &Provider{
+				clients: createMockClients(c, regions),
+			}
+			got, err := p.ListTopicsWithSubscriptions(context.Background())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
