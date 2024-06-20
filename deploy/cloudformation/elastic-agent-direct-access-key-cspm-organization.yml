@@ -164,11 +164,7 @@ Outputs:
   AccessKeyId:
     Description: Access Key ID
     Value: !Ref ElasticCSPMAccessKey
-    Export:
-      Name: AccessKeyId
 
   SecretAccessKey:
     Description: Secret Access Key
     Value: !GetAtt ElasticCSPMAccessKey.SecretAccessKey
-    Export:
-      Name: SecretAccessKey
