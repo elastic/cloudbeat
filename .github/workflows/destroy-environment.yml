@@ -12,6 +12,21 @@ on:
       ignore-prefix:
         type: string
         description: "Ignore all environments starting with `ignore-prefix`"
+        required: false
+      ec-api-key:
+        type: string
+        description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
+        required: false
+  workflow_call:
+    inputs:
+      prefix:
+        type: string
+        description: "Delete all environments starting with `prefix`"
+        required: true
+      ignore-prefix:
+        type: string
+        description: "Ignore all environments starting with `ignore-prefix`"
+        required: false
       ec-api-key:
         type: string
         description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
@@ -70,7 +85,7 @@ jobs:
 
       - name: Destroy Environment
         run: |
-          just delete-cloud-env ${{ env.ENV_PREFIX }} '${{ env.ENV_IGNORE_PREFIX }}' "false"
+          just delete-cloud-env "${ENV_PREFIX}" "${ENV_IGNORE_PREFIX}" "false"
 
       - name: Send Slack Notification
         uses: ./.github/actions/slack-notification
