@@ -33,4 +33,4 @@ jobs:
       elk-stack-version: 8.12.0
       serverless_mode: true
       run-sanity-tests: true
-      cleanup-env: true
+      expiration_days: 0

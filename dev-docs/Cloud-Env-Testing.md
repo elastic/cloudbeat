@@ -54,10 +54,6 @@ Follow these steps to run the workflow:
       - Specifying Tag: `v8.13.4`
       - Specifying Commit SHA: `c776cf650e962f04330789a9f113bd4bbd6d7c61`
 
-    - **`cleanup-env`** (**optional**): Set to `true` if you want the resources to automatically be cleaned up after
-      provisioning - useful if you don't want to test the env manually after deployment.
-      Default: `false`.
-
     - **`ec-api-key`** (**optional**): By default, all the new environments will be created in our EC Cloud Security organization.
       If you want to create the environment on your personal org (`@elastic.co`) you can enter
       your private [Elastic Cloud](https://cloud.elastic.co/home) API key. Follow the
@@ -66,7 +62,7 @@ Follow these steps to run the workflow:
 
    ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/c3259dd8-0e63-429b-9738-e1374eb8309b)
 
-1. Click the `Run workflow` button to start.
+5. Click the `Run workflow` button to start.
 
    ![Run Workflow](https://github.com/oren-zohar/cloudbeat/assets/85433724/7b05bf58-cc0b-4ec9-8e49-55d117673df8)
 
@@ -145,9 +141,7 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
 ## Cleanup Procedure
 
-If you wish to automatically delete the environment after the tests finish, set the `cleanup-env` input to `true`.
-
-In addition to the automatic cleanup, you can manually delete environments using the [Destroy Environment](https://github.com/elastic/cloudbeat/actions/workflows/destroy-environment.yml) workflow or by directly executing the `delete-cloud-env` command.
+You can manually delete environments using the [Destroy Environment](https://github.com/elastic/cloudbeat/actions/workflows/destroy-environment.yml) workflow or by directly executing the `delete-cloud-env` command.
 
 ### Destroy Environment Workflow
 
