@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch/logs"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type Provider struct {
@@ -163,7 +164,7 @@ func (p *Provider) getSubscriptionForAlarms(ctx context.Context, region *string,
 	topics := []string{}
 	for _, alarm := range alarms {
 		for _, action := range alarm.AlarmActions {
-			subscriptions, err := p.Sns.ListSubscriptionsByTopic(ctx, region, action)
+			subscriptions, err := p.Sns.ListSubscriptionsByTopic(ctx, pointers.Deref(region), action)
 			if err != nil {
 				p.Log.Errorf("failed to list subscriptions for topic %s: %v", action, err)
 				continue

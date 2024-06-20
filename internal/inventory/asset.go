@@ -27,41 +27,44 @@ import (
 type AssetCategory string
 
 const (
-	CategoryInfrastructure AssetCategory = "infrastructure"
 	CategoryIdentity       AssetCategory = "identity"
+	CategoryInfrastructure AssetCategory = "infrastructure"
 )
 
 // AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
 type AssetSubCategory string
 
 const (
-	SubCategoryAuthorization AssetSubCategory = "authorization"
-	SubCategoryCompute       AssetSubCategory = "compute"
-	SubCategoryStorage       AssetSubCategory = "storage"
-	SubCategoryDatabase      AssetSubCategory = "database"
-	SubCategoryNetwork       AssetSubCategory = "network"
-
+	SubCategoryAuthorization        AssetSubCategory = "authorization"
 	SubCategoryCloudProviderAccount AssetSubCategory = "cloud-provider-account"
+	SubCategoryCompute              AssetSubCategory = "compute"
+	SubCategoryDatabase             AssetSubCategory = "database"
+	SubCategoryIntegration          AssetSubCategory = "integration"
+	SubCategoryMessaging            AssetSubCategory = "messaging"
+	SubCategoryNetwork              AssetSubCategory = "network"
+	SubCategoryStorage              AssetSubCategory = "storage"
 )
 
 // AssetType is used to build the document index. Use only numbers, letters and dashes (-)
 type AssetType string
 
 const (
-	TypeAcl                AssetType = "acl"
-	TypeFirewall           AssetType = "firewall"
-	TypeInterface          AssetType = "interface"
-	TypeLoadBalancer       AssetType = "load-balancer"
-	TypeObjectStorage      AssetType = "object-storage"
-	TypePeering            AssetType = "peering"
-	TypeRelationalDatabase AssetType = "relational-database"
-	TypeSubnet             AssetType = "subnet"
-	TypeVirtualMachine     AssetType = "virtual-machine"
-	TypeVirtualNetwork     AssetType = "virtual-network"
-
-	TypePermissions    AssetType = "permissions"
-	TypeServiceAccount AssetType = "service-account"
-	TypeUser           AssetType = "user"
+	TypeAcl                 AssetType = "acl"
+	TypeEventSource         AssetType = "event-type"
+	TypeFirewall            AssetType = "firewall"
+	TypeInterface           AssetType = "interface"
+	TypeLoadBalancer        AssetType = "load-balancer"
+	TypeNotificationService AssetType = "notification-service"
+	TypeObjectStorage       AssetType = "object-storage"
+	TypePeering             AssetType = "peering"
+	TypePermissions         AssetType = "permissions"
+	TypeRelationalDatabase  AssetType = "relational-database"
+	TypeServerless          AssetType = "serverless"
+	TypeServiceAccount      AssetType = "service-account"
+	TypeSubnet              AssetType = "subnet"
+	TypeUser                AssetType = "user"
+	TypeVirtualMachine      AssetType = "virtual-machine"
+	TypeVirtualNetwork      AssetType = "virtual-network"
 )
 
 // AssetSubType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -76,12 +79,17 @@ const (
 	SubTypeELBv1                    AssetSubType = "elastic-load-balancer"
 	SubTypeELBv2                    AssetSubType = "elastic-load-balancer-v2"
 	SubTypeInternetGateway          AssetSubType = "internet-gateway"
+	SubTypeLambdaAlias              AssetSubType = "lambda-function-alias"
+	SubTypeLambdaEventSourceMapping AssetSubType = "lambda-event-source-mapping"
+	SubTypeLambdaFunction           AssetSubType = "lambda-function"
+	SubTypeLambdaLayer              AssetSubType = "lambda-layer"
 	SubTypeNatGateway               AssetSubType = "nat-gateway"
 	SubTypeRDS                      AssetSubType = "rds"
 	SubTypeSecurityGroup            AssetSubType = "security-group"
 	SubTypeTransitGateway           AssetSubType = "transit-gateway"
 	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
 	SubTypeVpc                      AssetSubType = "vpc"
+	SubTypeSNSTopic                 AssetSubType = "sns-topic"
 	SubTypeVpcAcl                   AssetSubType = "vpc-acl"
 	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connections"
 )

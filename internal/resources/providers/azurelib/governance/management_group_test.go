@@ -23,10 +23,10 @@ import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/atomic"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -106,12 +106,12 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 	t.Run("lock", func(t *testing.T) {
 		testhelper.SkipLong(t)
 
-		firstRun := atomic.NewBool(false)
+		var firstRun atomic.Bool
 		m := inventory.NewMockResourceGraphProviderAPI(t)
 		m.EXPECT().
 			ListAllAssetTypesByName(mock.Anything, mock.Anything, mock.Anything).
 			RunAndReturn(func(_ context.Context, _ string, _ []string) ([]inventory.AzureAsset, error) {
-				if firstRun.CAS(false, true) {
+				if firstRun.CompareAndSwap(false, true) {
 					time.Sleep(100 * time.Millisecond)
 					return assets, nil
 				}

@@ -15,32 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package sns
+package lambda
 
 import (
-	"context"
+	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/sns"
-	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type SNS interface {
-	ListTopics(ctx context.Context) ([]types.Topic, error)
-	ListSubscriptionsByTopic(ctx context.Context, region string, topic string) ([]types.Subscription, error)
-	ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.AwsResource, error)
+type FunctionInfo struct {
+	Function types.FunctionConfiguration `json:"function_configuration"`
+	Aliases  []awslib.AwsResource        `json:"alias_configurations"`
+	region   string
 }
 
-func NewSNSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return sns.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
-	return &Provider{
-		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
-	}
+func (v FunctionInfo) GetResourceArn() string {
+	return pointers.Deref(v.Function.FunctionArn)
+}
+
+func (v FunctionInfo) GetResourceName() string {
+	return pointers.Deref(v.Function.FunctionName)
+}
+
+func (v FunctionInfo) GetResourceType() string {
+	return fetching.LambdaFunctionType
+}
+
+func (v FunctionInfo) GetRegion() string {
+	return v.region
 }

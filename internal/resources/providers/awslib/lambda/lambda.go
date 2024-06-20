@@ -15,28 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package sns
+package lambda
 
 import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/sns"
-	"github.com/aws/aws-sdk-go-v2/service/sns/types"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
-type SNS interface {
-	ListTopics(ctx context.Context) ([]types.Topic, error)
-	ListSubscriptionsByTopic(ctx context.Context, region string, topic string) ([]types.Subscription, error)
-	ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.AwsResource, error)
+type Lambda interface {
+	ListAliases(context.Context) ([]awslib.AwsResource, error)
+	ListEventSourceMappings(context.Context) ([]awslib.AwsResource, error)
+	ListFunctions(context.Context) ([]awslib.AwsResource, error)
+	ListLayers(context.Context, string, string) ([]awslib.AwsResource, error)
 }
 
-func NewSNSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewLambdaProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
-		return sns.NewFromConfig(cfg)
+		return lambda.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
