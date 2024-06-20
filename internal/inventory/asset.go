@@ -27,8 +27,8 @@ import (
 type AssetCategory string
 
 const (
-	CategoryInfrastructure AssetCategory = "infrastructure"
 	CategoryIdentity       AssetCategory = "identity"
+	CategoryInfrastructure AssetCategory = "infrastructure"
 )
 
 // AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
@@ -40,6 +40,7 @@ const (
 	SubCategoryCompute              AssetSubCategory = "compute"
 	SubCategoryDatabase             AssetSubCategory = "database"
 	SubCategoryIntegration          AssetSubCategory = "integration"
+	SubCategoryMessaging            AssetSubCategory = "messaging"
 	SubCategoryNetwork              AssetSubCategory = "network"
 	SubCategoryStorage              AssetSubCategory = "storage"
 )
@@ -48,21 +49,22 @@ const (
 type AssetType string
 
 const (
-	TypeAcl                AssetType = "acl"
-	TypeEventSource        AssetType = "event-type"
-	TypeFirewall           AssetType = "firewall"
-	TypeInterface          AssetType = "interface"
-	TypeLoadBalancer       AssetType = "load-balancer"
-	TypeObjectStorage      AssetType = "object-storage"
-	TypePeering            AssetType = "peering"
-	TypePermissions        AssetType = "permissions"
-	TypeRelationalDatabase AssetType = "relational-database"
-	TypeServerless         AssetType = "serverless"
-	TypeServiceAccount     AssetType = "service-account"
-	TypeSubnet             AssetType = "subnet"
-	TypeUser               AssetType = "user"
-	TypeVirtualMachine     AssetType = "virtual-machine"
-	TypeVirtualNetwork     AssetType = "virtual-network"
+	TypeAcl                 AssetType = "acl"
+	TypeEventSource         AssetType = "event-type"
+	TypeFirewall            AssetType = "firewall"
+	TypeInterface           AssetType = "interface"
+	TypeLoadBalancer        AssetType = "load-balancer"
+	TypeNotificationService AssetType = "notification-service"
+	TypeObjectStorage       AssetType = "object-storage"
+	TypePeering             AssetType = "peering"
+	TypePermissions         AssetType = "permissions"
+	TypeRelationalDatabase  AssetType = "relational-database"
+	TypeServerless          AssetType = "serverless"
+	TypeServiceAccount      AssetType = "service-account"
+	TypeSubnet              AssetType = "subnet"
+	TypeUser                AssetType = "user"
+	TypeVirtualMachine      AssetType = "virtual-machine"
+	TypeVirtualNetwork      AssetType = "virtual-network"
 )
 
 // AssetSubType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -87,6 +89,7 @@ const (
 	SubTypeTransitGateway           AssetSubType = "transit-gateway"
 	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
 	SubTypeVpc                      AssetSubType = "vpc"
+	SubTypeSNSTopic                 AssetSubType = "sns-topic"
 	SubTypeVpcAcl                   AssetSubType = "vpc-acl"
 	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connections"
 )
