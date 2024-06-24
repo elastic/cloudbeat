@@ -114,6 +114,7 @@ env:
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
+  AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments ci=integration owner=${{ github.actor }}"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -342,13 +343,9 @@ jobs:
       - name: Deploy CSPM Azure agent
         id: cspm-azure-agent
         working-directory: deploy/azure
-        run: |
-          if [[ "${{ env.STACK_VERSION }}" == *"8.11"* ]]; then
-            az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
-          else
-            az group create --location EastUS --name "${{ env.DEPLOYMENT_NAME }}"
-            az deployment group create --resource-group "${{ env.DEPLOYMENT_NAME }}" --template-file ARM-for-single-account.json --parameters @arm_parameters.json
-          fi
+        env:
+          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+        run: ./install_agent_az_cli.sh
 
       - name: Install D4C integration
         id: kspm-d4c
