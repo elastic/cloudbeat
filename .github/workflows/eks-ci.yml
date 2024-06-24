@@ -95,7 +95,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./deploy/Dockerfile
@@ -114,7 +114,7 @@ jobs:
         shell: bash
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./tests/.
           push: false
