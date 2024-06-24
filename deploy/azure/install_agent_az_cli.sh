@@ -52,8 +52,11 @@ group=$(az group show -n "${DEPLOYMENT_NAME}" --query id --output tsv)
 # --tags requires the tags to be passed as separate arguments
 # shellcheck disable=SC2086
 az tag update --resource-id "$group" --operation Merge --tags ${AZURE_TAGS}
-# Get all resources within the resource group and store their IDs in resources
-mapfile -t resources < <(az resource list --resource-group "${DEPLOYMENT_NAME}" --query "[].id" --output tsv)
+# Get all resources within the resource group and store their IDs in an array
+resources=()
+while IFS= read -r resource_id; do
+    resources+=("$resource_id")
+done < <(az resource list --resource-group "${DEPLOYMENT_NAME}" --query "[].id" --output tsv)
 
 # Loop over each resource ID in resources
 for resource in "${resources[@]}"; do
