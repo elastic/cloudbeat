@@ -48,7 +48,7 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 			name: "with error",
 			client: func() Client {
 				m := &MockClient{}
-				m.On("DescribeLoadBalancers", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				m.On("DescribeLoadBalancers", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
 				return m
 			},
 			wantErr: true,
@@ -58,7 +58,7 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 			name: "with resources",
 			client: func() Client {
 				m := &MockClient{}
-				m.On("DescribeLoadBalancers", mock.Anything, mock.Anything).
+				m.On("DescribeLoadBalancers", mock.Anything, mock.Anything, mock.Anything).
 					Return(&elasticloadbalancing.DescribeLoadBalancersOutput{
 						LoadBalancerDescriptions: []types.LoadBalancerDescription{
 							{
