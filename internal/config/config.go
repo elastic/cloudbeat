@@ -34,10 +34,11 @@ import (
 )
 
 const (
-	DefaultNamespace             = "default"
-	VulnerabilityType            = "vuln_mgmt"
-	AssetInventoryType           = "asset_inventory"
-	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
+	DefaultNamespace                = "default"
+	VulnerabilityType               = "vuln_mgmt"
+	AssetInventoryType              = "asset_inventory"
+	defaultFindingsIndexPrefix      = "logs-cloud_security_posture.findings"
+	defaultVulnerabilityIndexPrefix = "logs-cloud_security_posture.vulnerabilities"
 )
 
 type Fetcher struct {
@@ -118,12 +119,15 @@ const (
 	OrganizationAccount = "organization-account"
 )
 
-// Datastream returns the name of a Data Stream to publish Cloubeat events to.
+// Datastream returns the name of a Data Stream to publish Cloudbeat events to.
 func (c *Config) Datastream() string {
 	if c.Index != "" {
 		return c.Index
 	}
-	return ResultsDatastreamIndexPrefix + "-" + DefaultNamespace
+	if c.Type == VulnerabilityType {
+		return defaultVulnerabilityIndexPrefix + "-" + DefaultNamespace
+	}
+	return defaultFindingsIndexPrefix + "-" + DefaultNamespace
 }
 
 func New(cfg *config.C) (*Config, error) {
