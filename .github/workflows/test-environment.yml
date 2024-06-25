@@ -113,8 +113,8 @@ env:
   WORKING_DIR: deploy/test-environments
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
-  GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
-  AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments ci=integration owner=${{ github.actor }}"
+  GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=${{ github.actor }}"
+  AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments owner=${{ github.actor }}"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -323,10 +323,8 @@ jobs:
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
-        env:
-          DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
         run: |
-          . ./set_env.sh && ./deploy.sh
+          . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}"
 
       - name: Install CSPM Azure integration
         id: cspm-azure-integration
