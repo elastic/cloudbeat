@@ -55,6 +55,7 @@ type Config struct {
 	BundlePath            string                  `config:"bundle_path"`
 	PackagePolicyId       string                  `config:"package_policy_id"`
 	PackagePolicyRevision int                     `config:"revision"`
+	Index                 string                  `config:"index"`
 }
 
 type CloudConfig struct {
@@ -116,6 +117,14 @@ const (
 	SingleAccount       = "single-account"
 	OrganizationAccount = "organization-account"
 )
+
+// Datastream returns the name of a Data Stream to publish Cloubeat events to.
+func (c *Config) Datastream() string {
+	if c.Index != "" {
+		return c.Index
+	}
+	return ResultsDatastreamIndexPrefix + "-" + DefaultNamespace
+}
 
 func New(cfg *config.C) (*Config, error) {
 	c, err := defaultConfig()
@@ -179,14 +188,6 @@ func getBundlePath() (string, error) {
 		return "", err
 	}
 	return filepath.Join(filepath.Dir(ex), "bundle.tar.gz"), nil
-}
-
-// Datastream function to generate the datastream value
-func Datastream(namespace string, indexPrefix string) string {
-	if namespace == "" {
-		namespace = DefaultNamespace
-	}
-	return indexPrefix + "-" + namespace
 }
 
 func isSupportedBenchmark(benchmark string) bool {
