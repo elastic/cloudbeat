@@ -306,7 +306,11 @@ require (
 	github.com/hashicorp/cronexpr v1.1.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+<<<<<<< HEAD
 	github.com/hashicorp/go-getter v1.7.2 // indirect
+=======
+	github.com/hashicorp/go-getter v1.7.5 // indirect
+>>>>>>> 923d3e2b (Bump github.com/hashicorp/go-getter from 1.7.4 to 1.7.5 (#2292))
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
