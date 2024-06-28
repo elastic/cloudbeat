@@ -38,6 +38,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 	user1 := iam.User{
 		Name:                "user-1",
 		Arn:                 "arn:aws:iam::000:user/user-1",
+		UserId:              "u-123123",
 		LastAccess:          "2023-03-28T12:27:26+00:00",
 		PasswordEnabled:     true,
 		MfaActive:           true,
@@ -85,7 +86,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			iamUserClassification,
-			"arn:aws:iam::000:user/user-1",
+			inventory.Identifiers(inventory.Arns("arn:aws:iam::000:user/user-1"), inventory.Ids("u-123123")),
 			"user-1",
 			inventory.WithRawAsset(user1),
 			inventory.WithCloud(inventory.AssetCloud{
@@ -103,7 +104,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 
 		inventory.NewAssetEvent(
 			iamUserClassification,
-			"arn:aws:iam::000:user/user-2",
+			inventory.Identifiers(inventory.Arns("arn:aws:iam::000:user/user-2")),
 			"user-2",
 			inventory.WithRawAsset(user2),
 			inventory.WithCloud(inventory.AssetCloud{

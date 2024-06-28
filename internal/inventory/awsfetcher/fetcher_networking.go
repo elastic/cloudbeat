@@ -36,19 +36,21 @@ type networkingFetcher struct {
 	AccountName string
 }
 
-type networkDescribeFunc func(context.Context) ([]awslib.AwsResource, error)
-type networkingProvider interface {
-	DescribeInternetGateways(context.Context) ([]awslib.AwsResource, error)
-	DescribeNatGateways(context.Context) ([]awslib.AwsResource, error)
-	DescribeNetworkAcl(context.Context) ([]awslib.AwsResource, error)
-	DescribeNetworkInterfaces(context.Context) ([]awslib.AwsResource, error)
-	DescribeSecurityGroups(context.Context) ([]awslib.AwsResource, error)
-	DescribeSubnets(context.Context) ([]awslib.AwsResource, error)
-	DescribeTransitGatewayAttachments(context.Context) ([]awslib.AwsResource, error)
-	DescribeTransitGateways(context.Context) ([]awslib.AwsResource, error)
-	DescribeVpcPeeringConnections(context.Context) ([]awslib.AwsResource, error)
-	DescribeVpcs(context.Context) ([]awslib.AwsResource, error)
-}
+type (
+	networkDescribeFunc func(context.Context) ([]awslib.AwsResource, error)
+	networkingProvider  interface {
+		DescribeInternetGateways(context.Context) ([]awslib.AwsResource, error)
+		DescribeNatGateways(context.Context) ([]awslib.AwsResource, error)
+		DescribeNetworkAcl(context.Context) ([]awslib.AwsResource, error)
+		DescribeNetworkInterfaces(context.Context) ([]awslib.AwsResource, error)
+		DescribeSecurityGroups(context.Context) ([]awslib.AwsResource, error)
+		DescribeSubnets(context.Context) ([]awslib.AwsResource, error)
+		DescribeTransitGatewayAttachments(context.Context) ([]awslib.AwsResource, error)
+		DescribeTransitGateways(context.Context) ([]awslib.AwsResource, error)
+		DescribeVpcPeeringConnections(context.Context) ([]awslib.AwsResource, error)
+		DescribeVpcs(context.Context) ([]awslib.AwsResource, error)
+	}
+)
 
 func newNetworkingFetcher(logger *logp.Logger, identity *cloud.Identity, provider networkingProvider) inventory.AssetFetcher {
 	return &networkingFetcher{
@@ -99,7 +101,7 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			item.GetResourceArn(),
+			inventory.Identifiers(inventory.Arns(item.GetResourceArn()), inventory.Ids(pointers.Deref(s.retrieveId(item)))),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{
@@ -201,4 +203,32 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 	}
 
 	return enricher
+}
+
+func (s *networkingFetcher) retrieveId(awsResource awslib.AwsResource) *string {
+	switch resource := awsResource.(type) {
+	case ec2.InternetGatewayInfo:
+		return resource.InternetGateway.InternetGatewayId
+	case ec2.NatGatewayInfo:
+		return resource.NatGateway.NatGatewayId
+	case ec2.NACLInfo:
+		return resource.NetworkAclId
+	case ec2.NetworkInterfaceInfo:
+		return resource.NetworkInterface.NetworkInterfaceId
+	case ec2.SecurityGroup:
+		return resource.GroupId
+	case ec2.SubnetInfo:
+		return resource.Subnet.SubnetId
+	case ec2.TransitGatewayAttachmentInfo:
+		return resource.TransitGatewayAttachment.TransitGatewayAttachmentId
+	case ec2.TransitGatewayInfo:
+		return resource.TransitGateway.TransitGatewayId
+	case ec2.VpcPeeringConnectionInfo:
+		return resource.VpcPeeringConnection.VpcPeeringConnectionId
+	case ec2.VpcInfo:
+		return resource.Vpc.VpcId
+	default:
+		s.logger.Warnf("Unsupported Networking Fetcher type %T", resource)
+		return nil
+	}
 }

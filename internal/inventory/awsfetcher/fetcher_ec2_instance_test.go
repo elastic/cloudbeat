@@ -77,7 +77,10 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			ec2InstanceClassification,
-			"arn:aws:ec2:us-east::ec2/234567890",
+			inventory.Identifiers(
+				inventory.Arns("arn:aws:ec2:us-east::ec2/234567890"),
+				inventory.Ids("234567890"),
+			),
 			"test-server",
 			inventory.WithRawAsset(instance1),
 			inventory.WithTags(map[string]string{"Name": "test-server", "key": "value"}),
@@ -124,7 +127,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 
 		inventory.NewAssetEvent(
 			ec2InstanceClassification,
-			"",
+			inventory.Identifiers(),
 			"",
 			inventory.WithRawAsset(instance2),
 			inventory.WithTags(map[string]string{}),

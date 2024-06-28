@@ -84,7 +84,10 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 		}
 		assetChannel <- inventory.NewAssetEvent(
 			ec2InstanceClassification,
-			instance.GetResourceArn(),
+			inventory.Identifiers(
+				inventory.Arns(instance.GetResourceArn()),
+				inventory.Ids(pointers.Deref(instance.InstanceId)),
+			),
 			instance.GetResourceName(),
 
 			inventory.WithRawAsset(instance),

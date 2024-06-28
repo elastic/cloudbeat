@@ -104,10 +104,10 @@ func (a *AssetInventory) Run(ctx context.Context) {
 func (a *AssetInventory) publish(assets []AssetEvent) {
 	events := lo.Map(assets, func(e AssetEvent, _ int) beat.Event {
 		return beat.Event{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Asset)},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Entity)},
 			Timestamp: a.now(),
 			Fields: mapstr.M{
-				"asset":             e.Asset,
+				"entity":            e.Entity,
 				"cloud":             e.Cloud,
 				"host":              e.Host,
 				"network":           e.Network,
@@ -120,10 +120,45 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 	a.publisher.PublishAll(events)
 }
 
-func generateIndex(a Asset) string {
+func generateIndex(a Entity) string {
 	return fmt.Sprintf(indexTemplate, a.Category, a.SubCategory, a.Type, a.SubType)
+}
+
+type IdentifierEnricher func(EntityIdentifiers) EntityIdentifiers
+
+func Arns(arns ...string) IdentifierEnricher {
+	return func(ei EntityIdentifiers) EntityIdentifiers {
+		arns = removeEmpty(arns)
+		if len(arns) > 0 {
+			ei.Arns = arns
+		}
+		return ei
+	}
+}
+
+func Ids(ids ...string) IdentifierEnricher {
+	return func(ei EntityIdentifiers) EntityIdentifiers {
+		ids = removeEmpty(ids)
+		if len(ids) > 0 {
+			ei.Arns = ids
+		}
+		return ei
+	}
+}
+
+func Identifiers(enrichers ...IdentifierEnricher) EntityIdentifiers {
+	identifiers := EntityIdentifiers{}
+	for _, enrich := range enrichers {
+		identifiers = enrich(identifiers)
+	}
+
+	return identifiers
 }
 
 func (a *AssetInventory) Stop() {
 	close(a.assetCh)
+}
+
+func removeEmpty(list []string) []string {
+	return lo.Filter(list, func(item string, _ int) bool { return item != "" })
 }

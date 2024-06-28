@@ -49,7 +49,7 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 				Type:        inventory.TypeNotificationService,
 				SubType:     inventory.SubTypeSNSTopic,
 			},
-			"topic:arn:test-topic",
+			inventory.Identifiers(inventory.Arns("topic:arn:test-topic")),
 			"test-topic",
 			inventory.WithRawAsset(awsResource),
 			inventory.WithCloud(inventory.AssetCloud{

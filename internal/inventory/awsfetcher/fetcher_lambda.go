@@ -34,13 +34,15 @@ type lambdaFetcher struct {
 	AccountName string
 }
 
-type lambdaDescribeFunc func(context.Context) ([]awslib.AwsResource, error)
-type lambdaProvider interface {
-	ListAliases(context.Context, string, string) ([]awslib.AwsResource, error)
-	ListEventSourceMappings(context.Context) ([]awslib.AwsResource, error)
-	ListFunctions(context.Context) ([]awslib.AwsResource, error)
-	ListLayers(context.Context) ([]awslib.AwsResource, error)
-}
+type (
+	lambdaDescribeFunc func(context.Context) ([]awslib.AwsResource, error)
+	lambdaProvider     interface {
+		ListAliases(context.Context, string, string) ([]awslib.AwsResource, error)
+		ListEventSourceMappings(context.Context) ([]awslib.AwsResource, error)
+		ListFunctions(context.Context) ([]awslib.AwsResource, error)
+		ListLayers(context.Context) ([]awslib.AwsResource, error)
+	}
+)
 
 func newLambdaFetcher(logger *logp.Logger, identity *cloud.Identity, provider lambdaProvider) inventory.AssetFetcher {
 	return &lambdaFetcher{
@@ -84,7 +86,7 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			item.GetResourceArn(),
+			inventory.Identifiers(inventory.Arns(item.GetResourceArn())),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{

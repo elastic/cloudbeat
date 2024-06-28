@@ -88,6 +88,7 @@ type User struct {
 	PasswordLastChanged string                 `json:"password_last_changed,omitempty"`
 	MfaActive           bool                   `json:"mfa_active"`
 	PasswordEnabled     bool                   `json:"password_enabled"`
+	UserId              string                 `json:"user_id"`
 }
 
 type AuthDevice struct {

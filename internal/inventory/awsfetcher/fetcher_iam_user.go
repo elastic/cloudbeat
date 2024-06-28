@@ -80,7 +80,7 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 		assetChannel <- inventory.NewAssetEvent(
 			iamUserClassification,
-			user.GetResourceArn(),
+			inventory.Identifiers(inventory.Arns(user.GetResourceArn()), inventory.Ids(user.UserId)),
 			user.GetResourceName(),
 
 			inventory.WithRawAsset(user),
