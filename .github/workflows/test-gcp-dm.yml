@@ -22,6 +22,7 @@ env:
   DEPLOYMENT_MANAGER_DIR: deploy/deployment-manager
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
+  GCP_LABELS: "ci=integration,owner=${{ github.actor }}"
 
 jobs:
   # Test a GCP Deployment Manager deployment using Application Default Credentials
@@ -100,8 +101,9 @@ jobs:
         working-directory: deploy/deployment-manager
         env:
           DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
+          DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
-          . ./set_env.sh && ./deploy.sh
+          . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_LABELS}"
 
       - name: Check for findings
         working-directory: ./tests
@@ -124,8 +126,10 @@ jobs:
       - name: Delete GCP Deployment Manager deployment
         if: always()
         working-directory: ${{ env.TEST_ENVS_DIR }}
+        env:
+          DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
-          DEPLOYMENT=${{env.GCP_DEPLOYMENT_NAME}}
+          DEPLOYMENT="${DEPLOYMENT_NAME}"
           PROJECT_NAME=$(gcloud config get-value core/project)
           PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
           ./delete_gcp_env.sh $PROJECT_NAME $PROJECT_NUMBER $DEPLOYMENT
@@ -203,22 +207,22 @@ jobs:
           STACK_VERSION: ${{ env.ELK_VERSION }}
         run: |
           # Deploys a GCP Service Account
-          cd ${{ env.DEPLOYMENT_MANAGER_DIR }}
-          export DEPLOYMENT_NAME="${{ env.GCP_SA_DEPLOYMENT_NAME }}"
-          export SERVICE_ACCOUNT_NAME="${{ env.GCP_SA_DEPLOYMENT_NAME }}-sa"
+          cd "${DEPLOYMENT_MANAGER_DIR}"
+          export DEPLOYMENT_NAME="${GCP_SA_DEPLOYMENT_NAME}"
+          export SERVICE_ACCOUNT_NAME="${GCP_SA_DEPLOYMENT_NAME}-sa"
           ./deploy_service_account.sh
-          mv KEY_FILE.json ../../${{ env.INTEGRATIONS_SETUP_DIR }}
+          mv KEY_FILE.json "../../${INTEGRATIONS_SETUP_DIR}"
 
           # Installs CSPM GCP integration
-          cd ../../${{ env.INTEGRATIONS_SETUP_DIR }}
+          cd "../../${INTEGRATIONS_SETUP_DIR}"
           export SERVICE_ACCOUNT_JSON_PATH="KEY_FILE.json"
-          export DEPLOYMENT_NAME="${{ env.GCP_AGENT_DEPLOYMENT_NAME }}"
+          export DEPLOYMENT_NAME="${GCP_AGENT_DEPLOYMENT_NAME}"
           poetry install
           poetry run python ./install_cspm_gcp_integration.py
 
           # Deploys the agent using an existing service account (SERVICE_ACCOUNT_NAME)
-          cd ../../${{ env.DEPLOYMENT_MANAGER_DIR }}
-          . ./set_env.sh && ./deploy.sh
+          cd "../../${DEPLOYMENT_MANAGER_DIR}"
+          . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_LABELS}"
 
       - name: Check for findings
         working-directory: ./tests
@@ -240,4 +244,4 @@ jobs:
         run: |
           PROJECT_NAME=$(gcloud config get-value core/project)
           PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
-          ./delete_gcp_env.sh $PROJECT_NAME $PROJECT_NUMBER ${{env.GCP_SA_DEPLOYMENT_NAME}} ${{env.GCP_AGENT_DEPLOYMENT_NAME}}
+          ./delete_gcp_env.sh $PROJECT_NAME $PROJECT_NUMBER "${GCP_SA_DEPLOYMENT_NAME}" "${GCP_AGENT_DEPLOYMENT_NAME}"

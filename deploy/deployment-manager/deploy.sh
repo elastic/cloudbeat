@@ -37,7 +37,6 @@ ROLE="roles/resourcemanager.projectIamAdmin"
 
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER%/} # Remove trailing slash if present
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
-DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
 SERVICE_ACCOUNT_NAME=${SERVICE_ACCOUNT_NAME:-false}
 
 # Set environment variables with the name and number of your project.
