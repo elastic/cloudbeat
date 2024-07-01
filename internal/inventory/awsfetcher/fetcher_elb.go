@@ -81,7 +81,7 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			item.GetResourceArn(),
+			[]string{item.GetResourceArn()},
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{

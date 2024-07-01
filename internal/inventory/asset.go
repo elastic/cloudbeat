@@ -17,12 +17,6 @@
 
 package inventory
 
-import (
-	"crypto/sha256"
-	"encoding/base64"
-	"fmt"
-)
-
 // AssetCategory is used to build the document index. Use only numbers, letters and dashes (-)
 type AssetCategory string
 
@@ -100,7 +94,7 @@ const (
 
 // AssetEvent holds the whole asset
 type AssetEvent struct {
-	Asset            Asset
+	Entity           Entity
 	Network          *AssetNetwork
 	Cloud            *AssetCloud
 	Host             *AssetHost
@@ -116,11 +110,10 @@ type AssetClassification struct {
 	SubType     AssetSubType     `json:"sub_type"`
 }
 
-// Asset contains the identifiers of the asset
-type Asset struct {
-	UUID string `json:"uuid"`
-	Id   string `json:"id"`
-	Name string `json:"name"`
+// Entity contains the identifiers of the asset
+type Entity struct {
+	Id   []string `json:"id"`
+	Name string   `json:"name"`
 	AssetClassification
 	Tags map[string]string `json:"tags"`
 	Raw  any               `json:"raw"`
@@ -128,18 +121,18 @@ type Asset struct {
 
 // AssetNetwork contains network information
 type AssetNetwork struct {
-	Ipv6Address         *string  `json:"ipv6_address"`
-	NetworkId           *string  `json:"network_id"`
-	NetworkInterfaceIds []string `json:"network_interface_ids"`
-	PrivateDnsName      *string  `json:"private_dns_name"`
-	PrivateIpAddress    *string  `json:"private_ip_address"`
-	PublicDnsName       *string  `json:"public_dns_name"`
-	PublicIpAddress     *string  `json:"public_ip_address"`
-	RouteTableIds       []string `json:"route_table_ids"`
-	SecurityGroupIds    []string `json:"security_group_ids"`
-	SubnetIds           []string `json:"subnet_ids"`
-	TransitGatewayIds   []string `json:"transit_gateway_ids"`
-	VpcIds              []string `json:"vpc_ids"`
+	Ipv6Address         *string  `json:"ipv6_address,omitempty"`
+	NetworkId           *string  `json:"network_id,omitempty"`
+	NetworkInterfaceIds []string `json:"network_interface_ids,omitempty"`
+	PrivateDnsName      *string  `json:"private_dns_name,omitempty"`
+	PrivateIpAddress    *string  `json:"private_ip_address,omitempty"`
+	PublicDnsName       *string  `json:"public_dns_name,omitempty"`
+	PublicIpAddress     *string  `json:"public_ip_address,omitempty"`
+	RouteTableIds       []string `json:"route_table_ids,omitempty"`
+	SecurityGroupIds    []string `json:"security_group_ids,omitempty"`
+	SubnetIds           []string `json:"subnet_ids,omitempty"`
+	TransitGatewayIds   []string `json:"transit_gateway_ids,omitempty"`
+	VpcIds              []string `json:"vpc_ids,omitempty"`
 }
 
 // AssetCloud contains information about the cloud provider
@@ -207,11 +200,10 @@ type AssetResourcePolicy struct {
 // AssetEnricher functional builder function
 type AssetEnricher func(asset *AssetEvent)
 
-func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...AssetEnricher) AssetEvent {
+func NewAssetEvent(c AssetClassification, ids []string, name string, enrichers ...AssetEnricher) AssetEvent {
 	a := AssetEvent{
-		Asset: Asset{
-			UUID:                generateUniqueId(c, id),
-			Id:                  id,
+		Entity: Entity{
+			Id:                  removeEmpty(ids),
 			Name:                name,
 			AssetClassification: c,
 		},
@@ -226,7 +218,7 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 
 func WithRawAsset(raw any) AssetEnricher {
 	return func(a *AssetEvent) {
-		a.Asset.Raw = &raw
+		a.Entity.Raw = &raw
 	}
 }
 
@@ -236,7 +228,7 @@ func WithTags(tags map[string]string) AssetEnricher {
 			return
 		}
 
-		a.Asset.Tags = tags
+		a.Entity.Tags = tags
 	}
 }
 
@@ -276,13 +268,4 @@ func WithResourcePolicies(policies ...AssetResourcePolicy) AssetEnricher {
 
 func EmptyEnricher() AssetEnricher {
 	return func(_ *AssetEvent) {}
-}
-
-func generateUniqueId(c AssetClassification, resourceId string) string {
-	hasher := sha256.New()
-	toBeHashed := fmt.Sprintf("%s-%s-%s-%s-%s", resourceId, c.Category, c.SubCategory, c.Type, c.SubType)
-	hasher.Write([]byte(toBeHashed)) //nolint:revive
-	hash := hasher.Sum(nil)
-	encoded := base64.StdEncoding.EncodeToString(hash)
-	return encoded
 }
