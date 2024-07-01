@@ -75,7 +75,7 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 	for _, bucket := range buckets {
 		assetChannel <- inventory.NewAssetEvent(
 			s3BucketClassification,
-			bucket.GetResourceArn(),
+			[]string{bucket.GetResourceArn()},
 			bucket.GetResourceName(),
 
 			inventory.WithRawAsset(bucket),

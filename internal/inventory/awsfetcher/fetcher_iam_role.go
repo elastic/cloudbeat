@@ -75,7 +75,7 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 		assetChannel <- inventory.NewAssetEvent(
 			iamRoleClassification,
-			pointers.Deref(role.Arn),
+			[]string{pointers.Deref(role.Arn), pointers.Deref(role.RoleId)},
 			pointers.Deref(role.RoleName),
 
 			inventory.WithRawAsset(*role),

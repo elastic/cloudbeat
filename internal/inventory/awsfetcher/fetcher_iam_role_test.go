@@ -71,7 +71,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			iamRoleClassification,
-			"arn:aws:iam::0000:role/role-name-1",
+			[]string{"arn:aws:iam::0000:role/role-name-1", "17823618723"},
 			"role-name-1",
 			inventory.WithRawAsset(role1),
 			inventory.WithCloud(inventory.AssetCloud{
@@ -89,7 +89,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 
 		inventory.NewAssetEvent(
 			iamRoleClassification,
-			"arn:aws:iam::0000:role/role-name-2",
+			[]string{"arn:aws:iam::0000:role/role-name-2", "17823618723"},
 			"role-name-2",
 			inventory.WithRawAsset(role2),
 			inventory.WithCloud(inventory.AssetCloud{

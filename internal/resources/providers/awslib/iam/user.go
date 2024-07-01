@@ -34,6 +34,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 const (
@@ -110,6 +111,7 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 			PasswordLastChanged: userAccount.PasswordLastChanged,
 			PasswordEnabled:     pwdEnabled,
 			MfaActive:           userAccount.MfaActive,
+			UserId:              pointers.Deref(apiUser.UserId),
 		})
 	}
 

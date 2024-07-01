@@ -40,9 +40,8 @@ func TestAssetInventory_Run(t *testing.T) {
 			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_inventory.asset_inventory-infrastructure_compute_virtual-machine_ec2-default"},
 			Timestamp: now(),
 			Fields: mapstr.M{
-				"asset": Asset{
-					UUID: "WH25UKB5ExLpkCAwRJDStPN3U+VGaYg9bF5qKu4L7Ro=",
-					Id:   "arn:aws:ec2:us-east::ec2/234567890",
+				"entity": Entity{
+					Id:   []string{"arn:aws:ec2:us-east::ec2/234567890"},
 					Name: "test-server",
 					AssetClassification: AssetClassification{
 						Category:    CategoryInfrastructure,
@@ -105,7 +104,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				Type:        TypeVirtualMachine,
 				SubType:     SubTypeEC2,
 			},
-			"arn:aws:ec2:us-east::ec2/234567890",
+			[]string{"arn:aws:ec2:us-east::ec2/234567890"},
 			"test-server",
 			WithTags(map[string]string{"Name": "test-server", "key": "value"}),
 			WithCloud(AssetCloud{
