@@ -86,7 +86,7 @@ func (b *Builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, err
 	}
 
-	transformer := transformer.NewTransformer(log, b.bdp, cdp, b.idp)
+	transformer := transformer.NewTransformer(log, cfg, b.bdp, cdp, b.idp)
 	return &basebenchmark{
 		log:         log,
 		manager:     manager,

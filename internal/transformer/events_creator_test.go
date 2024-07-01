@@ -29,6 +29,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -170,7 +171,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			bdp := tt.bdpp()
 			idp := tt.idpp()
 
-			transformer := NewTransformer(testhelper.NewLogger(s.T()), bdp, cdp, idp)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), &config.Config{}, bdp, cdp, idp)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
