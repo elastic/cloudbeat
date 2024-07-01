@@ -86,7 +86,7 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			inventory.Identifiers(inventory.Arns(item.GetResourceArn())),
+			[]string{item.GetResourceArn()},
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{

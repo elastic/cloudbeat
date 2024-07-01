@@ -101,7 +101,7 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			inventory.Identifiers(inventory.Arns(item.GetResourceArn()), inventory.Ids(pointers.Deref(s.retrieveId(item)))),
+			[]string{item.GetResourceArn(), pointers.Deref(s.retrieveId(item))},
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{

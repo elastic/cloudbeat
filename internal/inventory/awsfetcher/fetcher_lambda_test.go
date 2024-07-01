@@ -60,7 +60,7 @@ func TestLambdaFunction_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			classification,
-			inventory.Identifiers(inventory.Arns("arn:aws:lambda:us-east-1:378890115541:function:kuba-test-func")),
+			[]string{"arn:aws:lambda:us-east-1:378890115541:function:kuba-test-func"},
 			"kuba-test-func",
 			inventory.WithRawAsset(function1),
 			inventory.WithCloud(inventory.AssetCloud{

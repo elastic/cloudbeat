@@ -112,17 +112,11 @@ type AssetClassification struct {
 
 // Entity contains the identifiers of the asset
 type Entity struct {
-	Identifiers EntityIdentifiers `json:"identifiers"`
-	Name        string            `json:"name"`
+	Id   []string `json:"id"`
+	Name string   `json:"name"`
 	AssetClassification
 	Tags map[string]string `json:"tags"`
 	Raw  any               `json:"raw"`
-}
-
-// Specific identifiers of the asset
-type EntityIdentifiers struct {
-	Arns []string `json:"arns,omitempty"`
-	Ids  []string `json:"ids,omitempty"`
 }
 
 // AssetNetwork contains network information
@@ -206,10 +200,10 @@ type AssetResourcePolicy struct {
 // AssetEnricher functional builder function
 type AssetEnricher func(asset *AssetEvent)
 
-func NewAssetEvent(c AssetClassification, identifiers EntityIdentifiers, name string, enrichers ...AssetEnricher) AssetEvent {
+func NewAssetEvent(c AssetClassification, ids []string, name string, enrichers ...AssetEnricher) AssetEvent {
 	a := AssetEvent{
 		Entity: Entity{
-			Identifiers:         identifiers,
+			Id:                  removeEmpty(ids),
 			Name:                name,
 			AssetClassification: c,
 		},

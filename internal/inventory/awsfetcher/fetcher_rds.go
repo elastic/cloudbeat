@@ -75,7 +75,7 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	for _, item := range rdsInstances {
 		assetChannel <- inventory.NewAssetEvent(
 			rdsClassification,
-			inventory.Identifiers(inventory.Arns(item.GetResourceArn()), inventory.Ids(item.Identifier)),
+			[]string{item.GetResourceArn(), item.Identifier},
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{

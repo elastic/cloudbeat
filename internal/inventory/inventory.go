@@ -124,37 +124,6 @@ func generateIndex(a Entity) string {
 	return fmt.Sprintf(indexTemplate, a.Category, a.SubCategory, a.Type, a.SubType)
 }
 
-type IdentifierEnricher func(EntityIdentifiers) EntityIdentifiers
-
-func Arns(arns ...string) IdentifierEnricher {
-	return func(ei EntityIdentifiers) EntityIdentifiers {
-		arns = removeEmpty(arns)
-		if len(arns) > 0 {
-			ei.Arns = arns
-		}
-		return ei
-	}
-}
-
-func Ids(ids ...string) IdentifierEnricher {
-	return func(ei EntityIdentifiers) EntityIdentifiers {
-		ids = removeEmpty(ids)
-		if len(ids) > 0 {
-			ei.Arns = ids
-		}
-		return ei
-	}
-}
-
-func Identifiers(enrichers ...IdentifierEnricher) EntityIdentifiers {
-	identifiers := EntityIdentifiers{}
-	for _, enrich := range enrichers {
-		identifiers = enrich(identifiers)
-	}
-
-	return identifiers
-}
-
 func (a *AssetInventory) Stop() {
 	close(a.assetCh)
 }

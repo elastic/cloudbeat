@@ -81,10 +81,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 
 		assetChannel <- inventory.NewAssetEvent(
 			iamPolicyClassification,
-			inventory.Identifiers(
-				inventory.Arns(policy.GetResourceArn()),
-				inventory.Ids(pointers.Deref(policy.PolicyId)),
-			),
+			[]string{policy.GetResourceArn(), pointers.Deref(policy.PolicyId)},
 			resource.GetResourceName(),
 
 			inventory.WithRawAsset(policy),

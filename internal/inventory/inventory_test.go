@@ -41,8 +41,8 @@ func TestAssetInventory_Run(t *testing.T) {
 			Timestamp: now(),
 			Fields: mapstr.M{
 				"entity": Entity{
-					Identifiers: Identifiers(Arns("arn:aws:ec2:us-east::ec2/234567890")),
-					Name:        "test-server",
+					Id:   []string{"arn:aws:ec2:us-east::ec2/234567890"},
+					Name: "test-server",
 					AssetClassification: AssetClassification{
 						Category:    CategoryInfrastructure,
 						SubCategory: SubCategoryCompute,
@@ -104,7 +104,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				Type:        TypeVirtualMachine,
 				SubType:     SubTypeEC2,
 			},
-			Identifiers(Arns("arn:aws:ec2:us-east::ec2/234567890")),
+			[]string{"arn:aws:ec2:us-east::ec2/234567890"},
 			"test-server",
 			WithTags(map[string]string{"Name": "test-server", "key": "value"}),
 			WithCloud(AssetCloud{
