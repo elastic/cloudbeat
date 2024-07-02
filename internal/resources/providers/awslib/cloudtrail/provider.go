@@ -19,6 +19,7 @@ package cloudtrail
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
@@ -40,7 +41,11 @@ type Client interface {
 
 func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 	input := cloudtrail.DescribeTrailsInput{}
-	output, err := p.clients[awslib.DefaultRegion].DescribeTrails(ctx, &input)
+	defaultClient, err := awslib.GetDefaultClient(p.clients)
+	if err != nil {
+		return nil, fmt.Errorf("could not select default region client: %w", err)
+	}
+	output, err := defaultClient.DescribeTrails(ctx, &input)
 	if err != nil {
 		return nil, err
 	}

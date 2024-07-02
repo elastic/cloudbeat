@@ -25,6 +25,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -66,11 +67,10 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	})).Return(
 		[]*inventory.ExtendedGcpAsset{
 			{
-				Ecs: &fetching.EcsGcp{
-					Provider:         "gcp",
-					ProjectId:        "prjId",
-					ProjectName:      "prjName",
-					OrganizationId:   "orgId",
+				CloudAccount: &fetching.CloudAccountMetadata{
+					AccountId:        "prjId",
+					AccountName:      "prjName",
+					OrganisationId:   "orgId",
 					OrganizationName: "orgName",
 				},
 				Asset: &assetpb.Asset{
@@ -87,16 +87,72 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Equal(len(GcpAssetTypes), len(results))
 
 	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
-		ecs, err := r.Resource.GetElasticCommonData()
+		metadata, err := r.Resource.GetMetadata()
 		s.Require().NoError(err)
-		cloud := ecs["cloud"].(map[string]any)
-		account := cloud["account"].(map[string]any)
-		org := cloud["Organization"].(map[string]any)
+		cloudAccountMetadata := metadata.CloudAccountMetadata
 
-		s.Equal("prjName", account["name"])
-		s.Equal("prjId", account["id"])
-		s.Equal("orgId", org["id"])
-		s.Equal("orgName", org["name"])
-		s.Equal("gcp", cloud["provider"])
+		s.Equal("prjName", cloudAccountMetadata.AccountName)
+		s.Equal("prjId", cloudAccountMetadata.AccountId)
+		s.Equal("orgId", cloudAccountMetadata.OrganisationId)
+		s.Equal("orgName", cloudAccountMetadata.OrganizationName)
+		if metadata.Type == fetching.CloudIdentity {
+			m, err := r.GetElasticCommonData()
+			s.Require().NoError(err, "error getting Elastic Common Data")
+			s.Len(m, 2)
+		}
 	})
+}
+
+func (s *GcpAssetsFetcherTestSuite) TestFetcher_ElasticCommonData() {
+	cases := []struct {
+		resourceData map[string]any
+		expectedECS  map[string]any
+	}{
+		{
+			resourceData: map[string]any{},
+			expectedECS:  map[string]any{},
+		},
+		{
+			resourceData: map[string]any{"name": ""},
+			expectedECS:  map[string]any{},
+		},
+		{
+			resourceData: map[string]any{"name": "henrys-vm"},
+			expectedECS:  map[string]any{"host.name": "henrys-vm"},
+		},
+		{
+			resourceData: map[string]any{"hostname": ""},
+			expectedECS:  map[string]any{},
+		},
+		{
+			resourceData: map[string]any{"hostname": "henrys-vm"},
+			expectedECS:  map[string]any{"host.hostname": "henrys-vm"},
+		},
+		{
+			resourceData: map[string]any{"name": "x", "hostname": "y"},
+			expectedECS:  map[string]any{"host.name": "x", "host.hostname": "y"},
+		},
+	}
+
+	for _, tc := range cases {
+		dataStruct, err := structpb.NewStruct(tc.resourceData)
+		s.Require().NoError(err)
+
+		asset := &GcpAsset{
+			Type:    fetching.CloudCompute,
+			SubType: "gcp-compute-instance",
+			ExtendedAsset: &inventory.ExtendedGcpAsset{
+				Asset: &assetpb.Asset{
+					AssetType: inventory.ComputeInstanceAssetType,
+					Resource: &assetpb.Resource{
+						Data: dataStruct,
+					},
+				},
+			},
+		}
+
+		ecs, err := asset.GetElasticCommonData()
+		s.Require().NoError(err)
+		s.Equal(tc.expectedECS, ecs)
+	}
 }

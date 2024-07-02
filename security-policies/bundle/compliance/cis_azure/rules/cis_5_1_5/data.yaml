@@ -1,0 +1,133 @@
+metadata:
+  id: 66cdd4cc-5870-50e1-959c-91443716b87a
+  name: Ensure that logging for Azure Key Vault is 'Enabled'
+  profile_applicability: '* Level 1'
+  description: |-
+    Enable AuditEvent logging for key vault instances to ensure interactions with key vaults are logged and available.
+  rationale: |-
+    Monitoring how and when key vaults are accessed, and by whom, enables an audit trail of interactions with confidential information, keys, and certificates managed by Azure Keyvault.
+    Enabling logging for Key Vault saves information in an Azure storage account which the user provides.
+    This creates a new container named insights-logs-auditevent automatically for the specified storage account.
+    This same storage account can be used for collecting logs for multiple key vaults.
+  audit: |-
+    **From Azure Portal**
+
+    1. Go to `Key vaults`
+    2. For each Key vault
+    3. Go to `Diagnostic settings`
+    4. Click on `Edit Settings`
+    5. Ensure that `Archive to a storage account` is `Enabled`
+    6. Ensure that `AuditEvent` is checked, and the retention days is set to `180 days` or as appropriate
+
+    **From Azure CLI**
+
+    List all key vaults
+
+    ```
+    az keyvault list
+    ```
+
+    For each keyvault `id`
+    ```
+    az monitor diagnostic-settings list --resource <id>
+    ```
+
+    Ensure that `storageAccountId` is set as appropriate.
+    Also, ensure that `category` and `days` are set.
+    One of the sample outputs is as below.
+
+    ```
+    "logs": [
+     {
+        "category": "AuditEvent",
+        "enabled": true,
+        "retentionPolicy": {
+            "days": 180,
+            "enabled": true
+        }
+    }
+     ]
+    ```
+
+    **From PowerShell** 
+
+    List the key vault(s) in the subscription
+
+    ```
+    Get-AzKeyVault
+    ```
+
+    For each key vault, run the following: 
+
+    ```
+    Get-AzDiagnosticSetting -ResourceId <key vault resource ID>
+    ```
+
+    Ensure that `StorageAccountId`, `ServiceBusRuleId`, `MarketplacePartnerId`, or `WorkspaceId` is set as appropriate.
+    Also, ensure that `enabled` is set to `true`, and that `category` and `days` are set under the `Log` heading.
+  remediation: |-
+    **From Azure Portal**
+
+    1. Go to `Key vaults`
+    2. Select a Key vault
+    3. Select `Diagnostic settings`
+    4. Click on `Edit setting` against an existing diagnostic setting, or `Add diagnostic setting`
+    5. If creating a new diagnostic setting, provide a name
+    6. Check `Archive to a storage account`
+    7. Under Categories, check `Audit Logs`
+    8. Set an appropriate value for `Retention (days)`
+    9. Click `Save`
+
+    **From Azure CLI**
+
+    To update an existing `Diagnostic Settings`
+    ```
+    az monitor diagnostic-settings update --name "<diagnostics settings name>" --resource <key vault resource ID> --set retentionPolicy.days=90
+    ```
+
+    To create a new `Diagnostic Settings`
+
+    ```
+    az monitor diagnostic-settings create --name <diagnostic settings name> --resource <key vault resource ID> --logs "[{category:AuditEvents,enabled:true,retention-policy:{enabled:true,days:180}}]" --metrics "[{category:AllMetrics,enabled:true,retention-policy:{enabled:true,days:180}}]" <[--event-hub <event hub ID> --event-hub-rule <event hub auth rule ID> | --storage-account <storage account ID> |--workspace <log analytics workspace ID> | --marketplace-partner-id <full resource ID of third-party solution>]>
+    ```
+
+    **From PowerShell**
+
+    Create the `Log` settings object
+
+    ```
+    $logSettings = @()
+    $logSettings += New-AzDiagnosticSettingLogSettingsObject -Enabled $true -RetentionPolicyDay 180 -RetentionPolicyEnabled $true -Category AuditEvent
+    ```
+
+    Create the `Metric` settings object
+
+    ```
+    $metricSettings = @()
+    $metricSettings += New-AzDiagnosticSettingMetricSettingsObject -Enabled $true -RetentionPolicyDay 180 -RetentionPolicyEnabled $true -Category AllMetrics
+    ```
+
+    Create the `Diagnostic Settings` for each `Key Vault`
+
+    ```
+    New-AzDiagnosticSetting -Name "<diagnostic setting name>" -ResourceId <key vault resource ID> -Log $logSettings -Metric $metricSettings [-StorageAccountId <storage account ID> | -EventHubName <event hub name> -EventHubAuthorizationRuleId <event hub auth rule ID> | -WorkSpaceId <log analytics workspace ID> | -MarketPlacePartnerId <full resource ID for third-party solution>]
+    ```
+  impact: ''
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/key-vault/general/howto-logging
+    2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-data-protection#dp-8-ensure-security-of-key-and-certificate-repository
+    3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-logging-threat-detection#lt-3-enable-logging-for-security-investigation
+  section: Configuring Diagnostic Settings
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 5.1.5
+  - Configuring Diagnostic Settings
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 5.1.5
+    posture_type: cspm

@@ -205,6 +205,9 @@ load-pytest-eks:
 deploy-tests-helm target values_file='tests/test_environments/values/ci.yml' range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker='{{target}}' --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}} tests/test_environments/k8s-cloudbeat-tests/
 
+apply-k8s-test-objects:
+  kubectl apply -f tests/test_environments/k8s-objects-all-cases.yml && kubectl wait --for=condition=Ready --timeout={{TIMEOUT}} pod --all -n {{NAMESPACE}}
+
 purge-tests:
   helm del {{TESTS_RELEASE}} -n {{NAMESPACE}} & kubectl delete pvc --all -n {{NAMESPACE}}
 

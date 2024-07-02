@@ -2,7 +2,7 @@ exclude: (bin/(activate-)?hermit)|(scripts/make/gimme/.*)
 repos:
   ## General
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -24,22 +24,25 @@ repos:
     hooks:
       - id: add-trailing-comma
 
-  ## Golang hooks
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.56.1
+  - repo: local
     hooks:
       - id: golangci-lint
+        name: Run golangci-lint
+        entry: bash -c 'golangci-lint run'
+        language: system
+        files: .*.go
+        pass_filenames: false
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
+    rev: 7.1.0
     hooks:
       - id: flake8
         name: flake8 ./tests/ ./.ci/scripts ./github/actions
         files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.0.3
+    rev: v3.2.4
     hooks:
       - id: pylint
         args: [
@@ -49,8 +52,14 @@ repos:
         # TODO: Apply pylint in security-policies
         exclude: security-policies.*
 
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+
   - repo: https://github.com/psf/black
-    rev: 24.1.1
+    rev: 24.4.2
     hooks:
       - id: black
 
@@ -66,8 +75,8 @@ repos:
         ]
         files: deploy/cloudformation/.*yml
 
-  - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.85.0
+  - repo: https://github.com/aws-cloudformation/cfn-lint
+    rev: v1.4.2
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -160,7 +169,7 @@ repos:
         files: (\.rego)$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.39.0
+    rev: v0.41.0
     hooks:
       - id: markdownlint
         args: [ '--disable',
@@ -173,7 +182,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.15.0
+    rev: v0.23.1
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]

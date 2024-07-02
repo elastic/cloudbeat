@@ -5,10 +5,10 @@ Each rule has one or more test cases.
 Monitoring rules identification is performed by resource name.
 """
 
-from commonlib.framework.reporting import skip_param_case, SkipReportData
-from ..eks_test_case import EksAwsServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from commonlib.framework.reporting import SkipReportData, skip_param_case
 
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
+from ..eks_test_case import EksAwsServiceCase
 
 CIS_4_1 = "CIS 4.1"
 CIS_4_2 = "CIS 4.2"

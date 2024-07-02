@@ -114,6 +114,19 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 			regions:     []string{awslib.DefaultRegion},
 		},
 		{
+			name: "Should not return a resource when key is managed by AWS",
+			kmsClientMockReturnVals: kmsClientMockReturnVals{
+				"ListKeys": {{{mock.Anything, mock.Anything}, {&kmsClient.ListKeysOutput{Keys: []types.KeyListEntry{
+					{KeyId: &keyId1},
+				}}, nil}}},
+				"DescribeKey":          {{{mock.Anything, mock.Anything}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault, KeyManager: types.KeyManagerTypeAws}}, nil}}},
+				"GetKeyRotationStatus": {{{mock.Anything, mock.Anything}, {nil, errors.New("some error")}}},
+			},
+			expected:    []awslib.AwsResource(nil),
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion},
+		},
+		{
 			name: "Should return a resource for a symmetric key",
 			kmsClientMockReturnVals: kmsClientMockReturnVals{
 				"ListKeys": {
@@ -125,8 +138,8 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 					}}, nil}},
 				},
 				"DescribeKey": {
-					{{mock.Anything, mock.MatchedBy(MatchDescribeKeyInput(keyId1))}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}}, nil}},
-					{{mock.Anything, mock.MatchedBy(MatchDescribeKeyInput(keyId2))}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}}, nil}},
+					{{mock.Anything, mock.MatchedBy(MatchDescribeKeyInput(keyId1))}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault, KeyManager: types.KeyManagerTypeCustomer}}, nil}},
+					{{mock.Anything, mock.MatchedBy(MatchDescribeKeyInput(keyId2))}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault, KeyManager: types.KeyManagerTypeCustomer}}, nil}},
 				},
 				"GetKeyRotationStatus": {
 					{{mock.Anything, mock.MatchedBy(MatchGetKeyRotationStatusInput(keyId1))}, {&kmsClient.GetKeyRotationStatusOutput{KeyRotationEnabled: true}, nil}},
@@ -134,8 +147,8 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 				},
 			},
 			expected: []awslib.AwsResource{
-				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true, region: "us-east-1"},
-				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true, region: "us-east-2"},
+				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault, KeyManager: types.KeyManagerTypeCustomer}, KeyRotationEnabled: true, region: "us-east-1"},
+				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault, KeyManager: types.KeyManagerTypeCustomer}, KeyRotationEnabled: true, region: "us-east-2"},
 			},
 			expectError: false,
 			regions:     []string{"us-east-1", "us-east-2"},

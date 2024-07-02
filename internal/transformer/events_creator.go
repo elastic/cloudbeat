@@ -34,8 +34,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-var resultsIndex = config.Datastream("", config.ResultsDatastreamIndexPrefix)
-
 const (
 	ecsCategoryConfiguration = "configuration"
 	ecsKindState             = "state"
@@ -61,10 +59,10 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
+func NewTransformer(log *logp.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
 	return &Transformer{
 		log:                   log,
-		index:                 resultsIndex,
+		index:                 cfg.Datastream(),
 		idProvider:            idp,
 		benchmarkDataProvider: bdp,
 		commonDataProvider:    cdp,

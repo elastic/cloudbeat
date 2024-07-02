@@ -7,12 +7,12 @@ scms:
     kind: github
     spec:
       user: '{{ requiredEnv "GIT_USER" }}'
-      email: '{{ requiredEnv "GIT_EMAIL" }}'
       owner: "{{ .github.owner }}"
       repository: "{{ .github.repository }}"
       token: '{{ requiredEnv "GITHUB_TOKEN" }}'
       username: '{{ requiredEnv "GIT_USER" }}'
       branch: '{{ requiredEnv "GIT_BRANCH" }}'
+      email: 'cloudsecmachine@elastic.co'
 
 actions:
   default:

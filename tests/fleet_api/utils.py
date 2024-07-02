@@ -16,8 +16,10 @@ Import this module to utilize the provided functions for JSON file operations an
 """
 
 import json
-from typing import Union
+import sys
 from pathlib import Path
+from typing import Union
+
 import ruamel.yaml
 from jinja2 import Template
 from loguru import logger
@@ -25,16 +27,13 @@ from loguru import logger
 
 def read_json(json_path: Path) -> dict:
     """
-    Read JSON data from a file.
+    Read JSON data from a file. Exits if the file is not found or an error occurs while reading the file.
 
     Args:
         json_path (Path): Path to the JSON file.
 
     Returns:
         dict: Dictionary containing the JSON data.
-
-    Raises:
-        FileNotFoundError: If the specified JSON file does not exist.
     """
 
     try:
@@ -42,7 +41,10 @@ def read_json(json_path: Path) -> dict:
             return json.load(json_file)
     except FileNotFoundError:
         logger.error(f"{json_path.name} file not found.")
-        return {}
+        sys.exit(1)
+    except json.JSONDecodeError as ex:
+        logger.error(f"Error reading file {json_path}: {ex}")
+        sys.exit(1)
 
 
 def delete_file(file_path: Path):

@@ -18,7 +18,7 @@ on:
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.11.0"
+        default: "8.13.3"
         type: string
       ess-region:
         required: true
@@ -33,10 +33,20 @@ on:
           description: "Run sanity tests after provision"
           default: false
           type: boolean
-      cleanup-env:
-        description: "Cleanup resources after provision"
-        default: false
-        type: boolean
+      run-ui-sanity-tests:
+          description: "Run UI sanity tests after provision"
+          default: false
+          type: boolean
+      kibana_ref:
+        description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
+        required: false
+        default: "main"
+        type: string
+      expiration_days:
+        description: "Number of days until environment expiration"
+        required: false
+        default: 14
+        type: string
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
@@ -55,7 +65,7 @@ on:
       elk-stack-version:
         required: true
         description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.10.0"
+        default: "8.13.3"
         type: string
       ess-region:
         required: true
@@ -70,10 +80,20 @@ on:
         description: "Run sanity tests after provision"
         default: false
         type: boolean
-      cleanup-env:
-        description: "Cleanup resources after provision"
-        default: false
-        type: boolean
+      run-ui-sanity-tests:
+          description: "Run UI sanity tests after provision"
+          default: false
+          type: boolean
+      kibana_ref:
+        description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
+        required: false
+        default: "main"
+        type: string
+      expiration_days:
+        description: "Number of days until environment expiration"
+        required: false
+        default: 14
+        type: string
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
@@ -93,7 +113,8 @@ env:
   WORKING_DIR: deploy/test-environments
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
-  GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
+  GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=${{ github.actor }}"
+  AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments owner=${{ github.actor }}"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -155,6 +176,12 @@ jobs:
         run: |
           # Extract the stack version
           stack_version="${{ inputs.elk-stack-version }}"
+          is_serverless_mode="${{ inputs.serverless_mode }}"
+          if [[ $is_serverless_mode == "true" ]]; then
+            # Stack version is not relevant for serverless deployments
+            # Therefore, we set it to the latest snapshot version
+            stack_version="${{ env.ELK_VERSION }}"
+          fi
 
           echo "TF_VAR_stack_version=$stack_version" >> $GITHUB_ENV
           echo "STACK_VERSION=$stack_version" >> $GITHUB_ENV
@@ -234,50 +261,22 @@ jobs:
 
       - name: Set Environment Output
         id: env-output
-        run: |
-          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
-          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
-
-          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
-
-          export EC2_CSPM=$(terraform output -raw ec2_cspm_ssh_cmd)
-          echo "::add-mask::$EC2_CSPM"
-          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
-
-          export EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
-          echo "::add-mask::$EC2_KSPM"
-          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
-
-          export EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
-          echo "::add-mask::$EC2_CSPM_KEY"
-          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
-
-          export EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
-          echo "::add-mask::$EC2_KSPM_KEY"
-          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
-
-          export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
-          echo "::add-mask::$KSPM_PUBLIC_IP"
-          echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
-
-          export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
-          echo "::add-mask::$CSPM_PUBLIC_IP"
-          echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+        run: ../../.ci/scripts/set_cloud_env_params.sh
 
       - name: Upload tf state
         id: upload-state
         if: always()
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          EXPIRATION_DAYS: ${{ inputs.expiration_days }}
         run: |
-          aws s3 cp "./terraform.tfstate" "${{ env.S3_BUCKET }}/terraform.tfstate"
-          aws s3 cp "${{ env.EC2_CSPM_KEY }}" "${{ env.S3_BUCKET }}/cspm.pem"
-          aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
-          echo "s3-bucket-folder=${{ env.S3_BUCKET }}" >> $GITHUB_OUTPUT
-          echo "aws-cnvm-stack=${{ env.CNVM_STACK_NAME }}" >> $GITHUB_OUTPUT
+          aws s3 cp "./terraform.tfstate" "${S3_BUCKET}/terraform.tfstate"
+          aws s3 cp "${EC2_CSPM_KEY}" "${S3_BUCKET}/cspm.pem"
+          aws s3 cp "${EC2_KSPM_KEY}" "${S3_BUCKET}/kspm.pem"
+          echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
+          echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
+          python3 ../../.ci/scripts/create_env_config.py
+          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
 
       - name: Summary
         if: success()
@@ -324,10 +323,8 @@ jobs:
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
-        env:
-          DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
         run: |
-          . ./set_env.sh && ./deploy.sh
+          . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}"
 
       - name: Install CSPM Azure integration
         id: cspm-azure-integration
@@ -337,20 +334,16 @@ jobs:
 
       - id: azure-auth
         name: Azure login
-        uses: azure/login@v1.6.1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy CSPM Azure agent
         id: cspm-azure-agent
         working-directory: deploy/azure
-        run: |
-          if [[ "${{ env.STACK_VERSION }}" == *"8.11"* ]]; then
-            az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
-          else
-            az group create --location EastUS --name "${{ env.DEPLOYMENT_NAME }}"
-            az deployment group create --resource-group "${{ env.DEPLOYMENT_NAME }}" --template-file ARM-for-single-account.json --parameters @arm_parameters.json
-          fi
+        env:
+          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+        run: ./install_agent_az_cli.sh
 
       - name: Install D4C integration
         id: kspm-d4c
@@ -436,10 +429,14 @@ jobs:
         run: |
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-      - name: Cleanup Environment
-        if: ${{ !cancelled() && inputs.cleanup-env == true }}
-        run: |
-          just delete-cloud-env ${{ env.DEPLOYMENT_NAME }} '' "false"
+      - name: Run UI Sanity checks (Kibana)
+        uses: ./.github/actions/kibana-ftr
+        if: ${{ success() && inputs.run-ui-sanity-tests == true }}
+        with:
+          test_kibana_url: ${{ env.TEST_KIBANA_URL }}
+          test_es_url: ${{ env.TEST_ES_URL }}
+          es_version: ${{ env.STACK_VERSION }}
+          kibana_ref: ${{ inputs.kibana_ref }}
 
       - name: Create Slack Payload
         if: always()

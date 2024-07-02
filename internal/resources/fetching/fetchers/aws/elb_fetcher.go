@@ -66,7 +66,7 @@ func (f *ElbFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 	if err != nil {
 		return fmt.Errorf("failed to load balancers from Kubernetes %w", err)
 	}
-	result, err := f.elbProvider.DescribeLoadBalancer(ctx, balancers)
+	result, err := f.elbProvider.DescribeLoadBalancers(ctx, balancers)
 	if err != nil {
 		return fmt.Errorf("failed to load balancers from ELB %w", err)
 	}

@@ -16,11 +16,13 @@ spec:
     - /bin/sh
     - -c
     - |
-      pytest -rA --disable-warnings ${MARKER_CMD} "${TEST_MARKER}" ${RANGE_FLAG} ${TEST_RANGE} --alluredir=/usr/src/app/report
+      pytest -rA --disable-warnings ${MARKER_CMD} "${TEST_MARKER}" ${RANGE_FLAG} ${TEST_RANGE} --alluredir=/usr/src/app/report; pytest_exit_status=$?
       # When directly linking to mounted path,
       # INTERNALERROR> OSError: [Errno 16] Device or resource busy: '/usr/src/app/tests/report'
       # To workaround this, copy the report to a different path
-      cp -rv /usr/src/app/report/* /usr/src/app/tests/report
+      cp -r /usr/src/app/report/* /usr/src/app/tests/report || exit $?
+
+      exit $pytest_exit_status
     envFrom:
       - configMapRef:
           name: {{ .Values.serviceAccount.name }}-configmap
@@ -50,7 +52,7 @@ spec:
 
   restartPolicy: Never
   {{- if eq .Values.testData.clusterType "vanilla" }}
-  nodeName: kind-multi-control-plane
+  nodeName: {{ .Values.kindNode.name }}
   tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane

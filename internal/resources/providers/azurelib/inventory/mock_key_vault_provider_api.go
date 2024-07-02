@@ -38,6 +38,61 @@ func (_m *MockKeyVaultProviderAPI) EXPECT() *MockKeyVaultProviderAPI_Expecter {
 	return &MockKeyVaultProviderAPI_Expecter{mock: &_m.Mock}
 }
 
+// ListKeyVaultDiagnosticSettings provides a mock function with given fields: ctx, vault
+func (_m *MockKeyVaultProviderAPI) ListKeyVaultDiagnosticSettings(ctx context.Context, vault AzureAsset) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, vault)
+
+	var r0 []AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, AzureAsset) ([]AzureAsset, error)); ok {
+		return rf(ctx, vault)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, AzureAsset) []AzureAsset); ok {
+		r0 = rf(ctx, vault)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, AzureAsset) error); ok {
+		r1 = rf(ctx, vault)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListKeyVaultDiagnosticSettings'
+type MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call struct {
+	*mock.Call
+}
+
+// ListKeyVaultDiagnosticSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - vault AzureAsset
+func (_e *MockKeyVaultProviderAPI_Expecter) ListKeyVaultDiagnosticSettings(ctx interface{}, vault interface{}) *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call {
+	return &MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call{Call: _e.mock.On("ListKeyVaultDiagnosticSettings", ctx, vault)}
+}
+
+func (_c *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call) Run(run func(ctx context.Context, vault AzureAsset)) *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call) Return(_a0 []AzureAsset, _a1 error) *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call) RunAndReturn(run func(context.Context, AzureAsset) ([]AzureAsset, error)) *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListKeyVaultKeys provides a mock function with given fields: ctx, vault
 func (_m *MockKeyVaultProviderAPI) ListKeyVaultKeys(ctx context.Context, vault AzureAsset) ([]AzureAsset, error) {
 	ret := _m.Called(ctx, vault)

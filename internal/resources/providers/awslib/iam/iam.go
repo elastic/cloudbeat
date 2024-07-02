@@ -48,6 +48,8 @@ type Client interface {
 	ListUserPolicies(ctx context.Context, params *iamsdk.ListUserPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListUserPoliciesOutput, error)
 	GetAccessKeyLastUsed(ctx context.Context, params *iamsdk.GetAccessKeyLastUsedInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccessKeyLastUsedOutput, error)
 	GetAccountPasswordPolicy(ctx context.Context, params *iamsdk.GetAccountPasswordPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccountPasswordPolicyOutput, error)
+	GetRole(ctx context.Context, params *iamsdk.GetRoleInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetRoleOutput, error)
+	ListRoles(ctx context.Context, params *iamsdk.ListRolesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListRolesOutput, error)
 	GetRolePolicy(ctx context.Context, params *iamsdk.GetRolePolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetRolePolicyOutput, error)
 	GetCredentialReport(ctx context.Context, params *iamsdk.GetCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetCredentialReportOutput, error)
 	GetUserPolicy(ctx context.Context, params *iamsdk.GetUserPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetUserPolicyOutput, error)
@@ -84,8 +86,9 @@ type User struct {
 	LastAccess          string                 `json:"last_access,omitempty"`
 	Arn                 string                 `json:"arn,omitempty"`
 	PasswordLastChanged string                 `json:"password_last_changed,omitempty"`
-	PasswordEnabled     bool                   `json:"password_enabled"`
 	MfaActive           bool                   `json:"mfa_active"`
+	PasswordEnabled     bool                   `json:"password_enabled"`
+	UserId              string                 `json:"user_id"`
 }
 
 type AuthDevice struct {
@@ -135,6 +138,10 @@ type Policy struct {
 	types.Policy
 	Document map[string]any     `json:"document,omitempty"`
 	Roles    []types.PolicyRole `json:"roles"`
+}
+
+type Role struct {
+	types.Role
 }
 
 type ServerCertificatesInfo struct {

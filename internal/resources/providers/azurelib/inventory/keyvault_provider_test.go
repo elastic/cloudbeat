@@ -19,11 +19,13 @@ package inventory
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
@@ -42,6 +44,158 @@ func (m *mockAzureKeyVaultWrapper) AssetKeyVaultKeys(_ context.Context, subscrip
 func (m *mockAzureKeyVaultWrapper) AssetKeyVaultSecrets(_ context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.SecretsClientListResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, vaultName)
 	return r.Get(0).([]armkeyvault.SecretsClientListResponse), r.Error(1)
+}
+
+func (m *mockAzureKeyVaultWrapper) AssetDiagnosticSettings(_ context.Context, vaultId string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
+	r := m.Called(vaultId, options)
+	return r.Get(0).([]armmonitor.DiagnosticSettingsClientListResponse), r.Error(1)
+}
+
+func TestListKeyVaultDiagnosticSettings(t *testing.T) {
+	log := testhelper.NewLogger(t)
+
+	response := func(settings ...*armmonitor.DiagnosticSettingsResource) armmonitor.DiagnosticSettingsClientListResponse {
+		return armmonitor.DiagnosticSettingsClientListResponse{
+			DiagnosticSettingsResourceCollection: armmonitor.DiagnosticSettingsResourceCollection{
+				Value: settings,
+			},
+		}
+	}
+
+	settings := func(id string) *armmonitor.DiagnosticSettingsResource {
+		return &armmonitor.DiagnosticSettingsResource{
+			ID:   to.Ptr(id),
+			Name: to.Ptr("diagName"),
+			Type: to.Ptr("Microsoft.KeyVault/vaults"),
+			Properties: &armmonitor.DiagnosticSettings{
+				StorageAccountID: to.Ptr("storage_account_id"),
+				Logs: []*armmonitor.LogSettings{
+					{
+						Category: to.Ptr("AuditEvent"),
+						Enabled:  to.Ptr(true),
+					},
+				},
+			},
+		}
+	}
+
+	vaultAsset := AzureAsset{
+		Id:             "kv1",
+		Name:           "diagName",
+		ResourceGroup:  "rg1",
+		SubscriptionId: "sub1",
+		TenantId:       "ten1",
+	}
+
+	tests := map[string]struct {
+		inputVault               AzureAsset
+		mockWrapperResponse      []armmonitor.DiagnosticSettingsClientListResponse
+		mockWrapperResponseError error
+		expected                 []AzureAsset
+		expectError              bool
+	}{
+		"test error": {
+			inputVault:               vaultAsset,
+			mockWrapperResponse:      nil,
+			mockWrapperResponseError: errors.New("some error"),
+			expected:                 []AzureAsset{},
+			expectError:              true,
+		},
+		"test single": {
+			inputVault: vaultAsset,
+			mockWrapperResponse: []armmonitor.DiagnosticSettingsClientListResponse{
+				response(nil, settings("diag1")),
+			},
+			mockWrapperResponseError: nil,
+			expected: []AzureAsset{
+				{
+					Id:             "diag1",
+					Name:           "diagName",
+					DisplayName:    "",
+					ResourceGroup:  "rg1",
+					SubscriptionId: "sub1",
+					TenantId:       "ten1",
+					Type:           "Microsoft.KeyVault/vaults",
+					Properties: map[string]any{
+						"storageAccountId": settings("diag1").Properties.StorageAccountID,
+						"logs":             settings("diag1").Properties.Logs,
+					},
+				},
+			},
+			expectError: false,
+		},
+		"test multiple": {
+			inputVault: AzureAsset{
+				Id:             "kv1",
+				Name:           "name1",
+				ResourceGroup:  "rg1",
+				SubscriptionId: "sub1",
+				TenantId:       "ten1",
+			},
+			mockWrapperResponse: []armmonitor.DiagnosticSettingsClientListResponse{
+				response(nil, settings("diag1"), settings("diag2")),
+			},
+			mockWrapperResponseError: nil,
+			expected: []AzureAsset{
+				{
+					Id:             "diag1",
+					Name:           "diagName",
+					DisplayName:    "",
+					ResourceGroup:  "rg1",
+					SubscriptionId: "sub1",
+					TenantId:       "ten1",
+					Type:           "Microsoft.KeyVault/vaults",
+					Properties: map[string]any{
+						"storageAccountId": settings("diag1").Properties.StorageAccountID,
+						"logs":             settings("diag1").Properties.Logs,
+					},
+				},
+				{
+					Id:             "diag2",
+					Name:           "diagName",
+					DisplayName:    "",
+					ResourceGroup:  "rg1",
+					SubscriptionId: "sub1",
+					TenantId:       "ten1",
+					Type:           "Microsoft.KeyVault/vaults",
+					Properties: map[string]any{
+						"storageAccountId": settings("diag2").Properties.StorageAccountID,
+						"logs":             settings("diag2").Properties.Logs,
+					},
+				},
+			},
+			expectError: false,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			mockWrapper := &mockAzureKeyVaultWrapper{}
+			mockWrapper.Test(t)
+			mockWrapper.
+				On("AssetDiagnosticSettings", tc.inputVault.Id, mock.Anything).
+				Return(tc.mockWrapperResponse, tc.mockWrapperResponseError).
+				Once()
+			t.Cleanup(func() { mockWrapper.AssertExpectations(t) })
+
+			provider := keyVaultProvider{
+				log: log,
+				client: &azureKeyVaultWrapper{
+					AssetDiagnosticSettings: mockWrapper.AssetDiagnosticSettings,
+				},
+			}
+
+			got, err := provider.ListKeyVaultDiagnosticSettings(context.Background(), tc.inputVault)
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expected, got)
+		})
+	}
 }
 
 func TestListKeyVaultKeys(t *testing.T) {

@@ -19,11 +19,14 @@ package awslib
 
 import (
 	"errors"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 const (
-	DefaultRegion = "us-east-1"
-	GlobalRegion  = "global"
+	DefaultRegion    = "us-east-1"
+	DefaultGovRegion = "us-gov-east-1"
+	GlobalRegion     = "global"
 )
 
 var ErrClientNotFound = errors.New("aws client not found")
@@ -35,18 +38,29 @@ type AwsResource interface {
 	GetRegion() string
 }
 
+func GetDefaultClient[T any](list map[string]T) (T, error) {
+	c, ok := list[DefaultRegion]
+	if ok {
+		return c, nil
+	}
+
+	c, ok = list[DefaultGovRegion]
+	if ok {
+		return c, nil
+	}
+
+	return c, ErrClientNotFound
+}
+
 func GetClient[T any](region *string, list map[string]T) (T, error) {
-	c, ok := list[getRegion(region)]
+	if region == nil {
+		return GetDefaultClient(list)
+	}
+
+	c, ok := list[pointers.Deref(region)]
 	if !ok {
 		return c, ErrClientNotFound
 	}
+
 	return c, nil
-}
-
-func getRegion(region *string) string {
-	if region == nil {
-		return DefaultRegion
-	}
-
-	return *region
 }

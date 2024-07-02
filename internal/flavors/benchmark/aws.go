@@ -22,7 +22,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
@@ -59,21 +59,42 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, nil, err
 	}
 
-	// TODO: make this mock-able
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+	var (
+		awsConfig   *awssdk.Config
+		awsIdentity *cloud.Identity
+		err         error
+	)
+
+	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
+		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
+		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
+		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
 	}
 
-	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS Identity: %w", err)
 	}
+	log.Info("successfully retrieved AWS Identity")
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, *awsConfig, ch, awsIdentity)),
 	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
+}
+
+func (a *AWS) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
+	awsConfig, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+	}
+
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, *awsConfig)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+	}
+
+	return awsConfig, awsIdentity, nil
 }
 
 func (a *AWS) checkDependencies() error {

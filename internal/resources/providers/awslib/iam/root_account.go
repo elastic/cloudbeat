@@ -39,10 +39,15 @@ func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User 
 		return nil
 	}
 
-	pwdLastUsed, err := time.Parse(time.RFC3339, rootAccount.PasswordLastUsed)
-	if err != nil {
-		p.log.Errorf("fail to parse root account password last used, error: %v", err)
-		return nil
+	pwdLastUsed := time.Time{}
+	// "no_information" if never used, "N/A" if user has no password
+	// Docs: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html
+	if rootAccount.PasswordLastUsed != "no_information" && rootAccount.PasswordLastUsed != "N/A" {
+		pwdLastUsed, err = time.Parse(time.RFC3339, rootAccount.PasswordLastUsed)
+		if err != nil {
+			p.log.Errorf("fail to parse root account password last used, error: %v", err)
+			return nil
+		}
 	}
 
 	return &types.User{

@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -367,7 +367,12 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 
 			m, err := iamResource.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Len(m, 1)
+			switch iamResource.GetResourceType() {
+			case fetching.IAMUserType, fetching.PolicyType:
+				s.Len(m, 3)
+			default:
+				s.Len(m, 1)
+			}
 			s.Contains(m, "cloud.service.name")
 		})
 	}

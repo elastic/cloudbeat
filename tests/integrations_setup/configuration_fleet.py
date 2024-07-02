@@ -17,6 +17,7 @@ have been set in the system environment.
 """
 
 import os
+
 from munch import Munch
 
 # CNVM_TAGS format: "Key=<key1>,Value=<value1> Key=<key2>,Value=<value2> ..."
@@ -50,6 +51,7 @@ gcp_dm_config.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
 gcp_dm_config.zone = os.getenv("ZONE", "us-central1-a")
 gcp_dm_config.allow_ssh = os.getenv("ALLOW_SSH", "false") == "true"
 gcp_dm_config.credentials_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+gcp_dm_config.service_account_json_path = os.getenv("SERVICE_ACCOUNT_JSON_PATH", "")
 
 # Used for Azure deployment on stack 8.11.* (1.6.* package version)
 azure_arm_parameters = Munch()

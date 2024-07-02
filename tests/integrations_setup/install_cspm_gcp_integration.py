@@ -7,29 +7,31 @@ The following steps are performed:
 2. Create a CSPM GCP integration.
 3. Create a deploy/deployment-manager/config.json file to be used by the just deploy-dm command.
 """
-import sys
 import json
+import sys
 from pathlib import Path
-from munch import Munch
-from packaging import version
+
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.package_policy_api import create_cspm_integration
 from fleet_api.common_api import (
+    get_artifact_server,
     get_enrollment_token,
     get_fleet_server_host,
-    get_artifact_server,
     get_package_version,
     update_package_version,
 )
+from fleet_api.package_policy_api import create_cspm_integration
+from fleet_api.utils import read_json
 from loguru import logger
-from state_file_manager import state_manager, PolicyState, HostType
+from munch import Munch
 from package_policy import (
+    VERSION_MAP,
+    generate_random_name,
     load_data,
     version_compatible,
-    generate_random_name,
-    VERSION_MAP,
 )
+from packaging import version
+from state_file_manager import HostType, PolicyState, state_manager
 
 CSPM_GCP_EXPECTED_AGENTS = 1
 DEPLOYMENT_MANAGER_CONFIG = "../../deploy/deployment-manager/config.json"
@@ -46,7 +48,6 @@ INTEGRATION_INPUT = {
 AGENT_INPUT = {
     "name": generate_random_name("cspm-gcp"),
 }
-
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
@@ -68,6 +69,12 @@ if __name__ == "__main__":
         INTEGRATION_INPUT["vars"] = {
             "gcp.account_type": "single-account",
         }
+        if cnfg.gcp_dm_config.service_account_json_path:
+            logger.info("Using service account credentials json")
+            json_path = Path(__file__).parent / cnfg.gcp_dm_config.service_account_json_path
+            service_account_json = read_json(json_path)
+            INTEGRATION_INPUT["vars"]["gcp.credentials.json"] = json.dumps(service_account_json)
+
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,

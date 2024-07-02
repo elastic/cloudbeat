@@ -10,10 +10,10 @@ on:
         default: '["eks"]'
 
   # On post-merge execution running eks tests
-  # push:
-  #   branches:
-  #     - main
-  #     - "[0-9]+.[0-9]+"
+  push:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
@@ -24,7 +24,7 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.13.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
@@ -73,7 +73,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup GO (with caching)
-        uses: magnetikonline/action-golang-cache@v4
+        uses: magnetikonline/action-golang-cache@v5
         with:
           go-version-file: .go-version
 
@@ -95,7 +95,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./deploy/Dockerfile
@@ -114,7 +114,7 @@ jobs:
         shell: bash
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./tests/.
           push: false
@@ -159,11 +159,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - test-target: eks
-            range: ""
-            values_file: tests/test_environments/values/ci-eks-config-1.yml
-            k8s_context: "test-eks-config-1"
-            label: "EKS functional tests: config 1"
+          # GitHub issue: https://github.com/elastic/cloudbeat/issues/2190
+          # - test-target: eks
+          #   range: ""
+          #   values_file: tests/test_environments/values/ci-eks-config-1.yml
+          #   k8s_context: "test-eks-config-1"
+          #   label: "EKS functional tests: config 1"
           - test-target: eks
             range: ""
             values_file: tests/test_environments/values/ci-eks-config-2.yml
@@ -191,6 +192,8 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         if: success()
+        env:
+          ELK_VERSION: 8.13.0-SNAPSHOT
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 

@@ -77,7 +77,10 @@ func Check() error {
 // Build builds the Beat binary.
 func Build() error {
 	mg.Deps(BuildOpaBundle)
-	return devtools.Build(devtools.DefaultBuildArgs())
+
+	args := devtools.DefaultBuildArgs()
+	args.CGO = false
+	return devtools.Build(args)
 }
 
 // Clean cleans all generated files and build artifacts.
@@ -90,7 +93,9 @@ func Clean() error {
 // GolangCrossBuild build the Beat binary inside of the golang-builder.
 // Do not use directly, use crossBuild instead.
 func GolangCrossBuild() error {
-	return devtools.GolangCrossBuild(devtools.DefaultGolangCrossBuildArgs())
+	args := devtools.DefaultGolangCrossBuildArgs()
+	args.CGO = false
+	return devtools.GolangCrossBuild(args)
 }
 
 // BuildGoDaemon builds the go-daemon binary (use crossBuildGoDaemon).
@@ -234,7 +239,7 @@ func PackageAgent() {
 		panic(err)
 	}
 
-	if err := os.MkdirAll(dropPath, 0755); err != nil {
+	if err := os.MkdirAll(dropPath, 0o755); err != nil {
 		panic(err)
 	}
 

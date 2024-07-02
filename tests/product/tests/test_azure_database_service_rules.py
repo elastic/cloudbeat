@@ -5,11 +5,14 @@ This module verifies correctness of retrieved findings by manipulating audit act
 
 from datetime import datetime, timedelta
 from functools import partial
+
 import pytest
 from commonlib.utils import get_ES_evaluation, res_identifier
+from product.tests.data.azure import (
+    azure_database_service_test_cases as azure_database_service_tc,
+)
+from product.tests.parameters import Parameters, register_params
 
-from product.tests.data.azure import azure_database_service_test_cases as azure_database_service_tc
-from product.tests.parameters import register_params, Parameters
 from .data.constants import RES_NAME
 
 

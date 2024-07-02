@@ -31,29 +31,41 @@ const (
 	ProcessType    = "process"
 
 	// AWS subtypes
-	AccessAnalyzers           = "aws-access-analyzers"
-	AwsMonitoringType         = "aws-monitoring"
-	ConfigServiceResourceType = "aws-config"
-	EBSSnapshotType           = "aws-ebs-snapshot"
-	EBSType                   = "aws-ebs"
-	EC2NetworkingType         = "aws-ec2-network"
-	EC2Type                   = "aws-ec2"
-	EcrType                   = "aws-ecr"
-	ElbType                   = "aws-elb"
-	IAMServerCertificateType  = "aws-iam-server-certificate"
-	IAMType                   = "aws-iam"
-	IAMUserType               = "aws-iam-user"
-	KmsType                   = "aws-kms"
-	MultiTrailsType           = "aws-multi-trails"
-	NetworkNACLType           = "aws-nacl"
-	PolicyType                = "aws-policy"
-	PwdPolicyType             = "aws-password-policy"
-	RdsType                   = "aws-rds"
-	S3Type                    = "aws-s3"
-	SecurityGroupType         = "aws-security-group"
-	SecurityHubType           = "aws-securityhub"
-	TrailType                 = "aws-trail"
-	VpcType                   = "aws-vpc"
+	AccessAnalyzers              = "aws-access-analyzers"
+	AwsMonitoringType            = "aws-monitoring"
+	ConfigServiceResourceType    = "aws-config"
+	EBSSnapshotType              = "aws-ebs-snapshot"
+	EBSType                      = "aws-ebs"
+	EC2NetworkingType            = "aws-ec2-network"
+	EC2Type                      = "aws-ec2"
+	EcrType                      = "aws-ecr"
+	ElbType                      = "aws-elb"
+	IAMServerCertificateType     = "aws-iam-server-certificate"
+	IAMType                      = "aws-iam"
+	IAMUserType                  = "aws-iam-user"
+	InternetGateway              = "aws-internet-gateway"
+	KmsType                      = "aws-kms"
+	LambdaAliasType              = "aws-lambda-function-alias"
+	LambdaEventSourceMappingType = "aws-lambda-event-source-mapping"
+	LambdaFunctionType           = "aws-lambda-function"
+	LambdaLayerType              = "aws-lambda-layer"
+	MultiTrailsType              = "aws-multi-trails"
+	NatGateway                   = "aws-nat-gateway"
+	NetworkInterface             = "aws-network-interface"
+	NetworkNACLType              = "aws-nacl"
+	PolicyType                   = "aws-policy"
+	PwdPolicyType                = "aws-password-policy"
+	RdsType                      = "aws-rds"
+	S3Type                       = "aws-s3"
+	SNSTopicType                 = "aws-sns"
+	SecurityGroupType            = "aws-security-group"
+	SecurityHubType              = "aws-securityhub"
+	Subnet                       = "aws-subnet"
+	TrailType                    = "aws-trail"
+	TransitGateway               = "aws-transit-gateway"
+	TransitGatewayAttachment     = "aws-transit-gateway-attachment"
+	VpcPeeringConnectionType     = "aws-vpc-peering-connection"
+	VpcType                      = "aws-vpc"
 
 	// GCP subtypes
 	GcpLoggingType    = "gcp-logging"
@@ -119,14 +131,6 @@ type Condition interface {
 type ResourceInfo struct {
 	Resource
 	CycleMetadata cycle.Metadata
-}
-
-type EcsGcp struct {
-	Provider         string
-	ProjectId        string
-	ProjectName      string
-	OrganizationId   string
-	OrganizationName string
 }
 
 type Resource interface {

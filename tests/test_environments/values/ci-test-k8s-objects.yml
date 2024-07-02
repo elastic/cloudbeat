@@ -1,0 +1,13 @@
+cloudbeat:
+  deploy: true
+
+
+standaloneAgent:
+  deploy: false
+
+
+testData:
+  marker: k8s_object_psp_rules
+  agentName: cloudbeat
+  clusterType: vanilla
+  markerCmd: -m

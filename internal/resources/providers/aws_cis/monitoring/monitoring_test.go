@@ -47,7 +47,7 @@ var (
 	filter                         = "metric-filter-name"
 	metricFilterWithExpectedFilter = cloudwatchlogs_types.MetricFilter{
 		FilterName:    aws.String(filter),
-		FilterPattern: aws.String("some-filter-pattern"),
+		FilterPattern: aws.String("{a = b}"),
 	}
 	metricFilterWithoutFilter = cloudwatchlogs_types.MetricFilter{
 		FilterName: aws.String(filter),
@@ -157,8 +157,10 @@ func TestProvider_AggregateResources(t *testing.T) {
 							Status:         expectedCommonTrailStatus,
 							EventSelectors: expectedCommonTrailEventSelector,
 						},
-						MetricFilters: []cloudwatchlogs_types.MetricFilter{
-							metricFilterWithExpectedFilter,
+						MetricFilters: []MetricFilter{
+							{
+								MetricFilter:        metricFilterWithExpectedFilter,
+								ParsedFilterPattern: newSimpleExpression("a", coEqual, "b")},
 						},
 
 						MetricTopicBinding: map[string][]string{
@@ -187,7 +189,9 @@ func TestProvider_AggregateResources(t *testing.T) {
 							EventSelectors: expectedCommonTrailEventSelector,
 						},
 						MetricTopicBinding: map[string][]string{},
-						MetricFilters:      []cloudwatchlogs_types.MetricFilter{metricFilterWithoutFilter},
+						MetricFilters: []MetricFilter{
+							{MetricFilter: metricFilterWithoutFilter},
+						},
 					},
 				},
 			},

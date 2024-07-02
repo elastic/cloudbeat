@@ -46,7 +46,7 @@ Resources:
             - 2
             - !Split
               - /
-              - !Ref "AWS::StackId"
+              - !Ref AWS::StackId
       GroupDescription: Block incoming traffic
       SecurityGroupIngress: []
 
@@ -67,6 +67,23 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
 
+  # IAM Role to assume for Management Account
+  CloudbeatRootRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: cloudbeat-root
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt ElasticAgentRole.Arn
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -78,10 +95,10 @@ Resources:
             - 2
             - !Split
               - /
-              - !Ref "AWS::StackId"
+              - !Ref AWS::StackId
       Path: /
       Roles:
-        - !Ref "ElasticAgentRole"
+        - !Ref ElasticAgentRole
 
   # EC2 Instance to run elastic-agent
   ElasticAgentEc2Instance:
@@ -99,7 +116,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
         - Key: Task
           Value: Cloud Security Posture Management Scanner
       ImageId: !Ref LatestAmiId

@@ -2,6 +2,7 @@ package compliance.policy.gcp.iam.ensure_admin_without_multiple_roles
 
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
+import future.keywords.in
 
 admin_has_multiple_roles(admin_role, other_role) if {
 	admin := data_adapter.iam_policy.bindings[_]
@@ -11,5 +12,5 @@ admin_has_multiple_roles(admin_role, other_role) if {
 	other.role == other_role
 
 	m := admin.members[_]
-	m = other.members[_]
+	m in other.members
 }

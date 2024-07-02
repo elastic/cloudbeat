@@ -40,6 +40,7 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 		bapRes              map[string]enricherResponse
 		tdeRes              map[string]enricherResponse
 		threatProtectionRes map[string]enricherResponse
+		firewallRulesRes    map[string]enricherResponse
 	}{
 		"Some assets have encryption protection, others don't": {
 			input: []inventory.AzureAsset{
@@ -72,6 +73,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
+			firewallRulesRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
 		"Multiple encryption protectors": {
 			input: []inventory.AzureAsset{
@@ -97,6 +102,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 			},
 			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+			},
+			firewallRulesRes: map[string]enricherResponse{
 				"serverName1": noRes(),
 			},
 		},
@@ -127,6 +135,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName2": noRes(),
 			},
 			threatProtectionRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
+			firewallRulesRes: map[string]enricherResponse{
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
@@ -161,6 +173,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
+			firewallRulesRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
 		"Error in one threat protection": {
 			expectError: true,
@@ -191,6 +207,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			threatProtectionRes: map[string]enricherResponse{
 				"serverName1": noRes(),
 				"serverName2": errorRes(errors.New("error")),
+			},
+			firewallRulesRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
 			},
 		},
 		"Multiple transparent data encryption": {
@@ -226,6 +246,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
+			firewallRulesRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
 		"Error in one transparent data encryption": {
 			expectError: true,
@@ -258,6 +282,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 				"serverName1": noRes(),
 				"serverName2": noRes(),
 			},
+			firewallRulesRes: map[string]enricherResponse{
+				"serverName1": noRes(),
+				"serverName2": noRes(),
+			},
 		},
 		"All enrichments": {
 			input: []inventory.AzureAsset{
@@ -275,6 +303,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 					inventory.ExtensionSQLAdvancedThreatProtectionSettings: []inventory.AzureAsset{
 						mockThreatProtection("tde1", threatProtectionPros("Enabled")),
 					},
+					inventory.ExtensionSQLFirewallRules: []inventory.AzureAsset{
+						mockFirewallRule("id1", "name1"),
+					},
 				}),
 			},
 			epRes: map[string]enricherResponse{
@@ -288,6 +319,9 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 			},
 			threatProtectionRes: map[string]enricherResponse{
 				"serverName1": assetRes(mockThreatProtection("tde1", threatProtectionPros("Enabled"))),
+			},
+			firewallRulesRes: map[string]enricherResponse{
+				"serverName1": assetRes(mockFirewallRule("id1", "name1")),
 			},
 		},
 	}
@@ -311,6 +345,10 @@ func TestSQLServerEnricher_Enrich(t *testing.T) {
 
 			for serverName, r := range tc.threatProtectionRes {
 				provider.EXPECT().ListSQLAdvancedThreatProtectionSettings(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
+			}
+
+			for serverName, r := range tc.firewallRulesRes {
+				provider.EXPECT().ListSQLFirewallRules(mock.Anything, "subId", "group", serverName).Return(r.assets, r.err)
 			}
 
 			e := sqlServerEnricher{provider: provider}
@@ -371,6 +409,17 @@ func mockThreatProtection(id string, props map[string]any) inventory.AzureAsset 
 		Id:         id,
 		Type:       inventory.SQLServersAssetType + "/threatProtection",
 		Properties: props,
+	}
+}
+
+func mockFirewallRule(id, name string) inventory.AzureAsset {
+	return inventory.AzureAsset{
+		Id:   id,
+		Name: name,
+		Properties: map[string]any{
+			"startIpAddress": "0.0.0.0",
+			"endIpAddress":   "0.0.0.0",
+		},
 	}
 }
 

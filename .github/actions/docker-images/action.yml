@@ -1,0 +1,139 @@
+name: 'Docker Images'
+description: 'Build docker images'
+inputs:
+  build-docker-images:
+    description: "Build docker images"
+    required: false
+    default: 'true'
+
+  container-image-suffix:
+    description: 'Container image suffix'
+    required: false
+    default: ${{ github.run_id }}
+  elastic-agent-docker-image:
+    description: 'Elastic-Agent docker image'
+    required: false
+    default: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
+  elastic-agent-docker-image-tag:
+    description: 'Elastic-Agent docker image tag'
+    required: false
+    default: "8.14.0-SNAPSHOT"
+
+  docker-build-cache-folder:
+    description: 'Docker build cache folder'
+    required: false
+    default: '/tmp/.buildx-cache'
+  docker-images-folder:
+    description: 'Docker build cache folder'
+    required: false
+    default: '/tmp/.docker-images'
+
+  goos:
+    description: 'GOOS environment variable'
+    required: false
+    default: 'linux'
+  goarch:
+    description: 'GOARCH environment variable'
+    required: false
+    default: 'amd64'
+  docker-build-platforms:
+    description: 'Docker build platforms'
+    required: false
+    default: 'linux/amd64'
+runs:
+  using: composite
+  steps:
+    - name: Init directories
+      shell: bash
+      run: |
+        mkdir -p ${{ inputs.docker-build-cache-folder }}/{cloudbeat,agent,pytest}
+        mkdir -p ${{ inputs.docker-build-cache-folder }}-new/{cloudbeat,agent,pytest}
+        mkdir -p ${{ inputs.docker-images-folder }}
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Build cloudbeat binary
+      shell: bash
+      run: |
+        mage -v build
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Cache docker build cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ inputs.docker-build-cache-folder }}
+        key: ci-buildx-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Build cloudbeat-docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./deploy/Dockerfile
+        push: false
+        tags: cloudbeat:latest
+        cache-from: type=local,src=${{ inputs.docker-build-cache-folder }}/cloudbeat
+        cache-to: type=local,mode=max,dest=${{ inputs.docker-build-cache-folder }}-new/cloudbeat
+        outputs: type=docker,dest=${{ inputs.docker-images-folder }}/cloudbeat.tar
+        no-cache: false
+        platforms: ${{ inputs.docker-build-platforms }}
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Build elastic-agent
+      uses: docker/build-push-action@v5
+      env:
+        GOOS: ${{ inputs.goos }}
+        GOARCH: ${{ inputs.goarch }}
+      with:
+        context: .
+        file: ./scripts/packaging/docker/elastic-agent/Dockerfile
+        push: false
+        pull: true
+        tags: ${{ inputs.elastic-agent-docker-image }}:${{ inputs.elastic-agent-docker-image-tag }}
+        cache-from: type=local,src=${{ inputs.docker-build-cache-folder }}/agent
+        cache-to: type=local,mode=max,dest=${{ inputs.docker-build-cache-folder }}-new/agent
+        outputs: type=docker,dest=${{ inputs.docker-images-folder }}/elastic-agent.tar
+        build-args: |
+          ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:${{ inputs.elastic-agent-docker-image-tag }}
+        no-cache: false
+        platforms: ${{ inputs.docker-build-platforms }}
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Build pytest-docker
+      uses: docker/build-push-action@v5
+      with:
+        context: ./tests/.
+        push: false
+        tags: cloudbeat-test:latest
+        cache-from: type=local,src=${{ inputs.docker-build-cache-folder }}/pytest
+        cache-to: type=local,mode=max,dest=${{ inputs.docker-build-cache-folder }}-new/pytest
+        outputs: type=docker,dest=${{ inputs.docker-images-folder }}/pytest.tar
+        no-cache: false
+        platforms: ${{ inputs.docker-build-platforms }}
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Rotate cache
+      shell: bash
+      run: |
+        ls -lahR /tmp/ || true
+        [[ -d ${{ inputs.docker-build-cache-folder }}-new ]] && rm -rf ${{ inputs.docker-build-cache-folder }} && mv ${{ inputs.docker-build-cache-folder }}-new ${{ inputs.docker-build-cache-folder }}
+
+    - if: ${{ inputs.build-docker-images == 'true' }}
+      name: Upload docker images
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-images
+        path: ${{ inputs.docker-images-folder }}
+        if-no-files-found: error
+        retention-days: 2
+        overwrite: true
+
+    - if: ${{ inputs.build-docker-images == 'false' }}
+      name: Download docker images
+      uses: actions/download-artifact@v4
+      with:
+        name: docker-images
+        path: ${{ inputs.docker-images-folder }}

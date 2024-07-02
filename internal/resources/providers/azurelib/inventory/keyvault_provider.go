@@ -23,6 +23,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
@@ -31,11 +32,12 @@ import (
 )
 
 type azureKeyVaultWrapper struct {
-	AssetKeyVaultKeys    func(ctx context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.KeysClientListResponse, error)
-	AssetKeyVaultSecrets func(ctx context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.SecretsClientListResponse, error)
+	AssetKeyVaultKeys       func(ctx context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.KeysClientListResponse, error)
+	AssetKeyVaultSecrets    func(ctx context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.SecretsClientListResponse, error)
+	AssetDiagnosticSettings func(ctx context.Context, resourceURI string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error)
 }
 
-func defaultAzureKeyVaultWrapper(credentials azcore.TokenCredential) *azureKeyVaultWrapper {
+func defaultAzureKeyVaultWrapper(diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient, credentials azcore.TokenCredential) *azureKeyVaultWrapper {
 	return &azureKeyVaultWrapper{
 		AssetKeyVaultKeys: func(ctx context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.KeysClientListResponse, error) {
 			client, err := armkeyvault.NewKeysClient(subscriptionID, credentials, nil)
@@ -51,24 +53,70 @@ func defaultAzureKeyVaultWrapper(credentials azcore.TokenCredential) *azureKeyVa
 			}
 			return readPager(ctx, client.NewListPager(resourceGroupName, vaultName, nil))
 		},
+		AssetDiagnosticSettings: func(ctx context.Context, resourceURI string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
+			return readPager(ctx, diagnosticSettingsClient.NewListPager(resourceURI, options))
+		},
 	}
 }
 
 type KeyVaultProviderAPI interface {
 	ListKeyVaultKeys(ctx context.Context, vault AzureAsset) ([]AzureAsset, error)
 	ListKeyVaultSecrets(ctx context.Context, vault AzureAsset) ([]AzureAsset, error)
+	ListKeyVaultDiagnosticSettings(ctx context.Context, vault AzureAsset) ([]AzureAsset, error)
 }
 
-func NewKeyVaultProvider(log *logp.Logger, credentials azcore.TokenCredential) KeyVaultProviderAPI {
+func NewKeyVaultProvider(log *logp.Logger, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient, credentials azcore.TokenCredential) KeyVaultProviderAPI {
 	return &keyVaultProvider{
 		log:    log,
-		client: defaultAzureKeyVaultWrapper(credentials),
+		client: defaultAzureKeyVaultWrapper(diagnosticSettingsClient, credentials),
 	}
 }
 
 type keyVaultProvider struct {
 	log    *logp.Logger
 	client *azureKeyVaultWrapper
+}
+
+func (p *keyVaultProvider) ListKeyVaultDiagnosticSettings(ctx context.Context, vault AzureAsset) ([]AzureAsset, error) {
+	p.log.Info("Listing Azure Vault Diagnostic Settings")
+
+	responses, err := p.client.AssetDiagnosticSettings(ctx, vault.Id, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error while retrieving vault diagnostic settings: vaultId: %v, error: %w", vault.Id, err)
+	}
+
+	return lo.FlatMap(responses, func(res armmonitor.DiagnosticSettingsClientListResponse, _ int) []AzureAsset {
+		return lo.FilterMap(res.Value, func(setting *armmonitor.DiagnosticSettingsResource, _ int) (AzureAsset, bool) {
+			return p.transformDiagnosticSetting(setting, vault)
+		})
+	}), nil
+}
+
+func (p *keyVaultProvider) transformDiagnosticSetting(setting *armmonitor.DiagnosticSettingsResource, vault AzureAsset) (AzureAsset, bool) {
+	if setting == nil {
+		return AzureAsset{}, false
+	}
+
+	properties := map[string]any{}
+
+	maps.AddIfNotNil(properties, "storageAccountId", setting.Properties.StorageAccountID)
+	maps.AddIfSliceNotEmpty(properties, "logs", setting.Properties.Logs)
+
+	if len(properties) == 0 {
+		properties = nil
+	}
+
+	return AzureAsset{
+		Id:             pointers.Deref(setting.ID),
+		Name:           pointers.Deref(setting.Name),
+		DisplayName:    "",
+		Location:       "",
+		ResourceGroup:  vault.ResourceGroup,
+		SubscriptionId: vault.SubscriptionId,
+		TenantId:       vault.TenantId,
+		Type:           pointers.Deref(setting.Type),
+		Properties:     properties,
+	}, true
 }
 
 func (p *keyVaultProvider) ListKeyVaultKeys(ctx context.Context, vault AzureAsset) ([]AzureAsset, error) {

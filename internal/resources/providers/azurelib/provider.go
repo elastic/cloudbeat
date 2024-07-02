@@ -72,7 +72,7 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 	resourceGraphProvider := inventory.NewResourceGraphProvider(log, resourceGraphClientFactory)
 	return &provider{
 		AppServiceProviderAPI:       inventory.NewAppServiceProvider(log, azureConfig.Credentials),
-		KeyVaultProviderAPI:         inventory.NewKeyVaultProvider(log, azureConfig.Credentials),
+		KeyVaultProviderAPI:         inventory.NewKeyVaultProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
 		MysqlProviderAPI:            inventory.NewMysqlProvider(log, azureConfig.Credentials),
 		PostgresqlProviderAPI:       inventory.NewPostgresqlProvider(log, azureConfig.Credentials),
 		ProviderAPI:                 governance.NewProvider(log, resourceGraphProvider),

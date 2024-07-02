@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch/logs"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type Provider struct {
@@ -51,9 +52,14 @@ type (
 		Items []MonitoringItem
 	}
 
+	MetricFilter struct {
+		cloudwatchlogs_types.MetricFilter
+		ParsedFilterPattern MetricFilterPattern
+	}
+
 	MonitoringItem struct {
 		TrailInfo          cloudtrail.TrailInfo
-		MetricFilters      []cloudwatchlogs_types.MetricFilter
+		MetricFilters      []MetricFilter
 		MetricTopicBinding map[string][]string
 	}
 )
@@ -75,12 +81,12 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 		return nil, err
 	}
 
-	items := []MonitoringItem{}
+	items := make([]MonitoringItem, 0, len(trails))
 	for _, info := range trails {
 		if info.Trail.CloudWatchLogsLogGroupArn == nil {
 			items = append(items, MonitoringItem{
 				TrailInfo:          info,
-				MetricFilters:      []cloudwatchlogs_types.MetricFilter{},
+				MetricFilters:      []MetricFilter{},
 				MetricTopicBinding: map[string][]string{},
 			})
 			continue
@@ -96,11 +102,13 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 			continue
 		}
 
+		parsedMetrics := p.parserMetrics(metrics)
 		names := filterNamesFromMetrics(metrics)
+
 		if len(names) == 0 {
 			items = append(items, MonitoringItem{
 				TrailInfo:          info,
-				MetricFilters:      metrics,
+				MetricFilters:      parsedMetrics,
 				MetricTopicBinding: map[string][]string{},
 			})
 			continue
@@ -117,7 +125,7 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 		}
 		items = append(items, MonitoringItem{
 			TrailInfo:          info,
-			MetricFilters:      metrics,
+			MetricFilters:      parsedMetrics,
 			MetricTopicBinding: bindings,
 		})
 	}
@@ -125,11 +133,38 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 	return &Resource{Items: items}, nil
 }
 
+func (p *Provider) parserMetrics(metrics []cloudwatchlogs_types.MetricFilter) []MetricFilter {
+	parsedMetrics := make([]MetricFilter, 0, len(metrics))
+	for _, m := range metrics {
+		if m.FilterPattern == nil {
+			parsedMetrics = append(parsedMetrics, MetricFilter{
+				MetricFilter: m,
+			})
+			continue
+		}
+
+		exp, err := parseFilterPattern(*m.FilterPattern)
+		if err != nil {
+			p.Log.Errorf("failed to parse metric filter pattern: %v (pattern: %s)", err, *m.FilterPattern)
+			parsedMetrics = append(parsedMetrics, MetricFilter{
+				MetricFilter: m,
+			})
+			continue
+		}
+
+		parsedMetrics = append(parsedMetrics, MetricFilter{
+			MetricFilter:        m,
+			ParsedFilterPattern: exp,
+		})
+	}
+	return parsedMetrics
+}
+
 func (p *Provider) getSubscriptionForAlarms(ctx context.Context, region *string, alarms []cloudwatch_types.MetricAlarm) []string {
 	topics := []string{}
 	for _, alarm := range alarms {
 		for _, action := range alarm.AlarmActions {
-			subscriptions, err := p.Sns.ListSubscriptionsByTopic(ctx, region, action)
+			subscriptions, err := p.Sns.ListSubscriptionsByTopic(ctx, pointers.Deref(region), action)
 			if err != nil {
 				p.Log.Errorf("failed to list subscriptions for topic %s: %v", action, err)
 				continue

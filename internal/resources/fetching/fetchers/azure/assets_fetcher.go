@@ -175,5 +175,38 @@ func (r *AzureResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
-	return nil, nil
+	m := map[string]any{}
+
+	switch r.Asset.Type {
+	case inventory.VirtualMachineAssetType:
+		{
+			m["host.name"] = r.Asset.Name
+
+			// "host.hostname" = "properties.osProfile.computerName" if it exists
+			osProfileRaw, ok := r.Asset.Properties["osProfile"]
+			if !ok {
+				break
+			}
+			osProfile, ok := osProfileRaw.(map[string]any)
+			if !ok {
+				break
+			}
+			computerNameRaw, ok := osProfile["computerName"]
+			if !ok {
+				break
+			}
+			computerName, ok := computerNameRaw.(string)
+			if !ok {
+				break
+			}
+			m["host.hostname"] = computerName
+		}
+	case inventory.RoleDefinitionsType:
+		{
+			m["user.effective.id"] = r.Asset.Id
+			m["user.effective.name"] = r.Asset.Name
+		}
+	}
+
+	return m, nil
 }

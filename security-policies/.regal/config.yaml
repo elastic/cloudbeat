@@ -1,34 +1,168 @@
 rules:
+  # Ignore rules by default, this prevents breakage on updates
+  default:
+    level: ignore
+  # Re-enable specific rules. These are all the rules that we check as of 2024-05-30, directly from the output of:
+  # regal lint --debug
+  bugs:
+    constant-condition:
+      level: error
+    deprecated-builtin:
+      level: error
+    duplicate-rule:
+      level: error
+    if-empty-object:
+      level: error
+    impossible-not:
+      level: error
+    inconsistent-args:
+      level: error
+    invalid-metadata-attribute:
+      level: error
+    not-equals-in-loop:
+      level: error
+    redundant-existence-check:
+      level: error
+    rule-named-if:
+      level: error
+    rule-shadows-builtin:
+      level: error
+    top-level-iteration:
+      level: error
+    unassigned-return-value:
+      level: error
+    zero-arity-function:
+      level: error
+  custom:
+    forbidden-function-call:
+      forbidden-functions: []
+      level: ignore
+    naming-convention:
+      level: ignore
+    one-liner-rule:
+      level: ignore
+      max-line-length: 120
+    prefer-value-in-head:
+      level: ignore
   idiomatic:
     boolean-assignment:
       level: ignore
+    custom-has-key-construct:
+      level: error
+    custom-in-construct:
+      level: error
+    equals-pattern-matching:
+      level: error
+    no-defined-entrypoint:
+      level: error
+    non-raw-regex-pattern:
+      level: error
+    prefer-set-or-object-rule:
+      level: error
+    use-contains:
+      level: error
+    use-if:
+      level: error
+    use-in-operator:
+      level: error
     use-some-for-output-vars:
       level: ignore
   imports:
+    avoid-importing-input:
+      level: error
+    circular-import:
+      level: error
+    ignored-import:
+      level: error
+    implicit-future-keywords:
+      level: error
+    import-after-rule:
+      level: error
+    import-shadows-builtin:
+      level: error
+    import-shadows-import:
+      level: error
     prefer-package-imports:
+      level: ignore
+    redundant-alias:
+      level: error
+    redundant-data-import:
+      level: error
+    unresolved-import:
+      except-imports:
+      # list of paths that should be ignored
+      # these may be paths to data, or rules that may
+      # not be present at the time of linting
+        - data.benchmark_data_adapter
+      level: error
+    use-rego-v1:
+      level: ignore
+  performance:
+    with-outside-test-context:
       level: ignore
   style:
     avoid-get-and-list-prefix:
       level: ignore
+    chained-rule-body:
+      level: error
     default-over-else:
       level: ignore
+    default-over-not:
+      level: error
+    detached-metadata:
+      level: error
+    double-negative:
+      level: error
     external-reference:
       level: ignore
+    file-length:
+      level: error
+      max-file-length: 500
+    function-arg-return:
+      except-functions:
+        - walk
+      level: error
     line-length:
       level: ignore
-    prefer-some-in-iteration:
+    messy-rule:
       level: ignore
+    no-whitespace-comment:
+      level: error
+    opa-fmt:
+      level: error
     prefer-snake-case:
+      level: ignore
+    prefer-some-in-iteration:
       level: ignore
     rule-length:
       level: error
       max-rule-length: 50
+    rule-name-repeats-package:
+      level: ignore
     todo-comment:
       level: ignore
+    trailing-default-rule:
+      level: error
+    unconditional-assignment:
+      level: error
+    unnecessary-some:
+      level: error
     use-assignment-operator:
       level: ignore
+    yoda-condition:
+      level: error
   testing:
+    dubious-print-sprintf:
+      level: error
     file-missing-test-suffix:
       level: ignore
+    identically-named-tests:
+      level: error
+    metasyntactic-variable:
+      level: error
+    print-or-trace-call:
+      level: error
     test-outside-test-package:
       level: ignore
+    todo-test:
+      level: error

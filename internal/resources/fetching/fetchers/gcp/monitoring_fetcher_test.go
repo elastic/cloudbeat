@@ -70,11 +70,10 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
 	mockInventoryService.EXPECT().ListMonitoringAssets(mock.Anything, mock.Anything).Return(
 		[]*inventory.MonitoringAsset{
 			{
-				Ecs: &fetching.EcsGcp{
-					Provider:         "gcp",
-					ProjectId:        "a",
-					ProjectName:      "a",
-					OrganizationId:   "a",
+				CloudAccount: &fetching.CloudAccountMetadata{
+					AccountId:        "a",
+					AccountName:      "a",
+					OrganisationId:   "a",
 					OrganizationName: "a",
 				},
 				LogMetrics: []*inventory.ExtendedGcpAsset{
@@ -123,10 +122,10 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpMonitoringType,
 				Asset: &inventory.MonitoringAsset{
-					Ecs: &fetching.EcsGcp{
-						ProjectId:        projectId,
-						ProjectName:      "a",
-						OrganizationId:   "a",
+					CloudAccount: &fetching.CloudAccountMetadata{
+						AccountId:        projectId,
+						AccountName:      "a",
+						OrganisationId:   "a",
 						OrganizationName: "a",
 					},
 					LogMetrics: []*inventory.ExtendedGcpAsset{},
@@ -139,6 +138,12 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 				Type:    fetching.MonitoringIdentity,
 				SubType: fetching.GcpMonitoringType,
 				Region:  gcplib.GlobalRegion,
+				CloudAccountMetadata: fetching.CloudAccountMetadata{
+					AccountId:        projectId,
+					AccountName:      "a",
+					OrganisationId:   "a",
+					OrganizationName: "a",
+				},
 			},
 		},
 	}

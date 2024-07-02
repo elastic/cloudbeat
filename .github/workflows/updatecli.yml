@@ -16,7 +16,6 @@ name: Update Dependencies with Updatecli
 #        env:
 #          GITHUB_TOKEN: "${{ secrets.MY_GITHUB_TOKEN }}"
 #          GIT_USER: foo
-#          GIT_EMAIL: bar@elastic.co
 #       ```
 #
 # 3. Pass the secret `MY_GITHUB_TOKEN` in the act command. e.g:
@@ -54,16 +53,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
-      - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
-        with:
-          vaultUrl: ${{ secrets.VAULT_ADDR }}
-          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
-          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: ./.ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml
-          values: ./.ci/updatecli/values.yml
-          notifyIfFailure: false
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@eb158f6fd9e425b940a6750d6318f98e050ac390 # v0.76.1
+      - name: Run Updatecli in Apply mode
+        run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
           GIT_BRANCH: main
+          GIT_USER: "Cloud Security Machine"
+          GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
   updatecli-backport:
     name: Update ${{ matrix.pipeline-name }} dependencies - backport
@@ -86,11 +83,10 @@ jobs:
             | head -n 1)
 
           echo "GIT_BRANCH=$branchName" >> $GITHUB_ENV
-      - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
-        with:
-          vaultUrl: ${{ secrets.VAULT_ADDR }}
-          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
-          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: ./.ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml
-          values: ./.ci/updatecli/values.yml
-          notifyIfFailure: false
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@eb158f6fd9e425b940a6750d6318f98e050ac390 # v0.76.1
+      - name: Run Updatecli in Apply mode
+        run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
+        env:
+          GIT_USER: "Cloud Security Machine"
+          GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}

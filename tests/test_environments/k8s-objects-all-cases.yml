@@ -1,0 +1,240 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-pod
+  namespace: kube-system
+spec:
+  hostPID: false
+  hostNetwork: false
+  automountServiceAccountToken: false
+  containers:
+    - name: busybox
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      command:
+        - sleep
+        - "3600"
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: true
+        capabilities:
+          add: [ "NET_ADMIN", "SYS_TIME" ]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-service-account-pass
+  namespace: kube-system
+automountServiceAccountToken: false
+---
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: test-psp
+  annotations:
+    # docker/default identifies a profile for seccomp, but it is not particularly tied to the Docker runtime
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default,runtime/default'
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+spec:
+  privileged: false
+  # Required to prevent escalations to root.
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  # Allow core volume types.
+  volumes:
+    - 'csi'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    # Require the container to run without root privileges.
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    # This policy assumes the nodes are using AppArmor rather than SELinux.
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      # Forbid adding the root group.
+      - min: 1
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      # Forbid adding the root group.
+      - min: 1
+        max: 65535
+  readOnlyRootFilesystem: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: kube-system
+  name: test-role-pass
+rules:
+  - apiGroups: [ "" ] # "" indicates the core API group
+    resources: [ "pods" ]
+    verbs: [ "get", "watch", "list" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-cluster-role-pass
+rules:
+  - apiGroups: [ "" ] # "" indicates the core API group
+    resources: [ "pods" ]
+    verbs: [ "get", "watch", "list" ]
+  - apiGroups: [ 'policy' ]
+    resources: [ 'podsecuritypolicies' ]
+    verbs: [ 'use' ]
+    resourceNames: [ 'test-psp' ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: test-cluster-role-binding
+roleRef:
+  kind: ClusterRole
+  name: test-cluster-role-pass
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: test-service-account-pass
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-cluster-role-fail
+rules:
+  - apiGroups: [ "*" ] # "" indicates the core API group
+    resources: [ "*" ]
+    verbs: [ "*" ]
+  - apiGroups: [ 'policy' ]
+    resources: [ 'podsecuritypolicies' ]
+    verbs: [ 'use' ]
+    resourceNames: [ 'test-psp-fail' ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: test-cluster-role-binding-fail
+roleRef:
+  kind: ClusterRole
+  name: test-cluster-role-fail
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: test-service-account-fail
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: kube-system
+  name: test-role-fail
+rules:
+  - apiGroups: [ "*" ] # "" indicates the core API group
+    resources: [ "*" ]
+    verbs: [ "*" ]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-service-account-fail
+  namespace: kube-system
+automountServiceAccountToken: true
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-k8s-good-pod
+  namespace: kube-system
+  labels:
+    app: k8s-good-pod
+    testResourceId: k8s-pass
+spec:
+  hostPID: false
+  hostIPC: false
+  hostNetwork: false
+  automountServiceAccountToken: false
+  containers:
+    - name: busybox
+      image: busybox:latest
+      imagePullPolicy: Always
+      command:
+        - sleep
+        - "3600"
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        runAsUser: 10001
+        capabilities:
+          drop: ["ALL"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-k8s-bad-pod
+  namespace: kube-system
+  labels:
+    app: k8s-bad-pod
+    testResourceId: k8s-psp-failures
+spec:
+  hostPID: true
+  hostIPC: true
+  hostNetwork: true
+  automountServiceAccountToken: true
+  containers:
+    - name: busybox
+      image: busybox:latest
+      imagePullPolicy: Always
+      command:
+        - sleep
+        - "3600"
+      securityContext:
+        privileged: true
+        allowPrivilegeEscalation: true
+        runAsUser: 0
+        capabilities:
+          add: ["NET_ADMIN", "SYS_TIME", "NET_RAW"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod-sa-name-default
+  namespace: kube-system
+spec:
+  serviceAccountName: default
+  hostPID: false
+  hostNetwork: false
+  automountServiceAccountToken: false
+  containers:
+    - name: busybox
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      command:
+        - sleep
+        - "3600"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod-sa-default
+  namespace: kube-system
+spec:
+  serviceAccount: default
+  hostPID: false
+  hostNetwork: false
+  automountServiceAccountToken: false
+  containers:
+    - name: busybox
+      image: busybox
+      imagePullPolicy: IfNotPresent
+      command:
+        - sleep
+        - "3600"
+---

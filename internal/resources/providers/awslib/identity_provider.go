@@ -24,6 +24,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 )
@@ -34,7 +35,9 @@ type IdentityProviderGetter interface {
 	GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error)
 }
 
-type IdentityProvider struct{}
+type IdentityProvider struct {
+	Logger *logp.Logger
+}
 
 // GetIdentity returns AWS identity information
 func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error) {
@@ -45,7 +48,8 @@ func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*clo
 
 	alias, err := p.getAccountAlias(ctx, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get aliases: %w", err)
+		p.Logger.Warnf("failed to get aliases: %v", err)
+		alias = ""
 	}
 
 	return &cloud.Identity{

@@ -24,4 +24,4 @@ data:
   {{- end }}
   AGENT_NAME: {{ .Values.testData.agentName }}
   CLUSTER_TYPE: {{ .Values.testData.clusterType }}
-  EKS_CONFIG: {{ .Values.testData.clusterConfig }}
+  CLUSTER_CONFIG: {{ .Values.testData.clusterConfig }}

@@ -22,9 +22,6 @@ import (
 	"fmt"
 	"testing"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -93,7 +90,7 @@ func TestGetStrategy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%T", tt.wantType), func(t *testing.T) {
-			got, err := GetStrategy(&tt.cfg)
+			got, err := GetStrategy(&tt.cfg, testhelper.NewLogger(t))
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -140,36 +137,6 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 
 	// TODO: gcp diff tests cover
 	assert.NotNil(t, dp)
-}
-
-func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {
-	awsCfg := awslib.MockConfigProviderAPI{}
-	awsCfg.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
-		Call.
-		Return(
-			func(_ context.Context, config aws.ConfigAWS) *awssdk.Config {
-				if err != nil {
-					return nil
-				}
-
-				awsConfig := awssdk.NewConfig()
-				awsCredentials := awssdk.Credentials{
-					AccessKeyID:     config.AccessKeyID,
-					SecretAccessKey: config.SecretAccessKey,
-					SessionToken:    config.SessionToken,
-				}
-
-				awsConfig.Credentials = credentials.StaticCredentialsProvider{
-					Value: awsCredentials,
-				}
-				awsConfig.Region = "us1-east"
-				return awsConfig
-			},
-			func(_ context.Context, _ aws.ConfigAWS) error {
-				return err
-			},
-		)
-	return &awsCfg
 }
 
 func mockKubeClient(err error) k8s.ClientGetterAPI {

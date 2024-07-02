@@ -1,0 +1,19 @@
+cloudbeat:
+  deploy: true
+
+
+standaloneAgent:
+  deploy: false
+
+k8sFiles:
+  deploy: true
+
+kindNode:
+  # Node to be used for the test pod deployment
+  name: kind-test-files-control-plane
+
+testData:
+  marker: k8s_file_system_rules
+  agentName: cloudbeat
+  clusterType: vanilla
+  markerCmd: -m

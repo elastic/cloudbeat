@@ -39,7 +39,6 @@ import (
 )
 
 type EKS struct {
-	AWSCfgProvider         awslib.ConfigProviderAPI
 	AWSIdentityProvider    awslib.IdentityProviderGetter
 	AWSMetadataProvider    awslib.MetadataProvider
 	EKSClusterNameProvider awslib.EKSClusterNameProviderAPI
@@ -108,10 +107,15 @@ func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.C
 		return awssdk.Config{}, nil, nil
 	}
 
-	awsCfg, err := k.AWSCfgProvider.InitializeAWSConfig(ctx, cfg.CloudConfig.Aws.Cred)
+	awsCfg, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
+	metadata, err := k.AWSMetadataProvider.GetMetadata(ctx, *awsCfg)
+	if err != nil {
+		return *awsCfg, nil, fmt.Errorf("failed to retrieve aws metadata: %w", err)
+	}
+	awsCfg.Region = metadata.Region
 
 	identity, err := k.AWSIdentityProvider.GetIdentity(ctx, *awsCfg)
 	if err != nil {
@@ -122,9 +126,6 @@ func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.C
 }
 
 func (k *EKS) checkDependencies() error {
-	if k.AWSCfgProvider == nil {
-		return fmt.Errorf("aws config provider is uninitialized")
-	}
 	if k.AWSIdentityProvider == nil {
 		return fmt.Errorf("aws identity provider is uninitialized")
 	}

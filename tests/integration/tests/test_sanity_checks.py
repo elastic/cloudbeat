@@ -8,18 +8,24 @@ verifying that there are findings of 'resource.type' for each feature.
 """
 
 import time
+
 import pytest
-from loguru import logger
-from configuration import elasticsearch
+from commonlib.agents_map import (
+    CIS_AWS_COMPONENT,
+    CIS_AZURE_COMPONENT,
+    AgentComponentMapping,
+    AgentExpectedMapping,
+)
 from commonlib.utils import get_findings
-from commonlib.agents_map import CIS_AWS_COMPONENT, CIS_AZURE_COMPONENT, AgentExpectedMapping, AgentComponentMapping
+from configuration import elasticsearch
+from loguru import logger
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
 
 # The timeout and backoff for waiting all agents are running the specified component.
-COMPONENTS_TIMEOUT = 180
+COMPONENTS_TIMEOUT = 300
 COMPONENTS_BACKOFF = 10
 
 AGENT_VERSION = elasticsearch.agent_version
@@ -35,7 +41,9 @@ tests_data = {
         "cloud-audit",
         "cloud-database",
         "cloud-config",
-    ],  # Exclude "cloud-compute", "cloud-storage" due to lack of fetcher control and potential delays.
+        "cloud-compute",
+        "cloud-storage",
+    ],
     "cis_gcp": [
         "cloud-compute",
         "cloud-database",
@@ -48,18 +56,18 @@ tests_data = {
         "data-processing",
     ],
     "cis_azure": [
-        "cloud-compute",
         "cloud-storage",
         "cloud-database",
         "key-management",
         "monitoring",
         "cloud-dns",
-    ],  # Azure environment is not static, so we can't guarantee findings of all types.
+    ],  # Exclude "cloud-compute", Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": [
+        "file",
         "process",
         "k8s_object",
-    ],  # Optimize search findings by excluding 'file'.
+    ],
     "cnvm": ["vulnerability"],
 }
 
@@ -200,6 +208,11 @@ def test_cnvm_findings(cnvm_client, match_type):
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
+    # Check every finding has host section
+    for finding in results["hits"]["hits"]:
+        resource = finding["_source"]
+        assert "host" in resource, f"Resource '{match_type}' is missing 'host' section"
+        assert "name" in resource["host"], f"Resource '{match_type}' is missing 'host.name'"
 
 
 @pytest.mark.sanity

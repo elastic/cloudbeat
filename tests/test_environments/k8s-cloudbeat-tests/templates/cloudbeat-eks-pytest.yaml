@@ -1,4 +1,4 @@
-{{- if .Values.cloudbeatEks.test_environments -}}
+{{- if .Values.cloudbeatEks.deploy -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:

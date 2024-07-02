@@ -26,7 +26,7 @@ test_pass if {
 	eval_pass with input as test_data.generate_storage_account_with_extensions({}, {"storageAccount": {
 		"subscription_id": "subscription_id",
 		"id": "storage_account_id",
-		"properties": {"encryption": {"keySource": "Microsoft.KeyVault", "keyVaultProperties": {"KeyVaultUri": "key_uri", "keyName": "key_name"}}},
+		"properties": {"encryption": {"keySource": "Microsoft.Keyvault", "keyvaultproperties": {"KeyVaultUri": "key_uri", "keyName": "key_name"}}},
 	}})
 }
 

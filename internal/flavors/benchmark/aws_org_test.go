@@ -18,19 +18,27 @@
 package benchmark
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -39,6 +47,7 @@ func TestAWSOrg_Initialize(t *testing.T) {
 
 	tests := []struct {
 		name             string
+		iamProvider      iam.RoleGetter
 		identityProvider awslib.IdentityProviderGetter
 		accountProvider  awslib.AccountProviderAPI
 		cfg              config.Config
@@ -47,28 +56,32 @@ func TestAWSOrg_Initialize(t *testing.T) {
 	}{
 		{
 			name:    "nothing initialized",
-			wantErr: "aws identity provider is uninitialized",
+			wantErr: "aws iam provider is uninitialized",
 		},
 		{
 			name:             "account provider uninitialized",
+			iamProvider:      getMockIAMRoleGetter(nil),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  nil,
 			wantErr:          "account provider is uninitialized",
 		},
 		{
 			name:             "identity provider error",
+			iamProvider:      getMockIAMRoleGetter(nil),
 			identityProvider: mockAwsIdentityProvider(errors.New("some error")),
 			accountProvider:  mockAccountProvider(errors.New("not this error")),
 			wantErr:          "some error",
 		},
 		{
 			name:             "account provider error",
+			iamProvider:      getMockIAMRoleGetter(nil),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  mockAccountProvider(errors.New("some error")),
 			want:             []string{},
 		},
 		{
 			name:             "no error",
+			iamProvider:      getMockIAMRoleGetter(nil),
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  mockAccountProvider(nil),
 			want: []string{
@@ -95,6 +108,7 @@ func TestAWSOrg_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &AWSOrg{
+				IAMProvider:      tt.iamProvider,
 				IdentityProvider: tt.identityProvider,
 				AccountProvider:  tt.accountProvider,
 			}, &tt.cfg, tt.wantErr, tt.want)
@@ -146,10 +160,12 @@ func Test_getAwsAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
+				IAMProvider:      getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
 			}
-			got, err := a.getAwsAccounts(context.Background(), nil, aws.Config{}, &tt.rootIdentity)
+			log := logp.NewLogger("test")
+			got, err := a.getAwsAccounts(context.Background(), log, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
 				return
@@ -160,6 +176,100 @@ func Test_getAwsAccounts(t *testing.T) {
 			for i, account := range got {
 				assert.Equal(t, tt.want[i], account.Identity)
 				assert.IsType(t, &aws.CredentialsCache{}, account.Credentials)
+			}
+		})
+	}
+}
+
+type mockStsClient struct{}
+
+func (c *mockStsClient) AssumeRole(_ context.Context, _ *sts.AssumeRoleInput, _ ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
+	return &sts.AssumeRoleOutput{}, nil
+}
+
+func Test_pickManagementAccountRole(t *testing.T) {
+	tests := []struct {
+		name                 string
+		roles                []iam.Role
+		expectedLog          string
+		expectedErrorMessage string
+	}{
+		{
+			name:        "success: cloudbeat-root is not tagged (backward compatibility)",
+			roles:       []iam.Role{*makeRole("cloudbeat-root")},
+			expectedLog: "using 'cloudbeat-root' role for backward compatibility",
+		},
+		{
+			name: "success: cloudbeat_scan_management_account: Yes",
+			roles: []iam.Role{
+				*makeRole("cloudbeat-root", scanSettingTagKey, "Yes"),
+				*makeRole("cloudbeat-securityaudit"),
+			},
+			expectedLog: "assuming 'cloudbeat-securityaudit' role",
+		},
+		{
+			name: "success: cloudbeat_scan_management_account: No",
+			roles: []iam.Role{
+				*makeRole("cloudbeat-root", scanSettingTagKey, "No"),
+			},
+			expectedLog: "assuming 'cloudbeat-securityaudit' role",
+		},
+		{
+			name:                 "fail: cloudbeat-root does not exist",
+			roles:                []iam.Role{},
+			expectedErrorMessage: "role \"cloudbeat-root\" does not exist",
+		},
+		{
+			name: "warn: cloudbeat_scan_management_account: Yes, but cloudbeat-securityaudit does not exist",
+			roles: []iam.Role{
+				*makeRole("cloudbeat-root", scanSettingTagKey, "Yes"),
+			},
+			expectedLog: fmt.Sprintf(
+				"should be scanned (%s: %s), but %q role is missing",
+				scanSettingTagKey, scanSettingTagValue, memberRole,
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := AWSOrg{
+				IAMProvider:      getMockIAMRoleGetter(tt.roles),
+				IdentityProvider: mockAwsIdentityProvider(nil),
+				AccountProvider:  mockAccountProvider(nil),
+			}
+
+			// set up log capture
+			var log *logp.Logger
+			logCaptureBuf := &bytes.Buffer{}
+			{
+				replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
+					return zapcore.NewCore(
+						zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+						zapcore.AddSync(logCaptureBuf),
+						zapcore.DebugLevel,
+					)
+				})
+				log = logp.NewLogger("test").WithOptions(replacement)
+			}
+
+			stsClient := &mockStsClient{}
+			rootCfg := assumeRole(stsClient, aws.Config{}, "cloudbeat-root")
+			identity := cloud.Identity{
+				Account:      "123",
+				AccountAlias: "some-name",
+			}
+
+			_, err := a.pickManagementAccountRole(context.Background(), log, stsClient, rootCfg, identity)
+			if tt.expectedLog != "" {
+				require.NotEmpty(t, logCaptureBuf, "expected logs, but captured none")
+				require.Contains(t, logCaptureBuf.String(), tt.expectedLog, "expected message not found")
+			}
+			if tt.expectedErrorMessage != "" {
+				require.Error(t, err)
+				require.ErrorContains(t, err, tt.expectedErrorMessage)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}
@@ -189,4 +299,47 @@ func mockAccountProviderWithIdentities(identities []cloud.Identity) *awslib.Mock
 	provider := awslib.MockAccountProviderAPI{}
 	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything, mock.Anything).Return(identities, nil)
 	return &provider
+}
+
+type mockIAMProvider struct {
+	iam.MockRoleGetter
+	roles []iam.Role
+}
+
+func getMockIAMRoleGetter(roles []iam.Role) iam.RoleGetter {
+	result := &mockIAMProvider{
+		MockRoleGetter: iam.MockRoleGetter{},
+		roles:          roles,
+	}
+	on := result.MockRoleGetter.EXPECT().GetRole(mock.Anything, mock.AnythingOfType("string"))
+	on.RunAndReturn(
+		func(_ context.Context, roleName string) (*iam.Role, error) {
+			for _, role := range result.roles {
+				if *role.RoleName == roleName {
+					return &role, nil
+				}
+			}
+			return nil, fmt.Errorf("role %q does not exist", roleName)
+		},
+	)
+	return result
+}
+
+func makeRole(name string, tagKeyValues ...string) *iam.Role {
+	arn := "arn:aws:iam::123456789012" + name
+	tags := []types.Tag{}
+	for i := 0; i < len(tagKeyValues); i += 2 {
+		t := types.Tag{
+			Key:   &tagKeyValues[i],
+			Value: &tagKeyValues[i+1],
+		}
+		tags = append(tags, t)
+	}
+	return &iam.Role{
+		Role: types.Role{
+			Arn:      &arn,
+			RoleName: &name,
+			Tags:     tags,
+		},
+	}
 }

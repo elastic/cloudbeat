@@ -131,7 +131,22 @@ func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r IAMResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
+	m := map[string]any{
 		"cloud.service.name": "IAM",
-	}, nil
+	}
+
+	switch r.AwsResource.GetResourceType() {
+	case fetching.IAMUserType:
+		{
+			m["user.id"] = r.GetResourceArn()
+			m["user.name"] = r.GetResourceName()
+		}
+	case fetching.PolicyType:
+		{
+			m["user.effective.id"] = r.GetResourceArn()
+			m["user.effective.name"] = r.GetResourceName()
+		}
+	}
+
+	return m, nil
 }

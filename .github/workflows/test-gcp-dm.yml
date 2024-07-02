@@ -7,19 +7,27 @@ on:
       - "[0-9]+.[0-9]+"
     types: [opened, synchronize, reopened]
     paths:
+      - ".github/workflows/test-gcp-dm.yml"
       - "deploy/deployment-manager/compute_engine.py"
       - "deploy/deployment-manager/compute_engine.py.schema"
       - "deploy/deployment-manager/deploy.sh"
       - "deploy/deployment-manager/set_env.sh"
+      - "deploy/deployment-manager/deploy_service_account.sh"
+      - "deploy/deployment-manager/service_account.py"
+      - "deploy/deployment-manager/service_account.py.schema"
 
 env:
-  WORKING_DIR: deploy/test-environments
+  TEST_ENVS_DIR: deploy/test-environments
+  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
+  DEPLOYMENT_MANAGER_DIR: deploy/deployment-manager
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
+  GCP_LABELS: "ci=integration,owner=${{ github.actor }}"
 
 jobs:
-  Test-GCP-DM:
-    name: GCP Deployment Manager Test
+  # Test a GCP Deployment Manager deployment using Application Default Credentials
+  gcp_dm_adc:
+    name: CSPM GCP with ADC
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     permissions:
@@ -63,7 +71,7 @@ jobs:
       - name: Provision Test Environment (EC)
         id: apply
         if: success()
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
           terraform -v
           terraform init
@@ -80,21 +88,22 @@ jobs:
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
-        working-directory: deploy/test-environments/fleet_api
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
           poetry install
-          poetry run python src/install_cspm_gcp_integration.py
+          poetry run python ./install_cspm_gcp_integration.py
 
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
         env:
           DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
+          DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
-          . ./set_env.sh && ./deploy.sh
+          . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_LABELS}"
 
       - name: Check for findings
         working-directory: ./tests
@@ -106,7 +115,7 @@ jobs:
 
       - name: Destory EC deployment
         if: always()
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
           terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
 
@@ -116,9 +125,123 @@ jobs:
 
       - name: Delete GCP Deployment Manager deployment
         if: always()
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: ${{ env.TEST_ENVS_DIR }}
+        env:
+          DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
-          DEPLOYMENT=${{env.GCP_DEPLOYMENT_NAME}}
+          DEPLOYMENT="${DEPLOYMENT_NAME}"
           PROJECT_NAME=$(gcloud config get-value core/project)
           PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
           ./delete_gcp_env.sh $PROJECT_NAME $PROJECT_NUMBER $DEPLOYMENT
+
+  # Test a GCP Deployment Manager deployment using a Service Account
+  gcp_dm_sa:
+    needs: gcp_dm_adc
+    name: CSPM GCP with SA
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Set up unique deployment names
+        run: |
+          suffix="$(date +%s | tail -c 3)"
+          echo "TF_VAR_deployment_name=gcp-dm-ci-sa-test-$suffix" >> $GITHUB_ENV
+          echo "GCP_AGENT_DEPLOYMENT_NAME=ea-cspm-gcp-ci-test-$suffix" >> $GITHUB_ENV
+          echo "GCP_SA_DEPLOYMENT_NAME=sa-cspm-gcp-ci-test-$suffix" >> $GITHUB_ENV
+
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
+
+      - id: google-auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }} # this also sets the project name
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: set TF_VAR_stack_version
+        run: |
+          version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
+          echo "TF_VAR_stack_version=$version" >> $GITHUB_ENV
+
+      - name: Provision Test Environment (EC)
+        id: deploy_ec
+        if: success()
+        working-directory: ${{ env.TEST_ENVS_DIR }}
+        run: |
+          terraform -v
+          terraform init
+          terraform validate
+          terraform apply --auto-approve -target="module.ec_deployment" -target="module.ec_project"
+          terraform output
+          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
+          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
+          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
+
+          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
+          echo "::add-mask::$ES_PASSWORD"
+          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+
+      - name: Set up GCP Cloud SDK
+        if: always()
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: Deploy GCP Service Account and Agent
+        id: gcp_deploy
+        env:
+          STACK_VERSION: ${{ env.ELK_VERSION }}
+        run: |
+          # Deploys a GCP Service Account
+          cd "${DEPLOYMENT_MANAGER_DIR}"
+          export DEPLOYMENT_NAME="${GCP_SA_DEPLOYMENT_NAME}"
+          export SERVICE_ACCOUNT_NAME="${GCP_SA_DEPLOYMENT_NAME}-sa"
+          ./deploy_service_account.sh
+          mv KEY_FILE.json "../../${INTEGRATIONS_SETUP_DIR}"
+
+          # Installs CSPM GCP integration
+          cd "../../${INTEGRATIONS_SETUP_DIR}"
+          export SERVICE_ACCOUNT_JSON_PATH="KEY_FILE.json"
+          export DEPLOYMENT_NAME="${GCP_AGENT_DEPLOYMENT_NAME}"
+          poetry install
+          poetry run python ./install_cspm_gcp_integration.py
+
+          # Deploys the agent using an existing service account (SERVICE_ACCOUNT_NAME)
+          cd "../../${DEPLOYMENT_MANAGER_DIR}"
+          . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_LABELS}"
+
+      - name: Check for findings
+        working-directory: ./tests
+        env:
+          USE_K8S: false
+        run: |
+          poetry install
+          poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+      - name: Destory EC deployment
+        if: always()
+        working-directory: ${{ env.TEST_ENVS_DIR }}
+        run: |
+          terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
+
+      - name: Delete GCP Deployments
+        if: always()
+        working-directory: ${{ env.TEST_ENVS_DIR }}
+        run: |
+          PROJECT_NAME=$(gcloud config get-value core/project)
+          PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+          ./delete_gcp_env.sh $PROJECT_NAME $PROJECT_NUMBER "${GCP_SA_DEPLOYMENT_NAME}" "${GCP_AGENT_DEPLOYMENT_NAME}"

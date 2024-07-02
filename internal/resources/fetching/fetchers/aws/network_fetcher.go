@@ -103,7 +103,7 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 		f.log.Errorf("failed to describe security groups: %v", err)
 	}
 	resources = append(resources, securityGroups...)
-	vpcs, err := client.DescribeVPCs(ctx)
+	vpcs, err := client.DescribeVpcs(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe vpcs: %v", err)
 	}

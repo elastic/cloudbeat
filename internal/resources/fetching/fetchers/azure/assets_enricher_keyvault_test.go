@@ -50,11 +50,12 @@ func TestKeyVaultEnricher(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		inputAssets           []inventory.AzureAsset
-		mockKeysPerVaultID    map[string][]inventory.AzureAsset
-		mockSecretsPerVaultID map[string][]inventory.AzureAsset
-		expected              []inventory.AzureAsset
-		expectError           bool
+		inputAssets                []inventory.AzureAsset
+		mockKeysPerVaultID         map[string][]inventory.AzureAsset
+		mockSecretsPerVaultID      map[string][]inventory.AzureAsset
+		mockedDiagnosticPerVaultID map[string][]inventory.AzureAsset
+		expected                   []inventory.AzureAsset
+		expectError                bool
 	}{
 		"single": {
 			inputAssets: []inventory.AzureAsset{
@@ -66,11 +67,15 @@ func TestKeyVaultEnricher(t *testing.T) {
 			mockSecretsPerVaultID: map[string][]inventory.AzureAsset{
 				"id1": {assetSecret("sec1")},
 			},
+			mockedDiagnosticPerVaultID: map[string][]inventory.AzureAsset{
+				"id1": {assetVault("diag1")},
+			},
 			expected: func() []inventory.AzureAsset {
 				a := assetVault("id1")
 				a.Extension = map[string]any{}
 				a.Extension[inventory.ExtensionKeyVaultKeys] = []inventory.AzureAsset{assetKey("key1")}
 				a.Extension[inventory.ExtensionKeyVaultSecrets] = []inventory.AzureAsset{assetSecret("sec1")}
+				a.Extension[inventory.ExtensionKeyVaultDiagnosticSettings] = []inventory.AzureAsset{assetVault("diag1")}
 				return []inventory.AzureAsset{a}
 			}(),
 			expectError: false,
@@ -91,11 +96,17 @@ func TestKeyVaultEnricher(t *testing.T) {
 				"id2": {},
 				"id3": {assetSecret("sec2"), assetSecret("sec3")},
 			},
+			mockedDiagnosticPerVaultID: map[string][]inventory.AzureAsset{
+				"id1": {assetVault("diag1")},
+				"id2": {},
+				"id3": {assetVault("diag3")},
+			},
 			expected: func() []inventory.AzureAsset {
 				a := assetVault("id1")
 				a.Extension = map[string]any{}
 				a.Extension[inventory.ExtensionKeyVaultKeys] = []inventory.AzureAsset{assetKey("key1"), assetKey("key2")}
 				a.Extension[inventory.ExtensionKeyVaultSecrets] = []inventory.AzureAsset{assetSecret("sec1")}
+				a.Extension[inventory.ExtensionKeyVaultDiagnosticSettings] = []inventory.AzureAsset{assetVault("diag1")}
 
 				b := assetVault("id2")
 				b.Extension = map[string]any{}
@@ -104,7 +115,7 @@ func TestKeyVaultEnricher(t *testing.T) {
 				c := assetVault("id3")
 				c.Extension = map[string]any{}
 				c.Extension[inventory.ExtensionKeyVaultSecrets] = []inventory.AzureAsset{assetSecret("sec2"), assetSecret("sec3")}
-
+				c.Extension[inventory.ExtensionKeyVaultDiagnosticSettings] = []inventory.AzureAsset{assetVault("diag3")}
 				return []inventory.AzureAsset{a, b, c}
 			}(),
 			expectError: false,
@@ -134,6 +145,16 @@ func TestKeyVaultEnricher(t *testing.T) {
 				})).
 				RunAndReturn(func(_ context.Context, a inventory.AzureAsset) ([]inventory.AzureAsset, error) {
 					sl := tc.mockSecretsPerVaultID[a.Id]
+					return sl, nil
+				}).
+				Times(len(tc.inputAssets))
+			mockProvider.EXPECT().
+				ListKeyVaultDiagnosticSettings(mock.Anything, mock.MatchedBy(func(a inventory.AzureAsset) bool {
+					_, found := tc.mockedDiagnosticPerVaultID[a.Id]
+					return found
+				})).
+				RunAndReturn(func(_ context.Context, a inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+					sl := tc.mockedDiagnosticPerVaultID[a.Id]
 					return sl, nil
 				}).
 				Times(len(tc.inputAssets))

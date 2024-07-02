@@ -4,7 +4,7 @@
 [![CIS EKS](https://img.shields.io/badge/CIS-Amazon%20EKS%20(60%25)-FF9900?logo=Amazon+EKS)](RULES.md#eks-cis-benchmark)
 [![CIS AWS](https://img.shields.io/badge/CIS-AWS%20(87%25)-232F3E?logo=Amazon+AWS)](RULES.md#aws-cis-benchmark)
 [![CIS GCP](https://img.shields.io/badge/CIS-GCP%20(85%25)-4285F4?logo=Google+Cloud)](RULES.md#gcp-cis-benchmark)
-[![CIS AZURE](https://img.shields.io/badge/CIS-AZURE%20(47%25)-0078D4?logo=Microsoft+Azure)](RULES.md#azure-cis-benchmark)
+[![CIS AZURE](https://img.shields.io/badge/CIS-AZURE%20(48%25)-0078D4?logo=Microsoft+Azure)](RULES.md#azure-cis-benchmark)
 
 ![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/oren-zohar/a7160df46e48dff45b24096de9302d38/raw/csp-security-policies_coverage.json)
 

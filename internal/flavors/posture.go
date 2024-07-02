@@ -51,7 +51,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	strategy, err := benchmark.GetStrategy(cfg)
+	strategy, err := benchmark.GetStrategy(cfg, log)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -59,6 +59,12 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 	log.Infof("Creating benchmark %T", strategy)
 	bench, err := strategy.NewBenchmark(ctx, log, cfg)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
+	err = ensureHostProcessor(log, cfg)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -107,4 +113,19 @@ func (bt *posture) Stop() {
 	}
 
 	bt.cancel()
+}
+
+// ensureAdditionalProcessors modifies cfg.Processors list to ensure 'host'
+// processor is present for K8s and EKS benchmarks.
+func ensureHostProcessor(log *logp.Logger, cfg *config.Config) error {
+	if cfg.Benchmark != config.CIS_EKS && cfg.Benchmark != config.CIS_K8S {
+		return nil
+	}
+	log.Info("Adding host processor config")
+	hostProcessor, err := agentconfig.NewConfigFrom("add_host_metadata: ~")
+	if err != nil {
+		return err
+	}
+	cfg.Processors = append(cfg.Processors, hostProcessor)
+	return nil
 }

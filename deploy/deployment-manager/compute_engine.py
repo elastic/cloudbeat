@@ -14,10 +14,9 @@ def generate_config(context):
     artifact_server = context.properties["elasticArtifactServer"]
     scope = context.properties["scope"]
     parent_id = context.properties["parentId"]
-
     roles = ["roles/cloudasset.viewer", "roles/browser"]
     network_name = f"{deployment_name}-network"
-    sa_name = f"{deployment_name}-sa"
+    sa_name = context.properties["serviceAccountName"] or f"{deployment_name}-sa"
 
     ssh_fw_rule = {
         "name": "elastic-agent-firewall-rule",
@@ -52,7 +51,7 @@ def generate_config(context):
             ),
             "serviceAccounts": [
                 {
-                    "email": f"$(ref.{sa_name}.email)",
+                    "email": get_service_account_email(sa_name, project),
                     "scopes": [
                         "https://www.googleapis.com/auth/cloud-platform",
                         "https://www.googleapis.com/auth/cloudplatformorganizations",
@@ -79,7 +78,6 @@ def generate_config(context):
                 },
             ],
             "metadata": {
-                "dependsOn": [sa_name],
                 "items": [
                     {
                         "key": "startup-script",
@@ -115,16 +113,6 @@ def generate_config(context):
         },
     }
 
-    service_account = {
-        "name": sa_name,
-        "type": "iam.v1.serviceAccount",
-        "properties": {
-            "accountId": sa_name,
-            "displayName": "Elastic agent service account for CSPM",
-            "projectId": context.env["project"],
-        },
-    }
-
     network = {
         "name": network_name,
         "type": "compute.v1.network",
@@ -136,25 +124,20 @@ def generate_config(context):
         },
     }
 
-    bindings = []
-    for role in roles:
-        bindings.append(
-            {
-                "name": f"{deployment_name}-iam-binding-{role}",
-                "type": f"gcp-types/cloudresourcemanager-v1:virtual.{scope}.iamMemberBinding",
-                "properties": {
-                    "resource": get_resource_name(scope, parent_id),
-                    "role": role,
-                    "member": f"serviceAccount:$(ref.{sa_name}.email)",
-                },
-                "metadata": {
-                    "dependsOn": [sa_name],
-                },
-            },
+    resources = [instance, network]
+    # Create service account if not provided
+    if not context.properties["serviceAccountName"]:
+        instance["properties"]["metadata"]["dependsOn"] = [sa_name]
+        service_account, bindings = get_service_account(
+            sa_name,
+            deployment_name,
+            roles,
+            scope,
+            parent_id,
+            project,
         )
-
-    resources = [instance, service_account, network]
-    resources.extend(bindings)
+        resources.append(service_account)
+        resources.extend(bindings)
 
     if context.properties["allowSSH"]:
         resources.append(ssh_fw_rule)
@@ -167,3 +150,39 @@ def get_resource_name(scope, parent_id):
     if scope == "organizations":
         return f"{scope}/{parent_id}"
     return parent_id
+
+
+def get_service_account(sa_name, deployment_name, roles, scope, parent_id, project_id):
+    """return the service account and its bindings."""
+    service_account = {
+        "name": sa_name,
+        "type": "iam.v1.serviceAccount",
+        "properties": {
+            "accountId": sa_name,
+            "displayName": "Elastic agent service account for CSPM",
+            "projectId": project_id,
+        },
+    }
+
+    bindings = []
+    for role in roles:
+        bindings.append(
+            {
+                "name": f"{deployment_name}-iam-binding-{role}",
+                "type": f"gcp-types/cloudresourcemanager-v1:virtual.{scope}.iamMemberBinding",
+                "properties": {
+                    "resource": get_resource_name(scope, parent_id),
+                    "role": role,
+                    "member": f"serviceAccount:{get_service_account_email(sa_name, project_id)}",
+                },
+                "metadata": {
+                    "dependsOn": [sa_name],
+                },
+            },
+        )
+    return (service_account, bindings)
+
+
+def get_service_account_email(sa_name, project_id):
+    """return the service account email."""
+    return f"{sa_name}@{project_id}.iam.gserviceaccount.com"

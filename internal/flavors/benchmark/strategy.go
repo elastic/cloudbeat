@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
@@ -38,23 +39,23 @@ type Strategy interface {
 	checkDependencies() error
 }
 
-func GetStrategy(cfg *config.Config) (Strategy, error) {
+func GetStrategy(cfg *config.Config, log *logp.Logger) (Strategy, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
 			return &AWSOrg{
-				IdentityProvider: awslib.IdentityProvider{},
+				IAMProvider:      &iam.Provider{},
+				IdentityProvider: awslib.IdentityProvider{Logger: log},
 				AccountProvider:  awslib.AccountProvider{},
 			}, nil
 		}
 
 		return &AWS{
-			IdentityProvider: awslib.IdentityProvider{},
+			IdentityProvider: awslib.IdentityProvider{Logger: log},
 		}, nil
 	case config.CIS_EKS:
 		return &EKS{
-			AWSCfgProvider:         awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-			AWSIdentityProvider:    awslib.IdentityProvider{},
+			AWSIdentityProvider:    awslib.IdentityProvider{Logger: log},
 			AWSMetadataProvider:    awslib.Ec2MetadataProvider{},
 			EKSClusterNameProvider: awslib.EKSClusterNameProvider{},
 			ClientProvider:         k8s.ClientGetter{},
@@ -73,7 +74,8 @@ func GetStrategy(cfg *config.Config) (Strategy, error) {
 	case config.CIS_AZURE:
 		return &Azure{
 			cfgProvider:         &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
-			providerInitializer: &azurelib.ProviderInitializer{}}, nil
+			providerInitializer: &azurelib.ProviderInitializer{},
+		}, nil
 	}
 	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
 }

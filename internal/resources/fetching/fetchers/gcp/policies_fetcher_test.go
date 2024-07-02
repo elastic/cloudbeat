@@ -68,11 +68,10 @@ func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
 	mockInventoryService.On("ListProjectsAncestorsPolicies", mock.Anything).Return(
 		[]*inventory.ProjectPoliciesAsset{
 			{
-				Ecs: &fetching.EcsGcp{
-					Provider:         "gcp",
-					ProjectId:        "a",
-					ProjectName:      "a",
-					OrganizationId:   "a",
+				CloudAccount: &fetching.CloudAccountMetadata{
+					AccountId:        "a",
+					AccountName:      "a",
+					OrganisationId:   "a",
 					OrganizationName: "a",
 				},
 				Policies: []*inventory.ExtendedGcpAsset{
@@ -117,10 +116,10 @@ func TestGcpPoliciesAsset_GetMetadata(t *testing.T) {
 				Type:    fetching.ProjectManagement,
 				subType: fetching.GcpPolicies,
 				Asset: &inventory.ProjectPoliciesAsset{
-					Ecs: &fetching.EcsGcp{
-						ProjectId:        projectId,
-						ProjectName:      "a",
-						OrganizationId:   "a",
+					CloudAccount: &fetching.CloudAccountMetadata{
+						AccountId:        projectId,
+						AccountName:      "a",
+						OrganisationId:   "a",
 						OrganizationName: "a",
 					},
 					Policies: []*inventory.ExtendedGcpAsset{},
@@ -132,6 +131,12 @@ func TestGcpPoliciesAsset_GetMetadata(t *testing.T) {
 				Type:    fetching.ProjectManagement,
 				SubType: fetching.GcpPolicies,
 				Region:  gcplib.GlobalRegion,
+				CloudAccountMetadata: fetching.CloudAccountMetadata{
+					AccountId:        projectId,
+					AccountName:      "a",
+					OrganisationId:   "a",
+					OrganizationName: "a",
+				},
 			},
 		},
 	}
@@ -141,63 +146,6 @@ func TestGcpPoliciesAsset_GetMetadata(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestGcpPolicies_GetElasticCommonData(t *testing.T) {
-	type fields struct {
-		Type    string
-		subType string
-		Asset   *inventory.ProjectPoliciesAsset
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   map[string]any
-	}{
-		{
-			name: "verify elastic common data",
-			fields: fields{
-				Type:    fetching.ProjectManagement,
-				subType: fetching.GcpPolicies,
-				Asset: &inventory.ProjectPoliciesAsset{
-					Ecs: &fetching.EcsGcp{
-						ProjectId:        projectId,
-						ProjectName:      "a",
-						OrganizationId:   "a",
-						OrganizationName: "a",
-					},
-					Policies: []*inventory.ExtendedGcpAsset{},
-				},
-			},
-			want: map[string]any{
-				"cloud": map[string]any{
-					"provider": "gcp",
-					"account": map[string]any{
-						"id":   projectId,
-						"name": "a",
-					},
-					"Organization": map[string]any{
-						"id":   "a",
-						"name": "a",
-					},
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := &GcpPoliciesAsset{
-				Type:    tt.fields.Type,
-				subType: tt.fields.subType,
-				Asset:   tt.fields.Asset,
-			}
-
-			got, err := g.GetElasticCommonData()
-
-			require.NoError(t, err)
-			assert.Equalf(t, tt.want, got, "GetElasticCommonData()")
 		})
 	}
 }

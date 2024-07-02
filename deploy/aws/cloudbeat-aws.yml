@@ -6,6 +6,7 @@ cloudbeat:
         credentials:
           access_key_id: ${AWS_ACCESS_KEY_ID:""}
           secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
+        account_type: ${AWS_ACCOUNT_TYPE:""}
   type: cloudbeat/cis_aws
   # Defines how often an event is sent to the output
   period: 30s
@@ -46,7 +47,6 @@ output.elasticsearch:
 
 # ================================= Processors =================================
 processors:
-  - add_host_metadata: ~
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
 

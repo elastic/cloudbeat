@@ -6,7 +6,7 @@ Database service identification is performed by resource name.
 """
 
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 
 CIS_4_1_1 = "CIS 4.1.1"
 CIS_4_1_2 = "CIS 4.1.2"
@@ -23,7 +23,9 @@ CIS_4_3_5 = "CIS 4.3.5"
 CIS_4_3_6 = "CIS 4.3.6"
 CIS_4_3_7 = "CIS 4.3.7"
 CIS_4_3_8 = "CIS 4.3.8"
-CIS_4_4_1 = "CIS 4.4.1"
+# Disable 4.4.1 - Azure Database for MySQL - Single Server is being retired
+# See: https://learn.microsoft.com/en-us/azure/mysql/single-server/whats-happening-to-mysql-single-server
+# CIS_4_4_1 = "CIS 4.4.1"
 CIS_4_4_2 = "CIS 4.4.2"
 CIS_4_5_1 = "CIS 4.5.1"
 
@@ -327,24 +329,24 @@ cis_azure_4_3_8 = {
 
 # 4.4.* Rules ====================================
 
-cis_azure_4_4_1_pass = AzureServiceCase(
-    rule_tag=CIS_4_4_1,
-    case_identifier="rule-441",
-    expected=RULE_PASS_STATUS,
-)
-
-cis_azure_4_4_1_fail = AzureServiceCase(
-    rule_tag=CIS_4_4_1,
-    case_identifier="rule-441-fail",
-    expected=RULE_FAIL_STATUS,
-)
-
-cis_azure_4_4_1 = {
-    """4.4.1 Ensure 'Enforce SSL connection' is set to 'Enabled'
-      for Standard MySQL Database Server expect: passed""": cis_azure_4_4_1_pass,
-    """4.4.1 Ensure 'Enforce SSL connection' is set to 'Enabled'
-      for Standard MySQL Database Server expect: failed""": cis_azure_4_4_1_fail,
-}
+# cis_azure_4_4_1_pass = AzureServiceCase(
+#     rule_tag=CIS_4_4_1,
+#     case_identifier="rule-441",
+#     expected=RULE_PASS_STATUS,
+# )
+#
+# cis_azure_4_4_1_fail = AzureServiceCase(
+#     rule_tag=CIS_4_4_1,
+#     case_identifier="rule-441-fail",
+#     expected=RULE_FAIL_STATUS,
+# )
+#
+# cis_azure_4_4_1 = {
+#     """4.4.1 Ensure 'Enforce SSL connection' is set to 'Enabled'
+#       for Standard MySQL Database Server expect: passed""": cis_azure_4_4_1_pass,
+#     """4.4.1 Ensure 'Enforce SSL connection' is set to 'Enabled'
+#       for Standard MySQL Database Server expect: failed""": cis_azure_4_4_1_fail,
+# }
 
 cis_azure_4_4_2_pass = AzureServiceCase(
     rule_tag=CIS_4_4_2,
@@ -395,7 +397,7 @@ test_cases = {
     **cis_azure_4_3_6,
     **cis_azure_4_3_7,
     **cis_azure_4_3_8,
-    **cis_azure_4_4_1,
+    # **cis_azure_4_4_1,
     **cis_azure_4_4_2,
     **cis_azure_4_5_1,
 }

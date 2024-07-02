@@ -35,3 +35,9 @@ properties:
     type: boolean
     description: Allow SSH access to the instance
     metadata: allow-ssh
+
+  serviceAccountName:
+    oneOf:
+      - type: string
+      - type: boolean
+    description: Use an existing service account for the agent

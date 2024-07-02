@@ -4,11 +4,12 @@ provider "aws" {
 
 locals {
   common_tags = {
-    division = "${var.division}"
-    org      = "${var.org}"
-    team     = "${var.team}"
-    project  = "${var.project}"
-    owner    = "${var.owner}"
+    division   = "${var.division}"
+    org        = "${var.org}"
+    team       = "${var.team}"
+    project    = "${var.project}"
+    owner      = "${var.owner}"
+    deployment = "${var.deployment_name}"
   }
   ec_url = "https://cloud.elastic.co"
   ec_headers = {

@@ -2,10 +2,11 @@
 import datetime
 import json
 import time
-from typing import Union
 from functools import reduce
+from typing import Union
+
 import allure
-from commonlib.io_utils import get_logs_from_stream, get_events_from_index
+from commonlib.io_utils import get_events_from_index, get_logs_from_stream
 from loguru import logger
 
 FINDINGS_BACKOFF_SECONDS = 5
@@ -130,34 +131,6 @@ def get_logs_evaluation(
     return None
 
 
-def dict_contains(small, big):
-    """
-    Checks if the small dict like object is contained inside the big object
-    @param small: dict like object
-    @param big: dict like object
-    @return: true iff the small dict like object is contained inside the big object
-    """
-    if isinstance(small, dict):
-        if not set(small.keys()) <= set(big.keys()):
-            return False
-        for key in small.keys():
-            if not dict_contains(small.get(key), big.get(key)):
-                return False
-        return True
-
-    return small == big
-
-
-def get_resource_identifier(body):
-    def resource_identifier(resource):
-        if getattr(resource, "to_dict", None):
-            return dict_contains(body, resource.to_dict())
-        if getattr(resource, "__dict__", None):
-            return dict_contains(body, dict(resource))
-
-    return resource_identifier
-
-
 def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     """
     Wait for all agents to finish sending findings to ES.
@@ -211,52 +184,6 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
 
 def is_timeout(start_time: time, timeout: int) -> bool:
     return time.time() - start_time > timeout
-
-
-def command_contains_arguments(command, arguments_dict):
-    args = command.split()[1:]
-    args_dict = {}
-    for arg in args:
-        key, val = arg.split("=", 1)
-        args_dict[key] = val
-
-    set_dict = arguments_dict.get("set", {})
-    unset_list = arguments_dict.get("unset", [])
-
-    for key, val in set_dict.items():
-        arg_val = args_dict.get(key)
-        if val != arg_val:
-            return False
-
-    for key in unset_list:
-        if key in args_dict:
-            return False
-
-    return True
-
-
-def config_contains_arguments(config, arguments_dict):
-    set_dict = arguments_dict.get("set", {})
-    unset_list = arguments_dict.get("unset", [])
-
-    if not dict_contains(set_dict, config):
-        return False
-
-    for arg in unset_list:
-        current = config
-        arg_set = True
-
-        for arg_part in arg.split("."):
-            if (not isinstance(current, dict)) or (arg_part not in current):
-                arg_set = False
-                break
-
-            current = current[arg_part]
-
-        if arg_set:
-            return False
-
-    return True
 
 
 def get_findings(elastic_client, config_timeout, query, sort, match_type):

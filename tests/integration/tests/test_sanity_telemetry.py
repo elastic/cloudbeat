@@ -56,9 +56,9 @@ def test_telemetry_cloud_account_stats(cloud_security_telemetry_data):
     for account in cloud_account_stats:
         assert len(account.account_id) > 0, f"Telemetry data missing account_id for cloud_account_stats {account}"
         assert len(account.product) > 0, f"Telemetry data missing product for cloud_account_stats {account}"
-        # assert ( uncomment once bug is solved https://github.com/elastic/security-team/issues/8149
-        #     len(account.package_policy_id) > 0
-        # ), f"Telemetry data missing package_policy_id for cloud_account_stats {account}"
+        assert (
+            len(account.package_policy_id) > 0
+        ), f"Telemetry data missing package_policy_id for cloud_account_stats {account}"
 
         if not (account.product == "kspm" and "CIS Kubernetes" in account.posture_management_stats.benchmark_name):
             assert (

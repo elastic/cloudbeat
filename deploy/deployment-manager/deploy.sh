@@ -37,11 +37,13 @@ ROLE="roles/resourcemanager.projectIamAdmin"
 
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER%/} # Remove trailing slash if present
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
-DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
+SERVICE_ACCOUNT_NAME=${SERVICE_ACCOUNT_NAME:-false}
 
 # Set environment variables with the name and number of your project.
 export PROJECT_NAME=$(gcloud config get-value core/project)
 export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+
+source ./common.sh
 
 # Function to check if an environment variable is not provided
 check_env_not_provided() {
@@ -60,34 +62,6 @@ run_command() {
     if [ $status -ne 0 ]; then
         echo "Error: Command \"$1\" failed with exit code $status. Exiting..."
         exit $status
-    fi
-}
-
-configure_scope() {
-    if [ -n "$ORG_ID" ]; then
-        SCOPE="organizations"
-        PARENT_ID="$ORG_ID"
-        ROLE="roles/resourcemanager.organizationAdmin"
-    fi
-
-    # If ORG_ID is not set, SCOPE defaults to "projects" and PARENT_ID defaults to PROJECT_NAME
-    SCOPE=${SCOPE:-"projects"}
-    PARENT_ID=${PARENT_ID:-"$PROJECT_NAME"}
-}
-
-# Function to check if a role is assigned to the service account
-is_role_not_assigned() {
-    local role_assigned
-    role_assigned=$(gcloud ${SCOPE} get-iam-policy "${PARENT_ID}" \
-        --flatten="bindings[].members" --format="value(bindings.members)" \
-        --filter="bindings.role=${ROLE}" \
-        --format="table[no-heading](bindings.members)" |
-        grep "${PROJECT_NUMBER}@cloudservices.gserviceaccount.com")
-
-    if [ -n "${role_assigned}" ]; then
-        return 1 # Role is assigned
-    else
-        return 0 # Role is not assigned
     fi
 }
 
@@ -115,7 +89,7 @@ fi
 # Apply the deployment manager templates
 run_command "gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
     --template compute_engine.py \
-    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID}"
+    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID},serviceAccountName:${SERVICE_ACCOUNT_NAME}"
 
 ## Remove the role required to deploy the DM templates
 if [ "$ADD_ROLE" = "true" ]; then

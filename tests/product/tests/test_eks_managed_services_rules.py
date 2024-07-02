@@ -4,11 +4,11 @@ This module verifies correctness of retrieved findings by manipulating audit act
 """
 
 from datetime import datetime, timedelta
+
 import pytest
 from commonlib.utils import get_ES_evaluation
-
 from product.tests.data.aws import managed_services_test_cases as ms_tc
-from product.tests.parameters import register_params, Parameters
+from product.tests.parameters import Parameters, register_params
 
 
 @pytest.mark.eks_service_rules

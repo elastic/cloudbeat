@@ -2,6 +2,7 @@ package compliance.cis_aws.rules.cis_4_9
 
 import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
+import data.compliance.policy.aws_cloudtrail.pattern
 import data.compliance.policy.aws_cloudtrail.trail
 import future.keywords.if
 
@@ -18,6 +19,15 @@ finding = result if {
 	)
 }
 
-required_patterns = ["{ ($.eventSource = config.amazonaws.com) && (($.eventName=StopConfigurationRecorder)||($.eventName=DeleteDeliveryChannel) ||($.eventName=PutDeliveryChannel)||($.eventName=PutConfigurationRecorder)) }"]
+# { ($.eventSource = config.amazonaws.com) && (($.eventName=StopConfigurationRecorder)($.eventName=DeleteDeliveryChannel) ||($.eventName=PutDeliveryChannel)||($.eventName=PutConfigurationRecorder)) }
+required_patterns = [pattern.complex_expression("&&", [
+	pattern.simple_expression("$.eventSource", "=", "config.amazonaws.com"),
+	pattern.complex_expression("||", [
+		pattern.simple_expression("$.eventName", "=", "StopConfigurationRecorder"),
+		pattern.simple_expression("$.eventName", "=", "DeleteDeliveryChannel"),
+		pattern.simple_expression("$.eventName", "=", "PutDeliveryChannel"),
+		pattern.simple_expression("$.eventName", "=", "PutConfigurationRecorder"),
+	]),
+])]
 
 rule_evaluation = trail.at_least_one_trail_satisfied(required_patterns)

@@ -121,7 +121,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
-		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
+		elbProvider.EXPECT().DescribeLoadBalancers(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
 		identity := cloud.Identity{
 			Account: testAccount,
@@ -194,7 +194,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
-		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)
+		elbProvider.EXPECT().DescribeLoadBalancers(mock.Anything, mock.Anything).Return(nil, test.error)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 

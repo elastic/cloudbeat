@@ -20,15 +20,21 @@ package inventory
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	azfake "github.com/Azure/azure-sdk-for-go/sdk/azcore/fake"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql/fake"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type (
@@ -532,5 +538,129 @@ func threatProtectionAsset(id, state string) AzureAsset {
 			"creationTime": creationTime,
 		},
 		Extension: nil,
+	}
+}
+
+func TestListSQLFirewallRules(t *testing.T) {
+	subID := "11111111-aaaa-bbbb-cccc-dddddddddddd"
+	resourceGroup := "rg"
+	srv := "srv"
+
+	tests := map[string]struct {
+		mockPages [][]*armsql.FirewallRule
+		expected  []AzureAsset
+	}{
+		"single page": {
+			mockPages: [][]*armsql.FirewallRule{
+				{
+					{
+						Name: to.Ptr("name1"),
+					},
+					{
+						Name: to.Ptr("name2"),
+						Properties: &armsql.ServerFirewallRuleProperties{
+							StartIPAddress: to.Ptr("0.0.0.0"),
+							EndIPAddress:   to.Ptr("0.0.0.0"),
+						},
+					},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Name:           "name1",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+				},
+				{
+					Name:           "name2",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+					Properties: map[string]any{
+						"startIpAddress": "0.0.0.0",
+						"endIpAddress":   "0.0.0.0",
+					},
+				},
+			},
+		},
+		"two pages": {
+			mockPages: [][]*armsql.FirewallRule{
+				{
+					{
+						Name: to.Ptr("name1"),
+					},
+					{
+						Name: to.Ptr("name2"),
+						Properties: &armsql.ServerFirewallRuleProperties{
+							StartIPAddress: to.Ptr("0.0.0.0"),
+							EndIPAddress:   to.Ptr("0.0.0.0"),
+						},
+					},
+				},
+				{
+					{
+						Name: to.Ptr("name3"),
+						Properties: &armsql.ServerFirewallRuleProperties{
+							StartIPAddress: to.Ptr("0.0.0.0"),
+							EndIPAddress:   to.Ptr("0.0.0.0"),
+						},
+					},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Name:           "name1",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+				},
+				{
+					Name:           "name2",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+					Properties: map[string]any{
+						"startIpAddress": "0.0.0.0",
+						"endIpAddress":   "0.0.0.0",
+					},
+				},
+				{
+					Name:           "name3",
+					SubscriptionId: subID,
+					ResourceGroup:  resourceGroup,
+					Properties: map[string]any{
+						"startIpAddress": "0.0.0.0",
+						"endIpAddress":   "0.0.0.0",
+					},
+				},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			fakeSrv := &fake.FirewallRulesServer{}
+			fakeSrv.NewListByServerPager = func(_, _ string, _ *armsql.FirewallRulesClientListByServerOptions) azfake.PagerResponder[armsql.FirewallRulesClientListByServerResponse] {
+				pager := azfake.PagerResponder[armsql.FirewallRulesClientListByServerResponse]{}
+
+				for _, p := range tc.mockPages {
+					page := armsql.FirewallRulesClientListByServerResponse{
+						FirewallRuleListResult: armsql.FirewallRuleListResult{
+							Value: p,
+						},
+					}
+					pager.AddPage(http.StatusOK, page, nil)
+				}
+
+				return pager
+			}
+			fakeTransport := fake.NewFirewallRulesServerTransport(fakeSrv)
+
+			provider := NewSQLProvider(testhelper.NewLogger(t), nil).(*sqlProvider)
+			provider.clientOptions = &arm.ClientOptions{}
+			provider.clientOptions.Transport = fakeTransport
+
+			rules, err := provider.ListSQLFirewallRules(context.Background(), subID, resourceGroup, srv)
+			require.NoError(t, err)
+			assert.ElementsMatch(t, tc.expected, rules)
+		})
 	}
 }

@@ -13,7 +13,7 @@ inputs:
   slack-channel:
     description: 'Slack channel'
     required: false
-    default: '#csp-qa-alerts'
+    default: '#cloud-sec-qa-alerts'
   slack-message:
     description: 'Slack message: For multiple lines, provide a URL-encoded message and set url-encoded to true'
     required: false

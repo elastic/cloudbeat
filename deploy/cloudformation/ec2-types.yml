@@ -27,7 +27,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
       InstanceType: t4g.nano
       ImageId: ami-0a0ae3c8519bff7f0
       BlockDeviceMappings:
@@ -48,7 +48,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
       InstanceType: t4g.small
       ImageId: ami-062e673cc4273dad8
       BlockDeviceMappings:
@@ -69,7 +69,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
       InstanceType: t2.nano
       ImageId: ami-09ee771fad415a6d7
       BlockDeviceMappings:
@@ -90,7 +90,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
       InstanceType: t2.nano
       ImageId: ami-00aa9d3df94c6c354
       BlockDeviceMappings:
@@ -111,7 +111,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
       InstanceType: t2.nano
       ImageId: ami-089f338f3a2e69431
       BlockDeviceMappings:
@@ -132,7 +132,7 @@ Resources:
                 - 2
                 - !Split
                   - /
-                  - !Ref "AWS::StackId"
+                  - !Ref AWS::StackId
       InstanceType: t2.nano
       ImageId: ami-04b1c88a6bbd48f8e
       BlockDeviceMappings:
@@ -151,6 +151,6 @@ Resources:
             - 2
             - !Split
               - /
-              - !Ref "AWS::StackId"
+              - !Ref AWS::StackId
       GroupDescription: Block incoming traffic
       SecurityGroupIngress: []

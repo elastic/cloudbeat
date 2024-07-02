@@ -285,7 +285,7 @@ func mockFromResultMap(
 			}, nil
 		},
 	).Maybe()
-	m.EXPECT().ListParents(mock.Anything, mock.Anything).RunAndReturn(
+	m.EXPECT().ListParents(mock.Anything, mock.Anything, mock.Anything).RunAndReturn(
 		func(_ context.Context, input *organizations.ListParentsInput, _ ...func(*organizations.Options)) (*organizations.ListParentsOutput, error) {
 			id := pointers.Deref(input.ChildId)
 			result, ok := listParentsResults[id]
@@ -314,6 +314,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		m.EXPECT().ListParents(
 			mock.Anything,
 			&organizations.ListParentsInput{ChildId: &accountId},
+			mock.Anything,
 		).Return(nil, errors.New("some-error"))
 
 		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
@@ -326,6 +327,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		m.EXPECT().ListParents(
 			mock.Anything,
 			&organizations.ListParentsInput{ChildId: &accountId},
+			mock.Anything,
 		).Return(&organizations.ListParentsOutput{NextToken: aws.String("some-token")}, nil)
 		m.EXPECT().ListParents(
 			mock.Anything,
@@ -333,6 +335,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 				ChildId:   &accountId,
 				NextToken: aws.String("some-token"),
 			},
+			mock.Anything,
 		).Return(&organizations.ListParentsOutput{}, errors.New("some-error"))
 
 		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
@@ -345,6 +348,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		m.EXPECT().ListParents(
 			mock.Anything,
 			&organizations.ListParentsInput{ChildId: &accountId},
+			mock.Anything,
 		).Return(&organizations.ListParentsOutput{NextToken: aws.String("some-token")}, nil)
 		m.EXPECT().ListParents(
 			mock.Anything,
@@ -352,6 +356,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 				ChildId:   &accountId,
 				NextToken: aws.String("some-token"),
 			},
+			mock.Anything,
 		).Return(&organizations.ListParentsOutput{
 			Parents: []types.Parent{},
 		}, nil)
@@ -366,6 +371,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		m.EXPECT().ListParents(
 			mock.Anything,
 			&organizations.ListParentsInput{ChildId: &accountId},
+			mock.Anything,
 		).Return(&organizations.ListParentsOutput{NextToken: aws.String("some-token")}, nil)
 		m.EXPECT().ListParents(
 			mock.Anything,
@@ -373,6 +379,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 				ChildId:   &accountId,
 				NextToken: aws.String("some-token"),
 			},
+			mock.Anything,
 		).Return(&organizations.ListParentsOutput{
 			Parents: []types.Parent{{
 				Id:   aws.String("root-id"),

@@ -1,23 +1,10 @@
-ARG ELASTIC_AGENT_IMAGE # e.g. docker.elastic.co/cloud-release/elastic-agent-cloud:8.5.0-7dbc10f8-SNAPSHOT
+ARG ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:8.14.0-SNAPSHOT
 
-FROM --platform=linux/amd64 ${ELASTIC_AGENT_IMAGE} as elastic_agent_amd64
-ARG STACK_VERSION # e.g. 8.5.0-SNAPSHOT
-ARG VCS_REF_SHORT # e.g. abc123
-ONBUILD COPY --chown=elastic-agent cloudbeat \
-             ./data/elastic-agent-${VCS_REF_SHORT}/components/cloudbeat
-ONBUILD COPY --chown=elastic-agent bundle.tar.gz \
-             ./data/elastic-agent-${VCS_REF_SHORT}/components/bundle.tar.gz
-ONBUILD COPY --chown=elastic-agent cloudbeat.yml \
-             ./data/elastic-agent-${VCS_REF_SHORT}/components/cloudbeat.yml
+FROM ${ELASTIC_AGENT_IMAGE} as elastic_agent_cloudbeat
+COPY --chown=elastic-agent:elastic-agent --chmod=755 cloudbeat /tmp/components/cloudbeat
+COPY --chown=elastic-agent:elastic-agent --chmod=666 bundle.tar.gz /tmp/components/bundle.tar.gz
+COPY --chown=elastic-agent:elastic-agent --chmod=644 cloudbeat.yml /tmp/components/cloudbeat.yml
 
-FROM --platform=linux/arm64 ${ELASTIC_AGENT_IMAGE} as elastic_agent_arm64
-ARG STACK_VERSION # e.g. 8.5.0-SNAPSHOT
-ARG VCS_REF_SHORT # e.g. abc123
-ONBUILD COPY --chown=elastic-agent cloudbeat \
-             ./data/elastic-agent-${VCS_REF_SHORT}/components/cloudbeat
-ONBUILD COPY --chown=elastic-agent bundle.tar.gz \
-             ./data/elastic-agent-${VCS_REF_SHORT}/components/bundle.tar.gz
-ONBUILD COPY --chown=elastic-agent cloudbeat.yml \
-             ./data/elastic-agent-${VCS_REF_SHORT}/components/cloudbeat.yml
+RUN mv /tmp/components/* "$(dirname "$(realpath "$(which elastic-agent)")")"/components/
 
-FROM elastic_agent_${TARGETARCH}
+FROM elastic_agent_cloudbeat

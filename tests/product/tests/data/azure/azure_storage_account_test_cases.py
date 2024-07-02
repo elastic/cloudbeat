@@ -6,7 +6,7 @@ Storage account identification is performed by resource name.
 """
 
 from ..azure_test_case import AzureServiceCase
-from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 
 CIS_3_1 = "CIS 3.1"
 CIS_3_2 = "CIS 3.2"
@@ -15,6 +15,28 @@ CIS_3_8 = "CIS 3.8"
 CIS_3_9 = "CIS 3.9"
 CIS_3_10 = "CIS 3.10"
 CIS_3_15 = "CIS 3.15"
+CIS_5_1_4 = "CIS 5.1.4"
+
+cis_azure_5_1_4_pass = AzureServiceCase(
+    rule_tag=CIS_5_1_4,
+    case_identifier="testsapass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_azure_5_1_4_fail = AzureServiceCase(
+    rule_tag=CIS_5_1_4,
+    case_identifier="testsafail",
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_azure_5_1_4 = {
+    """5.1.4 Ensure the storage account containing the container with activity logs is encrypted
+      with Customer Managed Key
+      expect: passed""": cis_azure_5_1_4_pass,
+    """5.1.4 Ensure the storage account containing the container with activity logs is encrypted
+      with Customer Managed Key
+      expect: failed""": cis_azure_5_1_4_fail,
+}
 
 cis_azure_3_1_pass = AzureServiceCase(
     rule_tag=CIS_3_1,
@@ -152,4 +174,5 @@ test_cases = {
     **cis_azure_3_9,
     **cis_azure_3_10,
     **cis_azure_3_15,
+    **cis_azure_5_1_4,
 }

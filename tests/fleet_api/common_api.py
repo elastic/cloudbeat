@@ -2,18 +2,15 @@
 This module contains API calls related to Fleet settings
 """
 
-import time
-import json
 import codecs
-from typing import Dict, Any, List
-from munch import Munch, munchify
-from loguru import logger
+import json
+import time
+from typing import Any, Dict, List
+
 from fleet_api.base_call_api import APICallException, perform_api_call
-from fleet_api.utils import (
-    replace_image_field,
-    add_capabilities,
-    add_tags,
-)
+from fleet_api.utils import add_capabilities, add_tags, replace_image_field
+from loguru import logger
+from munch import Munch, munchify
 
 AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 AGENT_ARTIFACT_SUFFIX_SHORT = "/downloads/"
@@ -124,7 +121,6 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
@@ -158,7 +154,6 @@ def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def get_arm_template(url: str, template_path: str):
@@ -189,7 +184,6 @@ def get_arm_template(url: str, template_path: str):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return
 
 
 def get_build_info(version: str) -> str:
