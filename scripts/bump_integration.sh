@@ -47,7 +47,7 @@ update_manifest_version_vars() {
     echo "Update cloudformation-* in manifest.yml"
     sed -i'' -E "s/cloudformation-cnvm-[0-9]+\.[0-9]+\.[0-9]+/cloudformation-cnvm-$CURRENT_CLOUDBEAT_VERSION/g" $MANIFEST_PATH
     sed -i'' -E "s/cloudformation-cspm-ACCOUNT_TYPE-[0-9]+\.[0-9]+\.[0-9]+/cloudformation-cspm-ACCOUNT_TYPE-$CURRENT_CLOUDBEAT_VERSION/g" $MANIFEST_PATH
-    sed -i'' -E "s/cloudformation-cspm-direct-access-key-ACCOUNT_TYPE-[0-9]+\.[0-9]+\.[0-9]+/cloudformation-cspm-ACCOUNT_TYPE-$CURRENT_CLOUDBEAT_VERSION/g" $MANIFEST_PATH
+    sed -i'' -E "s/cloudformation-cspm-direct-access-key-ACCOUNT_TYPE-[0-9]+\.[0-9]+\.[0-9]+/cloudformation-cspm-direct-access-key-ACCOUNT_TYPE-$CURRENT_CLOUDBEAT_VERSION/g" $MANIFEST_PATH
 
     # cis_azure
     echo "Update cloudshell_git_branch in manifest.yml"
