@@ -73,6 +73,10 @@ func (r NetworkResource) GetData() any {
 	return r.AwsResource
 }
 
+func (r NetworkResource) GetIds() []string {
+	return []string{r.GetResourceArn()}
+}
+
 func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	identifier := r.GetResourceArn()
 	return fetching.ResourceMetadata{

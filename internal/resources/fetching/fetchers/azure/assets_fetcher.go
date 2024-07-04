@@ -174,6 +174,10 @@ func (r *AzureResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
+func (r *AzureResource) GetIds() []string {
+	return []string{r.Asset.Id}
+}
+
 func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
 	m := map[string]any{}
 

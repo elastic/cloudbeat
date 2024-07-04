@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ecr"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 const (
@@ -124,6 +125,10 @@ func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string
 
 func (res EcrResource) GetData() any {
 	return res
+}
+
+func (res EcrResource) GetIds() []string {
+	return []string{pointers.Deref(res.RepositoryArn), pointers.Deref(res.RegistryId)}
 }
 
 func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {

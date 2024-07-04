@@ -75,6 +75,10 @@ func (r RdsResource) GetData() any {
 	return r.dbInstance
 }
 
+func (r RdsResource) GetIds() []string {
+	return []string{r.dbInstance.GetResourceArn()}
+}
+
 func (r RdsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      r.dbInstance.GetResourceArn(),

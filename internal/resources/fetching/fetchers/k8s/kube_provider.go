@@ -73,6 +73,10 @@ func (r K8sResource) GetData() any {
 	return r.Data
 }
 
+func (r K8sResource) GetIds() []string {
+	return nil
+}
+
 func (r K8sResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
 	k8sObjMeta := getK8sObjectMeta(r.log, k8sObj)
