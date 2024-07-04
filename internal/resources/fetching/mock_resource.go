@@ -130,6 +130,49 @@ func (_c *MockResource_GetElasticCommonData_Call) RunAndReturn(run func() (map[s
 	return _c
 }
 
+// GetIds provides a mock function with given fields:
+func (_m *MockResource) GetIds() []string {
+	ret := _m.Called()
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func() []string); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	return r0
+}
+
+// MockResource_GetIds_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetIds'
+type MockResource_GetIds_Call struct {
+	*mock.Call
+}
+
+// GetIds is a helper method to define mock.On call
+func (_e *MockResource_Expecter) GetIds() *MockResource_GetIds_Call {
+	return &MockResource_GetIds_Call{Call: _e.mock.On("GetIds")}
+}
+
+func (_c *MockResource_GetIds_Call) Run(run func()) *MockResource_GetIds_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockResource_GetIds_Call) Return(_a0 []string) *MockResource_GetIds_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockResource_GetIds_Call) RunAndReturn(run func() []string) *MockResource_GetIds_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetMetadata provides a mock function with given fields:
 func (_m *MockResource) GetMetadata() (ResourceMetadata, error) {
 	ret := _m.Called()
