@@ -67,7 +67,7 @@ require (
 	github.com/open-policy-agent/opa v0.62.0
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
 	github.com/samber/lo v1.39.0
-	github.com/spf13/viper v1.18.2
+	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
 	go.elastic.co/go-licence-detector v0.6.0
@@ -399,7 +399,7 @@ require (
 	github.com/owenrumney/go-sarif/v2 v2.3.0 // indirect
 	github.com/owenrumney/squealer v1.2.1 // indirect
 	github.com/package-url/packageurl-go v0.1.2 // indirect
-	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
