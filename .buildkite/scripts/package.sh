@@ -13,6 +13,9 @@ if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
 fi
 
+# debug command to verify
+ls -lah /proc/sys/fs/binfmt_misc/ || true
+
 mage pythonEnv
 mage package
 
