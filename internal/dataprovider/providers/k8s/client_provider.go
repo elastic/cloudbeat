@@ -39,6 +39,8 @@ func (ClientGetter) GetClient(log *logp.Logger, kubeConfig string, options kuber
 	if replacementLogger, err := zap.NewProduction(); err != nil {
 		replacementLogger = replacementLogger.WithOptions(zap.IncreaseLevel(zap.ErrorLevel))
 		klog.SetLogger(zapr.NewLogger(replacementLogger))
+	} else {
+		log.Warnf("could not suppress klog: %+v", err)
 	}
 
 	client, err := kubernetes.GetKubernetesClient(kubeConfig, options)
