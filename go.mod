@@ -78,7 +78,7 @@ require (
 	golang.org/x/oauth2 v0.21.0
 	google.golang.org/api v0.186.0
 	gopkg.in/yaml.v2 v2.4.0
-	gotest.tools/gotestsum v1.11.0
+	gotest.tools/gotestsum v1.12.0
 	k8s.io/api v0.28.10
 	k8s.io/apimachinery v0.28.10
 	k8s.io/client-go v0.28.10
