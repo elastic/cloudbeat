@@ -136,10 +136,14 @@ func generateTemplate(sourcePath string, targetPath string, yqExpression string)
 		return err
 	}
 
+	preferences := yqlib.NewDefaultYamlPreferences()
+	preferences.Indent = 2
+	preferences.ColorsEnabled = false
+
 	generatedTemplateString, err := yqlib.NewStringEvaluator().Evaluate(
 		yqExpression,
 		string(inputBytes),
-		yqlib.NewYamlEncoder(2, false, yqlib.NewDefaultYamlPreferences()),
+		yqlib.NewYamlEncoder(preferences),
 		yqlib.NewYamlDecoder(yqlib.NewDefaultYamlPreferences()),
 	)
 	if err != nil {
