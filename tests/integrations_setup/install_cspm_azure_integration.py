@@ -11,16 +11,6 @@ import sys
 from pathlib import Path
 
 import configuration_fleet as cnfg
-from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.common_api import (
-    get_arm_template,
-    get_artifact_server,
-    get_enrollment_token,
-    get_fleet_server_host,
-    get_package_version,
-)
-from fleet_api.package_policy_api import create_cspm_integration
-from fleet_api.utils import rename_file_by_suffix
 from loguru import logger
 from munch import Munch
 from package_policy import (
@@ -33,6 +23,17 @@ from package_policy import (
 )
 from packaging import version
 from state_file_manager import HostType, PolicyState, state_manager
+
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.common_api import (
+    get_arm_template,
+    get_artifact_server,
+    get_enrollment_token,
+    get_fleet_server_host,
+    get_package_version,
+)
+from fleet_api.package_policy_api import create_cspm_integration
+from fleet_api.utils import rename_file_by_suffix
 
 CSPM_AZURE_AGENT_POLICY = "../../deploy/cloud/data/agent_policy_cspm_azure.json"
 CSPM_AZURE_PACKAGE_POLICY = "../../deploy/cloud/data/package_policy_cspm_azure.json"
@@ -68,6 +69,11 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
+    if version.parse(package_version) >= version.parse("1.9"):
+        INTEGRATION_INPUT["vars"] = {
+            "azure.account_type": "single-account",
+        }
+
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
