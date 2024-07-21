@@ -71,6 +71,7 @@ if __name__ == "__main__":
     if version.parse(package_version) >= version.parse("1.9"):
         INTEGRATION_INPUT["vars"] = {
             "azure.account_type": "single-account",
+            "azure.credentials.type": "arm_template",
         }
 
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
