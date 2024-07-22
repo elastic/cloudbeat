@@ -83,7 +83,7 @@ require (
 	k8s.io/apimachinery v0.28.10
 	k8s.io/client-go v0.28.10
 	k8s.io/klog/v2 v2.120.1
-	modernc.org/sqlite v1.29.2
+	modernc.org/sqlite v1.30.2
 )
 
 require (
@@ -504,9 +504,9 @@ require (
 	k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9 // indirect
 	k8s.io/kubectl v0.28.3 // indirect
 	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect
-	modernc.org/libc v1.41.0 // indirect
+	modernc.org/libc v1.52.1 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
-	modernc.org/memory v1.7.2 // indirect
+	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
 	oras.land/oras-go v1.2.5 // indirect
