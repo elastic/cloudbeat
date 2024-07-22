@@ -52,7 +52,7 @@
             "apiVersion": "2022-09-01",
             "name": "[variables('roleAssignmentDeployment')]",
             "subscriptionId": "[subscription().subscriptionId]",
-            "resourceGroup": "[resourceGroup().name]",
+            "location": "[parameters('ResourceGroupLocation')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -84,7 +84,7 @@
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
                             "properties": {
                                 "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
-                                "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
+                                "principalId": "[reference(reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
                         },
@@ -94,7 +94,7 @@
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
                             "properties": {
                                 "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('AdditionalRoleGUID'))]",
-                                "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
+                                "principalId": "[reference(reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
                         }
