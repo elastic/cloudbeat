@@ -42,7 +42,7 @@ repos:
         files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.2.5
+    rev: v3.2.6
     hooks:
       - id: pylint
         args: [
@@ -76,7 +76,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/aws-cloudformation/cfn-lint
-    rev: v1.6.1
+    rev: v1.8.2
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -182,7 +182,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.23.1
+    rev: v0.24.0
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
