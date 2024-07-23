@@ -65,7 +65,7 @@ const (
 type AssetSubType string
 
 const (
-	SubTypeEC2                      AssetSubType = "ec2"
+	SubTypeEC2                      AssetSubType = "ec2-instance"
 	SubTypeS3                       AssetSubType = "s3"
 	SubTypeIAM                      AssetSubType = "iam"
 	SubTypeEC2NetworkInterface      AssetSubType = "ec2-network-interface"
