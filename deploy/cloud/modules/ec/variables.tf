@@ -17,7 +17,7 @@ variable "region" {
 variable "deployment_template" {
   description = "Optional defaults to the CPU optimized template for GCP"
   type        = string
-  default     = "gcp-compute-optimized-v3"
+  default     = "gcp-storage-optimized"
 }
 
 variable "deployment_name_prefix" {
