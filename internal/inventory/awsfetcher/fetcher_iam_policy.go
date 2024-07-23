@@ -40,13 +40,6 @@ type iamPolicyProvider interface {
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-var iamPolicyClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryIdentity,
-	SubCategory: inventory.SubCategoryCloudProviderAccount,
-	Type:        inventory.TypePermissions,
-	SubType:     inventory.SubTypeIAM,
-}
-
 func newIamPolicyFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamPolicyProvider) inventory.AssetFetcher {
 	return &iamPolicyFetcher{
 		logger:      logger,
@@ -80,7 +73,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 		}
 
 		assetChannel <- inventory.NewAssetEvent(
-			iamPolicyClassification,
+			inventory.AssetClassificationAwsIamPolicy,
 			[]string{policy.GetResourceArn(), pointers.Deref(policy.PolicyId)},
 			resource.GetResourceName(),
 

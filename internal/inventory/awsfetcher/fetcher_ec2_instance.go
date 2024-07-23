@@ -39,13 +39,6 @@ type ec2InstancesProvider interface {
 	DescribeInstances(ctx context.Context) ([]*ec2.Ec2Instance, error)
 }
 
-var ec2InstanceClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryInfrastructure,
-	SubCategory: inventory.SubCategoryCompute,
-	Type:        inventory.TypeVirtualMachine,
-	SubType:     inventory.SubTypeEC2,
-}
-
 func newEc2InstancesFetcher(logger *logp.Logger, identity *cloud.Identity, provider ec2InstancesProvider) inventory.AssetFetcher {
 	return &ec2InstanceFetcher{
 		logger:      logger,
@@ -83,7 +76,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			subnetIds = append(subnetIds, id)
 		}
 		assetChannel <- inventory.NewAssetEvent(
-			ec2InstanceClassification,
+			inventory.AssetClassificationAwsEc2Instance,
 			[]string{instance.GetResourceArn(), pointers.Deref(instance.InstanceId)},
 			instance.GetResourceName(),
 

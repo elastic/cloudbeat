@@ -40,13 +40,6 @@ type iamRoleProvider interface {
 	ListRoles(ctx context.Context) ([]*iam.Role, error)
 }
 
-var iamRoleClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryIdentity,
-	SubCategory: inventory.SubCategoryCloudProviderAccount,
-	Type:        inventory.TypeServiceAccount,
-	SubType:     inventory.SubTypeIAM,
-}
-
 func newIamRoleFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamRoleProvider) inventory.AssetFetcher {
 	return &iamRoleFetcher{
 		logger:      logger,
@@ -74,7 +67,7 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 		}
 
 		assetChannel <- inventory.NewAssetEvent(
-			iamRoleClassification,
+			inventory.AssetClassificationAwsIamRole,
 			[]string{pointers.Deref(role.Arn), pointers.Deref(role.RoleId)},
 			pointers.Deref(role.RoleName),
 

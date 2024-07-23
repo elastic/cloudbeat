@@ -59,14 +59,9 @@ func (s *lambdaFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory
 		function       lambdaDescribeFunc
 		classification inventory.AssetClassification
 	}{
-		{"Lambda Event Source Mappings", s.provider.ListEventSourceMappings, inventory.AssetClassification{
-			Category:    inventory.CategoryInfrastructure,
-			SubCategory: inventory.SubCategoryIntegration,
-			Type:        inventory.TypeEventSource,
-			SubType:     inventory.SubTypeLambdaEventSourceMapping,
-		}},
-		{"Lambda Functions", s.provider.ListFunctions, newLambdaClassification(inventory.TypeServerless, inventory.SubTypeLambdaFunction)},
-		{"Lambda Layers", s.provider.ListLayers, newLambdaClassification(inventory.TypeServerless, inventory.SubTypeLambdaLayer)},
+		{"Lambda Event Source Mappings", s.provider.ListEventSourceMappings, inventory.AssetClassificationAwsLambdaEventSourceMapping},
+		{"Lambda Functions", s.provider.ListFunctions, inventory.AssetClassificationAwsLambdaFunction},
+		{"Lambda Layers", s.provider.ListLayers, inventory.AssetClassificationAwsLambdaLayer},
 	}
 	for _, r := range resourcesToFetch {
 		s.fetch(ctx, r.name, r.function, r.classification, assetChannel)
@@ -101,14 +96,5 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 				},
 			}),
 		)
-	}
-}
-
-func newLambdaClassification(assetType inventory.AssetType, assetSubType inventory.AssetSubType) inventory.AssetClassification {
-	return inventory.AssetClassification{
-		Category:    inventory.CategoryInfrastructure,
-		SubCategory: inventory.SubCategoryCompute,
-		Type:        assetType,
-		SubType:     assetSubType,
 	}
 }
