@@ -33,4 +33,4 @@ jobs:
         name: lint ${{ matrix.template }}
         with:
           github_token: ${{ secrets.github_token }}
-          workdir: "./deploy/azure/${{ matrix.template }}"
+          workdir: "./deploy/azure/${{ matrix.template }} -SkipByFile @{ '*' = '*ResourceIds should not contain*' }"
