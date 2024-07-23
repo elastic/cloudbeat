@@ -58,7 +58,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.12.5
 	github.com/hashicorp/go-uuid v1.0.3
-	github.com/huandu/xstrings v1.4.0
+	github.com/huandu/xstrings v1.5.0
 	github.com/magefile/mage v1.15.0
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20231205045356-1b22259a6c44
 	github.com/mikefarah/yq/v4 v4.44.2
@@ -66,7 +66,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/open-policy-agent/opa v0.62.0
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
-	github.com/samber/lo v1.39.0
+	github.com/samber/lo v1.46.0
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
