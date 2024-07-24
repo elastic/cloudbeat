@@ -22,7 +22,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"log"
 	"os"
 	"slices"
 	"strings"
@@ -51,7 +50,12 @@ type Classification struct {
 }
 
 func (item Classification) ID() string {
-	return fmt.Sprintf("%s_%s_%s_%s", item.Category, item.SubCategory, item.Type, item.SubType)
+	return fmt.Sprintf("%s_%s_%s_%s",
+		strcase.ToKebab(item.Category),
+		strcase.ToKebab(item.SubCategory),
+		strcase.ToKebab(item.Type),
+		strcase.ToKebab(item.SubType),
+	)
 }
 
 type ByProvider struct {
@@ -87,7 +91,6 @@ func (bp *ByProvider) Get(provider string) map[string]Classification {
 }
 
 func main() {
-	log.Println("KUBA!!!!")
 	implementedByProvider, err := loadClassificationsFromGolang(GO_FILE)
 	if err != nil {
 		panic(err)
@@ -170,10 +173,10 @@ func loadClassificationsFromExcel(filepath string) (*ByProvider, error) {
 		headers := rows[0]
 		for _, row := range rows[1:] {
 			cl := Classification{
-				Category:    strcase.ToKebab(row[getColumnIndex(headers, "asset.category")]),
-				SubCategory: strcase.ToKebab(row[getColumnIndex(headers, "asset.subcategory")]),
-				Type:        strcase.ToKebab(row[getColumnIndex(headers, "asset.type")]),
-				SubType:     strcase.ToKebab(row[getColumnIndex(headers, "asset.subtype")]),
+				Category:    row[getColumnIndex(headers, "asset.category")],
+				SubCategory: row[getColumnIndex(headers, "asset.subcategory")],
+				Type:        row[getColumnIndex(headers, "asset.type")],
+				SubType:     row[getColumnIndex(headers, "asset.subtype")],
 			}
 			output.Assign(provider, cl)
 		}
@@ -201,9 +204,9 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 
 		totalImplemented := 0
 		for _, key := range sortedKeys {
-			status := "NO"
+			status := "No ❌"
 			if _, ok := implemented[key]; ok {
-				status = "YES"
+				status = "Yes ✅"
 				totalImplemented += 1
 			}
 			item := planned[key]
@@ -217,7 +220,7 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 		percentage := totalImplemented * 100 / len(planned)
 		writeToFile(file,
 			fmt.Sprintf(
-				"\nProgress: %d%% (%d/%d)\n\n",
+				"\nProgress: %d%% (%d/%d)\n",
 				percentage, totalImplemented, len(planned),
 			),
 		)
