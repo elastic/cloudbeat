@@ -24,11 +24,14 @@ package tools
 
 import (
 	_ "github.com/elastic/go-licenser"
+	_ "github.com/ettle/strcase"
 	_ "github.com/magefile/mage"
 	_ "github.com/mitchellh/gox"
 	_ "github.com/pierrre/gotestcover"
 	_ "github.com/tsg/go-daemon"
+	_ "github.com/xuri/excelize/v2"
 	_ "go.elastic.co/go-licence-detector"
+	_ "golang.org/x/exp/maps"
 	_ "golang.org/x/lint/golint"
 	_ "gotest.tools/gotestsum/cmd"
 )
