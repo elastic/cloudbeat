@@ -81,5 +81,5 @@ Follow these steps to install the dependencies and execute the different scripts
 10. To purge integrations, use the following command:
 
     ``` bash
-    poetry run python src/purge_integrations.py
+    poetry run python ./integrations_setup/purge_integrations.py
     ```

@@ -18,6 +18,7 @@ from fleet_api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     get_package_version,
+    update_package_version,
 )
 from fleet_api.package_policy_api import create_cspm_integration
 from fleet_api.utils import rename_file_by_suffix
@@ -68,6 +69,18 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
+    logger.info(f"Package version: {package_version}")
+    update_package_version(
+        cfg=cnfg.elk_config,
+        package_name="cloud_security_posture",
+        package_version=package_version,
+    )
+    if version.parse(package_version) >= version.parse("1.9"):
+        INTEGRATION_INPUT["vars"] = {
+            "azure.account_type": "single-account",
+            "azure.credentials.type": "arm_template",
+        }
+
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
