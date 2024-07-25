@@ -266,6 +266,9 @@ jobs:
           TF_VAR_stack_version: ${{ env.ELK_VERSION }}
           TF_VAR_ess_region: "gcp-us-west2"
           TF_VAR_deployment_name: ${{ env.DEPLOYMENT_NAME }}
+          TF_VAR_pin_version: ${{ inputs.elk-stack-version }}
+          TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
+
         run: |
           terraform init
           terraform validate
