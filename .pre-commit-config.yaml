@@ -193,8 +193,8 @@ repos:
       - id: update-assets-md
         name: Update Asset Inventory's ASSETS.md
         description: Update implemented resources' status in internal/inventory/ASSETS.md
-        entry: go run
-        args: ['scripts/update_assets_md/main.go']
+        entry: bash
+        args: ['-c', 'cd scripts/update_assets_md && go run main.go']
         language: system
         pass_filenames: false
         files: internal/inventory/asset.go

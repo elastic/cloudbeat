@@ -32,9 +32,9 @@ import (
 )
 
 const (
-	GO_FILE             = "internal/inventory/asset.go"
-	EXCEL_FILE          = "internal/inventory/cloud_assets.xlsx"
-	SUMMARY_FILE        = "internal/inventory/ASSETS.md"
+	GO_FILE             = "../../internal/inventory/asset.go"
+	EXCEL_FILE          = "../../internal/inventory/cloud_assets.xlsx"
+	SUMMARY_FILE        = "../../internal/inventory/ASSETS.md"
 	CLASSIFICATION_TYPE = "AssetClassification"
 	// Provider prefixes
 	AWS_PREFIX   = "Aws"
