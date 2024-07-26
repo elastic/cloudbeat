@@ -87,7 +87,7 @@ const (
 	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
 	SubTypeVpc                      AssetSubType = "vpc"
 	SubTypeSNSTopic                 AssetSubType = "sns-topic"
-	SubTypeVpcAcl                   AssetSubType = "vpc-acl"
+	SubTypeVpcAcl                   AssetSubType = "s3-access-control-list"
 	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connections"
 )
 

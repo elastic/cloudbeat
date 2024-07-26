@@ -1,7 +1,7 @@
 ## AWS Resources
 
-**Progress: 19% (16/84)**
-Identity: 25% (3/12)
+**Progress: 20% (17/84)**
+Identity: 33% (4/12)
 Infrastructure: 18% (13/72)
 
 <details> <summary>Full table</summary>
@@ -10,7 +10,7 @@ Infrastructure: 18% (13/72)
 | Identity | Authentication | Certificate | API Gateway Client Certificate | No ❌ |
 | Identity | Authentication | Credential | Access Key | No ❌ |
 | Identity | Authentication | Credential | EC2 Key Pair | No ❌ |
-| Identity | Authorization | ACL | S3 Access Control List | No ❌ |
+| Identity | Authorization | ACL | S3 Access Control List | Yes ✅ |
 | Identity | Authorization | Grant | KMS Key Grant | No ❌ |
 | Identity | Authorization | Policy | S3 Bucket Policy Statement | No ❌ |
 | Identity | Digital Identity | Group | IAM Group | No ❌ |
