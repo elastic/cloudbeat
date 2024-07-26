@@ -82,7 +82,7 @@ const (
 	SubTypeLambdaLayer              AssetSubType = "lambda-layer"
 	SubTypeNatGateway               AssetSubType = "nat-gateway"
 	SubTypeRDS                      AssetSubType = "rds"
-	SubTypeSecurityGroup            AssetSubType = "security-group"
+	SubTypeSecurityGroup            AssetSubType = "ec2-security-group"
 	SubTypeTransitGateway           AssetSubType = "transit-gateway"
 	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
 	SubTypeVpc                      AssetSubType = "vpc"
