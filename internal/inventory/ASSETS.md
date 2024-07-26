@@ -1,8 +1,8 @@
 ## AWS Resources
 
-**Progress: 16% (14/83)**
+**Progress: 19% (16/84)**
 Identity: 25% (3/12)
-Infrastructure: 15% (11/71)
+Infrastructure: 18% (13/72)
 
 <details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
@@ -64,7 +64,8 @@ Infrastructure: 15% (11/71)
 | Infrastructure | Network | Firewall Rule | Inbound IP Permission | No ❌ |
 | Infrastructure | Network | Firewall Rule | IP Rule | No ❌ |
 | Infrastructure | Network | Firewall | EC2 Security Group | No ❌ |
-| Infrastructure | Network | Gateway | Internet Gateway | No ❌ |
+| Infrastructure | Network | Gateway | Internet Gateway | Yes ✅ |
+| Infrastructure | Network | Gateway | NAT Gateway | Yes ✅ |
 | Infrastructure | Network | Interface | EC2 Network Interface | Yes ✅ |
 | Infrastructure | Network | IP Address Range | VPC CIDR Block | No ❌ |
 | Infrastructure | Network | IP Address Range | VPC IPv4 CIDR Block | No ❌ |

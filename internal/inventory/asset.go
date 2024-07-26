@@ -46,6 +46,7 @@ const (
 	TypeAcl                 AssetType = "acl"
 	TypeEventSource         AssetType = "event-source"
 	TypeFirewall            AssetType = "firewall"
+	TypeGateway             AssetType = "gateway"
 	TypeInterface           AssetType = "interface"
 	TypeLoadBalancer        AssetType = "load-balancer"
 	TypeNotificationService AssetType = "notification-service"
@@ -53,8 +54,8 @@ const (
 	TypePeering             AssetType = "peering"
 	TypePolicy              AssetType = "policy"
 	TypeRelationalDatabase  AssetType = "relational-database"
-	TypeServerless          AssetType = "serverless"
 	TypeRole                AssetType = "role"
+	TypeServerless          AssetType = "serverless"
 	TypeSubnet              AssetType = "subnet"
 	TypeUser                AssetType = "user"
 	TypeVirtualMachine      AssetType = "virtual-machine"
@@ -115,8 +116,8 @@ var (
 	AssetClassificationAwsLambdaEventSourceMapping = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryIntegration, Type: TypeEventSource, SubType: SubTypeLambdaEventSourceMapping}
 	AssetClassificationAwsLambdaFunction           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaFunction}
 	AssetClassificationAwsLambdaLayer              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaLayer}
-	AssetClassificationAwsInternetGateway          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeVirtualNetwork, SubType: SubTypeInternetGateway}
-	AssetClassificationAwsNatGateway               = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeVirtualNetwork, SubType: SubTypeNatGateway}
+	AssetClassificationAwsInternetGateway          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeGateway, SubType: SubTypeInternetGateway}
+	AssetClassificationAwsNatGateway               = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeGateway, SubType: SubTypeNatGateway}
 	AssetClassificationAwsNetworkAcl               = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryAuthorization, Type: TypeAcl, SubType: SubTypeVpcAcl}
 	AssetClassificationAwsNetworkInterface         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeInterface, SubType: SubTypeEC2NetworkInterface}
 	AssetClassificationAwsSecurityGroup            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeFirewall, SubType: SubTypeSecurityGroup}
