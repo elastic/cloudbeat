@@ -44,7 +44,7 @@ type AssetType string
 
 const (
 	TypeAcl                 AssetType = "acl"
-	TypeEventSource         AssetType = "event-type"
+	TypeEventSource         AssetType = "event-source"
 	TypeFirewall            AssetType = "firewall"
 	TypeInterface           AssetType = "interface"
 	TypeLoadBalancer        AssetType = "load-balancer"

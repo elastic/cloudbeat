@@ -1,8 +1,8 @@
 ## AWS Resources
 
-**Progress: 15% (13/83)**
+**Progress: 16% (14/83)**
 Identity: 25% (3/12)
-Infrastructure: 14% (10/71)
+Infrastructure: 15% (11/71)
 
 <details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
@@ -49,7 +49,7 @@ Infrastructure: 14% (10/71)
 | Infrastructure | Integration | API | API Gateway Resource | No ❌ |
 | Infrastructure | Integration | API | API Gateway REST API | No ❌ |
 | Infrastructure | Integration | API | API Gateway Stage | No ❌ |
-| Infrastructure | Integration | Event Source | Lambda Event Source Mapping | No ❌ |
+| Infrastructure | Integration | Event Source | Lambda Event Source Mapping | Yes ✅ |
 | Infrastructure | Integration | Message Queue | SQS Queue | No ❌ |
 | Infrastructure | Management | Cloud Account | Cloud Service Provider Account | No ❌ |
 | Infrastructure | Management | Configuration | Config Configuration Recorder | No ❌ |
