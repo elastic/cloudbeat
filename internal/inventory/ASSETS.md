@@ -1,7 +1,7 @@
 ## AWS Resources
 
-**Progress: 12% (10/83)**
-Identity: 0% (0/12)
+**Progress: 15% (13/83)**
+Identity: 25% (3/12)
 Infrastructure: 14% (10/71)
 
 <details> <summary>Full table</summary>
@@ -14,11 +14,11 @@ Infrastructure: 14% (10/71)
 | Identity | Authorization | Grant | KMS Key Grant | No ❌ |
 | Identity | Authorization | Policy | S3 Bucket Policy Statement | No ❌ |
 | Identity | Digital Identity | Group | IAM Group | No ❌ |
-| Identity | Digital Identity | Policy | IAM Policy | No ❌ |
+| Identity | Digital Identity | Policy | IAM Policy | Yes ✅ |
 | Identity | Digital Identity | Policy | IAM Policy Statement | No ❌ |
 | Identity | Digital Identity | Principal | IAM Principal | No ❌ |
-| Identity | Digital Identity | Role | IAM Role | No ❌ |
-| Identity | Digital Identity | User | IAM User | No ❌ |
+| Identity | Digital Identity | Role | IAM Role | Yes ✅ |
+| Identity | Digital Identity | User | IAM User | Yes ✅ |
 | Infrastructure | Analytics | Cluster | EMR Cluster | No ❌ |
 | Infrastructure | Compute | Configuration | Launch Configuration | No ❌ |
 | Infrastructure | Compute | Configuration | Launch Template | No ❌ |

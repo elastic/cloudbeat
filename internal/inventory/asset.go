@@ -29,14 +29,14 @@ const (
 type AssetSubCategory string
 
 const (
-	SubCategoryAuthorization        AssetSubCategory = "authorization"
-	SubCategoryCloudProviderAccount AssetSubCategory = "cloud-provider-account"
-	SubCategoryCompute              AssetSubCategory = "compute"
-	SubCategoryDatabase             AssetSubCategory = "database"
-	SubCategoryIntegration          AssetSubCategory = "integration"
-	SubCategoryMessaging            AssetSubCategory = "messaging"
-	SubCategoryNetwork              AssetSubCategory = "network"
-	SubCategoryStorage              AssetSubCategory = "storage"
+	SubCategoryAuthorization   AssetSubCategory = "authorization"
+	SubCategoryCompute         AssetSubCategory = "compute"
+	SubCategoryDatabase        AssetSubCategory = "database"
+	SubCategoryDigitalIdentity AssetSubCategory = "digital-identity"
+	SubCategoryIntegration     AssetSubCategory = "integration"
+	SubCategoryMessaging       AssetSubCategory = "messaging"
+	SubCategoryNetwork         AssetSubCategory = "network"
+	SubCategoryStorage         AssetSubCategory = "storage"
 )
 
 // AssetType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -51,10 +51,10 @@ const (
 	TypeNotificationService AssetType = "notification-service"
 	TypeObjectStorage       AssetType = "object-storage"
 	TypePeering             AssetType = "peering"
-	TypePermissions         AssetType = "permissions"
+	TypePolicy              AssetType = "policy"
 	TypeRelationalDatabase  AssetType = "relational-database"
 	TypeServerless          AssetType = "serverless"
-	TypeServiceAccount      AssetType = "service-account"
+	TypeRole                AssetType = "role"
 	TypeSubnet              AssetType = "subnet"
 	TypeUser                AssetType = "user"
 	TypeVirtualMachine      AssetType = "virtual-machine"
@@ -109,9 +109,9 @@ var (
 	AssetClassificationAwsEc2Instance              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeEC2}
 	AssetClassificationAwsElbV1                    = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancer, SubType: SubTypeELBv1}
 	AssetClassificationAwsElbV2                    = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancer, SubType: SubTypeELBv2}
-	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypePermissions, SubType: SubTypeIAMPolicy}
-	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypeServiceAccount, SubType: SubTypeIAMRole}
-	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypeUser, SubType: SubTypeIAMUser}
+	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypePolicy, SubType: SubTypeIAMPolicy}
+	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypeRole, SubType: SubTypeIAMRole}
+	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypeUser, SubType: SubTypeIAMUser}
 	AssetClassificationAwsLambdaEventSourceMapping = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryIntegration, Type: TypeEventSource, SubType: SubTypeLambdaEventSourceMapping}
 	AssetClassificationAwsLambdaFunction           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaFunction}
 	AssetClassificationAwsLambdaLayer              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaLayer}
