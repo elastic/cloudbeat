@@ -1,5 +1,10 @@
-# AWS Resources
+## AWS Resources
 
+**Progress: 12% (10/83)**
+Identity: 0% (0/12)
+Infrastructure: 14% (10/71)
+
+<details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
 |---|---|---|---|---|
 | Identity | Authentication | Certificate | API Gateway Client Certificate | No ❌ |
@@ -85,10 +90,15 @@
 | Infrastructure | Storage | Object Storage | S3 Bucket | No ❌ |
 | Infrastructure | Storage | Snapshot | EBS Snapshot | No ❌ |
 | Infrastructure | Storage | Snapshot | RDS Snapshot | No ❌ |
+</details>
 
-Progress: 12% (10/83)
-# AZURE Resources
+## AZURE Resources
 
+**Progress: 0% (0/51)**
+Identity: 0% (0/8)
+Infrastructure: 0% (0/43)
+
+<details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
 |---|---|---|---|---|
 | Identity | Access Management | Role Assignment | Azure Role Assignment | No ❌ |
@@ -142,10 +152,16 @@ Progress: 12% (10/83)
 | Infrastructure | Storage | Object Storage | Azure Storage Blob Service | No ❌ |
 | Infrastructure | Storage | Snapshot | Azure Snapshot | No ❌ |
 | Infrastructure | Storage | Storage | Azure Storage Account | No ❌ |
+</details>
 
-Progress: 0% (0/51)
-# GCP Resources
+## GCP Resources
 
+**Progress: 0% (0/25)**
+Identity: 0% (0/4)
+Infrastructure: 0% (0/20)
+Management: 0% (0/1)
+
+<details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
 |---|---|---|---|---|
 | Identity | Access Management | IAM Policy | GCP IAM Policy | No ❌ |
@@ -173,5 +189,4 @@ Progress: 0% (0/51)
 | Infrastructure | Serverless | Function | GCP Cloud Function | No ❌ |
 | Infrastructure | Storage | Object Storage | GCP Bucket | No ❌ |
 | Management | Resource Management | Label | GCP Bucket Label | No ❌ |
-
-Progress: 0% (0/25)
+</details>

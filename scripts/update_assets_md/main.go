@@ -192,38 +192,68 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 	}
 	defer file.Close()
 
-	for _, provider := range []string{AWS_PREFIX, AZURE_PREFIX, GCP_PREFIX} {
-		writeToFile(file, fmt.Sprintf("# %s Resources\n\n", strings.ToUpper(provider)))
-		writeToFile(file, "| Category | SubCategory | Type | SubType | Implemented? |\n")
-		writeToFile(file, "|---|---|---|---|---|\n")
-
+	for providerNo, provider := range []string{AWS_PREFIX, AZURE_PREFIX, GCP_PREFIX} {
 		planned := plannedByProvider.Get(provider)
 		implemented := implementedByProvider.Get(provider)
 		sortedKeys := maps.Keys(planned)
 		slices.Sort(sortedKeys)
 
+		// stats
 		totalImplemented := 0
+		implementedByCategory := map[string]int{}
+		plannedByCategory := map[string]int{}
+
+		// table of assets
+		table := []string{
+			"<details> <summary>Full table</summary>",
+			"| Category | SubCategory | Type | SubType | Implemented? |",
+			"|---|---|---|---|---|",
+		}
+
 		for _, key := range sortedKeys {
+			item := planned[key]
 			status := "No ❌"
+
+			plannedByCategory[item.Category] += 1
 			if _, ok := implemented[key]; ok {
 				status = "Yes ✅"
 				totalImplemented += 1
+				implementedByCategory[item.Category] += 1
 			}
-			item := planned[key]
-			writeToFile(file,
+			table = append(table,
 				fmt.Sprintf(
-					"| %s | %s | %s | %s | %s |\n",
+					"| %s | %s | %s | %s | %s |",
 					item.Category, item.SubCategory, item.Type, item.SubType, status,
 				),
 			)
 		}
+		table = append(table, "</details>")
+
+		// write ASSETS.md
+		if providerNo > 0 {
+			writeToFile(file, "\n\n")
+		}
+		writeToFile(file, fmt.Sprintf("## %s Resources\n\n", strings.ToUpper(provider)))
+
 		percentage := totalImplemented * 100 / len(planned)
-		writeToFile(file,
-			fmt.Sprintf(
-				"\nProgress: %d%% (%d/%d)\n",
-				percentage, totalImplemented, len(planned),
-			),
+		writeToFile(
+			file,
+			fmt.Sprintf("**Progress: %d%% (%d/%d)**\n", percentage, totalImplemented, len(planned)),
 		)
+
+		sortedCategories := maps.Keys(plannedByCategory)
+		slices.Sort(sortedCategories)
+
+		for _, category := range sortedCategories {
+			plannedCount := plannedByCategory[category]
+			implementedCount := implementedByCategory[category]
+			percentage = implementedCount * 100 / plannedCount
+			writeToFile(
+				file,
+				fmt.Sprintf("%s: %d%% (%d/%d)\n", category, percentage, implementedCount, plannedCount),
+			)
+		}
+		writeToFile(file, "\n"+strings.Join(table, "\n"))
 	}
 
 	return nil
