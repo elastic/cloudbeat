@@ -255,6 +255,7 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 		}
 		writeToFile(file, "\n"+strings.Join(table, "\n"))
 	}
+	writeToFile(file, "\n") // required for valid Markdown :o
 
 	return nil
 }

@@ -67,7 +67,9 @@ type AssetSubType string
 const (
 	SubTypeEC2                      AssetSubType = "ec2-instance"
 	SubTypeS3                       AssetSubType = "s3"
-	SubTypeIAM                      AssetSubType = "iam"
+	SubTypeIAMPolicy                AssetSubType = "iam-policy"
+	SubTypeIAMRole                  AssetSubType = "iam-role"
+	SubTypeIAMUser                  AssetSubType = "iam-user"
 	SubTypeEC2NetworkInterface      AssetSubType = "ec2-network-interface"
 	SubTypeEC2Subnet                AssetSubType = "ec2-subnet"
 	SubTypeELBv1                    AssetSubType = "elastic-load-balancer"
@@ -107,9 +109,9 @@ var (
 	AssetClassificationAwsEc2Instance              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeEC2}
 	AssetClassificationAwsElbV1                    = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancer, SubType: SubTypeELBv1}
 	AssetClassificationAwsElbV2                    = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancer, SubType: SubTypeELBv2}
-	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypePermissions, SubType: SubTypeIAM}
-	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypeServiceAccount, SubType: SubTypeIAM}
-	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypeUser, SubType: SubTypeIAM}
+	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypePermissions, SubType: SubTypeIAMPolicy}
+	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypeServiceAccount, SubType: SubTypeIAMRole}
+	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryCloudProviderAccount, Type: TypeUser, SubType: SubTypeIAMUser}
 	AssetClassificationAwsLambdaEventSourceMapping = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryIntegration, Type: TypeEventSource, SubType: SubTypeLambdaEventSourceMapping}
 	AssetClassificationAwsLambdaFunction           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaFunction}
 	AssetClassificationAwsLambdaLayer              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaLayer}

@@ -39,13 +39,6 @@ type iamUserProvider interface {
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-var iamUserClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryIdentity,
-	SubCategory: inventory.SubCategoryCloudProviderAccount,
-	Type:        inventory.TypeUser,
-	SubType:     inventory.SubTypeIAM,
-}
-
 func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamUserProvider) inventory.AssetFetcher {
 	return &iamUserFetcher{
 		logger:      logger,
@@ -79,7 +72,7 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 		}
 
 		assetChannel <- inventory.NewAssetEvent(
-			iamUserClassification,
+			inventory.AssetClassificationAwsIamUser,
 			[]string{user.GetResourceArn(), user.UserId},
 			user.GetResourceName(),
 
