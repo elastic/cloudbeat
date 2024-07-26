@@ -67,7 +67,7 @@ type AssetSubType string
 
 const (
 	SubTypeEC2                      AssetSubType = "ec2-instance"
-	SubTypeS3                       AssetSubType = "s3"
+	SubTypeS3                       AssetSubType = "s3-bucket"
 	SubTypeIAMPolicy                AssetSubType = "iam-policy"
 	SubTypeIAMRole                  AssetSubType = "iam-role"
 	SubTypeIAMUser                  AssetSubType = "iam-user"

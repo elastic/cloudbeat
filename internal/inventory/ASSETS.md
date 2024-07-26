@@ -1,8 +1,8 @@
 ## AWS Resources
 
-**Progress: 23% (20/84)**
+**Progress: 25% (21/84)**
 Identity: 33% (4/12)
-Infrastructure: 22% (16/72)
+Infrastructure: 23% (17/72)
 
 <details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
@@ -88,7 +88,7 @@ Infrastructure: 22% (16/72)
 | Infrastructure | Security | Secrets Management | Secrets Manager Secret | No ❌ |
 | Infrastructure | Security | Security Management | Security Hub | No ❌ |
 | Infrastructure | Storage | Disk | EBS Volume | No ❌ |
-| Infrastructure | Storage | Object Storage | S3 Bucket | No ❌ |
+| Infrastructure | Storage | Object Storage | S3 Bucket | Yes ✅ |
 | Infrastructure | Storage | Snapshot | EBS Snapshot | No ❌ |
 | Infrastructure | Storage | Snapshot | RDS Snapshot | No ❌ |
 </details>
