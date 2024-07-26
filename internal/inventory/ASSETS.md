@@ -1,8 +1,8 @@
 ## AWS Resources
 
-**Progress: 22% (19/84)**
+**Progress: 23% (20/84)**
 Identity: 33% (4/12)
-Infrastructure: 20% (15/72)
+Infrastructure: 22% (16/72)
 
 <details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
@@ -44,7 +44,7 @@ Infrastructure: 20% (15/72)
 | Infrastructure | Database | Data Warehouse | Redshift Cluster | No ❌ |
 | Infrastructure | Database | NoSQL | DynamoDB Table | No ❌ |
 | Infrastructure | Database | Relational | RDS Cluster | No ❌ |
-| Infrastructure | Database | Relational | RDS Instance | No ❌ |
+| Infrastructure | Database | Relational | RDS Instance | Yes ✅ |
 | Infrastructure | Database | Search | Elasticsearch Domain | No ❌ |
 | Infrastructure | Integration | API | API Gateway Resource | No ❌ |
 | Infrastructure | Integration | API | API Gateway REST API | No ❌ |
