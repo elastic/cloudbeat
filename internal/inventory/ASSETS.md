@@ -1,8 +1,8 @@
 ## AWS Resources
 
-**Progress: 21% (18/84)**
+**Progress: 22% (19/84)**
 Identity: 33% (4/12)
-Infrastructure: 19% (14/72)
+Infrastructure: 20% (15/72)
 
 <details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
@@ -77,7 +77,7 @@ Infrastructure: 19% (14/72)
 | Infrastructure | Network | Load Balancer | Elastic Load Balancer | Yes ✅ |
 | Infrastructure | Network | Load Balancer | Elastic Load Balancer v2 | Yes ✅ |
 | Infrastructure | Network | Load Balancer | ELB Listener | No ❌ |
-| Infrastructure | Network | Peering | VPC Peering Connection | No ❌ |
+| Infrastructure | Network | Peering | VPC Peering Connection | Yes ✅ |
 | Infrastructure | Network | Subnet | DB Subnet Group | No ❌ |
 | Infrastructure | Network | Subnet | EC2 Subnet | Yes ✅ |
 | Infrastructure | Network | Virtual Network | Transit Gateway | Yes ✅ |

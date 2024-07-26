@@ -88,7 +88,7 @@ const (
 	SubTypeVpc                      AssetSubType = "vpc"
 	SubTypeSNSTopic                 AssetSubType = "sns-topic"
 	SubTypeVpcAcl                   AssetSubType = "s3-access-control-list"
-	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connections"
+	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connection"
 )
 
 const (
