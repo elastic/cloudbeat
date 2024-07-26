@@ -5,6 +5,7 @@ Identity: 33% (4/12)
 Infrastructure: 24% (18/73)
 
 <details> <summary>Full table</summary>
+
 | Category | SubCategory | Type | SubType | Implemented? |
 |---|---|---|---|---|
 | Identity | Authentication | Certificate | API Gateway Client Certificate | No ❌ |
@@ -92,6 +93,7 @@ Infrastructure: 24% (18/73)
 | Infrastructure | Storage | Object Storage | S3 Bucket | Yes ✅ |
 | Infrastructure | Storage | Snapshot | EBS Snapshot | No ❌ |
 | Infrastructure | Storage | Snapshot | RDS Snapshot | No ❌ |
+
 </details>
 
 ## AZURE Resources
@@ -101,6 +103,7 @@ Identity: 0% (0/8)
 Infrastructure: 0% (0/43)
 
 <details> <summary>Full table</summary>
+
 | Category | SubCategory | Type | SubType | Implemented? |
 |---|---|---|---|---|
 | Identity | Access Management | Role Assignment | Azure Role Assignment | No ❌ |
@@ -154,6 +157,7 @@ Infrastructure: 0% (0/43)
 | Infrastructure | Storage | Object Storage | Azure Storage Blob Service | No ❌ |
 | Infrastructure | Storage | Snapshot | Azure Snapshot | No ❌ |
 | Infrastructure | Storage | Storage | Azure Storage Account | No ❌ |
+
 </details>
 
 ## GCP Resources
@@ -164,6 +168,7 @@ Infrastructure: 0% (0/20)
 Management: 0% (0/1)
 
 <details> <summary>Full table</summary>
+
 | Category | SubCategory | Type | SubType | Implemented? |
 |---|---|---|---|---|
 | Identity | Access Management | IAM Policy | GCP IAM Policy | No ❌ |
@@ -191,4 +196,5 @@ Management: 0% (0/1)
 | Infrastructure | Serverless | Function | GCP Cloud Function | No ❌ |
 | Infrastructure | Storage | Object Storage | GCP Bucket | No ❌ |
 | Management | Resource Management | Label | GCP Bucket Label | No ❌ |
+
 </details>

@@ -205,7 +205,7 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 
 		// table of assets
 		table := []string{
-			"<details> <summary>Full table</summary>",
+			"<details> <summary>Full table</summary>\n",
 			"| Category | SubCategory | Type | SubType | Implemented? |",
 			"|---|---|---|---|---|",
 		}
@@ -227,7 +227,7 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 				),
 			)
 		}
-		table = append(table, "</details>")
+		table = append(table, "\n</details>")
 
 		// write ASSETS.md
 		if providerNo > 0 {
