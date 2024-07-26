@@ -1,8 +1,8 @@
 ## AWS Resources
 
-**Progress: 25% (21/84)**
+**Progress: 25% (22/85)**
 Identity: 33% (4/12)
-Infrastructure: 23% (17/72)
+Infrastructure: 24% (18/73)
 
 <details> <summary>Full table</summary>
 | Category | SubCategory | Type | SubType | Implemented? |
@@ -56,6 +56,7 @@ Infrastructure: 23% (17/72)
 | Infrastructure | Management | Configuration | Config Delivery Channel | No ❌ |
 | Infrastructure | Management | Inventory | Systems Manager Instance | No ❌ |
 | Infrastructure | Management | Patch | Systems Manager Instance Patch | No ❌ |
+| Infrastructure | Messaging | Notification Service | SNS Topic | Yes ✅ |
 | Infrastructure | Network | DNS | DNS Record | No ❌ |
 | Infrastructure | Network | DNS | Nameserver | No ❌ |
 | Infrastructure | Network | DNS | Route53 DNS Record | No ❌ |
