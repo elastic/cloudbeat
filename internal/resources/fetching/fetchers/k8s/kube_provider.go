@@ -135,8 +135,6 @@ func nullifyManagedFields(resource any) {
 		val.ManagedFields = nil
 	case *kubernetes.ClusterRoleBinding:
 		val.ManagedFields = nil
-	// case *policyv1beta1.PodSecurityPolicy:
-	// 	val.ManagedFields = nil
 	case *kubernetes.ServiceAccount:
 		val.ManagedFields = nil
 	case *kubernetes.NetworkPolicy:
