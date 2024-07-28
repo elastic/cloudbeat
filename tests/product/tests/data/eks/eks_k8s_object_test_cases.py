@@ -4,7 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 """
 
-from commonlib.framework.reporting import SkipReportData, skip_param_case
+# from commonlib.framework.reporting import SkipReportData, skip_param_case
 from configuration import eks
 
 from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
