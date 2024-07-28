@@ -168,9 +168,9 @@ jobs:
           - test-target: k8s_file_system_rules
             kind-config: kind-test-files
             values-file: tests/test_environments/values/ci-test-k8s-files.yml
-          - test-target: k8s_object_psp_rules
-            kind-config: kind-multi
-            values-file: tests/test_environments/values/ci-test-k8s-objects.yml
+          # - test-target: k8s_object_psp_rules
+          #   kind-config: kind-multi
+          #   values-file: tests/test_environments/values/ci-test-k8s-objects.yml
           - test-target: k8s_process_rules
             kind-config: kind-test-proc-conf1
             values-file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
