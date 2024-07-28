@@ -191,9 +191,7 @@ jobs:
           poetry run python upgrade_agents.py
 
       - name: Run Upgrade Sanity checks
-        # TODO: Remove after debugging
-        if: false
-        # if: success()
+        if: success()
         working-directory: ./tests
         env:
           AGENT_VERSION: ${{ needs.init.outputs.target-agent-version }}
