@@ -1136,21 +1136,12 @@ github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240524163615-2d687ac9d228 h1:e8TwY
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240524163615-2d687ac9d228/go.mod h1:HjUJr+gw2jebZYFMKc9TNbgwjHsNSo6HUSonhC0u62U=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc h1:3hGO3+tipLIULlrabnXpXpOV5qSDbN/EJo9Xsj3hqyo=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc/go.mod h1:8q2d8dmwavJXISowwaoreHFBnbR/uK4qanfRGhC/W9A=
-<<<<<<< HEAD
-github.com/elastic/elastic-agent-autodiscover v0.6.14 h1:0zJYNyv9GKTOiNqCHqEVboP+WioV73ia17Et+UlFbz8=
-github.com/elastic/elastic-agent-autodiscover v0.6.14/go.mod h1:39/fHHlnyTK6oUNZfAhxJwBTVahO9tNasEIjzsxGMu8=
-github.com/elastic/elastic-agent-client/v7 v7.9.0 h1:ryNbISIg4tTRT9KA0MYOa+fxW0CpsF+qxELWWb13rYE=
-github.com/elastic/elastic-agent-client/v7 v7.9.0/go.mod h1:/AeiwX9zxG99eUNrLhpApTpwmE71Qwuh4ozObn7a0ss=
-github.com/elastic/elastic-agent-libs v0.9.8 h1:fwl3hp0gNmKkuERcUQTwe4cyIK6M0jJkv16EIsB6Apw=
-github.com/elastic/elastic-agent-libs v0.9.8/go.mod h1:xhHF9jeWhPzKPtEHN+epKjdiZi0bCbACLxwkp1aHMpc=
-=======
 github.com/elastic/elastic-agent-autodiscover v0.8.0 h1:euHfPSsOE1z8GsPaFoc7lBB8pwyGGUiaE2lXHt0WwQI=
 github.com/elastic/elastic-agent-autodiscover v0.8.0/go.mod h1:lSHCpBzQj2DU0U5RX7Z1Kpt12R6WGca6598MorwlJsY=
 github.com/elastic/elastic-agent-client/v7 v7.15.0 h1:nDB7v8TBoNuD6IIzC3z7Q0y+7bMgXoT2DsHfolO2CHE=
 github.com/elastic/elastic-agent-client/v7 v7.15.0/go.mod h1:6h+f9QdIr3GO2ODC0Y8+aEXRwzbA5W4eV4dd/67z7nI=
 github.com/elastic/elastic-agent-libs v0.9.15 h1:WCLtuErafUxczT/rXJa4Vr6mxwC8dgtqMbEq+qWGD4M=
 github.com/elastic/elastic-agent-libs v0.9.15/go.mod h1:2VgYxHaeM+cCDBjiS2wbmTvzPGbnlXAtYrlcLefheS8=
->>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 github.com/elastic/elastic-agent-system-metrics v0.10.2 h1:AVW+YqgezR0mNOZ80NxPLH3tiYMenNGZ8SC/bIUf4Uc=
 github.com/elastic/elastic-agent-system-metrics v0.10.2/go.mod h1:0jJ2ARnzTTOEMmcRX9UNqSwbwguEluE/mK2HaM3GViI=
 github.com/elastic/elastic-integration-corpus-generator-tool v0.5.0/go.mod h1:uf9N86y+UACGybdEhZLpwZ93XHWVhsYZAA4c2T2v6YM=
@@ -2127,17 +2118,10 @@ github.com/onsi/gomega v1.20.1/go.mod h1:DtrZpjmvpn2mPm4YWQa0/ALMDj9v4YxLgojwPeR
 github.com/onsi/gomega v1.21.1/go.mod h1:iYAIXgPSaDHak0LCMA+AWBpIKBr8WZicMxnE8luStNc=
 github.com/onsi/gomega v1.22.1/go.mod h1:x6n7VNe4hw0vkyYUM4mjIXx3JbLiPaBPNgB7PRQ1tuM=
 github.com/onsi/gomega v1.23.0/go.mod h1:Z/NWtiqwBrwUt4/2loMmHL63EDLnYHmVbuBpDr2vQAg=
-<<<<<<< HEAD
-github.com/onsi/gomega v1.27.10 h1:naR28SdDFlqrG6kScpT8VWpu1xWY5nJRCF3XaYyBjhI=
-github.com/onsi/gomega v1.27.10/go.mod h1:RsS8tutOdbdgzbPtzzATp12yT7kM5I5aElG3evPbQ0M=
-github.com/open-policy-agent/opa v0.62.0 h1:8NAWkrg3tnMBi+pYqL7pEi7h6QmbMmVf/5IyjJS/A2s=
-github.com/open-policy-agent/opa v0.62.0/go.mod h1:FD8D++1j1m74Qam2iUnKlfPDeoxWTXANaRUVu8W/tmA=
-=======
 github.com/onsi/gomega v1.29.0 h1:KIA/t2t5UBzoirT4H9tsML45GEbo3ouUnBHsCfD2tVg=
 github.com/onsi/gomega v1.29.0/go.mod h1:9sxs+SwGrKI0+PWe4Fxa9tFQQBG5xSsSbMXOI8PPpoQ=
 github.com/open-policy-agent/opa v0.66.0 h1:DbrvfJQja0FBRcPOB3Z/BOckocN+M4ApNWyNhSRJt0w=
 github.com/open-policy-agent/opa v0.66.0/go.mod h1:EIgNnJcol7AvQR/IcWLwL13k64gHVbNAVG46b2G+/EY=
->>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 github.com/opencontainers/go-digest v0.0.0-20170106003457-a6d0ee40d420/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
 github.com/opencontainers/go-digest v0.0.0-20180430190053-c9281466c8b2/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
 github.com/opencontainers/go-digest v1.0.0-rc1/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=

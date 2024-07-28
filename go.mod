@@ -49,17 +49,10 @@ require (
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240524163615-2d687ac9d228
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
-<<<<<<< HEAD
-	github.com/elastic/elastic-agent-autodiscover v0.6.14
-	github.com/elastic/elastic-agent-client/v7 v7.9.0
-	github.com/elastic/elastic-agent-libs v0.9.8
-	github.com/elastic/go-licenser v0.4.1
-=======
 	github.com/elastic/elastic-agent-autodiscover v0.8.0
 	github.com/elastic/elastic-agent-client/v7 v7.15.0
 	github.com/elastic/elastic-agent-libs v0.9.15
 	github.com/elastic/go-licenser v0.4.2
->>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -85,17 +78,10 @@ require (
 	golang.org/x/oauth2 v0.21.0
 	google.golang.org/api v0.186.0
 	gopkg.in/yaml.v2 v2.4.0
-<<<<<<< HEAD
-	gotest.tools/gotestsum v1.11.0
-	k8s.io/api v0.28.10
-	k8s.io/apimachinery v0.28.10
-	k8s.io/client-go v0.28.10
-=======
 	gotest.tools/gotestsum v1.12.0
 	k8s.io/api v0.29.5
 	k8s.io/apimachinery v0.29.5
 	k8s.io/client-go v0.29.5
->>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 	k8s.io/klog/v2 v2.120.1
 	modernc.org/sqlite v1.29.2
 )
@@ -513,16 +499,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.14.2 // indirect
 	howett.net/plist v1.0.1 // indirect
-<<<<<<< HEAD
-	k8s.io/apiextensions-apiserver v0.28.2 // indirect
-	k8s.io/apiserver v0.28.2 // indirect
-	k8s.io/cli-runtime v0.28.4 // indirect
-	k8s.io/component-base v0.28.3 // indirect
-	k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9 // indirect
-	k8s.io/kubectl v0.28.3 // indirect
-	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect
-	modernc.org/libc v1.41.0 // indirect
-=======
 	k8s.io/apiextensions-apiserver v0.29.0 // indirect
 	k8s.io/apiserver v0.29.0 // indirect
 	k8s.io/cli-runtime v0.29.0 // indirect
@@ -531,7 +507,6 @@ require (
 	k8s.io/kubectl v0.29.0 // indirect
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
 	modernc.org/libc v1.52.1 // indirect
->>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.7.2 // indirect
 	modernc.org/strutil v1.2.0 // indirect
