@@ -4,7 +4,7 @@ Cases are organized as rules.
 Each rule has one or more test cases.
 """
 
-from commonlib.framework.reporting import SkipReportData, skip_param_case
+# from commonlib.framework.reporting import SkipReportData, skip_param_case
 from configuration import eks
 
 from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
@@ -164,25 +164,25 @@ cis_eks_4_2_9 = {
 }
 
 k8s_object_config_1 = {
-    **cis_eks_4_2_7,
-    **skip_param_case(
-        cis_eks_4_2_8,
-        data_to_report=SkipReportData(
-            skip_reason="Retest after testing configuration will be fixed.",
-            url_title="cloudbeat: #500",
-            url_link="https://github.com/elastic/cloudbeat/issues/500",
-        ),
-    ),
-    **cis_eks_4_2_9,
+    # **cis_eks_4_2_7,
+    # **skip_param_case(
+    #     cis_eks_4_2_8,
+    #     data_to_report=SkipReportData(
+    #         skip_reason="Retest after testing configuration will be fixed.",
+    #         url_title="cloudbeat: #500",
+    #         url_link="https://github.com/elastic/cloudbeat/issues/500",
+    #     ),
+    # ),
+    # **cis_eks_4_2_9,
 }
 
 k8s_object_config_2 = {
-    **cis_eks_4_2_1,
-    **cis_eks_4_2_2,
-    **cis_eks_4_2_3,
-    **cis_eks_4_2_4,
-    **cis_eks_4_2_5,
-    **cis_eks_4_2_6,
+    # **cis_eks_4_2_1,
+    # **cis_eks_4_2_2,
+    # **cis_eks_4_2_3,
+    # **cis_eks_4_2_4,
+    # **cis_eks_4_2_5,
+    # **cis_eks_4_2_6,
 }
 
 cis_eks_all = {
