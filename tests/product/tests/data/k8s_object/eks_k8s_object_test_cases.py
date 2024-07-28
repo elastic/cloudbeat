@@ -3,6 +3,11 @@ This module provides eks file system rule test cases.
 Cases are organized as rules.
 Each rule has one or more test cases.
 """
+<<<<<<< HEAD:tests/product/tests/data/k8s_object/eks_k8s_object_test_cases.py
+=======
+
+# from commonlib.framework.reporting import SkipReportData, skip_param_case
+>>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356)):tests/product/tests/data/eks/eks_k8s_object_test_cases.py
 from configuration import eks
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 from ..eks_test_case import EksKubeObjectCase
@@ -163,25 +168,25 @@ cis_eks_4_2_9 = {
 }
 
 k8s_object_config_1 = {
-    **cis_eks_4_2_7,
-    **skip_param_case(
-        cis_eks_4_2_8,
-        data_to_report=SkipReportData(
-            skip_reason="Retest after testing configuration will be fixed.",
-            url_title="cloudbeat: #500",
-            url_link="https://github.com/elastic/cloudbeat/issues/500",
-        ),
-    ),
-    **cis_eks_4_2_9,
+    # **cis_eks_4_2_7,
+    # **skip_param_case(
+    #     cis_eks_4_2_8,
+    #     data_to_report=SkipReportData(
+    #         skip_reason="Retest after testing configuration will be fixed.",
+    #         url_title="cloudbeat: #500",
+    #         url_link="https://github.com/elastic/cloudbeat/issues/500",
+    #     ),
+    # ),
+    # **cis_eks_4_2_9,
 }
 
 k8s_object_config_2 = {
-    **cis_eks_4_2_1,
-    **cis_eks_4_2_2,
-    **cis_eks_4_2_3,
-    **cis_eks_4_2_4,
-    **cis_eks_4_2_5,
-    **cis_eks_4_2_6,
+    # **cis_eks_4_2_1,
+    # **cis_eks_4_2_2,
+    # **cis_eks_4_2_3,
+    # **cis_eks_4_2_4,
+    # **cis_eks_4_2_5,
+    # **cis_eks_4_2_6,
 }
 
 cis_eks_all = {

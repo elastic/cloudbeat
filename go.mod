@@ -40,12 +40,21 @@ require (
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240209195728-d3cac73cfca8
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
+<<<<<<< HEAD
 	github.com/elastic/elastic-agent-autodiscover v0.6.6
 	github.com/elastic/elastic-agent-client/v7 v7.5.0
 	github.com/elastic/elastic-agent-libs v0.7.3
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
+=======
+	github.com/elastic/elastic-agent-autodiscover v0.8.0
+	github.com/elastic/elastic-agent-client/v7 v7.15.0
+	github.com/elastic/elastic-agent-libs v0.9.15
+	github.com/elastic/go-licenser v0.4.2
+	github.com/elastic/go-ucfg v0.8.8
+	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
+>>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.12.0
 	github.com/hashicorp/go-uuid v1.0.3
@@ -70,12 +79,21 @@ require (
 	golang.org/x/oauth2 v0.13.0
 	google.golang.org/api v0.148.0
 	gopkg.in/yaml.v2 v2.4.0
+<<<<<<< HEAD
 	gotest.tools/gotestsum v1.11.0
 	k8s.io/api v0.28.3
 	k8s.io/apimachinery v0.28.3
 	k8s.io/client-go v0.28.3
 	k8s.io/klog/v2 v2.100.1
 	modernc.org/sqlite v1.26.0
+=======
+	gotest.tools/gotestsum v1.12.0
+	k8s.io/api v0.29.5
+	k8s.io/apimachinery v0.29.5
+	k8s.io/client-go v0.29.5
+	k8s.io/klog/v2 v2.120.1
+	modernc.org/sqlite v1.30.2
+>>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 )
 
 require (
@@ -85,10 +103,21 @@ require (
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-git/go-git/v5 v5.11.0 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
+<<<<<<< HEAD
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/moby/sys/user v0.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
+=======
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
+	github.com/mattn/go-shellwords v1.0.12 // indirect
+	github.com/moby/docker-image-spec v1.3.1 // indirect
+	github.com/moby/sys/user v0.1.0 // indirect
+	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
+	github.com/ncruces/go-strftime v0.1.9 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sagikazarmark/locafero v0.4.0 // indirect
+>>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.45.0 // indirect
@@ -200,9 +229,15 @@ require (
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
+<<<<<<< HEAD
 	github.com/docker/cli v24.0.5+incompatible // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.7+incompatible // indirect
+=======
+	github.com/docker/cli v25.0.5+incompatible // indirect
+	github.com/docker/distribution v2.8.3+incompatible // indirect
+	github.com/docker/docker v26.1.4+incompatible // indirect
+>>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
@@ -227,7 +262,7 @@ require (
 	github.com/elliotchance/orderedmap v1.5.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
+	github.com/evanphx/json-patch v5.7.0+incompatible // indirect
 	github.com/exponent-io/jsonpath v0.0.0-20210407135951-1de76d718b3f // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
@@ -476,6 +511,7 @@ require (
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+<<<<<<< HEAD
 	helm.sh/helm/v3 v3.12.3 // indirect
 	howett.net/plist v1.0.0 // indirect
 	k8s.io/apiextensions-apiserver v0.27.3 // indirect
@@ -496,6 +532,24 @@ require (
 	modernc.org/token v1.0.1 // indirect
 	oras.land/oras-go v1.2.3 // indirect
 	oras.land/oras-go/v2 v2.3.1 // indirect
+=======
+	helm.sh/helm/v3 v3.14.2 // indirect
+	howett.net/plist v1.0.1 // indirect
+	k8s.io/apiextensions-apiserver v0.29.0 // indirect
+	k8s.io/apiserver v0.29.0 // indirect
+	k8s.io/cli-runtime v0.29.0 // indirect
+	k8s.io/component-base v0.29.0 // indirect
+	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
+	k8s.io/kubectl v0.29.0 // indirect
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b // indirect
+	modernc.org/libc v1.52.1 // indirect
+	modernc.org/mathutil v1.6.0 // indirect
+	modernc.org/memory v1.8.0 // indirect
+	modernc.org/strutil v1.2.0 // indirect
+	modernc.org/token v1.1.0 // indirect
+	oras.land/oras-go v1.2.5 // indirect
+	oras.land/oras-go/v2 v2.4.0 // indirect
+>>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356))
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/kustomize/api v0.13.5-0.20230601165947-6ce0bf390ce3 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.14.3-0.20230601165947-6ce0bf390ce3 // indirect

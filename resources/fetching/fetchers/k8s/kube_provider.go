@@ -118,8 +118,11 @@ func nullifyManagedFields(resource interface{}) {
 		val.ManagedFields = nil
 	case *kubernetes.ClusterRoleBinding:
 		val.ManagedFields = nil
+<<<<<<< HEAD:resources/fetching/fetchers/k8s/kube_provider.go
 	case *kubernetes.PodSecurityPolicy:
 		val.ManagedFields = nil
+=======
+>>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356)):internal/resources/fetching/fetchers/k8s/kube_provider.go
 	case *kubernetes.ServiceAccount:
 		val.ManagedFields = nil
 	case *kubernetes.NetworkPolicy:
