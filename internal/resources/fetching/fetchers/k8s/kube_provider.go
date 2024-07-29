@@ -22,7 +22,6 @@ import (
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
-	policyv1beta1 "k8s.io/api/policy/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -135,8 +134,6 @@ func nullifyManagedFields(resource any) {
 	case *kubernetes.ClusterRole:
 		val.ManagedFields = nil
 	case *kubernetes.ClusterRoleBinding:
-		val.ManagedFields = nil
-	case *policyv1beta1.PodSecurityPolicy:
 		val.ManagedFields = nil
 	case *kubernetes.ServiceAccount:
 		val.ManagedFields = nil
