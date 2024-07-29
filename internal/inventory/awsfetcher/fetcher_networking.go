@@ -67,21 +67,16 @@ func (s *networkingFetcher) Fetch(ctx context.Context, assetChannel chan<- inven
 		function       networkDescribeFunc
 		classification inventory.AssetClassification
 	}{
-		{"Internet Gateways", s.provider.DescribeInternetGateways, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeInternetGateway)},
-		{"NAT Gateways", s.provider.DescribeNatGateways, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeNatGateway)},
-		{"Network ACLs", s.provider.DescribeNetworkAcl, inventory.AssetClassification{
-			Category:    inventory.CategoryIdentity,
-			SubCategory: inventory.SubCategoryAuthorization,
-			Type:        inventory.TypeAcl,
-			SubType:     inventory.SubTypeVpcAcl,
-		}},
-		{"Network Interfaces", s.provider.DescribeNetworkInterfaces, newNetworkClassification(inventory.TypeInterface, inventory.SubTypeEC2NetworkInterface)},
-		{"Security Groups", s.provider.DescribeSecurityGroups, newNetworkClassification(inventory.TypeFirewall, inventory.SubTypeSecurityGroup)},
-		{"Subnets", s.provider.DescribeSubnets, newNetworkClassification(inventory.TypeSubnet, inventory.SubTypeEC2Subnet)},
-		{"Transit Gateways", s.provider.DescribeTransitGateways, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeTransitGateway)},
-		{"Transit Gateway Attachments", s.provider.DescribeTransitGatewayAttachments, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeTransitGatewayAttachment)},
-		{"VPC Peering Connections", s.provider.DescribeVpcPeeringConnections, newNetworkClassification(inventory.TypePeering, inventory.SubTypeVpcPeeringConnection)},
-		{"VPCs", s.provider.DescribeVpcs, newNetworkClassification(inventory.TypeVirtualNetwork, inventory.SubTypeVpc)},
+		{"Internet Gateways", s.provider.DescribeInternetGateways, inventory.AssetClassificationAwsInternetGateway},
+		{"NAT Gateways", s.provider.DescribeNatGateways, inventory.AssetClassificationAwsNatGateway},
+		{"Network ACLs", s.provider.DescribeNetworkAcl, inventory.AssetClassificationAwsNetworkAcl},
+		{"Network Interfaces", s.provider.DescribeNetworkInterfaces, inventory.AssetClassificationAwsNetworkInterface},
+		{"Security Groups", s.provider.DescribeSecurityGroups, inventory.AssetClassificationAwsSecurityGroup},
+		{"Subnets", s.provider.DescribeSubnets, inventory.AssetClassificationAwsSubnet},
+		{"Transit Gateways", s.provider.DescribeTransitGateways, inventory.AssetClassificationAwsTransitGateway},
+		{"Transit Gateway Attachments", s.provider.DescribeTransitGatewayAttachments, inventory.AssetClassificationAwsTransitGatewayAttachment},
+		{"VPC Peering Connections", s.provider.DescribeVpcPeeringConnections, inventory.AssetClassificationAwsVpcPeeringConnection},
+		{"VPCs", s.provider.DescribeVpcs, inventory.AssetClassificationAwsVpc},
 	}
 	for _, r := range resourcesToFetch {
 		s.fetch(ctx, r.name, r.function, r.classification, assetChannel)
@@ -117,15 +112,6 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 			}),
 			s.networkEnricher(item),
 		)
-	}
-}
-
-func newNetworkClassification(assetType inventory.AssetType, assetSubType inventory.AssetSubType) inventory.AssetClassification {
-	return inventory.AssetClassification{
-		Category:    inventory.CategoryInfrastructure,
-		SubCategory: inventory.SubCategoryNetwork,
-		Type:        assetType,
-		SubType:     assetSubType,
 	}
 }
 

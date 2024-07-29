@@ -16,3 +16,4 @@ packages:
         - deploy/test-environments/.terraform
         - deploy/cloud/.terraform
         - tools
+        - scripts
