@@ -37,7 +37,7 @@ func TestAssetInventory_Run(t *testing.T) {
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
 	expected := []beat.Event{
 		{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_inventory.asset_inventory-infrastructure_compute_virtual-machine_ec2-default"},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_inventory.asset_inventory-infrastructure_compute_virtual-machine_ec2-instance-default"},
 			Timestamp: now(),
 			Fields: mapstr.M{
 				"entity": Entity{

@@ -82,7 +82,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			rdsClassification,
+			inventory.AssetClassificationAwsRds,
 			[]string{"arn:aws:rds:eu-west-1:123:db:db1", "db1"},
 			"db1",
 			inventory.WithRawAsset(instance1),
@@ -98,7 +98,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 			}),
 		),
 		inventory.NewAssetEvent(
-			rdsClassification,
+			inventory.AssetClassificationAwsRds,
 			[]string{"arn:aws:rds:eu-west-1:123:db:db2", "db2"},
 			"db2",
 			inventory.WithRawAsset(instance2),

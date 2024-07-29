@@ -50,16 +50,10 @@ func TestLambdaFunction_Fetch(t *testing.T) {
 	}
 
 	in := []awslib.AwsResource{function1}
-	classification := inventory.AssetClassification{
-		Category:    inventory.CategoryInfrastructure,
-		SubCategory: inventory.SubCategoryCompute,
-		Type:        inventory.TypeServerless,
-		SubType:     inventory.SubTypeLambdaFunction,
-	}
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			classification,
+			inventory.AssetClassificationAwsLambdaFunction,
 			[]string{"arn:aws:lambda:us-east-1:378890115541:function:kuba-test-func"},
 			"kuba-test-func",
 			inventory.WithRawAsset(function1),

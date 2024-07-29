@@ -115,7 +115,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			iamPolicyClassification,
+			inventory.AssetClassificationAwsIamPolicy,
 			[]string{"arn:aws:iam::0000:policy/policy-1", "178263"},
 			"policy-1",
 			inventory.WithRawAsset(policy1),
@@ -138,7 +138,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 		),
 
 		inventory.NewAssetEvent(
-			iamPolicyClassification,
+			inventory.AssetClassificationAwsIamPolicy,
 			[]string{"arn:aws:iam::0000:policy/policy-2"},
 			"policy-2",
 			inventory.WithRawAsset(policy2),
@@ -155,7 +155,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 		),
 
 		inventory.NewAssetEvent(
-			iamPolicyClassification,
+			inventory.AssetClassificationAwsIamPolicy,
 			[]string{"arn:aws:iam::0000:policy/policy-3"},
 			"policy-3",
 			inventory.WithRawAsset(policy3),

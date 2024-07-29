@@ -102,7 +102,7 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			s3BucketClassification,
+			inventory.AssetClassificationAwsS3Bucket,
 			[]string{"arn:aws:s3:::bucket-1"},
 			"bucket-1",
 			inventory.WithRawAsset(bucket1),
@@ -137,7 +137,7 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 			}),
 		),
 		inventory.NewAssetEvent(
-			s3BucketClassification,
+			inventory.AssetClassificationAwsS3Bucket,
 			[]string{"arn:aws:s3:::bucket-2"},
 			"bucket-2",
 			inventory.WithRawAsset(bucket2),
