@@ -43,12 +43,7 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			inventory.AssetClassification{
-				Category:    inventory.CategoryInfrastructure,
-				SubCategory: inventory.SubCategoryMessaging,
-				Type:        inventory.TypeNotificationService,
-				SubType:     inventory.SubTypeSNSTopic,
-			},
+			inventory.AssetClassificationAwsSnsTopic,
 			[]string{"topic:arn:test-topic"},
 			"test-topic",
 			inventory.WithRawAsset(awsResource),

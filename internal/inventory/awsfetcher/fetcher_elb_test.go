@@ -67,7 +67,7 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			newElbClassification(inventory.SubTypeELBv1),
+			inventory.AssetClassificationAwsElbV1,
 			[]string{"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v1"},
 			"my-elb-v1",
 			inventory.WithRawAsset(asset),
@@ -117,7 +117,7 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			newElbClassification(inventory.SubTypeELBv2),
+			inventory.AssetClassificationAwsElbV2,
 			[]string{"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2"},
 			"my-elb-v2",
 			inventory.WithRawAsset(asset),

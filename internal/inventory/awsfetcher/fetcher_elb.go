@@ -60,8 +60,8 @@ func (f *elbFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 		function       elbDescribeFunc
 		classification inventory.AssetClassification
 	}{
-		{"Elastic Load Balancers v1", f.v1.DescribeAllLoadBalancers, newElbClassification(inventory.SubTypeELBv1)},
-		{"Elastic Load Balancers v2", f.v2.DescribeLoadBalancers, newElbClassification(inventory.SubTypeELBv2)},
+		{"Elastic Load Balancers v1", f.v1.DescribeAllLoadBalancers, inventory.AssetClassificationAwsElbV1},
+		{"Elastic Load Balancers v2", f.v2.DescribeLoadBalancers, inventory.AssetClassificationAwsElbV2},
 	}
 	for _, r := range resourcesToFetch {
 		f.fetch(ctx, r.name, r.function, r.classification, assetChannel)
@@ -96,14 +96,5 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 				},
 			}),
 		)
-	}
-}
-
-func newElbClassification(assetSubType inventory.AssetSubType) inventory.AssetClassification {
-	return inventory.AssetClassification{
-		Category:    inventory.CategoryInfrastructure,
-		SubCategory: inventory.SubCategoryNetwork,
-		Type:        inventory.TypeLoadBalancer,
-		SubType:     assetSubType,
 	}
 }

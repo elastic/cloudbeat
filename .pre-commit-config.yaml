@@ -187,3 +187,14 @@ repos:
       - id: regal-lint
         args: [security-policies/bundle]
         pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: update-assets-md
+        name: Update Asset Inventory's ASSETS.md
+        description: Update implemented resources' status in internal/inventory/ASSETS.md
+        entry: bash
+        args: ['-c', 'cd scripts/update_assets_md && go run main.go']
+        language: system
+        pass_filenames: false
+        files: internal/inventory/asset.go
