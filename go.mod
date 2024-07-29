@@ -31,8 +31,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.40.3
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.48.3
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.171.0
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.30.3
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.173.0
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.31.0
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.26.3
 	github.com/aws/aws-sdk-go-v2/service/iam v1.34.3
 	github.com/aws/aws-sdk-go-v2/service/kms v1.35.3
@@ -195,7 +195,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.33.3
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.34.0
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.17 // indirect
