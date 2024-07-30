@@ -33,7 +33,7 @@ type subscriptionAzureClientWrapper struct {
 	AssetLocations func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, options *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error)
 }
 
-type tenatAzureClientWrapper struct {
+type tenantAzureClientWrapper struct {
 	Tenants func(ctx context.Context, clientOptions *arm.ClientOptions, options *armsubscriptions.TenantsClientListOptions) ([]armsubscriptions.TenantsClientListResponse, error)
 }
 
@@ -44,7 +44,7 @@ type SubscriptionProviderAPI interface {
 
 type subscriptionProvider struct {
 	subscriptionClient subscriptionAzureClientWrapper
-	tenantClient       tenatAzureClientWrapper
+	tenantClient       tenantAzureClientWrapper
 	log                *logp.Logger //nolint:unused
 }
 
@@ -60,7 +60,7 @@ func NewSubscriptionProvider(log *logp.Logger, credentials azcore.TokenCredentia
 		},
 	}
 
-	tenantClient := tenatAzureClientWrapper{
+	tenantClient := tenantAzureClientWrapper{
 		Tenants: func(ctx context.Context, clientOptions *arm.ClientOptions, options *armsubscriptions.TenantsClientListOptions) ([]armsubscriptions.TenantsClientListResponse, error) {
 			c, err := armsubscriptions.NewTenantsClient(credentials, clientOptions)
 			if err != nil {
@@ -127,9 +127,9 @@ func (p *subscriptionProvider) ListTenants(ctx context.Context) ([]AzureAsset, e
 			Name:        pointers.Deref(t.TenantID),
 			DisplayName: pointers.Deref(t.DisplayName),
 			TenantId:    pointers.Deref(t.TenantID),
-			Type:        TeantAssetType,
+			Type:        TenantAssetType,
 		})
 	}
 
-	return nil, nil
+	return assets, nil
 }
