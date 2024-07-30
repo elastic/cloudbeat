@@ -48,6 +48,7 @@ const (
 
 	// Resource Types not present in Azure Resource Graph
 	LocationAssetType = "locations"
+	TeantAssetType    = "tenant"
 
 	// Authorizationresources group
 	RoleDefinitionsType = "microsoft.authorization/roledefinitions"

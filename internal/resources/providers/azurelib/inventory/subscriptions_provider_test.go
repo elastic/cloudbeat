@@ -38,7 +38,7 @@ func mockLocationsAsset(fn locationsFn) SubscriptionProviderAPI {
 		},
 	}
 
-	return &subscriptionProvider{client: wrapper, log: logp.NewLogger("mock_subscriptions_locations_asset_provider")}
+	return &subscriptionProvider{subscriptionClient: wrapper, log: logp.NewLogger("mock_subscriptions_locations_asset_provider")}
 }
 
 func TestSubscriptionProvider_ListLocations(t *testing.T) {
