@@ -22,6 +22,11 @@ on:
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+      kibana_ref:
+        description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
+        required: false
+        default: "main"
+        type: string
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -147,38 +152,7 @@ jobs:
 
       - name: Set Environment Output
         id: env-output
-        run: |
-          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
-          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
-
-          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
-
-          export EC2_CSPM=$(terraform output -raw ec2_cspm_ssh_cmd)
-          echo "::add-mask::$EC2_CSPM"
-          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
-
-          export EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
-          echo "::add-mask::$EC2_KSPM"
-          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
-
-          export EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
-          echo "::add-mask::$EC2_CSPM_KEY"
-          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
-
-          export EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
-          echo "::add-mask::$EC2_KSPM_KEY"
-          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
-
-          export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
-          echo "::add-mask::$KSPM_PUBLIC_IP"
-          echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
-
-          export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
-          echo "::add-mask::$CSPM_PUBLIC_IP"
-          echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+        run: ../../.ci/scripts/set_cloud_env_params.sh
 
       - name: Set Docker Image version
         if: ${{ ! inputs.docker-image-override }}
@@ -224,3 +198,12 @@ jobs:
           USE_K8S: false
         run: |
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+      - name: Run UI Sanity checks (Kibana)
+        uses: ./.github/actions/kibana-ftr
+        if: success()
+        with:
+          test_kibana_url: ${{ env.TEST_KIBANA_URL }}
+          test_es_url: ${{ env.TEST_ES_URL }}
+          es_version: ${{ needs.init.outputs.target-agent-version }}
+          kibana_ref: ${{ inputs.kibana_ref }}

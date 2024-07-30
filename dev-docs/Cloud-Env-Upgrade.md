@@ -49,8 +49,13 @@ Follow these steps to run the workflow:
       #mission-control channel, you can see it specify the stack version and the BC commit sha in the first line,
       e.g. `elastic / unified-release - staging # 8.11 - 10 - 8.9.0-cb971279`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.11.0-cb971279`.
+    - **`kibana_ref`** (**optional**): Specifies the Kibana branch, tag, or commit SHA to check out for the UI sanity tests, which will be executed after the environment is upgraded. This should correspond to the version of the `target-elk-stack-version` provisioned by this workflow. For the current version in development, use Kibana's `main` branch. Default: `main`. Examples of different inputs:
+      - Specifying Branch: `main`
+      - Specifying Tag: `v8.13.4`
+      - Specifying Commit SHA: `c776cf650e962f04330789a9f113bd4bbd6d7c61`
 
-   ![Optional Parameters](https://github.com/elastic/cloudbeat/assets/99176494/e852adb1-d9f9-47d0-b364-ec5486263b95)
+   ![Optional Parameters](https://github.com/user-attachments/assets/a0e1b61d-ea5a-4166-b1fa-23291e094317)
+
 
 ## Tracking Workflow Execution
 
