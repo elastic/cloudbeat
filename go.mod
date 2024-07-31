@@ -54,6 +54,7 @@ require (
 	github.com/elastic/elastic-agent-libs v0.9.15
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.8.8
+	github.com/go-logr/zapr v1.3.0
 	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.13.0
