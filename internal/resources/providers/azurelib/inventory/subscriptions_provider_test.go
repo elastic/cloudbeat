@@ -30,8 +30,9 @@ import (
 )
 
 type (
-	locationsFn func() ([]armsubscriptions.ClientListLocationsResponse, error)
-	tenantsFn   func() ([]armsubscriptions.TenantsClientListResponse, error)
+	locationsFn     func() ([]armsubscriptions.ClientListLocationsResponse, error)
+	tenantsFn       func() ([]armsubscriptions.TenantsClientListResponse, error)
+	subscriptionsFn func() ([]armsubscriptions.ClientListResponse, error)
 )
 
 func mockLocationsAsset(fn locationsFn) SubscriptionProviderAPI {
@@ -52,6 +53,16 @@ func mockTenantAsset(fn tenantsFn) SubscriptionProviderAPI {
 	}
 
 	return &subscriptionProvider{tenantClient: tenantClientWrapper, log: logp.NewLogger("mock_subscriptions_tenants_asset_provider")}
+}
+
+func mockSubscriptionAsset(fn subscriptionsFn) SubscriptionProviderAPI {
+	subscriptionClientWrapper := subscriptionAzureClientWrapper{
+		Subscriptions: func(_ context.Context, _ *arm.ClientOptions, _ *armsubscriptions.ClientListOptions) ([]armsubscriptions.ClientListResponse, error) {
+			return fn()
+		},
+	}
+
+	return &subscriptionProvider{subscriptionClient: subscriptionClientWrapper, log: logp.NewLogger("mock_subscriptions_subscription_asset_provider")}
 }
 
 func TestSubscriptionProvider_ListLocations(t *testing.T) {
@@ -240,6 +251,68 @@ func TestSubscriptionProvider_ListTenants(t *testing.T) {
 			provider := mockTenantAsset(tc.configMock)
 
 			assets, err := provider.ListTenants(context.Background())
+
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.Equal(t, tc.expected, assets)
+		})
+	}
+}
+
+func TestSubscriptionProvider_ListSubscriptions(t *testing.T) {
+	cases := map[string]struct {
+		expectError bool
+		configMock  subscriptionsFn
+		expected    []AzureAsset
+	}{
+		"Returns error": {
+			expectError: true,
+			configMock: func() ([]armsubscriptions.ClientListResponse, error) {
+				return nil, errors.New("error")
+			},
+			expected: nil,
+		},
+		"Returns subscriptions": {
+			expectError: false,
+			configMock: func() ([]armsubscriptions.ClientListResponse, error) {
+				return []armsubscriptions.ClientListResponse{
+					{
+						SubscriptionListResult: armsubscriptions.SubscriptionListResult{
+							Value: []*armsubscriptions.Subscription{
+								{
+									ID:             to.Ptr("/subscriptions/uuid"),
+									SubscriptionID: to.Ptr("uuid"),
+									DisplayName:    to.Ptr("main sub"),
+									TenantID:       to.Ptr("uuid2"),
+								},
+							},
+						},
+					},
+				}, nil
+			},
+
+			expected: []AzureAsset{
+				{
+					Id:             "/subscriptions/uuid",
+					Name:           "uuid",
+					DisplayName:    "main sub",
+					SubscriptionId: "uuid",
+					TenantId:       "uuid2",
+					Type:           SubscriptionAssetType,
+				},
+			},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			provider := mockSubscriptionAsset(tc.configMock)
+
+			assets, err := provider.ListSubscriptions(context.Background())
 
 			if tc.expectError {
 				require.Error(t, err)

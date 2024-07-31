@@ -37,15 +37,21 @@ type tenantAzureClientWrapper struct {
 	Tenants func(ctx context.Context, clientOptions *arm.ClientOptions, options *armsubscriptions.TenantsClientListOptions) ([]armsubscriptions.TenantsClientListResponse, error)
 }
 
+type subscriptionAzureClientWrapper struct {
+	Subscriptions func(ctx context.Context, clientOptions *arm.ClientOptions, options *armsubscriptions.ClientListOptions) ([]armsubscriptions.ClientListResponse, error)
+}
+
 type SubscriptionProviderAPI interface {
 	ListLocations(ctx context.Context, subID string) ([]AzureAsset, error)
 	ListTenants(ctx context.Context) ([]AzureAsset, error)
+	ListSubscriptions(ctx context.Context) ([]AzureAsset, error)
 }
 
 type subscriptionProvider struct {
-	locationClient locationAzureClientWrapper
-	tenantClient   tenantAzureClientWrapper
-	log            *logp.Logger //nolint:unused
+	locationClient     locationAzureClientWrapper
+	tenantClient       tenantAzureClientWrapper
+	subscriptionClient subscriptionAzureClientWrapper
+	log                *logp.Logger //nolint:unused
 }
 
 func NewSubscriptionProvider(log *logp.Logger, credentials azcore.TokenCredential) SubscriptionProviderAPI {
@@ -70,10 +76,22 @@ func NewSubscriptionProvider(log *logp.Logger, credentials azcore.TokenCredentia
 		},
 	}
 
+	subscriptionClient := subscriptionAzureClientWrapper{
+		Subscriptions: func(ctx context.Context, clientOptions *arm.ClientOptions, options *armsubscriptions.ClientListOptions) ([]armsubscriptions.ClientListResponse, error) {
+			cl, err := armsubscriptions.NewClient(credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+
+			return readPager(ctx, cl.NewListPager(options))
+		},
+	}
+
 	return &subscriptionProvider{
-		locationClient: locationClient,
-		tenantClient:   tenantClient,
-		log:            log,
+		locationClient:     locationClient,
+		tenantClient:       tenantClient,
+		subscriptionClient: subscriptionClient,
+		log:                log,
 	}
 }
 
@@ -128,6 +146,35 @@ func (p *subscriptionProvider) ListTenants(ctx context.Context) ([]AzureAsset, e
 			DisplayName: pointers.Deref(t.DisplayName),
 			TenantId:    pointers.Deref(t.TenantID),
 			Type:        TenantAssetType,
+		})
+	}
+
+	return assets, nil
+}
+
+func (p *subscriptionProvider) ListSubscriptions(ctx context.Context) ([]AzureAsset, error) {
+	paged, err := p.subscriptionClient.Subscriptions(ctx, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	subscriptions := lo.FlatMap(paged, func(item armsubscriptions.ClientListResponse, _ int) []*armsubscriptions.Subscription {
+		return item.SubscriptionListResult.Value
+	})
+
+	assets := make([]AzureAsset, 0, len(subscriptions))
+	for _, s := range subscriptions {
+		if s == nil {
+			continue
+		}
+
+		assets = append(assets, AzureAsset{
+			Id:             pointers.Deref(s.ID),
+			Name:           pointers.Deref(s.SubscriptionID),
+			DisplayName:    pointers.Deref(s.DisplayName),
+			TenantId:       pointers.Deref(s.TenantID),
+			SubscriptionId: pointers.Deref(s.SubscriptionID),
+			Type:           SubscriptionAssetType,
 		})
 	}
 
