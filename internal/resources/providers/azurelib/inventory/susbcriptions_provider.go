@@ -29,7 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-type subscriptionAzureClientWrapper struct {
+type locationAzureClientWrapper struct {
 	AssetLocations func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, options *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error)
 }
 
@@ -43,13 +43,13 @@ type SubscriptionProviderAPI interface {
 }
 
 type subscriptionProvider struct {
-	subscriptionClient subscriptionAzureClientWrapper
-	tenantClient       tenantAzureClientWrapper
-	log                *logp.Logger //nolint:unused
+	locationClient locationAzureClientWrapper
+	tenantClient   tenantAzureClientWrapper
+	log            *logp.Logger //nolint:unused
 }
 
 func NewSubscriptionProvider(log *logp.Logger, credentials azcore.TokenCredential) SubscriptionProviderAPI {
-	subscriptionClient := subscriptionAzureClientWrapper{
+	locationClient := locationAzureClientWrapper{
 		AssetLocations: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, options *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error) {
 			cl, err := armsubscriptions.NewClient(credentials, clientOptions)
 			if err != nil {
@@ -71,14 +71,14 @@ func NewSubscriptionProvider(log *logp.Logger, credentials azcore.TokenCredentia
 	}
 
 	return &subscriptionProvider{
-		subscriptionClient: subscriptionClient,
-		tenantClient:       tenantClient,
-		log:                log,
+		locationClient: locationClient,
+		tenantClient:   tenantClient,
+		log:            log,
 	}
 }
 
 func (p *subscriptionProvider) ListLocations(ctx context.Context, subID string) ([]AzureAsset, error) {
-	paged, err := p.subscriptionClient.AssetLocations(ctx, subID, nil, nil)
+	paged, err := p.locationClient.AssetLocations(ctx, subID, nil, nil)
 	if err != nil {
 		return nil, err
 	}

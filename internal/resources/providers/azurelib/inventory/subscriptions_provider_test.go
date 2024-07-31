@@ -35,13 +35,13 @@ type (
 )
 
 func mockLocationsAsset(fn locationsFn) SubscriptionProviderAPI {
-	wrapper := subscriptionAzureClientWrapper{
+	wrapper := locationAzureClientWrapper{
 		AssetLocations: func(_ context.Context, _ string, _ *arm.ClientOptions, _ *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error) {
 			return fn()
 		},
 	}
 
-	return &subscriptionProvider{subscriptionClient: wrapper, log: logp.NewLogger("mock_subscriptions_locations_asset_provider")}
+	return &subscriptionProvider{locationClient: wrapper, log: logp.NewLogger("mock_subscriptions_locations_asset_provider")}
 }
 
 func mockTenantAsset(fn tenantsFn) SubscriptionProviderAPI {
