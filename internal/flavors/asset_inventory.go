@@ -109,9 +109,7 @@ func initAwsFetchers(ctx context.Context, cfg *config.Config, logger *logp.Logge
 	return awsfetcher.New(logger, awsIdentity, *awsConfig), nil
 }
 
-func initAzureFetchers(ctx context.Context, cfg *config.Config, logger *logp.Logger) ([]inventory.AssetFetcher, error) {
-	// cfgProvider:         &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
-	// providerInitializer: &azurelib.ProviderInitializer{},
+func initAzureFetchers(_ context.Context, cfg *config.Config, logger *logp.Logger) ([]inventory.AssetFetcher, error) {
 	cfgProvider := &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}}
 	azureConfig, err := cfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure)
 	if err != nil {

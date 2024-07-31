@@ -26,6 +26,7 @@ import (
 )
 
 func New(logger *logp.Logger, provider azurelib.ProviderAPI, azureConfig *azure_auth.AzureFactoryConfig) []inventory.AssetFetcher {
-	// TODO(kuba): start something that returns a list of AssetFetchers
-	return nil
+	return []inventory.AssetFetcher{
+		newAccountFetcher(logger, provider),
+	}
 }
