@@ -57,15 +57,9 @@ func (s *snsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 		return
 	}
 
-	classification := inventory.AssetClassification{
-		Category:    inventory.CategoryInfrastructure,
-		SubCategory: inventory.SubCategoryMessaging,
-		Type:        inventory.TypeNotificationService,
-		SubType:     inventory.SubTypeSNSTopic,
-	}
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
-			classification,
+			inventory.AssetClassificationAwsSnsTopic,
 			[]string{item.GetResourceArn()},
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),

@@ -27,47 +27,47 @@ metadata:
   namespace: kube-system
 automountServiceAccountToken: false
 ---
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  name: test-psp
-  annotations:
-    # docker/default identifies a profile for seccomp, but it is not particularly tied to the Docker runtime
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default,runtime/default'
-    apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
-    apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
-spec:
-  privileged: false
-  # Required to prevent escalations to root.
-  allowPrivilegeEscalation: false
-  requiredDropCapabilities:
-    - ALL
-  # Allow core volume types.
-  volumes:
-    - 'csi'
-  hostNetwork: false
-  hostIPC: false
-  hostPID: false
-  runAsUser:
-    # Require the container to run without root privileges.
-    rule: 'MustRunAsNonRoot'
-  seLinux:
-    # This policy assumes the nodes are using AppArmor rather than SELinux.
-    rule: 'RunAsAny'
-  supplementalGroups:
-    rule: 'MustRunAs'
-    ranges:
-      # Forbid adding the root group.
-      - min: 1
-        max: 65535
-  fsGroup:
-    rule: 'MustRunAs'
-    ranges:
-      # Forbid adding the root group.
-      - min: 1
-        max: 65535
-  readOnlyRootFilesystem: false
----
+# apiVersion: policy/v1beta1
+# kind: PodSecurityPolicy
+# metadata:
+#   name: test-psp
+#   annotations:
+#     # docker/default identifies a profile for seccomp, but it is not particularly tied to the Docker runtime
+#     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default,runtime/default'
+#     apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
+#     apparmor.security.beta.kubernetes.io/defaultProfileName: 'runtime/default'
+# spec:
+#   privileged: false
+#   # Required to prevent escalations to root.
+#   allowPrivilegeEscalation: false
+#   requiredDropCapabilities:
+#     - ALL
+#   # Allow core volume types.
+#   volumes:
+#     - 'csi'
+#   hostNetwork: false
+#   hostIPC: false
+#   hostPID: false
+#   runAsUser:
+#     # Require the container to run without root privileges.
+#     rule: 'MustRunAsNonRoot'
+#   seLinux:
+#     # This policy assumes the nodes are using AppArmor rather than SELinux.
+#     rule: 'RunAsAny'
+#   supplementalGroups:
+#     rule: 'MustRunAs'
+#     ranges:
+#       # Forbid adding the root group.
+#       - min: 1
+#         max: 65535
+#   fsGroup:
+#     rule: 'MustRunAs'
+#     ranges:
+#       # Forbid adding the root group.
+#       - min: 1
+#         max: 65535
+#   readOnlyRootFilesystem: false
+# ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -86,10 +86,10 @@ rules:
   - apiGroups: [ "" ] # "" indicates the core API group
     resources: [ "pods" ]
     verbs: [ "get", "watch", "list" ]
-  - apiGroups: [ 'policy' ]
-    resources: [ 'podsecuritypolicies' ]
-    verbs: [ 'use' ]
-    resourceNames: [ 'test-psp' ]
+  # - apiGroups: [ 'policy' ]
+  #   resources: [ 'podsecuritypolicies' ]
+  #   verbs: [ 'use' ]
+  #   resourceNames: [ 'test-psp' ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -112,10 +112,10 @@ rules:
   - apiGroups: [ "*" ] # "" indicates the core API group
     resources: [ "*" ]
     verbs: [ "*" ]
-  - apiGroups: [ 'policy' ]
-    resources: [ 'podsecuritypolicies' ]
-    verbs: [ 'use' ]
-    resourceNames: [ 'test-psp-fail' ]
+  # - apiGroups: [ 'policy' ]
+  #   resources: [ 'podsecuritypolicies' ]
+  #   verbs: [ 'use' ]
+  #   resourceNames: [ 'test-psp-fail' ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

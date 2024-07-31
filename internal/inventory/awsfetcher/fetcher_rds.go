@@ -36,13 +36,6 @@ type rdsFetcher struct {
 	AccountName string
 }
 
-var rdsClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryInfrastructure,
-	SubCategory: inventory.SubCategoryDatabase,
-	Type:        inventory.TypeRelationalDatabase,
-	SubType:     inventory.SubTypeRDS,
-}
-
 type rdsProvider interface {
 	DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error)
 }
@@ -74,7 +67,7 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 
 	for _, item := range rdsInstances {
 		assetChannel <- inventory.NewAssetEvent(
-			rdsClassification,
+			inventory.AssetClassificationAwsRds,
 			[]string{item.GetResourceArn(), item.Identifier},
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),

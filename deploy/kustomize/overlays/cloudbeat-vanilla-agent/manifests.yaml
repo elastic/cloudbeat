@@ -248,10 +248,10 @@ rules:
       - roles
     verbs: ["get", "list", "watch"]
   # Needed for cloudbeat
-  - apiGroups: ["policy"]
-    resources:
-      - podsecuritypolicies
-    verbs: ["get", "list", "watch"]
+  # - apiGroups: ["policy"]
+  #   resources:
+  #     - podsecuritypolicies
+  #   verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

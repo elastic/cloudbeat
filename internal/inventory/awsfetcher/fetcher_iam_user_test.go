@@ -85,7 +85,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
-			iamUserClassification,
+			inventory.AssetClassificationAwsIamUser,
 			[]string{"arn:aws:iam::000:user/user-1", "u-123123"},
 			"user-1",
 			inventory.WithRawAsset(user1),
@@ -103,7 +103,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 		),
 
 		inventory.NewAssetEvent(
-			iamUserClassification,
+			inventory.AssetClassificationAwsIamUser,
 			[]string{"arn:aws:iam::000:user/user-2"},
 			"user-2",
 			inventory.WithRawAsset(user2),
