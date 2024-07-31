@@ -63,6 +63,8 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 		fetchers, err = initAzureFetchers(ctx, cfg, logger)
 	case config.ProviderGCP:
 		err = fmt.Errorf("GCP branch not implemented")
+	case "":
+		err = fmt.Errorf("missing config.v1.asset_inventory_provider setting")
 	default:
 		err = fmt.Errorf("unsupported Asset Inventory provider %q", cfg.AssetInventoryProvider)
 	}
