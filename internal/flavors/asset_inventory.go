@@ -87,6 +87,7 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 	return &assetInventory{
 		flavorBase: flavorBase{
 			ctx:       ctx,
+			client:    publisherClient,
 			cancel:    cancel,
 			publisher: publisher,
 			config:    cfg,
