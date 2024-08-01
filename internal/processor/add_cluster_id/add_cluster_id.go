@@ -25,6 +25,9 @@ import (
 	jsprocessor "github.com/elastic/beats/v7/libbeat/processors/script/javascript/module/processor"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -47,6 +50,12 @@ func New(agentCfg *agentconfig.C) (beat.Processor, error) {
 	cfg := config{}
 	if err := agentCfg.Unpack(&cfg); err != nil {
 		return nil, makeErrConfigUnpack(err)
+	}
+
+	// Prevent klog from writing anything other than errors to stderr
+	if replacementLogger, err := zap.NewProduction(); err != nil {
+		replacementLogger = replacementLogger.WithOptions(zap.IncreaseLevel(zap.ErrorLevel))
+		klog.SetLogger(zapr.NewLogger(replacementLogger))
 	}
 
 	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})

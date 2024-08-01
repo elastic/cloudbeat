@@ -22,7 +22,10 @@ import (
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
 	k8s "k8s.io/client-go/kubernetes"
+	"k8s.io/klog/v2"
 )
 
 type ClientGetterAPI interface {
@@ -32,6 +35,14 @@ type ClientGetterAPI interface {
 type ClientGetter struct{}
 
 func (ClientGetter) GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+	// Prevent klog from writing anything other than errors to stderr
+	if replacementLogger, err := zap.NewProduction(); err != nil {
+		replacementLogger = replacementLogger.WithOptions(zap.IncreaseLevel(zap.ErrorLevel))
+		klog.SetLogger(zapr.NewLogger(replacementLogger))
+	} else {
+		log.Warnf("could not suppress klog: %+v", err)
+	}
+
 	client, err := kubernetes.GetKubernetesClient(kubeConfig, options)
 	if err != nil {
 		if kubernetes.IsInCluster(kubeConfig) {
