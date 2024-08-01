@@ -98,9 +98,9 @@ Infrastructure: 24% (18/73)
 
 ## AZURE Resources
 
-**Progress: 0% (0/51)**
+**Progress: 3% (2/51)**
 Identity: 0% (0/8)
-Infrastructure: 0% (0/43)
+Infrastructure: 4% (2/43)
 
 <details> <summary>Full table</summary>
 
@@ -139,8 +139,8 @@ Infrastructure: 0% (0/43)
 | Infrastructure | Database | Relational Database | Azure SQL Server | No ❌ |
 | Infrastructure | Database | Replication | Azure Replication Link | No ❌ |
 | Infrastructure | Database | Scalability | Azure Elastic Pool | No ❌ |
-| Infrastructure | Management | Cloud Account | Azure Subscription | No ❌ |
-| Infrastructure | Management | Cloud Account | Azure Tenant | No ❌ |
+| Infrastructure | Management | Cloud Account | Azure Subscription | Yes ✅ |
+| Infrastructure | Management | Cloud Account | Azure Tenant | Yes ✅ |
 | Infrastructure | Management | Resource Group | Azure Resource Group | No ❌ |
 | Infrastructure | Network | DNS | Azure Server DNS Alias | No ❌ |
 | Infrastructure | Network | Network Security | Azure Cosmos DB Virtual Network Rule | No ❌ |
