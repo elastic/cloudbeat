@@ -185,7 +185,7 @@ func (p *Provider) DescribeNatGateways(ctx context.Context) ([]awslib.AwsResourc
 
 		var result []awslib.AwsResource
 		for _, item := range all {
-			result = append(result, NatGatewayInfo{
+			result = append(result, &NatGatewayInfo{
 				NatGateway: item,
 				awsAccount: p.awsAccountID,
 				region:     region,
@@ -214,7 +214,7 @@ func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource
 
 		var result []awslib.AwsResource
 		for _, nacl := range allAcls {
-			result = append(result, NACLInfo{
+			result = append(result, &NACLInfo{
 				nacl,
 				p.awsAccountID,
 				region,
@@ -243,7 +243,7 @@ func (p *Provider) DescribeNetworkInterfaces(ctx context.Context) ([]awslib.AwsR
 
 		var result []awslib.AwsResource
 		for _, item := range all {
-			result = append(result, NetworkInterfaceInfo{
+			result = append(result, &NetworkInterfaceInfo{
 				NetworkInterface: item,
 				region:           region,
 			})
@@ -271,7 +271,7 @@ func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsReso
 
 		var result []awslib.AwsResource
 		for _, sg := range all {
-			result = append(result, SecurityGroup{sg, p.awsAccountID, region})
+			result = append(result, &SecurityGroup{sg, p.awsAccountID, region})
 		}
 		return result, nil
 	})
@@ -318,7 +318,7 @@ func (p *Provider) DescribeSubnets(ctx context.Context) ([]awslib.AwsResource, e
 
 		var result []awslib.AwsResource
 		for _, item := range all {
-			result = append(result, SubnetInfo{
+			result = append(result, &SubnetInfo{
 				Subnet: item,
 				region: region,
 			})
@@ -346,7 +346,7 @@ func (p *Provider) DescribeTransitGatewayAttachments(ctx context.Context) ([]aws
 
 		var result []awslib.AwsResource
 		for _, item := range all {
-			result = append(result, TransitGatewayAttachmentInfo{
+			result = append(result, &TransitGatewayAttachmentInfo{
 				TransitGatewayAttachment: item,
 				awsAccount:               p.awsAccountID,
 				region:                   region,
@@ -375,7 +375,7 @@ func (p *Provider) DescribeTransitGateways(ctx context.Context) ([]awslib.AwsRes
 
 		var result []awslib.AwsResource
 		for _, item := range all {
-			result = append(result, TransitGatewayInfo{
+			result = append(result, &TransitGatewayInfo{
 				TransitGateway: item,
 				region:         region,
 			})
@@ -448,7 +448,7 @@ func (p *Provider) DescribeVpcPeeringConnections(ctx context.Context) ([]awslib.
 
 		var result []awslib.AwsResource
 		for _, peering := range all {
-			result = append(result, VpcPeeringConnectionInfo{
+			result = append(result, &VpcPeeringConnectionInfo{
 				VpcPeeringConnection: peering,
 				awsAccount:           p.awsAccountID,
 				region:               region,
@@ -488,7 +488,7 @@ func (p *Provider) DescribeVpcs(ctx context.Context) ([]awslib.AwsResource, erro
 				continue
 			}
 
-			result = append(result, VpcInfo{
+			result = append(result, &VpcInfo{
 				Vpc:        vpc,
 				FlowLogs:   logs.FlowLogs,
 				awsAccount: p.awsAccountID,
