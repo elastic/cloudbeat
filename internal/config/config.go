@@ -37,9 +37,6 @@ const (
 	DefaultNamespace                = "default"
 	VulnerabilityType               = "vuln_mgmt"
 	AssetInventoryType              = "asset_inventory"
-	ProviderAWS                     = "aws"
-	ProviderAzure                   = "azure"
-	ProviderGCP                     = "gcp"
 	defaultFindingsIndexPrefix      = "logs-cloud_security_posture.findings"
 	defaultVulnerabilityIndexPrefix = "logs-cloud_security_posture.vulnerabilities"
 )
