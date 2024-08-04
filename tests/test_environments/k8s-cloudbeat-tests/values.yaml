@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   name: cloudbeat-test
   repository: cloudbeat-test
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
   ecr: 391946104644.dkr.ecr.eu-west-2.amazonaws.com
@@ -124,6 +124,7 @@ elasticsearch:
   imageTag: "8.5.0-SNAPSHOT"
 
   protocol: http
+
 
   xpackSecurity:
     enabled: false
