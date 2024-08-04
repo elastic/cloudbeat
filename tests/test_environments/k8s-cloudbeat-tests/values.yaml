@@ -125,8 +125,6 @@ elasticsearch:
 
   protocol: http
 
-  nodeSelector:
-    "elasticsearch-node": "true"
 
   xpackSecurity:
     enabled: false
