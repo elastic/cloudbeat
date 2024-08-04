@@ -123,7 +123,7 @@ runs:
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Upload docker images
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4.3.4
       with:
         name: docker-images
         path: ${{ inputs.docker-images-folder }}
