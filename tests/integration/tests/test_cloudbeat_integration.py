@@ -5,10 +5,11 @@ The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
 
-import configuration
 import pytest
-from commonlib.utils import get_findings, wait_for_cycle_completion
 from loguru import logger
+
+import configuration
+from commonlib.utils import get_findings, wait_for_cycle_completion
 
 CONFIG_TIMEOUT = 45
 
@@ -90,6 +91,7 @@ def test_elastic_index_exists(kspm_client, match_type):
 
 
 @pytest.mark.pre_merge
+@pytest.mark.skip(reason="https://github.com/elastic/cloudbeat/issues/2383")
 @pytest.mark.order(4)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
 def test_leader_election(fixture_data, kspm_client, cloudbeat_agent, k8s):
