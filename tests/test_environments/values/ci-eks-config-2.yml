@@ -2,9 +2,6 @@ elasticsearch:
   volumeClaimTemplate:
     storageClassName: gp2
 
-  nodeSelector:
-    "elasticsearch-node": "true"
-
 image:
   repository: 391946104644.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat-test
   pullPolicy: Always
