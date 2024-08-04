@@ -125,6 +125,10 @@ elasticsearch:
 
   protocol: http
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> cb6ece0c (Update upload artifacts action (#2382))
   xpackSecurity:
     enabled: false
 
