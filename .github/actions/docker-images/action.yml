@@ -123,6 +123,7 @@ runs:
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Upload docker images
+      # Pin action version to 4.3.4 See https://github.com/actions/upload-artifact/issues/589
       uses: actions/upload-artifact@v4.3.4
       with:
         name: docker-images

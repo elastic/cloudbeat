@@ -1,8 +1,7 @@
 name: Tests
 
 on:
-  # TODO: update to pull_request_target after debugging the issue
-  pull_request:
+  pull_request_target:
     branches:
       - main
       - "[0-9]+.[0-9]+"
@@ -35,8 +34,6 @@ jobs:
     name: CIS Azure CI
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    # TODO: remove this once the issue is resolved
-    if: false
     permissions:
       contents: "read"
       id-token: "write"
@@ -60,8 +57,6 @@ jobs:
     name: CIS AWS CI
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    # TODO: remove this once the issue is resolved
-    if: false
     permissions:
       contents: "read"
       id-token: "write"
@@ -85,8 +80,6 @@ jobs:
     name: CIS GCP CI
     runs-on: ubuntu-22.04
     timeout-minutes: 60
-    # TODO: remove this once the issue is resolved
-    if: false
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -111,8 +104,6 @@ jobs:
     name: CNVM CI
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    # TODO: remove this once the issue is resolved
-    if: false
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -220,11 +211,10 @@ jobs:
 
   upload-allure-results:
     needs:
-      # TODO: uncomment all jobs once the issue is resolved
-      # - ci-azure
-      # - ci-aws
-      # - ci-gcp
-      # - ci-cnvm
+      - ci-azure
+      - ci-aws
+      - ci-gcp
+      - ci-cnvm
       - ci-k8s
     name: Upload integration tests results
     runs-on: ubuntu-22.04
