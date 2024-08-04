@@ -5,11 +5,10 @@ The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
 
-import pytest
-from loguru import logger
-
 import configuration
+import pytest
 from commonlib.utils import get_findings, wait_for_cycle_completion
+from loguru import logger
 
 CONFIG_TIMEOUT = 45
 
