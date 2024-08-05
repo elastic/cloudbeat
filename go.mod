@@ -47,9 +47,9 @@ require (
 	github.com/aws/smithy-go v1.20.3
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240728211339-e177fc500b53
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240804221824-81bc303d0b8f
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
-	github.com/elastic/elastic-agent-autodiscover v0.8.0
+	github.com/elastic/elastic-agent-autodiscover v0.8.1
 	github.com/elastic/elastic-agent-client/v7 v7.15.0
 	github.com/elastic/elastic-agent-libs v0.9.15
 	github.com/elastic/go-licenser v0.4.2
@@ -147,8 +147,8 @@ require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20230306123547-8075edf89bb0 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.12.0
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.9.1 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.13.0
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.29 // indirect
@@ -248,7 +248,7 @@ require (
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.10.6 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.10.8 // indirect
 	github.com/elastic/go-concert v0.3.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.4.0 // indirect
