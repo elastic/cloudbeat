@@ -159,12 +159,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # GitHub issue: https://github.com/elastic/cloudbeat/issues/2190
-          # - test-target: eks
-          #   range: ""
-          #   values_file: tests/test_environments/values/ci-eks-config-1.yml
-          #   k8s_context: "test-eks-config-1"
-          #   label: "EKS functional tests: config 1"
+          - test-target: eks
+            range: ""
+            values_file: tests/test_environments/values/ci-eks-config-1.yml
+            k8s_context: "test-eks-config-1"
+            label: "EKS functional tests: config 1"
           - test-target: eks
             range: ""
             values_file: tests/test_environments/values/ci-eks-config-2.yml
@@ -192,8 +191,6 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         if: success()
-        env:
-          ELK_VERSION: 8.13.0-SNAPSHOT
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
