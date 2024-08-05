@@ -104,15 +104,16 @@ func (a *AssetInventory) Run(ctx context.Context) {
 func (a *AssetInventory) publish(assets []AssetEvent) {
 	events := lo.Map(assets, func(e AssetEvent, _ int) beat.Event {
 		return beat.Event{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Entity)},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Asset)},
 			Timestamp: a.now(),
 			Fields: mapstr.M{
-				"entity":            e.Entity,
+				"asset":             e.Asset,
 				"cloud":             e.Cloud,
 				"host":              e.Host,
 				"network":           e.Network,
 				"iam":               e.IAM,
 				"resource_policies": e.ResourcePolicies,
+				"related.entities":  e.Asset.Id,
 			},
 		}
 	})
@@ -120,7 +121,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 	a.publisher.PublishAll(events)
 }
 
-func generateIndex(a Entity) string {
+func generateIndex(a Asset) string {
 	return fmt.Sprintf(indexTemplate, a.Category, a.SubCategory, a.Type, a.SubType)
 }
 
