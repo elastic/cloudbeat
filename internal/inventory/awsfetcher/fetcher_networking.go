@@ -167,6 +167,14 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 			SubnetIds:        []string{pointers.Deref(obj.NetworkInterface.SubnetId)},
 			VpcIds:           []string{pointers.Deref(obj.NetworkInterface.VpcId)},
 		})
+	case *ec2.SecurityGroup:
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			VpcIds: []string{pointers.Deref(obj.VpcId)},
+		})
+	case *ec2.SubnetInfo:
+		enricher = inventory.WithNetwork(inventory.AssetNetwork{
+			VpcIds: []string{pointers.Deref(obj.Subnet.VpcId)},
+		})
 	case *ec2.TransitGatewayAttachmentInfo:
 		routeTableId := ""
 		if obj.TransitGatewayAttachment.Association != nil {
@@ -183,8 +191,10 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 				pointers.Deref(obj.VpcPeeringConnection.RequesterVpcInfo.VpcId),
 			},
 		})
+	case *ec2.VpcInfo:
+		enricher = inventory.EmptyEnricher()
 	default:
-		s.logger.Warnf("Unsupported Networking Fetcher type %T", obj)
+		s.logger.Warnf("Unsupported Networking Fetcher type %T (enricher)", obj)
 		enricher = inventory.EmptyEnricher()
 	}
 
@@ -193,28 +203,28 @@ func (s *networkingFetcher) networkEnricher(item awslib.AwsResource) inventory.A
 
 func (s *networkingFetcher) retrieveId(awsResource awslib.AwsResource) *string {
 	switch resource := awsResource.(type) {
-	case ec2.InternetGatewayInfo:
+	case *ec2.InternetGatewayInfo:
 		return resource.InternetGateway.InternetGatewayId
-	case ec2.NatGatewayInfo:
+	case *ec2.NatGatewayInfo:
 		return resource.NatGateway.NatGatewayId
-	case ec2.NACLInfo:
+	case *ec2.NACLInfo:
 		return resource.NetworkAclId
-	case ec2.NetworkInterfaceInfo:
+	case *ec2.NetworkInterfaceInfo:
 		return resource.NetworkInterface.NetworkInterfaceId
-	case ec2.SecurityGroup:
+	case *ec2.SecurityGroup:
 		return resource.GroupId
-	case ec2.SubnetInfo:
+	case *ec2.SubnetInfo:
 		return resource.Subnet.SubnetId
-	case ec2.TransitGatewayAttachmentInfo:
+	case *ec2.TransitGatewayAttachmentInfo:
 		return resource.TransitGatewayAttachment.TransitGatewayAttachmentId
-	case ec2.TransitGatewayInfo:
+	case *ec2.TransitGatewayInfo:
 		return resource.TransitGateway.TransitGatewayId
-	case ec2.VpcPeeringConnectionInfo:
+	case *ec2.VpcPeeringConnectionInfo:
 		return resource.VpcPeeringConnection.VpcPeeringConnectionId
-	case ec2.VpcInfo:
+	case *ec2.VpcInfo:
 		return resource.Vpc.VpcId
 	default:
-		s.logger.Warnf("Unsupported Networking Fetcher type %T", resource)
+		s.logger.Warnf("Unsupported Networking Fetcher type %T (id)", resource)
 		return nil
 	}
 }
