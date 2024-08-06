@@ -69,10 +69,14 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 	}
 
 	for _, item := range azureAssets {
+		name := item.Name
+		if name == "" {
+			name = item.DisplayName
+		}
 		assetChan <- inventory.NewAssetEvent(
 			classification,
 			[]string{item.Id},
-			item.DisplayName,
+			name,
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
