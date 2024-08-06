@@ -47,7 +47,9 @@ const (
 	WebsitesAssetType                    = "microsoft.web/sites"
 
 	// Resource Types not present in Azure Resource Graph
-	LocationAssetType = "locations"
+	LocationAssetType     = "locations"
+	TenantAssetType       = "tenant"
+	SubscriptionAssetType = "subscription"
 
 	// Authorizationresources group
 	RoleDefinitionsType = "microsoft.authorization/roledefinitions"

@@ -15,21 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
+package azurefetcher
 
-package config
+import (
+	"github.com/elastic/elastic-agent-libs/logp"
 
-// https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/data_stream/findings/agent/stream
-const (
-	CIS_K8S       = "cis_k8s"
-	CIS_EKS       = "cis_eks"
-	CIS_AWS       = "cis_aws"
-	CIS_GCP       = "cis_gcp"
-	CIS_AZURE     = "cis_azure"
-	ProviderAWS   = "aws"
-	ProviderAzure = "azure"
-	ProviderGCP   = "gcp"
+	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
+	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 )
 
-var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS, CIS_GCP, CIS_AZURE}
+func New(logger *logp.Logger, provider azurelib.ProviderAPI, _ *azure_auth.AzureFactoryConfig) []inventory.AssetFetcher {
+	return []inventory.AssetFetcher{
+		newAccountFetcher(logger, provider),
+	}
+}

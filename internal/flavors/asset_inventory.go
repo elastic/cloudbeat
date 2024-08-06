@@ -20,16 +20,14 @@ package flavors
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/flavors/assetinventory"
 	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type assetInventory struct {
@@ -49,27 +47,24 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 	logger := logp.NewLogger("asset_inventory")
 	ctx, cancel := context.WithCancel(context.Background())
 
-	logger.Info("Creating AWS AssetInventory")
-
-	awsFetchers, err := initAwsFetchers(ctx, cfg, logger)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
-	publisherClient, err := NewClient(b.Publisher, cfg.Processors)
+	beatClient, err := NewClient(b.Publisher, cfg.Processors)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to init client: %w", err)
 	}
 
-	now := func() time.Time { return time.Now() } //nolint:gocritic
-	newAssetInventory := inventory.NewAssetInventory(logger, awsFetchers, publisherClient, now)
-	publisher := NewPublisher(logger, flushInterval, eventsThreshold, publisherClient)
+	strategy := assetinventory.GetStrategy(logger, cfg)
+	newAssetInventory, err := strategy.NewAssetInventory(ctx, beatClient)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
 
+	publisher := NewPublisher(logger, flushInterval, eventsThreshold, beatClient)
 	return &assetInventory{
 		flavorBase: flavorBase{
 			ctx:       ctx,
+			client:    beatClient,
 			cancel:    cancel,
 			publisher: publisher,
 			config:    cfg,
@@ -77,21 +72,6 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 		},
 		assetInventory: newAssetInventory,
 	}, nil
-}
-
-func initAwsFetchers(ctx context.Context, cfg *config.Config, logger *logp.Logger) ([]inventory.AssetFetcher, error) {
-	awsConfig, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
-	if err != nil {
-		return nil, err
-	}
-
-	idProvider := awslib.IdentityProvider{Logger: logger}
-	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return awsfetcher.New(logger, awsIdentity, *awsConfig), nil
 }
 
 func (bt *assetInventory) Run(*beat.Beat) error {
