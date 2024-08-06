@@ -51,7 +51,8 @@ func (f *resourceGraphFetcher) Fetch(ctx context.Context, assetChan chan<- inven
 		azureType      string
 		classification inventory.AssetClassification
 	}{
-		{"Virtual Machines", azurelib.AssetGroupResources, azurelib.VirtualMachineAssetType, inventory.AssetClassificationAzureTenant},
+		{"Virtual Machines", azurelib.AssetGroupResources, azurelib.VirtualMachineAssetType, inventory.AssetClassificationAzureVirtualMachine},
+		{"MySQL Flexible Servers", azurelib.AssetGroupResources, azurelib.FlexibleMySQLDBAssetType, inventory.AssetClassificationAzureSQLServer},
 	}
 	for _, r := range resourcesToFetch {
 		f.fetch(ctx, r.name, r.azureGroup, r.azureType, r.classification, assetChan)

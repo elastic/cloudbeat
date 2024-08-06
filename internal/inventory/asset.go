@@ -70,6 +70,8 @@ type AssetSubType string
 const (
 	SubTypeAzureTenant              AssetSubType = "azure-tenant"
 	SubTypeAzureSubscription        AssetSubType = "azure-subscription"
+	SubTypeAzureVirtualMachine      AssetSubType = "azure-virtual-machine"
+	SubTypeAzureSQLServer           AssetSubType = "azure-sql-server"
 	SubTypeEC2                      AssetSubType = "ec2-instance"
 	SubTypeEC2NetworkInterface      AssetSubType = "ec2-network-interface"
 	SubTypeEC2Subnet                AssetSubType = "ec2-subnet"
@@ -135,8 +137,10 @@ var (
 	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeS3}
 	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryMessaging, Type: TypeNotificationService, SubType: SubTypeSNSTopic}
 	// Azure
-	AssetClassificationAzureTenant       = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
-	AssetClassificationAzureSubscription = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
+	AssetClassificationAzureSubscription   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
+	AssetClassificationAzureTenant         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
+	AssetClassificationAzureVirtualMachine = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeAzureVirtualMachine}
+	AssetClassificationAzureSQLServer      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeAzureSQLServer}
 )
 
 // AssetEvent holds the whole asset
