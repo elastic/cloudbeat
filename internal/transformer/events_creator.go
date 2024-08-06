@@ -61,7 +61,7 @@ type ECSEvent struct {
 }
 
 type Related struct {
-	Entities []string `json:"entities,omitempty"`
+	Entity []string `json:"entity,omitempty"`
 }
 
 func NewTransformer(log *logp.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
@@ -94,7 +94,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	}
 
 	related := Related{
-		Entities: lo.Filter(eventData.GetIds(), func(item string, _ int) bool { return item != "" }),
+		Entity: lo.Filter(eventData.GetIds(), func(item string, _ int) bool { return item != "" }),
 	}
 
 	globalEnricher := dataprovider.NewEnricher(t.commonDataProvider)
