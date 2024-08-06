@@ -19,7 +19,7 @@ testData:
   clusterConfig: test-eks-config-1
   eksNodes:
     EKS_CONFIG_1_NODE_1: "ip-192-168-29-162.eu-west-2.compute.internal"
-    EKS_CONFIG_1_NODE_2: "ip-192-168-93-227.eu-west-2.compute.internal"
+    EKS_CONFIG_1_NODE_2: "ip-192-168-84-233.eu-west-2.compute.internal"
     EKS_CONFIG_2_NODE_1: "ip-192-168-33-106.eu-west-2.compute.internal"
     EKS_CONFIG_2_NODE_2: "ip-192-168-6-157.eu-west-2.compute.internal"
 
@@ -125,6 +125,7 @@ elasticsearch:
 
   protocol: http
 
+
   xpackSecurity:
     enabled: false
 
@@ -170,6 +171,59 @@ elasticsearch:
   labels:
     catf: related
 
+  lifecycle:
+    postStart:
+      exec:
+        command:
+          - bash
+          - -c
+          - |
+            #!/bin/bash
+            ES_URL=http://localhost:9200
+            while [[ "$(curl -s -o /dev/null -w '%{http_code}\n' $ES_URL)" != "200" ]]; do sleep 1; done
+            curl -s -XPUT "$ES_URL/_index_template/common_template" -H 'Content-Type: application/json' -d '{
+              "index_patterns": ["logs-cloud_security_posture.findings*"],
+              "priority": 500,
+              "template": {
+                "mappings": {
+                  "dynamic": false,
+                  "properties": {
+                    "resource": {
+                      "dynamic": false,
+                      "properties": {
+                        "type": { "type": "keyword" }
+                      }
+                    },
+                    "result": {
+                      "dynamic": false,
+                      "properties": {
+                        "evaluation": { "type": "keyword" }
+                      }
+                    },
+                    "rule": {
+                      "dynamic": false,
+                      "properties": {
+                        "benchmark": {
+                          "dynamic": false,
+                          "properties": {
+                            "id": { "type": "keyword" }
+                          }
+                        },
+                        "tags": { "type": "keyword" }
+                      }
+                    },
+                    "agent": {
+                      "dynamic": false,
+                      "properties": {
+                        "id": { "type": "keyword" },
+                        "version": { "type": "keyword" }
+                      }
+                    },
+                    "@timestamp": { "type": "date" }
+                  }
+                }
+              }
+            }'
 
 kibana:
   imageTag: "8.5.0-SNAPSHOT"

@@ -141,7 +141,7 @@ var (
 
 // AssetEvent holds the whole asset
 type AssetEvent struct {
-	Entity           Entity
+	Asset            Asset
 	Network          *AssetNetwork
 	Cloud            *AssetCloud
 	Host             *AssetHost
@@ -149,8 +149,8 @@ type AssetEvent struct {
 	ResourcePolicies []AssetResourcePolicy
 }
 
-// Entity contains the identifiers of the asset
-type Entity struct {
+// Asset contains the identifiers of the asset
+type Asset struct {
 	Id   []string `json:"id"`
 	Name string   `json:"name"`
 	AssetClassification
@@ -241,7 +241,7 @@ type AssetEnricher func(asset *AssetEvent)
 
 func NewAssetEvent(c AssetClassification, ids []string, name string, enrichers ...AssetEnricher) AssetEvent {
 	a := AssetEvent{
-		Entity: Entity{
+		Asset: Asset{
 			Id:                  removeEmpty(ids),
 			Name:                name,
 			AssetClassification: c,
@@ -257,7 +257,7 @@ func NewAssetEvent(c AssetClassification, ids []string, name string, enrichers .
 
 func WithRawAsset(raw any) AssetEnricher {
 	return func(a *AssetEvent) {
-		a.Entity.Raw = &raw
+		a.Asset.Raw = &raw
 	}
 }
 
@@ -267,7 +267,7 @@ func WithTags(tags map[string]string) AssetEnricher {
 			return
 		}
 
-		a.Entity.Tags = tags
+		a.Asset.Tags = tags
 	}
 }
 
