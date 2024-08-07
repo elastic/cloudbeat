@@ -85,7 +85,7 @@ func TestAssetInventory_Run(t *testing.T) {
 						Resource:  []string{"s3/bucket"},
 					},
 				},
-				"related.entities": []string{"arn:aws:ec2:us-east::ec2/234567890"},
+				"related.entity": []string{"arn:aws:ec2:us-east::ec2/234567890"},
 			},
 		},
 	}

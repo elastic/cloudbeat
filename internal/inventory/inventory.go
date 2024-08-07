@@ -113,7 +113,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 				"network":           e.Network,
 				"iam":               e.IAM,
 				"resource_policies": e.ResourcePolicies,
-				"related.entities":  e.Asset.Id,
+				"related.entity":    e.Asset.Id,
 			},
 		}
 	})
