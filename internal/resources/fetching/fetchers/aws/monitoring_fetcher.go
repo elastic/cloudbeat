@@ -94,6 +94,10 @@ func (r MonitoringResource) GetData() any {
 	return r
 }
 
+func (r MonitoringResource) GetIds() []string {
+	return []string{}
+}
+
 func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	id := fmt.Sprintf("cloudtrail-%s", r.identity.Account)
 	return fetching.ResourceMetadata{
@@ -108,6 +112,10 @@ func (r MonitoringResource) GetElasticCommonData() (map[string]any, error) { ret
 
 func (s SecurityHubResource) GetData() any {
 	return s
+}
+
+func (s SecurityHubResource) GetIds() []string {
+	return []string{s.GetResourceArn()}
 }
 
 func (s SecurityHubResource) GetMetadata() (fetching.ResourceMetadata, error) {

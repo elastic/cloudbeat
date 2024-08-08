@@ -182,6 +182,10 @@ func (r FSResource) GetData() any {
 	return r.EvalResource
 }
 
+func (r FSResource) GetIds() []string {
+	return nil
+}
+
 func (r FSResource) GetElasticCommonData() (map[string]any, error) {
 	m := map[string]any{}
 

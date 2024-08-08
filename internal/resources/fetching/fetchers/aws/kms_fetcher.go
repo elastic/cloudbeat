@@ -84,6 +84,10 @@ func (r KmsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
+func (r KmsResource) GetIds() []string {
+	return []string{r.key.GetResourceArn()}
+}
+
 func (r KmsResource) GetElasticCommonData() (map[string]any, error) {
 	m := map[string]any{
 		"cloud.service.name": "KMS",
