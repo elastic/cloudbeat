@@ -34,6 +34,7 @@ const (
 	SubCategoryDatabase        AssetSubCategory = "database"
 	SubCategoryDigitalIdentity AssetSubCategory = "digital-identity"
 	SubCategoryIntegration     AssetSubCategory = "integration"
+	SubCategoryManagement      AssetSubCategory = "management"
 	SubCategoryMessaging       AssetSubCategory = "messaging"
 	SubCategoryNetwork         AssetSubCategory = "network"
 	SubCategoryStorage         AssetSubCategory = "storage"
@@ -44,6 +45,7 @@ type AssetType string
 
 const (
 	TypeAcl                 AssetType = "acl"
+	TypeCloudAccount        AssetType = "cloud-account"
 	TypeEventSource         AssetType = "event-source"
 	TypeFirewall            AssetType = "firewall"
 	TypeGateway             AssetType = "gateway"
@@ -66,15 +68,16 @@ const (
 type AssetSubType string
 
 const (
+	SubTypeAzureTenant              AssetSubType = "azure-tenant"
+	SubTypeAzureSubscription        AssetSubType = "azure-subscription"
 	SubTypeEC2                      AssetSubType = "ec2-instance"
-	SubTypeS3                       AssetSubType = "s3-bucket"
-	SubTypeIAMPolicy                AssetSubType = "iam-policy"
-	SubTypeIAMRole                  AssetSubType = "iam-role"
-	SubTypeIAMUser                  AssetSubType = "iam-user"
 	SubTypeEC2NetworkInterface      AssetSubType = "ec2-network-interface"
 	SubTypeEC2Subnet                AssetSubType = "ec2-subnet"
 	SubTypeELBv1                    AssetSubType = "elastic-load-balancer"
 	SubTypeELBv2                    AssetSubType = "elastic-load-balancer-v2"
+	SubTypeIAMPolicy                AssetSubType = "iam-policy"
+	SubTypeIAMRole                  AssetSubType = "iam-role"
+	SubTypeIAMUser                  AssetSubType = "iam-user"
 	SubTypeInternetGateway          AssetSubType = "internet-gateway"
 	SubTypeLambdaAlias              AssetSubType = "lambda-function-alias"
 	SubTypeLambdaEventSourceMapping AssetSubType = "lambda-event-source-mapping"
@@ -82,17 +85,19 @@ const (
 	SubTypeLambdaLayer              AssetSubType = "lambda-layer"
 	SubTypeNatGateway               AssetSubType = "nat-gateway"
 	SubTypeRDS                      AssetSubType = "rds-instance"
+	SubTypeS3                       AssetSubType = "s3-bucket"
+	SubTypeSNSTopic                 AssetSubType = "sns-topic"
 	SubTypeSecurityGroup            AssetSubType = "ec2-security-group"
 	SubTypeTransitGateway           AssetSubType = "transit-gateway"
 	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
 	SubTypeVpc                      AssetSubType = "vpc"
-	SubTypeSNSTopic                 AssetSubType = "sns-topic"
 	SubTypeVpcAcl                   AssetSubType = "s3-access-control-list"
 	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connection"
 )
 
 const (
-	AwsCloudProvider = "aws"
+	AwsCloudProvider   = "aws"
+	AzureCloudProvider = "azure"
 )
 
 // AssetClassification holds the taxonomy of an asset
@@ -129,6 +134,9 @@ var (
 	AssetClassificationAwsRds                      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeRDS}
 	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeS3}
 	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryMessaging, Type: TypeNotificationService, SubType: SubTypeSNSTopic}
+	// Azure
+	AssetClassificationAzureTenant       = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
+	AssetClassificationAzureSubscription = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
 )
 
 // AssetEvent holds the whole asset

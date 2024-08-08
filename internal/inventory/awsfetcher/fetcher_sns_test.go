@@ -26,6 +26,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -67,5 +68,5 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
 	fetcher := newSNSFetcher(logger, identity, provider)
 
-	collectResourcesAndMatch(t, fetcher, expected)
+	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
