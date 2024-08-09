@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/gofrs/uuid"
+	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
@@ -59,6 +60,10 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
+type Related struct {
+	Entity []string `json:"entity,omitempty"`
+}
+
 func NewTransformer(log *logp.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
 	return &Transformer{
 		log:                   log,
@@ -88,17 +93,23 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		Raw:              eventData.RuleResult.Resource,
 	}
 
+	related := Related{
+		Entity: lo.Filter(eventData.GetIds(), func(item string, _ int) bool { return item != "" }),
+	}
+
 	globalEnricher := dataprovider.NewEnricher(t.commonDataProvider)
 
 	for _, finding := range eventData.Findings {
 		event := beat.Event{
 			Meta:      mapstr.M{libevents.FieldMetaIndex: t.index},
 			Timestamp: timestamp,
+
 			Fields: mapstr.M{
 				"event":    BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
 				"resource": resource,
 				"result":   finding.Result,
 				"rule":     finding.Rule,
+				"related":  related,
 				"message":  fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
 			},
 		}

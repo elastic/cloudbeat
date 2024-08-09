@@ -82,7 +82,7 @@ func (f *GcpServiceUsageFetcher) Stop() {
 }
 
 func (g *GcpServiceUsageAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
+	id := g.buildId()
 	return fetching.ResourceMetadata{
 		ID:                   id,
 		Type:                 g.Type,
@@ -93,8 +93,16 @@ func (g *GcpServiceUsageAsset) GetMetadata() (fetching.ResourceMetadata, error) 
 	}, nil
 }
 
+func (g *GcpServiceUsageAsset) buildId() string {
+	return fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
+}
+
 func (g *GcpServiceUsageAsset) GetData() any {
 	return g.Asset
+}
+
+func (g *GcpServiceUsageAsset) GetIds() []string {
+	return []string{g.buildId()}
 }
 
 func (g *GcpServiceUsageAsset) GetElasticCommonData() (map[string]any, error) {

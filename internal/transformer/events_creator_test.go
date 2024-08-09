@@ -180,6 +180,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Fields["result"], "event result is missing")
 				s.NotEmpty(event.Fields["rule"], "event rule is missing")
 				s.NotEmpty(event.Fields["file"], "elastic common data is missing")
+				s.NotEmpty(event.Fields["related"], "related data is missing")
 				s.NotEmpty(resource.Raw, "raw resource is missing")
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
 				s.Equal("test_resource_id", resource.ID)

@@ -131,6 +131,10 @@ func (r *GcpAsset) GetData() any {
 	return r.ExtendedAsset.Asset
 }
 
+func (r *GcpAsset) GetIds() []string {
+	return []string{r.ExtendedAsset.Name}
+}
+
 func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	var region string
 

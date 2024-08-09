@@ -36,15 +36,20 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
-type DummyResource struct {
-}
+type DummyResource struct{}
 
 func (d *DummyResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{}, nil
 }
+
 func (d *DummyResource) GetData() any {
 	return d
 }
+
+func (d *DummyResource) GetIds() []string {
+	return nil
+}
+
 func (d *DummyResource) GetElasticCommonData() (map[string]any, error) {
 	return nil, nil
 }

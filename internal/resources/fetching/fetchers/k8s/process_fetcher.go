@@ -279,6 +279,10 @@ func (res ProcResource) GetData() any {
 	return res.EvalResource
 }
 
+func (res ProcResource) GetIds() []string {
+	return nil
+}
+
 func (res ProcResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      res.EvalResource.PID + res.EvalResource.Stat.StartTime,

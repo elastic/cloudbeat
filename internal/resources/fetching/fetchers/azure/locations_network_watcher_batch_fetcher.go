@@ -115,7 +115,7 @@ type NetworkWatchersBatchedByLocationResource struct {
 }
 
 func (r *NetworkWatchersBatchedByLocationResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("%s-%s-%s", r.SubType, r.Location.Name, r.Subscription.ShortID)
+	id := r.buildId()
 	return fetching.ResourceMetadata{
 		ID:                   id,
 		Name:                 id,
@@ -126,8 +126,17 @@ func (r *NetworkWatchersBatchedByLocationResource) GetMetadata() (fetching.Resou
 	}, nil
 }
 
+func (r *NetworkWatchersBatchedByLocationResource) buildId() string {
+	id := fmt.Sprintf("%s-%s-%s", r.SubType, r.Location.Name, r.Subscription.ShortID)
+	return id
+}
+
 func (r *NetworkWatchersBatchedByLocationResource) GetData() any {
 	return r
+}
+
+func (r *NetworkWatchersBatchedByLocationResource) GetIds() []string {
+	return []string{r.buildId()}
 }
 
 func (r *NetworkWatchersBatchedByLocationResource) GetElasticCommonData() (map[string]any, error) {
