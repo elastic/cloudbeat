@@ -324,7 +324,7 @@ jobs:
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
         run: |
-          . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}"
+          . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}"
 
       - name: Install CSPM Azure integration
         id: cspm-azure-integration
