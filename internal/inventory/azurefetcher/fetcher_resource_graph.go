@@ -90,5 +90,4 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 			}),
 		)
 	}
-
 }
