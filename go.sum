@@ -1145,12 +1145,12 @@ github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240804221824-81bc303d0b8f h1:QCOGc
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240804221824-81bc303d0b8f/go.mod h1:kY2twAGkwS2OCCViHmbw3GO/QYysUoLRzn+t08oLUc4=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc h1:3hGO3+tipLIULlrabnXpXpOV5qSDbN/EJo9Xsj3hqyo=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc/go.mod h1:8q2d8dmwavJXISowwaoreHFBnbR/uK4qanfRGhC/W9A=
-github.com/elastic/elastic-agent-autodiscover v0.8.1 h1:u6TWqh7wfevu6S4GUq4SIxYBRo4b/P5RZmx/rSvT10A=
-github.com/elastic/elastic-agent-autodiscover v0.8.1/go.mod h1:0gzGsaDCAqBfUZjuCqqWsSI60eaZ778A5tQZV72rPV0=
+github.com/elastic/elastic-agent-autodiscover v0.8.2 h1:Fs2FhR33AMBPfm5/jz4drVzaEZaqOIHlDBvGtkUZdIk=
+github.com/elastic/elastic-agent-autodiscover v0.8.2/go.mod h1:VZnU53EVaFTxR8Xf6YsLN8FHD5DKQzHSPlKax9/4w+o=
 github.com/elastic/elastic-agent-client/v7 v7.15.0 h1:nDB7v8TBoNuD6IIzC3z7Q0y+7bMgXoT2DsHfolO2CHE=
 github.com/elastic/elastic-agent-client/v7 v7.15.0/go.mod h1:6h+f9QdIr3GO2ODC0Y8+aEXRwzbA5W4eV4dd/67z7nI=
-github.com/elastic/elastic-agent-libs v0.9.15 h1:WCLtuErafUxczT/rXJa4Vr6mxwC8dgtqMbEq+qWGD4M=
-github.com/elastic/elastic-agent-libs v0.9.15/go.mod h1:2VgYxHaeM+cCDBjiS2wbmTvzPGbnlXAtYrlcLefheS8=
+github.com/elastic/elastic-agent-libs v0.10.0 h1:W7uvay0UYdLPtauXGsMD8Xfoe4qtcVWQR4icBgf/26Q=
+github.com/elastic/elastic-agent-libs v0.10.0/go.mod h1:2VgYxHaeM+cCDBjiS2wbmTvzPGbnlXAtYrlcLefheS8=
 github.com/elastic/elastic-agent-system-metrics v0.10.8 h1:YoX3GfWWDtL5YrBkIbl7jQ/usOxBi+0N9jHke2EzFCk=
 github.com/elastic/elastic-agent-system-metrics v0.10.8/go.mod h1:3QiMu9wTKJFvpCN+5klgGqasTMNKJbgY3xcoN1KQXJk=
 github.com/elastic/elastic-integration-corpus-generator-tool v0.5.0/go.mod h1:uf9N86y+UACGybdEhZLpwZ93XHWVhsYZAA4c2T2v6YM=
