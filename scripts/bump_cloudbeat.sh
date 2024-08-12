@@ -226,7 +226,7 @@ bump_snyk_branch_monitoring() {
 
     # Import cloudbeat/main
     curl -X POST \
-        https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import \
+        "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
         -H 'Content-Type: application/json; charset=utf-8' \
         -H "Authorization: token $SNYK_API_KEY" \
         -d '{
