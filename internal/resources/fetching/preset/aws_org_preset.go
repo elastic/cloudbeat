@@ -51,6 +51,10 @@ func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return mdata, nil
 }
 
+func (w *wrapResource) GetIds() []string {
+	return w.wrapped.GetIds()
+}
+
 func (w *wrapResource) GetData() any { return w.wrapped.GetData() }
 func (w *wrapResource) GetElasticCommonData() (map[string]any, error) {
 	return w.wrapped.GetElasticCommonData()

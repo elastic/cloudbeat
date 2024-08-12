@@ -72,6 +72,10 @@ func (r S3Resource) GetData() any {
 	return r.bucket
 }
 
+func (r S3Resource) GetIds() []string {
+	return []string{r.bucket.GetResourceArn()}
+}
+
 func (r S3Resource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      r.bucket.GetResourceArn(),
