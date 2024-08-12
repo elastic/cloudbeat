@@ -82,7 +82,6 @@ const (
 	SubTypeAzureContainerRegistry   AssetSubType = "azure-container-registry"
 	SubTypeAzureCosmosDBAccount     AssetSubType = "azure-cosmos-db-account"
 	SubTypeAzureCosmosDBSQLDatabase AssetSubType = "azure-cosmos-db-sql-database"
-	SubTypeAzureDataDisk            AssetSubType = "azure-data-disk"
 	SubTypeAzureDisk                AssetSubType = "azure-disk"
 	SubTypeAzureElasticPool         AssetSubType = "azure-elastic-pool"
 	SubTypeAzureResourceGroup       AssetSubType = "azure-resource-group"
@@ -162,7 +161,6 @@ var (
 	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeRegistry, SubType: SubTypeAzureContainerRegistry}
 	AssetClassificationAzureCosmosDBAccount     = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeNoSQLDatabase, SubType: SubTypeAzureCosmosDBAccount}
 	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeNoSQLDatabase, SubType: SubTypeAzureCosmosDBSQLDatabase}
-	AssetClassificationAzureDataDisk            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeDisk, SubType: SubTypeAzureDataDisk}
 	AssetClassificationAzureDisk                = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeDisk, SubType: SubTypeAzureDisk}
 	AssetClassificationAzureElasticPool         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeScalability, SubType: SubTypeAzureElasticPool}
 	AssetClassificationAzureResourceGroup       = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeResourceGroup, SubType: SubTypeAzureResourceGroup}

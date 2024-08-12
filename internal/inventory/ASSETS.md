@@ -98,9 +98,9 @@ Infrastructure: 24% (18/73)
 
 ## AZURE Resources
 
-**Progress: 25% (13/51)**
+**Progress: 23% (12/51)**
 Identity: 0% (0/8)
-Infrastructure: 30% (13/43)
+Infrastructure: 27% (12/43)
 
 <details> <summary>Full table</summary>
 
@@ -149,7 +149,7 @@ Infrastructure: 30% (13/43)
 | Infrastructure | Security | Encryption | Azure Transparent Data Encryption | No ❌ |
 | Infrastructure | Security | Threat Detection | Azure Database Threat Detection Policy | No ❌ |
 | Infrastructure | Serverless | Function | Azure Function | No ❌ |
-| Infrastructure | Storage | Disk | Azure Data Disk | Yes ✅ |
+| Infrastructure | Storage | Disk | Azure Data Disk | No ❌ |
 | Infrastructure | Storage | Disk | Azure Disk | Yes ✅ |
 | Infrastructure | Storage | File Storage | Azure Storage File Service | No ❌ |
 | Infrastructure | Storage | File Storage | Azure Storage File Share | No ❌ |

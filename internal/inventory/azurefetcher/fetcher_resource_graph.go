@@ -51,8 +51,18 @@ func (f *resourceGraphFetcher) Fetch(ctx context.Context, assetChan chan<- inven
 		azureType      string
 		classification inventory.AssetClassification
 	}{
-		{"Virtual Machines", azurelib.AssetGroupResources, azurelib.VirtualMachineAssetType, inventory.AssetClassificationAzureVirtualMachine},
+		{"App Services", azurelib.AssetGroupResources, azurelib.WebsitesAssetType, inventory.AssetClassificationAzureAppService},
+		{"Container Registries", azurelib.AssetGroupResources, azurelib.ContainerRegistryAssetType, inventory.AssetClassificationAzureContainerRegistry},
+		{"Cosmos DB Accounts", azurelib.AssetGroupResources, azurelib.DocumentDBDatabaseAccountAssetType, inventory.AssetClassificationAzureCosmosDBAccount},
+		{"Cosmos DB SQL Databases", azurelib.AssetGroupResources, azurelib.CosmosDBForSQLDatabaseAssetType, inventory.AssetClassificationAzureCosmosDBSQLDatabase},
+		{"Disks", azurelib.AssetGroupResources, azurelib.DiskAssetType, inventory.AssetClassificationAzureDisk},
+		{"Elastic Pools", azurelib.AssetGroupResources, azurelib.ElasticPoolAssetType, inventory.AssetClassificationAzureElasticPool},
 		{"MySQL Flexible Servers", azurelib.AssetGroupResources, azurelib.FlexibleMySQLDBAssetType, inventory.AssetClassificationAzureSQLServer},
+		{"Resource Groups", azurelib.AssetGroupResourceContainers, azurelib.ResouceGroupAssetType, inventory.AssetClassificationAzureResourceGroup},
+		{"SQL Databases", azurelib.AssetGroupResources, azurelib.MySQLDatabaseAssetType, inventory.AssetClassificationAzureSQLDatabase},
+		{"Snapshots", azurelib.AssetGroupResources, azurelib.SnapshotAssetType, inventory.AssetClassificationAzureSnapshot},
+		{"Storage Accounts", azurelib.AssetGroupResources, azurelib.StorageAccountAssetType, inventory.AssetClassificationAzureStorageAccount},
+		{"Virtual Machines", azurelib.AssetGroupResources, azurelib.VirtualMachineAssetType, inventory.AssetClassificationAzureVirtualMachine},
 	}
 	for _, r := range resourcesToFetch {
 		f.fetch(ctx, r.name, r.azureGroup, r.azureType, r.classification, assetChan)
