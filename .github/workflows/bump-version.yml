@@ -8,7 +8,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
   SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
-  SNYK_API_TOKEN: ${{ secrets.SNYK_API_TOKEN }}
+  SNYK_API_KEY: ${{ secrets.SNYK_API_KEY }}
   SNYK_INTEGRATION_ID: ${{ secrets.SNYK_INTEGRATION_ID }}
 
 jobs:
