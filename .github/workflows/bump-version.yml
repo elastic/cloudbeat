@@ -41,6 +41,6 @@ jobs:
         # bump_cloudbeat.sh will create multiple PRs with different HEAD branches
         run: scripts/bump_cloudbeat.sh
 
-      # - name: Bump Cloud Security Posture Integration
-      #   # we need to run bump_integration.sh from the main branch
-      #   run: git checkout origin/main && scripts/bump_integration.sh
+      - name: Bump Cloud Security Posture Integration
+        # we need to run bump_integration.sh from the main branch
+        run: git checkout origin/main && scripts/bump_integration.sh

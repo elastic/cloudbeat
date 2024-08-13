@@ -253,6 +253,6 @@ bump_snyk_branch_monitoring() {
 
 }
 
-# run_version_changes_for_main
-# run_version_changes_for_release_branch
+run_version_changes_for_main
+run_version_changes_for_release_branch
 bump_snyk_branch_monitoring
