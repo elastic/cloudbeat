@@ -1,7 +1,7 @@
 name: Tests
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
       - "[0-9]+.[0-9]+"
@@ -103,7 +103,7 @@ jobs:
     needs: [ init-hermit ]
     name: CNVM CI
     runs-on: ubuntu-22.04
-    timeout-minutes: 40
+    timeout-minutes: 30
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
