@@ -87,7 +87,7 @@ func (f *GcpMonitoringFetcher) Stop() {
 }
 
 func (g *GcpMonitoringAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
+	id := g.buildId()
 	return fetching.ResourceMetadata{
 		ID:                   id,
 		Type:                 g.Type,
@@ -98,8 +98,16 @@ func (g *GcpMonitoringAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
+func (g *GcpMonitoringAsset) buildId() string {
+	return fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
+}
+
 func (g *GcpMonitoringAsset) GetData() any {
 	return g.Asset
+}
+
+func (g *GcpMonitoringAsset) GetIds() []string {
+	return []string{g.buildId()}
 }
 
 func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]any, error) {

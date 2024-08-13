@@ -111,14 +111,22 @@ func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if r.lb.LoadBalancerName == nil {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
-
 	return fetching.ResourceMetadata{
-		// A compromise because aws-sdk do not return an arn for an Elb
-		ID:      fmt.Sprintf("%s-%s", r.identity.Account, *r.lb.LoadBalancerName),
+		ID:      r.buildId(),
 		Type:    fetching.CloudLoadBalancer,
 		SubType: fetching.ElbType,
 		Name:    *r.lb.LoadBalancerName,
 	}, nil
+}
+
+// buildId A compromise because aws-sdk do not return an arn for an Elb
+func (r ElbResource) buildId() string {
+	id := fmt.Sprintf("%s-%s", r.identity.Account, *r.lb.LoadBalancerName)
+	return id
+}
+
+func (r ElbResource) GetIds() []string {
+	return []string{r.buildId()}
 }
 
 func (ElbResource) GetElasticCommonData() (map[string]any, error) {

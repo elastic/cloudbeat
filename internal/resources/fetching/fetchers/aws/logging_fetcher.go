@@ -100,6 +100,13 @@ func (r LoggingResource) GetData() any {
 	return r.AwsResource
 }
 
+func (r LoggingResource) GetIds() []string {
+	return []string{
+		r.GetResourceArn(),
+		r.GetResourceName(), // trail names are unique and at times the unique identifier present in logs
+	}
+}
+
 func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      r.GetResourceArn(),
@@ -109,6 +116,7 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Region:  r.GetRegion(),
 	}, nil
 }
+
 func (r LoggingResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]any{
 		"cloud.service.name": "CloudTrail",
@@ -127,6 +135,10 @@ func (c ConfigResource) GetMetadata() (fetching.ResourceMetadata, error) {
 
 func (c ConfigResource) GetData() any {
 	return c.configs
+}
+
+func (c ConfigResource) GetIds() []string {
+	return []string{}
 }
 
 func (c ConfigResource) GetElasticCommonData() (map[string]any, error) { return nil, nil }
