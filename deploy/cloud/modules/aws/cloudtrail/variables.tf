@@ -19,8 +19,6 @@ variable "kms_alias_name" {
 variable "aws_account_id" {
   description = "AWS account ID"
   type        = string
-  // TODO: remove default value
-  default = "704479110758"
 }
 
 variable "tags" {
