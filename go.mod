@@ -18,7 +18,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql v1.2.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.6.0
 	github.com/aquasecurity/go-dep-parser v0.0.0-20240202105001-4f19ab402b0b
-	github.com/aquasecurity/trivy v0.52.2
+	github.com/aquasecurity/trivy v0.53.0
 	github.com/aquasecurity/trivy-db v0.0.0-20240220070059-88dc6466aa40
 	github.com/aws/aws-sdk-go-v2 v1.30.3
 	github.com/aws/aws-sdk-go-v2/config v1.27.27
@@ -96,9 +96,8 @@ require (
 	github.com/Intevation/gval v1.3.0 // indirect
 	github.com/Intevation/jsonpath v0.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/aquasecurity/trivy-checks v0.11.0 // indirect
-	github.com/aws/aws-sdk-go v1.53.0 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.24 // indirect
+	github.com/aquasecurity/trivy-checks v0.13.0 // indirect
+	github.com/aws/aws-sdk-go v1.54.6 // indirect
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bitnami/go-version v0.0.0-20231130084017-bb00604d650c // indirect
 	github.com/containerd/cgroups/v3 v3.0.2 // indirect
@@ -165,7 +164,7 @@ require (
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/CycloneDX/cyclonedx-go v0.8.0 // indirect
+	github.com/CycloneDX/cyclonedx-go v0.9.0 // indirect
 	github.com/GoogleCloudPlatform/docker-credential-gcr v2.0.5+incompatible // indirect
 	github.com/Jeffail/gabs/v2 v2.6.0 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
@@ -191,7 +190,7 @@ require (
 	github.com/aquasecurity/go-gem-version v0.0.0-20201115065557-8eed6fe000ce // indirect
 	github.com/aquasecurity/go-npm-version v0.0.0-20201110091526-0b796d180798 // indirect
 	github.com/aquasecurity/go-pep440-version v0.0.0-20210121094942-22b2f8951d46 // indirect
-	github.com/aquasecurity/go-version v0.0.0-20210121072130-637058cfe492 // indirect
+	github.com/aquasecurity/go-version v0.0.0-20240603093900-cf8a8d29271d // indirect
 	github.com/aquasecurity/table v1.8.0 // indirect
 	github.com/aquasecurity/tml v0.6.1 // indirect
 	github.com/aquasecurity/trivy-java-db v0.0.0-20240109071736-184bd7481d48 // indirect
@@ -500,10 +499,10 @@ require (
 	howett.net/plist v1.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.30.0 // indirect
 	k8s.io/apiserver v0.30.0 // indirect
-	k8s.io/cli-runtime v0.30.0 // indirect
-	k8s.io/component-base v0.30.0 // indirect
+	k8s.io/cli-runtime v0.30.2 // indirect
+	k8s.io/component-base v0.30.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
-	k8s.io/kubectl v0.30.0 // indirect
+	k8s.io/kubectl v0.30.1 // indirect
 	k8s.io/utils v0.0.0-20231127182322-b307cd553661 // indirect
 	modernc.org/libc v1.56.0 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
