@@ -45,6 +45,7 @@ aws_config.access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "NA")
 aws_config.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "NA")
 aws_config.cnvm_tags = os.getenv("AWS_CNVM_TAGS", CNVM_TAGS)
 aws_config.cnvm_stack_name = os.getenv("CNVM_STACK_NAME", "NA")
+aws_config.cloudtrail_s3 = os.getenv("CLOUDTRAIL_S3", "NA")
 
 gcp_dm_config = Munch()
 gcp_dm_config.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
