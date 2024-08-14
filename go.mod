@@ -3,8 +3,8 @@ module github.com/elastic/cloudbeat
 go 1.22.5
 
 require (
-	cloud.google.com/go/asset v1.19.5
-	cloud.google.com/go/iam v1.1.12
+	cloud.google.com/go/asset v1.19.6
+	cloud.google.com/go/iam v1.1.13
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.7.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2 v2.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.4.0
@@ -17,7 +17,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity v0.13.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql v1.2.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.6.0
-	github.com/aquasecurity/go-dep-parser v0.0.0-20231120074854-8322cc2242bf
+	github.com/aquasecurity/go-dep-parser v0.0.0-20240202105001-4f19ab402b0b
 	github.com/aquasecurity/trivy v0.54.1
 	github.com/aquasecurity/trivy-db v0.0.0-20240718084044-d23a6ca8ba04
 	github.com/aws/aws-sdk-go-v2 v1.30.3
@@ -31,8 +31,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.40.3
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.48.3
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.173.0
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.31.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.175.0
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.32.0
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.26.3
 	github.com/aws/aws-sdk-go-v2/service/iam v1.34.3
 	github.com/aws/aws-sdk-go-v2/service/kms v1.35.3
@@ -49,9 +49,9 @@ require (
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240804221824-81bc303d0b8f
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
-	github.com/elastic/elastic-agent-autodiscover v0.8.1
+	github.com/elastic/elastic-agent-autodiscover v0.8.2
 	github.com/elastic/elastic-agent-client/v7 v7.15.0
-	github.com/elastic/elastic-agent-libs v0.9.15
+	github.com/elastic/elastic-agent-libs v0.10.0
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/go-logr/zapr v1.3.0
@@ -65,7 +65,7 @@ require (
 	github.com/mikefarah/yq/v4 v4.44.3
 	github.com/mitchellh/gox v1.0.1
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/open-policy-agent/opa v0.67.0
+	github.com/open-policy-agent/opa v0.67.1
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
 	github.com/samber/lo v1.46.0
 	github.com/spf13/viper v1.19.0
@@ -74,22 +74,22 @@ require (
 	go.elastic.co/go-licence-detector v0.6.1
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
-	go.uber.org/zap/exp v0.2.0
+	go.uber.org/zap/exp v0.1.1-0.20240530135403-273f9ea8c887
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.22.0
-	google.golang.org/api v0.190.0
+	google.golang.org/api v0.191.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.12.0
 	k8s.io/api v0.30.3
 	k8s.io/apimachinery v0.30.3
 	k8s.io/client-go v0.30.3
 	k8s.io/klog/v2 v2.130.1
-	modernc.org/sqlite v1.31.1
+	modernc.org/sqlite v1.32.0
 )
 
 require (
-	cloud.google.com/go/auth v0.7.3 // indirect
+	cloud.google.com/go/auth v0.8.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.3 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4 v4.6.0 // indirect
@@ -175,7 +175,7 @@ require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20240716105424-66b64c4bb379 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20230306123547-8075edf89bb0 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.13.0
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.14.0
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.10.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
@@ -323,7 +323,7 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/flatbuffers v24.3.25+incompatible // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/go-containerregistry v0.20.1
+	github.com/google/go-containerregistry v0.20.2
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/licenseclassifier v0.0.0-20221004142553-c1ed8fcf4bab // indirect
 	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
