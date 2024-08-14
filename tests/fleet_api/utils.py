@@ -93,6 +93,31 @@ def update_key(data: Union[dict, list], search_key: str, value_to_apply: str):
                 update_key(value, search_key, value_to_apply)
 
 
+def update_key_value(data: Union[dict, list], search_key: str, value_to_apply: str):
+    """Update the value of a specific key in the given data.
+
+    If the data is a dictionary, it searches for the specified key and updates its value.
+    If the data is a list, it recursively calls the function for each item in the list.
+
+    Args:
+        data (Union[dict,list]): The data to be updated, which can be either a dictionary or a list.
+        search_key (str): The key to search for in the data.
+        value_to_apply (str): The value to be applied to the matching key.
+
+    Returns:
+        None
+    """
+    if isinstance(data, list):
+        for item in data:
+            update_key_value(item, search_key, value_to_apply)
+    elif isinstance(data, dict):
+        for key, value in data.items():
+            if key == search_key:
+                data[key] = value_to_apply
+            elif isinstance(value, (dict, list)):
+                update_key_value(value, search_key, value_to_apply)
+
+
 def delete_key(data: Union[dict, list], search_key: str, key_to_delete: str):
     """Delete a specific key from the data if it matches the search key.
 
