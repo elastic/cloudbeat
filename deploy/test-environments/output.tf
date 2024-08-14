@@ -36,6 +36,21 @@ output "ec2_cspm_key" {
   value     = module.aws_ec2_for_cspm.ec2_ssh_key
   sensitive = true
 }
+
+output "ec2_cloudtrail_ssh_cmd" {
+  value     = module.aws_ec2_for_cloudtrail.cloudbeat_ssh_cmd
+  sensitive = true
+}
+
+output "ec2_cloudtrail_public_ip" {
+  value     = module.aws_ec2_for_cloudtrail.aws_instance_cloudbeat_public_ip
+  sensitive = true
+}
+
+output "ec2_cloudtrail_key" {
+  value     = module.aws_ec2_for_cloudtrail.ec2_ssh_key
+  sensitive = true
+}
 # =============================================================
 
 # Elastic Cloud output
