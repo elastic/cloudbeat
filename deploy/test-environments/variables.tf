@@ -47,6 +47,12 @@ variable "serverless_mode" {
   type        = bool
 }
 
+variable "cdr_infra" {
+  default     = false
+  description = "Set to true to create a CDR infra deployment"
+  type        = bool
+}
+
 variable "deployment_template" {
   default     = "gcp-compute-optimized-v2"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"
