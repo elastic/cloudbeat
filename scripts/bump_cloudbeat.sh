@@ -213,5 +213,46 @@ run_version_changes_for_release_branch() {
     upload_cloud_formation_templates
 }
 
+bump_snyk_branch_monitoring() {
+    # Get cloudbeat target ID
+    SNYK_CLOUDBEAT_ID=$(curl -X GET "https://api.snyk.io/rest/orgs/$SNYK_ORG_ID/targets?version=2024-05-23&display_name=cloudbeat" \
+        -H "accept: application/vnd.api+json" \
+        -H "authorization: $SNYK_API_KEY" | jq -r '.data[0].id')
+
+    # Delete cloudbeat target
+    curl -X DELETE "https://api.snyk.io/rest/orgs/$SNYK_ORG_ID/targets/$SNYK_CLOUDBEAT_ID?version=2024-05-23" \
+        -H "accept: application/vnd.api+json" \
+        -H "authorization: $SNYK_API_KEY"
+
+    # Import cloudbeat/main
+    curl -X POST \
+        "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
+        -H 'Content-Type: application/json; charset=utf-8' \
+        -H "Authorization: token $SNYK_API_KEY" \
+        -d '{
+  "target": {
+    "owner": "elastic",
+    "name": "cloudbeat",
+    "branch": "main"
+  },
+  "exclusionGlobs": "deploy, scripts, tests, security-policies"
+}'
+    # Import cloudbeat/$CURRENT_MINOR_VERSION
+    curl -X POST \
+        "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
+        -H 'Content-Type: application/json; charset=utf-8' \
+        -H "Authorization: token $SNYK_API_KEY" \
+        -d "{
+  \"target\": {
+    \"owner\": \"elastic\",
+    \"name\": \"cloudbeat\",
+    \"branch\": \"$CURRENT_MINOR_VERSION\"
+  },
+  \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
+}"
+
+}
+
 run_version_changes_for_main
 run_version_changes_for_release_branch
+bump_snyk_branch_monitoring
