@@ -74,7 +74,7 @@ require (
 	go.elastic.co/go-licence-detector v0.6.1
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
-	go.uber.org/zap/exp v0.1.1-0.20240530135403-273f9ea8c887
+	go.uber.org/zap/exp v0.2.0
 	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.22.0
