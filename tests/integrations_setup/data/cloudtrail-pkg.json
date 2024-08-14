@@ -1,0 +1,945 @@
+{
+  "policy_ids": [
+    ""
+  ],
+  "package": {
+    "name": "aws",
+    "version": ""
+  },
+  "name": "",
+  "description": "",
+  "namespace": "",
+  "inputs": {
+    "awshealth-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.awshealth": {
+          "enabled": true,
+          "vars": {
+            "period": "24h",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "billing-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.billing": {
+          "enabled": true,
+          "vars": {
+            "period": "24h",
+            "cost_explorer_config.group_by_dimension_keys": [
+              "AZ",
+              "INSTANCE_TYPE",
+              "SERVICE",
+              "LINKED_ACCOUNT"
+            ],
+            "cost_explorer_config.group_by_tag_keys": [
+              "aws:createdBy"
+            ],
+            "include_linked_accounts": true,
+            "leaderelection": false
+          }
+        }
+      }
+    },
+    "cloudtrail-aws-s3": {
+      "enabled": true,
+      "streams": {
+        "aws.cloudtrail": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": true,
+            "bucket_arn": "",
+            "endpoint": "",
+            "region": "",
+            "interval": "1m",
+            "number_of_workers": 5,
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-cloudtrail"
+            ],
+            "preserve_original_event": true,
+            "cloudtrail_regex": "/CloudTrail/",
+            "cloudtrail_digest_regex": "/CloudTrail-Digest/",
+            "cloudtrail_insight_regex": "/CloudTrail-Insight/",
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "cloudtrail-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.cloudtrail": {
+          "enabled": false,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-cloudtrail"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "cloudtrail-httpjson": {
+      "enabled": false,
+      "streams": {
+        "aws.cloudtrail": {
+          "enabled": false,
+          "vars": {
+            "url": "https://server.example.com:8089",
+            "ssl": "#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n",
+            "interval": "10s",
+            "search": "search sourcetype=aws:cloudtrail",
+            "tags": [
+              "forwarded",
+              "aws-cloudtrail"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "cloudwatch-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.cloudwatch_logs": {
+          "enabled": false,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-cloudwatch-logs"
+            ],
+            "preserve_original_event": false,
+            "data_stream.dataset": "generic"
+          }
+        }
+      }
+    },
+    "cloudwatch-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.cloudwatch_metrics": {
+          "enabled": false,
+          "vars": {
+            "period": "300s",
+            "include_linked_accounts": true,
+            "regions": [],
+            "metrics": "- namespace: AWS/EC2\n  resource_type: ec2:instance\n  name:\n    - CPUUtilization\n    - DiskWriteOps\n  statistic:\n    - Average\n    - Maximum\n  # dimensions:\n   # - name: InstanceId\n      # value: i-123456\n  # tags:\n    # - key: created-by\n      # value: foo\n"
+          }
+        }
+      }
+    },
+    "dynamodb-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.dynamodb": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "ebs-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.ebs": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "ec2-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.ec2_logs": {
+          "enabled": false,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-ec2-logs"
+            ],
+            "preserve_original_event": false,
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "ec2-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.ec2_logs": {
+          "enabled": true,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-ec2-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "ec2-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.ec2_metrics": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "ecs-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.ecs_metrics": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "elb-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.elb_logs": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-elb-logs"
+            ],
+            "preserve_original_event": false,
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "elb-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.elb_logs": {
+          "enabled": false,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-elb-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "elb-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.elb_metrics": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "lambda-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.lambda": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "natgateway-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.natgateway": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "include_linked_accounts": true,
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n"
+          }
+        }
+      }
+    },
+    "firewall-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.firewall_logs": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-firewall-logs"
+            ],
+            "preserve_original_event": false,
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "firewall-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.firewall_logs": {
+          "enabled": false,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-firewall-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "firewall-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.firewall_metrics": {
+          "enabled": true,
+          "vars": {
+            "period": "60s",
+            "regions": [],
+            "include_linked_accounts": true,
+            "metrics": "- namespace: AWS/NetworkFirewall\n  name:\n    - DroppedPackets\n    - PassedPackets\n    - ReceivedPackets\n    - Packets\n  statistic:\n    - Sum\n  # dimensions:\n   # - name: FirewallName\n      # value: SampleFirewall\n  # tags:\n    # - key: created-by\n      # value: sample\n"
+          }
+        }
+      }
+    },
+    "rds-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.rds": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "s3-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.s3access": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-s3access"
+            ],
+            "preserve_original_event": false,
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "s3-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.s3_daily_storage": {
+          "enabled": true,
+          "vars": {
+            "period": "24h",
+            "regions": [],
+            "include_linked_accounts": true
+          }
+        },
+        "aws.s3_request": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "s3_storage_lens-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.s3_storage_lens": {
+          "enabled": true,
+          "vars": {
+            "period": "24h",
+            "regions": [],
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "sns-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.sns": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "sqs-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.sqs": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "transitgateway-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.transitgateway": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "include_linked_accounts": true,
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n"
+          }
+        }
+      }
+    },
+    "usage-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.usage": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "vpcflow-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.vpcflow": {
+          "enabled": false,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "max_number_of_messages": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-vpcflow"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "vpcflow-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.vpcflow": {
+          "enabled": true,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-vpcflow"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "vpn-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.vpn": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "waf-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.waf": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-waf"
+            ],
+            "preserve_original_event": false,
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "waf-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.waf": {
+          "enabled": false,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-waf"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "route53-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.route53_public_logs": {
+          "enabled": true,
+          "vars": {
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "tags": [
+              "forwarded",
+              "aws-route53_public-logs"
+            ],
+            "preserve_original_event": false
+          }
+        },
+        "aws.route53_resolver_logs": {
+          "enabled": true,
+          "vars": {
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "tags": [
+              "forwarded",
+              "aws-route53_resolver-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "route53-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.route53_resolver_logs": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-route53_resolver-logs"
+            ],
+            "preserve_original_event": false,
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "cloudfront-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.cloudfront_logs": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-cloudfront"
+            ],
+            "processors": "# - drop_event:\n  # when:\n    # contains:\n      # source: \"test\"\n",
+            "preserve_original_event": false,
+            "max_number_of_messages": 5
+          }
+        }
+      }
+    },
+    "redshift-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.redshift": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "include_linked_accounts": true,
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n"
+          }
+        }
+      }
+    },
+    "kinesis-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.kinesis": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    },
+    "securityhub-httpjson": {
+      "enabled": false,
+      "streams": {
+        "aws.securityhub_findings": {
+          "enabled": true,
+          "vars": {
+            "interval": "1h",
+            "initial_interval": "24h",
+            "tags": [
+              "forwarded",
+              "aws_securityhub_findings"
+            ],
+            "tld": "amazonaws.com",
+            "ssl": "#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n",
+            "preserve_original_event": false,
+            "preserve_duplicate_custom_fields": false
+          }
+        },
+        "aws.securityhub_insights": {
+          "enabled": true,
+          "vars": {
+            "interval": "1m",
+            "tags": [
+              "forwarded",
+              "aws_securityhub_insights"
+            ],
+            "tld": "amazonaws.com",
+            "ssl": "#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n",
+            "preserve_original_event": false,
+            "preserve_duplicate_custom_fields": false
+          }
+        }
+      }
+    },
+    "inspector-httpjson": {
+      "enabled": false,
+      "streams": {
+        "aws.inspector": {
+          "enabled": true,
+          "vars": {
+            "interval": "1m",
+            "initial_interval": "24h",
+            "http_client_timeout": "30s",
+            "tags": [
+              "forwarded",
+              "aws-inspector"
+            ],
+            "tld": "amazonaws.com",
+            "ssl": "#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n",
+            "preserve_original_event": false,
+            "preserve_duplicate_custom_fields": false
+          }
+        }
+      }
+    },
+    "guardduty-httpjson": {
+      "enabled": false,
+      "streams": {
+        "aws.guardduty": {
+          "enabled": true,
+          "vars": {
+            "interval": "1m",
+            "initial_interval": "24h",
+            "http_client_timeout": "30s",
+            "tags": [
+              "forwarded",
+              "aws-guardduty"
+            ],
+            "tld": "amazonaws.com",
+            "ssl": "#certificate_authorities:\n#  - |\n#    -----BEGIN CERTIFICATE-----\n#    MIIDCjCCAfKgAwIBAgITJ706Mu2wJlKckpIvkWxEHvEyijANBgkqhkiG9w0BAQsF\n#    ADAUMRIwEAYDVQQDDAlsb2NhbGhvc3QwIBcNMTkwNzIyMTkyOTA0WhgPMjExOTA2\n#    MjgxOTI5MDRaMBQxEjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEB\n#    BQADggEPADCCAQoCggEBANce58Y/JykI58iyOXpxGfw0/gMvF0hUQAcUrSMxEO6n\n#    fZRA49b4OV4SwWmA3395uL2eB2NB8y8qdQ9muXUdPBWE4l9rMZ6gmfu90N5B5uEl\n#    94NcfBfYOKi1fJQ9i7WKhTjlRkMCgBkWPkUokvBZFRt8RtF7zI77BSEorHGQCk9t\n#    /D7BS0GJyfVEhftbWcFEAG3VRcoMhF7kUzYwp+qESoriFRYLeDWv68ZOvG7eoWnP\n#    PsvZStEVEimjvK5NSESEQa9xWyJOmlOKXhkdymtcUd/nXnx6UTCFgnkgzSdTWV41\n#    CI6B6aJ9svCTI2QuoIq2HxX/ix7OvW1huVmcyHVxyUECAwEAAaNTMFEwHQYDVR0O\n#    BBYEFPwN1OceFGm9v6ux8G+DZ3TUDYxqMB8GA1UdIwQYMBaAFPwN1OceFGm9v6ux\n#    8G+DZ3TUDYxqMA8GA1UdEwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG5D\n#    874A4YI7YUwOVsVAdbWtgp1d0zKcPRR+r2OdSbTAV5/gcS3jgBJ3i1BN34JuDVFw\n#    3DeJSYT3nxy2Y56lLnxDeF8CUTUtVQx3CuGkRg1ouGAHpO/6OqOhwLLorEmxi7tA\n#    H2O8mtT0poX5AnOAhzVy7QW0D/k4WaoLyckM5hUa6RtvgvLxOwA0U+VGurCDoctu\n#    8F4QOgTAWyh8EZIwaKCliFRSynDpv3JTUwtfZkxo6K6nce1RhCWFAsMvDZL8Dgc0\n#    yvgJ38BRsFOtkRuAGSf6ZUwTO8JJRRIFnpUzXflAnGivK9M13D5GEQMmIl6U9Pvk\n#    sxSmbIUfc2SGJGCJD4I=\n#    -----END CERTIFICATE-----\n",
+            "preserve_original_event": false,
+            "preserve_duplicate_custom_fields": false
+          }
+        }
+      }
+    },
+    "guardduty-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.guardduty": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": false,
+            "interval": "1m",
+            "number_of_workers": 5,
+            "visibility_timeout": "300s",
+            "api_timeout": "120s",
+            "max_number_of_messages": 5,
+            "endpoint": "",
+            "region": "",
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-guardduty"
+            ],
+            "preserve_original_event": false,
+            "preserve_duplicate_custom_fields": false
+          }
+        }
+      }
+    },
+    "apigateway-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.apigateway_metrics": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "include_linked_accounts": true,
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n"
+          }
+        }
+      }
+    },
+    "apigateway-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.apigateway_logs": {
+          "enabled": false,
+          "vars": {
+            "collect_s3_logs": false,
+            "endpoint": "",
+            "region": "",
+            "interval": "1m",
+            "number_of_workers": 5,
+            "max_number_of_messages": 5,
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-apigateway-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "apigateway-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.apigateway_logs": {
+          "enabled": true,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-apigateway-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "emr-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.emr_metrics": {
+          "enabled": true,
+          "vars": {
+            "period": "5m",
+            "regions": [],
+            "include_linked_accounts": true,
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n"
+          }
+        }
+      }
+    },
+    "emr-aws-s3": {
+      "enabled": false,
+      "streams": {
+        "aws.emr_logs": {
+          "enabled": true,
+          "vars": {
+            "collect_s3_logs": true,
+            "queue_url": false,
+            "endpoint": "",
+            "region": "",
+            "interval": "1m",
+            "number_of_workers": 5,
+            "max_number_of_messages": 5,
+            "fips_enabled": false,
+            "tags": [
+              "forwarded",
+              "aws-emr-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "emr-aws-cloudwatch": {
+      "enabled": false,
+      "streams": {
+        "aws.emr_logs": {
+          "enabled": false,
+          "vars": {
+            "log_streams": [],
+            "start_position": "beginning",
+            "scan_frequency": "1m",
+            "api_timeput": "120s",
+            "api_sleep": "200ms",
+            "tags": [
+              "forwarded",
+              "aws-emr-logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "kafka-aws/metrics": {
+      "enabled": false,
+      "streams": {
+        "aws.kafka_metrics": {
+          "enabled": true,
+          "vars": {
+            "period": "1m",
+            "regions": [],
+            "tags_filter": "# - key: \"created-by\"\n  # value: \"foo\"\n",
+            "include_linked_accounts": true
+          }
+        }
+      }
+    }
+  },
+  "vars": {
+    "access_key_id": "",
+    "secret_access_key": "",
+    "default_region": ""
+  }
+}
