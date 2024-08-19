@@ -47,7 +47,7 @@ jobs:
 
       - name: golangci-lint
         shell: bash
-        run: golangci-lint run --out-format github-actions
+        run: golangci-lint run --out-format colored-line-number
 
       - name: Mage Check
         shell: bash
