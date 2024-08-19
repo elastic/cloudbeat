@@ -62,7 +62,7 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 				KeyId: keyEntry.KeyId,
 			})
 			if err != nil {
-				p.log.Errorf(err.Error())
+				p.log.Error(err.Error())
 				continue
 			}
 
@@ -78,7 +78,7 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 				KeyId: keyEntry.KeyId,
 			})
 			if err != nil {
-				p.log.Errorf(err.Error())
+				p.log.Error(err.Error())
 				continue
 			}
 
