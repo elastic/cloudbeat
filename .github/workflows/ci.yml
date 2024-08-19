@@ -1,11 +1,12 @@
 name: Tests
 
 on:
-  pull_request_target:
-    branches:
-      - main
-      - "[0-9]+.[0-9]+"
-    types: [opened, synchronize, reopened]
+  # Temporary disabled, will be solved by https://github.com/elastic/security-team/issues/9129
+  # pull_request_target:
+  #   branches:
+  #     - main
+  #     - "[0-9]+.[0-9]+"
+  #   types: [opened, synchronize, reopened]
   push:
     branches:
       - main
@@ -105,6 +106,17 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Check out the repo
         uses: actions/checkout@v4
 

@@ -213,7 +213,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		s.Contains(evalRes.Cmd, "/usr/bin/kubelet")
 
 		s.Equal(testProcess.Pid, strconv.FormatInt(procCD["process.pid"].(int64), 10))
-		s.Greater(procCD["process.args_count"].(int64), int64(0))
+		s.Positive(procCD["process.args_count"].(int64))
 		s.Contains(procCD["process.command_line"], "/usr/bin/kubelet")
 		s.Equal("kubelet", procCD["process.name"])
 
