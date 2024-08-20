@@ -24,11 +24,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-<<<<<<< HEAD:resources/fetching/fetchers/k8s/kube_fetcher_test.go
 	v1 "k8s.io/api/core/v1"
-=======
-	"k8s.io/api/core/v1"
->>>>>>> 0029a1ad (Upgrade helm to v3.14.2 (#2356)):internal/resources/fetching/fetchers/k8s/kube_fetcher_test.go
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
