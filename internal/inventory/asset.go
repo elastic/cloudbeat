@@ -29,8 +29,10 @@ const (
 type AssetSubCategory string
 
 const (
+	SubCategoryApplication     AssetSubCategory = "application"
 	SubCategoryAuthorization   AssetSubCategory = "authorization"
 	SubCategoryCompute         AssetSubCategory = "compute"
+	SubCategoryContainer       AssetSubCategory = "container"
 	SubCategoryDatabase        AssetSubCategory = "database"
 	SubCategoryDigitalIdentity AssetSubCategory = "digital-identity"
 	SubCategoryIntegration     AssetSubCategory = "integration"
@@ -46,30 +48,50 @@ type AssetType string
 const (
 	TypeAcl                 AssetType = "acl"
 	TypeCloudAccount        AssetType = "cloud-account"
+	TypeDisk                AssetType = "disk"
 	TypeEventSource         AssetType = "event-source"
 	TypeFirewall            AssetType = "firewall"
 	TypeGateway             AssetType = "gateway"
 	TypeInterface           AssetType = "interface"
 	TypeLoadBalancer        AssetType = "load-balancer"
+	TypeNoSQLDatabase       AssetType = "nosql-database"
 	TypeNotificationService AssetType = "notification-service"
 	TypeObjectStorage       AssetType = "object-storage"
 	TypePeering             AssetType = "peering"
 	TypePolicy              AssetType = "policy"
+	TypeRegistry            AssetType = "registry"
 	TypeRelationalDatabase  AssetType = "relational"
+	TypeResourceGroup       AssetType = "resource-group"
 	TypeRole                AssetType = "role"
+	TypeScalability         AssetType = "scalability"
 	TypeServerless          AssetType = "serverless"
+	TypeSnapshot            AssetType = "snapshot"
+	TypeStorage             AssetType = "storage"
 	TypeSubnet              AssetType = "subnet"
 	TypeUser                AssetType = "user"
 	TypeVirtualMachine      AssetType = "virtual-machine"
 	TypeVirtualNetwork      AssetType = "virtual-network"
+	TypeWebApplication      AssetType = "web-application"
 )
 
 // AssetSubType is used to build the document index. Use only numbers, letters and dashes (-)
 type AssetSubType string
 
 const (
-	SubTypeAzureTenant              AssetSubType = "azure-tenant"
+	SubTypeAzureAppService          AssetSubType = "azure-app-service"
+	SubTypeAzureContainerRegistry   AssetSubType = "azure-container-registry"
+	SubTypeAzureCosmosDBAccount     AssetSubType = "azure-cosmos-db-account"
+	SubTypeAzureCosmosDBSQLDatabase AssetSubType = "azure-cosmos-db-sql-database"
+	SubTypeAzureDisk                AssetSubType = "azure-disk"
+	SubTypeAzureElasticPool         AssetSubType = "azure-elastic-pool"
+	SubTypeAzureResourceGroup       AssetSubType = "azure-resource-group"
+	SubTypeAzureSQLDatabase         AssetSubType = "azure-sql-database"
+	SubTypeAzureSQLServer           AssetSubType = "azure-sql-server"
+	SubTypeAzureSnapshot            AssetSubType = "azure-snapshot"
+	SubTypeAzureStorageAccount      AssetSubType = "azure-storage-account"
 	SubTypeAzureSubscription        AssetSubType = "azure-subscription"
+	SubTypeAzureTenant              AssetSubType = "azure-tenant"
+	SubTypeAzureVirtualMachine      AssetSubType = "azure-virtual-machine"
 	SubTypeEC2                      AssetSubType = "ec2-instance"
 	SubTypeEC2NetworkInterface      AssetSubType = "ec2-network-interface"
 	SubTypeEC2Subnet                AssetSubType = "ec2-subnet"
@@ -135,8 +157,20 @@ var (
 	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeS3}
 	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryMessaging, Type: TypeNotificationService, SubType: SubTypeSNSTopic}
 	// Azure
-	AssetClassificationAzureTenant       = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
-	AssetClassificationAzureSubscription = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
+	AssetClassificationAzureAppService          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryApplication, Type: TypeWebApplication, SubType: SubTypeAzureAppService}
+	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeRegistry, SubType: SubTypeAzureContainerRegistry}
+	AssetClassificationAzureCosmosDBAccount     = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeNoSQLDatabase, SubType: SubTypeAzureCosmosDBAccount}
+	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeNoSQLDatabase, SubType: SubTypeAzureCosmosDBSQLDatabase}
+	AssetClassificationAzureDisk                = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeDisk, SubType: SubTypeAzureDisk}
+	AssetClassificationAzureElasticPool         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeScalability, SubType: SubTypeAzureElasticPool}
+	AssetClassificationAzureResourceGroup       = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeResourceGroup, SubType: SubTypeAzureResourceGroup}
+	AssetClassificationAzureSQLDatabase         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeAzureSQLDatabase}
+	AssetClassificationAzureSQLServer           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeAzureSQLServer}
+	AssetClassificationAzureSnapshot            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeSnapshot, SubType: SubTypeAzureSnapshot}
+	AssetClassificationAzureStorageAccount      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeStorage, SubType: SubTypeAzureStorageAccount}
+	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
+	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
+	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeAzureVirtualMachine}
 )
 
 // AssetEvent holds the whole asset
