@@ -60,7 +60,7 @@ func (s *registryTestSuite) registerFetcher(f fetching.Fetcher, key string, cond
 }
 
 func (s *registryTestSuite) TestKeys() {
-	var tests = []struct {
+	tests := []struct {
 		key   string
 		value int
 	}{
@@ -107,7 +107,7 @@ func (s *registryTestSuite) TestRunRegistered() {
 	f3 := newSyncNumberFetcher(3, s.resourceCh)
 	s.registerFetcher(f3, "some-key-3")
 
-	var tests = []struct {
+	tests := []struct {
 		key string
 		res numberResource
 	}{
@@ -144,7 +144,7 @@ func (s *registryTestSuite) TestShouldRun() {
 	conditionTrue := newBoolFetcherCondition(true, "always-fetcher-condition")
 	conditionFalse := newBoolFetcherCondition(false, "never-fetcher-condition")
 
-	var tests = []struct {
+	tests := []struct {
 		conditions []fetching.Condition
 		expected   bool
 	}{
@@ -207,6 +207,10 @@ type numberResource struct {
 
 func (res numberResource) GetData() any {
 	return res.Num
+}
+
+func (res numberResource) GetIds() []string {
+	return nil
 }
 
 func (res numberResource) GetMetadata() (fetching.ResourceMetadata, error) {

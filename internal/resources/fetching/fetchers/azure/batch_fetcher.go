@@ -124,6 +124,12 @@ func (r *AzureBatchResource) GetData() any {
 	return r.Assets
 }
 
+func (r *AzureBatchResource) GetIds() []string {
+	return lo.Map(r.Assets, func(item inventory.AzureAsset, _ int) string {
+		return item.Id
+	})
+}
+
 func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	// Assuming all batch in not empty includes assets of the same subscription
 	id := fmt.Sprintf("%s-%s", r.SubType, r.Subscription.ShortID)

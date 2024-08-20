@@ -137,6 +137,7 @@ type Resource interface {
 	GetMetadata() (ResourceMetadata, error)
 	GetData() any
 	GetElasticCommonData() (map[string]any, error)
+	GetIds() []string
 }
 
 type ResourceFields struct {

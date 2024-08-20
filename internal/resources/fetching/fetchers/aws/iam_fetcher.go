@@ -115,6 +115,10 @@ func (r IAMResource) GetData() any {
 	return r.AwsResource
 }
 
+func (r IAMResource) GetIds() []string {
+	return []string{r.GetResourceArn(), r.identity.Account}
+}
+
 func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	identifier := r.GetResourceArn()
 	if identifier == "" {

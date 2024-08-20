@@ -30,6 +30,7 @@ notice_overrides = [
     {"name": "github.com/golang/glog", "licenceType": "Apache-2.0"},
     {"name": "github.com/spdx/tools-golang", "licenceFile": "LICENSE.code", "licenceType": "Apache-2.0"},
     {"name": "github.com/aquasecurity/trivy-policies", "licenceType": "MIT"},
+    {"name": "github.com/csaf-poc/csaf_distribution/v3", "licenceType": "Apache-2.0"},
 ]
 
 # Additional third-party, non-source code dependencies, to add to the CSV output.

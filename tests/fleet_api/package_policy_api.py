@@ -113,18 +113,20 @@ def create_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str, data:
     """
     url = f"{cfg.kibana_url}/api/fleet/package_policies"
 
-    package_policy = munchify(pkg_policy)
-    package_policy.policy_id = agent_policy_id
+    if pkg_policy.get("policy_id") is not None:
+        pkg_policy["policy_id"] = agent_policy_id
+    else:
+        pkg_policy["policy_ids"] = [agent_policy_id]
 
     for key, value in data.items():
-        update_key(package_policy, key, value)
+        update_key(pkg_policy, key, value)
 
     try:
         response = perform_api_call(
             method="POST",
             url=url,
             auth=cfg.auth,
-            params={"json": package_policy},
+            params={"json": pkg_policy},
         )
         package_policy_id = munchify(response).item.id
         logger.info(f"Package policy '{package_policy_id}' created successfully")
