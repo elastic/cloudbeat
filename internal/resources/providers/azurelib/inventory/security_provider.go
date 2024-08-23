@@ -161,7 +161,7 @@ func (p *securityContactsProvider) ListSecurityContacts(ctx context.Context, sub
 func (p *securityContactsProvider) transformSecurityContract(contact *armsecurity.Contact, subscriptionID string) AzureAsset {
 	properties := map[string]any{}
 
-	maps.AddIfNotNil(properties, "alertNotifications", contact.Properties.AlertNotifications)
+	maps.AddIfSliceNotEmpty(properties, "notificationsSources", contact.Properties.NotificationsSources)
 	maps.AddIfNotNil(properties, "emails", contact.Properties.Emails)
 	maps.AddIfNotNil(properties, "notificationsByRole", contact.Properties.NotificationsByRole)
 	maps.AddIfNotNil(properties, "phone", contact.Properties.Phone)
