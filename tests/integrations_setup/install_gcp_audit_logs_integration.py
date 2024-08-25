@@ -43,13 +43,17 @@ if __name__ == "__main__":
     package_data["package"]["version"] = package_version
     package_data["vars"]["project_id"] = cnfg.gcp_audit_config.project_id
 
-    update_key_value(data=package_data["inputs"]["audit-gcp-pubsub"],
-                     search_key="topic",
-                     value_to_apply=cnfg.gcp_audit_config.topic_name)
+    update_key_value(
+        data=package_data["inputs"]["audit-gcp-pubsub"],
+        search_key="topic",
+        value_to_apply=cnfg.gcp_audit_config.topic_name,
+    )
 
-    update_key_value(data=package_data["inputs"]["audit-gcp-pubsub"],
-                     search_key="subscription_name",
-                     value_to_apply=cnfg.gcp_audit_config.subscription_name)
+    update_key_value(
+        data=package_data["inputs"]["audit-gcp-pubsub"],
+        search_key="subscription_name",
+        value_to_apply=cnfg.gcp_audit_config.subscription_name,
+    )
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
