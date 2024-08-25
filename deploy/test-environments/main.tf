@@ -2,6 +2,10 @@ provider "aws" {
   region = var.region
 }
 
+provider "google" {
+  project = var.gcp_project_id
+}
+
 locals {
   common_tags = {
     division   = "${var.division}"
@@ -11,6 +15,7 @@ locals {
     owner      = "${var.owner}"
     deployment = "${var.deployment_name}"
   }
+
   ec_url = "https://cloud.elastic.co"
   ec_headers = {
     Content-type  = "application/json"
@@ -47,6 +52,17 @@ module "aws_ec2_for_cloudtrail" {
   deploy_agent    = false # Agent will not be deployed
   deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
   specific_tags   = merge(local.common_tags, { "ec2_type" : "cloudtrail" })
+}
+
+module "gcp_audit_logs" {
+  count     = var.cdr_infra ? 1 : 0
+  providers = { google : google }
+  source    = "../cloud/modules/gcp/vm"
+
+  deployment_name = var.deployment_name
+  network         = "default"
+  specific_tags   = merge(local.common_tags, { "vm_instance" : "audit-logs" })
+
 }
 
 resource "random_string" "suffix" {

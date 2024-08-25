@@ -5,6 +5,10 @@ terraform {
       version = "~> 4.15.0"
     }
 
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.0.0"
+    }
     ec = {
       source  = "elastic/ec"
       version = ">=0.9.0"

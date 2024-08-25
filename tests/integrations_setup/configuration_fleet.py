@@ -54,6 +54,12 @@ gcp_dm_config.allow_ssh = os.getenv("ALLOW_SSH", "false") == "true"
 gcp_dm_config.credentials_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
 gcp_dm_config.service_account_json_path = os.getenv("SERVICE_ACCOUNT_JSON_PATH", "")
 
+gcp_audit_config = Munch()
+gcp_audit_config.credentials_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+gcp_audit_config.project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "")
+gcp_audit_config.topic_name = os.getenv("GCP_TOPIC_NAME", "")
+gcp_audit_config.subscription_name = os.getenv("GCP_SUBSCRIPTION_NAME", "")
+
 # Used for Azure deployment on stack 8.11.* (1.6.* package version)
 azure_arm_parameters = Munch()
 azure_arm_parameters.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
