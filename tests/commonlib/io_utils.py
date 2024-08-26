@@ -55,6 +55,50 @@ def get_events_from_index(
 
     return events
 
+def get_assets_from_index(
+    elastic_client,
+    category: str, sub_category: str, type_: str, sub_type: str,
+    time_after: datetime,
+) -> list[Munch]:
+    """
+    TODO(kuba)
+    """
+    query = {
+        "bool": {
+            "must": [
+                {
+                    "match": {
+                        "asset.category": category,
+                        "asset.sub_category": sub_category,
+                        "asset.type": type_,
+                        "asset.sub_type": sub_type,
+                    }
+                }
+            ],
+            "filter": [
+                {
+                    "range": {
+                        "@timestamp": {
+                            "gte": time_after.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    sort = [{"@timestamp": {"order": "desc"}}]
+    result = elastic_client.get_index_data(
+        query=query,
+        sort=sort,
+        size=1000,
+    )
+
+    assets = []
+    for asset in munchify(dict(result)).hits.hits:
+        assets.append(asset._source)
+
+    return assets
+
 
 def get_logs_from_stream(stream: str) -> list[Munch]:
     """
