@@ -5,6 +5,13 @@ variable "region" {
   default     = "eu-west-1"
 }
 
+# Azure provider variable
+variable "location" {
+  description = "Azure location"
+  type        = string
+  default     = "East US"
+}
+
 # EC2 variable
 variable "ami_map" {
   description = "Mapping of regions to AMI IDs"

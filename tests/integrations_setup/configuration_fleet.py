@@ -65,3 +65,11 @@ azure_arm_parameters = Munch()
 azure_arm_parameters.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
 azure_arm_parameters.location = os.getenv("LOCATION", "CentralUS")
 azure_arm_parameters.credentials = os.getenv("AZURE_CREDENTIALS", "")
+
+# Used for Azure Logs integration
+azure_config = Munch()
+azure_config.eventhub = os.getenv("EVENTHUB", "")
+azure_config.consumer_group = os.getenv("CONSUMER_GROUP", "$Default")
+azure_config.connection_string = os.getenv("CONNECTION_STRING", "")
+azure_config.storage_account = os.getenv("STORAGE_ACCOUNT", "")
+azure_config.storage_account_key = os.getenv("STORAGE_ACCOUNT_KEY", "")
