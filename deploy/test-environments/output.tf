@@ -38,19 +38,35 @@ output "ec2_cspm_key" {
 }
 
 output "ec2_cloudtrail_ssh_cmd" {
-  value     = var.cdr_infra ? module.aws_ec2_for_cloudtrail.cloudbeat_ssh_cmd : null
+  value     = var.cdr_infra ? module.aws_ec2_for_cloudtrail[0].cloudbeat_ssh_cmd : null
   sensitive = true
 }
 
 output "ec2_cloudtrail_public_ip" {
-  value     = var.cdr_infra ? module.aws_ec2_for_cloudtrail.aws_instance_cloudbeat_public_ip : null
+  value     = var.cdr_infra ? module.aws_ec2_for_cloudtrail[0].aws_instance_cloudbeat_public_ip : null
   sensitive = true
 }
 
 output "ec2_cloudtrail_key" {
-  value     = var.cdr_infra ? module.aws_ec2_for_cloudtrail.ec2_ssh_key : null
+  value     = var.cdr_infra ? module.aws_ec2_for_cloudtrail[0].ec2_ssh_key : null
   sensitive = true
 }
+
+output "az_vm_activity_logs_ssh_cmd" {
+  value     = var.cdr_infra ? module.azure_vm_activity_logs[0].azure_vm_ssh_cmd : null
+  sensitive = true
+}
+
+output "az_vm_activity_logs_public_ip" {
+  value     = var.cdr_infra ? module.azure_vm_activity_logs[0].azure_vm_public_ip : null
+  sensitive = true
+}
+
+output "az_vm_activity_logs_key" {
+  value     = var.cdr_infra ? module.azure_vm_activity_logs[0].azure_vm_ssh_key : null
+  sensitive = true
+}
+
 # =============================================================
 
 # Elastic Cloud output

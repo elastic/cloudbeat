@@ -5,6 +5,11 @@ terraform {
       version = "~> 4.15.0"
     }
 
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.11, < 4.0"
+    }
+
     ec = {
       source  = "elastic/ec"
       version = ">=0.9.0"
