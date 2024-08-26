@@ -96,18 +96,20 @@ func (_c *mockSecurityClientWrapper_ListAutoProvisioningSettings_Call) RunAndRet
 }
 
 // ListSecurityContacts provides a mock function with given fields: ctx, subID
-func (_m *mockSecurityClientWrapper) ListSecurityContacts(ctx context.Context, subID string) (armsecurity.ContactsClientListResponse, error) {
+func (_m *mockSecurityClientWrapper) ListSecurityContacts(ctx context.Context, subID string) ([]armsecurity.ContactsClientListResponse, error) {
 	ret := _m.Called(ctx, subID)
 
-	var r0 armsecurity.ContactsClientListResponse
+	var r0 []armsecurity.ContactsClientListResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (armsecurity.ContactsClientListResponse, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]armsecurity.ContactsClientListResponse, error)); ok {
 		return rf(ctx, subID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) armsecurity.ContactsClientListResponse); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) []armsecurity.ContactsClientListResponse); ok {
 		r0 = rf(ctx, subID)
 	} else {
-		r0 = ret.Get(0).(armsecurity.ContactsClientListResponse)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]armsecurity.ContactsClientListResponse)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
@@ -138,12 +140,12 @@ func (_c *mockSecurityClientWrapper_ListSecurityContacts_Call) Run(run func(ctx 
 	return _c
 }
 
-func (_c *mockSecurityClientWrapper_ListSecurityContacts_Call) Return(_a0 armsecurity.ContactsClientListResponse, _a1 error) *mockSecurityClientWrapper_ListSecurityContacts_Call {
+func (_c *mockSecurityClientWrapper_ListSecurityContacts_Call) Return(_a0 []armsecurity.ContactsClientListResponse, _a1 error) *mockSecurityClientWrapper_ListSecurityContacts_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *mockSecurityClientWrapper_ListSecurityContacts_Call) RunAndReturn(run func(context.Context, string) (armsecurity.ContactsClientListResponse, error)) *mockSecurityClientWrapper_ListSecurityContacts_Call {
+func (_c *mockSecurityClientWrapper_ListSecurityContacts_Call) RunAndReturn(run func(context.Context, string) ([]armsecurity.ContactsClientListResponse, error)) *mockSecurityClientWrapper_ListSecurityContacts_Call {
 	_c.Call.Return(run)
 	return _c
 }

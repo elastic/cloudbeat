@@ -40,17 +40,19 @@ func TestListSecurityContacts(t *testing.T) {
 		return n
 	}
 
-	response := func(c ...*armsecurity.Contact) armsecurity.ContactsClientListResponse {
-		return armsecurity.ContactsClientListResponse{
-			ContactList: armsecurity.ContactList{
-				Value: c,
+	response := func(c ...*armsecurity.Contact) []armsecurity.ContactsClientListResponse {
+		return []armsecurity.ContactsClientListResponse{
+			{
+				ContactList: armsecurity.ContactList{
+					Value: c,
+				},
 			},
 		}
 	}
 
 	tests := map[string]struct {
 		inputSubID      string
-		mockReturn      armsecurity.ContactsClientListResponse
+		mockReturn      []armsecurity.ContactsClientListResponse
 		mockReturnError error
 		expected        []AzureAsset
 		expectError     bool
