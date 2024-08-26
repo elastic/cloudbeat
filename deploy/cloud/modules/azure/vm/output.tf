@@ -1,7 +1,6 @@
 output "azure_vm_ssh_cmd" {
   description = "Use this command SSH into the azure vm instance"
-  #   value       = "ssh -i ${local.vm_private_key_file} ${local.vm_username}@${aws_instance.cloudbeat.public_ip}"
-  value = "ssh -i ${local.vm_private_key_file} ${local.vm_username}@${data.azurerm_public_ip.data-pip.ip_address}"
+  value       = "ssh -i ${local.vm_private_key_file} ${local.vm_username}@${data.azurerm_public_ip.data-pip.ip_address}"
 }
 
 output "azure_vm_ssh_key" {
