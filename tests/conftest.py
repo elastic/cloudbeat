@@ -176,6 +176,14 @@ def kspm_client():
     """
     return create_es_client(configuration.elasticsearch.kspm_index)
 
+@pytest.fixture
+def asset_inventory_client():
+    """
+    This function (fixture) instantiate ElasticWrapper.
+    @return: ElasticWrapper client with asset inventory index.
+    """
+    return create_es_client(configuration.elasticsearch.asset_inventory_index)
+
 
 @pytest.fixture(scope="session", autouse=True)
 def api_client():
