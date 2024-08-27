@@ -2,11 +2,16 @@
 import datetime
 import json
 import time
+import munch
 from functools import reduce
-from typing import Union
+from typing import Union, List
 
 import allure
-from commonlib.io_utils import get_events_from_index, get_logs_from_stream
+from commonlib.io_utils import (
+    get_events_from_index,
+    get_logs_from_stream,
+    get_assets_from_index,
+)
 from loguru import logger
 
 FINDINGS_BACKOFF_SECONDS = 5
@@ -74,13 +79,13 @@ def get_ES_evaluation(
 
     return None
 
-def get_ES_asset(
+def get_ES_assets(
     elastic_client,
     timeout,
     category, sub_category, type_, sub_type,
     exec_timestamp,
     resource_identifier=lambda r: True,
-) -> Union[str, None]:
+) -> Union[List[munch.Munch], None]:
     start_time = time.time()
     latest_timestamp = exec_timestamp
 
@@ -96,6 +101,7 @@ def get_ES_asset(
             logger.debug(e)
             continue
 
+        filtered_assets = []
         for asset in assets:
             asset_timestamp = datetime.datetime.strptime(
                 getattr(asset, "@timestamp"),
@@ -104,9 +110,10 @@ def get_ES_asset(
             if asset_timestamp > latest_timestamp:
                 latest_timestamp = asset_timestamp
             if resource_identifier(asset):
-                # TODO(kuba): what would be asset's type here
-                # need to fix return values
-                return asset
+                filtered_assets.append(asset)
+        if len(filtered_assets) > 0:
+            return filtered_assets
+
     return None
 
 def get_logs_evaluation(

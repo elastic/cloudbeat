@@ -66,14 +66,10 @@ def get_assets_from_index(
     query = {
         "bool": {
             "must": [
-                {
-                    "match": {
-                        "asset.category": category,
-                        "asset.sub_category": sub_category,
-                        "asset.type": type_,
-                        "asset.sub_type": sub_type,
-                    }
-                }
+                {"match": {"asset.category": category}},
+                {"match": {"asset.sub_category": sub_category}},
+                {"match": {"asset.type": type_}},
+                {"match": {"asset.sub_type": sub_type}},
             ],
             "filter": [
                 {
