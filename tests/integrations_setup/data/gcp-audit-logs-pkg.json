@@ -1,0 +1,265 @@
+{
+  "package": {
+    "name": "gcp",
+    "version": ""
+  },
+  "name": "",
+  "namespace": "",
+  "description": "",
+  "policy_ids": [""],
+  "vars": {
+    "project_id": "",
+    "credentials_file": "/home/ubuntu/credentials.json"
+  },
+  "inputs": {
+    "audit-gcp-pubsub": {
+      "enabled": true,
+      "streams": {
+        "gcp.audit": {
+          "enabled": true,
+          "vars": {
+            "topic": "",
+            "subscription_name": "",
+            "subscription_create": false,
+            "tags": [
+              "forwarded",
+              "gcp-audit"
+            ],
+            "preserve_original_event": true,
+            "keep_json": false
+          }
+        }
+      }
+    },
+    "firewall-gcp-pubsub": {
+      "enabled": false,
+      "streams": {
+        "gcp.firewall": {
+          "enabled": true,
+          "vars": {
+            "topic": "cloud-logging-firewall",
+            "subscription_name": "filebeat-gcp-firewall",
+            "subscription_create": false,
+            "tags": [
+              "forwarded",
+              "gcp-firewall"
+            ],
+            "preserve_original_event": false,
+            "keep_json": false
+          }
+        }
+      }
+    },
+    "vpcflow-gcp-pubsub": {
+      "enabled": false,
+      "streams": {
+        "gcp.vpcflow": {
+          "enabled": true,
+          "vars": {
+            "topic": "cloud-logging-vpcflow",
+            "subscription_name": "filebeat-gcp-vpcflow",
+            "subscription_create": false,
+            "tags": [
+              "forwarded",
+              "gcp-vpcflow"
+            ],
+            "preserve_original_event": false,
+            "keep_json": false
+          }
+        }
+      }
+    },
+    "dns-gcp-pubsub": {
+      "enabled": false,
+      "streams": {
+        "gcp.dns": {
+          "enabled": true,
+          "vars": {
+            "topic": "cloud-logging-dns",
+            "subscription_name": "filebeat-gcp-dns",
+            "subscription_create": false,
+            "tags": [
+              "forwarded",
+              "gcp-dns"
+            ],
+            "preserve_original_event": false,
+            "keep_json": false
+          }
+        }
+      }
+    },
+    "billing-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.billing": {
+          "enabled": true,
+          "vars": {
+            "period": "24h",
+            "table_pattern": "gcp_billing_export_v1",
+            "cost_type": "regular"
+          }
+        }
+      }
+    },
+    "compute-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.compute": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "60s",
+            "tags": [
+              "gcp-compute"
+            ]
+          }
+        }
+      }
+    },
+    "firestore-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.firestore": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "60s",
+            "tags": [
+              "gcp-firestore"
+            ]
+          }
+        }
+      }
+    },
+    "loadbalancing-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.loadbalancing_metrics": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "60s"
+          }
+        }
+      }
+    },
+    "loadbalancing-gcp-pubsub": {
+      "enabled": false,
+      "streams": {
+        "gcp.loadbalancing_logs": {
+          "enabled": true,
+          "vars": {
+            "topic": "cloud-logging-load_balancer",
+            "subscription_name": "filebeat-gcp-load_balancer",
+            "subscription_create": false,
+            "tags": [
+              "forwarded",
+              "gcp-loadbalancing_logs"
+            ],
+            "preserve_original_event": false
+          }
+        }
+      }
+    },
+    "storage-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.storage": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "5m",
+            "tags": [
+              "gcp-storage"
+            ]
+          }
+        }
+      }
+    },
+    "gke-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.gke": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "60s"
+          }
+        }
+      }
+    },
+    "dataproc-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.dataproc": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "60s"
+          }
+        }
+      }
+    },
+    "pubsub-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.pubsub": {
+          "enabled": true,
+          "vars": {
+            "period": "60s"
+          }
+        }
+      }
+    },
+    "redis-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.redis": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "60s"
+          }
+        }
+      }
+    },
+    "cloudrun-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.cloudrun_metrics": {
+          "enabled": true,
+          "vars": {
+            "regions": [],
+            "period": "60s"
+          }
+        }
+      }
+    },
+    "cloudsql-gcp/metrics": {
+      "enabled": false,
+      "streams": {
+        "gcp.cloudsql_mysql": {
+          "enabled": true,
+          "vars": {
+            "period": "60s"
+          }
+        },
+        "gcp.cloudsql_postgresql": {
+          "enabled": true,
+          "vars": {
+            "period": "60s",
+            "tags": [
+              "gcp-cloudsql-postgresql"
+            ]
+          }
+        },
+        "gcp.cloudsql_sqlserver": {
+          "enabled": true,
+          "vars": {
+            "period": "60s"
+          }
+        }
+      }
+    }
+  }
+}
