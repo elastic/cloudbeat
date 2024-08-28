@@ -47,3 +47,21 @@ echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >>"$GITHUB_ENV"
 CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
 echo "::add-mask::$CSPM_PUBLIC_IP"
 echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >>"$GITHUB_ENV"
+
+if [ "${TF_VAR_cdr_infra:-}" == "true" ]; then
+    ec2_cloudtrail_public_ip=$(terraform output -raw ec2_cloudtrail_public_ip)
+    echo "::add-mask::$ec2_cloudtrail_public_ip"
+    echo "CLOUDTRAIL_PUBLIC_IP=$ec2_cloudtrail_public_ip" >>"$GITHUB_ENV"
+
+    ec2_cloudtrail_key=$(terraform output -raw ec2_cloudtrail_key)
+    echo "::add-mask::$ec2_cloudtrail_key"
+    echo "CLOUDTRAIL_KEY=$ec2_cloudtrail_key" >>"$GITHUB_ENV"
+
+    az_vm_activity_logs_public_ip=$(terraform output -raw az_vm_activity_logs_public_ip)
+    echo "::add-mask::$az_vm_activity_logs_public_ip"
+    echo "ACTIVITY_LOGS_PUBLIC_IP=$az_vm_activity_logs_public_ip" >>"$GITHUB_ENV"
+
+    az_vm_activity_logs_key=$(terraform output -raw az_vm_activity_logs_key)
+    echo "::add-mask::$az_vm_activity_logs_key"
+    echo "ACTIVITY_LOGS_KEY=$az_vm_activity_logs_key" >>"$GITHUB_ENV"
+fi

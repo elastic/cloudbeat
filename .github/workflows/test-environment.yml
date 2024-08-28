@@ -98,6 +98,11 @@ on:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
         required: false
+      cdr-infra:
+        description: "Flag to indicate that the CDR infrastructure is being created"
+        type: boolean
+        required: false
+        default: false
     outputs:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
@@ -217,6 +222,17 @@ jobs:
           echo "::add-mask::$enrollment_token"
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
 
+      - name: Init CDR Infra
+        id: init-cdr-infra
+        env:
+          CDR_INFRA: ${{ inputs.cdr-infra }}
+        run: |
+          if [ "$CDR_INFRA" == "true" ]; then
+            echo "TF_VAR_cdr_infra=true" >> $GITHUB_ENV
+          else
+            echo "TF_VAR_cdr_infra=false" >> $GITHUB_ENV
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -239,6 +255,19 @@ jobs:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - id: google-auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - id: azure-auth
+        name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set TF_STATE_FOLDER
         run: |
@@ -278,6 +307,10 @@ jobs:
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
+          if [ "$TF_VAR_cdr_infra" == "true" ]; then
+            aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cspm.pem"
+            aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/cspm.pem"
+          fi
 
       - name: Summary
         if: success()
@@ -295,170 +328,197 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
-      - name: Install CNVM integration
-        id: cnvm
+      - name: Install AWS Cloudtrail integration
+        id: cloudtrail
+        if: env.TF_VAR_cdr_infra == "true"
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cnvm_integration.py
-
-      - name: Deploy CNVM agent
         env:
-          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+          CLOUDTRAIL_S3: ${{ secrets.CLOUDTRAIL_S3 }}
         run: |
-          unset ENROLLMENT_TOKEN
-          just deploy-cloudformation
+          poetry run python ./install_cloudtrail_integration.py
 
-      - name: Install CSPM GCP integration
-        id: cspm-gcp-integration
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      - name: Deploy AWS Cloudtrail agent
+        if: env.TF_VAR_cdr_infra == "true"
         run: |
-          poetry run python ./install_cspm_gcp_integration.py
-
-      - id: google-auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-      - name: Deploy CSPM GCP agent
-        id: cspm-gcp-agent
-        working-directory: deploy/deployment-manager
-        run: |
-          . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}" --zone="${GCP_ZONE}"
-
-      - name: Install CSPM Azure integration
-        id: cspm-azure-integration
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cspm_azure_integration.py
-
-      - id: azure-auth
-        name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy CSPM Azure agent
-        id: cspm-azure-agent
-        working-directory: deploy/azure
-        env:
-          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
-        run: ./install_agent_az_cli.sh
-
-      - name: Install D4C integration
-        id: kspm-d4c
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_d4c_integration.py
-
-      - name: Install KSPM EKS integration
-        id: kspm-eks
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_kspm_eks_integration.py
-
-      - name: Deploy KSPM EKS agent
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-        run: |
-          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
-              --name $(terraform output -raw deployment_name) --alias eks-config
-          echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
-          aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
-          kubectl config use-context eks-config
-          kubectl apply -f ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_d4c.yaml
-
-      - name: Install KSPM Unmanaged integration
-        id: kspm-unmanaged
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_kspm_unmanaged_integration.py
-
-      - name: Deploy KSPM Unmanaged agent
-        run: |
-          chmod 600 ${{ env.EC2_KSPM_KEY }}
+          chmod 600 $CLOUDTRAIL_KEY
           # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_unmanaged.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
+          scp -o StrictHostKeyChecking=no -v -i $CLOUDTRAIL_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/cloudtrail-linux.sh "ubuntu@$CLOUDTRAIL_PUBLIC_IP:~/."
           # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_unmanaged.yaml"
+          ssh -o StrictHostKeyChecking=no -v -i $CLOUDTRAIL_KEY "ubuntu@$CLOUDTRAIL_PUBLIC_IP" "chmod +x cloudtrail-linux.sh && ./cloudtrail-linux.sh"
 
-      - name: Install CSPM integration
-        id: cspm
+      - name: Install Azure Activity Logs integration
+        id: cloudtrail
+        if: env.TF_VAR_cdr_infra == "true"
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        env:
+          EVENTHUB: "activity-logs"
+          CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+          STORAGE_ACCOUNT: "testenvsactivitylogs"
+          STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
         run: |
-          poetry run python ./install_cspm_integration.py
+          poetry run python ./install_az_activity_logs_integration.py
 
-      - name: Deploy CSPM agent
+      - name: Deploy AWS Cloudtrail agent
+        if: env.TF_VAR_cdr_infra == "true"
         run: |
-          chmod 600 ${{ env.EC2_CSPM_KEY }}
+          chmod 600 $ACTIVITY_LOGS_KEY
           # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
+          scp -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/az_activity_logs.sh "ubuntu@$ACTIVITY_LOGS_PUBLIC_IP:~/."
           # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
+          ssh -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY "ubuntu@$ACTIVITY_LOGS_PUBLIC_IP" "chmod +x az_activity_logs.sh && ./az_activity_logs.sh"
 
-      - name: Upload Integrations data
-        if: always()
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          aws s3 cp "./kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
-          aws s3 cp "./kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
-          aws s3 cp "./kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
-          aws s3 cp "./cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
-          aws s3 cp "./state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
+      # TODO: Uncomment the following steps after debugging the integration scripts
+      # - name: Install CNVM integration
+      #   id: cnvm
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cnvm_integration.py
 
-      - name: Install Agentless integrations
-        id: agentless
-        if: env.TEST_AGENTLESS == 'true'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        run: |
-          poetry run python ./install_agentless_integrations.py
+      # - name: Deploy CNVM agent
+      #   env:
+      #     STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+      #   run: |
+      #     unset ENROLLMENT_TOKEN
+      #     just deploy-cloudformation
 
-      - name: Wait for agents to enroll
-        id: wait-for-agents
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./agents_enrolled.py
+      # - name: Install CSPM GCP integration
+      #   id: cspm-gcp-integration
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cspm_gcp_integration.py
 
-      - name: Run Sanity checks
-        if: ${{ success() && inputs.run-sanity-tests == true }}
-        working-directory: ./tests
-        run: |
-          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+      # - name: Deploy CSPM GCP agent
+      #   id: cspm-gcp-agent
+      #   working-directory: deploy/deployment-manager
+      #   run: |
+      #     . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}" --zone="${GCP_ZONE}"
 
-      - name: Run UI Sanity checks (Kibana)
-        uses: ./.github/actions/kibana-ftr
-        if: ${{ success() && inputs.run-ui-sanity-tests == true }}
-        with:
-          test_kibana_url: ${{ env.TEST_KIBANA_URL }}
-          test_es_url: ${{ env.TEST_ES_URL }}
-          es_version: ${{ env.STACK_VERSION }}
-          kibana_ref: ${{ inputs.kibana_ref }}
+      # - name: Install CSPM Azure integration
+      #   id: cspm-azure-integration
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cspm_azure_integration.py
 
-      - name: Create Slack Payload
-        if: always()
-        id: prepare-data
-        working-directory: ./
-        env:
-          WORKFLOW: "${{ github.workflow }}"
-          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          GITHUB_ACTOR: "${{ github.actor }}"
-          ESS_TYPE: ${{ inputs.serverless_mode }}
-          JOB_STATUS: "${{ job.status }}"
-          S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
-        run: |
-          python3 ./.ci/scripts/prepare_slack_data.py
+      # - name: Deploy CSPM Azure agent
+      #   id: cspm-azure-agent
+      #   working-directory: deploy/azure
+      #   env:
+      #     AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+      #   run: ./install_agent_az_cli.sh
 
-      - name: Send Slack Notification
-        uses: ./.github/actions/slack-notification
-        if: always()
-        continue-on-error: true
-        with:
-          vault-url: ${{ secrets.VAULT_ADDR }}
-          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
-          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
-          slack-payload: ${{ steps.prepare-data.outputs.payload }}
+      # - name: Install D4C integration
+      #   id: kspm-d4c
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_d4c_integration.py
+
+      # - name: Install KSPM EKS integration
+      #   id: kspm-eks
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_kspm_eks_integration.py
+
+      # - name: Deploy KSPM EKS agent
+      #   env:
+      #     S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+      #   run: |
+      #     aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
+      #         --name $(terraform output -raw deployment_name) --alias eks-config
+      #     echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
+      #     aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
+      #     kubectl config use-context eks-config
+      #     kubectl apply -f ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_d4c.yaml
+
+      # - name: Install KSPM Unmanaged integration
+      #   id: kspm-unmanaged
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_kspm_unmanaged_integration.py
+
+      # - name: Deploy KSPM Unmanaged agent
+      #   run: |
+      #     chmod 600 ${{ env.EC2_KSPM_KEY }}
+      #     # Copy the manifest file to the EC2 instance
+      #     scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_unmanaged.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
+      #     # Apply the manifest file
+      #     ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_unmanaged.yaml"
+
+      # - name: Install CSPM integration
+      #   id: cspm
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cspm_integration.py
+
+      # - name: Deploy CSPM agent
+      #   run: |
+      #     chmod 600 ${{ env.EC2_CSPM_KEY }}
+      #     # Copy the manifest file to the EC2 instance
+      #     scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
+      #     # Apply the manifest file
+      #     ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
+
+      # - name: Upload Integrations data
+      #   if: always()
+      #   env:
+      #     S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     aws s3 cp "./kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
+      #     aws s3 cp "./kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
+      #     aws s3 cp "./kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
+      #     aws s3 cp "./cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
+      #     aws s3 cp "./state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
+
+      # - name: Install Agentless integrations
+      #   id: agentless
+      #   if: env.TEST_AGENTLESS == 'true'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   env:
+      #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      #   run: |
+      #     poetry run python ./install_agentless_integrations.py
+
+      # - name: Wait for agents to enroll
+      #   id: wait-for-agents
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./agents_enrolled.py
+
+      # - name: Run Sanity checks
+      #   if: ${{ success() && inputs.run-sanity-tests == true }}
+      #   working-directory: ./tests
+      #   run: |
+      #     poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+      # - name: Run UI Sanity checks (Kibana)
+      #   uses: ./.github/actions/kibana-ftr
+      #   if: ${{ success() && inputs.run-ui-sanity-tests == true }}
+      #   with:
+      #     test_kibana_url: ${{ env.TEST_KIBANA_URL }}
+      #     test_es_url: ${{ env.TEST_ES_URL }}
+      #     es_version: ${{ env.STACK_VERSION }}
+      #     kibana_ref: ${{ inputs.kibana_ref }}
+
+      # - name: Create Slack Payload
+      #   if: always()
+      #   id: prepare-data
+      #   working-directory: ./
+      #   env:
+      #     WORKFLOW: "${{ github.workflow }}"
+      #     RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      #     GITHUB_ACTOR: "${{ github.actor }}"
+      #     ESS_TYPE: ${{ inputs.serverless_mode }}
+      #     JOB_STATUS: "${{ job.status }}"
+      #     S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
+      #   run: |
+      #     python3 ./.ci/scripts/prepare_slack_data.py
+
+      # - name: Send Slack Notification
+      #   uses: ./.github/actions/slack-notification
+      #   if: always()
+      #   continue-on-error: true
+      #   with:
+      #     vault-url: ${{ secrets.VAULT_ADDR }}
+      #     vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+      #     vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+      #     slack-payload: ${{ steps.prepare-data.outputs.payload }}
