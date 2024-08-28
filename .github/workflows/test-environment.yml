@@ -122,6 +122,7 @@ env:
   GCP_ZONE: "us-central1-a"
   AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments owner=${{ github.actor }}"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_gcp_service_account_json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
 
 jobs:
   Deploy:
@@ -310,6 +311,7 @@ jobs:
           if [[ ${TF_VAR_cdr_infra:-} == "true" ]]; then
             aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cloudtrail.pem"
             aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
+            aws s3 cp "${AUDIT_LOGS_KEY}" "${S3_BUCKET}/gcp_audit_logs.pem"
           fi
 
       - name: Summary
@@ -362,10 +364,30 @@ jobs:
         if: env.TF_VAR_cdr_infra == 'true'
         run: |
           chmod 600 $ACTIVITY_LOGS_KEY
-          # Copy the manifest file to the EC2 instance
+          # Copy the manifest file to the VM instance
           scp -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/az_activity_logs.sh "azureuser@$ACTIVITY_LOGS_PUBLIC_IP:~/."
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY "azureuser@$ACTIVITY_LOGS_PUBLIC_IP" "chmod +x az_activity_logs.sh && ./az_activity_logs.sh"
+
+      - name: Install GCP Audit Logs integration
+        id: gcp-audit-logs-integration
+        if: env.TF_VAR_cdr_infra == 'true'
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        env:
+          GCP_TOPIC_NAME: "test-envs-topic"
+          GCP_SUBSCRIPTION_NAME: "test-envs-topic-sub-id"
+        run: |
+          poetry run python ./install_gcp_audit_logs_integration.py
+
+      - name: Deploy GCP Audit Logs agent
+        if: env.TF_VAR_cdr_infra == 'true'
+        run: |
+          chmod 600 $AUDIT_LOGS_KEY
+          # Copy the manifest file to the VM instance
+          scp -o StrictHostKeyChecking=no -v -i $AUDIT_LOGS_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/gcp_audit_logs.sh "ubuntu@$AUDIT_LOGS_PUBLIC_IP:~/."
+          # Apply the manifest file
+          ssh -o StrictHostKeyChecking=no -v -i $AUDIT_LOGS_KEY "ubuntu@$AUDIT_LOGS_PUBLIC_IP" "chmod +x gcp_audit_logs.sh && ./gcp_audit_logs.sh"
+
 
       # TODO: Uncomment the following steps after debugging the integration scripts
       # - name: Install CNVM integration

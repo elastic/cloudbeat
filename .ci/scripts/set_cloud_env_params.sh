@@ -64,4 +64,12 @@ if [[ ${TF_VAR_cdr_infra:-} == "true" ]]; then
     az_vm_activity_logs_key=$(terraform output -raw az_vm_activity_logs_key)
     echo "::add-mask::$az_vm_activity_logs_key"
     echo "ACTIVITY_LOGS_KEY=$az_vm_activity_logs_key" >>"$GITHUB_ENV"
+
+    gcp_audit_logs_public_ip=$(terraform output -raw gcp_audit_logs_public_ip)
+    echo "::add-mask::$gcp_audit_logs_public_ip"
+    echo "AUDIT_LOGS_PUBLIC_IP=$gcp_audit_logs_public_ip" >>"$GITHUB_ENV"
+
+    gcp_audit_logs_key=$(terraform output -raw gcp_audit_logs_key)
+    echo "::add-mask::$gcp_audit_logs_key"
+    echo "AUDIT_LOGS_KEY=$gcp_audit_logs_key" >>"$GITHUB_ENV"
 fi

@@ -30,6 +30,13 @@ variable "gcp_project_id" {
   default     = "default"
 }
 
+variable "gcp_service_account_json" {
+  description = "GCP Service Account JSON"
+  type        = string
+  default     = "default"
+  sensitive   = true
+}
+
 # Elastic Cloud variables
 # ===========================================
 variable "ec_api_key" {

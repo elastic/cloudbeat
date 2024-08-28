@@ -37,3 +37,10 @@ variable "scopes" {
   type        = list(string)
   default     = ["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/cloudplatformorganizations"]
 }
+
+variable "gcp_service_account_json" {
+  description = "GCP Service Account JSON"
+  type        = string
+  default     = "default"
+  sensitive   = true
+}
