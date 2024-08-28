@@ -240,6 +240,12 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - id: azure-auth
+        name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Set TF_STATE_FOLDER
         run: |
           echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
@@ -332,12 +338,6 @@ jobs:
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
           poetry run python ./install_cspm_azure_integration.py
-
-      - id: azure-auth
-        name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy CSPM Azure agent
         id: cspm-azure-agent
