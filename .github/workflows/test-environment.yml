@@ -307,7 +307,7 @@ jobs:
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
-          if [[ "$TF_VAR_cdr_infra" == "true" ]]; then
+          if [[ ${TF_VAR_cdr_infra:-} == "true" ]]; then
             aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cloudtrail.pem"
             aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
           fi
