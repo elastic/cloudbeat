@@ -23,6 +23,13 @@ variable "ami_map" {
   }
 }
 
+# GCP project ID
+variable "gcp_project_id" {
+  description = "GCP project ID"
+  type        = string
+  default     = "default"
+}
+
 # Elastic Cloud variables
 # ===========================================
 variable "ec_api_key" {
