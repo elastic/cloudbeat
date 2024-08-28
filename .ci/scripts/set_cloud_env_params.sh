@@ -48,7 +48,7 @@ CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
 echo "::add-mask::$CSPM_PUBLIC_IP"
 echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >>"$GITHUB_ENV"
 
-if [ "${TF_VAR_cdr_infra:-}" == "true" ]; then
+if [[ "${TF_VAR_cdr_infra:-}" == "true" ]]; then
     ec2_cloudtrail_public_ip=$(terraform output -raw ec2_cloudtrail_public_ip)
     echo "::add-mask::$ec2_cloudtrail_public_ip"
     echo "CLOUDTRAIL_PUBLIC_IP=$ec2_cloudtrail_public_ip" >>"$GITHUB_ENV"

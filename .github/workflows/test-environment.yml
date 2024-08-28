@@ -227,7 +227,7 @@ jobs:
         env:
           CDR_INFRA: ${{ inputs.cdr-infra }}
         run: |
-          if [ "${CDR_INFRA:-}" == "true" ]; then
+          if [[ "${CDR_INFRA:-}" == "true" ]]; then
             echo "TF_VAR_cdr_infra=true" >> $GITHUB_ENV
           else
             echo "TF_VAR_cdr_infra=false" >> $GITHUB_ENV
@@ -307,9 +307,9 @@ jobs:
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
-          if [ "$TF_VAR_cdr_infra" == "true" ]; then
-            aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cspm.pem"
-            aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/cspm.pem"
+          if [[ "$TF_VAR_cdr_infra" == "true" ]]; then
+            aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cloudtrail.pem"
+            aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
           fi
 
       - name: Summary
@@ -358,14 +358,14 @@ jobs:
         run: |
           poetry run python ./install_az_activity_logs_integration.py
 
-      - name: Deploy AWS Cloudtrail agent
+      - name: Deploy Azure Activity Logs agent
         if: env.TF_VAR_cdr_infra == 'true'
         run: |
           chmod 600 $ACTIVITY_LOGS_KEY
           # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/az_activity_logs.sh "ubuntu@$ACTIVITY_LOGS_PUBLIC_IP:~/."
+          scp -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/az_activity_logs.sh "azureuser@$ACTIVITY_LOGS_PUBLIC_IP:~/."
           # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY "ubuntu@$ACTIVITY_LOGS_PUBLIC_IP" "chmod +x az_activity_logs.sh && ./az_activity_logs.sh"
+          ssh -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY "azureuser@$ACTIVITY_LOGS_PUBLIC_IP" "chmod +x az_activity_logs.sh && ./az_activity_logs.sh"
 
       # TODO: Uncomment the following steps after debugging the integration scripts
       # - name: Install CNVM integration
