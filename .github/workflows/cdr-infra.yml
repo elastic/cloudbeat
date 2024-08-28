@@ -34,9 +34,11 @@ jobs:
       contents: 'read'
       id-token: 'write'
     with:
-      deployment_name: ${{ inputs.deployment-name || 'cdr-run' }}
-      # For now, the region is not used because it's overridden in the tf, but it's here for future compatibility.
-      ess-region: "gcp-us-west2"
-      elk-stack-version: ${{ inputs.elk-stack-version || '8.16.0-SNAPSHOT' }}
+      # TODO: replace 'cdr-run' with inputs.deployment-name
+      deployment_name: 'cdr-run'
+      # deployment_name: ${{ inputs.deployment-name }}
+      ess-region: 'gcp-us-west2'
+      # TODO: replace '8.16.0' with inputs.elk-stack-version
+      elk-stack-version: '8.16.0-SNAPSHOT'
       serverless_mode: false
       cdr-infra: true

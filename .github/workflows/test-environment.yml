@@ -227,7 +227,7 @@ jobs:
         env:
           CDR_INFRA: ${{ inputs.cdr-infra }}
         run: |
-          if [ "$CDR_INFRA" == "true" ]; then
+          if [ "${CDR_INFRA:-}" == "true" ]; then
             echo "TF_VAR_cdr_infra=true" >> $GITHUB_ENV
           else
             echo "TF_VAR_cdr_infra=false" >> $GITHUB_ENV
@@ -330,7 +330,7 @@ jobs:
 
       - name: Install AWS Cloudtrail integration
         id: cloudtrail
-        if: env.TF_VAR_cdr_infra == "true"
+        if: env.TF_VAR_cdr_infra == 'true'
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           CLOUDTRAIL_S3: ${{ secrets.CLOUDTRAIL_S3 }}
@@ -338,7 +338,7 @@ jobs:
           poetry run python ./install_cloudtrail_integration.py
 
       - name: Deploy AWS Cloudtrail agent
-        if: env.TF_VAR_cdr_infra == "true"
+        if: env.TF_VAR_cdr_infra == 'true'
         run: |
           chmod 600 $CLOUDTRAIL_KEY
           # Copy the manifest file to the EC2 instance
@@ -348,7 +348,7 @@ jobs:
 
       - name: Install Azure Activity Logs integration
         id: cloudtrail
-        if: env.TF_VAR_cdr_infra == "true"
+        if: env.TF_VAR_cdr_infra == 'true'
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           EVENTHUB: "activity-logs"
@@ -359,7 +359,7 @@ jobs:
           poetry run python ./install_az_activity_logs_integration.py
 
       - name: Deploy AWS Cloudtrail agent
-        if: env.TF_VAR_cdr_infra == "true"
+        if: env.TF_VAR_cdr_infra == 'true'
         run: |
           chmod 600 $ACTIVITY_LOGS_KEY
           # Copy the manifest file to the EC2 instance
