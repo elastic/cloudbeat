@@ -329,7 +329,7 @@ jobs:
           echo "$summary" # Print the summary to the workflow log
 
       - name: Install AWS Cloudtrail integration
-        id: cloudtrail
+        id: cloudtrail-integration
         if: env.TF_VAR_cdr_infra == 'true'
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
@@ -347,7 +347,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -v -i $CLOUDTRAIL_KEY "ubuntu@$CLOUDTRAIL_PUBLIC_IP" "chmod +x cloudtrail-linux.sh && ./cloudtrail-linux.sh"
 
       - name: Install Azure Activity Logs integration
-        id: cloudtrail
+        id: az-activity-logs-integration
         if: env.TF_VAR_cdr_infra == 'true'
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
