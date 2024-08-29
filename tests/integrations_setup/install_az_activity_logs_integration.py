@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-This script installs AWS CloudTrail integration
+This script installs Activity Logs Azure integration
 
 The following steps are performed:
 1. Create an agent policy.
-2. Create a CloudTrail integration.
-3. Create a CloudTrail bash script to be deployed on a host.
+2. Create an Activity Logs integration.
+3. Create an Activity Logs bash script to be deployed on a host.
 """
 from pathlib import Path
 
@@ -17,7 +17,7 @@ from fleet_api.common_api import (
     get_fleet_server_host,
     get_package_version,
 )
-from fleet_api.package_policy_api import create_cspm_integration
+from fleet_api.package_policy_api import create_integration
 from fleet_api.utils import read_json, render_template, update_key_value
 from loguru import logger
 from munch import Munch
@@ -25,37 +25,39 @@ from package_policy import SIMPLIFIED_AGENT_POLICY, generate_random_name
 from state_file_manager import HostType, PolicyState, state_manager
 
 CSPM_EXPECTED_AGENTS = 0
-INTEGRATION_NAME = "CLOUDTRAIL AWS"
-aws_config = cnfg.aws_config
+INTEGRATION_NAME = "ACTIVITY LOGS AZURE"
 
-cloudtrail_template = Path(__file__).parent / "data/cspm-linux.j2"
+agent_launcher_template = Path(__file__).parent / "data/cspm-linux.j2"
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
-    package_version = get_package_version(cfg=cnfg.elk_config, package_name="aws", prerelease=False)
+    package_version = get_package_version(cfg=cnfg.elk_config, package_name="azure", prerelease=False)
     logger.info(f"Package version: {package_version}")
 
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data = SIMPLIFIED_AGENT_POLICY
-    agent_data["name"] = generate_random_name("cloudtrail-aws")
+    agent_data["name"] = generate_random_name("activity-logs-azure")
 
-    package_data = read_json(Path(__file__).parent / "data/cloudtrail-pkg.json")
-    package_data["name"] = generate_random_name("pkg-cloudtrail-aws")
+    package_data = read_json(Path(__file__).parent / "data/az-activity-logs-pkg.json")
+    package_data["name"] = generate_random_name("pkg-activity-logs-azure")
     package_data["package"]["version"] = package_version
-    package_data["vars"]["access_key_id"] = cnfg.aws_config.access_key_id
-    package_data["vars"]["secret_access_key"] = cnfg.aws_config.secret_access_key
+    package_data["vars"]["eventhub"] = cnfg.azure_config.eventhub
+    package_data["vars"]["consumer_group"] = cnfg.azure_config.consumer_group
+    package_data["vars"]["connection_string"] = cnfg.azure_config.connection_string
+    package_data["vars"]["storage_account"] = cnfg.azure_config.storage_account
+    package_data["vars"]["storage_account_key"] = cnfg.azure_config.storage_account_key
 
-    update_key_value(package_data, "bucket_arn", cnfg.aws_config.cloudtrail_s3)
+    update_key_value(package_data, "storage_account_container", generate_random_name("activity-logs"))
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
 
     logger.info(f"Create {INTEGRATION_NAME} integration")
-    package_policy_id = create_cspm_integration(
+    package_policy_id = create_integration(
         cfg=cnfg.elk_config,
         pkg_policy=package_data,
         agent_policy_id=agent_policy_id,
-        cspm_data={},
+        data={},
     )
 
     state_manager.add_policy(
@@ -76,16 +78,16 @@ if __name__ == "__main__":
     )
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
-    manifest_params.file_path = Path(__file__).parent / "cloudtrail.sh"
+    manifest_params.file_path = Path(__file__).parent / "az_activity_logs.sh"
     manifest_params.agent_version = cnfg.elk_config.stack_version
     manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
 
     # Render the template and get the replaced content
-    rendered_content = render_template(cloudtrail_template, manifest_params.toDict())
+    rendered_content = render_template(agent_launcher_template, manifest_params.toDict())
 
     logger.info(f"Creating {INTEGRATION_NAME} linux manifest")
     # Write the rendered content to a file
-    with open(Path(__file__).parent / "cloudtrail-linux.sh", "w", encoding="utf-8") as cloudtrail_file:
-        cloudtrail_file.write(rendered_content)
+    with open(Path(__file__).parent / "az_activity_logs.sh", "w", encoding="utf-8") as agent_launcher_file:
+        agent_launcher_file.write(rendered_content)
 
     logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
