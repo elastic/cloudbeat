@@ -48,13 +48,13 @@ module "aws_ec2_for_cspm" {
 }
 
 module "gcp_audit_logs" {
-  count     = var.cdr_infra ? 1 : 0
-  providers = { google : google }
-  source    = "../cloud/modules/gcp/vm"
+  count                    = var.cdr_infra ? 1 : 0
+  providers                = { google : google }
+  source                   = "../cloud/modules/gcp/vm"
   gcp_service_account_json = var.gcp_service_account_json
-  deployment_name = var.deployment_name
-  network         = "default"
-  specific_tags   = merge(local.common_tags, { "vm_instance" : "audit-logs" })
+  deployment_name          = var.deployment_name
+  network                  = "default"
+  specific_tags            = merge(local.common_tags, { "vm_instance" : "audit-logs" })
 
 }
 
