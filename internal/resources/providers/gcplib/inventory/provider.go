@@ -477,10 +477,10 @@ func getAncestorsAssets(ctx context.Context, ancestorsPoliciesCache *MapCache[[]
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
 		return ancestorsPoliciesCache.Get(func() []*ExtendedGcpAsset {
 			var assetType string
-			if strings.HasPrefix(parent, "folders") {
+			if isFolder(parent) {
 				assetType = CrmFolderAssetType
 			}
-			if strings.HasPrefix(parent, "organizations") {
+			if isOrganization(parent) {
 				assetType = CrmOrgAssetType
 			}
 			return p.extendWithCloudMetadata(ctx, p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
@@ -498,7 +498,9 @@ func (p *Provider) getCloudAccountMetadata(ctx context.Context, projectId string
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		orgName = p.crm.getOrganizationDisplayName(ctx, fmt.Sprintf("organizations/%s", orgId))
+		if isOrganization(p.config.Parent) {
+			orgName = p.crm.getOrganizationDisplayName(ctx, fmt.Sprintf("organizations/%s", orgId))
+		}
 		wg.Done()
 	}()
 	wg.Add(1)
@@ -543,4 +545,12 @@ func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*Ext
 	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {
 		return asset.AssetType == assetType
 	})
+}
+
+func isFolder(parent string) bool {
+	return strings.HasPrefix(parent, "folders")
+}
+
+func isOrganization(parent string) bool {
+	return strings.HasPrefix(parent, "organizations")
 }
