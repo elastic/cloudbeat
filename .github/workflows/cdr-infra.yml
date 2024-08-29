@@ -1,4 +1,4 @@
-name: Create CDR Infrastructure
+name: Create Environment with Cloud Logs (CDR)
 run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
 
 on:

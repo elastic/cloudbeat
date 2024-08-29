@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "resource_group" {
 
 locals {
   vm_private_key_file = "${path.module}/azure-vm-${random_id.id.hex}.pem"
-  vm_username         = "azureuser"
+  vm_username         = "ubuntu"
   deploy_name         = "${var.deployment_name}-${random_id.id.hex}"
   tags = merge({
     name = var.deployment_name
