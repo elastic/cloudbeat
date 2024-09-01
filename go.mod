@@ -21,17 +21,17 @@ require (
 	github.com/aquasecurity/trivy v0.54.1
 	github.com/aquasecurity/trivy-db v0.0.0-20240802062956-ed690fa5e757
 	github.com/aws/aws-sdk-go-v2 v1.30.4
-	github.com/aws/aws-sdk-go-v2/config v1.27.30
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.29
+	github.com/aws/aws-sdk-go-v2/config v1.27.31
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.30
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.12
 	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.32.5
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.43.5
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.53.5
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.42.5
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.40.5
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.37.5
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.38.0
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.48.5
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.176.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.177.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.32.2
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.26.5
 	github.com/aws/aws-sdk-go-v2/service/iam v1.35.0
@@ -39,7 +39,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.58.1
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.31.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.82.2
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.60.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.61.0
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.46.5
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.52.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.31.5
