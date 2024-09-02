@@ -24,12 +24,7 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
-  # TODO: remove pull_request section after testing
-  pull_request:
-    branches:
-      - main
-      - "[0-9]+.[0-9]+"
-    types: [opened, synchronize, reopened]
+
 jobs:
   deploy:
     uses: ./.github/workflows/test-environment.yml
@@ -39,11 +34,8 @@ jobs:
       contents: 'read'
       id-token: 'write'
     with:
-      # TODO: replace 'cdr-check' with ${{ inputs.deployment-name }}
-      deployment_name: 'cdr-check'
+      deployment_name: ${{ inputs.deployment-name }}
       ess-region: 'gcp-us-west2'
-      # TODO: replace '8.16.0' with ${{ inputs.elk-stack-version }}
-      elk-stack-version: '8.16.0-SNAPSHOT'
-      # TODO: replace 'false' with ${{ inputs.serverless_mode }}
-      serverless_mode: false
+      elk-stack-version: ${{ inputs.elk-stack-version }}
+      serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       cdr-infra: true
