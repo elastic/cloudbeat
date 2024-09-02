@@ -19,10 +19,13 @@ finding = result if {
 default notification_alert_high = false
 
 notification_alert_high if {
-	# Ensure at least one Security Contact Settings exists and alertNotifications severity is set to high.
+	# Ensure at least one Security Contact Settings exists and alertNotifications severity is set to high, low, or medium.
 	some security_contact in data_adapter.resource
 
 	security_contact.name == "default"
-	lower(security_contact.properties.alertNotifications.state) == "on"
-	lower(security_contact.properties.alertNotifications.minimalSeverity) in ["low", "medium", "high"]
+
+	some notification_source in security_contact.properties.notificationsSources
+
+	lower(notification_source.sourceType) == "alert"
+	lower(notification_source.minimalSeverity) in ["low", "medium", "high"]
 }
