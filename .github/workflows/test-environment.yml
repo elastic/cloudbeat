@@ -347,11 +347,6 @@ jobs:
           src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
           ../../.ci/scripts/remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-          # chmod 600 $CLOUDTRAIL_KEY
-          # # Copy the manifest file to the EC2 instance
-          # scp -o StrictHostKeyChecking=no -v -i $CLOUDTRAIL_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/cloudtrail-linux.sh "ubuntu@$CLOUDTRAIL_PUBLIC_IP:~/."
-          # # Apply the manifest file
-          # ssh -o StrictHostKeyChecking=no -v -i $CLOUDTRAIL_KEY "ubuntu@$CLOUDTRAIL_PUBLIC_IP" "chmod +x cloudtrail-linux.sh && ./cloudtrail-linux.sh"
 
       - name: Install Azure Activity Logs integration
         id: az-activity-logs-integration
@@ -372,11 +367,6 @@ jobs:
           src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
           ../../.ci/scripts/remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-          # chmod 600 $ACTIVITY_LOGS_KEY
-          # # Copy the manifest file to the VM instance
-          # scp -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/az_activity_logs.sh "ubuntu@$ACTIVITY_LOGS_PUBLIC_IP:~/."
-          # # Apply the manifest file
-          # ssh -o StrictHostKeyChecking=no -v -i $ACTIVITY_LOGS_KEY "ubuntu@$ACTIVITY_LOGS_PUBLIC_IP" "chmod +x az_activity_logs.sh && ./az_activity_logs.sh"
 
       - name: Install GCP Audit Logs integration
         id: gcp-audit-logs-integration
@@ -395,11 +385,6 @@ jobs:
           src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
           ../../.ci/scripts/remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-          # chmod 600 $AUDIT_LOGS_KEY
-          # # Copy the manifest file to the VM instance
-          # scp -o StrictHostKeyChecking=no -v -i $AUDIT_LOGS_KEY ../../${{ env.INTEGRATIONS_SETUP_DIR }}/gcp_audit_logs.sh "ubuntu@$AUDIT_LOGS_PUBLIC_IP:~/."
-          # # Apply the manifest file
-          # ssh -o StrictHostKeyChecking=no -v -i $AUDIT_LOGS_KEY "ubuntu@$AUDIT_LOGS_PUBLIC_IP" "chmod +x gcp_audit_logs.sh && ./gcp_audit_logs.sh"
 
       - name: Install CNVM integration
         id: cnvm
@@ -475,12 +460,6 @@ jobs:
           cmd="kubectl apply -f $scriptname"
           ../../.ci/scripts/remote_setup.sh -k "$EC2_KSPM_KEY" -s "$src" -h "$KSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-          # chmod 600 ${{ env.EC2_KSPM_KEY }}
-          # # Copy the manifest file to the EC2 instance
-          # scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_unmanaged.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
-          # # Apply the manifest file
-          # ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_unmanaged.yaml"
-
       - name: Install CSPM integration
         id: cspm
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
@@ -493,11 +472,6 @@ jobs:
           src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
           ../../.ci/scripts/remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-          # chmod 600 ${{ env.EC2_CSPM_KEY }}
-          # # Copy the manifest file to the EC2 instance
-          # scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
-          # # Apply the manifest file
-          # ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
 
       - name: Upload Integrations data
         if: always()

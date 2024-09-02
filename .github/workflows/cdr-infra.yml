@@ -39,8 +39,8 @@ jobs:
       contents: 'read'
       id-token: 'write'
     with:
-      # TODO: replace 'cdr-run' with ${{ inputs.deployment-name }}
-      deployment_name: 'cdr-run-test'
+      # TODO: replace 'cdr-check' with ${{ inputs.deployment-name }}
+      deployment_name: 'cdr-check'
       ess-region: 'gcp-us-west2'
       # TODO: replace '8.16.0' with ${{ inputs.elk-stack-version }}
       elk-stack-version: '8.16.0-SNAPSHOT'
