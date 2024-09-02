@@ -31,6 +31,7 @@ SIMPLIFIED_AGENT_POLICY = {
     "monitoring_enabled": ["logs", "metrics"],
 }
 VERSION_MAP = {
+    "asset_inventory_aws": "0.1.7",
     "cis_k8s": "1.1.0",
     "cis_eks": "1.2.0",
     "cis_aws": "1.2.0",
@@ -158,7 +159,7 @@ def generate_policy_template(cfg: Munch, policy_template: dict = None) -> dict:
     return generated_policy
 
 
-def generate_package_policy(template: dict, policy_input: dict) -> dict:
+def generate_package_policy(template: dict, policy_input: dict, stream_name: str) -> dict:
     """
     Generate a package policy based on a template and policy input.
 
@@ -174,15 +175,15 @@ def generate_package_policy(template: dict, policy_input: dict) -> dict:
     for input_name, data in package_policy["inputs"].items():
         if integration_key in input_name:
             update_policy_input_data(data, policy_input)
-            if "vars" in policy_input and "vars" not in data["streams"]["cloud_security_posture.findings"]:
-                data["streams"]["cloud_security_posture.findings"]["vars"] = policy_input["vars"]
+            if "vars" in policy_input and "vars" not in data["streams"][stream_name]:
+                data["streams"][stream_name]["vars"] = policy_input["vars"]
     package_policy["vars"]["posture"] = policy_input.get("posture", "")
     package_policy["vars"]["deployment"] = policy_input.get("deployment", "")
     package_policy["name"] = policy_input.get("name", "")
     return package_policy
 
 
-def load_data(cfg: Munch, agent_input: dict, package_input: dict) -> Tuple[Dict, Dict]:
+def load_data(cfg: Munch, agent_input: dict, package_input: dict, stream_name: str) -> Tuple[Dict, Dict]:
     """
     Load agent and package policies based on input data.
 
@@ -201,6 +202,7 @@ def load_data(cfg: Munch, agent_input: dict, package_input: dict) -> Tuple[Dict,
     package_policy = generate_package_policy(
         template=package_template,
         policy_input=package_input,
+        stream_name=stream_name,
     )
 
     return agent_policy, package_policy

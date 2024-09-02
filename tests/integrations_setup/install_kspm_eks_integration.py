@@ -71,6 +71,7 @@ if __name__ == "__main__":
         cfg=cnfg.elk_config,
         agent_input=AGENT_INPUT,
         package_input=INTEGRATION_INPUT,
+        stream_name="cloud_security_posture.findings",
     )
 
     logger.info("Create agent policy")
