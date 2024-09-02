@@ -33,24 +33,26 @@ func TestListSecurityContacts(t *testing.T) {
 	notificationsByRole := func(roles []string, state string) *armsecurity.ContactPropertiesNotificationsByRole {
 		n := &armsecurity.ContactPropertiesNotificationsByRole{}
 		n.State = (*armsecurity.State)(&state)
-		n.Roles = make([]*armsecurity.Roles, 0, len(roles))
+		n.Roles = make([]*armsecurity.SecurityContactRole, 0, len(roles))
 		for _, r := range roles {
-			n.Roles = append(n.Roles, (*armsecurity.Roles)(&r))
+			n.Roles = append(n.Roles, (*armsecurity.SecurityContactRole)(&r))
 		}
 		return n
 	}
 
-	response := func(c ...*armsecurity.Contact) armsecurity.ContactsClientListResponse {
-		return armsecurity.ContactsClientListResponse{
-			ContactList: armsecurity.ContactList{
-				Value: c,
+	response := func(c ...*armsecurity.Contact) []armsecurity.ContactsClientListResponse {
+		return []armsecurity.ContactsClientListResponse{
+			{
+				ContactList: armsecurity.ContactList{
+					Value: c,
+				},
 			},
 		}
 	}
 
 	tests := map[string]struct {
 		inputSubID      string
-		mockReturn      armsecurity.ContactsClientListResponse
+		mockReturn      []armsecurity.ContactsClientListResponse
 		mockReturnError error
 		expected        []AzureAsset
 		expectError     bool

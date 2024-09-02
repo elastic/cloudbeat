@@ -8,31 +8,31 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_alert_notifications({
-			"state": "Off",
+		prop_notification_sources([{
 			"minimalSeverity": "Medium",
-		}),
+			"sourceType": "Another",
+		}]),
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_alert_notifications({"state": "On"}),
+		prop_notification_sources([{"sourceType": "Alert"}]),
 	)])
 
 	eval_fail with input as test_data.generate_security_contacts([
 		test_data.generate_single_security_contact(
 			"non-default",
-			prop_alert_notifications({
-				"state": "On",
+			prop_notification_sources([{
 				"minimalSeverity": "High",
-			}),
+				"sourceType": "Alert",
+			}]),
 		),
 		test_data.generate_single_security_contact(
 			"default",
-			prop_alert_notifications({
-				"state": "On",
-				"minimalSeverity": "Wrong Value",
-			}),
+			prop_notification_sources([{
+				"minimalSeverity": "Wrong value",
+				"sourceType": "Alert",
+			}]),
 		),
 	])
 }
@@ -40,42 +40,42 @@ test_violation if {
 test_pass if {
 	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_alert_notifications({
-			"state": "On",
+		prop_notification_sources([{
 			"minimalSeverity": "High",
-		}),
+			"sourceType": "Alert",
+		}]),
 	)])
 
 	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_alert_notifications({
-			"state": "On",
+		prop_notification_sources([{
 			"minimalSeverity": "Medium",
-		}),
+			"sourceType": "Alert",
+		}]),
 	)])
 
 	eval_pass with input as test_data.generate_security_contacts([test_data.generate_single_security_contact(
 		"default",
-		prop_alert_notifications({
-			"state": "On",
+		prop_notification_sources([{
 			"minimalSeverity": "Low",
-		}),
+			"sourceType": "Alert",
+		}]),
 	)])
 
 	eval_pass with input as test_data.generate_security_contacts([
 		test_data.generate_single_security_contact(
 			"non-default",
-			prop_alert_notifications({
-				"state": "On",
+			prop_notification_sources([{
 				"minimalSeverity": "Low",
-			}),
+				"sourceType": "Alert",
+			}]),
 		),
 		test_data.generate_single_security_contact(
 			"default",
-			prop_alert_notifications({
-				"state": "On",
+			prop_notification_sources([{
 				"minimalSeverity": "High",
-			}),
+				"sourceType": "Alert",
+			}]),
 		),
 	])
 }
@@ -96,4 +96,4 @@ not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
 
-prop_alert_notifications(alertNotifications) = {"alertNotifications": alertNotifications}
+prop_notification_sources(notificationsSource) = {"notificationsSources": notificationsSource}
