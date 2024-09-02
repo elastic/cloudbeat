@@ -98,9 +98,9 @@ Infrastructure: 24% (18/73)
 
 ## AZURE Resources
 
-**Progress: 3% (2/51)**
+**Progress: 23% (12/51)**
 Identity: 0% (0/8)
-Infrastructure: 4% (2/43)
+Infrastructure: 27% (12/43)
 
 <details> <summary>Full table</summary>
 
@@ -116,9 +116,9 @@ Infrastructure: 4% (2/43)
 | Identity | Service Identity | Service Principal | Azure AD Service Principal | No ❌ |
 | Infrastructure | Application Integration | Message Queue | Azure Storage Queue | No ❌ |
 | Infrastructure | Application Integration | Message Queue | Azure Storage Queue Service | No ❌ |
-| Infrastructure | Application | Web Application | Azure App Service | No ❌ |
-| Infrastructure | Compute | Virtual Machine | Azure Virtual Machine | No ❌ |
-| Infrastructure | Container | Registry | Azure Container Registry | No ❌ |
+| Infrastructure | Application | Web Application | Azure App Service | Yes ✅ |
+| Infrastructure | Compute | Virtual Machine | Azure Virtual Machine | Yes ✅ |
+| Infrastructure | Container | Registry | Azure Container Registry | Yes ✅ |
 | Infrastructure | Database | Backup and Recovery | Azure Recoverable Database | No ❌ |
 | Infrastructure | Database | Backup and Recovery | Azure Restorable Dropped Database | No ❌ |
 | Infrastructure | Database | Backup and Recovery | Azure Restore Point | No ❌ |
@@ -135,13 +135,13 @@ Infrastructure: 4% (2/43)
 | Infrastructure | Database | NoSQL Database | Azure Cosmos DB Table Resource | No ❌ |
 | Infrastructure | Database | NoSQL Database | Azure Storage Table | No ❌ |
 | Infrastructure | Database | NoSQL Database | Azure Storage Table Service | No ❌ |
-| Infrastructure | Database | Relational Database | Azure SQL Database | No ❌ |
-| Infrastructure | Database | Relational Database | Azure SQL Server | No ❌ |
+| Infrastructure | Database | Relational | Azure SQL Database | Yes ✅ |
+| Infrastructure | Database | Relational | Azure SQL Server | Yes ✅ |
 | Infrastructure | Database | Replication | Azure Replication Link | No ❌ |
-| Infrastructure | Database | Scalability | Azure Elastic Pool | No ❌ |
+| Infrastructure | Database | Scalability | Azure Elastic Pool | Yes ✅ |
 | Infrastructure | Management | Cloud Account | Azure Subscription | Yes ✅ |
 | Infrastructure | Management | Cloud Account | Azure Tenant | Yes ✅ |
-| Infrastructure | Management | Resource Group | Azure Resource Group | No ❌ |
+| Infrastructure | Management | Resource Group | Azure Resource Group | Yes ✅ |
 | Infrastructure | Network | DNS | Azure Server DNS Alias | No ❌ |
 | Infrastructure | Network | Network Security | Azure Cosmos DB Virtual Network Rule | No ❌ |
 | Infrastructure | Network | Private Connectivity | Azure Cosmos DB Private Endpoint Connection | No ❌ |
@@ -150,13 +150,13 @@ Infrastructure: 4% (2/43)
 | Infrastructure | Security | Threat Detection | Azure Database Threat Detection Policy | No ❌ |
 | Infrastructure | Serverless | Function | Azure Function | No ❌ |
 | Infrastructure | Storage | Disk | Azure Data Disk | No ❌ |
-| Infrastructure | Storage | Disk | Azure Disk | No ❌ |
+| Infrastructure | Storage | Disk | Azure Disk | Yes ✅ |
 | Infrastructure | Storage | File Storage | Azure Storage File Service | No ❌ |
 | Infrastructure | Storage | File Storage | Azure Storage File Share | No ❌ |
 | Infrastructure | Storage | Object Storage | Azure Storage Blob Container | No ❌ |
 | Infrastructure | Storage | Object Storage | Azure Storage Blob Service | No ❌ |
-| Infrastructure | Storage | Snapshot | Azure Snapshot | No ❌ |
-| Infrastructure | Storage | Storage | Azure Storage Account | No ❌ |
+| Infrastructure | Storage | Snapshot | Azure Snapshot | Yes ✅ |
+| Infrastructure | Storage | Storage | Azure Storage Account | Yes ✅ |
 
 </details>
 

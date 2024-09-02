@@ -5,6 +5,13 @@ variable "region" {
   default     = "eu-west-1"
 }
 
+# Azure provider variable
+variable "location" {
+  description = "Azure location"
+  type        = string
+  default     = "East US"
+}
+
 # EC2 variable
 variable "ami_map" {
   description = "Mapping of regions to AMI IDs"
@@ -14,6 +21,13 @@ variable "ami_map" {
     "eu-west-3" = "ami-0532b3f7436b93d52"
     # Add more regions and respective AMI IDs here
   }
+}
+
+# GCP project ID
+variable "gcp_project_id" {
+  description = "GCP project ID"
+  type        = string
+  default     = "default"
 }
 
 # Elastic Cloud variables
