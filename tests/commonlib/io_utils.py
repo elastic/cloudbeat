@@ -61,7 +61,7 @@ def get_assets_from_index(
     time_after: datetime,
 ) -> list[Munch]:
     """
-    TODO(kuba)
+    TODO(kuba) Update the docstring
     """
     query = {
         "bool": {

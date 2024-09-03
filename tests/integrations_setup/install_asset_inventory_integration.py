@@ -23,7 +23,7 @@ from fleet_api.common_api import (
     get_package_version,
 )
 from fleet_api.package_policy_api import create_integration
-from fleet_api.utils import rename_file_by_suffix
+from fleet_api.utils import rename_file_by_suffix, render_template
 from loguru import logger
 from munch import Munch
 from package_policy import (
@@ -37,31 +37,21 @@ from package_policy import (
 from state_file_manager import HostType, PolicyState, state_manager
 
 EXPECTED_AGENTS = 1
-# AI_CLOUDFORMATION_CONFIG = "../../deploy/cloudformation/config.json"
-# TODO(kuba): The CF template does not exist yet. Create it
-# AI_TEMPLATE = "../../deploy/cloudformation/elastic-agent-ec2-asset-inventory.yml"
-# AI_TEMP_FILE = "elastic-agent-ec2-asset-inventory-temp.yml"
-# TODO(kuba): Not sure what the tags do yet...
-# AI_AGENT_TAGS = ["cft_version:*", "cft_arn:arn:aws:cloudformation:.*"]
-# TODO(kuba): Add the integration to version map. But how do I enable betas?
 PKG_DEFAULT_VERSION = VERSION_MAP.get("asset_inventory_aws", "")
 INTEGRATION_NAME = "Asset Inventory AWS"
 INTEGRATION_INPUT = {
     "name": generate_random_name("pkg-asset-inventory-aws"),
     "input_name": "asset_inventory_aws",
     "vars": {
-        "access_key_id": aws_config.access_key_id,
-        "secret_access_key": aws_config.secret_access_key,
+        "access_key_id": cnfg.aws_config.access_key_id,
+        "secret_access_key": cnfg.aws_config.secret_access_key,
         "aws.credentials.type": "direct_access_keys",
     },
 }
 AGENT_INPUT = {
     "name": generate_random_name("asset-inventory-aws"),
 }
-aws_config = cnfg.aws_config
-
-# ai_cloudformation_config = Path(__file__).parent / AI_CLOUDFORMATION_CONFIG
-# ai_cloudformation_template = Path(__file__).parent / AI_TEMPLATE
+script_template = Path(__file__).parent / "data/cspm-linux.j2"
 
 
 if __name__ == "__main__":
@@ -79,6 +69,7 @@ if __name__ == "__main__":
         agent_input=AGENT_INPUT,
         package_input=INTEGRATION_INPUT,
         stream_name="cloud_asset_inventory.asset_inventory",
+        package_name="cloud_asset_inventory",
     )
 
     logger.info("Create agent policy")
@@ -103,45 +94,6 @@ if __name__ == "__main__":
         ),
     )
 
-    # KUBA: CloudFormation approach
-    # cloudformation_params = Munch()
-    # cloudformation_params.ENROLLMENT_TOKEN = get_enrollment_token(
-    #     cfg=cnfg.elk_config,
-    #     policy_id=agent_policy_id,
-    # )
-
-    # cloudformation_params.FLEET_URL = get_fleet_server_host(cfg=cnfg.elk_config)
-    # cloudformation_params.ELASTIC_AGENT_VERSION = cnfg.elk_config.stack_version
-    # cloudformation_params.ELASTIC_ARTIFACT_SERVER = get_artifact_server(cnfg.elk_config.stack_version)
-
-    # with open(ai_cloudformation_config, "w") as file:
-    #     json.dump(cloudformation_params, file)
-
-    # logger.info(f"Get {INTEGRATION_NAME} template")
-    # default_url = get_package_default_url(
-    #     cfg=cnfg.elk_config,
-    #     # TODO(kuba): Can policy name just be anything?
-    #     policy_name=INTEGRATION_INPUT["posture"],
-    #     # TODO(kuba): Policy type needs to be investigated for sure.
-    #     policy_type="cloudbeat/vuln_mgmt_aws",
-    # )
-    # template_url = extract_template_url(url_string=default_url)
-
-    # logger.info(f"Using {template_url} for stack creation")
-    # if template_url:
-    #     rename_file_by_suffix(
-    #         file_path=ai_cloudformation_template,
-    #         suffix="-orig",
-    #     )
-    # # TODO(kuba): I think we could do with a new function for a generic/AI template.
-    # get_cnvm_template(
-    #     url=template_url,
-    #     template_path=ai_cloudformation_template,
-    #     # TODO(kuba): let's define our own tags to use, but either way, seem optional
-    #     cnvm_tags=cnfg.aws_config.cnvm_tags,
-    # )
-
-    # CSPM install approach
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(
         cfg=cnfg.elk_config,
@@ -153,7 +105,7 @@ if __name__ == "__main__":
     manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
 
     # Render the template and get the replaced content
-    rendered_content = render_template(cspm_template, manifest_params.toDict())
+    rendered_content = render_template(script_template, manifest_params.toDict())
 
     logger.info(f"Creating {INTEGRATION_NAME} linux manifest")
     # Write the rendered content to a file
