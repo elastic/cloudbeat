@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "resource_group" {
 
 locals {
   vm_private_key_file = "${path.module}/azure-vm-${random_id.id.hex}.pem"
-  vm_username         = "azureuser"
+  vm_username         = "ubuntu"
   deploy_name         = "${var.deployment_name}-${random_id.id.hex}"
   tags = merge({
     name = var.deployment_name
@@ -116,6 +116,7 @@ resource "azurerm_linux_virtual_machine" "linux_vm" {
   location            = azurerm_resource_group.resource_group.location
   size                = var.size
   admin_username      = local.vm_username
+  depends_on          = [azurerm_network_interface_security_group_association.azure_vm_nsg_association]
   network_interface_ids = [
     azurerm_network_interface.vm_nic.id
   ]
