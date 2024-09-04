@@ -20,7 +20,6 @@ package azurelib
 import (
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -64,11 +63,6 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		return nil, fmt.Errorf("failed to init monitor client: %w", err)
 	}
 
-	genericARMClient, err := arm.NewClient("armsecurity-custom", "v0.0.1", azureConfig.Credentials, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to init generic arm client: %w", err)
-	}
-
 	resourceGraphProvider := inventory.NewResourceGraphProvider(log, resourceGraphClientFactory)
 	return &provider{
 		AppServiceProviderAPI:       inventory.NewAppServiceProvider(log, azureConfig.Credentials),
@@ -78,7 +72,7 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 		ProviderAPI:                 governance.NewProvider(log, resourceGraphProvider),
 		ResourceGraphProviderAPI:    resourceGraphProvider,
 		SQLProviderAPI:              inventory.NewSQLProvider(log, azureConfig.Credentials),
-		SecurityContactsProviderAPI: inventory.NewSecurityContacts(log, azureConfig.Credentials, genericARMClient),
+		SecurityContactsProviderAPI: inventory.NewSecurityContacts(log, azureConfig.Credentials),
 		StorageAccountProviderAPI:   inventory.NewStorageAccountProvider(log, diagnosticSettingsClient, azureConfig.Credentials),
 		SubscriptionProviderAPI:     inventory.NewSubscriptionProvider(log, azureConfig.Credentials),
 	}, nil
