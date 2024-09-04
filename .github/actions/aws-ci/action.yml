@@ -14,7 +14,13 @@ inputs:
     description: 'AWS account type'
     required: false
     default: single-account
-
+  cloudbeat-config:
+    description: 'Full path to a cloudbeat configuration file, e.g. "deploy/aws/cloudbeat-aws.yml"'
+    required: true
+  pytest-keyword-expression:
+    description: 'Keyword expression to use as a pytest -k flag valyu'
+    required: true
+    default: 'aws'
   debug:
     description: 'debug'
     required: false
@@ -35,9 +41,10 @@ runs:
         AWS_ACCESS_KEY_ID: ${{ inputs.aws-access-key-id }}
         AWS_SECRET_ACCESS_KEY: ${{ inputs.aws-secret-access-key }}
         AWS_ACCOUNT_TYPE: ${{ inputs.aws-account-type }}
+        CLOUDBEAT_CONFIG: ${{ inputs.cloudbeat-config }}
       shell: bash
       run: |
-        ./cloudbeat -c deploy/aws/cloudbeat-aws.yml -d '*' &
+        ./cloudbeat -c ${{ env.CLOUDBEAT_CONFIG }} -d '*' &
 
     - name: Wait for cloudbeat to send some events
       shell: bash
@@ -47,8 +54,9 @@ runs:
       working-directory: ./tests
       env:
         USE_K8S: "false"
+        KEYWORD: ${{ inputs.pytest-keyword-expression }}
       shell: bash
-      run: poetry run pytest -k "aws" --alluredir=./allure/results/ --clean-alluredir
+      run: poetry run pytest -k "${{ env.KEYWORD }}" --alluredir=./allure/results/ --clean-alluredir
 
     - name: Upload test results
       if: ${{ always() }}

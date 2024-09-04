@@ -37,6 +37,21 @@ output "ec2_cspm_key" {
   sensitive = true
 }
 
+output "ec2_asset_inventory_ssh_cmd" {
+  value     = module.aws_ec2_for_asset_inventory.cloudbeat_ssh_cmd
+  sensitive = true
+}
+
+output "ec2_asset_inventory_public_ip" {
+  value     = module.aws_ec2_for_asset_inventory.aws_instance_cloudbeat_public_ip
+  sensitive = true
+}
+
+output "ec2_asset_inventory_key" {
+  value     = module.aws_ec2_for_asset_inventory.ec2_ssh_key
+  sensitive = true
+}
+
 output "ec2_cloudtrail_ssh_cmd" {
   value     = var.cdr_infra ? module.aws_ec2_for_cloudtrail.cloudbeat_ssh_cmd : null
   sensitive = true
