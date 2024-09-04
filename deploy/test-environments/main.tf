@@ -2,6 +2,14 @@ provider "aws" {
   region = var.region
 }
 
+provider "google" {
+  project = var.gcp_project_id
+}
+
+provider "azurerm" {
+  features {}
+}
+
 locals {
   common_tags = {
     division   = "${var.division}"
@@ -11,6 +19,7 @@ locals {
     owner      = "${var.owner}"
     deployment = "${var.deployment_name}"
   }
+
   ec_url = "https://cloud.elastic.co"
   ec_headers = {
     Content-type  = "application/json"
@@ -48,15 +57,14 @@ module "aws_ec2_for_asset_inventory" {
   specific_tags   = merge(local.common_tags, { "ec2_type" : "asset_inventory" })
 }
 
-module "aws_ec2_for_cloudtrail" {
-  count           = var.cdr_infra ? 1 : 0
-  source          = "../cloud/modules/ec2"
-  providers       = { aws : aws }
-  aws_ami         = var.ami_map[var.region]
-  deploy_k8s      = false
-  deploy_agent    = false # Agent will not be deployed
-  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
-  specific_tags   = merge(local.common_tags, { "ec2_type" : "cloudtrail" })
+module "gcp_audit_logs" {
+  count                    = var.cdr_infra ? 1 : 0
+  providers                = { google : google }
+  source                   = "../cloud/modules/gcp/vm"
+  gcp_service_account_json = var.gcp_service_account_json
+  deployment_name          = var.deployment_name
+  network                  = "default"
+  specific_tags            = merge(local.common_tags, { "vm_instance" : "audit-logs" })
 }
 
 resource "random_string" "suffix" {
@@ -123,4 +131,25 @@ module "eks" {
   # node_group_two_desired_size = 1
   enable_node_group_two = false
   tags                  = merge(local.common_tags, { "ec2_type" : "kspm_eks" })
+}
+
+# ===== CDR Infrastructure Resources =====
+module "aws_ec2_for_cloudtrail" {
+  count           = var.cdr_infra ? 1 : 0
+  source          = "../cloud/modules/ec2"
+  providers       = { aws : aws }
+  aws_ami         = var.ami_map[var.region]
+  deploy_k8s      = false
+  deploy_agent    = false # Agent will not be deployed
+  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
+  specific_tags   = merge(local.common_tags, { "ec2_type" : "cloudtrail" })
+}
+
+module "azure_vm_activity_logs" {
+  count           = var.cdr_infra ? 1 : 0
+  source          = "../cloud/modules/azure/vm"
+  providers       = { azurerm : azurerm }
+  location        = var.location
+  deployment_name = var.deployment_name
+  specific_tags   = merge(local.common_tags, { "vm_type" : "activity-logs" })
 }

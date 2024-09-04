@@ -19,16 +19,10 @@ package inventory
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
@@ -38,7 +32,7 @@ import (
 )
 
 type securityClientWrapper interface {
-	ListSecurityContacts(ctx context.Context, subID string) (armsecurity.ContactsClientListResponse, error)
+	ListSecurityContacts(ctx context.Context, subID string) ([]armsecurity.ContactsClientListResponse, error)
 	ListAutoProvisioningSettings(ctx context.Context, subID string) ([]armsecurity.AutoProvisioningSettingsClientListResponse, error)
 }
 
@@ -47,76 +41,17 @@ type SecurityContactsProviderAPI interface {
 	ListAutoProvisioningSettings(ctx context.Context, subscriptionID string) ([]AzureAsset, error)
 }
 
-const listSecurityContactsURI = "/subscriptions/%s/providers/Microsoft.Security/securityContacts"
-
-// azureSecurityContactsClient is needed till this issue -
-// https://github.com/Azure/azure-sdk-for-go/issues/19740 is fixed.
-// Implementation code is similar to armsecurity.ContactsClient but it attempts to decode -
-// the List response to two possible structs.
-type azureSecurityContactsClient struct {
-	armClient *arm.Client
+type defaultSecurityClientWrapper struct {
+	credential azcore.TokenCredential
 }
 
-// ListSecurityContacts implements the Security Contacts List Azure REST API call.
-// https://learn.microsoft.com/en-us/rest/api/defenderforcloud/security-contacts/list
-func (c *azureSecurityContactsClient) ListSecurityContacts(ctx context.Context, subID string) (armsecurity.ContactsClientListResponse, error) {
-	req, err := c.listSecurityContactsRequest(ctx, c.armClient.Endpoint(), subID)
-	if err != nil {
-		return armsecurity.ContactsClientListResponse{}, err
-	}
-
-	httpResp, err := c.armClient.Pipeline().Do(req)
-	if err != nil {
-		return armsecurity.ContactsClientListResponse{}, err
-	}
-
-	if !runtime.HasStatusCode(httpResp, http.StatusOK) {
-		err = runtime.NewResponseError(httpResp)
-		return armsecurity.ContactsClientListResponse{}, err
-	}
-
-	return c.listSecurityContactsResponseDecode(httpResp)
-}
-
-// listCreateRequest creates the List request.
-func (*azureSecurityContactsClient) listSecurityContactsRequest(ctx context.Context, endpoint, subID string) (*policy.Request, error) {
-	if subID == "" {
-		return nil, errors.New("parameter subscription id cannot be empty")
-	}
-
-	urlPath := fmt.Sprintf(listSecurityContactsURI, url.PathEscape(subID))
-
-	req, err := runtime.NewRequest(ctx, http.MethodGet, runtime.JoinPaths(endpoint, urlPath))
+func (w *defaultSecurityClientWrapper) ListSecurityContacts(ctx context.Context, subID string) ([]armsecurity.ContactsClientListResponse, error) {
+	cl, err := armsecurity.NewContactsClient(subID, w.credential, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	reqQP := req.Raw().URL.Query()
-	reqQP.Set("api-version", "2020-01-01-preview")
-	req.Raw().URL.RawQuery = reqQP.Encode()
-	req.Raw().Header.Set("Accept", "application/json")
-
-	return req, nil
-}
-
-func (*azureSecurityContactsClient) listSecurityContactsResponseDecode(resp *http.Response) (armsecurity.ContactsClientListResponse, error) {
-	result := armsecurity.ContactsClientListResponse{}
-	if err := runtime.UnmarshalAsJSON(resp, &result.ContactList.Value); err != nil {
-		// fallback attempt to unmarshal
-		if secondErr := runtime.UnmarshalAsJSON(resp, &result); secondErr != nil {
-			return armsecurity.ContactsClientListResponse{}, err
-		}
-	}
-	return result, nil
-}
-
-type defaultSecurityClientWrapper struct {
-	credential                  azcore.TokenCredential
-	azureSecurityContactsClient *azureSecurityContactsClient
-}
-
-func (w *defaultSecurityClientWrapper) ListSecurityContacts(ctx context.Context, subID string) (armsecurity.ContactsClientListResponse, error) {
-	return w.azureSecurityContactsClient.ListSecurityContacts(ctx, subID)
+	return readPager(ctx, cl.NewListPager(nil))
 }
 
 func (w *defaultSecurityClientWrapper) ListAutoProvisioningSettings(ctx context.Context, subID string) ([]armsecurity.AutoProvisioningSettingsClientListResponse, error) {
@@ -132,14 +67,11 @@ type securityContactsProvider struct {
 	log    *logp.Logger //nolint:unused
 }
 
-func NewSecurityContacts(log *logp.Logger, credential azcore.TokenCredential, armClient *arm.Client) SecurityContactsProviderAPI {
+func NewSecurityContacts(log *logp.Logger, credential azcore.TokenCredential) SecurityContactsProviderAPI {
 	return &securityContactsProvider{
 		log: log,
 		client: &defaultSecurityClientWrapper{
 			credential: credential,
-			azureSecurityContactsClient: &azureSecurityContactsClient{
-				armClient: armClient,
-			},
 		},
 	}
 }
@@ -150,18 +82,22 @@ func (p *securityContactsProvider) ListSecurityContacts(ctx context.Context, sub
 		return nil, fmt.Errorf("error while fetching security contacts: %w", err)
 	}
 
-	return lo.FilterMap(res.Value, func(contract *armsecurity.Contact, _ int) (AzureAsset, bool) {
-		if contract == nil {
-			return AzureAsset{}, false
-		}
-		return p.transformSecurityContract(contract, subscriptionID), true
-	}), nil
+	return lo.Flatten(
+		lo.Map(res, func(listResponse armsecurity.ContactsClientListResponse, _ int) []AzureAsset {
+			return lo.FilterMap(listResponse.ContactList.Value, func(contact *armsecurity.Contact, _ int) (AzureAsset, bool) {
+				if contact == nil {
+					return AzureAsset{}, false
+				}
+				return p.transformSecurityContract(contact, subscriptionID), true
+			})
+		}),
+	), nil
 }
 
 func (p *securityContactsProvider) transformSecurityContract(contact *armsecurity.Contact, subscriptionID string) AzureAsset {
 	properties := map[string]any{}
 
-	maps.AddIfNotNil(properties, "alertNotifications", contact.Properties.AlertNotifications)
+	maps.AddIfSliceNotEmpty(properties, "notificationsSources", contact.Properties.NotificationsSources)
 	maps.AddIfNotNil(properties, "emails", contact.Properties.Emails)
 	maps.AddIfNotNil(properties, "notificationsByRole", contact.Properties.NotificationsByRole)
 	maps.AddIfNotNil(properties, "phone", contact.Properties.Phone)

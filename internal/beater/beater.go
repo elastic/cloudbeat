@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/common/reload"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -30,14 +29,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/launcher"
 )
 
-func New(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("launcher")
 	reloader := launcher.NewListener(log)
 	validator := &validator{}
 
 	s := launcher.New(log, "Cloudbeat", reloader, validator, NewBeater, cfg)
 
-	reload.RegisterV2.MustRegisterInput(reloader)
+	b.Registry.MustRegisterInput(reloader)
 	return s, nil
 }
 

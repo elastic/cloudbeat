@@ -98,6 +98,11 @@ on:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
         required: false
+      cdr-infra:
+        description: "Flag to indicate that the CDR infrastructure is being created"
+        type: boolean
+        required: false
+        default: false
     outputs:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
@@ -117,6 +122,7 @@ env:
   GCP_ZONE: "us-central1-a"
   AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments owner=${{ github.actor }}"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  TF_VAR_gcp_service_account_json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
 
 jobs:
   Deploy:
@@ -217,6 +223,17 @@ jobs:
           echo "::add-mask::$enrollment_token"
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
 
+      - name: Init CDR Infra
+        id: init-cdr-infra
+        env:
+          CDR_INFRA: ${{ inputs.cdr-infra }}
+        run: |
+          if [[ "${CDR_INFRA:-}" == "true" ]]; then
+            echo "TF_VAR_cdr_infra=true" >> $GITHUB_ENV
+          else
+            echo "TF_VAR_cdr_infra=false" >> $GITHUB_ENV
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -240,8 +257,22 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Set TF_STATE_FOLDER
+      - id: azure-auth
+        name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - id: google-auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Update Vars
         run: |
+          echo "TF_VAR_gcp_project_id=$GCP_PROJECT" >> $GITHUB_ENV
           echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
       - name: Terraform Init
@@ -279,6 +310,11 @@ jobs:
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
+          if [[ ${TF_VAR_cdr_infra:-} == "true" ]]; then
+            aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cloudtrail.pem"
+            aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
+            aws s3 cp "${AUDIT_LOGS_KEY}" "${S3_BUCKET}/gcp_audit_logs.pem"
+          fi
 
       - name: Summary
         if: success()
@@ -295,6 +331,61 @@ jobs:
           )
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
+
+      - name: Install AWS Cloudtrail integration
+        id: cloudtrail-integration
+        if: env.TF_VAR_cdr_infra == 'true'
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        env:
+          CLOUDTRAIL_S3: ${{ secrets.CLOUDTRAIL_S3 }}
+        run: |
+          poetry run python ./install_cloudtrail_integration.py
+
+      - name: Deploy AWS Cloudtrail agent
+        if: env.TF_VAR_cdr_infra == 'true'
+        run: |
+          scriptname="cloudtrail-linux.sh"
+          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          cmd="chmod +x $scriptname && ./$scriptname"
+          ../../.ci/scripts/remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+      - name: Install Azure Activity Logs integration
+        id: az-activity-logs-integration
+        if: env.TF_VAR_cdr_infra == 'true'
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        env:
+          EVENTHUB: "activity-logs"
+          CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+          STORAGE_ACCOUNT: "testenvsactivitylogs"
+          STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+        run: |
+          poetry run python ./install_az_activity_logs_integration.py
+
+      - name: Deploy Azure Activity Logs agent
+        if: env.TF_VAR_cdr_infra == 'true'
+        run: |
+          scriptname="az_activity_logs.sh"
+          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          cmd="chmod +x $scriptname && ./$scriptname"
+          ../../.ci/scripts/remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+      - name: Install GCP Audit Logs integration
+        id: gcp-audit-logs-integration
+        if: env.TF_VAR_cdr_infra == 'true'
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        env:
+          GCP_TOPIC_NAME: "test-envs-topic"
+          GCP_SUBSCRIPTION_NAME: "test-envs-topic-sub-id"
+        run: |
+          poetry run python ./install_gcp_audit_logs_integration.py
+
+      - name: Deploy GCP Audit Logs agent
+        if: env.TF_VAR_cdr_infra == 'true'
+        run: |
+          scriptname="gcp_audit_logs.sh"
+          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          cmd="chmod +x $scriptname && ./$scriptname"
+          ../../.ci/scripts/remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install CNVM integration
         id: cnvm
@@ -315,13 +406,6 @@ jobs:
         run: |
           poetry run python ./install_cspm_gcp_integration.py
 
-      - id: google-auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
@@ -333,12 +417,6 @@ jobs:
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
           poetry run python ./install_cspm_azure_integration.py
-
-      - id: azure-auth
-        name: Azure login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy CSPM Azure agent
         id: cspm-azure-agent
@@ -378,11 +456,10 @@ jobs:
 
       - name: Deploy KSPM Unmanaged agent
         run: |
-          chmod 600 ${{ env.EC2_KSPM_KEY }}
-          # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_unmanaged.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
-          # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_unmanaged.yaml"
+          scriptname="kspm_unmanaged.yaml"
+          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          cmd="kubectl apply -f $scriptname"
+          ../../.ci/scripts/remote_setup.sh -k "$EC2_KSPM_KEY" -s "$src" -h "$KSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install CSPM integration
         id: cspm
@@ -392,11 +469,10 @@ jobs:
 
       - name: Deploy CSPM agent
         run: |
-          chmod 600 ${{ env.EC2_CSPM_KEY }}
-          # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
-          # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
+          scriptname="cspm-linux.sh"
+          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          cmd="chmod +x $scriptname && ./$scriptname"
+          ../../.ci/scripts/remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install AWS Asset Inventory integration
         id: aws-asset-inventory
