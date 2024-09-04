@@ -16,7 +16,6 @@ from .data.constants import RES_NAME
 
 @pytest.mark.asset_inventory
 @pytest.mark.aws_asset_inventory
-@pytest.mark.aws_ec2_asset_inventory
 def test_aws_ec2_asset_inventory(
     asset_inventory_client,
 ):
