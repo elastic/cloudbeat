@@ -100,6 +100,7 @@ if __name__ == "__main__":
         policy_id=agent_policy_id,
     )
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
+    # TODO(kuba): Rename cspm.sh files maybe?
     manifest_params.file_path = Path(__file__).parent / "cspm.sh"
     manifest_params.agent_version = cnfg.elk_config.stack_version
     manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
@@ -109,6 +110,7 @@ if __name__ == "__main__":
 
     logger.info(f"Creating {INTEGRATION_NAME} linux manifest")
     # Write the rendered content to a file
+    # TODO(kuba): Rename cspm.sh files maybe?
     with open(Path(__file__).parent / "cspm-linux.sh", "w", encoding="utf-8") as cspm_file:
         cspm_file.write(rendered_content)
 
