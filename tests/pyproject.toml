@@ -68,5 +68,6 @@ markers = [
     "azure_storage_account_rules",
     "azure_virtual_machine_rules",
     "azure_microsoft_defender_rules",
-    "aws_ec2_asset_inventory",
+    "asset_inventory",
+    "aws_asset_inventory",
 ]
