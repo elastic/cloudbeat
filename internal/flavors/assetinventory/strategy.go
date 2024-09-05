@@ -30,9 +30,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/inventory/azurefetcher"
+	"github.com/elastic/cloudbeat/internal/inventory/gcpfetcher"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
+	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
+	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
 type Strategy interface {
@@ -54,7 +57,7 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 	case config.ProviderAzure:
 		fetchers, err = s.initAzureFetchers(ctx)
 	case config.ProviderGCP:
-		err = fmt.Errorf("GCP branch not implemented")
+		fetchers, err = s.initGcpFetchers(ctx)
 	case "":
 		err = fmt.Errorf("missing config.v1.asset_inventory_provider setting")
 	default:
@@ -97,6 +100,20 @@ func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetche
 	}
 
 	return azurefetcher.New(s.logger, provider, azureConfig), nil
+}
+
+func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
+	cfgProvider := &gcp_auth.ConfigProvider{AuthProvider: &gcp_auth.GoogleAuthProvider{}}
+	gcpConfig, err := cfgProvider.GetGcpClientConfig(ctx, s.cfg.CloudConfig.Gcp, s.logger)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize gcp config: %w", err)
+	}
+	inventoryInitializer := &gcp_inventory.ProviderInitializer{}
+	provider, err := inventoryInitializer.Init(ctx, s.logger, *gcpConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
+	}
+	return gcpfetcher.New(s.logger, provider), nil
 }
 
 func GetStrategy(logger *logp.Logger, cfg *config.Config) Strategy {

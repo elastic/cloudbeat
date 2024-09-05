@@ -40,6 +40,7 @@ const (
 	SubCategoryMessaging       AssetSubCategory = "messaging"
 	SubCategoryNetwork         AssetSubCategory = "network"
 	SubCategoryStorage         AssetSubCategory = "storage"
+	SubCategoryServiceIdentity AssetSubCategory = "service-identity"
 )
 
 // AssetType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -72,6 +73,9 @@ const (
 	TypeVirtualMachine      AssetType = "virtual-machine"
 	TypeVirtualNetwork      AssetType = "virtual-network"
 	TypeWebApplication      AssetType = "web-application"
+	TypeServiceAccount      AssetType = "service-account"
+	TypeServiceAccountKey   AssetType = "service-account-key"
+	TypeResourceHierarchy   AssetType = "resource-hierarchy"
 )
 
 // AssetSubType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -115,11 +119,21 @@ const (
 	SubTypeVpc                      AssetSubType = "vpc"
 	SubTypeVpcAcl                   AssetSubType = "s3-access-control-list"
 	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connection"
+	SubTypeGcpProject               AssetSubType = "gcp-project"
+	SubTypeGcpInstance              AssetSubType = "gcp-instance"
+	SubTypeGcpSubnet                AssetSubType = "gcp-subnet"
+	SubTypeGcpFirewall              AssetSubType = "gcp-firewall"
+	SubTypeGcpBucket                AssetSubType = "gcp-bucket"
+	SubTypeGcpOrganization          AssetSubType = "gcp-organization"
+	SubTypeGcpFolder                AssetSubType = "gcp-folder"
+	SubTypeGcpServiceAccount        AssetSubType = "gcp-service-account"
+	SubTypeGcpServiceAccountKey     AssetSubType = "gcp-service-account-key"
 )
 
 const (
 	AwsCloudProvider   = "aws"
 	AzureCloudProvider = "azure"
+	GcpCloudProvider   = "gcp"
 )
 
 // AssetClassification holds the taxonomy of an asset
@@ -171,6 +185,17 @@ var (
 	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
 	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
 	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeAzureVirtualMachine}
+
+	// GCP
+	AssetClassificationGcpProject           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeGcpProject}
+	AssetClassificationGcpOrganization      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeGcpOrganization}
+	AssetClassificationGcpFolder            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeResourceHierarchy, SubType: SubTypeGcpFolder}
+	AssetClassificationGcpInstance          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeGcpInstance}
+	AssetClassificationGcpBucket            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeGcpBucket}
+	AssetClassificationGcpFirewall          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeFirewall, SubType: SubTypeGcpFirewall}
+	AssetClassificationGcpSubnet            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeSubnet, SubType: SubTypeGcpSubnet}
+	AssetClassificationGcpServiceAccount    = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryServiceIdentity, Type: TypeServiceAccount, SubType: SubTypeGcpServiceAccount}
+	AssetClassificationGcpServiceAccountKey = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryServiceIdentity, Type: TypeServiceAccountKey, SubType: SubTypeGcpServiceAccountKey}
 )
 
 // AssetEvent holds the whole asset
@@ -210,17 +235,23 @@ type AssetNetwork struct {
 
 // AssetCloud contains information about the cloud provider
 type AssetCloud struct {
-	AvailabilityZone *string             `json:"availability_zone,omitempty"`
-	Provider         string              `json:"provider,omitempty"`
-	Region           string              `json:"region,omitempty"`
-	Account          AssetCloudAccount   `json:"account"`
-	Instance         *AssetCloudInstance `json:"instance,omitempty"`
-	Machine          *AssetCloudMachine  `json:"machine,omitempty"`
-	Project          *AssetCloudProject  `json:"project,omitempty"`
-	Service          *AssetCloudService  `json:"service,omitempty"`
+	AvailabilityZone *string                `json:"availability_zone,omitempty"`
+	Provider         string                 `json:"provider,omitempty"`
+	Region           string                 `json:"region,omitempty"`
+	Account          AssetCloudAccount      `json:"account"`
+	Organization     AssetCloudOrganization `json:"organization,omitempty"`
+	Instance         *AssetCloudInstance    `json:"instance,omitempty"`
+	Machine          *AssetCloudMachine     `json:"machine,omitempty"`
+	Project          *AssetCloudProject     `json:"project,omitempty"`
+	Service          *AssetCloudService     `json:"service,omitempty"`
 }
 
 type AssetCloudAccount struct {
+	Id   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type AssetCloudOrganization struct {
 	Id   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
 }
