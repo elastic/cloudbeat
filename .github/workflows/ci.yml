@@ -76,7 +76,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
           aws-account-type: single-account
           cloudbeat-config: "deploy/aws/cloudbeat-aws.yml"
-          pytest-keyword-expression: "aws"
+          pytest-keyword-expression: "cspm_aws"
 
   ci-aws-asset-inventory:
     needs: [ init-hermit ]
@@ -101,7 +101,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
           aws-account-type: single-account
           cloudbeat-config: "deploy/aws-asset-inventory/cloudbeat-aws-asset-inventory.yml"
-          pytest-keyword-expression: "aws_asset_inventory"
+          pytest-keyword-expression: "asset_inventory_aws"
 
   ci-gcp:
     needs: [ init-hermit ]
