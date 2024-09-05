@@ -65,7 +65,14 @@ def get_assets_from_index(
     time_after: datetime,
 ) -> list[Munch]:
     """
-    TODO(kuba) Update the docstring
+    Resturns assets from a given index matching given classification.
+    @param elastic_client: Client to connect to Elasticsearch.
+    @param category: Asset category used as a filter
+    @param sub_category: Asset subcategory used as a filter
+    @param type: Asset type used as a filter
+    @param sub_type: Asset subtype used as a filter
+    @param time_after: Filter events having timestamp > time_after
+    @return: List of Munch objects
     """
     query = {
         "bool": {

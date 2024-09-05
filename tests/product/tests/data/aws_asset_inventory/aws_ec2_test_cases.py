@@ -1,5 +1,6 @@
 """
-TODO(kuba)
+This module provides AWS Elastic Compute Cloud EC2 service rule test cases for Asset
+Inventory.
 """
 
 from ..asset_inventory_test_case import AssetInventoryCase

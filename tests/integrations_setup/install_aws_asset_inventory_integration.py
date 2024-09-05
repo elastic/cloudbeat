@@ -1,27 +1,17 @@
 #!/usr/bin/env python
 """
-TODO(kuba): UPDATE THIS DOCSTRING!
-
 This script installs Asset Inventory AWS integration
 
 The following steps are performed:
 1. Create an agent policy.
 2. Create a Asset Inventory AWS integration.
-3. Create a deploy/cloudformation/config.json file to be used by the just deploy-cloudformation command.
+3. Render aws-asset-inventory.sh file to be used to install and enroll agent on an EC2
+instance
 """
 import sys
 from pathlib import Path
 
 import configuration_fleet as cnfg
-from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.common_api import (
-    get_artifact_server,
-    get_enrollment_token,
-    get_fleet_server_host,
-    get_package_version,
-)
-from fleet_api.package_policy_api import create_integration
-from fleet_api.utils import render_template
 from loguru import logger
 from munch import Munch
 from package_policy import (
@@ -31,6 +21,16 @@ from package_policy import (
     version_compatible,
 )
 from state_file_manager import HostType, PolicyState, state_manager
+
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.common_api import (
+    get_artifact_server,
+    get_enrollment_token,
+    get_fleet_server_host,
+    get_package_version,
+)
+from fleet_api.package_policy_api import create_integration
+from fleet_api.utils import render_template
 
 EXPECTED_AGENTS = 1
 PKG_DEFAULT_VERSION = VERSION_MAP.get("asset_inventory_aws", "")
@@ -97,7 +97,6 @@ if __name__ == "__main__":
         policy_id=agent_policy_id,
     )
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
-    # TODO(kuba): Rename cspm.sh files maybe?
     manifest_params.file_path = Path(__file__).parent / "aws-asset-inventory.sh"
     manifest_params.agent_version = cnfg.elk_config.stack_version
     manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
@@ -107,7 +106,6 @@ if __name__ == "__main__":
 
     logger.info(f"Creating {INTEGRATION_NAME} linux manifest")
     # Write the rendered content to a file
-    # TODO(kuba): Rename cspm.sh files maybe?
     with open(Path(__file__).parent / "aws-asset-inventory-linux.sh", "w", encoding="utf-8") as cspm_file:
         cspm_file.write(rendered_content)
 
