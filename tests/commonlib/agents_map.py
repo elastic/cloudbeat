@@ -2,7 +2,7 @@
 Generate agent parameterization for pytest.
 """
 
-from configuration import agent, elasticsearch
+from configuration import elasticsearch
 from fleet_api.agent_policy_api import get_agents
 from loguru import logger
 from munch import Munch
