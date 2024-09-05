@@ -50,6 +50,10 @@ var ResourcesToFetch = []ResourcesClassification{
 	{gcpinventory.ComputeSubnetworkAssetType, inventory.AssetClassificationGcpSubnet},
 	{gcpinventory.IamServiceAccountAssetType, inventory.AssetClassificationGcpServiceAccount},
 	{gcpinventory.IamServiceAccountKeyAssetType, inventory.AssetClassificationGcpServiceAccountKey},
+	{gcpinventory.GkeClusterAssetType, inventory.AssetClassificationGcpGkeCluster},
+	{gcpinventory.ComputeForwardingRuleAssetType, inventory.AssetClassificationGcpForwardingRule},
+	{gcpinventory.CloudFunctionAssetType, inventory.AssetClassificationGcpCloudFunction},
+	{gcpinventory.CloudRunService, inventory.AssetClassificationGcpCloudRunService},
 }
 
 func newAssetsInventoryFetcher(logger *logp.Logger, provider inventoryProvider) inventory.AssetFetcher {
