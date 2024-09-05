@@ -16,6 +16,17 @@ from product.tests.parameters import Parameters, register_params
 def test_aws_ec2_asset_inventory(
     asset_inventory_client,
 ):
+    """
+    TODO(kuba): rewrite the docstring
+    This data driven test verifies rules and findings return by cloudbeat agent.
+    In order to add new cases @pytest.mark.parameterize section shall be updated.
+    Setup and teardown actions are defined in data method.
+    This test verifies that cloudbeat returns correct finding.
+    @param rule_tag: Name of rule to be verified.
+    @param case_identifier: Resource unique identifier
+    @param expected: Result to be found in finding evaluation field.
+    @return: None - Test Pass / Fail result is generated.
+    """
     assets = get_ES_assets(
         asset_inventory_client,
         timeout=10,
