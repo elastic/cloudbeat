@@ -176,6 +176,7 @@ def kspm_client():
     """
     return create_es_client(configuration.elasticsearch.kspm_index)
 
+
 @pytest.fixture
 def asset_inventory_client():
     """

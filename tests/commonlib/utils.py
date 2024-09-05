@@ -2,15 +2,15 @@
 import datetime
 import json
 import time
-import munch
 from functools import reduce
-from typing import Union, List
+from typing import List, Union
 
 import allure
+import munch
 from commonlib.io_utils import (
+    get_assets_from_index,
     get_events_from_index,
     get_logs_from_stream,
-    get_assets_from_index,
 )
 from loguru import logger
 
@@ -79,10 +79,14 @@ def get_ES_evaluation(
 
     return None
 
+
 def get_ES_assets(
     elastic_client,
     timeout,
-    category, sub_category, type_, sub_type,
+    category,
+    sub_category,
+    type_,
+    sub_type,
     exec_timestamp,
     resource_identifier=lambda r: True,
 ) -> Union[List[munch.Munch], None]:
@@ -94,7 +98,10 @@ def get_ES_assets(
             time.sleep(EVALUATION_BACKOFF_SECONDS)
             assets = get_assets_from_index(
                 elastic_client,
-                category, sub_category, type_, sub_type,
+                category,
+                sub_category,
+                type_,
+                sub_type,
                 latest_timestamp,
             )
         except Exception as e:
@@ -115,6 +122,7 @@ def get_ES_assets(
             return filtered_assets
 
     return None
+
 
 def get_logs_evaluation(
     k8s,
