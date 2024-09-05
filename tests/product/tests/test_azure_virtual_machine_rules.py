@@ -16,7 +16,7 @@ from product.tests.parameters import Parameters, register_params
 from .data.constants import RES_NAME
 
 
-@pytest.mark.azure_virtual_machine_rules
+@pytest.mark.cspm_azure_virtual_machine_rules
 def test_azure_virtual_machine_rules(
     cspm_client,
     cloudbeat_agent,

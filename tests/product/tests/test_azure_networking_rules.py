@@ -14,7 +14,7 @@ from product.tests.parameters import Parameters, register_params
 from .data.constants import RES_NAME
 
 
-@pytest.mark.azure_networking_rules
+@pytest.mark.cspm_azure_networking_rules
 def test_azure_networking_rules(
     cspm_client,
     cloudbeat_agent,
