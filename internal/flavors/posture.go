@@ -86,6 +86,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 			publisher: publisher,
 			config:    cfg,
 			log:       log,
+			client:    client,
 		},
 		benchmark: bench,
 	}, nil

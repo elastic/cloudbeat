@@ -1,0 +1,41 @@
+name: Create Environment with Cloud Logs (CDR)
+run-name: Creating ${{ github.event.inputs.deployment-name }} by @${{ github.actor }}
+
+on:
+  # Ability to execute on demand
+  workflow_dispatch:
+    inputs:
+      deployment-name:
+        type: string
+        description: |
+          Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
+        required: true
+      serverless_mode:
+        description: "Deploy a serverless project instead of an ESS deployment"
+        type: boolean
+        required: true
+        default: false
+      elk-stack-version:
+        required: true
+        description: "The version of the ELK stack: For BC use version without hash 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        default: "8.16.0"
+        type: string
+      docker-image-override:
+        required: false
+        description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+        type: string
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/test-environment.yml
+    secrets: inherit
+    # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    with:
+      deployment_name: ${{ inputs.deployment-name }}
+      ess-region: 'gcp-us-west2'
+      elk-stack-version: ${{ inputs.elk-stack-version }}
+      serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
+      cdr-infra: true
