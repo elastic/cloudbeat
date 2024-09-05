@@ -1,11 +1,12 @@
 """
-CIS AWS Elastic Compute Cloud asset inventory verification.
-This module verifies presence of retrieved assets
+AWS Asset Inventory Elastic Compute Cloud verification.
+This module verifies presence and correctness of retrieved assets
 """
 
 from datetime import datetime, timedelta
 
 import pytest
+
 from commonlib.utils import get_ES_assets
 from product.tests.data.aws_asset_inventory import aws_ec2_test_cases as aws_ec2_tc
 from product.tests.parameters import Parameters, register_params
@@ -17,15 +18,7 @@ def test_aws_ec2_asset_inventory(
     asset_inventory_client,
 ):
     """
-    TODO(kuba): rewrite the docstring
-    This data driven test verifies rules and findings return by cloudbeat agent.
-    In order to add new cases @pytest.mark.parameterize section shall be updated.
-    Setup and teardown actions are defined in data method.
-    This test verifies that cloudbeat returns correct finding.
-    @param rule_tag: Name of rule to be verified.
-    @param case_identifier: Resource unique identifier
-    @param expected: Result to be found in finding evaluation field.
-    @return: None - Test Pass / Fail result is generated.
+    This data driven test verifies assets published by cloudbeat agent.
     """
     assets = get_ES_assets(
         asset_inventory_client,
