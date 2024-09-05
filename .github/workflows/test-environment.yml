@@ -30,13 +30,13 @@ on:
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
       run-sanity-tests:
-          description: "Run sanity tests after provision"
-          default: false
-          type: boolean
+        description: "Run sanity tests after provision"
+        default: false
+        type: boolean
       run-ui-sanity-tests:
-          description: "Run UI sanity tests after provision"
-          default: false
-          type: boolean
+        description: "Run UI sanity tests after provision"
+        default: false
+        type: boolean
       kibana_ref:
         description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
@@ -81,9 +81,9 @@ on:
         default: false
         type: boolean
       run-ui-sanity-tests:
-          description: "Run UI sanity tests after provision"
-          default: false
-          type: boolean
+        description: "Run UI sanity tests after provision"
+        default: false
+        type: boolean
       kibana_ref:
         description: "Kibana branch, tag, or commit SHA to check out the UI sanity tests from"
         required: false
@@ -135,15 +135,14 @@ jobs:
       TF_VAR_ess_region: ${{ inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
       TF_VAR_serverless_mode: ${{ inputs.serverless_mode }}
-      TEST_AGENTLESS: ${{ inputs.serverless_mode }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
     # Add "id-token" with the intended permissions.
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     outputs:
       deploy-s3-bucket: ${{ steps.upload-state.outputs.s3-bucket-folder }}
       aws-cnvm-stack-name: ${{ steps.upload-state.outputs.aws-cnvm-stack }}
@@ -237,7 +236,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install Poetry
         run: |
@@ -485,14 +484,11 @@ jobs:
           aws s3 cp "./cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
           aws s3 cp "./state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
 
-      - name: Install Agentless integrations
+      - name: Install Agentless agent AWS integrations
         id: agentless
-        if: env.TEST_AGENTLESS == 'true'
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
-          poetry run python ./install_agentless_integrations.py
+          poetry run python ./install_agentless_agent_integrations.py
 
       - name: Wait for agents to enroll
         id: wait-for-agents

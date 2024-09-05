@@ -197,6 +197,7 @@ def load_data(cfg: Munch, agent_input: dict, package_input: dict) -> Tuple[Dict,
     logger.info("Loading agent and package policies")
     agent_policy = SIMPLIFIED_AGENT_POLICY
     agent_policy["name"] = agent_input.get("name", "")
+    agent_policy["supports_agentless"] = True if agent_input.get("supports_agentless", False) else False;
     package_template = generate_policy_template(cfg=cfg)
     package_policy = generate_package_policy(
         template=package_template,
