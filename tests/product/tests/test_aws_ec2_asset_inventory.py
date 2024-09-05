@@ -6,7 +6,6 @@ This module verifies presence and correctness of retrieved assets
 from datetime import datetime, timedelta
 
 import pytest
-
 from commonlib.utils import get_ES_assets
 from product.tests.data.aws_asset_inventory import aws_ec2_test_cases as aws_ec2_tc
 from product.tests.parameters import Parameters, register_params

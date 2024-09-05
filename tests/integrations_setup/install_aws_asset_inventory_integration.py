@@ -12,16 +12,6 @@ import sys
 from pathlib import Path
 
 import configuration_fleet as cnfg
-from loguru import logger
-from munch import Munch
-from package_policy import (
-    VERSION_MAP,
-    generate_random_name,
-    load_data,
-    version_compatible,
-)
-from state_file_manager import HostType, PolicyState, state_manager
-
 from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.common_api import (
     get_artifact_server,
@@ -31,6 +21,15 @@ from fleet_api.common_api import (
 )
 from fleet_api.package_policy_api import create_integration
 from fleet_api.utils import render_template
+from loguru import logger
+from munch import Munch
+from package_policy import (
+    VERSION_MAP,
+    generate_random_name,
+    load_data,
+    version_compatible,
+)
+from state_file_manager import HostType, PolicyState, state_manager
 
 EXPECTED_AGENTS = 1
 PKG_DEFAULT_VERSION = VERSION_MAP.get("asset_inventory_aws", "")
