@@ -55,9 +55,13 @@ def get_events_from_index(
 
     return events
 
+
 def get_assets_from_index(
     elastic_client,
-    category: str, sub_category: str, type_: str, sub_type: str,
+    category: str,
+    sub_category: str,
+    type_: str,
+    sub_type: str,
     time_after: datetime,
 ) -> list[Munch]:
     """

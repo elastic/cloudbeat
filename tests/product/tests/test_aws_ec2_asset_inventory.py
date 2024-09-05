@@ -4,14 +4,11 @@ This module verifies presence of retrieved assets
 """
 
 from datetime import datetime, timedelta
-from functools import partial
 
 import pytest
-from commonlib.utils import get_ES_assets, res_identifier
+from commonlib.utils import get_ES_assets
 from product.tests.data.aws_asset_inventory import aws_ec2_test_cases as aws_ec2_tc
 from product.tests.parameters import Parameters, register_params
-
-from .data.constants import RES_NAME
 
 
 @pytest.mark.asset_inventory

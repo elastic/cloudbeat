@@ -9,7 +9,6 @@ The following steps are performed:
 2. Create a Asset Inventory AWS integration.
 3. Create a deploy/cloudformation/config.json file to be used by the just deploy-cloudformation command.
 """
-import json
 import sys
 from pathlib import Path
 
@@ -17,20 +16,17 @@ import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.common_api import (
     get_artifact_server,
-    get_cnvm_template,
     get_enrollment_token,
     get_fleet_server_host,
     get_package_version,
 )
 from fleet_api.package_policy_api import create_integration
-from fleet_api.utils import rename_file_by_suffix, render_template
+from fleet_api.utils import render_template
 from loguru import logger
 from munch import Munch
 from package_policy import (
     VERSION_MAP,
-    extract_template_url,
     generate_random_name,
-    get_package_default_url,
     load_data,
     version_compatible,
 )
