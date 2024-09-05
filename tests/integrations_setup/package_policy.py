@@ -134,7 +134,10 @@ def update_policy_input_data(data, input_data):
 
 
 def generate_policy_template(
-    cfg: Munch, package_name: str = "", policy_template: dict = None, stream_prefix: str = ""
+    cfg: Munch,
+    package_name: str = "",
+    policy_template: dict = None,
+    stream_prefix: str = "",
 ) -> dict:
     """
     Generate a policy template based on configuration and a template.
@@ -193,7 +196,11 @@ def generate_package_policy(template: dict, policy_input: dict, stream_name: str
 
 
 def load_data(
-    cfg: Munch, agent_input: dict, package_input: dict, stream_name: str, package_name: str = ""
+    cfg: Munch,
+    agent_input: dict,
+    package_input: dict,
+    stream_name: str,
+    package_name: str = "",
 ) -> Tuple[Dict, Dict]:
     """
     Load agent and package policies based on input data.
