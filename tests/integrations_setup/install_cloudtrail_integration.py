@@ -24,7 +24,7 @@ from munch import Munch
 from package_policy import SIMPLIFIED_AGENT_POLICY, generate_random_name
 from state_file_manager import HostType, PolicyState, state_manager
 
-CSPM_EXPECTED_AGENTS = 0
+LOGS_EXPECTED_AGENTS = 1
 INTEGRATION_NAME = "CLOUDTRAIL AWS"
 aws_config = cnfg.aws_config
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         PolicyState(
             agent_policy_id,
             package_policy_id,
-            CSPM_EXPECTED_AGENTS,
+            LOGS_EXPECTED_AGENTS,
             [],
             HostType.LINUX_TAR.value,
             package_data["name"],
