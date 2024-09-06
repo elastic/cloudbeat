@@ -38,7 +38,7 @@ PKG_DEFAULT_VERSION = VERSION_MAP.get("cis_aws", "")
 aws_config = cnfg.aws_config
 
 integration_name = generate_random_name("pkg-cspm-aws")
-INTEGRATION_INPUT = {
+AGENTLESS_INTEGRATION_INPUT = {
     "name": integration_name,
     "input_name": "cis_aws",
     "posture": "cspm",
@@ -74,14 +74,14 @@ if __name__ == "__main__":
     )
 
     patch_vars(
-        var_dict=INTEGRATION_INPUT.get("vars", {}),
+        var_dict=AGENTLESS_INTEGRATION_INPUT.get("vars", {}),
         package_version=package_version,
     )
     logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
         agent_input=AGENTLESS_INPUT,
-        package_input=INTEGRATION_INPUT,
+        package_input=AGENTLESS_INTEGRATION_INPUT,
     )
 
     logger.info("Create agentless-agent policy")
@@ -102,7 +102,7 @@ if __name__ == "__main__":
             CSPM_EXPECTED_AGENTS,
             [],
             HostType.LINUX_TAR.value,
-            INTEGRATION_INPUT["name"],
+            AGENTLESS_INTEGRATION_INPUT["name"],
         ),
     )
 
