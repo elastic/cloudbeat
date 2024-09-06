@@ -12,15 +12,6 @@ import sys
 from pathlib import Path
 
 import configuration_fleet as cnfg
-from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.common_api import (
-    get_artifact_server,
-    get_enrollment_token,
-    get_fleet_server_host,
-    get_package_version,
-)
-from fleet_api.package_policy_api import create_integration
-from fleet_api.utils import render_template
 from loguru import logger
 from munch import Munch
 from package_policy import (
@@ -30,6 +21,16 @@ from package_policy import (
     version_compatible,
 )
 from state_file_manager import HostType, PolicyState, state_manager
+
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.common_api import (
+    get_artifact_server,
+    get_enrollment_token,
+    get_fleet_server_host,
+    get_package_version,
+)
+from fleet_api.package_policy_api import create_integration
+from fleet_api.utils import render_template
 
 EXPECTED_AGENTS = 1
 PKG_DEFAULT_VERSION = VERSION_MAP.get("asset_inventory_aws", "")
@@ -51,7 +52,7 @@ script_template = Path(__file__).parent / "data/cspm-linux.j2"
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
-    package_version = get_package_version(cfg=cnfg.elk_config)
+    package_version = get_package_version(cfg=cnfg.elk_config, package_name="cloud_asset_inventory")
     logger.info(f"Package version: {package_version}")
     if not version_compatible(
         current_version=package_version,

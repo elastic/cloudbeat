@@ -49,7 +49,8 @@ output.elasticsearch:
 processors:
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
-
+  - drop_fields:
+      fields: ["host.name"]
 # Sets log level. The default log level is info.
 # Available log levels are: error, warning, info, debug
 logging.level: debug
