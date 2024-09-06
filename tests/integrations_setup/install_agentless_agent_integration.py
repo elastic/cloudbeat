@@ -49,7 +49,7 @@ INTEGRATION_INPUT = {
         "aws.credentials.type": "direct_access_keys",
     },
 }
-AGENT_INPUT = {
+AGENTLESS_INPUT = {
     "name": f"Agentless policy for {integration_name}",
     "supports_agentless": True,
 }
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
-        agent_input=AGENT_INPUT,
+        agent_input=AGENTLESS_INPUT,
         package_input=INTEGRATION_INPUT,
     )
 
