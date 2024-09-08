@@ -162,9 +162,9 @@ Infrastructure: 27% (12/43)
 
 ## GCP Resources
 
-**Progress: 36% (9/25)**
-Identity: 50% (2/4)
-Infrastructure: 35% (7/20)
+**Progress: 56% (14/25)**
+Identity: 75% (3/4)
+Infrastructure: 55% (11/20)
 Management: 0% (0/1)
 
 <details> <summary>Full table</summary>
@@ -172,12 +172,12 @@ Management: 0% (0/1)
 | Category | SubCategory | Type | SubType | Implemented? |
 |---|---|---|---|---|
 | Identity | Access Management | IAM Policy | GCP IAM Policy | No ❌ |
-| Identity | Access Management | IAM Role | GCP IAM Role | No ❌ |
+| Identity | Access Management | IAM Role | GCP IAM Role | Yes ✅ |
 | Identity | Service Identity | Service Account Key | GCP Service Account Key | Yes ✅ |
 | Identity | Service Identity | Service Account | GCP Service Account | Yes ✅ |
 | Infrastructure | Compute | Virtual Machine | GCP Instance | Yes ✅ |
-| Infrastructure | Container | Orchestration | GKE Cluster | No ❌ |
-| Infrastructure | Container | Serverless | GCP Cloud Run Service | No ❌ |
+| Infrastructure | Container | Orchestration | GKE Cluster | Yes ✅ |
+| Infrastructure | Container | Serverless | GCP Cloud Run Service | Yes ✅ |
 | Infrastructure | Management | Cloud Account | GCP Organization | Yes ✅ |
 | Infrastructure | Management | Cloud Account | GCP Project | Yes ✅ |
 | Infrastructure | Management | Resource Hierarchy | GCP Folder | Yes ✅ |
@@ -188,12 +188,12 @@ Management: 0% (0/1)
 | Infrastructure | Network | Firewall | GCP Network Tag | No ❌ |
 | Infrastructure | Network | IP Address Range | IP Range | No ❌ |
 | Infrastructure | Network | Load Balancing | GCP Compute Target Pool | No ❌ |
-| Infrastructure | Network | Load Balancing | GCP Forwarding Rule | No ❌ |
+| Infrastructure | Network | Load Balancing | GCP Forwarding Rule | Yes ✅ |
 | Infrastructure | Network | Network Interface | GCP Network Interface | No ❌ |
 | Infrastructure | Network | Network Interface | GCP Network Interface Access Config | No ❌ |
 | Infrastructure | Network | Subnet | GCP Subnet | Yes ✅ |
 | Infrastructure | Network | Virtual Network | GCP VPC | No ❌ |
-| Infrastructure | Serverless | Function | GCP Cloud Function | No ❌ |
+| Infrastructure | Serverless | Function | GCP Cloud Function | Yes ✅ |
 | Infrastructure | Storage | Object Storage | GCP Bucket | Yes ✅ |
 | Management | Resource Management | Label | GCP Bucket Label | No ❌ |
 

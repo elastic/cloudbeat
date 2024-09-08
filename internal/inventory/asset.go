@@ -29,18 +29,20 @@ const (
 type AssetSubCategory string
 
 const (
-	SubCategoryApplication     AssetSubCategory = "application"
-	SubCategoryAuthorization   AssetSubCategory = "authorization"
-	SubCategoryCompute         AssetSubCategory = "compute"
-	SubCategoryContainer       AssetSubCategory = "container"
-	SubCategoryDatabase        AssetSubCategory = "database"
-	SubCategoryDigitalIdentity AssetSubCategory = "digital-identity"
-	SubCategoryIntegration     AssetSubCategory = "integration"
-	SubCategoryManagement      AssetSubCategory = "management"
-	SubCategoryMessaging       AssetSubCategory = "messaging"
-	SubCategoryNetwork         AssetSubCategory = "network"
-	SubCategoryStorage         AssetSubCategory = "storage"
-	SubCategoryServiceIdentity AssetSubCategory = "service-identity"
+	SubCategoryApplication      AssetSubCategory = "application"
+	SubCategoryAuthorization    AssetSubCategory = "authorization"
+	SubCategoryCompute          AssetSubCategory = "compute"
+	SubCategoryContainer        AssetSubCategory = "container"
+	SubCategoryDatabase         AssetSubCategory = "database"
+	SubCategoryDigitalIdentity  AssetSubCategory = "digital-identity"
+	SubCategoryIntegration      AssetSubCategory = "integration"
+	SubCategoryManagement       AssetSubCategory = "management"
+	SubCategoryMessaging        AssetSubCategory = "messaging"
+	SubCategoryNetwork          AssetSubCategory = "network"
+	SubCategoryStorage          AssetSubCategory = "storage"
+	SubCategoryServiceIdentity  AssetSubCategory = "service-identity"
+	SubCategoryAccessManagement AssetSubCategory = "access-management"
+	SubCategoryServerless       AssetSubCategory = "serverless"
 )
 
 // AssetType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -76,6 +78,10 @@ const (
 	TypeServiceAccount      AssetType = "service-account"
 	TypeServiceAccountKey   AssetType = "service-account-key"
 	TypeResourceHierarchy   AssetType = "resource-hierarchy"
+	TypeOrchestration       AssetType = "orchestration"
+	TypeFunction            AssetType = "function"
+	TypeLoadBalancing       AssetType = "load-balancing"
+	TypeIamRole             AssetType = "iam-role"
 )
 
 // AssetSubType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -128,6 +134,11 @@ const (
 	SubTypeGcpFolder                AssetSubType = "gcp-folder"
 	SubTypeGcpServiceAccount        AssetSubType = "gcp-service-account"
 	SubTypeGcpServiceAccountKey     AssetSubType = "gcp-service-account-key"
+	SubTypeGcpGkeCluster            AssetSubType = "gke-cluster"
+	SubTypeGcpForwardingRule        AssetSubType = "gcp-forwarding-rule"
+	SubTypeGcpCloudFunction         AssetSubType = "gcp-cloud-function"
+	SubTypeGcpCloudRunService       AssetSubType = "gcp-cloud-run-service"
+	SubTypeGcpIamRole               AssetSubType = "gcp-iam-role"
 )
 
 const (
@@ -196,6 +207,12 @@ var (
 	AssetClassificationGcpSubnet            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeSubnet, SubType: SubTypeGcpSubnet}
 	AssetClassificationGcpServiceAccount    = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryServiceIdentity, Type: TypeServiceAccount, SubType: SubTypeGcpServiceAccount}
 	AssetClassificationGcpServiceAccountKey = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryServiceIdentity, Type: TypeServiceAccountKey, SubType: SubTypeGcpServiceAccountKey}
+
+	AssetClassificationGcpGkeCluster      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeOrchestration, SubType: SubTypeGcpGkeCluster}
+	AssetClassificationGcpForwardingRule  = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancing, SubType: SubTypeGcpForwardingRule}
+	AssetClassificationGcpIamRole         = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryAccessManagement, Type: TypeIamRole, SubType: SubTypeGcpIamRole}
+	AssetClassificationGcpCloudFunction   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryServerless, Type: TypeFunction, SubType: SubTypeGcpCloudFunction}
+	AssetClassificationGcpCloudRunService = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeServerless, SubType: SubTypeGcpCloudRunService}
 )
 
 // AssetEvent holds the whole asset
