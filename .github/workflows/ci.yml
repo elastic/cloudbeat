@@ -76,6 +76,28 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
           aws-account-type: single-account
 
+  ci-aws-asset-inventory:
+    needs: [ init-hermit ]
+    name: AWS Asset Inventory CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run AWS Asset Inventory integration tests
+        uses: ./.github/actions/aws-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+
   ci-gcp:
     needs: [ init-hermit ]
     name: CIS GCP CI
@@ -225,6 +247,7 @@ jobs:
     needs:
       - ci-azure
       - ci-aws
+      - ci-aws-asset-inventory
       - ci-gcp
       - ci-cnvm
       - ci-k8s

@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 """
-This script installs KSPM EKS integration
+This script installs Asset Inventory AWS integration
 
 The following steps are performed:
 1. Create an agent policy.
-2. Create a KSPM EKS integration.
-3. Create a KSPM manifest to be deployed on a host.
+2. Create a Asset Inventory AWS integration.
+3. Render aws-asset-inventory.sh file to be used to install and enroll agent on an EC2
+instance
 """
 import sys
 from pathlib import Path
 
 import configuration_fleet as cnfg
-from fleet_api.agent_policy_api import create_agent_policy, get_agent_policy_id_by_name
+from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.common_api import (
-    create_kubernetes_manifest,
+    get_artifact_server,
     get_enrollment_token,
     get_fleet_server_host,
     get_package_version,
-    update_package_version,
 )
-from fleet_api.package_policy_api import create_kspm_eks_integration
+from fleet_api.package_policy_api import create_integration
+from fleet_api.utils import render_template
 from loguru import logger
 from munch import Munch
 from package_policy import (
@@ -30,15 +31,12 @@ from package_policy import (
 )
 from state_file_manager import HostType, PolicyState, state_manager
 
-KSPM_EKS_EXPECTED_AGENTS = 2
-D4C_AGENT_POLICY_NAME = "tf-ap-d4c"
-INTEGRATION_NAME = "KSPM EKS"
-PKG_DEFAULT_VERSION = VERSION_MAP.get("cis_eks", "")
+EXPECTED_AGENTS = 1
+PKG_DEFAULT_VERSION = VERSION_MAP.get("asset_inventory_aws", "")
+INTEGRATION_NAME = "Asset Inventory AWS"
 INTEGRATION_INPUT = {
-    "name": generate_random_name("pkg-kspm-eks"),
-    "input_name": "cis_eks",
-    "posture": "kspm",
-    "deployment": "cloudbeat/cis_eks",
+    "name": generate_random_name("pkg-asset-inventory-aws"),
+    "input_name": "asset_inventory_aws",
     "vars": {
         "access_key_id": cnfg.aws_config.access_key_id,
         "secret_access_key": cnfg.aws_config.secret_access_key,
@@ -46,12 +44,14 @@ INTEGRATION_INPUT = {
     },
 }
 AGENT_INPUT = {
-    "name": generate_random_name("kspm-eks"),
+    "name": generate_random_name("asset-inventory-aws"),
 }
+script_template = Path(__file__).parent / "data/cspm-linux.j2"
+
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
-    package_version = get_package_version(cfg=cnfg.elk_config)
+    package_version = get_package_version(cfg=cnfg.elk_config, package_name="cloud_asset_inventory")
     logger.info(f"Package version: {package_version}")
     if not version_compatible(
         current_version=package_version,
@@ -59,47 +59,33 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
-
-    update_package_version(
-        cfg=cnfg.elk_config,
-        package_name="cloud_security_posture",
-        package_version=package_version,
-    )
-
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
         agent_input=AGENT_INPUT,
         package_input=INTEGRATION_INPUT,
-        stream_name="cloud_security_posture.findings",
+        stream_name="cloud_asset_inventory.asset_inventory",
+        package_name="cloud_asset_inventory",
     )
 
     logger.info("Create agent policy")
-    agent_policy_id = get_agent_policy_id_by_name(
-        cfg=cnfg.elk_config,
-        policy_name=D4C_AGENT_POLICY_NAME,
-    )
-    if not agent_policy_id:
-        agent_policy_id = create_agent_policy(
-            cfg=cnfg.elk_config,
-            json_policy=agent_data,
-        )
+    agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
 
-    logger.info(f"Create {INTEGRATION_NAME} integration")
-    package_policy_id = create_kspm_eks_integration(
+    logger.info(f"Create {INTEGRATION_NAME} integration for policy {agent_policy_id}")
+    package_policy_id = create_integration(
         cfg=cnfg.elk_config,
         pkg_policy=package_data,
         agent_policy_id=agent_policy_id,
-        eks_data={},
+        data={},
     )
 
     state_manager.add_policy(
         PolicyState(
             agent_policy_id,
             package_policy_id,
-            KSPM_EKS_EXPECTED_AGENTS,
+            EXPECTED_AGENTS,
             [],
-            HostType.KUBERNETES.value,
+            HostType.LINUX_TAR.value,
             INTEGRATION_INPUT["name"],
         ),
     )
@@ -109,10 +95,17 @@ if __name__ == "__main__":
         cfg=cnfg.elk_config,
         policy_id=agent_policy_id,
     )
-
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
-    manifest_params.yaml_path = Path(__file__).parent / "kspm_eks.yaml"
-    manifest_params.docker_image_override = cnfg.kspm_config.docker_image_override
-    logger.info(f"Creating {INTEGRATION_NAME} manifest")
-    create_kubernetes_manifest(cfg=cnfg.elk_config, params=manifest_params)
+    manifest_params.file_path = Path(__file__).parent / "aws-asset-inventory.sh"
+    manifest_params.agent_version = cnfg.elk_config.stack_version
+    manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
+
+    # Render the template and get the replaced content
+    rendered_content = render_template(script_template, manifest_params.toDict())
+
+    logger.info(f"Creating {INTEGRATION_NAME} linux manifest")
+    # Write the rendered content to a file
+    with open(Path(__file__).parent / "aws-asset-inventory-linux.sh", "w", encoding="utf-8") as cspm_file:
+        cspm_file.write(rendered_content)
+
     logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
