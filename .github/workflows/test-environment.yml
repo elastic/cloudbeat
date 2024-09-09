@@ -482,11 +482,10 @@ jobs:
 
       - name: Deploy AWS Asset Inventory agent
         run: |
-          chmod 600 ${{ env.EC2_CSPM_KEY }}
-          # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_ASSET_INV_KEY }} ../../${{ env.INTEGRATIONS_SETUP_DIR }}/aws-asset-inventory-linux.sh "ubuntu@${{ env.ASSET_INV_PUBLIC_IP }}:~/."
-          # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_ASSET_INV_KEY }} "ubuntu@${{ env.ASSET_INV_PUBLIC_IP }}" "chmod +x aws-asset-inventory-linux.sh && ./aws-asset-inventory-linux.sh"
+          scriptname="aws-asset-inventory-linux.sh"
+          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          cmd="chmod +x $scriptname && ./$scriptname"
+          ../../.ci/scripts/remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Upload Integrations data
         if: always()
@@ -494,12 +493,12 @@ jobs:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          aws s3 cp "./kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
-          aws s3 cp "./kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
-          aws s3 cp "./kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
-          aws s3 cp "./cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
-          aws s3 cp "./aws-asset-inventory-linux.sh" "${{ env.S3_BUCKET }}/aws-asset-inventory-linux.sh"
-          aws s3 cp "./state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
+          aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
+          aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
+          aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
+          aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
+          aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
+          aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 
       - name: Install Agentless integrations
         id: agentless
