@@ -1,5 +1,5 @@
 """
-This module provides Azure test case definition
+This module provides Asset Inventory test case definition
 """
 
 from dataclasses import astuple, dataclass
@@ -11,9 +11,10 @@ class AssetInventoryCase:
     Represents Asset Inventory test case
     """
 
-    # rule_tag: str
-    # case_identifier: str
-    # expected: str
+    category : str
+    sub_category : str
+    type_ : str
+    sub_type : str
 
     def __iter__(self):
         return iter(astuple(self))

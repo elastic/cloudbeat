@@ -7,14 +7,18 @@ from datetime import datetime, timedelta
 
 import pytest
 from commonlib.utils import get_ES_assets
-from product.tests.data.aws_asset_inventory import aws_ec2_test_cases as aws_ec2_tc
+from product.tests.data.aws_asset_inventory import test_cases as aws_tc
 from product.tests.parameters import Parameters, register_params
 
 
 @pytest.mark.asset_inventory
 @pytest.mark.asset_inventory_aws
-def test_aws_ec2_asset_inventory(
+def test_aws_asset_inventory(
     asset_inventory_client,
+    category,
+    sub_category,
+    type_,
+    sub_type,
 ):
     """
     This data driven test verifies assets published by cloudbeat agent.
@@ -22,10 +26,10 @@ def test_aws_ec2_asset_inventory(
     assets = get_ES_assets(
         asset_inventory_client,
         timeout=10,
-        category="infrastructure",
-        sub_category="compute",
-        type_="virtual-machine",
-        sub_type="ec2-instance",
+        category=category,
+        sub_category=sub_category,
+        type_=type_,
+        sub_type=sub_type,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
     )
 
@@ -40,10 +44,10 @@ def test_aws_ec2_asset_inventory(
 
 
 register_params(
-    test_aws_ec2_asset_inventory,
+    test_aws_asset_inventory,
     Parameters(
-        (),
-        [*aws_ec2_tc.test_cases.values()],
-        ids=[*aws_ec2_tc.test_cases.keys()],
+        ("category", "sub_category", "type_", "sub_type"),
+        [*aws_tc.test_cases.values()],
+        ids=[*aws_tc.test_cases.keys()],
     ),
 )
