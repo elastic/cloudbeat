@@ -43,4 +43,9 @@ const (
 	MonitoringAlertPolicyAssetType = "monitoring.googleapis.com/AlertPolicy"
 	DnsPolicyAssetType             = "dns.googleapis.com/Policy"
 	ServiceUsageAssetType          = "serviceusage.googleapis.com/Service"
+	GkeClusterAssetType            = "container.googleapis.com/Cluster"
+	ComputeForwardingRuleAssetType = "compute.googleapis.com/ForwardingRule"
+	IamRoleAssetType               = "iam.googleapis.com/Role"
+	CloudFunctionAssetType         = "cloudfunctions.googleapis.com/CloudFunction"
+	CloudRunService                = "run.googleapis.com/Service"
 )
