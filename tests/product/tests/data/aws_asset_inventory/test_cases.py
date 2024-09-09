@@ -17,5 +17,5 @@ test_cases = {
         sub_category="digital-identity",
         type_="role",
         sub_type="iam-role",
-    )
+    ),
 }
