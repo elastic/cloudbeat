@@ -1,8 +1,9 @@
 cloudbeat:
   type: cloudbeat/asset_inventory
-  asset_inventory_provider: aws
   config:
     v1:
+      type: asset_inventory
+      asset_inventory_provider: aws
       aws:
         credentials:
           access_key_id: ${AWS_ACCESS_KEY_ID:""}
