@@ -11,5 +11,11 @@ test_cases = {
         sub_category="compute",
         type_="virtual-machine",
         sub_type="ec2-instance",
+    ),
+    "[Asset Inventory][AWS][IAM Role] assets found": AssetInventoryCase(
+        category="identity",
+        sub_category="digital-identity",
+        type_="role",
+        sub_type="iam-role",
     )
 }
