@@ -10,13 +10,14 @@ The following steps are performed:
 import json
 
 import configuration_fleet as cnfg
-from fleet_api.package_policy_api import create_cspm_integration
 from loguru import logger
 from package_policy import (
     generate_package_policy,
     generate_policy_template,
     generate_random_name,
 )
+
+from fleet_api.package_policy_api import create_cspm_integration
 
 AGENT_POLICY_ID = "agentless"
 
@@ -84,7 +85,7 @@ if __name__ == "__main__":
         generate_aws_integration_data(),
         generate_azure_integration_data(),
     ]
-    cspm_template = generate_policy_template(cfg=cnfg.elk_config)
+    cspm_template = generate_policy_template(cfg=cnfg.elk_config, stream_prefix="cloud_security_posture")
     for integration_data in integrations:
         NAME = integration_data["name"]
         logger.info(f"Creating {NAME} integration for policy {AGENT_POLICY_ID}")
