@@ -20,13 +20,35 @@ on:
         description: "The version of the ELK stack: For BC use version without hash 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.16.0"
         type: string
+      cis-infra:
+        required: false
+        description: "Deploy the CIS infrastructure"
+        type: boolean
+        default: false
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
 
 jobs:
+  init:
+    runs-on: ubuntu-latest
+    outputs:
+      infra-type: ${{ steps.set_infra_type.outputs.infra_type }}
+    steps:
+      - name: Set infra type
+        id: set_infra_type
+        env:
+          CIS_INFRA: ${{ fromJSON(inputs.cis-infra) }}
+        run: |
+          if [[ "$CIS_INFRA" == "true" ]]; then
+            echo "infra_type=all" >> $GITHUB_OUTPUT
+          else
+            echo "infra_type=cdr" >> $GITHUB_OUTPUT
+          fi
+
   deploy:
+    needs: init
     uses: ./.github/workflows/test-environment.yml
     secrets: inherit
     # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
@@ -38,4 +60,6 @@ jobs:
       ess-region: 'gcp-us-west2'
       elk-stack-version: ${{ inputs.elk-stack-version }}
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
-      cdr-infra: true
+      # TODO: remove
+      # cdr-infra: true
+      infra-type: ${{ needs.init.outputs.infra-type }}
