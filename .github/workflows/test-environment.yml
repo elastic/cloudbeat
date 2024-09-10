@@ -296,10 +296,10 @@ jobs:
         id: provision-terraform
         if: success()
         env:
-          TF_VAR_deployment_name: {{ env.DEPLOYMENT_NAME }}
-          TF_VAR_region: {{ env.AWS_REGION }}
-          TF_VAR_project: {{ github.actor }}
-          TF_VAR_owner: {{ github.actor }}
+          TF_VAR_deployment_name: ${{ env.DEPLOYMENT_NAME }}
+          TF_VAR_region: ${{ env.AWS_REGION }}
+          TF_VAR_project: ${{ github.actor }}
+          TF_VAR_owner: ${{ github.actor }}
         run: |
           ./manage_infrastructure.sh "$INFRA_TYPE" "apply"
       # TODO: remove
