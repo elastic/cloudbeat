@@ -88,7 +88,7 @@ test_cases = {
         category="infrastructure",
         sub_category="network",
         type_="firewall",
-        sub_type="security-group",
+        sub_type="ec2-security-group",
     ),
     "[Asset Inventory][AWS][EC2 Subnet] assets found": AssetInventoryCase(
         category="infrastructure",
@@ -117,7 +117,7 @@ test_cases = {
     "[Asset Inventory][AWS][VPC] assets found": AssetInventoryCase(
         category="infrastructure",
         sub_category="network",
-        type_="virtualnetwork",
+        type_="virtual-network",
         sub_type="vpc",
     ),
     "[Asset Inventory][AWS][RDS] assets found": AssetInventoryCase(
