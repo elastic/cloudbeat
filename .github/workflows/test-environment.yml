@@ -559,11 +559,13 @@ jobs:
           poetry run python ./install_aws_asset_inventory_integration.py
 
       - name: Deploy AWS Asset Inventory agent
+        if: env.INFRA_TYPE != 'cdr'
+        working-directory: ${{ env.WORKING_DIR }}/cis
         run: |
           scriptname="aws-asset-inventory-linux.sh"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../../../.ci/scripts/remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Upload Integrations data
         if: always()
@@ -572,17 +574,12 @@ jobs:
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
           if [[$INFRA_TYPE != 'cdr']]; then
-            aws s3 cp "./cspm-linux.sh" "${S3_BUCKET}/cspm-linux.sh"
-            aws s3 cp "./kspm_unmanaged.yaml" "${S3_BUCKET}/kspm_unmanaged.yaml"
-            aws s3 cp "./kspm_d4c.yaml" "${S3_BUCKET}/kspm_d4c.yaml"
-            aws s3 cp "./kspm_eks.yaml" "${S3_BUCKET}/kspm_eks.yaml"
+            aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
+            aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
+            aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
+            aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
+            aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
           fi
-          aws s3 cp "./state_data.json" "${S3_BUCKET}/state_data.json"
-          aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
-          aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
-          aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
-          aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
-          aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
           aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 
       - name: Install Agentless integrations

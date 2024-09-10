@@ -28,19 +28,19 @@ fi
 
 # Determine which function to call based on argument
 case $1 in
-    "elk-stack")
-        upload_elk_stack
-        ;;
-    "cis")
-        upload_cis
-        ;;
-    "cdr")
-        upload_cdr
-        ;;
-    *)
-        echo "Usage: $0 {elk-stack|cis|cdr}"
-        exit 1
-        ;;
+"elk-stack")
+    upload_elk_stack
+    ;;
+"cis")
+    upload_cis
+    ;;
+"cdr")
+    upload_cdr
+    ;;
+*)
+    echo "Usage: $0 {elk-stack|cis|cdr}"
+    exit 1
+    ;;
 esac
 
 echo "Upload operation completed."

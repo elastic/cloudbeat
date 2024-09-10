@@ -22,7 +22,6 @@ function delete_all_states() {
     local bucket_folder=$1
     echo "Deleting all Terraform states from bucket: $bucket_folder"
 
-
     states=("cdr" "cis" "elk-stack")
     # Get all states
     for state in "${states[@]}"; do
