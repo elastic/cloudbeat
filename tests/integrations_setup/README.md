@@ -78,7 +78,13 @@ Follow these steps to install the dependencies and execute the different scripts
     poetry run python ./integrations_setup/install_cspm_azure_integration.py
     ```
 
-10. To purge integrations, use the following command:
+10. To execute the AWS Asset Inventory integration, use the following command:
+
+    ``` bash
+    poetry run python ./integrations_setup/install_aws_asset_inventory_integration.py
+    ```
+
+11. To purge integrations, use the following command:
 
     ``` bash
     poetry run python ./integrations_setup/purge_integrations.py

@@ -15,19 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package gcpfetcher
 
-// name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
-const defaultBeatVersion = "9.0.0"
+import (
+	"github.com/elastic/elastic-agent-libs/logp"
 
-// Version represents version information for a package
-type Version struct {
-	Version    string `mapstructure:"version,omitempty"`     // Version is the semantic version of the package
-	CommitHash string `mapstructure:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
-	CommitTime string `mapstructure:"commit_time,omitempty"` // CommitTime is the git commit time of the package
-}
+	"github.com/elastic/cloudbeat/internal/inventory"
+	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+)
 
-type CloudbeatVersionInfo struct {
-	Version `mapstructure:",squash"` // Version info for cloudbeat
-	Policy  Version                  `mapstructure:"policy,omitempty"` // Policy version info for the rules policy
+func New(logger *logp.Logger, provider gcpinventory.ServiceAPI) []inventory.AssetFetcher {
+	return []inventory.AssetFetcher{
+		newAssetsInventoryFetcher(logger, provider),
+	}
 }
