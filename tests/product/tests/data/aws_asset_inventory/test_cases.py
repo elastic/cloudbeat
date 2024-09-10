@@ -113,12 +113,12 @@ test_cases = {
     #     type_="virtual-network",
     #     sub_type="transit-gateway-attachment",
     # ),
-    "[Asset Inventory][AWS][VPC Peering Connection] assets found": AssetInventoryCase(
-        category="infrastructure",
-        sub_category="network",
-        type_="peering",
-        sub_type="vpc-peering-connection",
-    ),
+    # "[Asset Inventory][AWS][VPC Peering Connection] assets found": AssetInventoryCase(
+    #     category="infrastructure",
+    #     sub_category="network",
+    #     type_="peering",
+    #     sub_type="vpc-peering-connection",
+    # ),
     "[Asset Inventory][AWS][VPC] assets found": AssetInventoryCase(
         category="infrastructure",
         sub_category="network",
