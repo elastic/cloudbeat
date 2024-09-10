@@ -32,6 +32,10 @@ EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
 echo "::add-mask::$EC2_KSPM"
 echo "EC2_KSPM=$EC2_KSPM" >>"$GITHUB_ENV"
 
+EC2_ASSET_INV=$(terraform output -raw ec2_asset_inventory_ssh_cmd)
+echo "::add-mask::$EC2_ASSET_INV"
+echo "EC2_ASSET_INV=$EC2_ASSET_INV" >>"$GITHUB_ENV"
+
 EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
 echo "::add-mask::$EC2_CSPM_KEY"
 echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >>"$GITHUB_ENV"
@@ -40,10 +44,44 @@ EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
 echo "::add-mask::$EC2_KSPM_KEY"
 echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >>"$GITHUB_ENV"
 
+EC2_ASSET_INV_KEY=$(terraform output -raw ec2_asset_inventory_key)
+echo "::add-mask::$EC2_ASSET_INV_KEY"
+echo "EC2_ASSET_INV_KEY=$EC2_ASSET_INV_KEY" >>"$GITHUB_ENV"
+
 KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
 echo "::add-mask::$KSPM_PUBLIC_IP"
 echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >>"$GITHUB_ENV"
 
+ASSET_INV_PUBLIC_IP=$(terraform output -raw ec2_asset_inventory_public_ip)
+echo "::add-mask::$ASSET_INV_PUBLIC_IP"
+echo "ASSET_INV_PUBLIC_IP=$ASSET_INV_PUBLIC_IP" >>"$GITHUB_ENV"
+
 CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
 echo "::add-mask::$CSPM_PUBLIC_IP"
 echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >>"$GITHUB_ENV"
+
+if [[ ${TF_VAR_cdr_infra:-} == "true" ]]; then
+    ec2_cloudtrail_public_ip=$(terraform output -raw ec2_cloudtrail_public_ip)
+    echo "::add-mask::$ec2_cloudtrail_public_ip"
+    echo "CLOUDTRAIL_PUBLIC_IP=$ec2_cloudtrail_public_ip" >>"$GITHUB_ENV"
+
+    ec2_cloudtrail_key=$(terraform output -raw ec2_cloudtrail_key)
+    echo "::add-mask::$ec2_cloudtrail_key"
+    echo "CLOUDTRAIL_KEY=$ec2_cloudtrail_key" >>"$GITHUB_ENV"
+
+    az_vm_activity_logs_public_ip=$(terraform output -raw az_vm_activity_logs_public_ip)
+    echo "::add-mask::$az_vm_activity_logs_public_ip"
+    echo "ACTIVITY_LOGS_PUBLIC_IP=$az_vm_activity_logs_public_ip" >>"$GITHUB_ENV"
+
+    az_vm_activity_logs_key=$(terraform output -raw az_vm_activity_logs_key)
+    echo "::add-mask::$az_vm_activity_logs_key"
+    echo "ACTIVITY_LOGS_KEY=$az_vm_activity_logs_key" >>"$GITHUB_ENV"
+
+    gcp_audit_logs_public_ip=$(terraform output -raw gcp_audit_logs_public_ip)
+    echo "::add-mask::$gcp_audit_logs_public_ip"
+    echo "AUDIT_LOGS_PUBLIC_IP=$gcp_audit_logs_public_ip" >>"$GITHUB_ENV"
+
+    gcp_audit_logs_key=$(terraform output -raw gcp_audit_logs_key)
+    echo "::add-mask::$gcp_audit_logs_key"
+    echo "AUDIT_LOGS_KEY=$gcp_audit_logs_key" >>"$GITHUB_ENV"
+fi

@@ -56,6 +56,7 @@ cnvm_cloudformation_template = Path(__file__).parent / CNMV_TEMPLATE
 
 
 if __name__ == "__main__":
+    # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config)
     logger.info(f"Package version: {package_version}")
     if not version_compatible(
@@ -69,6 +70,7 @@ if __name__ == "__main__":
         cfg=cnfg.elk_config,
         agent_input=AGENT_INPUT,
         package_input=INTEGRATION_INPUT,
+        stream_name="cloud_security_posture.findings",
     )
 
     logger.info("Create agent policy")

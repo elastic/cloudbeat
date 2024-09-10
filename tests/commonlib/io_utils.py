@@ -56,6 +56,57 @@ def get_events_from_index(
     return events
 
 
+def get_assets_from_index(
+    elastic_client,
+    category: str,
+    sub_category: str,
+    type_: str,
+    sub_type: str,
+    time_after: datetime,
+) -> list[Munch]:
+    """
+    Resturns assets from a given index matching given classification.
+    @param elastic_client: Client to connect to Elasticsearch.
+    @param category: Asset category used as a filter
+    @param sub_category: Asset subcategory used as a filter
+    @param type: Asset type used as a filter
+    @param sub_type: Asset subtype used as a filter
+    @param time_after: Filter events having timestamp > time_after
+    @return: List of Munch objects
+    """
+    query = {
+        "bool": {
+            "must": [
+                {"match": {"asset.category": category}},
+                {"match": {"asset.sub_category": sub_category}},
+                {"match": {"asset.type": type_}},
+                {"match": {"asset.sub_type": sub_type}},
+            ],
+            "filter": [
+                {
+                    "range": {
+                        "@timestamp": {
+                            "gte": time_after.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+                        },
+                    },
+                },
+            ],
+        },
+    }
+    sort = [{"@timestamp": {"order": "desc"}}]
+    result = elastic_client.get_index_data(
+        query=query,
+        sort=sort,
+        size=1000,
+    )
+
+    assets = []
+    for asset in munchify(dict(result)).hits.hits:
+        assets.append(asset._source)
+
+    return assets
+
+
 def get_logs_from_stream(stream: str) -> list[Munch]:
     """
     This function converts logs stream to list of Munch objects (dictionaries)

@@ -47,15 +47,24 @@ module "aws_ec2_for_cspm" {
   specific_tags   = merge(local.common_tags, { "ec2_type" : "cspm" })
 }
 
+module "aws_ec2_for_asset_inventory" {
+  source          = "../cloud/modules/ec2"
+  providers       = { aws : aws }
+  aws_ami         = var.ami_map[var.region]
+  deploy_k8s      = false
+  deploy_agent    = false # Agent will not be deployed
+  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
+  specific_tags   = merge(local.common_tags, { "ec2_type" : "asset_inventory" })
+}
+
 module "gcp_audit_logs" {
-  count     = var.cdr_infra ? 1 : 0
-  providers = { google : google }
-  source    = "../cloud/modules/gcp/vm"
-
-  deployment_name = var.deployment_name
-  network         = "default"
-  specific_tags   = merge(local.common_tags, { "vm_instance" : "audit-logs" })
-
+  count                    = var.cdr_infra ? 1 : 0
+  providers                = { google : google }
+  source                   = "../cloud/modules/gcp/vm"
+  gcp_service_account_json = var.gcp_service_account_json
+  deployment_name          = var.deployment_name
+  network                  = "default"
+  specific_tags            = merge(local.common_tags, { "vm_instance" : "audit-logs" })
 }
 
 resource "random_string" "suffix" {

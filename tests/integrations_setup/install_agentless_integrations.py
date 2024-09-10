@@ -88,7 +88,11 @@ if __name__ == "__main__":
     for integration_data in integrations:
         NAME = integration_data["name"]
         logger.info(f"Creating {NAME} integration for policy {AGENT_POLICY_ID}")
-        package_policy = generate_package_policy(cspm_template, integration_data)
+        package_policy = generate_package_policy(
+            cspm_template,
+            integration_data,
+            stream_name="cloud_security_posture.findings",
+        )
         package_policy["force"] = True
 
         logger.info(f"Creating {package_policy}")

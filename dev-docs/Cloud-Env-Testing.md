@@ -138,6 +138,14 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
    This command should list the pods in the kube-system namespace, confirming that you have successfully connected to your EKS cluster.
 
+## Create Environment with Cloud Logs
+
+The [`Create Environment with Cloud Logs`](https://github.com/elastic/cloudbeat/actions/workflows/cdr-infra.yml) GitHub Action extends the regular [`Create Environment`](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) action by including a pre-configured installation of Cloud Logs. This workflow installs integrations for AWS CloudTrail, GCP Audit Logs, and Azure Activity Logs, including the necessary connectivity and configuration on the respective cloud providers.
+
+### Workflow Inputs
+
+The workflow requires a subset of input parameters. All required inputs are described [here](#how-to-run-the-workflow).
+
 
 ## Cleanup Procedure
 

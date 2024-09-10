@@ -46,4 +46,18 @@ resource "google_compute_instance" "vm_instance" {
   service_account {
     scopes = var.scopes
   }
+
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = local.vm_username
+      private_key = tls_private_key.gcp_vm_key.private_key_pem
+      host        = self.network_interface[0].access_config[0].nat_ip
+    }
+
+    inline = [
+      "echo '${var.gcp_service_account_json}' | base64 --decode > /home/ubuntu/credentials.json",
+      "chmod 600 /home/ubuntu/credentials.json"
+    ]
+  }
 }
