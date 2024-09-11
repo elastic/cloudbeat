@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-This script installs CSPM integrations on the 'Agentless' agent policy.
+This script installs CSPM integrations for Agentless agents.
 The following steps are performed:
 1. Create a CSPM AWS integration.
 2. Create a CSPM Azure integration.
@@ -17,8 +17,7 @@ from package_policy import (
     generate_policy_template,
     generate_random_name,
     load_data
-)   
-
+)
 
 def generate_aws_integration_data():
     """
@@ -83,7 +82,10 @@ if __name__ == "__main__":
         generate_aws_integration_data(),
         generate_azure_integration_data(),
     ]
-    cspm_template = generate_policy_template(cfg=cnfg.elk_config, stream_prefix="cloud_security_posture")
+    cspm_template = generate_policy_template(
+        cfg=cnfg.elk_config,
+        stream_prefix="cloud_security_posture"
+    )
     for integration_data in integrations:
         INTEGRATION_NAME = integration_data["name"]
         AGENTLESS_INPUT = {
