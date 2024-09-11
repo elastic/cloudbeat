@@ -19,6 +19,7 @@ from package_policy import (
     load_data
 )
 
+
 def generate_aws_integration_data():
     """
     Generate data for creating CSPM AWS integration
@@ -92,7 +93,6 @@ if __name__ == "__main__":
             "name": f"Agentless policy for {INTEGRATION_NAME}",
             "supports_agentless": True,
         }
-
 
         logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")
         agent_data, package_data = load_data(
