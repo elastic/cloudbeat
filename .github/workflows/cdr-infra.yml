@@ -60,6 +60,4 @@ jobs:
       ess-region: 'gcp-us-west2'
       elk-stack-version: ${{ inputs.elk-stack-version }}
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
-      # TODO: remove
-      # cdr-infra: true
       infra-type: ${{ needs.init.outputs.infra-type }}

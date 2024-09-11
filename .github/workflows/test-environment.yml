@@ -335,7 +335,7 @@ jobs:
           scriptname="cloudtrail-linux.sh"
           src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
-          ../../../.ci/scripts/remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install Azure Activity Logs integration
         id: az-activity-logs-integration
@@ -356,7 +356,7 @@ jobs:
           scriptname="az_activity_logs.sh"
           src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
-          ../../../.ci/scripts/remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install GCP Audit Logs integration
         id: gcp-audit-logs-integration
@@ -375,7 +375,7 @@ jobs:
           scriptname="gcp_audit_logs.sh"
           src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
-          ../../../.ci/scripts/remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install CNVM integration
         id: cnvm
@@ -459,7 +459,7 @@ jobs:
           scriptname="kspm_unmanaged.yaml"
           src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="kubectl apply -f $scriptname"
-          ../../../.ci/scripts/remote_setup.sh -k "$EC2_KSPM_KEY" -s "$src" -h "$KSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../remote_setup.sh -k "$EC2_KSPM_KEY" -s "$src" -h "$KSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install CSPM AWS integration
         id: cspm-aws-integration
@@ -475,7 +475,7 @@ jobs:
           scriptname="cspm-linux.sh"
           src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
-          ../../../.ci/scripts/remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install AWS Asset Inventory integration
         id: aws-asset-inventory
@@ -491,7 +491,7 @@ jobs:
           scriptname="aws-asset-inventory-linux.sh"
           src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
-          ../../../.ci/scripts/remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Upload Integrations data
         if: always()
