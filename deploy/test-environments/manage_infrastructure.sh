@@ -1,35 +1,5 @@
 #!/bin/bash
 
-# TODO: remove
-# # Function to run Terraform in a given directory for apply or destroy operation
-# run_terraform() {
-#     local dir=$1
-#     local operation=$2
-#     echo "Running Terraform $operation in $dir..."
-#     cd "$dir" || exit
-#     terraform init
-
-#     if [ "$operation" == "apply" ]; then
-#         terraform validate
-#         terraform apply -auto-approve
-#     elif [ "$operation" == "destroy" ]; then
-#         if [ "$dir" == "cis" ] && terraform state list | grep -q "kubernetes_config_map_v1_data.aws_auth"; then
-#             echo "Removing aws_auth resource from state in cis..."
-#             terraform state rm "$(terraform state list | grep "kubernetes_config_map_v1_data.aws_auth")"
-#         fi
-#         terraform destroy -auto-approve && rm terraform.tfstate
-#     elif [ "$operation" == "output" ]; then
-#         ./set_cloud_env_params.sh "$dir"
-#     elif [ "$operation" == "upload" ]; then
-#         ./upload_state.sh "$dir"
-#     else
-#         echo "Invalid operation. Use 'apply' or 'destroy'."
-#         cd - > /dev/null || exit 1
-#     fi
-
-#     cd - > /dev/null || exit
-# }
-
 # Function to run Terraform in a given directory for apply, destroy, output, or upload operation
 run_terraform() {
     local dir=$1
@@ -52,10 +22,10 @@ run_terraform() {
         terraform destroy -auto-approve && rm terraform.tfstate
         ;;
     "output")
-        ./set_cloud_env_params.sh "$dir"
+        ../set_cloud_env_params.sh "$dir"
         ;;
     "upload")
-        ./upload_state.sh "$dir"
+        ../upload_state.sh "$dir"
         ;;
     *)
         echo "Invalid operation. Use 'apply', 'destroy', 'output', or 'upload'."
