@@ -336,11 +336,11 @@ jobs:
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
         run: |
           ./manage_infrastructure.sh "$INFRA_TYPE" "upload"
-          aws s3 cp "${EC2_ASSET_INV_KEY}" "${S3_BUCKET}/asset_inv.pem"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
-          python3 ../../.ci/scripts/create_env_config.py
-          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
+          # TODO: remove "true" after debugging
+          python3 ../../.ci/scripts/create_env_config.py || true
+          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json" || true
       # TODO: remove
       # - name: Upload tf state
       #   id: upload-state
