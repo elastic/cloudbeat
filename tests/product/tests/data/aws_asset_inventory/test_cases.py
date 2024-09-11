@@ -124,7 +124,7 @@ test_cases = {
         category="infrastructure",
         sub_category="database",
         type_="relational",
-        sub_type="rds",
+        sub_type="rds-instance",
     ),
     "[Asset Inventory][AWS][S3] assets found": AssetInventoryCase(
         category="infrastructure",
