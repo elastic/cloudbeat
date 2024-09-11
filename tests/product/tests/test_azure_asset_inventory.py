@@ -12,6 +12,7 @@ from product.tests.data.azure_asset_inventory import test_cases as azure_tc
 from product.tests.parameters import Parameters, register_params
 
 
+# pylint: disable=duplicate-code
 @pytest.mark.asset_inventory
 @pytest.mark.asset_inventory_azure
 def test_azure_asset_inventory(
