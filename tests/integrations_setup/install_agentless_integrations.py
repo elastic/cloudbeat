@@ -85,7 +85,7 @@ if __name__ == "__main__":
     ]
     cspm_template = generate_policy_template(
         cfg=cnfg.elk_config,
-        stream_prefix="cloud_security_posture"
+        stream_prefix="cloud_security_posture",
     )
     for integration_data in integrations:
         INTEGRATION_NAME = integration_data["name"]
