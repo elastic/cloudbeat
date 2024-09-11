@@ -60,6 +60,12 @@ variable "deploy_aws_ec2" {
   default     = true
 }
 
+variable "deploy_aws_asset_inventory" {
+  description = "Deploy AWS Asset Inventory EC2 resources"
+  type        = bool
+  default     = true
+}
+
 # ========= Cloud Tags ========================
 variable "division" {
   default     = "engineering"

@@ -228,17 +228,6 @@ jobs:
           enrollment_token="init"
           echo "::add-mask::$enrollment_token"
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
-      # TODO: remove
-      # - name: Init CDR Infra
-      #   id: init-cdr-infra
-      #   env:
-      #     INPUT_CDR_INFRA: ${{ inputs.cdr-infra }}
-      #   run: |
-      #     if [[ "${INPUT_CDR_INFRA:-}" == "true" ]]; then
-      #       echo "CDR_INFRA=true" >> $GITHUB_ENV
-      #     else
-      #       echo "CDR_INFRA=false" >> $GITHUB_ENV
-      #     fi
 
       - name: Init Infra Type
         id: init-infra-type
@@ -338,9 +327,8 @@ jobs:
           ./manage_infrastructure.sh "$INFRA_TYPE" "upload"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
-          # TODO: remove "true" after debugging
-          python3 ../../.ci/scripts/create_env_config.py || true
-          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json" || true
+          python3 ../../.ci/scripts/create_env_config.py
+          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
       # TODO: remove
       # - name: Upload tf state
       #   id: upload-state
@@ -548,18 +536,19 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}/cis
         run: |
           scriptname="cspm-linux.sh"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
           cmd="chmod +x $scriptname && ./$scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+          ../../../.ci/scripts/remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
       - name: Install AWS Asset Inventory integration
         id: aws-asset-inventory
+        if: env.INFRA_TYPE != 'cis'
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
           poetry run python ./install_aws_asset_inventory_integration.py
 
       - name: Deploy AWS Asset Inventory agent
-        if: env.INFRA_TYPE != 'cdr'
+        if: env.INFRA_TYPE != 'cis'
         working-directory: ${{ env.WORKING_DIR }}/cis
         run: |
           scriptname="aws-asset-inventory-linux.sh"
@@ -578,7 +567,6 @@ jobs:
             aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
             aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
             aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
-            aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
           fi
           aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 

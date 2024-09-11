@@ -33,12 +33,6 @@ variable "deploy_aws_cspm" {
   default     = true
 }
 
-variable "deploy_aws_asset_inventory" {
-  description = "Deploy AWS Asset Inventory EC2 resources"
-  type        = bool
-  default     = true
-}
-
 variable "division" {
   default     = "engineering"
   type        = string

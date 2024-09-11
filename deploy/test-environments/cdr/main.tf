@@ -59,4 +59,14 @@ module "azure_vm_activity_logs" {
   specific_tags   = merge(local.common_tags, { "vm_type" : "activity-logs" })
 }
 
+module "aws_ec2_for_asset_inventory" {
+  count           = var.deploy_aws_asset_inventory ? 1 : 0
+  source          = "../../cloud/modules/ec2"
+  providers       = { aws : aws }
+  aws_ami         = var.ami_map[var.region]
+  deploy_k8s      = false
+  deploy_agent    = false
+  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
+  specific_tags   = merge(local.common_tags, { "ec2_type" : "asset_inventory" })
+}
 # ===== End Of CDR Infrastructure Resources =====
