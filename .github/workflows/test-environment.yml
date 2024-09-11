@@ -298,7 +298,7 @@ jobs:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
         run: |
-          ./manage_infrastructure.sh "$INFRA_TYPE" "upload"
+          ./manage_infrastructure.sh "$INFRA_TYPE" "upload-state"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py

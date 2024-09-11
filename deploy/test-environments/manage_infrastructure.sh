@@ -24,11 +24,11 @@ run_terraform() {
     "output")
         ../set_cloud_env_params.sh "$dir"
         ;;
-    "upload")
+    "upload-state")
         ../upload_state.sh "$dir"
         ;;
     *)
-        echo "Invalid operation. Use 'apply', 'destroy', 'output', or 'upload'."
+        echo "Invalid operation. Use 'apply', 'destroy', 'output', or 'upload-state'."
         cd - >/dev/null || exit 1
         ;;
     esac
@@ -38,7 +38,7 @@ run_terraform() {
 
 # Check for valid input
 if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 {elk-stack|cis|cdr|all} {apply|destroy|output|upload}"
+    echo "Usage: $0 {elk-stack|cis|cdr|all} {apply|destroy|output|upload-state}"
     exit 1
 fi
 
@@ -63,7 +63,7 @@ all)
     run_terraform "cis" "$action"
     ;;
 *)
-    echo "Usage: $0 {elk-stack|cis|cdr|all} {apply|destroy|output|upload}"
+    echo "Usage: $0 {elk-stack|cis|cdr|all} {apply|destroy|output|upload-state}"
     exit 1
     ;;
 esac
