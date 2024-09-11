@@ -14,7 +14,7 @@ from product.tests.parameters import Parameters, register_params
 from .data.constants import RES_ID
 
 
-@pytest.mark.aws_vpc_rules
+@pytest.mark.cspm_aws_vpc_rules
 def test_aws_vpc_service_rules(
     cspm_client,
     cloudbeat_agent,

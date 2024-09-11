@@ -1,5 +1,5 @@
-name: 'AWS CI'
-description: 'AWS integration tests'
+name: 'AWS Asset Inventory CI'
+description: 'AWS Asset Inventory integration tests'
 inputs:
   elk-version:
     description: 'ELK version'
@@ -37,24 +37,24 @@ runs:
         AWS_ACCOUNT_TYPE: ${{ inputs.aws-account-type }}
       shell: bash
       run: |
-        ./cloudbeat -c deploy/aws/cloudbeat-aws.yml -d '*' &
+        ./cloudbeat -c deploy/aws-asset-inventory/cloudbeat-aws-asset-inventory.yml -d '*' &
 
     - name: Wait for cloudbeat to send some events
       shell: bash
       run: sleep 20
 
-    - name: Check for findings
+    - name: Check for assets
       working-directory: ./tests
       env:
         USE_K8S: "false"
       shell: bash
-      run: poetry run pytest -k "cspm_aws" --alluredir=./allure/results/ --clean-alluredir
+      run: poetry run pytest -k "asset_inventory_aws" --alluredir=./allure/results/ --clean-alluredir
 
     - name: Upload test results
       if: ${{ always() }}
       uses: actions/upload-artifact@v4
       with:
-        name: allure-results-ci-aws
+        name: allure-results-ci-aws-asset-inventory
         path: tests/allure/results/
         overwrite: true
 
@@ -62,7 +62,7 @@ runs:
       name: Upload cloudbeat logs
       uses: actions/upload-artifact@v4
       with:
-        name: cloubeat-logs-ci-aws
+        name: cloubeat-logs-ci-aws-asset-inventory
         path: logs/
         if-no-files-found: warn
         retention-days: 1
