@@ -11,14 +11,13 @@ import json
 
 import configuration_fleet as cnfg
 from fleet_api.package_policy_api import create_cspm_integration
+from fleet_api.agent_policy_api import create_agent_policy
 from loguru import logger
 from package_policy import (
-    generate_package_policy,
     generate_policy_template,
     generate_random_name,
-)
-
-AGENT_POLICY_ID = "agentless"
+    load_data
+)   
 
 
 def generate_aws_integration_data():
@@ -86,21 +85,29 @@ if __name__ == "__main__":
     ]
     cspm_template = generate_policy_template(cfg=cnfg.elk_config, stream_prefix="cloud_security_posture")
     for integration_data in integrations:
-        NAME = integration_data["name"]
-        logger.info(f"Creating {NAME} integration for policy {AGENT_POLICY_ID}")
-        package_policy = generate_package_policy(
-            cspm_template,
-            integration_data,
-            stream_name="cloud_security_posture.findings",
-        )
-        package_policy["force"] = True
+        INTEGRATION_NAME = integration_data["name"]
+        AGENTLESS_INPUT = {
+            "name": f"Agentless policy for {INTEGRATION_NAME}",
+            "supports_agentless": True,
+        }
 
-        logger.info(f"Creating {package_policy}")
 
-        create_cspm_integration(
+        logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")
+        agent_data, package_data = load_data(
             cfg=cnfg.elk_config,
-            pkg_policy=package_policy,
-            agent_policy_id=AGENT_POLICY_ID,
+            agent_input=AGENTLESS_INPUT,
+            package_input=integration_data,
+        )
+
+        logger.info("Create agentless-agent policy")
+        agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
+
+        logger.info(f"Create agentless-agent {INTEGRATION_NAME} integration")
+        package_policy_id = create_cspm_integration(
+            cfg=cnfg.elk_config,
+            pkg_policy=package_data,
+            agent_policy_id=agent_policy_id,
             cspm_data={},
         )
-        logger.info(f"Installation of {NAME} integration is done")
+
+        logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
