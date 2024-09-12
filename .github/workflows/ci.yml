@@ -98,6 +98,28 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
 
+  ci-gcp-asset-inventory:
+    needs: [init-hermit]
+    name: GCP Asset Inventory CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run GCP Asset Inventory integration tests
+        uses: ./.github/actions/gcp-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          credentials-json: ${{ secrets.GCP_ASSETS_INVENTORY_CREDENTIALS_JSON }}
+          project-id: "elastic-security-test"
+
   ci-gcp:
     needs: [ init-hermit ]
     name: CIS GCP CI
