@@ -6,7 +6,6 @@ This module verifies presence and correctness of retrieved assets
 from datetime import datetime, timedelta
 
 import pytest
-
 from commonlib.utils import get_ES_assets
 from product.tests.data.azure_asset_inventory import test_cases as azure_tc
 from product.tests.parameters import Parameters, register_params

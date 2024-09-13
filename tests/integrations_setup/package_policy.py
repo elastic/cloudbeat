@@ -8,11 +8,10 @@ import uuid
 from typing import Dict, Tuple
 from urllib.parse import parse_qs, unquote, urlparse
 
+from fleet_api.common_api import get_package
 from loguru import logger
 from munch import Munch
 from packaging import version
-
-from fleet_api.common_api import get_package
 
 # Constants
 CLOUD_SECURITY_POSTURE = "cloud_security_posture"

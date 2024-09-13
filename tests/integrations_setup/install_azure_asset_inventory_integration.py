@@ -11,18 +11,6 @@ import sys
 from pathlib import Path
 
 import configuration_fleet as cnfg
-from loguru import logger
-from munch import Munch
-from package_policy import (
-    VERSION_MAP,
-    extract_arm_template_url,
-    generate_random_name,
-    get_package_default_url,
-    load_data,
-    version_compatible,
-)
-from state_file_manager import HostType, PolicyState, state_manager
-
 from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.common_api import (
     get_arm_template,
@@ -34,6 +22,17 @@ from fleet_api.common_api import (
 )
 from fleet_api.package_policy_api import create_integration
 from fleet_api.utils import rename_file_by_suffix
+from loguru import logger
+from munch import Munch
+from package_policy import (
+    VERSION_MAP,
+    extract_arm_template_url,
+    generate_random_name,
+    get_package_default_url,
+    load_data,
+    version_compatible,
+)
+from state_file_manager import HostType, PolicyState, state_manager
 
 EXPECTED_AGENTS = 1
 AGENT_POLICY = "../../deploy/cloud/data/agent_policy_asset_inventory_azure.json"
