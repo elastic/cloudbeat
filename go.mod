@@ -18,6 +18,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql v1.2.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.6.0
 	github.com/aquasecurity/go-dep-parser v0.0.0-20240606050805-1de9a375c629
+<<<<<<< HEAD
 	github.com/aquasecurity/trivy v0.54.1
 	github.com/aquasecurity/trivy-db v0.0.0-20240902054819-77e1fdeee388
 	github.com/aws/aws-sdk-go-v2 v1.30.4
@@ -44,6 +45,34 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.52.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.31.5
 	github.com/aws/aws-sdk-go-v2/service/sts v1.30.5
+=======
+	github.com/aquasecurity/trivy v0.55.1
+	github.com/aquasecurity/trivy-db v0.0.0-20240910133327-7e0f4d2ed4c1
+	github.com/aws/aws-sdk-go-v2 v1.30.5
+	github.com/aws/aws-sdk-go-v2/config v1.27.33
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.32
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.13
+	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.32.7
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.43.7
+	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.53.7
+	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.42.7
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.40.7
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.39.0
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.48.7
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.177.3
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.33.0
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.26.7
+	github.com/aws/aws-sdk-go-v2/service/iam v1.35.2
+	github.com/aws/aws-sdk-go-v2/service/kms v1.35.7
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.58.3
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.31.2
+	github.com/aws/aws-sdk-go-v2/service/rds v1.82.5
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.61.2
+	github.com/aws/aws-sdk-go-v2/service/s3control v1.47.0
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.52.4
+	github.com/aws/aws-sdk-go-v2/service/sns v1.31.7
+	github.com/aws/aws-sdk-go-v2/service/sts v1.30.7
+>>>>>>> 5b6387fc (build(deps): Bump the trivy group with 2 updates (#2511))
 	github.com/aws/smithy-go v1.20.4
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
