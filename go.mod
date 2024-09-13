@@ -50,8 +50,8 @@ require (
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240906192047-9f2f7445453b
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.8.2
-	github.com/elastic/elastic-agent-client/v7 v7.15.0
-	github.com/elastic/elastic-agent-libs v0.10.0
+	github.com/elastic/elastic-agent-client/v7 v7.16.0
+	github.com/elastic/elastic-agent-libs v0.10.1
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/go-logr/zapr v1.3.0
