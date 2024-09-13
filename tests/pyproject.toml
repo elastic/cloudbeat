@@ -71,4 +71,5 @@ markers = [
     "asset_inventory",
     "asset_inventory_aws",
     "asset_inventory_azure",
+    "asset_inventory_gcp",
 ]
