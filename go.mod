@@ -77,7 +77,7 @@ require (
 	go.uber.org/zap/exp v0.1.1-0.20240530135403-273f9ea8c887
 	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/oauth2 v0.22.0
+	golang.org/x/oauth2 v0.23.0
 	google.golang.org/api v0.195.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.12.0
