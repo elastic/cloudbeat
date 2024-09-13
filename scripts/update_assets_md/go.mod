@@ -1,6 +1,6 @@
 module github.com/elastic/cloudbeat/scripts/update_assets_md
 
-go 1.22.5
+go 1.23.0
 
 require (
 	github.com/ettle/strcase v0.2.0

@@ -3,10 +3,15 @@ import datetime
 import json
 import time
 from functools import reduce
-from typing import Union
+from typing import List, Union
 
 import allure
-from commonlib.io_utils import get_events_from_index, get_logs_from_stream
+import munch
+from commonlib.io_utils import (
+    get_assets_from_index,
+    get_events_from_index,
+    get_logs_from_stream,
+)
 from loguru import logger
 
 FINDINGS_BACKOFF_SECONDS = 5
@@ -71,6 +76,50 @@ def get_ES_evaluation(
                     attachment_type=allure.attachment_type.JSON,
                 )
                 return evaluation
+
+    return None
+
+
+def get_ES_assets(
+    elastic_client,
+    timeout,
+    category,
+    sub_category,
+    type_,
+    sub_type,
+    exec_timestamp,
+    resource_identifier=lambda r: True,
+) -> Union[List[munch.Munch], None]:
+    start_time = time.time()
+    latest_timestamp = exec_timestamp
+
+    while time.time() - start_time < timeout:
+        try:
+            time.sleep(EVALUATION_BACKOFF_SECONDS)
+            assets = get_assets_from_index(
+                elastic_client,
+                category,
+                sub_category,
+                type_,
+                sub_type,
+                latest_timestamp,
+            )
+        except Exception as e:
+            logger.debug(e)
+            continue
+
+        filtered_assets = []
+        for asset in assets:
+            asset_timestamp = datetime.datetime.strptime(
+                getattr(asset, "@timestamp"),
+                "%Y-%m-%dT%H:%M:%S.%fZ",
+            )
+            if asset_timestamp > latest_timestamp:
+                latest_timestamp = asset_timestamp
+            if resource_identifier(asset):
+                filtered_assets.append(asset)
+        if len(filtered_assets) > 0:
+            return filtered_assets
 
     return None
 

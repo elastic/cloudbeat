@@ -305,6 +305,7 @@ jobs:
           aws s3 cp "./terraform.tfstate" "${S3_BUCKET}/terraform.tfstate"
           aws s3 cp "${EC2_CSPM_KEY}" "${S3_BUCKET}/cspm.pem"
           aws s3 cp "${EC2_KSPM_KEY}" "${S3_BUCKET}/kspm.pem"
+          aws s3 cp "${EC2_ASSET_INV_KEY}" "${S3_BUCKET}/asset_inv.pem"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
@@ -473,17 +474,31 @@ jobs:
           cmd="chmod +x $scriptname && ./$scriptname"
           ../../.ci/scripts/remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
+      - name: Install AWS Asset Inventory integration
+        id: aws-asset-inventory
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        run: |
+          poetry run python ./install_aws_asset_inventory_integration.py
+
+      - name: Deploy AWS Asset Inventory agent
+        run: |
+          scriptname="aws-asset-inventory-linux.sh"
+          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+          cmd="chmod +x $scriptname && ./$scriptname"
+          ../../.ci/scripts/remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
       - name: Upload Integrations data
         if: always()
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
-          aws s3 cp "./kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
-          aws s3 cp "./kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
-          aws s3 cp "./kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
-          aws s3 cp "./cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
-          aws s3 cp "./state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
+          aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
+          aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
+          aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
+          aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
+          aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
+          aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 
       - name: Install Agentless integrations
         id: agentless

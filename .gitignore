@@ -32,6 +32,8 @@ vendor/*
 test-logs/*.log
 tests/allure/results/*
 tests/allure/reports/*
+tests/integrations_setup/state_data.json
+tests/integrations_setup/*.sh
 
 # vscode
 .vscode*
