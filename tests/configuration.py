@@ -11,6 +11,7 @@ from munch import Munch
 
 FINDINGS_INDEX_PATTERN = "*cloud_security_posture.findings*"
 VULNERABILITIES_INDEX_PATTERN = "*cloud_security_posture.vulnerabilities*"
+ASSET_INVENTORY_INDEX_PATTERN = "*cloud_asset_inventory.asset_inventory*"
 
 # --- Cloudbeat agent environment definition ----------------
 agent = Munch()
@@ -74,6 +75,7 @@ elasticsearch.kibana_url = os.getenv("KIBANA_URL", "")
 elasticsearch.kspm_index = os.getenv("KSPM_INDEX", FINDINGS_INDEX_PATTERN)
 elasticsearch.cspm_index = os.getenv("CSPM_INDEX", FINDINGS_INDEX_PATTERN)
 elasticsearch.cnvm_index = os.getenv("CNVM_INDEX", VULNERABILITIES_INDEX_PATTERN)
+elasticsearch.asset_inventory_index = os.getenv("ASSET_INVENTORY_INDEX", ASSET_INVENTORY_INDEX_PATTERN)
 elasticsearch.stack_version = os.getenv("STACK_VERSION", "")
 elasticsearch.agent_version = os.getenv("AGENT_VERSION", "")
 

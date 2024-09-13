@@ -14,7 +14,7 @@ from product.tests.parameters import Parameters, register_params
 from .data.constants import RES_NAME
 
 
-@pytest.mark.aws_logging_rules
+@pytest.mark.cspm_aws_logging_rules
 def test_aws_logging_rules(
     cspm_client,
     cloudbeat_agent,

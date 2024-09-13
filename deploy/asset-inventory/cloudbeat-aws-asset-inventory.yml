@@ -1,0 +1,64 @@
+cloudbeat:
+  type: cloudbeat/asset_inventory
+  config:
+    v1:
+      type: asset_inventory
+      asset_inventory_provider: aws
+      aws:
+        credentials:
+          access_key_id: ${AWS_ACCESS_KEY_ID:""}
+          secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
+        account_type: ${AWS_ACCOUNT_TYPE:""}
+  # Defines how often an event is sent to the output
+  period: 30s
+  evaluator:
+    decision_logs: false
+# =================================== Kibana ===================================
+setup.kibana:
+  # Kibana Host
+  host: "http://host.docker.internal:5601"
+# =============================== Elastic Cloud ================================
+
+# These settings simplify using Cloudbeat with the Elastic Cloud (https://cloud.elastic.co/).
+
+# The cloud.id setting overwrites the `output.elasticsearch.hosts` and
+# `setup.kibana.host` options.
+# You can find the `cloud.id` in the Elastic Cloud web UI.
+#cloud.id:
+
+# The cloud.auth setting overwrites the `output.elasticsearch.username` and
+# `output.elasticsearch.password` settings. The format is `<user>:<pass>`.
+#cloud.auth:
+
+# ---------------------------- Elasticsearch Output ----------------------------
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ${ES_HOST}
+
+  # Protocol - either `http` (default) or `https`.
+  #  protocol: "https"
+
+  # Authentication credentials - either API key or username/password.
+  #api_key: "id:api_key"
+  username: ${ES_USERNAME}
+  password: ${ES_PASSWORD}
+
+  # Enable to allow sending output to older ES versions
+  allow_older_versions: true
+
+# ================================= Processors =================================
+processors:
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - drop_fields:
+      fields: ["host.name"]
+# Sets log level. The default log level is info.
+# Available log levels are: error, warning, info, debug
+logging.level: debug
+# Enable debug output for selected components. To enable all selectors use ["*"]
+# Other available selectors are "beat", "publisher", "service"
+# Multiple selectors can be chained.
+#logging.selectors: ["publisher"]
+
+# Send all logging output to stderr. The default is false.
+#logging.to_stderr: false

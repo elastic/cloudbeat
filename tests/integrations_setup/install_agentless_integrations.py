@@ -84,11 +84,15 @@ if __name__ == "__main__":
         generate_aws_integration_data(),
         generate_azure_integration_data(),
     ]
-    cspm_template = generate_policy_template(cfg=cnfg.elk_config)
+    cspm_template = generate_policy_template(cfg=cnfg.elk_config, stream_prefix="cloud_security_posture")
     for integration_data in integrations:
         NAME = integration_data["name"]
         logger.info(f"Creating {NAME} integration for policy {AGENT_POLICY_ID}")
-        package_policy = generate_package_policy(cspm_template, integration_data)
+        package_policy = generate_package_policy(
+            cspm_template,
+            integration_data,
+            stream_name="cloud_security_posture.findings",
+        )
         package_policy["force"] = True
 
         logger.info(f"Creating {package_policy}")

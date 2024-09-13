@@ -16,7 +16,7 @@ from product.tests.parameters import Parameters, register_params
 from .data.constants import RES_NAME
 
 
-@pytest.mark.azure_identity_access_management_rules
+@pytest.mark.cspm_azure_identity_access_management_rules
 def test_azure_identity_access_management_rules(
     cspm_client,
     cloudbeat_agent,

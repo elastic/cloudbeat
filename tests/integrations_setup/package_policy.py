@@ -31,6 +31,7 @@ SIMPLIFIED_AGENT_POLICY = {
     "monitoring_enabled": ["logs", "metrics"],
 }
 VERSION_MAP = {
+    "asset_inventory_aws": "0.1.7",
     "cis_k8s": "1.1.0",
     "cis_eks": "1.2.0",
     "cis_aws": "1.2.0",
@@ -62,7 +63,7 @@ def generate_input_id(name: str, input_type: str) -> str:
     return f"{name}-{input_type}"
 
 
-def format_inputs(policy_templates: list) -> dict:
+def format_inputs(policy_templates: list, stream_prefix: str) -> dict:
     """
     Format inputs based on policy templates.
 
@@ -81,14 +82,14 @@ def format_inputs(policy_templates: list) -> dict:
             input_dict = {
                 "enabled": False,
                 "streams": {
-                    f"{CLOUD_SECURITY_POSTURE}.{data_stream}": {
+                    f"{stream_prefix}.{data_stream}": {
                         "enabled": False,
                     },
                 },
             }
             # Conditionally add "vars" based on input_type
             if input_type in REQUIRE_VARS:
-                input_dict["streams"][f"{CLOUD_SECURITY_POSTURE}.{data_stream}"]["vars"] = {}
+                input_dict["streams"][f"{stream_prefix}.{data_stream}"]["vars"] = {}
             inputs_dict[generate_input_id(name=name, input_type=input_type)] = input_dict
     return inputs_dict
 
@@ -132,7 +133,12 @@ def update_policy_input_data(data, input_data):
             update_policy_input_data(item, input_data)
 
 
-def generate_policy_template(cfg: Munch, policy_template: dict = None) -> dict:
+def generate_policy_template(
+    cfg: Munch,
+    package_name: str = "",
+    policy_template: dict = None,
+    stream_prefix: str = "",
+) -> dict:
     """
     Generate a policy template based on configuration and a template.
 
@@ -148,17 +154,23 @@ def generate_policy_template(cfg: Munch, policy_template: dict = None) -> dict:
         policy_template = DEFAULT_PACKAGE_POLICY_TEMPLATE
 
     generated_policy = copy.deepcopy(policy_template)
-    package_policy_info = get_package(cfg=cfg)
+    if package_name:
+        package_policy_info = get_package(cfg=cfg, package_name=package_name, prerelease=True)
+    else:
+        package_policy_info = get_package(cfg=cfg, prerelease=True)
     generated_policy["package"] = {
         "name": package_policy_info.get("name", ""),
         "version": package_policy_info.get("version", ""),
     }
-    generated_policy["inputs"] = format_inputs(package_policy_info.get("policy_templates", []))
+    generated_policy["inputs"] = format_inputs(
+        package_policy_info.get("policy_templates", []),
+        stream_prefix=stream_prefix,
+    )
     generated_policy["vars"] = format_vars(package_vars=package_policy_info.get("vars", []))
     return generated_policy
 
 
-def generate_package_policy(template: dict, policy_input: dict) -> dict:
+def generate_package_policy(template: dict, policy_input: dict, stream_name: str) -> dict:
     """
     Generate a package policy based on a template and policy input.
 
@@ -174,15 +186,22 @@ def generate_package_policy(template: dict, policy_input: dict) -> dict:
     for input_name, data in package_policy["inputs"].items():
         if integration_key in input_name:
             update_policy_input_data(data, policy_input)
-            if "vars" in policy_input and "vars" not in data["streams"]["cloud_security_posture.findings"]:
-                data["streams"]["cloud_security_posture.findings"]["vars"] = policy_input["vars"]
-    package_policy["vars"]["posture"] = policy_input.get("posture", "")
-    package_policy["vars"]["deployment"] = policy_input.get("deployment", "")
+            if "vars" in policy_input and "vars" not in data["streams"][stream_name]:
+                data["streams"][stream_name]["vars"] = policy_input["vars"]
+    if "posture" in stream_name:
+        package_policy["vars"]["posture"] = policy_input.get("posture", "")
+        package_policy["vars"]["deployment"] = policy_input.get("deployment", "")
     package_policy["name"] = policy_input.get("name", "")
     return package_policy
 
 
-def load_data(cfg: Munch, agent_input: dict, package_input: dict) -> Tuple[Dict, Dict]:
+def load_data(
+    cfg: Munch,
+    agent_input: dict,
+    package_input: dict,
+    stream_name: str,
+    package_name: str = "",
+) -> Tuple[Dict, Dict]:
     """
     Load agent and package policies based on input data.
 
@@ -197,10 +216,22 @@ def load_data(cfg: Munch, agent_input: dict, package_input: dict) -> Tuple[Dict,
     logger.info("Loading agent and package policies")
     agent_policy = SIMPLIFIED_AGENT_POLICY
     agent_policy["name"] = agent_input.get("name", "")
-    package_template = generate_policy_template(cfg=cfg)
+    stream_prefix = stream_name.split(".")[0]
+    if package_name:
+        package_template = generate_policy_template(
+            cfg=cfg,
+            package_name=package_name,
+            stream_prefix=stream_prefix,
+        )
+    else:
+        package_template = generate_policy_template(
+            cfg=cfg,
+            stream_prefix=stream_prefix,
+        )
     package_policy = generate_package_policy(
         template=package_template,
         policy_input=package_input,
+        stream_name=stream_name,
     )
 
     return agent_policy, package_policy
@@ -257,7 +288,7 @@ def patch_vars(var_dict, package_version):
         var_dict["aws.account_type"] = "single-account"
 
 
-def get_package_default_url(cfg: Munch, policy_name: str, policy_type: str) -> str:
+def get_package_default_url(cfg: Munch, policy_name: str, policy_type: str, package_name: str = "") -> str:
     """
     Get the package default URL for a specific policy and policy type from the configuration.
 
@@ -270,7 +301,10 @@ def get_package_default_url(cfg: Munch, policy_name: str, policy_type: str) -> s
         str: The default package URL for the specified policy and type.
              An empty string is returned if not found.
     """
-    package_policy = get_package(cfg=cfg)
+    if package_name:
+        package_policy = get_package(cfg=cfg, package_name=package_name)
+    else:
+        package_policy = get_package(cfg=cfg)
     policy_templates = package_policy.get("policy_templates", [])
 
     for template in policy_templates:
