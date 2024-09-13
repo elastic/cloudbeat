@@ -1,0 +1,30 @@
+{
+    "policy_id": "${agent_policy_id}",
+    "package": {
+        "name": "cloud_asset_inventory",
+        "version": "0.1.7"
+    },
+    "name": "pkg-plcy-asset-inventory-azure-tf",
+    "description": "",
+    "namespace": "default",
+    "inputs": {
+        "asset_inventory-cloudbeat/asset_inventory_aws": {
+            "enabled": false,
+            "streams": {
+                "cloud_asset_inventory.asset_inventory": {
+                    "enabled": false,
+                    "vars": {}
+                }
+            }
+        },
+        "asset_inventory-cloudbeat/asset_inventory_azure": {
+            "enabled": true,
+            "streams": {
+                "cloud_asset_inventory.asset_inventory": {
+                    "enabled": true,
+                    "vars": {}
+                }
+            }
+        }
+    }
+}

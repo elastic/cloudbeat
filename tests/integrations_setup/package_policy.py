@@ -8,10 +8,11 @@ import uuid
 from typing import Dict, Tuple
 from urllib.parse import parse_qs, unquote, urlparse
 
-from fleet_api.common_api import get_package
 from loguru import logger
 from munch import Munch
 from packaging import version
+
+from fleet_api.common_api import get_package
 
 # Constants
 CLOUD_SECURITY_POSTURE = "cloud_security_posture"
@@ -32,6 +33,7 @@ SIMPLIFIED_AGENT_POLICY = {
 }
 VERSION_MAP = {
     "asset_inventory_aws": "0.1.7",
+    "asset_inventory_azure": "0.1.10",
     "cis_k8s": "1.1.0",
     "cis_eks": "1.2.0",
     "cis_aws": "1.2.0",
