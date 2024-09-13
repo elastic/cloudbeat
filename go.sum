@@ -710,8 +710,8 @@ github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 h1:YEetp8
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240902050359-30320a3bfcfc h1:XNdQDk9aPy4vk1KIm7p4TAHz6jMaAXiIjjtIrEY5fCo=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240902050359-30320a3bfcfc/go.mod h1:m8d3EBr2z7YvWfxRgoE7SsUNbMTpyWXi67fG7B7vn7w=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240906192047-9f2f7445453b h1:YneDTFhpC/BV90wMw/4W6fThVHq9V3QAHroY1gHvwVg=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240906192047-9f2f7445453b/go.mod h1:m8d3EBr2z7YvWfxRgoE7SsUNbMTpyWXi67fG7B7vn7w=
 github.com/elastic/e2e-testing v1.2.3 h1:XKF91O+Y6RcrTuNc7kMM4/HE9pvkvjASIYhEWS5XkT0=
 github.com/elastic/e2e-testing v1.2.3/go.mod h1:TqP9TlnqFqKqd61etWkYgb8T+RulH7vmhg7lxQw/Yag=
 github.com/elastic/elastic-agent-autodiscover v0.8.2 h1:Fs2FhR33AMBPfm5/jz4drVzaEZaqOIHlDBvGtkUZdIk=
