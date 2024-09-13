@@ -26,7 +26,7 @@ updates:
         patterns:
           - "github.com/aquasecurity/*"
     labels:
-      - "backport-skip"
+      - "backport-v8.x"
       - "dependency"
       - "go"
     open-pull-requests-limit: 10
@@ -43,7 +43,7 @@ updates:
     schedule:
       interval: "monthly"
     labels:
-      - "backport-skip"
+      - "backport-v8.x"
       - "dependency"
       - "github_actions"
     groups:
