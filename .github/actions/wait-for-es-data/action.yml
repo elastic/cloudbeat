@@ -1,0 +1,35 @@
+name: "Wait for ES Data"
+description: "Waits for data on ES indices"
+inputs:
+  index:
+    description: "Which ES index to look at"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Wait for data
+      env:
+        ES_HOST: http://localhost:9200
+      shell: bash
+      run: |
+        URL="${ES_HOST}/${{ inputs.index }}/_search?size=0"
+        HEADER="Content-Type: application/json"
+        MAX_RETRIES=100
+
+        echo "Checking index: ${{ inputs.index }}"
+
+        for ((i = 1; i <= MAX_RETRIES; i++)); do
+            result=$(curl -s -X GET "$URL" -H "$HEADER" | jq '.hits.total.value')
+
+            if [ "$result" -gt 0 ]; then
+                echo "Data found: $result documents in index ${{ inputs.index }}"
+                exit 0
+            fi
+
+            echo "No data yet. Retrying in 1s... ($i/$MAX_RETRIES)"
+            sleep 1
+        done
+
+        echo "No data found after $MAX_RETRIES retries."
+        exit 1
