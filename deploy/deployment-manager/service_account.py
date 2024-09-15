@@ -14,7 +14,7 @@ def generate_config(context):
         "name": sa_name,
         "type": "iam.v1.serviceAccount",
         "properties": {
-            "accountId": sa_name,
+            "accountId": f"{sa_name}-id",
             "displayName": "Elastic agent service account for CSPM",
             "projectId": context.env["project"],
         },
