@@ -35,9 +35,10 @@ runs:
       run: |
         ./cloudbeat -c deploy/asset-inventory/cloudbeat-gcp-asset-inventory.yml -d '*' &
 
-    - name: Wait for cloudbeat to send some events
-      shell: bash
-      run: sleep 20
+    - name: Wait for data
+      uses: ./.github/actions/wait-for-es-data
+      with:
+        index: .ds-logs-cloud_asset_inventory.asset_inventory-*
 
     - name: Check for assets
       working-directory: ./tests
