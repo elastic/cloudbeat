@@ -4,18 +4,22 @@ inputs:
   index:
     description: "Which ES index to look at"
     required: true
+  es_host:
+    description: "the ES host URL"
+    default: "http://localhost:9200"
+  retries:
+    description: "How many times to retry checking for data. (1s interval)"
+    default: "100"
 
 runs:
   using: composite
   steps:
     - name: Wait for data
-      env:
-        ES_HOST: http://localhost:9200
       shell: bash
       run: |
-        URL="${ES_HOST}/${{ inputs.index }}/_search?size=0"
+        URL="${{inputs.es_host}}/${{ inputs.index }}/_search?size=0"
         HEADER="Content-Type: application/json"
-        MAX_RETRIES=100
+        MAX_RETRIES=${{inputs.retries}}
 
         echo "Checking index: ${{ inputs.index }}"
 
