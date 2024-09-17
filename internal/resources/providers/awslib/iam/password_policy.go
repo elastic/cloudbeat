@@ -41,10 +41,7 @@ func (p Provider) GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, er
 			return &PasswordPolicy{}, nil
 		}
 
-		p.log.Infof("Debug the error %+v", err)
-
 		return nil, err
-
 	}
 
 	policy := output.PasswordPolicy
