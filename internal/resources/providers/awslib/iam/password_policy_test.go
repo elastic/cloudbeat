@@ -24,9 +24,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/smithy-go/ptr"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 func Test_GetPasswordPolicy(t *testing.T) {
