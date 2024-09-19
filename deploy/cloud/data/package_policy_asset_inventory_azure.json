@@ -2,7 +2,7 @@
     "policy_id": "${agent_policy_id}",
     "package": {
         "name": "cloud_asset_inventory",
-        "version": "0.1.7"
+        "version": "0.2.1"
     },
     "name": "pkg-plcy-asset-inventory-azure-tf",
     "description": "",
