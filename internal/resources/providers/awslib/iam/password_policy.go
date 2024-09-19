@@ -19,8 +19,10 @@ package iam
 
 import (
 	"context"
+	"errors"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -30,6 +32,15 @@ func (p Provider) GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, er
 	output, err := p.client.GetAccountPasswordPolicy(ctx, &iam.GetAccountPasswordPolicyInput{})
 	if err != nil {
 		p.log.Debug("Failed to get account password policy: %v", err)
+
+		// AWS error reference https://docs.aws.amazon.com/IAM/latest/APIReference/API_GetAccountPasswordPolicy.html
+		var awsErr *types.NoSuchEntityException
+		if errors.As(err, &awsErr) {
+			// Reasoning behind this debug line https://github.com/elastic/cloudbeat/issues/1751
+			p.log.Debug("Returning empty password policy because 'password policy not found' is not a valid response. The account has a default password policy")
+			return &PasswordPolicy{}, nil
+		}
+
 		return nil, err
 	}
 
