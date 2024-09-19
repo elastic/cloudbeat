@@ -436,6 +436,7 @@ jobs:
         working-directory: deploy/azure
         env:
           AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+          DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}-inventory"
         run: ./install_agent_az_cli.sh
 
       - name: Install D4C integration
