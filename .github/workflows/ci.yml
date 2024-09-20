@@ -54,6 +54,29 @@ jobs:
           azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
           azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
 
+  ci-azure-asset-inventory:
+    needs: [ init-hermit ]
+    name: Azure Asset Inventory CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run Azure integration tests
+        uses: ./.github/actions/azure-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+          azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+          azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+
   ci-aws:
     needs: [ init-hermit ]
     name: CIS AWS CI
@@ -99,28 +122,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
 
-  ci-gcp-asset-inventory:
-    needs: [init-hermit]
-    name: GCP Asset Inventory CI
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
-    permissions:
-      contents: "read"
-      id-token: "write"
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
-
-      - name: Run GCP Asset Inventory integration tests
-        uses: ./.github/actions/gcp-asset-inventory-ci
-        with:
-          elk-version: ${{ env.ELK_VERSION }}
-          credentials-json: ${{ secrets.GCP_ASSETS_INVENTORY_CREDENTIALS_JSON }}
-          project-id: "elastic-security-test"
-
   ci-gcp:
     needs: [ init-hermit ]
     name: CIS GCP CI
@@ -144,6 +145,29 @@ jobs:
           service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
           gcp-project-id: 'elastic-security-test'
           gcp-account-type: 'single-account'
+
+  ci-gcp-asset-inventory:
+    needs: [init-hermit]
+    name: GCP Asset Inventory CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run GCP Asset Inventory integration tests
+        uses: ./.github/actions/gcp-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          credentials-json: ${{ secrets.GCP_ASSETS_INVENTORY_CREDENTIALS_JSON }}
+          project-id: "elastic-security-test"
+
 
   ci-cnvm:
     needs: [ init-hermit ]
@@ -269,9 +293,11 @@ jobs:
   upload-allure-results:
     needs:
       - ci-azure
+      - ci-azure-asset-inventory
       - ci-aws
       - ci-aws-asset-inventory
       - ci-gcp
+      - ci-gcp-asset-inventory
       - ci-cnvm
       - ci-k8s
     name: Upload integration tests results
