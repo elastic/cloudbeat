@@ -163,6 +163,7 @@ disable=raw-checker-failed,
         too-many-instance-attributes,
         too-many-branches,
         too-many-arguments,
+        too-many-positional-arguments,
         too-many-locals,
         W1514 # we use default encoding from the env var
 
