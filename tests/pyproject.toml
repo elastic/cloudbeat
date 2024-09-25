@@ -70,5 +70,6 @@ markers = [
     "cspm_azure_microsoft_defender_rules",
     "asset_inventory",
     "asset_inventory_aws",
+    "asset_inventory_azure",
     "asset_inventory_gcp",
 ]
