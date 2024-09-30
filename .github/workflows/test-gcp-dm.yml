@@ -16,6 +16,10 @@ on:
       - "deploy/deployment-manager/service_account.py"
       - "deploy/deployment-manager/service_account.py.schema"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 env:
   TEST_ENVS_DIR: deploy/test-environments
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
