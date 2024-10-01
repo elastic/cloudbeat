@@ -8,15 +8,11 @@ The following steps are performed:
 """
 
 import json
-from loguru import logger
 import configuration_fleet as cnfg
-from package_policy import (
-    generate_policy_template,
-    generate_random_name,
-    load_data,
-)
-from fleet_api.package_policy_api import create_cspm_integration
 from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.package_policy_api import create_cspm_integration
+from loguru import logger
+from package_policy import generate_policy_template, generate_random_name, load_data
 
 
 def generate_aws_integration_data():
