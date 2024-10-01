@@ -8,11 +8,13 @@ The following steps are performed:
 """
 
 import json
+
 import configuration_fleet as cnfg
-from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.package_policy_api import create_cspm_integration
 from loguru import logger
 from package_policy import generate_policy_template, generate_random_name, load_data
+
+from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.package_policy_api import create_cspm_integration
 
 
 def generate_aws_integration_data():
