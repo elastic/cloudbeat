@@ -36,6 +36,7 @@ type storageFetcher struct {
 type (
 	storageProviderFunc func(context.Context, []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 	storageProvider     interface {
+		ListSubscriptions(ctx context.Context) ([]azurelib.AzureAsset, error)
 		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueues(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueueServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
@@ -43,11 +44,10 @@ type (
 	}
 )
 
-func newStorageFetcher(logger *logp.Logger, provider storageProvider, accountProvider accountProvider) inventory.AssetFetcher {
+func newStorageFetcher(logger *logp.Logger, provider storageProvider) inventory.AssetFetcher {
 	return &storageFetcher{
-		logger:          logger,
-		provider:        provider,
-		accountProvider: accountProvider,
+		logger:   logger,
+		provider: provider,
 	}
 }
 
@@ -74,7 +74,7 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 }
 
 func (f *storageFetcher) listStorageAccounts(ctx context.Context) ([]azurelib.AzureAsset, error) {
-	subscriptions, err := f.accountProvider.ListSubscriptions(ctx)
+	subscriptions, err := f.provider.ListSubscriptions(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error listing subscriptions: %v", err)
 	}
