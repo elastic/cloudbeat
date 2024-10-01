@@ -19,6 +19,7 @@ package azurefetcher
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -27,23 +28,26 @@ import (
 )
 
 type storageFetcher struct {
-	logger   *logp.Logger
-	provider storageProvider
+	logger          *logp.Logger
+	provider        storageProvider
+	accountProvider accountProvider
 }
 
 type (
-	storageProviderFunc func(context.Context) ([]azurelib.AzureAsset, error)
+	storageProviderFunc func(context.Context, []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 	storageProvider     interface {
-		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
-		ListStorageAccountQueueServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
-		ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]AzureAsset, error)
+		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountQueues(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountQueueServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]azurelib.AzureAsset, error)
 	}
 )
 
-func newStorageFetcher(logger *logp.Logger, provider storageProvider) inventory.AssetFetcher {
+func newStorageFetcher(logger *logp.Logger, provider storageProvider, accountProvider accountProvider) inventory.AssetFetcher {
 	return &storageFetcher{
-		logger:   logger,
-		provider: provider,
+		logger:          logger,
+		provider:        provider,
+		accountProvider: accountProvider,
 	}
 }
 
@@ -53,19 +57,46 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 		function       storageProviderFunc
 		classification inventory.AssetClassification
 	}{
-		{"Tenants", f.provider.ListTenants, inventory.AssetClassificationAzureTenant},
-		{"Subscriptions", f.provider.ListSubscriptions, inventory.AssetClassificationAzureSubscription},
+		{"Storage Blob Services", f.provider.ListStorageAccountBlobServices, inventory.AssetClassificationAzureStorageBlobService},
+		{"Storage Queue Services", f.provider.ListStorageAccountQueueServices, inventory.AssetClassificationAzureStorageQueueService},
+		{"Storage Queues", f.provider.ListStorageAccountQueues, inventory.AssetClassificationAzureStorageQueue},
 	}
+
+	storageAccounts, err := f.listStorageAccounts(ctx)
+	if err != nil {
+		f.logger.Errorf("Could not fetch anything: %v", err)
+		return
+	}
+
 	for _, r := range resourcesToFetch {
-		f.fetch(ctx, r.name, r.function, r.classification, assetChan)
+		f.fetch(ctx, storageAccounts, r.name, r.function, r.classification, assetChan)
 	}
 }
 
-func (f *storageFetcher) fetch(ctx context.Context, resourceName string, function storageProviderFunc, classification inventory.AssetClassification, assetChan chan<- inventory.AssetEvent) {
+func (f *storageFetcher) listStorageAccounts(ctx context.Context) ([]azurelib.AzureAsset, error) {
+	subscriptions, err := f.accountProvider.ListSubscriptions(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error listing subscriptions: %v", err)
+	}
+
+	var subscriptionIds []string
+	for _, subscription := range subscriptions {
+		subscriptionIds = append(subscriptionIds, subscription.Id)
+	}
+
+	storageAccounts, err := f.provider.ListStorageAccounts(ctx, subscriptionIds)
+	if err != nil {
+		return nil, fmt.Errorf("error listing storage accounts: %v", err)
+	}
+
+	return storageAccounts, nil
+}
+
+func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.AzureAsset, resourceName string, function storageProviderFunc, classification inventory.AssetClassification, assetChan chan<- inventory.AssetEvent) {
 	f.logger.Infof("Fetching %s", resourceName)
 	defer f.logger.Infof("Fetching %s - Finished", resourceName)
 
-	azureAssets, err := function(ctx)
+	azureAssets, err := function(ctx, storageAccounts)
 	if err != nil {
 		f.logger.Errorf("Could not fetch %s: %v", resourceName, err)
 		return
