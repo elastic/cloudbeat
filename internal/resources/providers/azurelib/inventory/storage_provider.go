@@ -228,8 +228,8 @@ func (p *storageAccountProvider) ListStorageAccountQueueServices(ctx context.Con
 				},
 			})
 		}
-		if err != nil {
-			return nil, fmt.Errorf("error while transforming azure queue services for storage accounts %s: %w", sa.Id, err)
+		if errs != nil {
+			return nil, fmt.Errorf("error while transforming azure queue services for storage accounts %s: %w", sa.Id, errs)
 		}
 	}
 

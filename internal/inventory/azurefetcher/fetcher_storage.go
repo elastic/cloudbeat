@@ -28,9 +28,8 @@ import (
 )
 
 type storageFetcher struct {
-	logger          *logp.Logger
-	provider        storageProvider
-	accountProvider accountProvider
+	logger   *logp.Logger
+	provider storageProvider
 }
 
 type (
@@ -79,7 +78,7 @@ func (f *storageFetcher) listStorageAccounts(ctx context.Context) ([]azurelib.Az
 		return nil, fmt.Errorf("error listing subscriptions: %v", err)
 	}
 
-	var subscriptionIds []string
+	subscriptionIds := make([]string, len(subscriptions))
 	for _, subscription := range subscriptions {
 		subscriptionIds = append(subscriptionIds, subscription.Name)
 	}
