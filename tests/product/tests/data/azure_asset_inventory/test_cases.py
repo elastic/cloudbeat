@@ -77,4 +77,22 @@ test_cases = {
         type_="storage",
         sub_type="azure-storage-account",
     ),
+    "[Asset Inventory][Azure][Azure Storage Queue] assets found": AssetInventoryCase(
+        category="infrastructure",
+        sub_category="application-integration",
+        type_="message-queue",
+        sub_type="azure-storage-queue",
+    ),
+    "[Asset Inventory][Azure][Azure Storage Queue Service] assets found": AssetInventoryCase(
+        category="infrastructure",
+        sub_category="application-integration",
+        type_="message-queue",
+        sub_type="azure-storage-queue-service",
+    ),
+    "[Asset Inventory][Azure][Azure Storage Blob Service] assets found": AssetInventoryCase(
+        category="infrastructure",
+        sub_category="storage",
+        type_="object-storage",
+        sub_type="azure-storage-blob-service",
+    ),
 }
