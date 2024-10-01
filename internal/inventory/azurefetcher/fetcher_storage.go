@@ -81,7 +81,7 @@ func (f *storageFetcher) listStorageAccounts(ctx context.Context) ([]azurelib.Az
 
 	var subscriptionIds []string
 	for _, subscription := range subscriptions {
-		subscriptionIds = append(subscriptionIds, subscription.Id)
+		subscriptionIds = append(subscriptionIds, subscription.Name)
 	}
 
 	storageAccounts, err := f.provider.ListStorageAccounts(ctx, subscriptionIds)
