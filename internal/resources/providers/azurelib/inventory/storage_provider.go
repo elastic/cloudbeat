@@ -131,15 +131,25 @@ func transformStorageAccounts(accountPages []armstorage.AccountsClientListRespon
 				errs = errors.Join(errs, err)
 			}
 
+			// extracting resourceGroup from the ID:
+			// /subscriptions/<id>/resourceGroups/<name>/providers/Microsoft.Storage/storageAccounts/<name2>
+			var resourceGroup string
+			idElements := strings.Split(pointers.Deref(item.ID), "/")
+			if len(idElements) > 5 && idElements[3] == "resourceGroups" {
+				resourceGroup = idElements[4]
+			}
+
+			var tenantId string
+			if item.Identity != nil {
+				tenantId = pointers.Deref(item.Identity.TenantID)
+			}
+
 			return AzureAsset{
-				Id:   pointers.Deref(item.ID),
-				Name: pointers.Deref(item.Name),
-				Type: strings.ToLower(pointers.Deref(item.Type)),
-				// These are kept empty because:
-				// 1. they are not used for evaluation
-				// 2. only subscriptionId is required for the request issued by armstorage.NewAccountsClient
-				ResourceGroup:  "",
-				TenantId:       "",
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  resourceGroup,
+				TenantId:       tenantId,
 				SubscriptionId: storageAccountId,
 				Properties:     properties,
 				Extension: map[string]any{
