@@ -73,6 +73,7 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 }
 
 func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
+	// TODO(kuba): Handle AWS Gov
 	awsConfig, err := awslib.InitializeAWSConfig(s.cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, err
@@ -83,6 +84,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 	if err != nil {
 		return nil, err
 	}
+	// TODO(kuba): handle selecting accounts and getting organizational fetchers
 
 	return awsfetcher.New(s.logger, awsIdentity, *awsConfig), nil
 }
