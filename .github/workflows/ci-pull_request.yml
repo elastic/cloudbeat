@@ -67,6 +67,11 @@ jobs:
         shell: bash
         run: terraform fmt -check -recursive
 
+      - name: Show git diff on failure
+        shell: bash
+        if: ${{ failure() }}
+        run: git diff
+
   unit-test:
     name: Unit Test
     runs-on: ubuntu-22.04
