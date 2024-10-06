@@ -240,8 +240,7 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 			fmt.Sprintf("**Progress: %d%% (%d/%d)**\n", percentage, totalImplemented, len(planned)),
 		)
 
-		sortedCategories := maps.Keys(plannedByCategory)
-		slices.Sort(sortedCategories)
+		sortedCategories := slices.Sorted(maps.Keys(plannedByCategory))
 
 		for _, category := range sortedCategories {
 			plannedCount := plannedByCategory[category]
