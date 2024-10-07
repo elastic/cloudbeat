@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	ristrettoCache        *ristretto.Cache
+	ristrettoCache        *ristretto.Cache[string, *cachedRegions]
 	allRegionCacheTTL     = 720 * time.Hour
 	currentRegionCacheTTL time.Duration
 )
@@ -42,8 +42,8 @@ func init() {
 	}
 }
 
-func newCachedRegions() (*ristretto.Cache, error) {
-	return ristretto.NewCache(&ristretto.Config{
+func newCachedRegions() (*ristretto.Cache[string, *cachedRegions], error) {
+	return ristretto.NewCache(&ristretto.Config[string, *cachedRegions]{
 		NumCounters: 100,
 		MaxCost:     10000,
 		BufferItems: 64,
@@ -110,6 +110,7 @@ func (s *cachedRegionSelector) setCache(list []string) bool {
 
 	return ristrettoCache.SetWithTTL(s.key, cache, 1, s.keep)
 }
+
 func (s *cachedRegionSelector) getCache() []string {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
@@ -118,10 +119,5 @@ func (s *cachedRegionSelector) getCache() []string {
 		return nil
 	}
 
-	cachedList, ok := cachedObject.(*cachedRegions)
-	if !ok {
-		return nil
-	}
-
-	return cachedList.regions
+	return cachedObject.regions
 }
