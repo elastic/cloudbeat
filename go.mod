@@ -21,29 +21,29 @@ require (
 	github.com/aquasecurity/trivy v0.55.2
 	github.com/aquasecurity/trivy-db v0.0.0-20240910133327-7e0f4d2ed4c1
 	github.com/aws/aws-sdk-go-v2 v1.31.0
-	github.com/aws/aws-sdk-go-v2/config v1.27.36
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.34
+	github.com/aws/aws-sdk-go-v2/config v1.27.39
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.37
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.14
-	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.33.0
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.44.0
-	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.54.0
-	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.43.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.41.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.40.0
-	github.com/aws/aws-sdk-go-v2/service/configservice v1.49.0
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.178.0
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.35.0
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.27.0
-	github.com/aws/aws-sdk-go-v2/service/iam v1.36.0
-	github.com/aws/aws-sdk-go-v2/service/kms v1.36.0
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.61.0
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.32.0
-	github.com/aws/aws-sdk-go-v2/service/rds v1.84.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.0
-	github.com/aws/aws-sdk-go-v2/service/s3control v1.48.0
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.53.0
-	github.com/aws/aws-sdk-go-v2/service/sns v1.32.0
-	github.com/aws/aws-sdk-go-v2/service/sts v1.31.0
+	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.33.3
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.44.3
+	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.54.3
+	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.43.3
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.41.3
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.40.3
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.49.3
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.179.2
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.35.3
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.27.3
+	github.com/aws/aws-sdk-go-v2/service/iam v1.36.3
+	github.com/aws/aws-sdk-go-v2/service/kms v1.36.3
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.62.1
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.33.1
+	github.com/aws/aws-sdk-go-v2/service/rds v1.85.2
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.63.3
+	github.com/aws/aws-sdk-go-v2/service/s3control v1.48.3
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.53.3
+	github.com/aws/aws-sdk-go-v2/service/sns v1.32.3
+	github.com/aws/aws-sdk-go-v2/service/sts v1.31.3
 	github.com/aws/smithy-go v1.21.0
 	github.com/dgraph-io/ristretto v0.1.2-0.20240116140435-c67e07994f91
 	github.com/djherbis/times v1.6.0
@@ -71,7 +71,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
-	go.elastic.co/go-licence-detector v0.6.1
+	go.elastic.co/go-licence-detector v0.7.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
 	go.uber.org/zap/exp v0.1.1-0.20240530135403-273f9ea8c887
@@ -117,7 +117,6 @@ require (
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-git/go-git/v5 v5.12.0 // indirect
-	github.com/gobuffalo/here v0.6.7 // indirect
 	github.com/gofrs/uuid/v5 v5.2.0 // indirect
 	github.com/google/certificate-transparency-go v1.1.8 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
@@ -235,13 +234,13 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.18 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.38.0
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.38.3
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.20 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.20 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.18 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.23.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.27.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.23.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.27.3 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
@@ -373,7 +372,6 @@ require (
 	github.com/josephspurrier/goversioninfo v1.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/karrick/godirwalk v1.17.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/knqyf263/go-apk-version v0.0.0-20200609155635-041fdbb8563f // indirect
@@ -393,7 +391,6 @@ require (
 	github.com/lunixbochs/struc v0.0.0-20200707160740-784aaebc1d40 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/markbates/pkger v0.17.1 // indirect
 	github.com/masahiro331/go-disk v0.0.0-20240625071113-56c933208fee // indirect
 	github.com/masahiro331/go-ebs-file v0.0.0-20240112135404-d5fbb1d46323 // indirect
 	github.com/masahiro331/go-ext4-filesystem v0.0.0-20240620024024-ca14e6327bbd // indirect
@@ -508,7 +505,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
-	google.golang.org/grpc v1.67.0
+	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
