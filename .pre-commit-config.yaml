@@ -178,6 +178,7 @@ repos:
                 MD033,  # Allow inline HTML
                 MD046,  # Allow code blocks to be fenced with backticks
                 MD041,  # Allow multiple top level headers
+                MD058,  # Allow tables without blank lines around
                 '--' ]
         # TODO: Apply makrdownlint in other files
         files: security-policies/.*\.(md|markdown)$
