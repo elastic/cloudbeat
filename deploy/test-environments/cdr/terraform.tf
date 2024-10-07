@@ -15,16 +15,6 @@ terraform {
       version = ">= 3.11, < 4.0"
     }
 
-    ec = {
-      source  = "elastic/ec"
-      version = ">=0.9.0"
-    }
-
-    restapi = {
-      source  = "mastercard/restapi"
-      version = "~> 1.18.0"
-    }
-
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5.1"

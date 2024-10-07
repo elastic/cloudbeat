@@ -6,7 +6,7 @@ To provide an easy and deterministic way to set up the latest cloud environment,
 
 **Prerequisite**
 
-This project utilizes AWS and Elastic Cloud accounts. To ensure proper deployment and usage, it is essential to obtain appropriate licenses in compliance with the licensing terms and conditions provided by the respective service providers.
+This project utilizes AWS, Elastic Cloud, Azure, and GCP accounts. To ensure proper deployment and usage, you need to obtain appropriate licenses and credentials in compliance with the licensing terms and conditions provided by the respective service providers.
 
 Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 
@@ -21,41 +21,41 @@ To generate an Elastic Cloud token, you have two options:
 Choose the method that is most convenient for you to obtain the Elastic Cloud token required for deployment.
 
 
+For AWS:
+
 Ensure that the following AWS credentials are defined:
 
 - `AWS_ACCESS_KEY_ID`: Your AWS access key ID.
 - `AWS_SECRET_ACCESS_KEY`: Your AWS secret access key.
 
+For GCP:
+
+Ensure that you have your GCP service account key file. This file is usually stored at a path like ~/.config/gcloud, but the exact location may vary.
+
+For Azure:
+
+Ensure that you are logged in to Azure using:
+
+```bash
+az login
+```
 
 To successfully deploy the environment, ensure that the following variables are provided as deployment parameters or exported as environment variables:
 
 ```bash
 export TF_VAR_ec_api_key={TOKEN} # <-- should be replaced by Elastic Cloud TOKEN
-export TF_VAR_stack_version=8.7.2-SNAPSHOT
+export TF_VAR_stack_version=8.16.0-SNAPSHOT
 export TF_VAR_ess_region=gcp-us-west2
 ```
 
-## Modules
+## Directory Structure
 
-This project leverages a set of foundational modules specifically designed for [cloud deployment](../cloud/modules/).
+### elk-stack
 
-### EC2
+This directory handles the deployment of the Elastic Stack. It includes:
 
-**aws_ec2_for_kspm** - This module facilitates the deployment of an EC2 instance with a Kubernetes cluster using the kind tool. The deployment process relies on a customized image that includes the necessary components for running kind.
-
-**aws_ec2_for_cspm** - This module facilitates the deployment of an EC2 instance for CSPM.
-
-Please note that the customized image is currently available in the following regions: **eu-west-1** and **eu-west-3**. Therefore, ensure that you deploy this module in one of these regions to leverage the customized image effectively.
-
-**Module variables (CSPM / KSPM)**
-
-| Variable  | Default Value | Comment |
-|:-------------:|:-------------:|:------------|
-| region      |   eu-west-1   | AWS EC2 deployment region |
-
-
-
-### Elastic Cloud
+- Deployment Types: `deployment` and `project`, defined by the var.serverless_mode key.
+- Required Variable: `ec_api_key`. It is also recommended to provide `deployment_name` as an input parameter during development.
 
 **ec_deployment** - This module facilitates the deployment of Elastic Cloud instance.
 
@@ -66,73 +66,93 @@ Please note that the customized image is currently available in the following re
 | stack_version | latest | The ELK stack version can also be defined using the `TF_VAR_stack_version` environment variable |
 | pin_version   | None | Optional: The ELK pin version (docker tag override) can also be defined using the `TF_VAR_pin_version` environment variable |
 
+
+### cis
+
+This directory is responsible for provisioning EC2 machines and EKS clusters related to CSPM and KSPM.
+
+**aws_ec2_for_kspm** - This module facilitates the deployment of an EC2 instance with a Kubernetes cluster using the kind tool. The deployment process relies on a customized image that includes the necessary components for running kind.
+
+**aws_ec2_for_cspm** - This module facilitates the deployment of an EC2 instance for CSPM.
+
+Please note that the customized image is currently available in the following regions: **eu-west-1** and **eu-west-3**. Therefore, ensure that you deploy this module in one of these regions to leverage the customized image effectively.
+
+### cdr
+
+This directory includes modules for provisioning infrastructure for CDR, including:
+
+- GCP VM (requires gcp_project_id as an input variable)
+- Azure VM
+- AWS EC2 for CloudTrail
+- Additional EC2 for asset inventory
+
+### Modules
+
+All projects utilize a set of foundational modules specifically designed for [cloud deployment](../cloud/modules/).
+
+
 ## Execution
 
-To execute the full project, encompassing the deployment of an EC2 instance, setting up a Kubernetes cluster using kind, and deploying Elastic Cloud, follow the steps outlined below
+There is no single Terraform command to execute the full project. Instead, each module can be executed separately using Terraform commands. The scripts provided in the project are responsible for managing the execution of the entire setup.
 
-- Initiate the project
+### Full Project Execution
+
+The full project execution is managed by scripts, not by Terraform directly. Use the following scripts to handle the deployment process:
+
+- `manage_infrastructure.sh`: This script manages Terraform provisioning with commands for {elk-stack|cis|cdr|all} {apply|destroy|output|upload-state}.
+The following command applies all Terraform configurations for the elk-stack, cis, and cdr directories:
+```bash
+./manage_infrastructure.sh all apply
+```
+The following command destroys all Terraform configurations for the elk-stack, cis, and cdr directories:
 
 ```bash
-cd test-environments
+./manage_infrastructure.sh all destroy
+```
+
+The following command retrieves outputs from all deployed environments:
+```bash
+./manage_infrastructure.sh all output
+```
+
+
+### Running Individual Modules
+
+- Elastic Stack
+
+```bash
+cd elk-stack
 terraform init
+terraform apply --auto-approve
 ```
 
-- Deploy test environment
+- CIS modules
 
 ```bash
-terraform apply --auto-approve -var="deployment_name=dev-env"
+cd cis
+terraform init
+terraform apply --auto-approve
 ```
 
-For development purposes, it is possible to deploy each module separately, allowing for focused and independent development and testing. Each module within the project represents a specific component or functionality and can be deployed individually to streamline the development process.
-
-Below are examples demonstrating how to execute individual modules separately:
-
-- EC2 for CSPM
+- Specific module in CIS
 
 ```bash
-terraform apply --auto-approve -target "module.aws_ec2_for_cspm"
-```
-
-- EC2 + Kind Kubernetes (KSPM)
-
-```bash
+cd cis
 terraform apply --auto-approve -target "module.aws_ec2_for_kspm"
 ```
 
-- EC Deployment
+- CDR modules
 
 ```bash
-terraform apply --auto-approve -target "module.ec_deployment"
-```
-
-BC version
-
-```bash
-terraform apply --auto-approve -var="stack_version=8.12.0" -var="pin_version=8.12.0-9f05a310" -target "module.ec_deployment"
-```
-
-
-- EKS Deployment
-
-```bash
-terraform apply --auto-approve -target "module.eks"
+cd cdr
+terraform init
+terraform apply --auto-approve
 ```
 
 ## Environment Cleanup
 
 To destroy local environment use
 
-``` bash
-terraform destroy -var="region=eu-west-1"
-```
-
-
-To destroy the environment provisioned using the Sanity job, follow these steps:
-
-1. [Download](https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra?region=eu-west-3&tab=objects) the Terraform state file to the [test-environments](../test-environments/) folder.
-2. Rename the state file, for example, `terraform-sanity.tfstate`.
-3. Run the following command:
-
-``` bash
-terraform destroy -var="region=eu-west-1" -state terraform-sanity.tfstate
+```bash
+./manage_infrastructure.sh all destroy
 ```
