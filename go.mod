@@ -45,7 +45,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.32.3
 	github.com/aws/aws-sdk-go-v2/service/sts v1.31.3
 	github.com/aws/smithy-go v1.21.0
-	github.com/dgraph-io/ristretto v0.1.2-0.20240116140435-c67e07994f91
+	github.com/dgraph-io/ristretto v1.0.0
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241005225259-775d26d94a5a
 	github.com/elastic/e2e-testing v1.2.3
