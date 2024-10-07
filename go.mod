@@ -78,7 +78,7 @@ require (
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.23.0
-	google.golang.org/api v0.198.0
+	google.golang.org/api v0.199.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.12.0
 	k8s.io/api v0.31.1
@@ -89,7 +89,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/auth v0.9.4 // indirect
+	cloud.google.com/go/auth v0.9.5 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4 v4.6.0 // indirect
@@ -171,7 +171,7 @@ require (
 require (
 	cloud.google.com/go v0.115.1 // indirect
 	cloud.google.com/go/accesscontextmanager v1.9.1 // indirect
-	cloud.google.com/go/compute/metadata v0.5.1 // indirect
+	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	cloud.google.com/go/longrunning v0.6.1 // indirect
 	cloud.google.com/go/orgpolicy v1.13.1 // indirect
 	cloud.google.com/go/osconfig v1.14.1 // indirect
