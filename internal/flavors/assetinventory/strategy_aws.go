@@ -20,15 +20,19 @@ package assetinventory
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -76,12 +80,27 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 			rootRoleConfig,
 			fmtIAMRole(identity.Account, memberRole),
 		)
-		// TODO(kuba): Test that the role works or don't try to create fetchers for it
+		if ok := tryListingAccounts(ctx, s.logger, assumedRoleConfig); !ok {
+			// role does not exist, skip identity/account
+			continue
+		}
 		accountFetchers := awsfetcher.New(s.logger, &identity, assumedRoleConfig)
 		fetchers = append(fetchers, accountFetchers...)
 	}
 
 	return fetchers, nil
+}
+
+func tryListingAccounts(ctx context.Context, log *logp.Logger, roleConfig awssdk.Config) bool {
+	s3Client := s3.NewFromConfig(roleConfig)
+	_, err := s3Client.ListBuckets(ctx, &s3.ListBucketsInput{MaxBuckets: pointers.Ref(int32(1))})
+	if err == nil {
+		return true
+	}
+	if !strings.Contains(err.Error(), "not authorized to perform: sts:AssumeRole") {
+		log.Errorf("Expected a 403 autorization error, but got: %v", err)
+	}
+	return false
 }
 
 func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {
