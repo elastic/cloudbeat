@@ -28,10 +28,8 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/inventory/azurefetcher"
 	"github.com/elastic/cloudbeat/internal/inventory/gcpfetcher"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
@@ -70,23 +68,6 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 
 	now := func() time.Time { return time.Now() } //nolint:gocritic
 	return inventory.NewAssetInventory(s.logger, fetchers, client, now), nil
-}
-
-func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
-	// TODO(kuba): Handle AWS Gov
-	awsConfig, err := awslib.InitializeAWSConfig(s.cfg.CloudConfig.Aws.Cred)
-	if err != nil {
-		return nil, err
-	}
-
-	idProvider := awslib.IdentityProvider{Logger: s.logger}
-	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
-	if err != nil {
-		return nil, err
-	}
-	// TODO(kuba): handle selecting accounts and getting organizational fetchers
-
-	return awsfetcher.New(s.logger, awsIdentity, *awsConfig), nil
 }
 
 func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetcher, error) {
