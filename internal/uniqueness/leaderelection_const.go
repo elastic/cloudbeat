@@ -29,7 +29,7 @@ const (
 	// wait to force acquire leadership. This is measured against time of
 	// last observed ack.
 	//
-	LeaseDuration = 5 * time.Second
+	LeaseDuration = 30 * time.Second
 	// RenewDeadline is the duration that the acting manager will retry
 	// refreshing leadership before giving up.
 	//
