@@ -22,13 +22,13 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"maps"
 	"os"
 	"slices"
 	"strings"
 
 	"github.com/ettle/strcase"
 	"github.com/xuri/excelize/v2"
-	"golang.org/x/exp/maps"
 )
 
 const (
@@ -195,8 +195,7 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 	for providerNo, provider := range []string{AWS_PREFIX, AZURE_PREFIX, GCP_PREFIX} {
 		planned := plannedByProvider.Get(provider)
 		implemented := implementedByProvider.Get(provider)
-		sortedKeys := maps.Keys(planned)
-		slices.Sort(sortedKeys)
+		sortedKeys := slices.Sorted(maps.Keys(planned))
 
 		// stats
 		totalImplemented := 0
@@ -241,8 +240,7 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 			fmt.Sprintf("**Progress: %d%% (%d/%d)**\n", percentage, totalImplemented, len(planned)),
 		)
 
-		sortedCategories := maps.Keys(plannedByCategory)
-		slices.Sort(sortedCategories)
+		sortedCategories := slices.Sorted(maps.Keys(plannedByCategory))
 
 		for _, category := range sortedCategories {
 			plannedCount := plannedByCategory[category]
