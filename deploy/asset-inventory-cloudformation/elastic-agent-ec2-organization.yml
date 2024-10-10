@@ -184,7 +184,7 @@ Resources:
   CloudbeatRoleStackSet:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      StackSetName: cloudbeat-role-stackset
+      StackSetName: cloudbeat-role-asset-inventory-stackset
       Description: StackSet for deploying the cloudbeat-asset-inventory-securityaudit IAM role to member accounts in the specified organizational units.
       AutoDeployment:
         Enabled: true
