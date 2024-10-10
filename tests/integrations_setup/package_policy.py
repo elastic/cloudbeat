@@ -217,6 +217,8 @@ def load_data(
     logger.info("Loading agent and package policies")
     agent_policy = SIMPLIFIED_AGENT_POLICY
     agent_policy["name"] = agent_input.get("name", "")
+    agent_policy["supports_agentless"] = bool(agent_input.get("supports_agentless"))
+
     stream_prefix = stream_name.split(".")[0]
     if package_name:
         package_template = generate_policy_template(
