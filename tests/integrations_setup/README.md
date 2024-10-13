@@ -84,7 +84,13 @@ Follow these steps to install the dependencies and execute the different scripts
     poetry run python ./integrations_setup/install_aws_asset_inventory_integration.py
     ```
 
-11. To purge integrations, use the following command:
+11. To execute the Azure Asset Inventory integration, use the following command:
+
+    ``` bash
+    poetry run python ./integrations_setup/install_azure_asset_inventory_integration.py
+    ```
+
+12. To purge integrations, use the following command:
 
     ``` bash
     poetry run python ./integrations_setup/purge_integrations.py

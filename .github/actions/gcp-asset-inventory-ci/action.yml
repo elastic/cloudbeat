@@ -1,0 +1,66 @@
+name: "GCP Asset Inventory CI"
+description: "GCP Asset Inventory integration tests"
+inputs:
+  elk-version:
+    description: "ELK version"
+    required: true
+  credentials-json:
+    description: "GCP Service account key JSON"
+    required: true
+  project-id:
+    description: "GCP Project ID"
+    required: true
+
+  debug:
+    description: "debug"
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Init Integration
+      uses: ./.github/actions/init-integration
+      with:
+        elk-version: ${{ inputs.elk-version }}
+
+    - name: Run cloudbeat in background
+      env:
+        ES_HOST: http://localhost:9200
+        ES_USERNAME: elastic
+        ES_PASSWORD: changeme
+        GCP_PROJECT_ID: ${{ inputs.project-id}}
+        GCP_CREDENTIALS_JSON: ${{ inputs.credentials-json }}
+        GCP_ACCOUNT_TYPE: single-account
+      shell: bash
+      run: |
+        ./cloudbeat -c deploy/asset-inventory/cloudbeat-gcp-asset-inventory.yml -d '*' &
+
+    - name: Wait for data
+      uses: ./.github/actions/wait-for-es-data
+      with:
+        index: .ds-logs-cloud_asset_inventory.asset_inventory-*
+
+    - name: Check for assets
+      working-directory: ./tests
+      env:
+        USE_K8S: "false"
+      shell: bash
+      run: poetry run pytest -k "asset_inventory_gcp" --alluredir=./allure/results/ --clean-alluredir
+
+    - name: Upload test results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-ci-gcp-asset-inventory
+        path: tests/allure/results/
+        overwrite: true
+
+    - if: ${{ failure() || cancelled() || inputs.debug == 'true' }}
+      name: Upload cloudbeat logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: cloubeat-logs-ci-gcp-asset-inventory
+        path: logs/
+        if-no-files-found: warn
+        retention-days: 1
+        overwrite: true

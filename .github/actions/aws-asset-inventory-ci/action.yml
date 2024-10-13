@@ -37,7 +37,7 @@ runs:
         AWS_ACCOUNT_TYPE: ${{ inputs.aws-account-type }}
       shell: bash
       run: |
-        ./cloudbeat -c deploy/aws-asset-inventory/cloudbeat-aws-asset-inventory.yml -d '*' &
+        ./cloudbeat -c deploy/asset-inventory/cloudbeat-aws-asset-inventory.yml -d '*' &
 
     - name: Wait for cloudbeat to send some events
       shell: bash

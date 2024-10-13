@@ -29,7 +29,6 @@ import (
 	_ "github.com/pierrre/gotestcover"
 	_ "github.com/tsg/go-daemon"
 	_ "go.elastic.co/go-licence-detector"
-	_ "golang.org/x/exp/maps"
 	_ "golang.org/x/lint/golint"
 	_ "gotest.tools/gotestsum/cmd"
 )

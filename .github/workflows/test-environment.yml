@@ -183,12 +183,6 @@ jobs:
         run: |
           # Extract the stack version
           stack_version="${{ inputs.elk-stack-version }}"
-          is_serverless_mode="${{ inputs.serverless_mode }}"
-          if [[ $is_serverless_mode == "true" ]]; then
-            # Stack version is not relevant for serverless deployments
-            # Therefore, we set it to the latest snapshot version
-            stack_version="${{ env.ELK_VERSION }}"
-          fi
 
           echo "TF_VAR_stack_version=$stack_version" >> $GITHUB_ENV
           echo "STACK_VERSION=$stack_version" >> $GITHUB_ENV
@@ -423,6 +417,20 @@ jobs:
         working-directory: deploy/azure
         env:
           AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+        run: ./install_agent_az_cli.sh
+
+      - name: Install Azure Asset Inventory integration
+        id: azure-asset-inventory-integration
+        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        run: |
+          poetry run python ./install_azure_asset_inventory_integration.py
+
+      - name: Deploy Azure Asset Inventory agent
+        id: azure-asset-inventory-agent
+        working-directory: deploy/azure
+        env:
+          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+          DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}-inventory"
         run: ./install_agent_az_cli.sh
 
       - name: Install D4C integration
