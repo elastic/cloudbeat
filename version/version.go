@@ -18,7 +18,7 @@
 package version
 
 // name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
-const defaultBeatVersion = "8.15.3"
+const defaultBeatVersion = "8.15.4"
 
 // Version represents version information for a package
 type Version struct {
