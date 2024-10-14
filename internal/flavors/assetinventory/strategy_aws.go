@@ -80,7 +80,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 			rootRoleConfig,
 			fmtIAMRole(identity.Account, memberRole),
 		)
-		if ok := tryListingAccounts(ctx, s.logger, assumedRoleConfig); !ok {
+		if ok := tryListingBuckets(ctx, s.logger, assumedRoleConfig); !ok {
 			// role does not exist, skip identity/account
 			continue
 		}
@@ -91,7 +91,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 	return fetchers, nil
 }
 
-func tryListingAccounts(ctx context.Context, log *logp.Logger, roleConfig awssdk.Config) bool {
+func tryListingBuckets(ctx context.Context, log *logp.Logger, roleConfig awssdk.Config) bool {
 	s3Client := s3.NewFromConfig(roleConfig)
 	_, err := s3Client.ListBuckets(ctx, &s3.ListBucketsInput{MaxBuckets: pointers.Ref(int32(1))})
 	if err == nil {
