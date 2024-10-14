@@ -2,13 +2,11 @@ name: Tests
 
 on:
   # Temporary disabled, will be solved by https://github.com/elastic/security-team/issues/9129
-  # TODO: comment after debugging and change to pull_request_target
-  pull_request:
   # pull_request_target:
-    branches:
-      - main
-      - "[0-9]+.[0-9]+"
-    types: [opened, synchronize, reopened]
+  #  branches:
+  #   - main
+  #   - "[0-9]+.[0-9]+"
+  #   types: [opened, synchronize, reopened]
   push:
     branches:
       - main
@@ -32,175 +30,175 @@ jobs:
         uses: ./.github/actions/hermit
         with:
           init-tools: 'true'
-  # TODO: uncomment after debugging
-  # ci-azure:
-  #   needs: [ init-hermit ]
-  #   name: CIS Azure CI
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     contents: "read"
-  #     id-token: "write"
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+  ci-azure:
+    needs: [ init-hermit ]
+    name: CIS Azure CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Run Azure integration tests
-  #       uses: ./.github/actions/azure-ci
-  #       with:
-  #         elk-version: ${{ env.ELK_VERSION }}
-  #         azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-  #         azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-  #         azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-  # ci-azure-asset-inventory:
-  #   needs: [ init-hermit ]
-  #   name: Azure Asset Inventory CI
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     contents: "read"
-  #     id-token: "write"
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+      - name: Run Azure integration tests
+        uses: ./.github/actions/azure-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+          azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+          azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+  ci-azure-asset-inventory:
+    needs: [ init-hermit ]
+    name: Azure Asset Inventory CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Run Azure integration tests
-  #       uses: ./.github/actions/azure-asset-inventory-ci
-  #       with:
-  #         elk-version: ${{ env.ELK_VERSION }}
-  #         azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-  #         azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-  #         azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-  # ci-aws:
-  #   needs: [ init-hermit ]
-  #   name: CIS AWS CI
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     contents: "read"
-  #     id-token: "write"
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+      - name: Run Azure integration tests
+        uses: ./.github/actions/azure-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+          azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+          azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+  ci-aws:
+    needs: [ init-hermit ]
+    name: CIS AWS CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Run AWS integration tests
-  #       uses: ./.github/actions/aws-ci
-  #       with:
-  #         elk-version: ${{ env.ELK_VERSION }}
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
-  #         aws-account-type: single-account
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-  # ci-aws-asset-inventory:
-  #   needs: [ init-hermit ]
-  #   name: AWS Asset Inventory CI
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     contents: "read"
-  #     id-token: "write"
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+      - name: Run AWS integration tests
+        uses: ./.github/actions/aws-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+          aws-account-type: single-account
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+  ci-aws-asset-inventory:
+    needs: [ init-hermit ]
+    name: AWS Asset Inventory CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Run AWS Asset Inventory integration tests
-  #       uses: ./.github/actions/aws-asset-inventory-ci
-  #       with:
-  #         elk-version: ${{ env.ELK_VERSION }}
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-  # ci-gcp:
-  #   needs: [ init-hermit ]
-  #   name: CIS GCP CI
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     contents: 'read'
-  #     id-token: 'write'
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+      - name: Run AWS Asset Inventory integration tests
+        uses: ./.github/actions/aws-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+  ci-gcp:
+    needs: [ init-hermit ]
+    name: CIS GCP CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Run GCP integration tests
-  #       uses: ./.github/actions/gcp-ci
-  #       with:
-  #         elk-version: ${{ env.ELK_VERSION }}
-  #         workload-identity-provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-  #         service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-  #         gcp-project-id: 'elastic-security-test'
-  #         gcp-account-type: 'single-account'
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-  # ci-gcp-asset-inventory:
-  #   needs: [init-hermit]
-  #   name: GCP Asset Inventory CI
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     contents: "read"
-  #     id-token: "write"
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+      - name: Run GCP integration tests
+        uses: ./.github/actions/gcp-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          workload-identity-provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          gcp-project-id: 'elastic-security-test'
+          gcp-account-type: 'single-account'
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+  ci-gcp-asset-inventory:
+    needs: [init-hermit]
+    name: GCP Asset Inventory CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Run GCP Asset Inventory integration tests
-  #       uses: ./.github/actions/gcp-asset-inventory-ci
-  #       with:
-  #         elk-version: ${{ env.ELK_VERSION }}
-  #         credentials-json: ${{ secrets.GCP_ASSETS_INVENTORY_CREDENTIALS_JSON }}
-  #         project-id: "elastic-security-test"
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run GCP Asset Inventory integration tests
+        uses: ./.github/actions/gcp-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          credentials-json: ${{ secrets.GCP_ASSETS_INVENTORY_CREDENTIALS_JSON }}
+          project-id: "elastic-security-test"
 
 
-  # ci-cnvm:
-  #   needs: [ init-hermit ]
-  #   name: CNVM CI
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 30
-  #   steps:
-  #     - name: Free Disk Space (Ubuntu)
-  #       uses: jlumbroso/free-disk-space@main
-  #       with:
-  #         tool-cache: false
-  #         android: true
-  #         dotnet: true
-  #         haskell: true
-  #         large-packages: false
-  #         docker-images: true
-  #         swap-storage: true
+  ci-cnvm:
+    needs: [ init-hermit ]
+    name: CNVM CI
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
 
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-  #     - name: Run CNVM integration tests
-  #       uses: ./.github/actions/cnvm-ci
-  #       with:
-  #         elk-version: ${{ env.ELK_VERSION }}
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: 'us-east-2'
+      - name: Run CNVM integration tests
+        uses: ./.github/actions/cnvm-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'us-east-2'
 
   docker-images:
     needs: [ init-hermit ]
@@ -245,24 +243,21 @@ jobs:
           - test-target: pre_merge
             kind-config: kind-multi
             values-file: tests/test_environments/values/ci.yml
-          # TODO: uncomment after debugging
-          # - test-target: pre_merge_agent
-          #   kind-config: kind-multi
-          #   values-file: tests/test_environments/values/ci-sa-agent.yml
-          # - test-target: k8s_file_system_rules
-          #   kind-config: kind-test-files
-          #   values-file: tests/test_environments/values/ci-test-k8s-files.yml
-          # ===== End of commented out tests =====
+          - test-target: pre_merge_agent
+            kind-config: kind-multi
+            values-file: tests/test_environments/values/ci-sa-agent.yml
+          - test-target: k8s_file_system_rules
+            kind-config: kind-test-files
+            values-file: tests/test_environments/values/ci-test-k8s-files.yml
           # - test-target: k8s_object_psp_rules
           #   kind-config: kind-multi
           #   values-file: tests/test_environments/values/ci-test-k8s-objects.yml
-          # TODO: uncomment after debugging
-          # - test-target: k8s_process_rules
-          #   kind-config: kind-test-proc-conf1
-          #   values-file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
-          # - test-target: k8s_process_rules
-          #   kind-config: kind-test-proc-conf2
-          #   values-file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
+          - test-target: k8s_process_rules
+            kind-config: kind-test-proc-conf1
+            values-file: tests/test_environments/values/ci-test-k8s-proc-conf1.yml
+          - test-target: k8s_process_rules
+            kind-config: kind-test-proc-conf2
+            values-file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -295,95 +290,95 @@ jobs:
           values-file: ${{ matrix.values-file }}
           docker-images-folder: '/tmp/.docker-images'
 
-  # upload-allure-results:
-  #   needs:
-  #     - ci-azure
-  #     - ci-azure-asset-inventory
-  #     - ci-aws
-  #     - ci-aws-asset-inventory
-  #     - ci-gcp
-  #     - ci-gcp-asset-inventory
-  #     - ci-cnvm
-  #     - ci-k8s
-  #   name: Upload integration tests results
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 60
-  #   permissions:
-  #     pull-requests: write
-  #   if: ${{ always() }}
-  #   env:
-  #     AWS_REGION: "eu-west-1"
-  #     ALLURE_S3_BUCKET: "s3://csp-allure-reports/allure_reports/cloudbeat/ci"
-  #     S3_BUCKET_ALLURE_REPORT_AP: "http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/ci"
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+  upload-allure-results:
+    needs:
+      - ci-azure
+      - ci-azure-asset-inventory
+      - ci-aws
+      - ci-aws-asset-inventory
+      - ci-gcp
+      - ci-gcp-asset-inventory
+      - ci-cnvm
+      - ci-k8s
+    name: Upload integration tests results
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    permissions:
+      pull-requests: write
+    if: ${{ always() }}
+    env:
+      AWS_REGION: "eu-west-1"
+      ALLURE_S3_BUCKET: "s3://csp-allure-reports/allure_reports/cloudbeat/ci"
+      S3_BUCKET_ALLURE_REPORT_AP: "http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/ci"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - uses: actions/download-artifact@v4
-  #       if: ${{ always() }}
-  #       with:
-  #         pattern: allure-results-ci-*
-  #         path: tests/allure/results/
-  #         merge-multiple: true
+      - uses: actions/download-artifact@v4
+        if: ${{ always() }}
+        with:
+          pattern: allure-results-ci-*
+          path: tests/allure/results/
+          merge-multiple: true
 
-  #     - name: log
-  #       if: ${{ always() }}
-  #       shell: bash
-  #       run: |
-  #         ls -lahR tests/allure/results/ || true
+      - name: log
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          ls -lahR tests/allure/results/ || true
 
-  #     - name: Publish allure report
-  #       if: ${{ always() }}
-  #       uses: andrcuns/allure-publish-action@v2.7.1
-  #       env:
-  #         GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         AWS_REGION: ${{ env.AWS_REGION }}
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       with:
-  #         storageType: s3
-  #         resultsGlob: "tests/allure/results"
-  #         updatePr: actions
-  #         collapseSummary: false
-  #         summary: suites
-  #         summaryTableType: markdown
-  #         copyLatest: true
-  #         bucket: csp-allure-reports
-  #         prefix: allure_reports/cloudbeat/ci/${{ github.event.number }}
-  #         ignoreMissingResults: true
-  #         debug: false
+      - name: Publish allure report
+        if: ${{ always() }}
+        uses: andrcuns/allure-publish-action@v2.7.1
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: "tests/allure/results"
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
+          bucket: csp-allure-reports
+          prefix: allure_reports/cloudbeat/ci/${{ github.event.number }}
+          ignoreMissingResults: true
+          debug: false
 
-  #     - name: Allure Summary
-  #       if: ${{ success() && github.event_name != 'push' }}
-  #       env:
-  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: |
-  #         curl --fail --show-error --location '${{ env.S3_BUCKET_ALLURE_REPORT_AP }}/${{ github.event.number }}/history/history-trend.json' --output ./history-trend.json
-  #         allure_result=./history-trend.json
-  #         allure_url=${{ env.S3_BUCKET_ALLURE_REPORT_AP }}/${{ github.event.number }}/index.html
+      - name: Allure Summary
+        if: ${{ success() && github.event_name != 'push' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail --show-error --location '${{ env.S3_BUCKET_ALLURE_REPORT_AP }}/${{ github.event.number }}/history/history-trend.json' --output ./history-trend.json
+          allure_result=./history-trend.json
+          allure_url=${{ env.S3_BUCKET_ALLURE_REPORT_AP }}/${{ github.event.number }}/index.html
 
-  #         ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
-  #         allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
+          ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
+          allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
 
-  #         # saving result into env variable (with multiline handling)
-  #         echo "ALLURE_SUMMARY<<EOF" >> $GITHUB_ENV
-  #         echo "$allure_summary" >> $GITHUB_ENV
-  #         echo "EOF" >> $GITHUB_ENV
+          # saving result into env variable (with multiline handling)
+          echo "ALLURE_SUMMARY<<EOF" >> $GITHUB_ENV
+          echo "$allure_summary" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
-  #     - name: Comment test success result
-  #       uses: marocchino/sticky-pull-request-comment@v2
-  #       if: ${{ success() && github.event_name != 'push' }}
-  #       with:
-  #         header: CI Test Results
-  #         number: ${{ github.event.number }}
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         message: |
-  #           ${{ env.ALLURE_SUMMARY }}
+      - name: Comment test success result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ success() && github.event_name != 'push' }}
+        with:
+          header: CI Test Results
+          number: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ${{ env.ALLURE_SUMMARY }}
 
-  #     - if: ${{ success() }}
-  #       name: Cleanup docker image artifacts
-  #       uses: geekyeggo/delete-artifact@v5
-  #       with:
-  #         name: docker-images
-  #         failOnError: false
+      - if: ${{ success() }}
+        name: Cleanup docker image artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: docker-images
+          failOnError: false
