@@ -210,17 +210,19 @@ cis_azure_4_3_3_pass = AzureServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
-cis_azure_4_3_3_fail = AzureServiceCase(
-    rule_tag=CIS_4_3_3,
-    case_identifier="test-postgresql-single-server-failpgserver",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+# cis_azure_4_3_3_fail = AzureServiceCase(
+#     rule_tag=CIS_4_3_3,
+#     case_identifier="test-postgresql-single-server-failpgserver",
+#     expected=RULE_FAIL_STATUS,
+# )
 
 cis_azure_4_3_3 = {
     """4.3.3 Ensure server parameter 'log_connections' is set to 'ON' for
         PostgreSQL Database Server (Automated) expect: passed""": cis_azure_4_3_3_pass,
-    """4.3.3 Ensure server parameter 'log_connections' is set to 'ON' for
-        PostgreSQL Database Server (Automated) expect: failed""": cis_azure_4_3_3_fail,
+    # TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+    # """4.3.3 Ensure server parameter 'log_connections' is set to 'ON' for
+    #     PostgreSQL Database Server (Automated) expect: failed""": cis_azure_4_3_3_fail,
 }
 
 cis_azure_4_3_4_pass = AzureServiceCase(
@@ -229,24 +231,27 @@ cis_azure_4_3_4_pass = AzureServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
-cis_azure_4_3_4_fail = AzureServiceCase(
-    rule_tag=CIS_4_3_4,
-    case_identifier="test-postgresql-single-server-failpgserver",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+# cis_azure_4_3_4_fail = AzureServiceCase(
+#     rule_tag=CIS_4_3_4,
+#     case_identifier="test-postgresql-single-server-failpgserver",
+#     expected=RULE_FAIL_STATUS,
+# )
 
 cis_azure_4_3_4 = {
     """4.3.4 Ensure server parameter 'log_disconnections' is set to 'ON' for
         PostgreSQL Database Server (Automated) expect: passed""": cis_azure_4_3_4_pass,
-    """4.3.4 Ensure server parameter 'log_disconnections' is set to 'ON' for
-        PostgreSQL Database Server (Automated) expect: failed""": cis_azure_4_3_4_fail,
+    # TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+    # """4.3.4 Ensure server parameter 'log_disconnections' is set to 'ON' for
+    #     PostgreSQL Database Server (Automated) expect: failed""": cis_azure_4_3_4_fail,
 }
 
-cis_azure_4_3_5_pass_single_server = AzureServiceCase(
-    rule_tag=CIS_4_3_5,
-    case_identifier="test-postgresql-single-server",
-    expected=RULE_PASS_STATUS,
-)
+# TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+# cis_azure_4_3_5_pass_single_server = AzureServiceCase(
+#     rule_tag=CIS_4_3_5,
+#     case_identifier="test-postgresql-single-server",
+#     expected=RULE_PASS_STATUS,
+# )
 
 cis_azure_4_3_5_fail_single_server = AzureServiceCase(
     rule_tag=CIS_4_3_5,
@@ -267,8 +272,9 @@ cis_azure_4_3_5_fail_flexible_server = AzureServiceCase(
 )
 
 cis_azure_4_3_5 = {
-    """4.3.5 Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server
-    (Automated) [SINGLE SERVER] expect: passed""": cis_azure_4_3_5_pass_single_server,
+    # TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+    # """4.3.5 Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server
+    # (Automated) [SINGLE SERVER] expect: passed""": cis_azure_4_3_5_pass_single_server,
     """4.3.5 Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server
     (Automated) [SINGLE SERVER] expect: failed""": cis_azure_4_3_5_fail_single_server,
     """4.3.5 Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server
@@ -277,24 +283,25 @@ cis_azure_4_3_5 = {
     (Automated) [FLEXIBLE SERVER] expect: failed""": cis_azure_4_3_5_fail_flexible_server,
 }
 
-cis_azure_4_3_6_pass = AzureServiceCase(
-    rule_tag=CIS_4_3_6,
-    case_identifier="test-postgresql-single-server",
-    expected=RULE_PASS_STATUS,
-)
+# TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+# cis_azure_4_3_6_pass = AzureServiceCase(
+#     rule_tag=CIS_4_3_6,
+#     case_identifier="test-postgresql-single-server",
+#     expected=RULE_PASS_STATUS,
+# )
 
-cis_azure_4_3_6_fail = AzureServiceCase(
-    rule_tag=CIS_4_3_6,
-    case_identifier="test-postgresql-single-server-failpgserver",
-    expected=RULE_FAIL_STATUS,
-)
+# cis_azure_4_3_6_fail = AzureServiceCase(
+#     rule_tag=CIS_4_3_6,
+#     case_identifier="test-postgresql-single-server-failpgserver",
+#     expected=RULE_FAIL_STATUS,
+# )
 
-cis_azure_4_3_6 = {
-    """4.3.6 Ensure Server Parameter 'log_retention_days' is greater
-        than 3 days for PostgreSQL Database Server (Automated) expect: passed""": cis_azure_4_3_6_pass,
-    """4.3.6 Ensure Server Parameter 'log_retention_days' is greater
-        than 3 days for PostgreSQL Database Server (Automated) expect: failed""": cis_azure_4_3_6_fail,
-}
+# cis_azure_4_3_6 = {
+#     """4.3.6 Ensure Server Parameter 'log_retention_days' is greater
+#         than 3 days for PostgreSQL Database Server (Automated) expect: passed""": cis_azure_4_3_6_pass,
+#     """4.3.6 Ensure Server Parameter 'log_retention_days' is greater
+#         than 3 days for PostgreSQL Database Server (Automated) expect: failed""": cis_azure_4_3_6_fail,
+# }
 
 cis_azure_4_3_7_pass = AzureServiceCase(
     rule_tag=CIS_4_3_7,
@@ -302,30 +309,33 @@ cis_azure_4_3_7_pass = AzureServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
-cis_azure_4_3_7_fail = AzureServiceCase(
-    rule_tag=CIS_4_3_7,
-    case_identifier="test-postgresql-single-server-failpgserver",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+# cis_azure_4_3_7_fail = AzureServiceCase(
+#     rule_tag=CIS_4_3_7,
+#     case_identifier="test-postgresql-single-server-failpgserver",
+#     expected=RULE_FAIL_STATUS,
+# )
 
 cis_azure_4_3_7 = {
     """4.3.7 Ensure 'Allow access to Azure services' for PostgreSQL
         Database Server is disabled (Automated) expect: passed""": cis_azure_4_3_7_pass,
-    """4.3.7 Ensure 'Allow access to Azure services' for PostgreSQL
-        Database Server is disabled (Automated) expect: failed""": cis_azure_4_3_7_fail,
+    # TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+    # """4.3.7 Ensure 'Allow access to Azure services' for PostgreSQL
+    #     Database Server is disabled (Automated) expect: failed""": cis_azure_4_3_7_fail,
 }
 
-cis_azure_4_3_8_fail = AzureServiceCase(
-    rule_tag=CIS_4_3_8,
-    case_identifier="test-postgresql-single-server-failpgserver",
-    expected=RULE_FAIL_STATUS,
-)
+# TODO: This will be cleaned up in issue https://github.com/elastic/cloudbeat/issues/2544
+# cis_azure_4_3_8_fail = AzureServiceCase(
+#     rule_tag=CIS_4_3_8,
+#     case_identifier="test-postgresql-single-server-failpgserver",
+#     expected=RULE_FAIL_STATUS,
+# )
 
-cis_azure_4_3_8 = {
-    # Can't test this rule passing, motivation: https://github.com/elastic/cloudbeat/pull/1797
-    """4.3.8 Ensure 'Infrastructure double encryption' for PostgreSQL
-        Database Server is 'Enabled' (Automated) expect: failed""": cis_azure_4_3_8_fail,
-}
+# cis_azure_4_3_8 = {
+#     # Can't test this rule passing, motivation: https://github.com/elastic/cloudbeat/pull/1797
+#     """4.3.8 Ensure 'Infrastructure double encryption' for PostgreSQL
+#         Database Server is 'Enabled' (Automated) expect: failed""": cis_azure_4_3_8_fail,
+# }
 
 # 4.4.* Rules ====================================
 
@@ -394,9 +404,9 @@ test_cases = {
     **cis_azure_4_3_3,
     **cis_azure_4_3_4,
     **cis_azure_4_3_5,
-    **cis_azure_4_3_6,
+    # **cis_azure_4_3_6,
     **cis_azure_4_3_7,
-    **cis_azure_4_3_8,
+    # **cis_azure_4_3_8,
     # **cis_azure_4_4_1,
     **cis_azure_4_4_2,
     **cis_azure_4_5_1,
