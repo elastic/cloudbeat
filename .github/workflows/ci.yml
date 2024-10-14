@@ -202,36 +202,36 @@ jobs:
   #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   #         aws-region: 'us-east-2'
 
-  # docker-images:
-  #   needs: [ init-hermit ]
-  #   name: Build docker images
-  #   # Since we build the cloudbeat in the worker's OS and as non static,
-  #   # we need to keep the OS version same as elastic-agent docker image base.
-  #   # docker run --interactive --tty --rm --entrypoint bash docker.elastic.co/elastic-agent/elastic-agent-complete:8.14.0-SNAPSHOT -c 'cat /etc/os-release'
-  #   runs-on: ubuntu-20.04
-  #   timeout-minutes: 40
-  #   steps:
-  #     - name: Free Disk Space (Ubuntu)
-  #       uses: jlumbroso/free-disk-space@main
-  #       with:
-  #         tool-cache: false
-  #         android: true
-  #         dotnet: true
-  #         haskell: true
-  #         large-packages: false
-  #         docker-images: true
-  #         swap-storage: true
+  docker-images:
+    needs: [ init-hermit ]
+    name: Build docker images
+    # Since we build the cloudbeat in the worker's OS and as non static,
+    # we need to keep the OS version same as elastic-agent docker image base.
+    # docker run --interactive --tty --rm --entrypoint bash docker.elastic.co/elastic-agent/elastic-agent-complete:8.14.0-SNAPSHOT -c 'cat /etc/os-release'
+    runs-on: ubuntu-20.04
+    timeout-minutes: 40
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
 
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Hermit Environment
-  #       uses: ./.github/actions/hermit
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
-  #     - name: Build docker images
-  #       uses: ./.github/actions/docker-images
-  #       with:
-  #         build-docker-images: 'true'
+      - name: Build docker images
+        uses: ./.github/actions/docker-images
+        with:
+          build-docker-images: 'true'
 
   ci-k8s:
     needs: [ init-hermit, docker-images ]
