@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=duplicate-code
 """
 Generate and deploy development templates for Azure deployment.
 
