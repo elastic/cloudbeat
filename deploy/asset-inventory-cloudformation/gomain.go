@@ -1,5 +1,3 @@
-// TODO(kuba): Update this file
-
 // Licensed to Elasticsearch B.V. under one or more contributor
 // license agreements. See the NOTICE file distributed with
 // this work for additional information regarding copyright
