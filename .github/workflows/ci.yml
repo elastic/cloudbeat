@@ -3,10 +3,9 @@ name: Tests
 on:
   # Temporary disabled, will be solved by https://github.com/elastic/security-team/issues/9129
   # pull_request_target:
-  #  branches:
-  #   - main
-  #   - "[0-9]+.[0-9]+"
-  #   types: [opened, synchronize, reopened]
+  #   branches:
+  #     - main
+  #     - "[0-9]+.[0-9]+"
   push:
     branches:
       - main
