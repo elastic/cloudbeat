@@ -26,7 +26,7 @@ inputs:
   docker-images-folder:
     description: 'Docker build cache folder'
     required: false
-    default: '/tmp/.docker-images'
+    default: .docker-images
 
   goos:
     description: 'GOOS environment variable'
@@ -118,16 +118,16 @@ runs:
       name: Rotate cache
       shell: bash
       run: |
-        ls -lahR /tmp/ || true
+        ls -lahR ${{ inputs.docker-images-folder }} || true
         [[ -d ${{ inputs.docker-build-cache-folder }}-new ]] && rm -rf ${{ inputs.docker-build-cache-folder }} && mv ${{ inputs.docker-build-cache-folder }}-new ${{ inputs.docker-build-cache-folder }}
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Upload docker images
-      # Pin action version to 4.3.4 See https://github.com/actions/upload-artifact/issues/589
-      uses: actions/upload-artifact@v4.3.4
+      uses: actions/upload-artifact@v4
       with:
         name: docker-images
-        path: ${{ inputs.docker-images-folder }}
+        path: |
+          ${{ inputs.docker-images-folder }}/*.tar
         if-no-files-found: error
         retention-days: 2
         overwrite: true
