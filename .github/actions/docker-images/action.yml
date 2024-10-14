@@ -22,11 +22,11 @@ inputs:
   docker-build-cache-folder:
     description: 'Docker build cache folder'
     required: false
-    default: '/tmp/.buildx-cache'
+    default: /tmp/.buildx-cache
   docker-images-folder:
     description: 'Docker build cache folder'
     required: false
-    default: '/tmp/.docker-images'
+    default: /tmp/.docker-images
 
   goos:
     description: 'GOOS environment variable'
