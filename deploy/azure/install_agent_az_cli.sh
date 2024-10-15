@@ -33,11 +33,17 @@
 # Exit immediately if a command exits with a non-zero status, print each command before executing it, and fail pipelines if any command fails.
 set -euo pipefail
 
+# Extract major and minor versions
+MAJOR_VERSION=$(echo "${STACK_VERSION}" | cut -d'.' -f1)
 MINOR_VERSION=$(echo "${STACK_VERSION}" | cut -d'.' -f2)
-# Check if minor version is less than 12, ie. 8.11 and below
-if ((MINOR_VERSION < 12)); then
-    echo "Versions 8.11 and below are not supported. Please use versions 8.12+"
-    exit 0
+
+# Check for unsupported versions
+if [[ "$MAJOR_VERSION" -eq 8 && "$MINOR_VERSION" -lt 12 ]]; then
+    echo "Versions 8.11 and below are not supported. Please use versions 8.12+."
+    exit 1
+elif [[ "$MAJOR_VERSION" -lt 8 ]]; then
+    echo "Unsupported version: ${STACK_VERSION}. Please use versions 8.12+ or 9.x.x and above."
+    exit 1
 fi
 
 # Create a resource group with the name DEPLOYMENT_NAME

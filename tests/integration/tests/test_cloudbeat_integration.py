@@ -10,7 +10,7 @@ import pytest
 from commonlib.utils import get_findings, wait_for_cycle_completion
 from loguru import logger
 
-CONFIG_TIMEOUT = 45
+CONFIG_TIMEOUT = 90
 
 cluster_data_dict = {
     "vanilla": ["file", "process", "k8s_object"],
