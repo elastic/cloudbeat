@@ -45,7 +45,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.32.3
 	github.com/aws/aws-sdk-go-v2/service/sts v1.31.3
 	github.com/aws/smithy-go v1.21.0
+<<<<<<< HEAD
 	github.com/dgraph-io/ristretto v0.1.1
+=======
+	github.com/dgraph-io/ristretto v1.0.0
+>>>>>>> 008aabb8 (build(deps): Bump github.com/dgraph-io/ristretto from 0.1.1 to 1.0.0 (#2574))
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20240902050359-30320a3bfcfc
 	github.com/elastic/e2e-testing v1.2.3
