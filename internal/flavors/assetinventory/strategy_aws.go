@@ -41,7 +41,6 @@ const (
 )
 
 func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
-	// TODO(kuba): Handle AWS Gov
 	awsConfig, err := awslib.InitializeAWSConfig(s.cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, err
