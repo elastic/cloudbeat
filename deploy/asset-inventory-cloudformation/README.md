@@ -1,6 +1,3 @@
-#TODO(kuba): Update readme
-
-
 ## Elastic Agent EC2 CloudFormation template
 
 ### What it does
@@ -22,7 +19,6 @@ FLEET_URL="<Elastic Agent Fleet URL>"
 ENROLLMENT_TOKEN="<Elastic Agent Enrollment Token>"
 ELASTIC_ARTIFACT_SERVER="https://artifacts.elastic.co/downloads/beats/elastic-agent" # Replace artifact URL with a pre-release version (BC or snapshot)
 ELASTIC_AGENT_VERSION="<Elastic Agent Version>" # e.g: 8.8.0 | 8.8.0-SNAPSHOT
-DEPLOYMENT_TYPE="<Type>" # e.g: CNVM | CSPM (default is CNVM)
 
 DEV.ALLOW_SSH=false # Set to true to allow SSH connections to the deployed instance
 DEV.KEY_NAME="" # When SSH is allowed, you must provide the key name that will be used to ssh into the EC2
