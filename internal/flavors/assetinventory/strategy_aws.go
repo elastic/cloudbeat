@@ -78,6 +78,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 		)
 		if ok := tryListingBuckets(ctx, s.logger, assumedRoleConfig); !ok {
 			// role does not exist, skip identity/account
+			s.logger.Infof("Skipping identity on purpose %+v", identity)
 			continue
 		}
 		accountFetchers := awsfetcher.New(s.logger, &identity, assumedRoleConfig)
