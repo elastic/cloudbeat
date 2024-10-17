@@ -190,7 +190,7 @@ func (p *storageAccountProvider) ListStorageAccountQueues(ctx context.Context, s
 
 		queues, err := transformQueues(responses, sa)
 		if err != nil {
-			return nil, fmt.Errorf("error while transforming azure queues for storage accounts %s: %w", sa.Id, err)
+			p.log.Errorf("error while transforming azure queues for storage accounts %s: %w", sa.Id, err)
 		}
 
 		assets = append(assets, queues...)
@@ -207,11 +207,10 @@ func (p *storageAccountProvider) ListStorageAccountQueueServices(ctx context.Con
 			return nil, fmt.Errorf("error while fetching azure queue services for storage accounts %s: %w", sa.Id, err)
 		}
 
-		var errs error
 		for _, item := range response.Value {
 			properties, err := maps.AsMapStringAny(item.QueueServiceProperties)
 			if err != nil {
-				errs = errors.Join(errs, err)
+				p.log.Errorf("error while transforming azure queue services for storage accounts %s: %w", sa.Id, err)
 			}
 
 			assets = append(assets, AzureAsset{
@@ -228,11 +227,7 @@ func (p *storageAccountProvider) ListStorageAccountQueueServices(ctx context.Con
 				},
 			})
 		}
-		if errs != nil {
-			return nil, fmt.Errorf("error while transforming azure queue services for storage accounts %s: %w", sa.Id, errs)
-		}
 	}
-
 	return assets, nil
 }
 
