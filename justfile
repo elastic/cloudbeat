@@ -125,6 +125,9 @@ deploy-arm:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
+deploy-asset-inventory-cloudformation:
+  cd deploy/asset-inventory-cloudformation && go run .
+
 deploy-dm:
   .deploy/deployment-manager/deploy.sh
 
