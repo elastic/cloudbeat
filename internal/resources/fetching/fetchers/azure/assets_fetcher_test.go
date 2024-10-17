@@ -20,12 +20,12 @@ package fetchers
 import (
 	"context"
 	"errors"
+	"maps"
 	"testing"
 
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -61,7 +61,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	var flatMockAssets []inventory.AzureAsset
 	for _, assetGroup := range AzureAssetGroups {
 		var mockAssets []inventory.AzureAsset
-		for _, assetType := range maps.Keys(AzureAssetTypeToTypePair) {
+		for assetType := range maps.Keys(AzureAssetTypeToTypePair) {
 			mockAssets = append(mockAssets,
 				inventory.AzureAsset{
 					Id:             "id",

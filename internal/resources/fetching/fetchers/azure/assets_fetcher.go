@@ -21,9 +21,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/elastic/elastic-agent-libs/logp"
-	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -98,7 +99,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	var assets []inventory.AzureAsset
 	for _, assetGroup := range AzureAssetGroups {
 		// Fetching all types even if non-existent in asset group for simplicity
-		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureAssetTypeToTypePair))
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, slices.Collect(maps.Keys(AzureAssetTypeToTypePair)))
 		if err != nil {
 			f.log.Errorf("AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
 			errAgg = errors.Join(errAgg, err)

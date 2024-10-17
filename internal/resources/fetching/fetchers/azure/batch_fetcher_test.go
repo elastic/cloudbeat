@@ -20,12 +20,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"maps"
 	"testing"
 
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -60,7 +60,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	var flatMockAssets []inventory.AzureAsset
 	for _, assetGroup := range AzureBatchAssetGroups {
 		var mockAssets []inventory.AzureAsset
-		for _, assetType := range maps.Keys(AzureBatchAssets) {
+		for assetType := range maps.Keys(AzureBatchAssets) {
 			mockId := fmt.Sprintf("%s-%s", AzureBatchAssets[assetType].SubType, "subId1")
 			mockAssets = append(mockAssets,
 				inventory.AzureAsset{
@@ -167,8 +167,8 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 
 	for _, assetGroup := range AzureBatchAssetGroups {
 		var mockAssets []inventory.AzureAsset
-		for _, assetType := range maps.Keys(AzureBatchAssets) {
-			for _, subKey := range maps.Keys(subMap) {
+		for assetType := range maps.Keys(AzureBatchAssets) {
+			for subKey := range maps.Keys(subMap) {
 				mockId := fmt.Sprintf("%s-%s", AzureBatchAssets[assetType].SubType, subKey)
 				mockAssets = append(mockAssets,
 					inventory.AzureAsset{
@@ -213,7 +213,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 	})
 	s.Len(expectedSubs, len(subMap))
 
-	for _, subKey := range maps.Keys(expectedSubs) {
+	for subKey := range maps.Keys(expectedSubs) {
 		typesPerSub := expectedSubs[subKey]
 		s.Len(typesPerSub, len(AzureBatchAssets))
 		for _, subTypeRes := range typesPerSub {
