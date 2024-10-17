@@ -57,7 +57,7 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 
 	// setup
 	logger := logp.NewLogger("azurefetcher_test")
-	provider := newMockSubscriptionProvider(t)
+	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(azureAssets, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(nil, nil)
 	fetcher := newAccountFetcher(logger, provider)
@@ -94,7 +94,7 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 
 	// setup
 	logger := logp.NewLogger("azurefetcher_test")
-	provider := newMockSubscriptionProvider(t)
+	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(nil, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(azureAssets, nil)
 	fetcher := newAccountFetcher(logger, provider)
