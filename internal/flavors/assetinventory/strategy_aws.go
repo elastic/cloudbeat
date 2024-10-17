@@ -56,9 +56,6 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
 		return awsfetcher.New(s.logger, awsIdentity, *awsConfig), nil
 	}
-	if s.cfg.CloudConfig.Aws.AccountType != config.OrganizationAccount {
-		return nil, fmt.Errorf("unsupported account_type: %q", s.cfg.CloudConfig.Aws.AccountType)
-	}
 
 	// Assume audit roles per selected account and generate fetchers for them
 	rootRoleConfig := assumeRole(

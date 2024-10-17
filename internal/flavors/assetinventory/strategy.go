@@ -51,7 +51,12 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 
 	switch s.cfg.AssetInventoryProvider {
 	case config.ProviderAWS:
-		fetchers, err = s.initAwsFetchers(ctx)
+		switch s.cfg.CloudConfig.Aws.AccountType {
+		case config.SingleAccount, config.OrganizationAccount:
+			fetchers, err = s.initAwsFetchers(ctx)
+		default:
+			err = fmt.Errorf("unsupported account_type: %q", s.cfg.CloudConfig.Aws.AccountType)
+		}
 	case config.ProviderAzure:
 		fetchers, err = s.initAzureFetchers(ctx)
 	case config.ProviderGCP:
