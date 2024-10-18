@@ -44,6 +44,7 @@ type provider struct {
 // Second argument is scopes. Leave nil, then it selects default; Adjust if in trouble
 // Docs: https://learn.microsoft.com/en-us/graph/sdks/create-client?from=snippets&tabs=go
 func NewProvider(log *logp.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error) {
+	// Requires 'Directory.Read.All' API permission
 	c, err := graph.NewGraphServiceClientWithCredentials(azureConfig.Credentials, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating MS Graph client: %w", err)
