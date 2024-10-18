@@ -73,7 +73,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 				item.GetBackingStore().Enumerate(),
 			),
 			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
+				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
 					Id: tenantId,
 				},
