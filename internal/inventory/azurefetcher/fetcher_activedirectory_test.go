@@ -128,7 +128,7 @@ await:
 		}
 	}
 
-	require.Len(t, received, 0, "expected error, not AssetEvents")
+	require.Empty(t, received, "expected error, not AssetEvents")
 	require.NotEmpty(t, logCaptureBuf, "expected logs, but captured none")
 	require.Contains(t, logCaptureBuf.String(), "error listing service principals", "expected message not found")
 }
