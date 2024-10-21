@@ -18,13 +18,20 @@
 package azurefetcher
 
 import (
+	"bytes"
+	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/google/uuid"
 	"github.com/microsoft/kiota-abstractions-go/store"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -78,4 +85,50 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	fetcher := newActiveDirectoryFetcher(logger, provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
+}
+
+func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
+	// set up log capture
+	var log *logp.Logger
+	logCaptureBuf := &bytes.Buffer{}
+	{
+		replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
+			return zapcore.NewCore(
+				zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+				zapcore.AddSync(logCaptureBuf),
+				zapcore.DebugLevel,
+			)
+		})
+		log = logp.NewLogger("test").WithOptions(replacement)
+	}
+
+	provider := newMockActivedirectoryProvider(t)
+	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
+		[]*models.ServicePrincipal{}, fmt.Errorf("! error listing service principals"),
+	)
+
+	fetcher := newActiveDirectoryFetcher(log, provider)
+
+	// collect
+	ch := make(chan inventory.AssetEvent)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+	go func() {
+		fetcher.Fetch(ctx, ch)
+	}()
+
+	received := []inventory.AssetEvent{}
+await:
+	for {
+		select {
+		case <-ctx.Done():
+			break await
+		case event := <-ch:
+			received = append(received, event)
+		}
+	}
+
+	require.Len(t, received, 0, "expected error, not AssetEvents")
+	require.NotEmpty(t, logCaptureBuf, "expected logs, but captured none")
+	require.Contains(t, logCaptureBuf.String(), "error listing service principals", "expected message not found")
 }
