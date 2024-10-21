@@ -24,7 +24,6 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
-	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -34,8 +33,7 @@ type activedirectoryFetcher struct {
 }
 
 type (
-	activedirectoryProviderFunc func(context.Context) ([]azurelib.AzureAsset, error)
-	activedirectoryProvider     interface {
+	activedirectoryProvider interface {
 		ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error)
 	}
 )

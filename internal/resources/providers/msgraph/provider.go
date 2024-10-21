@@ -75,6 +75,9 @@ func (p *provider) ListServicePrincipals(ctx context.Context) ([]*models.Service
 		p.client.ServicePrincipals().RequestAdapter,
 		models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue,
 	)
+	if err != nil {
+		return nil, fmt.Errorf("error paging Azure Service Principals: %w", err)
+	}
 
 	items := []*models.ServicePrincipal{}
 	err = pageIterator.Iterate(ctx, func(pageItem *models.ServicePrincipal) bool {
