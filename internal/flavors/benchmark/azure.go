@@ -50,7 +50,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-		builder.WithManagerTimeout(20*time.Minute),
+		builder.WithManagerTimeout(17*time.Hour),
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
