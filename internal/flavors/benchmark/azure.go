@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -50,7 +51,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-		builder.WithManagerTimeout(20*time.Minute),
+		builder.WithManagerTimeout(calculateFetcherTimeout(cfg.Period)),
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
@@ -94,4 +95,17 @@ func (a *Azure) checkDependencies() error {
 		return errors.New("azure asset inventory is uninitialized")
 	}
 	return nil
+}
+
+// calculateFetcherTimeout calculates the timeout for each fetcher based on period as ~70% of the period duration. If less than 3 hours, it returns 3 hours.
+func calculateFetcherTimeout(period time.Duration) time.Duration {
+	roundedHours := math.Round(period.Hours() * 0.7)
+	to := time.Duration(roundedHours) * time.Hour
+
+	const min = 3 * time.Hour
+	if to < min {
+		return min
+	}
+
+	return to
 }
