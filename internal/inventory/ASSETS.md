@@ -98,9 +98,9 @@ Infrastructure: 24% (18/73)
 
 ## AZURE Resources
 
-**Progress: 23% (12/51)**
+**Progress: 29% (15/51)**
 Identity: 0% (0/8)
-Infrastructure: 27% (12/43)
+Infrastructure: 34% (15/43)
 
 <details> <summary>Full table</summary>
 
@@ -114,8 +114,8 @@ Infrastructure: 27% (12/43)
 | Identity | Directory | Group | Azure AD Group | No ❌ |
 | Identity | Directory | User | Azure AD User | No ❌ |
 | Identity | Service Identity | Service Principal | Azure AD Service Principal | No ❌ |
-| Infrastructure | Application Integration | Message Queue | Azure Storage Queue | No ❌ |
-| Infrastructure | Application Integration | Message Queue | Azure Storage Queue Service | No ❌ |
+| Infrastructure | Application Integration | Message Queue | Azure Storage Queue | Yes ✅ |
+| Infrastructure | Application Integration | Message Queue | Azure Storage Queue Service | Yes ✅ |
 | Infrastructure | Application | Web Application | Azure App Service | Yes ✅ |
 | Infrastructure | Compute | Virtual Machine | Azure Virtual Machine | Yes ✅ |
 | Infrastructure | Container | Registry | Azure Container Registry | Yes ✅ |
@@ -154,7 +154,7 @@ Infrastructure: 27% (12/43)
 | Infrastructure | Storage | File Storage | Azure Storage File Service | No ❌ |
 | Infrastructure | Storage | File Storage | Azure Storage File Share | No ❌ |
 | Infrastructure | Storage | Object Storage | Azure Storage Blob Container | No ❌ |
-| Infrastructure | Storage | Object Storage | Azure Storage Blob Service | No ❌ |
+| Infrastructure | Storage | Object Storage | Azure Storage Blob Service | Yes ✅ |
 | Infrastructure | Storage | Snapshot | Azure Snapshot | Yes ✅ |
 | Infrastructure | Storage | Storage | Azure Storage Account | Yes ✅ |
 
