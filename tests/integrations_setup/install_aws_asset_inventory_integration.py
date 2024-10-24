@@ -38,8 +38,8 @@ INTEGRATION_INPUT = {
     "name": generate_random_name("pkg-asset-inventory-aws"),
     "input_name": "asset_inventory_aws",
     "vars": {
-        "access_key_id": cnfg.aws_config.access_key_id,
-        "secret_access_key": cnfg.aws_config.secret_access_key,
+        "aws.access_key_id": cnfg.aws_config.access_key_id,
+        "aws.secret_access_key": cnfg.aws_config.secret_access_key,
         "aws.credentials.type": "direct_access_keys",
     },
 }
