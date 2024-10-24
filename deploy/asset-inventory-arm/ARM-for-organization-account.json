@@ -1,0 +1,450 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[concat('cloudbeat-resource-group-', dateTimeToEpoch(utcNow('u')))]",
+            "metadata": {
+                "description": "The resource group name where the virtual machine with the Elastic Agent is running on"
+            }
+        },
+        "SubscriptionId": {
+            "type": "string",
+            "metadata": {
+                "description": "The id of the subscription where the virtual machine with the Elastic Agent is running on"
+            }
+        },
+        "ElasticArtifactServer": {
+            "type": "string",
+            "defaultValue": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
+            "metadata": {
+                "description": "The URL of the artifact server"
+            }
+        },
+        "ElasticAgentVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "The version of elastic-agent to install"
+            },
+            "defaultValue": "9.0.0"
+        },
+        "FleetUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "The fleet URL of elastic-agent"
+            }
+        },
+        "EnrollmentToken": {
+            "type": "string",
+            "metadata": {
+                "description": "The enrollment token of elastic-agent"
+            }
+        },
+        "DeploymentLocation": {
+            "type": "string",
+            "defaultValue": "[deployment().location]",
+            "metadata": {
+                "description": "Deployment location"
+            }
+        }
+    },
+    "variables": {
+        "resourceGroupDeployment": "[concat('resource-group-deployment-', parameters('DeploymentLocation'))]",
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', parameters('DeploymentLocation'))]",
+        "roleGUID": "[guid(parameters('SubscriptionId'), parameters('ResourceGroupName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('resourceGroupDeployment')]",
+            "location": "[parameters('DeploymentLocation')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "DeploymentLocation": {
+                        "value": "[parameters('DeploymentLocation')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "DeploymentLocation": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Resources/resourceGroups",
+                            "apiVersion": "2022-09-01",
+                            "name": "[parameters('ResourceGroupName')]",
+                            "location": "[parameters('DeploymentLocation')]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "[variables('roleAssignmentDeployment')]",
+            "location": "[parameters('DeploymentLocation')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "AdditionalRoleGUID": {
+                        "value": "[variables('roleGUID')]"
+                    },
+                    "ManagementGroupID": {
+                        "value": "[managementGroup().id]"
+                    },
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "SubscriptionId": {
+                        "value": "[parameters('SubscriptionId')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "AdditionalRoleGUID": {
+                            "type": "string"
+                        },
+                        "ManagementGroupID": {
+                            "type": "string"
+                        },
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "SubscriptionId": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(parameters('ManagementGroupID'), parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
+                            "properties": {
+                                "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                                "principalId": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('AdditionalRoleGUID'))]",
+                                "principalId": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[variables('resourceGroupDeployment')]",
+                "cloudbeat-vm-deployment"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "cloudbeat-vm-deployment",
+            "resourceGroup": "[parameters('ResourceGroupName')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "AdditionalRoleGUID": {
+                        "value": "[variables('roleGUID')]"
+                    },
+                    "ManagementGroupID": {
+                        "value": "[managementGroup().id]"
+                    },
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "SubscriptionId": {
+                        "value": "[parameters('SubscriptionId')]"
+                    }
+                },
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "AdditionalRoleGUID": {
+                            "type": "string"
+                        },
+                        "ManagementGroupID": {
+                            "type": "string"
+                        },
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "SubscriptionId": {
+                            "type": "string"
+                        },
+                        "AdminUsername": {
+                            "type": "string",
+                            "defaultValue": "cloudbeat",
+                            "metadata": {
+                                "description": "Admin username for the OS profile (Don't change)"
+                            }
+                        },
+                        "ResourceGroupLocation": {
+                            "type": "string",
+                            "defaultValue": "[resourceGroup().location]",
+                            "metadata": {
+                                "description": "Resource Group Location"
+                            }
+                        },
+                        "VMSize": {
+                            "type": "string",
+                            "defaultValue": "Standard_DS2_v2",
+                            "metadata": {
+                                "description": "Size of the VM to be deployed"
+                            }
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2023-09-01",
+                            "name": "cloudbeatVM",
+                            "location": "[parameters('ResourceGroupLocation')]",
+                            "dependsOn": [
+                                "cloudbeatNic",
+                                "cloudbeatGenerateKeypair"
+                            ],
+                            "properties": {
+                                "hardwareProfile": {
+                                    "vmSize": "[parameters('VMSize')]"
+                                },
+                                "storageProfile": {
+                                    "osDisk": {
+                                        "createOption": "FromImage",
+                                        "managedDisk": {
+                                            "storageAccountType": "Standard_LRS"
+                                        }
+                                    },
+                                    "imageReference": {
+                                        "publisher": "canonical",
+                                        "offer": "0001-com-ubuntu-server-jammy",
+                                        "sku": "22_04-lts-gen2",
+                                        "version": "latest"
+                                    }
+                                },
+                                "osProfile": {
+                                    "computerName": "cloudbeatVM",
+                                    "adminUsername": "[parameters('AdminUsername')]",
+                                    "linuxConfiguration": {
+                                        "disablePasswordAuthentication": true,
+                                        "ssh": {
+                                            "publicKeys": [
+                                                {
+                                                    "path": "/home/cloudbeat/.ssh/authorized_keys",
+                                                    "keyData": "[reference('cloudbeatGenerateKeypair').outputs.public_key]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'cloudbeatNic')]"
+                                        }
+                                    ]
+                                }
+                            },
+                            "identity": {
+                                "type": "SystemAssigned"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2023-06-01",
+                            "name": "cloudbeatVNet",
+                            "location": "[parameters('ResourceGroupLocation')]",
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": [
+                                        "10.0.0.0/16"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "cloudbeatSubnet",
+                                        "properties": {
+                                            "addressPrefix": "10.0.0.0/24"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2023-06-01",
+                            "name": "cloudbeatNic",
+                            "location": "[parameters('ResourceGroupLocation')]",
+                            "dependsOn": [
+                                "cloudbeatVNet"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'cloudbeatVNet', 'cloudbeatSubnet')]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Resources/deploymentScripts",
+                            "apiVersion": "2023-08-01",
+                            "name": "cloudbeatGenerateKeypair",
+                            "location": "[parameters('ResourceGroupLocation')]",
+                            "kind": "AzureCLI",
+                            "properties": {
+                                "azCliVersion": "2.51.0",
+                                "cleanupPreference": "Always",
+                                "retentionInterval": "P1D",
+                                "scriptContent": "#/bin/bash -e\nyes | ssh-keygen -f sshkey -N ''\necho \"{\\\"public_key\\\":\\\"$(cat sshkey.pub)\\\"}\" > $AZ_SCRIPTS_OUTPUT_PATH",
+                                "timeout": "PT30M"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleDefinitions",
+                            "apiVersion": "2022-04-01",
+                            "name": "[parameters('AdditionalRoleGUID')]",
+                            "properties": {
+                                "assignableScopes": [
+                                    "[parameters('ManagementGroupID')]",
+                                    "[concat('/subscriptions/', parameters('SubscriptionId'))]",
+                                    "[concat('/subscriptions/', parameters('SubscriptionId'), '/resourcegroups/', parameters('ResourceGroupName'))]"
+                                ],
+                                "description": "Additional read permissions for cloudbeatVM",
+                                "permissions": [
+                                    {
+                                        "actions": [
+                                            "Microsoft.Web/sites/*/read",
+                                            "Microsoft.Web/sites/config/Read",
+                                            "Microsoft.Web/sites/config/list/Action"
+                                        ]
+                                    }
+                                ],
+                                "roleName": "[concat('cloudbeatVM additional permissions ', parameters('ResourceGroupName'))]",
+                                "type": "CustomRole"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[variables('resourceGroupDeployment')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "elastic-agent-deployment",
+            "resourceGroup": "[parameters('ResourceGroupName')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ElasticArtifactServer": {
+                        "value": "[parameters('ElasticArtifactServer')]"
+                    },
+                    "FleetUrl": {
+                        "value": "[parameters('FleetUrl')]"
+                    },
+                    "EnrollmentToken": {
+                        "value": "[parameters('EnrollmentToken')]"
+                    },
+                    "ElasticAgentVersion": {
+                        "value": "[parameters('ElasticAgentVersion')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ElasticArtifactServer": {
+                            "type": "string"
+                        },
+                        "FleetUrl": {
+                            "type": "string"
+                        },
+                        "EnrollmentToken": {
+                            "type": "string"
+                        },
+                        "ElasticAgentVersion": {
+                            "type": "string"
+                        },
+                        "ResourceGroupLocation": {
+                            "type": "string",
+                            "defaultValue": "[resourceGroup().location]",
+                            "metadata": {
+                                "description": "Resource Group Location"
+                            }
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "apiVersion": "2023-09-01",
+                            "name": "cloudbeatVM/customScriptExtension",
+                            "location": "[parameters('ResourceGroupLocation')]",
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Extensions",
+                                "type": "CustomScript",
+                                "typeHandlerVersion": "2.1",
+                                "settings": {
+                                    "fileUris": [
+                                        "https://raw.githubusercontent.com/elastic/cloudbeat/main/deploy/azure/install-agent.sh"
+                                    ],
+                                    "commandToExecute": "[concat('bash install-agent.sh ', parameters('ElasticAgentVersion'), ' ', parameters('ElasticArtifactServer'), ' ', parameters('FleetUrl'), ' ', parameters('EnrollmentToken'))]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "cloudbeat-vm-deployment",
+                "[variables('roleAssignmentDeployment')]"
+            ]
+        }
+    ]
+}
