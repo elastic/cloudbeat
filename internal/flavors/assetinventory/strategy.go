@@ -34,6 +34,7 @@ import (
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
 )
 
 type Strategy interface {
@@ -84,10 +85,15 @@ func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetche
 	initializer := &azurelib.ProviderInitializer{}
 	provider, err := initializer.Init(s.logger, *azureConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize azure config: %w", err)
+		return nil, fmt.Errorf("failed to initialize azure provider: %w", err)
 	}
 
-	return azurefetcher.New(s.logger, provider, azureConfig), nil
+	msgraphProvider, err := msgraph.NewProvider(s.logger, *azureConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize azure msgraph provider: %w", err)
+	}
+
+	return azurefetcher.New(s.logger, provider, msgraphProvider), nil
 }
 
 func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {

@@ -22,12 +22,13 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
-	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
 )
 
-func New(logger *logp.Logger, provider azurelib.ProviderAPI, _ *azure_auth.AzureFactoryConfig) []inventory.AssetFetcher {
+func New(logger *logp.Logger, provider azurelib.ProviderAPI, msgraphProvider msgraph.ProviderAPI) []inventory.AssetFetcher {
 	return []inventory.AssetFetcher{
 		newAccountFetcher(logger, provider),
+		newActiveDirectoryFetcher(logger, msgraphProvider),
 		newResourceGraphFetcher(logger, provider),
 	}
 }
