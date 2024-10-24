@@ -132,54 +132,57 @@ jobs:
         env:
           S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
         run: |
-          aws s3 cp "${{ env.S3_BUCKET }}/terraform.tfstate" "./terraform.tfstate"
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
+          aws s3 cp "$S3_BUCKET/elk-stack-terraform.tfstate" "./elk-stack/terraform.tfstate"
+          aws s3 cp "$S3_BUCKET/cis-terraform.tfstate" "./cis/terraform.tfstate"
 
       - name: Update ELK stack version
-        id: apply
+        id: provision-elk-terraform
         if: success()
+        env:
+          TF_VAR_deployment_name: ${{ inputs.deployment_name }}
+          TF_VAR_region: ${{ env.AWS_REGION }}
+          TF_VAR_project: ${{ github.actor }}
+          TF_VAR_owner: ${{ github.actor }}
+          INFRA_TYPE: elk-stack
         run: |
-          terraform apply --auto-approve \
-            -var="deployment_name=${{ inputs.deployment_name }}" \
-            -var="region=${{ env.AWS_REGION }}" \
-            -var="project=${{ github.actor }}" \
-            -var="owner=${{ github.actor }}"
+          ./manage_infrastructure.sh "$INFRA_TYPE" "apply"
 
       - name: Set Environment Output
         id: env-output
-        run: ../../.ci/scripts/set_cloud_env_params.sh
+        env:
+          INFRA_TYPE: cis
+        run: |
+          ./manage_infrastructure.sh "$INFRA_TYPE" "output"
 
       - name: Set Docker Image version
         if: ${{ ! inputs.docker-image-override }}
         env:
           VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.target-elk-stack-version }}'
         run: |
-          echo "DOCKER_IMAGE=${{ env.VERSION }}" >> $GITHUB_ENV
+          echo "DOCKER_IMAGE=${VERSION}" >> $GITHUB_ENV
 
       - name: Download Integrations data
+        working-directory: ${{ env.WORKING_DIR }}/cis
         env:
           S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
         run: |
-          aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
-          aws s3 cp "${{ env.S3_BUCKET }}/state_data.json" "../../${{ env.INTEGRATIONS_SETUP_DIR }}/state_data.json"
+          aws s3 cp "${S3_BUCKET}/kspm.pem" "${EC2_KSPM_KEY}"
+          aws s3 cp "${S3_BUCKET}/state_data.json" "../../../${INTEGRATIONS_SETUP_DIR}/state_data.json"
 
       - name: Upgrade KSPM Unmanaged agent
+        working-directory: ${{ env.WORKING_DIR }}/cis
         run: |
-          chmod 600 ${{ env.EC2_KSPM_KEY }}
+          chmod 600 ${EC2_KSPM_KEY}
           # Update image
-          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}"
+          ssh -o StrictHostKeyChecking=no -v -i ${EC2_KSPM_KEY} "ubuntu@${KSPM_PUBLIC_IP}" "kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${DOCKER_IMAGE}"
 
       - name: Upgrade KSPM EKS agent
+        env:
+          DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
         run: |
-          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
-              --name $(terraform output -raw deployment_name) --alias eks-config
+          aws eks --region $AWS_REGION update-kubeconfig --name $DEPLOYMENT_NAME --alias eks-config
           kubectl config use-context eks-config
-          kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
+          kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${DOCKER_IMAGE}
           kubectl rollout restart daemonset/elastic-agent -n kube-system
 
       - name: Upgrade Linux agents
