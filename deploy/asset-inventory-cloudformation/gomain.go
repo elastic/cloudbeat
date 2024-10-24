@@ -15,6 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// Config is put into a different package to prevent cyclic imports in case
+// it is needed in several locations
+
 package main
 
 import (
@@ -118,10 +121,6 @@ func generateProdTemplate(prodTemplatePath string, devTemplatePath string) error
 	"Key": "project",
 	"Value": "cloudformation"
 }
-.Resources.ElasticAgentEc2Instance.Properties.Tags += {
-	"Key": "deployment-type",
-	"Value": "asset-inventory"
-}
 `
 	return generateTemplate(prodTemplatePath, devTemplatePath, yqExpression)
 }
@@ -132,14 +131,10 @@ func generateTemplate(sourcePath string, targetPath string, yqExpression string)
 		return err
 	}
 
-	preferences := yqlib.NewDefaultYamlPreferences()
-	preferences.Indent = 2
-	preferences.ColorsEnabled = false
-
 	generatedTemplateString, err := yqlib.NewStringEvaluator().Evaluate(
 		yqExpression,
 		string(inputBytes),
-		yqlib.NewYamlEncoder(preferences),
+		yqlib.NewYamlEncoder(2, false, yqlib.NewDefaultYamlPreferences()),
 		yqlib.NewYamlDecoder(yqlib.NewDefaultYamlPreferences()),
 	)
 	if err != nil {
