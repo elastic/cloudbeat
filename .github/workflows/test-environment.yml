@@ -521,7 +521,9 @@ jobs:
           aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
           aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
           aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
-          aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
+          if [[ "${env.asset_inventory_supported}" == "true" ]]; then
+            aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
+          fi
           aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 
       - name: Install Agentless integrations
