@@ -515,13 +515,14 @@ jobs:
         if: always()
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          ASSET_INVENTORY_SUPPORTED: "${{ env.asset_inventory_supported }}"
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
           aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
           aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
           aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
           aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
-          if [[ "${env.asset_inventory_supported}" == "true" ]]; then
+          if [[ "${ASSET_INVENTORY_SUPPORTED}" == "true" ]]; then
             aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
           fi
           aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
