@@ -21,7 +21,7 @@ concurrency:
 jobs:
   check-asset-inventory-supported-version:
     name: Check Asset Inventory supported version
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       asset_inventory_supported: ${{ steps.check-asset-inventory-supported-version.outputs.asset_inventory_supported }}
     steps:
