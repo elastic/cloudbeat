@@ -30,9 +30,15 @@ jobs:
 
       - name: Check Asset Inventory supported version
         id: check-asset-inventory-supported-version
-        uses: ./.github/actions/stack-asset-inventory-dependency
-        with:
-          stack_version: ${{ env.ELK_VERSION }}
+        run: |
+          MIN_VERSION="8.16.0"
+          if [[ "$(echo -e "$MIN_VERSION\n${{ env.ELK_VERSION }}" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
+            echo "Stack version meets the requirement: ${{ env.ELK_VERSION }} >= $MIN_VERSION."
+            echo "asset_inventory_supported=true" >> $GITHUB_ENV
+          else
+            echo "Stack version is below the requirement: ${{ env.ELK_VERSION }} < $MIN_VERSION."
+            echo "asset_inventory_supported=false" >> $GITHUB_ENV
+          fi
 
   init-hermit:
     name: Init Hermit Tools
