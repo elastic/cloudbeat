@@ -147,6 +147,7 @@ jobs:
     outputs:
       deploy-s3-bucket: ${{ steps.upload-state.outputs.s3-bucket-folder }}
       aws-cnvm-stack-name: ${{ steps.upload-state.outputs.aws-cnvm-stack }}
+      asset_inventory_supported: ${{ steps.check-asset-inventory-supported-version.outputs.asset_inventory_supported }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -420,28 +421,22 @@ jobs:
         run: ./install_agent_az_cli.sh
 
       - name: Check Asset Inventory supported version
-        id: asset-inventory-version-check
-        run: |
-          MIN_VERSION="8.16.0"
-          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
-            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
-            echo "asset_inventory_supported=true" >> $GITHUB_ENV
-          else
-            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
-            echo "asset_inventory_supported=false" >> $GITHUB_ENV
-          fi
+        id: check-asset-inventory-supported-version
+        uses: ./.github/actions/stack-asset-inventory-dependency
+        with:
+          stack_version: ${{ inputs.elk-stack-version }}
 
       - name: Install Azure Asset Inventory integration
         id: azure-asset-inventory-integration
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        if: env.asset_inventory_supported == 'true'
+        if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
         run: |
           poetry run python ./install_azure_asset_inventory_integration.py
 
       - name: Deploy Azure Asset Inventory agent
         id: azure-asset-inventory-agent
         working-directory: deploy/azure
-        if: env.asset_inventory_supported == 'true'
+        if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
         env:
           AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
           DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}-inventory"
@@ -499,12 +494,12 @@ jobs:
       - name: Install AWS Asset Inventory integration
         id: aws-asset-inventory
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        if: env.asset_inventory_supported == 'true'
+        if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
         run: |
           poetry run python ./install_aws_asset_inventory_integration.py
 
       - name: Deploy AWS Asset Inventory agent
-        if: env.asset_inventory_supported == 'true'
+        if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
         run: |
           scriptname="aws-asset-inventory-linux.sh"
           src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
