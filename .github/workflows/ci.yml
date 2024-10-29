@@ -30,13 +30,15 @@ jobs:
 
       - name: Check Asset Inventory supported version
         id: check-asset-inventory-supported-version
+        env:
+          STACK_VERSION: ${{ env.ELK_VERSION }}
         run: |
           MIN_VERSION="8.16.0"
-          if [[ "$(echo -e "$MIN_VERSION\n${{ env.ELK_VERSION }}" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
-            echo "Stack version meets the requirement: ${{ env.ELK_VERSION }} >= $MIN_VERSION."
+          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
+            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
             echo "asset_inventory_supported=true" >> $GITHUB_ENV
           else
-            echo "Stack version is below the requirement: ${{ env.ELK_VERSION }} < $MIN_VERSION."
+            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
             echo "asset_inventory_supported=false" >> $GITHUB_ENV
           fi
 
