@@ -227,8 +227,9 @@ type AssetEvent struct {
 
 // Asset contains the identifiers of the asset
 type Asset struct {
-	Id   []string `json:"id"`
-	Name string   `json:"name"`
+	Id              []string `json:"id"`
+	RelatedEntityId []string `json:"related_entity_id"`
+	Name            string   `json:"name"`
 	AssetClassification
 	Tags map[string]string `json:"tags"`
 	Raw  any               `json:"raw"`
