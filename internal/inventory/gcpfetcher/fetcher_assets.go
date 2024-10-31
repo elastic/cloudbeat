@@ -56,6 +56,7 @@ var ResourcesToFetch = []ResourcesClassification{
 	{gcpinventory.ComputeForwardingRuleAssetType, inventory.AssetClassificationGcpForwardingRule},
 	{gcpinventory.CloudFunctionAssetType, inventory.AssetClassificationGcpCloudFunction},
 	{gcpinventory.CloudRunService, inventory.AssetClassificationGcpCloudRunService},
+	{gcpinventory.IamRoleAssetType, inventory.AssetClassificationGcpIamRole},
 }
 
 func newAssetsInventoryFetcher(logger *logp.Logger, provider inventoryProvider) inventory.AssetFetcher {
