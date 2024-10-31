@@ -344,6 +344,12 @@ func WithRawAsset(raw any) AssetEnricher {
 	}
 }
 
+func WithRelatedAssetIds(ids []string) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Asset.RelatedEntityId = ids
+	}
+}
+
 func WithTags(tags map[string]string) AssetEnricher {
 	return func(a *AssetEvent) {
 		if len(tags) == 0 {

@@ -21,6 +21,8 @@ import (
 	"context"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
 	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
@@ -85,6 +87,9 @@ func (f *assetsInventory) fetch(ctx context.Context, assetChan chan<- inventory.
 			[]string{item.Name},
 			item.Name,
 			inventory.WithRawAsset(item),
+			inventory.WithRelatedAssetIds(
+				f.findRelatedAssetIds(classification.SubType, item),
+			),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.GcpCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -101,4 +106,54 @@ func (f *assetsInventory) fetch(ctx context.Context, assetChan chan<- inventory.
 			}),
 		)
 	}
+}
+
+func (f *assetsInventory) findRelatedAssetIds(subType inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
+	var ids []string
+	ids = append(ids, item.Ancestors...)
+	ids = append(ids, item.Resource.Parent)
+
+	var fields map[string]*structpb.Value
+	if item.Resource != nil && item.Resource.Data != nil {
+		fields = item.GetResource().GetData().GetFields()
+	}
+
+	switch subType {
+	case inventory.SubTypeGcpInstance:
+		if v, ok := fields["networkInterfaces"]; ok {
+			for _, networkInterface := range v.GetListValue().GetValues() {
+				networkInterfaceFields := networkInterface.GetStructValue().GetFields()
+				ids = appendIfExists(ids, networkInterfaceFields, "network")
+				ids = appendIfExists(ids, networkInterfaceFields, "subnetwork")
+			}
+		}
+		if v, ok := fields["serviceAccounts"]; ok {
+			for _, serviceAccount := range v.GetListValue().GetValues() {
+				serviceAccountFields := serviceAccount.GetStructValue().GetFields()
+				ids = appendIfExists(ids, serviceAccountFields, "email")
+			}
+		}
+		if v, ok := fields["disks"]; ok {
+			for _, disk := range v.GetListValue().GetValues() {
+				diskFields := disk.GetStructValue().GetFields()
+				ids = appendIfExists(ids, diskFields, "source")
+			}
+		}
+		ids = appendIfExists(ids, fields, "machineType")
+		ids = appendIfExists(ids, fields, "zone")
+	default:
+		f.logger.Warnf("cannot find related asset IDs for unsupported sub-type %q", subType)
+		return ids
+	}
+	ids = lo.WithoutEmpty(ids)
+	ids = lo.Uniq(ids)
+	return ids
+}
+
+func appendIfExists(slice []string, fields map[string]*structpb.Value, key string) []string {
+	value, ok := fields[key]
+	if !ok {
+		return slice
+	}
+	return append(slice, value.GetStringValue())
 }
