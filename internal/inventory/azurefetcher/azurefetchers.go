@@ -30,5 +30,6 @@ func New(logger *logp.Logger, provider azurelib.ProviderAPI, msgraphProvider msg
 		newAccountFetcher(logger, provider),
 		newActiveDirectoryFetcher(logger, msgraphProvider),
 		newResourceGraphFetcher(logger, provider),
+		newStorageFetcher(logger, provider),
 	}
 }

@@ -29,20 +29,21 @@ const (
 type AssetSubCategory string
 
 const (
-	SubCategoryApplication      AssetSubCategory = "application"
-	SubCategoryAuthorization    AssetSubCategory = "authorization"
-	SubCategoryCompute          AssetSubCategory = "compute"
-	SubCategoryContainer        AssetSubCategory = "container"
-	SubCategoryDatabase         AssetSubCategory = "database"
-	SubCategoryDigitalIdentity  AssetSubCategory = "digital-identity"
-	SubCategoryIntegration      AssetSubCategory = "integration"
-	SubCategoryManagement       AssetSubCategory = "management"
-	SubCategoryMessaging        AssetSubCategory = "messaging"
-	SubCategoryNetwork          AssetSubCategory = "network"
-	SubCategoryStorage          AssetSubCategory = "storage"
-	SubCategoryServiceIdentity  AssetSubCategory = "service-identity"
-	SubCategoryAccessManagement AssetSubCategory = "access-management"
-	SubCategoryServerless       AssetSubCategory = "serverless"
+	SubCategoryAccessManagement       AssetSubCategory = "access-management"
+	SubCategoryApplication            AssetSubCategory = "application"
+	SubCategoryApplicationIntegration AssetSubCategory = "application-integration"
+	SubCategoryAuthorization          AssetSubCategory = "authorization"
+	SubCategoryCompute                AssetSubCategory = "compute"
+	SubCategoryContainer              AssetSubCategory = "container"
+	SubCategoryDatabase               AssetSubCategory = "database"
+	SubCategoryDigitalIdentity        AssetSubCategory = "digital-identity"
+	SubCategoryIntegration            AssetSubCategory = "integration"
+	SubCategoryManagement             AssetSubCategory = "management"
+	SubCategoryMessaging              AssetSubCategory = "messaging"
+	SubCategoryNetwork                AssetSubCategory = "network"
+	SubCategoryServerless             AssetSubCategory = "serverless"
+	SubCategoryServiceIdentity        AssetSubCategory = "service-identity"
+	SubCategoryStorage                AssetSubCategory = "storage"
 )
 
 // AssetType is used to build the document index. Use only numbers, letters and dashes (-)
@@ -57,6 +58,7 @@ const (
 	TypeGateway             AssetType = "gateway"
 	TypeInterface           AssetType = "interface"
 	TypeLoadBalancer        AssetType = "load-balancer"
+	TypeMessageQueue        AssetType = "message-queue"
 	TypeNoSQLDatabase       AssetType = "nosql-database"
 	TypeNotificationService AssetType = "notification-service"
 	TypeObjectStorage       AssetType = "object-storage"
@@ -69,6 +71,8 @@ const (
 	TypeRole                AssetType = "role"
 	TypeScalability         AssetType = "scalability"
 	TypeServerless          AssetType = "serverless"
+	TypeServiceAccount      AssetType = "service-account"
+	TypeServiceAccountKey   AssetType = "service-account-key"
 	TypeSnapshot            AssetType = "snapshot"
 	TypeStorage             AssetType = "storage"
 	TypeSubnet              AssetType = "subnet"
@@ -76,8 +80,6 @@ const (
 	TypeVirtualMachine      AssetType = "virtual-machine"
 	TypeVirtualNetwork      AssetType = "virtual-network"
 	TypeWebApplication      AssetType = "web-application"
-	TypeServiceAccount      AssetType = "service-account"
-	TypeServiceAccountKey   AssetType = "service-account-key"
 	TypeResourceHierarchy   AssetType = "resource-hierarchy"
 	TypeOrchestration       AssetType = "orchestration"
 	TypeFunction            AssetType = "function"
@@ -101,6 +103,9 @@ const (
 	SubTypeAzureSQLServer           AssetSubType = "azure-sql-server"
 	SubTypeAzureSnapshot            AssetSubType = "azure-snapshot"
 	SubTypeAzureStorageAccount      AssetSubType = "azure-storage-account"
+	SubTypeAzureStorageBlobService  AssetSubType = "azure-storage-blob-service"
+	SubTypeAzureStorageQueue        AssetSubType = "azure-storage-queue"
+	SubTypeAzureStorageQueueService AssetSubType = "azure-storage-queue-service"
 	SubTypeAzureSubscription        AssetSubType = "azure-subscription"
 	SubTypeAzureTenant              AssetSubType = "azure-tenant"
 	SubTypeAzureVirtualMachine      AssetSubType = "azure-virtual-machine"
@@ -196,6 +201,9 @@ var (
 	AssetClassificationAzureServicePrincipal    = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypePrincipal, SubType: SubTypeAzurePrincipal}
 	AssetClassificationAzureSnapshot            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeSnapshot, SubType: SubTypeAzureSnapshot}
 	AssetClassificationAzureStorageAccount      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeStorage, SubType: SubTypeAzureStorageAccount}
+	AssetClassificationAzureStorageBlobService  = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeAzureStorageBlobService}
+	AssetClassificationAzureStorageQueue        = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryApplicationIntegration, Type: TypeMessageQueue, SubType: SubTypeAzureStorageQueue}
+	AssetClassificationAzureStorageQueueService = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryApplicationIntegration, Type: TypeMessageQueue, SubType: SubTypeAzureStorageQueueService}
 	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
 	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
 	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeAzureVirtualMachine}
