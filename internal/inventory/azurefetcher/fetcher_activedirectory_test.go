@@ -111,21 +111,16 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 
 	// collect
 	ch := make(chan inventory.AssetEvent)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
-	go func() {
-		fetcher.Fetch(ctx, ch)
-	}()
+	fetcher.Fetch(ctx, ch)
+	<-ctx.Done()
+	close(ch)
 
 	received := []inventory.AssetEvent{}
-await:
-	for {
-		select {
-		case <-ctx.Done():
-			break await
-		case event := <-ch:
-			received = append(received, event)
-		}
+	for event := range ch {
+		received = append(received, event)
 	}
 
 	require.Empty(t, received, "expected error, not AssetEvents")
