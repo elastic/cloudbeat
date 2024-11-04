@@ -28,18 +28,18 @@ import (
 
 type accountFetcher struct {
 	logger   *logp.Logger
-	provider subscriptionProvider
+	provider accountProvider
 }
 
 type (
-	subscriptionProviderFunc func(context.Context) ([]azurelib.AzureAsset, error)
-	subscriptionProvider     interface {
+	accountProviderFunc func(context.Context) ([]azurelib.AzureAsset, error)
+	accountProvider     interface {
 		ListTenants(ctx context.Context) ([]azurelib.AzureAsset, error)
 		ListSubscriptions(ctx context.Context) ([]azurelib.AzureAsset, error)
 	}
 )
 
-func newAccountFetcher(logger *logp.Logger, provider subscriptionProvider) inventory.AssetFetcher {
+func newAccountFetcher(logger *logp.Logger, provider accountProvider) inventory.AssetFetcher {
 	return &accountFetcher{
 		logger:   logger,
 		provider: provider,
@@ -49,7 +49,7 @@ func newAccountFetcher(logger *logp.Logger, provider subscriptionProvider) inven
 func (f *accountFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
 	resourcesToFetch := []struct {
 		name           string
-		function       subscriptionProviderFunc
+		function       accountProviderFunc
 		classification inventory.AssetClassification
 	}{
 		{"Tenants", f.provider.ListTenants, inventory.AssetClassificationAzureTenant},
@@ -60,7 +60,7 @@ func (f *accountFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 	}
 }
 
-func (f *accountFetcher) fetch(ctx context.Context, resourceName string, function subscriptionProviderFunc, classification inventory.AssetClassification, assetChan chan<- inventory.AssetEvent) {
+func (f *accountFetcher) fetch(ctx context.Context, resourceName string, function accountProviderFunc, classification inventory.AssetClassification, assetChan chan<- inventory.AssetEvent) {
 	f.logger.Infof("Fetching %s", resourceName)
 	defer f.logger.Infof("Fetching %s - Finished", resourceName)
 
