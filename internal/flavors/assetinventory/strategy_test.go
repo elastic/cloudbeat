@@ -67,7 +67,9 @@ func TestStrategyPicks(t *testing.T) {
 				AssetInventoryProvider: config.ProviderGCP,
 				CloudConfig: config.CloudConfig{
 					Gcp: config.GcpConfig{
-						AccountType: config.SingleAccount,
+						AccountType:    config.SingleAccount,
+						ProjectId:      "nonexistent",
+						OrganizationId: "nonexistent",
 					},
 				},
 			},
