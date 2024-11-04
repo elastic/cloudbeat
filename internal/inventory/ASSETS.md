@@ -98,8 +98,7 @@ Infrastructure: 24% (18/73)
 
 ## AZURE Resources
 
-**Progress: 29% (15/51)**
-Identity: 0% (0/8)
+**Progress: 31% (16/51)**
 Identity: 12% (1/8)
 Infrastructure: 34% (15/43)
 
