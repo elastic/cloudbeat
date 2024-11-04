@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -74,6 +75,10 @@ func TestStrategyPicks(t *testing.T) {
 				CloudConfig: config.CloudConfig{
 					Aws: config.AwsConfig{
 						AccountType: config.SingleAccount,
+						Cred: aws.ConfigAWS{
+							AccessKeyID:     "key",
+							SecretAccessKey: "key",
+						},
 					},
 				},
 			},
@@ -82,19 +87,21 @@ func TestStrategyPicks(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		s := strategy{
-			logger: logp.NewLogger("strategy_test"),
-			cfg:    tc.cfg,
-		}
-		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-		defer cancel()
-		obj, err := s.NewAssetInventory(ctx, nil)
-		if tc.expectedErr != "" {
-			assert.Equal(t, inventory.AssetInventory{}, obj)
-			assert.Error(t, err)
-			assert.ErrorContains(t, err, tc.expectedErr)
-		} else {
-			assert.NoError(t, err)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			s := strategy{
+				logger: logp.NewLogger("strategy_test"),
+				cfg:    tc.cfg,
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+			defer cancel()
+			obj, err := s.NewAssetInventory(ctx, nil)
+			if tc.expectedErr != "" {
+				assert.Equal(t, inventory.AssetInventory{}, obj)
+				assert.Error(t, err)
+				assert.ErrorContains(t, err, tc.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
 	}
 }
