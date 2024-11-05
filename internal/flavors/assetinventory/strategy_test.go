@@ -70,10 +70,13 @@ func TestStrategyPicks(t *testing.T) {
 						AccountType:    config.SingleAccount,
 						ProjectId:      "nonexistent",
 						OrganizationId: "nonexistent",
+						GcpClientOpt: config.GcpClientOpt{
+							CredentialsJSON: "{\"type\": \"service_account\"}",
+						},
 					},
 				},
 			},
-			"",
+			"could not parse key",
 		},
 		{
 			"expected error: AWS unsupported account type",
