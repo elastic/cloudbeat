@@ -20,3 +20,5 @@ upload_file deploy/cloudformation/elastic-agent-ec2-cspm.yml "cloudformation-csp
 upload_file deploy/cloudformation/elastic-agent-ec2-cspm-organization.yml "cloudformation-cspm-organization-account" "$version"
 upload_file deploy/cloudformation/elastic-agent-direct-access-key-cspm.yml "cloudformation-cspm-direct-access-key-single-account" "$version"
 upload_file deploy/cloudformation/elastic-agent-direct-access-key-cspm-organization.yml "cloudformation-cspm-direct-access-key-organization-account" "$version"
+upload_file deploy/asset-inventory-cloudformation/elastic-agent-ec2.yml "cloudformation-asset-inventory-single-account" "$version"
+upload_file deploy/asset-inventory-cloudformation/elastic-agent-ec2-organization.yml "cloudformation-asset-inventory-organization-account" "$version"
