@@ -29,5 +29,6 @@ func New(logger *logp.Logger, provider azurelib.ProviderAPI, _ *azure_auth.Azure
 	return []inventory.AssetFetcher{
 		newAccountFetcher(logger, provider),
 		newResourceGraphFetcher(logger, provider),
+		newStorageFetcher(logger, provider),
 	}
 }

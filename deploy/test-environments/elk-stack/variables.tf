@@ -29,7 +29,7 @@ variable "serverless_mode" {
 }
 
 variable "deployment_template" {
-  default     = "gcp-compute-optimized-v2"
+  default     = "gcp-general-purpose"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"
   type        = string
 }
