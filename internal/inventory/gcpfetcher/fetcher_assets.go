@@ -144,6 +144,16 @@ func (f *assetsInventory) findRelatedAssetIds(subType inventory.AssetSubType, it
 		}
 		ids = appendIfExists(ids, fields, "machineType")
 		ids = appendIfExists(ids, fields, "zone")
+	case inventory.SubTypeGcpFirewall, inventory.SubTypeGcpSubnet:
+		ids = appendIfExists(ids, fields, "network")
+	case inventory.SubTypeGcpProject, inventory.SubTypeGcpBucket:
+		if item.IamPolicy == nil {
+			break
+		}
+		for _, binding := range item.IamPolicy.Bindings {
+			ids = append(ids, binding.Role)
+			ids = append(ids, binding.Members...)
+		}
 	default:
 		f.logger.Warnf("cannot find related asset IDs for unsupported sub-type %q", subType)
 		return ids
