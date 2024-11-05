@@ -21,6 +21,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
@@ -29,6 +30,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -49,6 +51,7 @@ func newAccountsClientListResponse(items ...*armstorage.Account) armstorage.Acco
 }
 
 func TestTransformStorageAccounts(t *testing.T) {
+	id := "/subscriptions/<subid>/resourceGroups/<name>/providers/Microsoft.Storage/storageAccounts/id1"
 	tests := map[string]struct {
 		inputServicesPages  []armstorage.AccountsClientListResponse
 		inputSubscriptionId string
@@ -60,8 +63,8 @@ func TestTransformStorageAccounts(t *testing.T) {
 			inputServicesPages: []armstorage.AccountsClientListResponse{
 				newAccountsClientListResponse(
 					&armstorage.Account{
-						ID:   to.Ptr("id1"),
-						Name: to.Ptr("name1"),
+						ID:   to.Ptr(id),
+						Name: to.Ptr("id1"),
 						Type: to.Ptr("Microsoft.Storage/storageaccounts"),
 						Properties: &armstorage.AccountProperties{
 							Encryption: &armstorage.Encryption{},
@@ -69,20 +72,21 @@ func TestTransformStorageAccounts(t *testing.T) {
 					},
 				),
 			},
-			inputSubscriptionId: "id1",
+			inputSubscriptionId: "subid",
 			expected: []AzureAsset{
 				{
-					Id:   "id1",
-					Name: "name1",
+					Id:   id,
+					Name: "id1",
 					Properties: map[string]any{
 						"encryption": map[string]any{},
 					},
 					Extension: map[string]any{
-						ExtensionStorageAccountID:   "id1",
-						ExtensionStorageAccountName: "name1",
+						ExtensionStorageAccountID:   id,
+						ExtensionStorageAccountName: "id1",
 					},
 					Type:           StorageAccountAssetType,
-					SubscriptionId: "id1",
+					SubscriptionId: "subid",
+					ResourceGroup:  "<name>",
 				},
 			},
 			expectError: false,
@@ -162,6 +166,221 @@ func TestTransformBlobServices(t *testing.T) {
 	}
 }
 
+func TestListStorageAccountQueues(t *testing.T) {
+	response := func(v []*armstorage.ListQueue) armstorage.QueueClientListResponse {
+		return armstorage.QueueClientListResponse{
+			ListQueueResource: armstorage.ListQueueResource{Value: v},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.ListQueue
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list queues": {
+			input: []*armstorage.ListQueue{
+				{
+					ID:              pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/queues/queue1"),
+					Name:            pointers.Ref("queue1"),
+					Type:            pointers.Ref("microsoft.storage/storageaccounts/queues"),
+					QueueProperties: &armstorage.ListQueueProperties{},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/queues/queue1",
+					Name:       "queue1",
+					Properties: map[string]any{},
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/queues",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetQueues: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error) {
+						x := tc
+						return []armstorage.QueueClientListResponse{response(x.input)}, nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountQueues(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestListStorageAccountQueueServices(t *testing.T) {
+	response := func(v []*armstorage.QueueServiceProperties) armstorage.QueueServicesClientListResponse {
+		return armstorage.QueueServicesClientListResponse{
+			ListQueueServices: armstorage.ListQueueServices{
+				Value: v,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.QueueServiceProperties
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list queue services": {
+			input: []*armstorage.QueueServiceProperties{
+				{
+					ID:                     pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/queueServices/queue1"),
+					Name:                   pointers.Ref("queue1"),
+					Type:                   pointers.Ref("microsoft.storage/storageaccounts/queueservices"),
+					QueueServiceProperties: &armstorage.QueueServicePropertiesProperties{},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/queueServices/queue1",
+					Name:       "queue1",
+					Properties: map[string]any{},
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/queueservices",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetQueueServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.QueueServicesClientListOptions) (armstorage.QueueServicesClientListResponse, error) {
+						x := tc
+						return response(x.input), nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountQueueServices(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestListStorageAccountBlobServices(t *testing.T) {
+	response := func(v []*armstorage.BlobServiceProperties) armstorage.BlobServicesClientListResponse {
+		return armstorage.BlobServicesClientListResponse{
+			BlobServiceItems: armstorage.BlobServiceItems{
+				Value: v,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.BlobServiceProperties
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list blob services": {
+			input: []*armstorage.BlobServiceProperties{
+				{
+					ID:   pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/blobServices/blob1"),
+					Name: pointers.Ref("blob1"),
+					Type: pointers.Ref("microsoft.storage/storageaccounts/blobservices"),
+					BlobServiceProperties: &armstorage.BlobServicePropertiesProperties{
+						IsVersioningEnabled: pointers.Ref(true),
+					},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:   "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/blobServices/blob1",
+					Name: "blob1",
+					Properties: map[string]any{
+						"isVersioningEnabled": true,
+					},
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/blobservices",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetBlobServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
+						x := tc
+						return []armstorage.BlobServicesClientListResponse{response(x.input)}, nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountBlobServices(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
 func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 	log := testhelper.NewLogger(t)
 
@@ -175,7 +394,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 		subscriptions            map[string]string
 		responsesPerSubscription map[string][]armmonitor.DiagnosticSettingsClientListResponse
 		expected                 []AzureAsset
-		expecterError            bool
+		expectedError            bool
 	}{
 		"one element one subscription": {
 			subscriptions: map[string]string{"sub1": "subName1"},
@@ -238,7 +457,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Type:           "Microsoft.Insights/diagnosticSettings",
 				},
 			},
-			expecterError: false,
+			expectedError: false,
 		},
 		"two elements one subscription": {
 			subscriptions: map[string]string{"sub1": "subName1"},
@@ -352,7 +571,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Type:           "Microsoft.Insights/diagnosticSettings",
 				},
 			},
-			expecterError: false,
+			expectedError: false,
 		},
 		"two elements two subscriptions": {
 			subscriptions: map[string]string{"sub1": "subName1", "sub2": "subName2"},
@@ -470,7 +689,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 					Type:           "Microsoft.Insights/diagnosticSettings",
 				},
 			},
-			expecterError: false,
+			expectedError: false,
 		},
 	}
 
@@ -490,7 +709,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 			}
 
 			got, err := provider.ListDiagnosticSettingsAssetTypes(context.Background(), cycle.Metadata{}, lo.Keys[string](tc.subscriptions))
-			if tc.expecterError {
+			if tc.expectedError {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
