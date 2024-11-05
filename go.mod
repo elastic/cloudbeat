@@ -24,25 +24,25 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.42
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.18
-	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.33.3
+	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.34.3
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.47.0
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.55.4
-	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.43.3
+	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.42.3
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.40.3
-	github.com/aws/aws-sdk-go-v2/service/configservice v1.49.3
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.179.2
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.43.0
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.50.3
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.187.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.36.3
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.28.3
 	github.com/aws/aws-sdk-go-v2/service/iam v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/kms v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.64.1
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.34.3
-	github.com/aws/aws-sdk-go-v2/service/rds v1.85.2
+	github.com/aws/aws-sdk-go-v2/service/rds v1.89.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.2
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.49.3
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.54.4
-	github.com/aws/aws-sdk-go-v2/service/sns v1.32.3
+	github.com/aws/aws-sdk-go-v2/service/sns v1.33.3
 	github.com/aws/aws-sdk-go-v2/service/sts v1.32.3
 	github.com/aws/smithy-go v1.22.0
 	github.com/dgraph-io/ristretto v1.0.0
