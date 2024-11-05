@@ -18,15 +18,17 @@
 package assetinventory
 
 import (
-	context "context"
+	"context"
 	"testing"
 	"time"
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/inventory"
 )
 
 func TestStrategyPicks(t *testing.T) {
@@ -119,10 +121,10 @@ func TestStrategyPicks(t *testing.T) {
 			obj, err := s.NewAssetInventory(ctx, nil)
 			if tc.expectedErr != "" {
 				assert.Equal(t, inventory.AssetInventory{}, obj)
-				assert.Error(t, err)
-				assert.ErrorContains(t, err, tc.expectedErr)
+				require.Error(t, err)
+				require.ErrorContains(t, err, tc.expectedErr)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}
