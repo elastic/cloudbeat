@@ -116,6 +116,16 @@ func (f *assetsInventory) findRelatedAssetIds(subType inventory.AssetSubType, it
 		ids = append(ids, item.Resource.Parent)
 	}
 
+	ids = append(ids, f.findRelatedAssetIdsForSubType(subType, item)...)
+
+	ids = lo.Compact(ids)
+	ids = lo.Uniq(ids)
+	return ids
+}
+
+func (f *assetsInventory) findRelatedAssetIdsForSubType(subType inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
+	ids := []string{}
+
 	var fields map[string]*structpb.Value
 	if item.Resource != nil && item.Resource.Data != nil {
 		fields = item.GetResource().GetData().GetFields()
@@ -158,8 +168,7 @@ func (f *assetsInventory) findRelatedAssetIds(subType inventory.AssetSubType, it
 		f.logger.Warnf("cannot find related asset IDs for unsupported sub-type %q", subType)
 		return ids
 	}
-	ids = lo.Compact(ids)
-	ids = lo.Uniq(ids)
+
 	return ids
 }
 
