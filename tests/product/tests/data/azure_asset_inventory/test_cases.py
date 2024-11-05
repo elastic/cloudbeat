@@ -2,6 +2,7 @@
 This module provides Azure test cases for Asset Inventory.
 """
 
+# pylint: disable=relative-beyond-top-level
 from ..asset_inventory_test_case import AssetInventoryCase
 
 test_cases = {
