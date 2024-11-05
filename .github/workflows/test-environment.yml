@@ -268,21 +268,34 @@ jobs:
           echo "TF_VAR_gcp_project_id=$GCP_PROJECT" >> $GITHUB_ENV
           echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
-      - name: Provision Infrastructure
-        id: provision-terraform
-        if: success()
-        env:
-          TF_VAR_deployment_name: ${{ env.DEPLOYMENT_NAME }}
-          TF_VAR_region: ${{ env.AWS_REGION }}
-          TF_VAR_project: ${{ github.actor }}
-          TF_VAR_owner: ${{ github.actor }}
-        run: |
-          ./manage_infrastructure.sh "$INFRA_TYPE" "apply"
+      # - name: Provision Infrastructure
+      #   id: provision-terraform
+      #   if: success()
+      #   env:
+      #     TF_VAR_deployment_name: ${{ env.DEPLOYMENT_NAME }}
+      #     TF_VAR_region: ${{ env.AWS_REGION }}
+      #     TF_VAR_project: ${{ github.actor }}
+      #     TF_VAR_owner: ${{ github.actor }}
+      #   run: |
+      #     ./manage_infrastructure.sh "$INFRA_TYPE" "apply"
 
-      - name: Set Environment Output
-        id: env-output
-        run: |
-          ./manage_infrastructure.sh "$INFRA_TYPE" "output"
+      - name: Deploy ELK Cloud Stack
+        id: elk-stack
+        uses: ./.github/actions/elk-stack
+        with:
+          deployment-name: ${{ env.DEPLOYMENT_NAME }}
+          serverless-mode: ${{ env.TEST_AGENTLESS }}
+          elk-stack-version: ${{ env.STACK_VERSION }}
+          ess-region: ${{ env.TF_VAR_ess_region }}
+          ec-api-key: ${{ env.TF_VAR_ec_api_key }}
+          docker-image-version-override: ${{ env.TF_VAR_pin_version }}
+          tag-project: ${{ github.actor }}
+          tag-owner: ${{ github.actor }}   
+
+      # - name: Set Environment Output
+      #   id: env-output
+      #   run: |
+      #     ./manage_infrastructure.sh "$INFRA_TYPE" "output"
 
       - name: Upload tf state
         id: upload-state
@@ -291,7 +304,7 @@ jobs:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
         run: |
-          ./manage_infrastructure.sh "$INFRA_TYPE" "upload-state"
+          ./manage_infrastructure.sh "elk-stack" "upload-state"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
@@ -299,6 +312,8 @@ jobs:
 
       - name: Summary
         if: success()
+        env:
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
         run: |
           summary="Kibana URL: $KIBANA_URL"
           bucket_name="$S3_BASE_BUCKET"
@@ -312,285 +327,285 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
-      - name: Install AWS Cloudtrail integration
-        id: cloudtrail-integration
-        if: env.INFRA_TYPE != 'cis'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          CLOUDTRAIL_S3: ${{ secrets.CLOUDTRAIL_S3 }}
-        run: |
-          poetry run python ./install_cloudtrail_integration.py
+      # - name: Install AWS Cloudtrail integration
+      #   id: cloudtrail-integration
+      #   if: env.INFRA_TYPE != 'cis'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   env:
+      #     CLOUDTRAIL_S3: ${{ secrets.CLOUDTRAIL_S3 }}
+      #   run: |
+      #     poetry run python ./install_cloudtrail_integration.py
 
-      - name: Deploy AWS Cloudtrail agent
-        if: env.INFRA_TYPE != 'cis'
-        working-directory: ${{ env.WORKING_DIR }}/cdr
-        run: |
-          scriptname="cloudtrail-linux.sh"
-          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      # - name: Deploy AWS Cloudtrail agent
+      #   if: env.INFRA_TYPE != 'cis'
+      #   working-directory: ${{ env.WORKING_DIR }}/cdr
+      #   run: |
+      #     scriptname="cloudtrail-linux.sh"
+      #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+      #     cmd="chmod +x $scriptname && ./$scriptname"
+      #     ../remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-      - name: Install Azure Activity Logs integration
-        id: az-activity-logs-integration
-        if: env.INFRA_TYPE != 'cis'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          EVENTHUB: "activity-logs"
-          CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
-          STORAGE_ACCOUNT: "testenvsactivitylogs"
-          STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
-        run: |
-          poetry run python ./install_az_activity_logs_integration.py
+      # - name: Install Azure Activity Logs integration
+      #   id: az-activity-logs-integration
+      #   if: env.INFRA_TYPE != 'cis'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   env:
+      #     EVENTHUB: "activity-logs"
+      #     CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+      #     STORAGE_ACCOUNT: "testenvsactivitylogs"
+      #     STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+      #   run: |
+      #     poetry run python ./install_az_activity_logs_integration.py
 
-      - name: Deploy Azure Activity Logs agent
-        if: env.INFRA_TYPE != 'cis'
-        working-directory: ${{ env.WORKING_DIR }}/cdr
-        run: |
-          scriptname="az_activity_logs.sh"
-          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      # - name: Deploy Azure Activity Logs agent
+      #   if: env.INFRA_TYPE != 'cis'
+      #   working-directory: ${{ env.WORKING_DIR }}/cdr
+      #   run: |
+      #     scriptname="az_activity_logs.sh"
+      #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+      #     cmd="chmod +x $scriptname && ./$scriptname"
+      #     ../remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-      - name: Install GCP Audit Logs integration
-        id: gcp-audit-logs-integration
-        if: env.INFRA_TYPE != 'cis'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          GCP_TOPIC_NAME: "test-envs-topic"
-          GCP_SUBSCRIPTION_NAME: "test-envs-topic-sub-id"
-        run: |
-          poetry run python ./install_gcp_audit_logs_integration.py
+      # - name: Install GCP Audit Logs integration
+      #   id: gcp-audit-logs-integration
+      #   if: env.INFRA_TYPE != 'cis'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   env:
+      #     GCP_TOPIC_NAME: "test-envs-topic"
+      #     GCP_SUBSCRIPTION_NAME: "test-envs-topic-sub-id"
+      #   run: |
+      #     poetry run python ./install_gcp_audit_logs_integration.py
 
-      - name: Deploy GCP Audit Logs agent
-        if: env.INFRA_TYPE != 'cis'
-        working-directory: ${{ env.WORKING_DIR }}/cdr
-        run: |
-          scriptname="gcp_audit_logs.sh"
-          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      # - name: Deploy GCP Audit Logs agent
+      #   if: env.INFRA_TYPE != 'cis'
+      #   working-directory: ${{ env.WORKING_DIR }}/cdr
+      #   run: |
+      #     scriptname="gcp_audit_logs.sh"
+      #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+      #     cmd="chmod +x $scriptname && ./$scriptname"
+      #     ../remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-      - name: Install CNVM integration
-        id: cnvm
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cnvm_integration.py
+      # - name: Install CNVM integration
+      #   id: cnvm
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cnvm_integration.py
 
-      - name: Deploy CNVM agent
-        if: env.INFRA_TYPE != 'cdr'
-        env:
-          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: |
-          unset ENROLLMENT_TOKEN
-          just deploy-cloudformation
+      # - name: Deploy CNVM agent
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   env:
+      #     STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+      #   run: |
+      #     unset ENROLLMENT_TOKEN
+      #     just deploy-cloudformation
 
-      - name: Install CSPM GCP integration
-        id: cspm-gcp-integration
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cspm_gcp_integration.py
+      # - name: Install CSPM GCP integration
+      #   id: cspm-gcp-integration
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cspm_gcp_integration.py
 
-      - name: Deploy CSPM GCP agent
-        id: cspm-gcp-agent
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: deploy/deployment-manager
-        env:
-          ACTOR: ${{ github.actor }}
-        run: |
-          # GCP labeling rules:
-          # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
-          # Convert github.actor to lowercase, replace disallowed characters
-          GCP_LABEL=$(echo "$ACTOR" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/_/g')
-          GCP_DEFAULT_TAGS="division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=$GCP_LABEL"
-          . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}" --zone="${GCP_ZONE}"
+      # - name: Deploy CSPM GCP agent
+      #   id: cspm-gcp-agent
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: deploy/deployment-manager
+      #   env:
+      #     ACTOR: ${{ github.actor }}
+      #   run: |
+      #     # GCP labeling rules:
+      #     # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
+      #     # Convert github.actor to lowercase, replace disallowed characters
+      #     GCP_LABEL=$(echo "$ACTOR" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/_/g')
+      #     GCP_DEFAULT_TAGS="division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=$GCP_LABEL"
+      #     . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}" --zone="${GCP_ZONE}"
 
-      - name: Install CSPM Azure integration
-        id: cspm-azure-integration
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cspm_azure_integration.py
+      # - name: Install CSPM Azure integration
+      #   id: cspm-azure-integration
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cspm_azure_integration.py
 
-      - name: Deploy CSPM Azure agent
-        id: cspm-azure-agent
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: deploy/azure
-        env:
-          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
-        run: ./install_agent_az_cli.sh
+      # - name: Deploy CSPM Azure agent
+      #   id: cspm-azure-agent
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: deploy/azure
+      #   env:
+      #     AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+      #   run: ./install_agent_az_cli.sh
 
-      - name: Check Asset Inventory supported version
-        id: asset-inventory-version-check
-        run: |
-          MIN_VERSION="8.16.0"
-          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
-            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
-            echo "asset_inventory_supported=true" >> $GITHUB_ENV
-          else
-            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
-            echo "asset_inventory_supported=false" >> $GITHUB_ENV
-          fi
+      # - name: Check Asset Inventory supported version
+      #   id: asset-inventory-version-check
+      #   run: |
+      #     MIN_VERSION="8.16.0"
+      #     if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
+      #       echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
+      #       echo "asset_inventory_supported=true" >> $GITHUB_ENV
+      #     else
+      #       echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
+      #       echo "asset_inventory_supported=false" >> $GITHUB_ENV
+      #     fi
 
-      - name: Install Azure Asset Inventory integration
-        id: azure-asset-inventory-integration
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        if: env.asset_inventory_supported == 'true'
-        run: |
-          poetry run python ./install_azure_asset_inventory_integration.py
+      # - name: Install Azure Asset Inventory integration
+      #   id: azure-asset-inventory-integration
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   if: env.asset_inventory_supported == 'true'
+      #   run: |
+      #     poetry run python ./install_azure_asset_inventory_integration.py
 
-      - name: Deploy Azure Asset Inventory agent
-        id: azure-asset-inventory-agent
-        working-directory: deploy/azure
-        if: env.asset_inventory_supported == 'true'
-        env:
-          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
-          DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}-inventory"
-        run: ./install_agent_az_cli.sh
+      # - name: Deploy Azure Asset Inventory agent
+      #   id: azure-asset-inventory-agent
+      #   working-directory: deploy/azure
+      #   if: env.asset_inventory_supported == 'true'
+      #   env:
+      #     AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
+      #     DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}-inventory"
+      #   run: ./install_agent_az_cli.sh
 
-      - name: Install D4C integration
-        id: kspm-d4c
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_d4c_integration.py
+      # - name: Install D4C integration
+      #   id: kspm-d4c
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_d4c_integration.py
 
-      - name: Install KSPM EKS integration
-        id: kspm-eks
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_kspm_eks_integration.py
+      # - name: Install KSPM EKS integration
+      #   id: kspm-eks
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_kspm_eks_integration.py
 
-      - name: Deploy KSPM EKS agent
-        if: env.INFRA_TYPE != 'cdr'
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-        run: |
-          aws eks --region ${AWS_REGION} update-kubeconfig --name ${DEPLOYMENT_NAME} --alias eks-config
-          echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
-          kubectl config use-context eks-config
-          kubectl apply -f ../../${INTEGRATIONS_SETUP_DIR}/kspm_d4c.yaml
+      # - name: Deploy KSPM EKS agent
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   env:
+      #     S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+      #   run: |
+      #     aws eks --region ${AWS_REGION} update-kubeconfig --name ${DEPLOYMENT_NAME} --alias eks-config
+      #     echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
+      #     kubectl config use-context eks-config
+      #     kubectl apply -f ../../${INTEGRATIONS_SETUP_DIR}/kspm_d4c.yaml
 
-      - name: Install KSPM Unmanaged integration
-        id: kspm-unmanaged
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_kspm_unmanaged_integration.py
+      # - name: Install KSPM Unmanaged integration
+      #   id: kspm-unmanaged
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_kspm_unmanaged_integration.py
 
-      - name: Deploy KSPM Unmanaged agent
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.WORKING_DIR }}/cis
-        run: |
-          scriptname="kspm_unmanaged.yaml"
-          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="kubectl apply -f $scriptname"
-          ../remote_setup.sh -k "$EC2_KSPM_KEY" -s "$src" -h "$KSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      # - name: Deploy KSPM Unmanaged agent
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.WORKING_DIR }}/cis
+      #   run: |
+      #     scriptname="kspm_unmanaged.yaml"
+      #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+      #     cmd="kubectl apply -f $scriptname"
+      #     ../remote_setup.sh -k "$EC2_KSPM_KEY" -s "$src" -h "$KSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-      - name: Install CSPM AWS integration
-        id: cspm-aws-integration
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cspm_integration.py
+      # - name: Install CSPM AWS integration
+      #   id: cspm-aws-integration
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./install_cspm_integration.py
 
-      - name: Deploy CSPM agent
-        if: env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.WORKING_DIR }}/cis
-        run: |
-          scriptname="cspm-linux.sh"
-          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      # - name: Deploy CSPM agent
+      #   if: env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.WORKING_DIR }}/cis
+      #   run: |
+      #     scriptname="cspm-linux.sh"
+      #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+      #     cmd="chmod +x $scriptname && ./$scriptname"
+      #     ../remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-      - name: Install AWS Asset Inventory integration
-        id: aws-asset-inventory
-        if: env.INFRA_TYPE != 'cis'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        if: env.asset_inventory_supported == 'true'
-        run: |
-          poetry run python ./install_aws_asset_inventory_integration.py
+      # - name: Install AWS Asset Inventory integration
+      #   id: aws-asset-inventory
+      #   if: env.INFRA_TYPE != 'cis'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   if: env.asset_inventory_supported == 'true'
+      #   run: |
+      #     poetry run python ./install_aws_asset_inventory_integration.py
 
-      - name: Deploy AWS Asset Inventory agent
-        if: env.INFRA_TYPE != 'cis' && env.asset_inventory_supported == 'true'
-        working-directory: ${{ env.WORKING_DIR }}/cis
-        run: |
-          scriptname="aws-asset-inventory-linux.sh"
-          src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      # - name: Deploy AWS Asset Inventory agent
+      #   if: env.INFRA_TYPE != 'cis' && env.asset_inventory_supported == 'true'
+      #   working-directory: ${{ env.WORKING_DIR }}/cis
+      #   run: |
+      #     scriptname="aws-asset-inventory-linux.sh"
+      #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
+      #     cmd="chmod +x $scriptname && ./$scriptname"
+      #     ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-      - name: Upload Integrations data
-        if: always()
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-          ASSET_INVENTORY_SUPPORTED: "${{ env.asset_inventory_supported }}"
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          if [[ $INFRA_TYPE != 'cdr' ]]; then
-            aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
-            aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
-            aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
-            aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
-          else
-            if [[ "${ASSET_INVENTORY_SUPPORTED}" == "true" ]]; then
-              aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
-            fi
-          fi
-          aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
+      # - name: Upload Integrations data
+      #   if: always()
+      #   env:
+      #     S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+      #     ASSET_INVENTORY_SUPPORTED: "${{ env.asset_inventory_supported }}"
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     if [[ $INFRA_TYPE != 'cdr' ]]; then
+      #       aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
+      #       aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
+      #       aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
+      #       aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
+      #     else
+      #       if [[ "${ASSET_INVENTORY_SUPPORTED}" == "true" ]]; then
+      #         aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
+      #       fi
+      #     fi
+      #     aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 
-      - name: Install Agentless integrations
-        id: agentless
-        if: env.TEST_AGENTLESS == 'true' && env.INFRA_TYPE != 'cdr'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        run: |
-          poetry run python ./install_agentless_integrations.py
+      # - name: Install Agentless integrations
+      #   id: agentless
+      #   if: env.TEST_AGENTLESS == 'true' && env.INFRA_TYPE != 'cdr'
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   env:
+      #     AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      #   run: |
+      #     poetry run python ./install_agentless_integrations.py
 
-      - name: Wait for agents to enroll
-        id: wait-for-agents
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./agents_enrolled.py
+      # - name: Wait for agents to enroll
+      #   id: wait-for-agents
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./agents_enrolled.py
 
-      - name: Run Sanity checks
-        if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
-        working-directory: ./tests
-        run: |
-          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+      # - name: Run Sanity checks
+      #   if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
+      #   working-directory: ./tests
+      #   run: |
+      #     poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-      - name: Run UI Sanity checks (Kibana)
-        uses: ./.github/actions/kibana-ftr
-        if: ${{ success() && inputs.run-ui-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
-        with:
-          test_kibana_url: ${{ env.TEST_KIBANA_URL }}
-          test_es_url: ${{ env.TEST_ES_URL }}
-          es_version: ${{ env.STACK_VERSION }}
-          kibana_ref: ${{ inputs.kibana_ref }}
+      # - name: Run UI Sanity checks (Kibana)
+      #   uses: ./.github/actions/kibana-ftr
+      #   if: ${{ success() && inputs.run-ui-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
+      #   with:
+      #     test_kibana_url: ${{ env.TEST_KIBANA_URL }}
+      #     test_es_url: ${{ env.TEST_ES_URL }}
+      #     es_version: ${{ env.STACK_VERSION }}
+      #     kibana_ref: ${{ inputs.kibana_ref }}
 
-      - name: Create Slack Payload
-        if: always()
-        id: prepare-data
-        working-directory: ./
-        env:
-          WORKFLOW: "${{ github.workflow }}"
-          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          GITHUB_ACTOR: "${{ github.actor }}"
-          ESS_TYPE: ${{ inputs.serverless_mode }}
-          JOB_STATUS: "${{ job.status }}"
-          S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
-        run: |
-          python3 ./.ci/scripts/prepare_slack_data.py
+      # - name: Create Slack Payload
+      #   if: always()
+      #   id: prepare-data
+      #   working-directory: ./
+      #   env:
+      #     WORKFLOW: "${{ github.workflow }}"
+      #     RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      #     GITHUB_ACTOR: "${{ github.actor }}"
+      #     ESS_TYPE: ${{ inputs.serverless_mode }}
+      #     JOB_STATUS: "${{ job.status }}"
+      #     S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
+      #   run: |
+      #     python3 ./.ci/scripts/prepare_slack_data.py
 
-      - name: Send Slack Notification
-        uses: ./.github/actions/slack-notification
-        if: always()
-        continue-on-error: true
-        with:
-          vault-url: ${{ secrets.VAULT_ADDR }}
-          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
-          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
-          slack-payload: ${{ steps.prepare-data.outputs.payload }}
+      # - name: Send Slack Notification
+      #   uses: ./.github/actions/slack-notification
+      #   if: always()
+      #   continue-on-error: true
+      #   with:
+      #     vault-url: ${{ secrets.VAULT_ADDR }}
+      #     vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+      #     vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+      #     slack-payload: ${{ steps.prepare-data.outputs.payload }}
