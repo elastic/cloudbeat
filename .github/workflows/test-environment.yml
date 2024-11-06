@@ -267,7 +267,8 @@ jobs:
         run: |
           echo "TF_VAR_gcp_project_id=$GCP_PROJECT" >> $GITHUB_ENV
           echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
-
+      # TODO: REMOVE THIS SECTION
+      #========================================================
       # - name: Provision Infrastructure
       #   id: provision-terraform
       #   if: success()
@@ -278,6 +279,7 @@ jobs:
       #     TF_VAR_owner: ${{ github.actor }}
       #   run: |
       #     ./manage_infrastructure.sh "$INFRA_TYPE" "apply"
+      #========================================================
 
       - name: Deploy ELK Cloud Stack
         id: elk-stack
@@ -292,10 +294,13 @@ jobs:
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}   
 
+      # TODO: REMOVE THIS SECTION
+      #========================================================
       # - name: Set Environment Output
       #   id: env-output
       #   run: |
       #     ./manage_infrastructure.sh "$INFRA_TYPE" "output"
+      #========================================================
 
       - name: Upload tf state
         id: upload-state
@@ -327,6 +332,40 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
+      - name: Deploy CDR Integrations
+        id: cdr-integrations
+        if: env.INFRA_TYPE != 'cis'
+        uses: ./.github/actions/cdr
+        with:
+          deployment-name: ${{ env.DEPLOYMENT_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+          azure-location: "East US"
+          gcp-project-id: ${{ env.GCP_PROJECT }}
+          gcp-service-account-json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
+          deploy-az-vm: true
+          deploy-gcp-vm: true
+          deploy-aws-ec2: true
+          deploy-aws-asset-inventory: true
+          aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
+          azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+          azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+          es-user: ${{ steps.elk-stack.outputs.es-user }}
+          es-password: ${{ steps.elk-stack.outputs.es-password }}
+          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          elk-stack-version: ${{ env.STACK_VERSION }}
+          azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
+          tag-project: ${{ github.actor }}
+          tag-owner: ${{ github.actor }}
+
+      - name: Upload tf state
+        id: env.INFRA_TYPE != 'cis'
+        if: always()
+        env:
+          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+        run: |
+          ./manage_infrastructure.sh "cdr" "upload-state"
+
+      # TODO: REMOVE THIS SECTION    
       # - name: Install AWS Cloudtrail integration
       #   id: cloudtrail-integration
       #   if: env.INFRA_TYPE != 'cis'
@@ -384,6 +423,7 @@ jobs:
       #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
       #     cmd="chmod +x $scriptname && ./$scriptname"
       #     ../remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      #========================================================
 
       # - name: Install CNVM integration
       #   id: cnvm
@@ -520,6 +560,8 @@ jobs:
       #     cmd="chmod +x $scriptname && ./$scriptname"
       #     ../remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
+      # TODO: REMOVE THIS SECTION
+      #========================================================
       # - name: Install AWS Asset Inventory integration
       #   id: aws-asset-inventory
       #   if: env.INFRA_TYPE != 'cis'
@@ -536,6 +578,7 @@ jobs:
       #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
       #     cmd="chmod +x $scriptname && ./$scriptname"
       #     ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      #========================================================
 
       # - name: Upload Integrations data
       #   if: always()
