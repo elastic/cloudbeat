@@ -6,6 +6,10 @@ inputs:
       Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
     required: true
     type: string
+  env-s3-bucket:
+    description: "S3 bucket"
+    required: true
+    type: string
   aws-region:
     description: "AWS region"
     default: "eu-west-1"
@@ -309,3 +313,16 @@ runs:
         src="../../../tests/integrations_setup/$scriptname"
         cmd="chmod +x $scriptname && ./$scriptname"
         ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+      - name: Upload tf state
+        id: upload-state-cdr
+        if: always()
+        working-directory: deploy/test-environments
+        env:
+          S3_BUCKET: "${{ inputs.env-s3-bucket }}"
+          CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-key }}
+          ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az_vm-activity-logs-key }}
+          AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}
+          EC2_ASSET_INV_KEY: ${{ steps.generate-data.outputs.ec2-asset-inv-key }}
+        run: |
+          ./manage_infrastructure.sh "cdr" "upload-state"

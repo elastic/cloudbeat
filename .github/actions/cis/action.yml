@@ -277,3 +277,13 @@ runs:
         KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_agentless_integrations.py
+
+      - name: Upload tf state
+        id: upload-state-cis
+        working-directory: deploy/test-environments
+        env:
+          S3_BUCKET: "${{ inputs.env-s3-bucket }}"
+          EC2_CSPM_KEY: ${{ steps.generate-data.outputs.ec2-cspm-key }}
+          EC2_KSPM_KEY: ${{ steps.generate-data.outputs.ec2-kspm-key }}
+        run: |
+          ./manage_infrastructure.sh "cis" "upload-state"
