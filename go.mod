@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	cloud.google.com/go/asset v1.20.3
 	cloud.google.com/go/iam v1.2.2
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.7.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2 v2.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.4.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.11.0
@@ -24,25 +24,25 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.42
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.18
-	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.33.3
+	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.34.3
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.47.0
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.55.4
-	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.43.3
+	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.42.3
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.40.3
-	github.com/aws/aws-sdk-go-v2/service/configservice v1.49.3
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.179.2
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.43.0
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.50.3
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.187.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.36.3
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.28.3
 	github.com/aws/aws-sdk-go-v2/service/iam v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/kms v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.64.1
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.34.3
-	github.com/aws/aws-sdk-go-v2/service/rds v1.85.2
+	github.com/aws/aws-sdk-go-v2/service/rds v1.89.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.66.2
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.49.3
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.54.4
-	github.com/aws/aws-sdk-go-v2/service/sns v1.32.3
+	github.com/aws/aws-sdk-go-v2/service/sns v1.33.3
 	github.com/aws/aws-sdk-go-v2/service/sts v1.32.3
 	github.com/aws/smithy-go v1.22.0
 	github.com/dgraph-io/ristretto v0.1.1
@@ -51,7 +51,7 @@ require (
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.8.2
 	github.com/elastic/elastic-agent-client/v7 v7.16.0
-	github.com/elastic/elastic-agent-libs v0.17.0
+	github.com/elastic/elastic-agent-libs v0.17.1
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/go-logr/zapr v1.3.0
@@ -74,7 +74,7 @@ require (
 	go.elastic.co/go-licence-detector v0.7.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.27.0
-	go.uber.org/zap/exp v0.1.1-0.20240530135403-273f9ea8c887
+	go.uber.org/zap/exp v0.3.0
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.23.0
 	google.golang.org/api v0.204.0
