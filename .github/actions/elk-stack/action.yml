@@ -9,7 +9,7 @@ inputs:
     description: "Elastic Cloud deployment region"
     default: "gcp-us-west2"
     type: string
-    required: false    
+    required: false
   deployment-name:
     description: |
       Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
@@ -92,7 +92,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Deploy ELK Cloud Stack 
+    - name: Deploy ELK Cloud Stack
       id: deploy-elk-cloud-stack
       env:
         TF_VAR_deployment_name: ${{ inputs.deployment-name }}

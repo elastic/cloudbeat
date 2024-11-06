@@ -292,7 +292,7 @@ jobs:
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
           tag-project: ${{ github.actor }}
-          tag-owner: ${{ github.actor }}   
+          tag-owner: ${{ github.actor }}
 
       # TODO: REMOVE THIS SECTION
       #========================================================
@@ -365,7 +365,7 @@ jobs:
         run: |
           ./manage_infrastructure.sh "cdr" "upload-state"
 
-      # TODO: REMOVE THIS SECTION    
+      # TODO: REMOVE THIS SECTION
       # - name: Install AWS Cloudtrail integration
       #   id: cloudtrail-integration
       #   if: env.INFRA_TYPE != 'cis'
