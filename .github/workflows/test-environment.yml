@@ -358,12 +358,37 @@ jobs:
           tag-owner: ${{ github.actor }}
 
       - name: Upload tf state
-        id: env.INFRA_TYPE != 'cis'
-        if: always()
+        id: upload-state-cdr
+        if: env.INFRA_TYPE != 'cis'
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
         run: |
           ./manage_infrastructure.sh "cdr" "upload-state"
+
+      - name: Deploy CIS Integrations
+        id: cis-integrations
+        if: env.INFRA_TYPE != 'cdr'
+        uses: ./.github/actions/cis
+        with:
+          deployment-name: ${{ env.DEPLOYMENT_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+          cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
+          gcp-zone: ${{ env.GCP_ZONE }}
+          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+          cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
+          stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}
+          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          test-agentless: ${{ env.TEST_AGENTLESS }}
+          tag-project: ${{ github.actor }}
+          tag-owner: ${{ github.actor }}
+
+      - name: Upload tf state
+        id: upload-state-cis
+        if: env.INFRA_TYPE != 'cdr'
+        env:
+          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+        run: |
+          ./manage_infrastructure.sh "cis" "upload-state"
 
       # TODO: REMOVE THIS SECTION
       # - name: Install AWS Cloudtrail integration
@@ -425,6 +450,8 @@ jobs:
       #     ../remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
       #========================================================
 
+      # TODO: Remove this section
+      #========================================================
       # - name: Install CNVM integration
       #   id: cnvm
       #   if: env.INFRA_TYPE != 'cdr'
@@ -559,6 +586,7 @@ jobs:
       #     src="../../../$INTEGRATIONS_SETUP_DIR/$scriptname"
       #     cmd="chmod +x $scriptname && ./$scriptname"
       #     ../remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+      #========================================================
 
       # TODO: REMOVE THIS SECTION
       #========================================================
