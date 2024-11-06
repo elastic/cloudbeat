@@ -19,7 +19,6 @@ package ec2
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
@@ -61,7 +60,7 @@ func (i Ec2Instance) GetResourceId() string {
 		return ""
 	}
 
-	return strings.Split(*i.Instance.InstanceId, "-")[1]
+	return *i.Instance.InstanceId
 }
 
 func (i Ec2Instance) GetResourceType() string {
