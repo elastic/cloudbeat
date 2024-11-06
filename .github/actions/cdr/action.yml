@@ -145,37 +145,37 @@ runs:
       shell: bash
       working-directory: "deploy/test-environments/cdr"
       run: |
-        ec2_cloudtrail_public_ip=$(terraform output -raw ec2_cloudtrail_public_ip)
-        echo "::add-mask::$ec2_cloudtrail_public_ip"
-        echo "CLOUDTRAIL_PUBLIC_IP=$ec2_cloudtrail_public_ip" >>"$GITHUB_ENV"
+        aws_ec2_cloudtrail_public_ip=$(terraform output -raw ec2_cloudtrail_public_ip)
+        echo "::add-mask::$aws_ec2_cloudtrail_public_ip"
+        echo "aws_ec2-cloudtrail-public-ip=$aws_ec2_cloudtrail_public_ip" >> "$GITHUB_OUTPUT"
 
-        ec2_cloudtrail_key=$(terraform output -raw ec2_cloudtrail_key)
-        echo "::add-mask::$ec2_cloudtrail_key"
-        echo "CLOUDTRAIL_KEY=$ec2_cloudtrail_key" >>"$GITHUB_ENV"
+        aws_ec2_cloudtrail_key=$(terraform output -raw ec2_cloudtrail_key)
+        echo "::add-mask::$aws_ec2_cloudtrail_key"
+        echo "aws_ec2-cloudtrail-key=$aws_ec2_cloudtrail_key" >>"$GITHUB_OUTPUT"
 
         az_vm_activity_logs_public_ip=$(terraform output -raw az_vm_activity_logs_public_ip)
         echo "::add-mask::$az_vm_activity_logs_public_ip"
-        echo "ACTIVITY_LOGS_PUBLIC_IP=$az_vm_activity_logs_public_ip" >>"$GITHUB_ENV"
+        echo "az-vm-activity-logs-public-ip=$az_vm_activity_logs_public_ip" >> "$GITHUB_OUTPUT"
 
         az_vm_activity_logs_key=$(terraform output -raw az_vm_activity_logs_key)
         echo "::add-mask::$az_vm_activity_logs_key"
-        echo "ACTIVITY_LOGS_KEY=$az_vm_activity_logs_key" >>"$GITHUB_ENV"
+        echo "az-vm-activity-logs-key=$az_vm_activity_logs_key" >> "$GITHUB_OUTPUT"
 
         gcp_audit_logs_public_ip=$(terraform output -raw gcp_audit_logs_public_ip)
         echo "::add-mask::$gcp_audit_logs_public_ip"
-        echo "AUDIT_LOGS_PUBLIC_IP=$gcp_audit_logs_public_ip" >>"$GITHUB_ENV"
+        echo "gcp-audit-logs-public-ip=$gcp_audit_logs_public_ip" >> "$GITHUB_OUTPUT"
 
         gcp_audit_logs_key=$(terraform output -raw gcp_audit_logs_key)
         echo "::add-mask::$gcp_audit_logs_key"
-        echo "AUDIT_LOGS_KEY=$gcp_audit_logs_key" >>"$GITHUB_ENV"
+        echo "gcp-audit-logs-key=$gcp_audit_logs_key" >> "$GITHUB_OUTPUT"
 
         ec2_asset_inv_key=$(terraform output -raw ec2_asset_inventory_key)
         echo "::add-mask::$ec2_asset_inv_key"
-        echo "EC2_ASSET_INV_KEY=$ec2_asset_inv_key" >>"$GITHUB_ENV"
+        echo "ec2-asset-inv-key=$ec2_asset_inv_key" >> "$GITHUB_OUTPUT"
 
         asset_inv_public_ip=$(terraform output -raw ec2_asset_inventory_public_ip)
         echo "::add-mask::$asset_inv_public_ip"
-        echo "ASSET_INV_PUBLIC_IP=$asset_inv_public_ip" >>"$GITHUB_ENV"
+        echo "asset-inv-public-ip=$asset_inv_public_ip" >> "$GITHUB_OUTPUT"
 
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
@@ -192,6 +192,9 @@ runs:
     - name: Deploy AWS Cloudtrail agent
       if: steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success'
       working-directory: deploy/test-environments/cdr
+      env:
+        CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-key }}
+        CLOUDTRAIL_PUBLIC_IP: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-public-ip }}
       run: |
         scriptname="cloudtrail-linux.sh"
         src="../../../tests/integrations_setup/$scriptname"
@@ -216,6 +219,9 @@ runs:
     - name: Deploy Azure Activity Logs agent
       if: steps.deploy-cdr-infra.outcome  == 'success' && steps.az-activity-logs-integration.outcome == 'success'
       working-directory: deploy/test-environments/cdr
+      env:
+        ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az_vm-activity-logs-key }}
+        ACTIVITY_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.az_vm-activity-logs-public-ip }}
       run: |
         scriptname="az_activity_logs.sh"
         src="../../../tests/integrations_setup/$scriptname"
@@ -238,6 +244,9 @@ runs:
     - name: Deploy GCP Audit Logs agent
       if: steps.deploy-cdr-infra.outcome  == 'success' && steps.gcp-audit-logs-integration.outcome == 'success'
       working-directory: deploy/test-environments/cdr
+      env:
+        AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}
+        AUDIT_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.gcp-audit-logs-public-ip }}
       run: |
         scriptname="gcp_audit_logs.sh"
         src="../../../tests/integrations_setup/$scriptname"
@@ -292,6 +301,9 @@ runs:
     - name: Deploy AWS Asset Inventory agent
       if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
       working-directory: deploy/test-environments/cdr
+      env:
+        EC2_ASSET_INV_KEY: ${{ steps.generate-data.outputs.ec2-asset-inv-key }}
+        ASSET_INV_PUBLIC_IP: ${{ steps.generate-data.outputs.asset-inv-public-ip }}
       run: |
         scriptname="aws-asset-inventory-linux.sh"
         src="../../../tests/integrations_setup/$scriptname"

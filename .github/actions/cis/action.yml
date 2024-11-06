@@ -47,6 +47,21 @@ inputs:
     description: "Run agentless integrations"
     type: boolean
     default: false
+  es-user:
+    description: "Elasticsearch user"
+    default: "elastic"
+    required: false
+    type: string
+  es-password:
+    description: "Elasticsearch password"
+    default: "changeme"
+    required: false
+    type: string
+  kibana-url:
+    description: "Kibana URL"
+    default: "default"
+    required: false
+    type: string
   tag-project:
     description: "Optional project resource tag"
     default: "test-environments"
@@ -110,8 +125,11 @@ runs:
     - name: Install CNVM integration
       id: cnvm
       working-directory: tests/integrations_setup
-      # env:
-      #   CNVM_STACK_NAME: "${{ inputs.cnvm-stack-name }}"
+      env:
+        # CNVM_STACK_NAME: "${{ inputs.cnvm-stack-name }}"
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_cnvm_integration.py
 
@@ -127,6 +145,10 @@ runs:
     - name: Install CSPM GCP integration
       id: cspm-gcp-integration
       working-directory: tests/integrations_setup
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_cspm_gcp_integration.py
 
@@ -149,6 +171,10 @@ runs:
     - name: Install CSPM Azure integration
       id: cspm-azure-integration
       working-directory: tests/integrations_setup
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_cspm_azure_integration.py
 
@@ -164,6 +190,10 @@ runs:
       id: kspm-d4c
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_d4c_integration.py
 
@@ -171,6 +201,10 @@ runs:
       id: kspm-eks
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_kspm_eks_integration.py
 
@@ -190,6 +224,10 @@ runs:
       id: kspm-unmanaged
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_kspm_unmanaged_integration.py
 
@@ -209,6 +247,10 @@ runs:
       id: cspm-aws-integration
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_cspm_integration.py
 
@@ -230,5 +272,8 @@ runs:
       working-directory: tests/integrations_setup
       env:
         AZURE_CREDENTIALS: ${{ inputs.cspm-azure-creds }}
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_agentless_integrations.py
