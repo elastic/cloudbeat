@@ -15,11 +15,6 @@ inputs:
     default: "eu-west-1"
     required: false
     type: string
-  azure-location:
-    description: "Azure location"
-    default: "East US"
-    required: false
-    type: string
   gcp-project-id:
     description: "GCP project ID"
     default: "default"
@@ -30,26 +25,6 @@ inputs:
     default: "default"
     required: false
     type: string
-  deploy-az-vm:
-    description: "Deploy Azure VM resources"
-    default: true
-    required: false
-    type: boolean
-  deploy-gcp-vm:
-    description: "Deploy GCP VM resources"
-    default: true
-    required: false
-    type: boolean
-  deploy-aws-ec2:
-    description: "Deploy AWS EC2 resources"
-    default: true
-    required: false
-    type: boolean
-  deploy-aws-asset-inventory:
-    description: "Deploy AWS Asset Inventory EC2 resources"
-    default: true
-    required: false
-    type: boolean
   aws-cloudtrail-s3-bucket:
     description: "AWS Cloudtrail S3 bucket"
     default: "default"
@@ -90,21 +65,6 @@ inputs:
     default: "Key=division,Value=engineering"
     required: false
     type: string
-  tag-division:
-    description: "Optional division resource tag"
-    default: "engineering"
-    required: false
-    type: string
-  tag-org:
-    description: "Optional org resource tag"
-    default: "security"
-    required: false
-    type: string
-  tag-team:
-    description: "Optional team resource tag"
-    default: "cloud-security-posture"
-    required: false
-    type: string
   tag-project:
     description: "Optional project resource tag"
     default: "test-environments"
@@ -124,16 +84,8 @@ runs:
       env:
         TF_VAR_deployment_name: ${{ inputs.deployment-name }}
         TF_VAR_region: ${{ inputs.aws-region }}
-        TF_VAR_location: ${{ inputs.azure-location }}
         TF_VAR_gcp_project_id: ${{ inputs.gcp-project-id }}
         TF_VAR_gcp_service_account_json: ${{ inputs.gcp-service-account-json }}
-        TF_VAR_deploy_az_vm: ${{ inputs.deploy-az-vm }}
-        TF_VAR_deploy_gcp_vm: ${{ inputs.deploy-gcp-vm }}
-        TF_VAR_deploy_aws_ec2: ${{ inputs.deploy-aws-ec2 }}
-        TF_VAR_deploy_aws_asset_inventory: ${{ inputs.deploy-aws-asset-inventory }}
-        TF_VAR_division: ${{ inputs.tag-division }}
-        TF_VAR_org: ${{ inputs.tag-org }}
-        TF_VAR_team: ${{ inputs.tag-team }}
         TF_VAR_project: ${{ inputs.tag-project }}
         TF_VAR_owner: ${{ inputs.tag-owner }}
       shell: bash

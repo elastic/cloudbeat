@@ -8,17 +8,9 @@ inputs:
     type: string
   aws-region:
     description: "AWS region"
-    default: "eu-west-1"
     required: false
+    default: "eu-west-1"
     type: string
-  deploy-aws-kspm:
-    description: "Deploy AWS KSPM EC2 resources"
-    type: boolean
-    default: true
-  deploy-aws-cspm:
-    description: "Deploy AWS CSPM EC2 resources"
-    type: boolean
-    default: true
   cnvm-stack-name:
     description: "CNVM CloudFormation stack name"
     required: true
@@ -80,9 +72,6 @@ runs:
       id: deploy-cis-infra
       env:
         TF_VAR_deployment_name: ${{ inputs.deployment-name }}
-        TF_VAR_region: ${{ inputs.aws-region }}
-        TF_VAR_deploy_aws_kspm: ${{ inputs.deploy-aws-kspm }}
-        TF_VAR_deploy_aws_cspm: ${{ inputs.deploy-aws-cspm }}
         TF_VAR_project: ${{ inputs.tag-project }}
         TF_VAR_owner: ${{ inputs.tag-owner }}
       shell: bash

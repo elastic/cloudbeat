@@ -278,17 +278,17 @@ jobs:
           ess-region: ${{ env.TF_VAR_ess_region }}
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
+          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
-      - name: Upload tf state
+      - name: Upload environment info
         id: upload-state
         if: always()
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
         run: |
-          ./manage_infrastructure.sh "elk-stack" "upload-state"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
@@ -318,13 +318,8 @@ jobs:
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
           aws-region: ${{ env.AWS_REGION }}
-          azure-location: "East US"
           gcp-project-id: ${{ env.GCP_PROJECT }}
           gcp-service-account-json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
-          deploy-az-vm: true
-          deploy-gcp-vm: true
-          deploy-aws-ec2: true
-          deploy-aws-asset-inventory: true
           aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
           azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
           azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
@@ -342,13 +337,15 @@ jobs:
         uses: ./.github/actions/cis
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
-          aws-region: ${{ env.AWS_REGION }}
           cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
           gcp-zone: ${{ env.GCP_ZONE }}
           cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
           cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          es-user: ${{ steps.elk-stack.outputs.es-user }}
+          es-password: ${{ steps.elk-stack.outputs.es-password }}
+          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
           test-agentless: ${{ env.TEST_AGENTLESS }}
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
