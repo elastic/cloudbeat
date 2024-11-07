@@ -120,6 +120,6 @@ runs:
         id: upload-state-elk
         working-directory: deploy/test-environments
         env:
-          S3_BUCKET: "${{ inputs.env-s3-bucket }}"
+          S3_BUCKET: ${{ inputs.env-s3-bucket }}
         run: |
           ./manage_infrastructure.sh "elk-stack" "upload-state"

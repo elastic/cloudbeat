@@ -271,7 +271,7 @@ runs:
         if: always()
         working-directory: deploy/test-environments
         env:
-          S3_BUCKET: "${{ inputs.env-s3-bucket }}"
+          S3_BUCKET: ${{ inputs.env-s3-bucket }}
           CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-key }}
           ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az_vm-activity-logs-key }}
           AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}

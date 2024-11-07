@@ -271,7 +271,7 @@ runs:
         id: upload-state-cis
         working-directory: deploy/test-environments
         env:
-          S3_BUCKET: "${{ inputs.env-s3-bucket }}"
+          S3_BUCKET: ${{ inputs.env-s3-bucket }}
           EC2_CSPM_KEY: ${{ steps.generate-data.outputs.ec2-cspm-key }}
           EC2_KSPM_KEY: ${{ steps.generate-data.outputs.ec2-kspm-key }}
         run: |
