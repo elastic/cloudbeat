@@ -294,10 +294,20 @@ jobs:
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
 
+      - name: Update Stack Vars
+        env:
+          STACK_ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          STACK_ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          STACK_KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          STACK_ES_URL: ${{ steps.elk-stack.outputs.es-url }}
+        run: |
+          echo "ES_USER=$STACK_ES_USER" >> $GITHUB_ENV
+          echo "ES_PASSWORD=$STACK_ES_PASSWORD" >> $GITHUB_ENV
+          echo "KIBANA_URL=$STACK_KIBANA_URL" >> $GITHUB_ENV
+          echo "ES_URL=$STACK_ES_URL" >> $GITHUB_ENV
+
       - name: Summary
         if: success()
-        env:
-          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
         run: |
           summary="Kibana URL: $KIBANA_URL"
           bucket_name="$S3_BASE_BUCKET"
