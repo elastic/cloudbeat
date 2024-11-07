@@ -38,6 +38,7 @@ updates:
       interval: "monthly"
 
   - package-ecosystem: "gomod"
+    target-branch: "8.x"
     directory: "/"
     groups:
       azure:
