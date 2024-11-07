@@ -116,10 +116,10 @@ runs:
         echo "::add-mask::${test_es_url}"
         echo "test-es-url=${test_es_url}" >> "$GITHUB_OUTPUT"
 
-      - name: Upload tf state
-        id: upload-state-elk
-        working-directory: deploy/test-environments
-        env:
-          S3_BUCKET: ${{ inputs.env-s3-bucket }}
-        run: |
-          ./manage_infrastructure.sh "elk-stack" "upload-state"
+    - name: Upload tf state
+      id: upload-state-elk
+      working-directory: deploy/test-environments
+      env:
+        S3_BUCKET: ${{ inputs.env-s3-bucket }}
+      run: |
+        ./manage_infrastructure.sh "elk-stack" "upload-state"
