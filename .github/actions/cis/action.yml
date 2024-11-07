@@ -113,6 +113,7 @@ runs:
 
     - name: Install CNVM integration
       id: cnvm
+      shell: bash
       working-directory: tests/integrations_setup
       env:
         # CNVM_STACK_NAME: "${{ inputs.cnvm-stack-name }}"
@@ -124,6 +125,7 @@ runs:
 
     - name: Deploy CNVM agent
       if: steps.cnvm.outcome  == 'success'
+      shell: bash
       env:
         STACK_NAME: "${{ inputs.cnvm-stack-name }}"
         ENROLLMENT_TOKEN: "${{ inputs.stack-enrollment-token }}"
@@ -133,6 +135,7 @@ runs:
 
     - name: Install CSPM GCP integration
       id: cspm-gcp-integration
+      shell: bash
       working-directory: tests/integrations_setup
       env:
         ES_USER: ${{ inputs.es-user }}
@@ -144,6 +147,7 @@ runs:
     - name: Deploy CSPM GCP agent
       id: cspm-gcp-agent
       if: steps.cspm-gcp-integration.outcome  == 'success'
+      shell: bash
       working-directory: deploy/deployment-manager
       env:
         ACTOR: ${{ github.actor }}
@@ -160,6 +164,7 @@ runs:
     - name: Install CSPM Azure integration
       id: cspm-azure-integration
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
@@ -171,6 +176,7 @@ runs:
       id: cspm-azure-agent
       if: steps.cspm-azure-integration.outcome  == 'success'
       working-directory: deploy/azure
+      shell: bash
       env:
         AZURE_TAGS: "${{ inputs.cspm-azure-tags }}"
       run: ./install_agent_az_cli.sh
@@ -179,6 +185,7 @@ runs:
       id: kspm-d4c
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
@@ -190,6 +197,7 @@ runs:
       id: kspm-eks
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
@@ -199,6 +207,7 @@ runs:
 
     - name: Deploy KSPM EKS agent
       if: steps.kspm-eks.outcome  == 'success'
+      shell: bash
       env:
         DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
         S3_BUCKET: "${{ inputs.env-s3-bucket }}"
@@ -213,6 +222,7 @@ runs:
       id: kspm-unmanaged
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
@@ -223,6 +233,7 @@ runs:
     - name: Deploy KSPM Unmanaged agent
       if: steps.kspm-unmanaged.outcome  == 'success'
       working-directory: deploy/test-environments/cis
+      shell: bash
       env:
         EC2_KSPM_KEY: ${{ steps.generate-data.outputs.ec2-kspm-key }}
         KSPM_PUBLIC_IP: ${{ steps.generate-data.outputs.kspm-public-ip }}
@@ -236,6 +247,7 @@ runs:
       id: cspm-aws-integration
       if: steps.deploy-cis-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
@@ -246,6 +258,7 @@ runs:
     - name: Deploy CSPM agent
       if: steps.cspm-aws-integration.outcome  == 'success'
       working-directory: deploy/test-environments/cis
+      shell: bash
       env:
         EC2_CSPM_KEY: ${{ steps.generate-data.outputs.ec2-cspm-key }}
         CSPM_PUBLIC_IP: ${{ steps.generate-data.outputs.cspm-public-ip }}
@@ -259,6 +272,7 @@ runs:
       id: agentless
       if: ${{ inputs.test-agentless }} == 'true'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         AZURE_CREDENTIALS: ${{ inputs.cspm-azure-creds }}
         ES_USER: ${{ inputs.es-user }}
@@ -274,5 +288,6 @@ runs:
         S3_BUCKET: ${{ inputs.env-s3-bucket }}
         EC2_CSPM_KEY: ${{ steps.generate-data.outputs.ec2-cspm-key }}
         EC2_KSPM_KEY: ${{ steps.generate-data.outputs.ec2-kspm-key }}
+      shell: bash
       run: |
         ./manage_infrastructure.sh "cis" "upload-state"

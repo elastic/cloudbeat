@@ -137,6 +137,7 @@ runs:
       id: cloudtrail-integration
       if: steps.deploy-cdr-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         CLOUDTRAIL_S3: ${{ inputs.aws-cloudtrail-s3-bucket }}
         ES_USER: ${{ inputs.es-user }}
@@ -148,6 +149,7 @@ runs:
     - name: Deploy AWS Cloudtrail agent
       if: steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success'
       working-directory: deploy/test-environments/cdr
+      shell: bash
       env:
         CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-key }}
         CLOUDTRAIL_PUBLIC_IP: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-public-ip }}
@@ -161,6 +163,7 @@ runs:
       id: az-activity-logs-integration
       if: steps.deploy-cdr-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         EVENTHUB: "activity-logs"
         CONNECTION_STRING: ${{ inputs.azure-eventhub-connection-string }}
@@ -175,6 +178,7 @@ runs:
     - name: Deploy Azure Activity Logs agent
       if: steps.deploy-cdr-infra.outcome  == 'success' && steps.az-activity-logs-integration.outcome == 'success'
       working-directory: deploy/test-environments/cdr
+      shell: bash
       env:
         ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az_vm-activity-logs-key }}
         ACTIVITY_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.az_vm-activity-logs-public-ip }}
@@ -188,6 +192,7 @@ runs:
       id: gcp-audit-logs-integration
       if: steps.deploy-cdr-infra.outcome  == 'success'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         GCP_TOPIC_NAME: "test-envs-topic"
         GCP_SUBSCRIPTION_NAME: "test-envs-topic-sub-id"
@@ -200,6 +205,7 @@ runs:
     - name: Deploy GCP Audit Logs agent
       if: steps.deploy-cdr-infra.outcome  == 'success' && steps.gcp-audit-logs-integration.outcome == 'success'
       working-directory: deploy/test-environments/cdr
+      shell: bash
       env:
         AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}
         AUDIT_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.gcp-audit-logs-public-ip }}
@@ -211,6 +217,7 @@ runs:
 
     - name: Check Asset Inventory supported version
       id: asset-inventory-version-check
+      shell: bash
       env:
         STACK_VERSION: ${{ inputs.elk-stack-version }}
       run: |
@@ -227,6 +234,7 @@ runs:
       id: azure-asset-inventory-integration
       working-directory: tests/integrations_setup
       if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
+      shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
@@ -238,6 +246,7 @@ runs:
       id: azure-asset-inventory-agent
       working-directory: deploy/azure
       if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
+      shell: bash
       env:
         AZURE_TAGS: ${{ inputs.azure-tags }}
         DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-inventory"
@@ -247,6 +256,7 @@ runs:
       id: aws-asset-inventory
       if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
       working-directory: tests/integrations_setup
+      shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
@@ -257,6 +267,7 @@ runs:
     - name: Deploy AWS Asset Inventory agent
       if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
       working-directory: deploy/test-environments/cdr
+      shell: bash      
       env:
         EC2_ASSET_INV_KEY: ${{ steps.generate-data.outputs.ec2-asset-inv-key }}
         ASSET_INV_PUBLIC_IP: ${{ steps.generate-data.outputs.asset-inv-public-ip }}
@@ -270,6 +281,7 @@ runs:
       id: upload-state-cdr
       if: always()
       working-directory: deploy/test-environments
+      shell: bash      
       env:
         S3_BUCKET: ${{ inputs.env-s3-bucket }}
         CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-key }}
