@@ -103,11 +103,11 @@ runs:
       run: |
         aws_ec2_cloudtrail_public_ip=$(terraform output -raw ec2_cloudtrail_public_ip)
         echo "::add-mask::$aws_ec2_cloudtrail_public_ip"
-        echo "aws_ec2-cloudtrail-public-ip=$aws_ec2_cloudtrail_public_ip" >> "$GITHUB_OUTPUT"
+        echo "aws-ec2-cloudtrail-public-ip=$aws_ec2_cloudtrail_public_ip" >> "$GITHUB_OUTPUT"
 
         aws_ec2_cloudtrail_key=$(terraform output -raw ec2_cloudtrail_key)
         echo "::add-mask::$aws_ec2_cloudtrail_key"
-        echo "aws_ec2-cloudtrail-key=$aws_ec2_cloudtrail_key" >>"$GITHUB_OUTPUT"
+        echo "aws-ec2-cloudtrail-key=$aws_ec2_cloudtrail_key" >>"$GITHUB_OUTPUT"
 
         az_vm_activity_logs_public_ip=$(terraform output -raw az_vm_activity_logs_public_ip)
         echo "::add-mask::$az_vm_activity_logs_public_ip"
@@ -135,7 +135,7 @@ runs:
 
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
-      if: steps.deploy-cdr-infra.outcome  == 'success'
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -147,12 +147,12 @@ runs:
         poetry run python ./install_cloudtrail_integration.py
 
     - name: Deploy AWS Cloudtrail agent
-      if: steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success'
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
-        CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-key }}
-        CLOUDTRAIL_PUBLIC_IP: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-public-ip }}
+        CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws-ec2-cloudtrail-key }}
+        CLOUDTRAIL_PUBLIC_IP: ${{ steps.generate-data.outputs.aws-ec2-cloudtrail-public-ip }}
       run: |
         scriptname="cloudtrail-linux.sh"
         src="../../../tests/integrations_setup/$scriptname"
@@ -161,7 +161,7 @@ runs:
 
     - name: Install Azure Activity Logs integration
       id: az-activity-logs-integration
-      if: steps.deploy-cdr-infra.outcome  == 'success'
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -176,12 +176,12 @@ runs:
         poetry run python ./install_az_activity_logs_integration.py
 
     - name: Deploy Azure Activity Logs agent
-      if: steps.deploy-cdr-infra.outcome  == 'success' && steps.az-activity-logs-integration.outcome == 'success'
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.az-activity-logs-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
-        ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az_vm-activity-logs-key }}
-        ACTIVITY_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.az_vm-activity-logs-public-ip }}
+        ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az-vm-activity-logs-key }}
+        ACTIVITY_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.az-vm-activity-logs-public-ip }}
       run: |
         scriptname="az_activity_logs.sh"
         src="../../../tests/integrations_setup/$scriptname"
@@ -190,7 +190,7 @@ runs:
 
     - name: Install GCP Audit Logs integration
       id: gcp-audit-logs-integration
-      if: steps.deploy-cdr-infra.outcome  == 'success'
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -203,7 +203,7 @@ runs:
         poetry run python ./install_gcp_audit_logs_integration.py
 
     - name: Deploy GCP Audit Logs agent
-      if: steps.deploy-cdr-infra.outcome  == 'success' && steps.gcp-audit-logs-integration.outcome == 'success'
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.gcp-audit-logs-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -217,6 +217,7 @@ runs:
 
     - name: Check Asset Inventory supported version
       id: asset-inventory-version-check
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       shell: bash
       env:
         STACK_VERSION: ${{ inputs.elk-stack-version }}
@@ -233,7 +234,7 @@ runs:
     - name: Install Azure Asset Inventory integration
       id: azure-asset-inventory-integration
       working-directory: tests/integrations_setup
-      if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'}}
       shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
@@ -245,7 +246,7 @@ runs:
     - name: Deploy Azure Asset Inventory agent
       id: azure-asset-inventory-agent
       working-directory: deploy/azure
-      if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       shell: bash
       env:
         AZURE_TAGS: ${{ inputs.azure-tags }}
@@ -254,7 +255,7 @@ runs:
 
     - name: Install AWS Asset Inventory integration
       id: aws-asset-inventory
-      if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -265,7 +266,7 @@ runs:
         poetry run python ./install_aws_asset_inventory_integration.py
 
     - name: Deploy AWS Asset Inventory agent
-      if: steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       working-directory: deploy/test-environments/cdr
       shell: bash      
       env:
@@ -277,15 +278,15 @@ runs:
         cmd="chmod +x $scriptname && ./$scriptname"
         ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-    - name: Upload tf state
+    - name: Upload CDR state
       id: upload-state-cdr
       if: always()
       working-directory: deploy/test-environments
       shell: bash      
       env:
         S3_BUCKET: ${{ inputs.env-s3-bucket }}
-        CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws_ec2-cloudtrail-key }}
-        ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az_vm-activity-logs-key }}
+        CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws-ec2-cloudtrail-key }}
+        ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az-vm-activity-logs-key }}
         AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}
         EC2_ASSET_INV_KEY: ${{ steps.generate-data.outputs.ec2-asset-inv-key }}
       run: |

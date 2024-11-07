@@ -323,6 +323,7 @@ jobs:
           aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
           azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
           azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           es-user: ${{ steps.elk-stack.outputs.es-user }}
           es-password: ${{ steps.elk-stack.outputs.es-password }}
           kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}

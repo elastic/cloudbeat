@@ -7,14 +7,15 @@ run_terraform() {
 
     echo "Running Terraform $operation in $dir..."
     cd "$dir" || exit
-    terraform init
 
     case $operation in
     "apply")
+        terraform init
         terraform validate
         terraform apply -auto-approve
         ;;
     "destroy")
+        terraform init
         if [ "$dir" == "cis" ] && terraform state list | grep -q "kubernetes_config_map_v1_data.aws_auth"; then
             echo "Removing aws_auth resource from state in cis..."
             terraform state rm "$(terraform state list | grep "kubernetes_config_map_v1_data.aws_auth")"
