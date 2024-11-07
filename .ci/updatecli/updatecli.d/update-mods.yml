@@ -23,7 +23,6 @@ actions:
       automerge: false
       labels:
         - automation
-        - backport-v8.x
         - dependency
         - go
       description: |-

@@ -25,7 +25,6 @@ actions:
       labels:
         - automation
         - dependency
-        - backport-v8.x
         - go
       description: |-
         ### What

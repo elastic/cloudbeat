@@ -49,6 +49,7 @@ jobs:
       fail-fast: false
       matrix:
         pipeline-name: [ beats, golang, hermit, mods ]
+        git-branch: [ main, 8.x ]
     steps:
       - uses: actions/checkout@v4
       - name: Init Hermit
@@ -58,7 +59,7 @@ jobs:
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
-          GIT_BRANCH: main
+          GIT_BRANCH: ${{ matrix.git-branch }}
           GIT_USER: "Cloud Security Machine"
           GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
