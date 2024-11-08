@@ -43,7 +43,7 @@ env:
 
 jobs:
   updatecli:
-    name: Update ${{ matrix.pipeline-name }} dependencies
+    name: "[${{ matrix.git-branch }}] Update ${{ matrix.pipeline-name }} dependencies"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -16,7 +16,7 @@ scms:
 
 actions:
   default:
-    title: '[updatecli] Update to elastic/beats@{{ source "beats" }}'
+    title: '[updatecli] {{ requiredEnv "GIT_BRANCH" }} - Update to elastic/beats@{{ source "beats" }}'
     kind: github/pullrequest
     scmid: default
     spec:
