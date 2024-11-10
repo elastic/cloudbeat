@@ -54,6 +54,10 @@ inputs:
     default: "default"
     required: false
     type: string
+  docker-image-override:
+    required: false
+    description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+    type: string
   tag-project:
     description: "Optional project resource tag"
     default: "test-environments"
@@ -193,6 +197,7 @@ runs:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
+        DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       run: |
         poetry run python ./install_d4c_integration.py
 
@@ -205,6 +210,7 @@ runs:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
+        DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       run: |
         poetry run python ./install_kspm_eks_integration.py
 
@@ -240,6 +246,7 @@ runs:
       env:
         EC2_KSPM_KEY: ${{ steps.generate-data.outputs.ec2-kspm-key }}
         KSPM_PUBLIC_IP: ${{ steps.generate-data.outputs.kspm-public-ip }}
+        DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       run: |
         scriptname="kspm_unmanaged.yaml"
         src="../../../tests/integrations_setup/$scriptname"

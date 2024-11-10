@@ -45,7 +45,7 @@ on:
       expiration_days:
         description: "Number of days until environment expiration"
         required: false
-        default: 14
+        default: 5
         type: string
       ec-api-key:
         type: string
@@ -92,7 +92,7 @@ on:
       expiration_days:
         description: "Number of days until environment expiration"
         required: false
-        default: 14
+        default: 5
         type: string
       ec-api-key:
         type: string
