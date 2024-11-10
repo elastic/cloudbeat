@@ -349,7 +349,7 @@ jobs:
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
           cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
-          gcp-zone: ${{ env.GCP_ZONE }}
+          cspm-gcp-zone: ${{ env.GCP_ZONE }}
           cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
           cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}

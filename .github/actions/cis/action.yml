@@ -113,6 +113,7 @@ runs:
 
     - name: Install CNVM integration
       id: cnvm
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome == 'success' }}
       shell: bash
       working-directory: tests/integrations_setup
       env:
@@ -124,7 +125,7 @@ runs:
         poetry run python ./install_cnvm_integration.py
 
     - name: Deploy CNVM agent
-      if: steps.cnvm.outcome  == 'success'
+      if: ${{ !cancelled() && steps.cnvm.outcome  == 'success' }}
       shell: bash
       env:
         STACK_NAME: "${{ inputs.cnvm-stack-name }}"
@@ -135,6 +136,7 @@ runs:
 
     - name: Install CSPM GCP integration
       id: cspm-gcp-integration
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome == 'success' }}      
       shell: bash
       working-directory: tests/integrations_setup
       env:
@@ -146,7 +148,7 @@ runs:
 
     - name: Deploy CSPM GCP agent
       id: cspm-gcp-agent
-      if: steps.cspm-gcp-integration.outcome  == 'success'
+      if: ${{ !cancelled() && steps.cspm-gcp-integration.outcome  == 'success' }}
       shell: bash
       working-directory: deploy/deployment-manager
       env:
@@ -163,6 +165,7 @@ runs:
 
     - name: Install CSPM Azure integration
       id: cspm-azure-integration
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -174,7 +177,7 @@ runs:
 
     - name: Deploy CSPM Azure agent
       id: cspm-azure-agent
-      if: steps.cspm-azure-integration.outcome  == 'success'
+      if: ${{ !cancelled() && steps.cspm-azure-integration.outcome  == 'success' }}
       working-directory: deploy/azure
       shell: bash
       env:
@@ -183,7 +186,7 @@ runs:
 
     - name: Install D4C integration
       id: kspm-d4c
-      if: steps.deploy-cis-infra.outcome  == 'success'
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -195,7 +198,7 @@ runs:
 
     - name: Install KSPM EKS integration
       id: kspm-eks
-      if: steps.deploy-cis-infra.outcome  == 'success'
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -206,7 +209,7 @@ runs:
         poetry run python ./install_kspm_eks_integration.py
 
     - name: Deploy KSPM EKS agent
-      if: steps.kspm-eks.outcome  == 'success'
+      if: ${{ !cancelled() && steps.kspm-eks.outcome  == 'success' }}
       shell: bash
       env:
         DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
@@ -220,7 +223,7 @@ runs:
 
     - name: Install KSPM Unmanaged integration
       id: kspm-unmanaged
-      if: steps.deploy-cis-infra.outcome  == 'success'
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -231,7 +234,7 @@ runs:
         poetry run python ./install_kspm_unmanaged_integration.py
 
     - name: Deploy KSPM Unmanaged agent
-      if: steps.kspm-unmanaged.outcome  == 'success'
+      if: ${{ !cancelled() && steps.kspm-unmanaged.outcome  == 'success' }}
       working-directory: deploy/test-environments/cis
       shell: bash
       env:
@@ -245,7 +248,7 @@ runs:
 
     - name: Install CSPM AWS integration
       id: cspm-aws-integration
-      if: steps.deploy-cis-infra.outcome  == 'success'
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -256,7 +259,7 @@ runs:
         poetry run python ./install_cspm_integration.py
 
     - name: Deploy CSPM agent
-      if: steps.cspm-aws-integration.outcome  == 'success'
+      if: ${{ !cancelled() && steps.cspm-aws-integration.outcome  == 'success' }}
       working-directory: deploy/test-environments/cis
       shell: bash
       env:
@@ -270,7 +273,7 @@ runs:
 
     - name: Install Agentless integrations
       id: agentless
-      if: ${{ inputs.test-agentless }} == 'true'
+      if: ${{ !cancelled() && inputs.test-agentless == 'true' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -283,6 +286,7 @@ runs:
 
     - name: Upload tf state
       id: upload-state-cis
+      if: always()
       working-directory: deploy/test-environments
       env:
         S3_BUCKET: ${{ inputs.env-s3-bucket }}
