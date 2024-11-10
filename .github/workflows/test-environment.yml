@@ -404,4 +404,4 @@ jobs:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
           vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
-          slack-payload: ${{ steps.prepare-data.outputs.payload }}
+          slack-payload: ${{ steps.prepare-slack-data.outputs.payload }}
