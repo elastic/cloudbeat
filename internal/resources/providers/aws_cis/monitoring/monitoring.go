@@ -64,12 +64,12 @@ type (
 	}
 )
 
-func NewProvider(log *logp.Logger, awsConfig aws.Config, trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client], cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client], cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client], snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client]) *Provider {
+func NewProvider(ctx context.Context, log *logp.Logger, awsConfig aws.Config, trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client], cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client], cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client], snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client]) *Provider {
 	return &Provider{
-		Cloudtrail:     cloudtrail.NewProvider(log, awsConfig, trailCrossRegionFactory),
-		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, cloudwatchCrossResignFactory),
-		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, cloudwatchlogsCrossRegionFactory),
-		Sns:            sns.NewSNSProvider(log, awsConfig, snsCrossRegionFactory),
+		Cloudtrail:     cloudtrail.NewProvider(ctx, log, awsConfig, trailCrossRegionFactory),
+		Cloudwatch:     cloudwatch.NewProvider(ctx, log, awsConfig, cloudwatchCrossResignFactory),
+		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(ctx, log, awsConfig, cloudwatchlogsCrossRegionFactory),
+		Sns:            sns.NewSNSProvider(ctx, log, awsConfig, snsCrossRegionFactory),
 		Log:            log,
 	}
 }

@@ -44,11 +44,11 @@ type Provider struct {
 	awsAccountID string
 }
 
-func NewElbProvider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewElbProvider(ctx context.Context, log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return elb.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:          log,
 		client:       elb.NewFromConfig(cfg),

@@ -36,11 +36,11 @@ type ElasticCompute interface {
 	GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error)
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewEC2Provider(ctx context.Context, log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return ec2.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:          log,
 		clients:      m.GetMultiRegionsClientMap(),
@@ -48,11 +48,11 @@ func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, facto
 	}
 }
 
-func NewCurrentRegionEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewCurrentRegionEC2Provider(ctx context.Context, log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return ec2.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.CurrentRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.CurrentRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:          log,
 		clients:      m.GetMultiRegionsClientMap(),
