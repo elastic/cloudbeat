@@ -41,11 +41,11 @@ type Client interface {
 	DescribeRepositories(ctx context.Context, params *ecrClient.DescribeRepositoriesInput, optFns ...func(*ecrClient.Options)) (*ecrClient.DescribeRepositoriesOutput, error)
 }
 
-func NewEcrProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewEcrProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return ecrClient.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 
 	return &Provider{clients: m.GetMultiRegionsClientMap()}
 }
