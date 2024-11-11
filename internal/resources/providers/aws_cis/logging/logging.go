@@ -39,6 +39,7 @@ type Provider struct {
 }
 
 func NewProvider(
+	ctx context.Context,
 	log *logp.Logger,
 	cfg aws.Config,
 	multiRegionTrailFactory awslib.CrossRegionFactory[cloudtrail.Client],
@@ -47,7 +48,7 @@ func NewProvider(
 ) *Provider {
 	return &Provider{
 		log:           log,
-		s3Provider:    s3.NewProvider(log, cfg, multiRegionS3Factory, accountId),
-		trailProvider: cloudtrail.NewProvider(log, cfg, multiRegionTrailFactory),
+		s3Provider:    s3.NewProvider(ctx, log, cfg, multiRegionS3Factory, accountId),
+		trailProvider: cloudtrail.NewProvider(ctx, log, cfg, multiRegionTrailFactory),
 	}
 }
