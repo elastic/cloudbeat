@@ -97,7 +97,7 @@ func (k *EKS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(preset.NewCisEksFetchers(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)),
+		registry.WithFetchersMap(preset.NewCisEksFetchers(ctx, log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)),
 	), dp, idp, nil
 }
 
