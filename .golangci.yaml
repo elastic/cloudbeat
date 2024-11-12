@@ -8,7 +8,7 @@ linters:
     - containedctx
     - contextcheck
     - exhaustruct
-    - exportloopref
+    - copyloopvar
     - fatcontext
     - gci
     - gocritic
