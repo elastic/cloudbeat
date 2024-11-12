@@ -94,7 +94,6 @@ func TestTransformStorageAccounts(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			got, err := transformStorageAccounts(tc.inputServicesPages, tc.inputSubscriptionId)
 			if tc.expectError {
@@ -152,7 +151,6 @@ func TestTransformBlobServices(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			got, err := transformBlobServices(tc.inputServicesPages, tc.inputStorageAccount)
 			if tc.expectError {
@@ -694,7 +692,6 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			provider := &storageAccountProvider{

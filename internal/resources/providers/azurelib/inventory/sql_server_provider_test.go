@@ -635,7 +635,6 @@ func TestListSQLFirewallRules(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			fakeSrv := &fake.FirewallRulesServer{}
 			fakeSrv.NewListByServerPager = func(_, _ string, _ *armsql.FirewallRulesClientListByServerOptions) azfake.PagerResponder[armsql.FirewallRulesClientListByServerResponse] {
