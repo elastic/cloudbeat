@@ -255,7 +255,6 @@ func TestReadPager(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			pagerHandlerMock := runtime.PagingHandler[int]{
 				More:    tc.moreFn,

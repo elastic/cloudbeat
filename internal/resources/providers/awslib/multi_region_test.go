@@ -92,7 +92,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			multiRegionClients := wrapper.NewMultiRegionClients(tt.args.selector(), tt.args.cfg, factory, tt.args.log)
+			multiRegionClients := wrapper.NewMultiRegionClients(context.Background(), tt.args.selector(), tt.args.cfg, factory, tt.args.log)
 			clients := multiRegionClients.GetMultiRegionsClientMap()
 			if !reflect.DeepEqual(clients, tt.want) {
 				t.Errorf("GetRegions() got = %v, want %v", clients, tt.want)

@@ -102,9 +102,9 @@ func calculateFetcherTimeout(period time.Duration) time.Duration {
 	roundedHours := math.Round(period.Hours() * 0.7)
 	to := time.Duration(roundedHours) * time.Hour
 
-	const min = 3 * time.Hour
-	if to < min {
-		return min
+	const minTimeout = 3 * time.Hour
+	if to < minTimeout {
+		return minTimeout
 	}
 
 	return to
