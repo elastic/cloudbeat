@@ -18,6 +18,7 @@
 package preset
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 
@@ -45,16 +46,17 @@ var (
 	eksRequiredProcesses = k8sfetchers.ProcessesConfigMap{"kubelet": {ConfigFileArguments: []string{"config"}}}
 	eksFsPatterns        = []string{
 		"/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
-		"/hostfs/var/lib/kubelet/kubeconfig"}
+		"/hostfs/var/lib/kubelet/kubeconfig",
+	}
 )
 
-func NewCisEksFetchers(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) registry.FetchersMap {
+func NewCisEksFetchers(ctx context.Context, log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) registry.FetchersMap {
 	log.Infof("Initializing EKS fetchers")
 	m := make(registry.FetchersMap)
 
 	if identity != nil {
 		log.Info("Initialize aws-related fetchers")
-		ecrPrivateProvider := ecr.NewEcrProvider(log, awsConfig, &awslib.MultiRegionClientFactory[ecr.Client]{})
+		ecrPrivateProvider := ecr.NewEcrProvider(ctx, log, awsConfig, &awslib.MultiRegionClientFactory[ecr.Client]{})
 		privateRepoRegex := fmt.Sprintf(awsfetchers.PrivateRepoRegexTemplate, identity.Account)
 
 		ecrPodDescriber := awsfetchers.PodDescriber{
@@ -65,7 +67,7 @@ func NewCisEksFetchers(log *logp.Logger, awsConfig aws.Config, ch chan fetching.
 		ecrFetcher := awsfetchers.NewEcrFetcher(log, ch, k8sClient, ecrPodDescriber)
 		m[fetching.EcrType] = registry.RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
 
-		elbProvider := elb.NewElbProvider(log, identity.Account, awsConfig, &awslib.MultiRegionClientFactory[elb.Client]{})
+		elbProvider := elb.NewElbProvider(ctx, log, identity.Account, awsConfig, &awslib.MultiRegionClientFactory[elb.Client]{})
 		loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
 		elbFetcher := awsfetchers.NewElbFetcher(log, ch, k8sClient, elbProvider, identity, loadBalancerRegex)
 		m[fetching.ElbType] = registry.RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(le)}}
