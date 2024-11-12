@@ -32,11 +32,11 @@ type Cloudwatch interface {
 	DescribeAlarms(ctx context.Context, region *string, filters []string) ([]types.MetricAlarm, error)
 }
 
-func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return cloudwatch.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		clients: m.GetMultiRegionsClientMap(),
 	}

@@ -54,7 +54,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 
 	// Early exit if we're scanning the entire account.
 	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
-		return awsfetcher.New(s.logger, awsIdentity, *awsConfig), nil
+		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig), nil
 	}
 
 	// Assume audit roles per selected account and generate fetchers for them
@@ -81,7 +81,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 			s.logger.Infof("Skipping identity on purpose %+v", identity)
 			continue
 		}
-		accountFetchers := awsfetcher.New(s.logger, &identity, assumedRoleConfig)
+		accountFetchers := awsfetcher.New(ctx, s.logger, &identity, assumedRoleConfig)
 		fetchers = append(fetchers, accountFetchers...)
 	}
 

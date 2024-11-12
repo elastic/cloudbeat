@@ -39,11 +39,11 @@ type KMS interface {
 	DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewKMSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewKMSProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return kms.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.CurrentRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.CurrentRegionSelector(), cfg, f, log)
 
 	return &Provider{
 		log:     log,

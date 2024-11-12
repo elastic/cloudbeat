@@ -31,11 +31,11 @@ import (
 	ec2Provider "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 )
 
-func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], ec2Provider ec2Provider.ElasticCompute) *Provider {
+func NewProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], ec2Provider ec2Provider.ElasticCompute) *Provider {
 	f := func(cfg aws.Config) Client {
 		return rds.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:     log,
 		clients: m.GetMultiRegionsClientMap(),

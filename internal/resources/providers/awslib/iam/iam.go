@@ -153,13 +153,13 @@ type PolicyDocument struct {
 	Policy     string `json:"policy,omitempty"`
 }
 
-func NewIAMProvider(log *logp.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzerClient]) *Provider {
+func NewIAMProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzerClient]) *Provider {
 	provider := Provider{
 		log:    log,
 		client: iamsdk.NewFromConfig(cfg),
 	}
 	if crossRegionFactory != nil {
-		m := crossRegionFactory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, func(cfg aws.Config) AccessAnalyzerClient {
+		m := crossRegionFactory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, func(cfg aws.Config) AccessAnalyzerClient {
 			return accessanalyzer.NewFromConfig(cfg)
 		}, log)
 		provider.accessAnalyzerClients = m.GetMultiRegionsClientMap()
