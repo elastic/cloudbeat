@@ -275,7 +275,6 @@ func TestExtractCommandName(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		name := strings.ReplaceAll(tc.cmd, "/", "|") // For readability, because tests are also hierarchical with '/'.
 		t.Run(name, func(t *testing.T) {
 			got := extractCommandName(tc.cmd)
