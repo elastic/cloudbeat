@@ -54861,7 +54861,7 @@ Contents of probable licence file $GOMODCACHE/github.com/xeipuuv/gojsonschema@v1
 --------------------------------------------------------------------------------
 Dependency : github.com/xi2/xz
 Version: v0.0.0-20171230120015-48954b6210f8
-Licence type (autodetected): MIT
+Licence type (autodetected): Unlicense
 --------------------------------------------------------------------------------
 
 Contents of probable licence file $GOMODCACHE/github.com/xi2/xz@v0.0.0-20171230120015-48954b6210f8/LICENSE:
