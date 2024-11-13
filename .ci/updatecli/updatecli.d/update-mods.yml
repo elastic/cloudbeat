@@ -16,7 +16,7 @@ scms:
 
 actions:
   default:
-    title: '[updatecli] Update golang mod dependencies'
+    title: '[updatecli] {{ requiredEnv "GIT_BRANCH" }} - Update golang mod dependencies'
     kind: github/pullrequest
     scmid: default
     spec:

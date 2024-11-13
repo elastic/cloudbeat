@@ -29,7 +29,41 @@ updates:
       - "backport-skip"
       - "dependency"
       - "go"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
+    # elastic/beats is using v7 in their go.mod, leading to automatic updates not working. Manual update is needed with
+    # go get -u github.com/elastic/beats/v7@<commit sha>
+    ignore:
+      - dependency-name: "github.com/elastic/beats/v7"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "gomod"
+    target-branch: "8.x"
+    directory: "/"
+    groups:
+      azure:
+        patterns:
+          - "github.com/Azure/*"
+      aws:
+        patterns:
+          - "github.com/aws/*"
+      google:
+        patterns:
+          - "cloud.google.com/*"
+          - "google.golang.org/api"
+      elastic:
+        patterns:
+          - "github.com/elastic/*"
+      k8s:
+        patterns:
+          - "k8s.io/*"
+      trivy:
+        patterns:
+          - "github.com/aquasecurity/*"
+    labels:
+      - "dependency"
+      - "go"
+    open-pull-requests-limit: 2
     # elastic/beats is using v7 in their go.mod, leading to automatic updates not working. Manual update is needed with
     # go get -u github.com/elastic/beats/v7@<commit sha>
     ignore:

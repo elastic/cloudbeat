@@ -16,7 +16,7 @@ scms:
 
 actions:
   cloudbeat:
-    title: '[updatecli] Update Golang version to {{ source "latestGoVersion" }}'
+    title: '[updatecli] {{ requiredEnv "GIT_BRANCH" }} - Update Golang version to {{ source "latestGoVersion" }}'
     kind: github/pullrequest
     scmid: default
     sourceid: latestGoVersion
@@ -24,8 +24,8 @@ actions:
       automerge: false
       labels:
         - automation
-        - dependency
         - backport-skip
+        - dependency
         - go
       description: |-
         ### What
