@@ -57,6 +57,9 @@ update_manifest_version_vars() {
     echo "Update cloudshell_git_branch in manifest.yml"
     sed -i'' -E "s/cloudbeat%2F[0-9]+\.[0-9]+/cloudbeat%2F$MAJOR_MINOR_CLOUDBEAT/g" "$manifest_path"
 
+    # aws asset inventory
+    sed -i'' -E "s/cloudformation-asset-inventory-ACCOUNT_TYPE-[0-9]+\.[0-9]+\.[0-9]+/cloudformation-asset-inventory-ACCOUNT_TYPE-$CURRENT_CLOUDBEAT_VERSION/g" "$manifest_path"
+
     git add "$manifest_path"
     if git diff --cached --quiet; then
         echo "No changes to commit in $manifest_path"

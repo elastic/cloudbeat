@@ -118,7 +118,6 @@ env:
   WORKING_DIR: deploy/test-environments
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
-  GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=${{ github.actor }}"
   GCP_ZONE: "us-central1-a"
   AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments owner=${{ github.actor }}"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
@@ -403,7 +402,14 @@ jobs:
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
+        env:
+          ACTOR: ${{ github.actor }}
         run: |
+          # GCP labeling rules:
+          # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
+          # Convert github.actor to lowercase, replace disallowed characters
+          GCP_LABEL=$(echo "$ACTOR" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/_/g')
+          GCP_DEFAULT_TAGS="division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=$GCP_LABEL"
           . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}" --zone="${GCP_ZONE}"
 
       - name: Install CSPM Azure integration
@@ -419,15 +425,29 @@ jobs:
           AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
         run: ./install_agent_az_cli.sh
 
+      - name: Check Asset Inventory supported version
+        id: asset-inventory-version-check
+        run: |
+          MIN_VERSION="8.16.0"
+          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
+            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
+            echo "asset_inventory_supported=true" >> $GITHUB_ENV
+          else
+            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
+            echo "asset_inventory_supported=false" >> $GITHUB_ENV
+          fi
+
       - name: Install Azure Asset Inventory integration
         id: azure-asset-inventory-integration
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        if: env.asset_inventory_supported == 'true'
         run: |
           poetry run python ./install_azure_asset_inventory_integration.py
 
       - name: Deploy Azure Asset Inventory agent
         id: azure-asset-inventory-agent
         working-directory: deploy/azure
+        if: env.asset_inventory_supported == 'true'
         env:
           AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
           DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}-inventory"
@@ -485,10 +505,12 @@ jobs:
       - name: Install AWS Asset Inventory integration
         id: aws-asset-inventory
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        if: env.asset_inventory_supported == 'true'
         run: |
           poetry run python ./install_aws_asset_inventory_integration.py
 
       - name: Deploy AWS Asset Inventory agent
+        if: env.asset_inventory_supported == 'true'
         run: |
           scriptname="aws-asset-inventory-linux.sh"
           src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
@@ -499,13 +521,16 @@ jobs:
         if: always()
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          ASSET_INVENTORY_SUPPORTED: "${{ env.asset_inventory_supported }}"
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         run: |
           aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
           aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
           aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
           aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
-          aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
+          if [[ "${ASSET_INVENTORY_SUPPORTED}" == "true" ]]; then
+            aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
+          fi
           aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 
       - name: Install Agentless integrations

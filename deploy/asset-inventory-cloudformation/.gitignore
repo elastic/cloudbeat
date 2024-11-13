@@ -1,0 +1,4 @@
+elastic-agent-ec2-dev-*.yml
+*generated.yml
+config.env
+config.json

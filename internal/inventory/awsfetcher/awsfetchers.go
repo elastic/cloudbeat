@@ -18,6 +18,8 @@
 package awsfetcher
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -34,15 +36,15 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
 )
 
-func New(logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
-	ec2Provider := ec2.NewEC2Provider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
-	elbProvider := elb.NewElbProvider(logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[elb.Client]{})
-	elbv2Provider := elbv2.NewElbV2Provider(logger, cfg, &awslib.MultiRegionClientFactory[elbv2.Client]{})
-	iamProvider := iam.NewIAMProvider(logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
-	lambdaProvider := lambda.NewLambdaProvider(logger, cfg, &awslib.MultiRegionClientFactory[lambda.Client]{})
-	rdsProvider := rds.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
-	s3Provider := s3.NewProvider(logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
-	snsProvider := sns.NewSNSProvider(logger, cfg, &awslib.MultiRegionClientFactory[sns.Client]{})
+func New(ctx context.Context, logger *logp.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
+	ec2Provider := ec2.NewEC2Provider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
+	elbProvider := elb.NewElbProvider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[elb.Client]{})
+	elbv2Provider := elbv2.NewElbV2Provider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[elbv2.Client]{})
+	iamProvider := iam.NewIAMProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
+	lambdaProvider := lambda.NewLambdaProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[lambda.Client]{})
+	rdsProvider := rds.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
+	s3Provider := s3.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
+	snsProvider := sns.NewSNSProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[sns.Client]{})
 
 	return []inventory.AssetFetcher{
 		newEc2InstancesFetcher(logger, identity, ec2Provider),
