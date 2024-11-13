@@ -29,7 +29,6 @@ updates:
         patterns:
           - "github.com/aquasecurity/*"
     labels:
-      - "backport-skip"
       - "dependency"
       - "backport-skip"
       - "go"
