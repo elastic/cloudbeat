@@ -88,7 +88,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 	}
 	log.Info("successfully retrieved AWS Identity")
 
-	a.IAMProvider = iam.NewIAMProvider(log, *awsConfig, nil)
+	a.IAMProvider = iam.NewIAMProvider(ctx, log, *awsConfig, nil)
 
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(

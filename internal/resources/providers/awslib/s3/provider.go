@@ -42,11 +42,11 @@ const (
 	NoPublicAccessBlockConfigurationCode = "NoSuchPublicAccessBlockConfiguration"
 )
 
-func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
+func NewProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
 	f := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 
 	controlClient := s3control.NewFromConfig(cfg)
 
