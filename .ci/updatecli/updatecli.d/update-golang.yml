@@ -26,10 +26,6 @@ actions:
         - automation
         - backport-skip
         - dependency
-<<<<<<< HEAD
-        - backport-skip
-=======
->>>>>>> 7ffa27b7 (Improve 8.x Dependency Updates (#2691))
         - go
       description: |-
         ### What
