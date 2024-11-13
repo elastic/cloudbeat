@@ -2,9 +2,12 @@
 
 version: 2
 updates:
-  # Maintain dependencies for go.mod
+  # Maintain dependencies for go.mod main branch
   - package-ecosystem: "gomod"
     directory: "/"
+    commit-message:
+      include: scope
+      prefix: "main"
     groups:
       azure:
         patterns:
@@ -27,6 +30,7 @@ updates:
           - "github.com/aquasecurity/*"
     labels:
       - "dependency"
+      - "backport-skip"
       - "go"
     open-pull-requests-limit: 2
     # elastic/beats is using v7 in their go.mod, leading to automatic updates not working. Manual update is needed with
@@ -36,9 +40,13 @@ updates:
     schedule:
       interval: "monthly"
 
+  # Maintain dependencies for go.mod 8.x branch
   - package-ecosystem: "gomod"
     target-branch: "8.x"
     directory: "/"
+    commit-message:
+      include: scope
+      prefix: "8.x"
     groups:
       azure:
         patterns:
@@ -61,6 +69,7 @@ updates:
           - "github.com/aquasecurity/*"
     labels:
       - "dependency"
+      - "backport-skip"
       - "go"
     open-pull-requests-limit: 2
     # elastic/beats is using v7 in their go.mod, leading to automatic updates not working. Manual update is needed with
