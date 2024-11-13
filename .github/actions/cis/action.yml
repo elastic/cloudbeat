@@ -140,7 +140,7 @@ runs:
 
     - name: Install CSPM GCP integration
       id: cspm-gcp-integration
-      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome == 'success' }}      
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome == 'success' }}
       shell: bash
       working-directory: tests/integrations_setup
       env:
