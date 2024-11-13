@@ -323,7 +323,7 @@ jobs:
 
       - name: Deploy CDR Integrations
         id: cdr-integrations
-        if: env.INFRA_TYPE != 'cis'
+        if: ${{ !cancelled() && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cis' }}
         uses: ./.github/actions/cdr
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
@@ -344,7 +344,7 @@ jobs:
 
       - name: Deploy CIS Integrations
         id: cis-integrations
-        if: env.INFRA_TYPE != 'cdr'
+        if: ${{ !cancelled() && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
         uses: ./.github/actions/cis
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
