@@ -289,7 +289,6 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 	}
 
 	for _, tt := range testcases {
-		tt := tt
 		s.Run(tt.name, func() {
 			mocks := s.initMocks()
 			sut := s.newLauncher(mocks, beaterMockCreator)

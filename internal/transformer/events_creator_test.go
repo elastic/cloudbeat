@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"regexp"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -188,7 +187,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
 				s.Equal(event.Fields["cloudbeat"], versionInfo)
 				s.Equal(enrichedValue, event.Fields[enrichedKey])
-				s.Regexp(regexp.MustCompile("^Rule \".*\": (passed|failed)$"), event.Fields["message"], "event message is not correct")
+				s.Regexp("^Rule \".*\": (passed|failed)$", event.Fields["message"], "event message is not correct")
 			}
 		})
 	}

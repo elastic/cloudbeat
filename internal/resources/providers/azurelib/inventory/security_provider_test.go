@@ -136,7 +136,6 @@ func TestListSecurityContacts(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
 
@@ -258,7 +257,6 @@ func TestListAutoProvisioningSettings(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
 

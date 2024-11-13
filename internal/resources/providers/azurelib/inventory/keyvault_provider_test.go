@@ -169,7 +169,6 @@ func TestListKeyVaultDiagnosticSettings(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			mockWrapper := &mockAzureKeyVaultWrapper{}
 			mockWrapper.Test(t)
@@ -283,7 +282,6 @@ func TestListKeyVaultKeys(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			mockWrapper := &mockAzureKeyVaultWrapper{}
 			mockWrapper.Test(t)
@@ -403,7 +401,6 @@ func TestListKeyVaultSecrets(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			mockWrapper := &mockAzureKeyVaultWrapper{}
 			mockWrapper.Test(t)
