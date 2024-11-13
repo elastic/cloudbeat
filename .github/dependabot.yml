@@ -26,10 +26,47 @@ updates:
         patterns:
           - "github.com/aquasecurity/*"
     labels:
+<<<<<<< HEAD
       - "backport-skip"
+=======
+>>>>>>> 7ffa27b7 (Improve 8.x Dependency Updates (#2691))
       - "dependency"
       - "go"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
+    # elastic/beats is using v7 in their go.mod, leading to automatic updates not working. Manual update is needed with
+    # go get -u github.com/elastic/beats/v7@<commit sha>
+    ignore:
+      - dependency-name: "github.com/elastic/beats/v7"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "gomod"
+    target-branch: "8.x"
+    directory: "/"
+    groups:
+      azure:
+        patterns:
+          - "github.com/Azure/*"
+      aws:
+        patterns:
+          - "github.com/aws/*"
+      google:
+        patterns:
+          - "cloud.google.com/*"
+          - "google.golang.org/api"
+      elastic:
+        patterns:
+          - "github.com/elastic/*"
+      k8s:
+        patterns:
+          - "k8s.io/*"
+      trivy:
+        patterns:
+          - "github.com/aquasecurity/*"
+    labels:
+      - "dependency"
+      - "go"
+    open-pull-requests-limit: 2
     # elastic/beats is using v7 in their go.mod, leading to automatic updates not working. Manual update is needed with
     # go get -u github.com/elastic/beats/v7@<commit sha>
     ignore:
@@ -43,7 +80,31 @@ updates:
     schedule:
       interval: "monthly"
     labels:
+<<<<<<< HEAD
       - "backport-skip"
+=======
+      - "dependency"
+      - "github_actions"
+    groups:
+      artifact:
+        patterns:
+        - "actions/download-artifact"
+        - "actions/upload-artifact"
+    ignore:
+        # Skip versions 4.x upload-artifact and download-artifact due to this issue: https://github.com/actions/upload-artifact/issues/478
+      - dependency-name: "actions/download-artifact"
+        versions: [">=4.0.0"]
+      - dependency-name: "actions/upload-artifact"
+        versions: [">=4.0.0"]
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: ".github/workflows"
+    target-branch: "8.x"
+    schedule:
+      interval: "monthly"
+    labels:
+>>>>>>> 7ffa27b7 (Improve 8.x Dependency Updates (#2691))
       - "dependency"
       - "github_actions"
     groups:
