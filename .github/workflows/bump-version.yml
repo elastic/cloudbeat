@@ -25,12 +25,13 @@ jobs:
         run: |
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           IFS='.' read -r major minor patch <<< "$current"
-          ((minor++))
-          next="$major.$minor.$patch"
-          echo "current: $current"
-          echo "next: $next"
-          echo "CURRENT_CLOUDBEAT_VERSION=$current" >> $GITHUB_ENV
-          echo "NEXT_CLOUDBEAT_VERSION=$next" >> $GITHUB_ENV
+          minor=$((minor+1))    
+          echo $minor
+          # next="$major.$minor.$patch"
+          # echo "current: $current"
+          # echo "next: $next"
+          # echo "CURRENT_CLOUDBEAT_VERSION=$current" >> $GITHUB_ENV
+          # echo "NEXT_CLOUDBEAT_VERSION=$next" >> $GITHUB_ENV
 
       - name: Setup Git User
         run: |
