@@ -701,8 +701,8 @@ github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 h1:YEetp8
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241112173109-96968c93d761 h1:6WtXjTYvgkXTsBqi9YFyZnXAPIjRBOwKzAoxtIFncfI=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241112173109-96968c93d761/go.mod h1:+jMmUNWEDWwfJfJY4aUApngxuHqLWGiisToYglcCxmY=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241114145125-f17e0828f1de h1:PNseyrO3mJ5KcW555PHzSDS2GNZIzrTCAhoZgRxr/54=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241114145125-f17e0828f1de/go.mod h1:6njIuVqNr+KXzRKpfJ6v4CGRjtNje9+x+tjeVghct4I=
 github.com/elastic/e2e-testing v1.2.3 h1:XKF91O+Y6RcrTuNc7kMM4/HE9pvkvjASIYhEWS5XkT0=
 github.com/elastic/e2e-testing v1.2.3/go.mod h1:TqP9TlnqFqKqd61etWkYgb8T+RulH7vmhg7lxQw/Yag=
 github.com/elastic/elastic-agent-autodiscover v0.9.0 h1:+iWIKh0u3e8I+CJa3FfWe9h0JojNasPgYIA47gpuuns=
@@ -711,8 +711,8 @@ github.com/elastic/elastic-agent-client/v7 v7.16.0 h1:yKGq2+CxAuW8Kh0EoNl202tqAy
 github.com/elastic/elastic-agent-client/v7 v7.16.0/go.mod h1:6h+f9QdIr3GO2ODC0Y8+aEXRwzbA5W4eV4dd/67z7nI=
 github.com/elastic/elastic-agent-libs v0.12.1 h1:5jkxMx15Bna8cq7/Sz/XUIVUXfNWiJ80iSk4ICQ7KJ0=
 github.com/elastic/elastic-agent-libs v0.12.1/go.mod h1:5CR02awPrBr+tfmjBBK+JI+dMmHNQjpVY24J0wjbC7M=
-github.com/elastic/elastic-agent-system-metrics v0.11.1 h1:BxViQHnqxvvi/65rj3mGwG6Eto6ldFCTnuDTUJnakaU=
-github.com/elastic/elastic-agent-system-metrics v0.11.1/go.mod h1:3QiMu9wTKJFvpCN+5klgGqasTMNKJbgY3xcoN1KQXJk=
+github.com/elastic/elastic-agent-system-metrics v0.11.4 h1:Z/8CML5RKvGpi6/QUFok1K3EriBAv2kUAXnsk8hCifk=
+github.com/elastic/elastic-agent-system-metrics v0.11.4/go.mod h1:TTW2ysv78uHBQ68hG8TXiaX1m6f29ZHgGWb8XONYsU8=
 github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4/go.mod h1:EWib/APOK0SL3dFbYqvxE3UYd8E6s1ouQ7iEp/0LWV4=
 github.com/elastic/go-concert v0.3.0 h1:Y66JFn3ENndpHErOhTASu8/Fz1SSsLZicPufCmvQD60=
 github.com/elastic/go-concert v0.3.0/go.mod h1:UWt1MB5HxxZ85hKynLaYl/AaLIKFx0WiBP2uJSRfduA=
@@ -1491,6 +1491,8 @@ github.com/shibumi/go-pathspec v1.3.0 h1:QUyMZhFo0Md5B8zV8x2tesohbb5kfbpTi9rBnKh
 github.com/shibumi/go-pathspec v1.3.0/go.mod h1:Xutfslp817l2I1cZvgcfeMQJG5QnU2lh5tVaaMCl3jE=
 github.com/shirou/gopsutil/v3 v3.24.2 h1:kcR0erMbLg5/3LcInpw0X/rrPSqq4CDPyI6A6ZRC18Y=
 github.com/shirou/gopsutil/v3 v3.24.2/go.mod h1:tSg/594BcA+8UdQU2XcW803GWYgdtauFFPgJCJKZlVk=
+github.com/shirou/gopsutil/v4 v4.24.7 h1:V9UGTK4gQ8HvcnPKf6Zt3XHyQq/peaekfxpJ2HSocJk=
+github.com/shirou/gopsutil/v4 v4.24.7/go.mod h1:0uW/073rP7FYLOkvxolUQM5rMOLTNmRXnFKafpb71rw=
 github.com/shoenig/go-m1cpu v0.1.6 h1:nxdKQNcEB6vzgA2E2bvzKIYRuNj7XNJ4S/aRSwKzFtM=
 github.com/shoenig/go-m1cpu v0.1.6/go.mod h1:1JJMcUBvfNwpq05QDQVAnx3gUHr9IYF7GNg9SUEw2VQ=
 github.com/shoenig/test v0.6.4/go.mod h1:byHiCGXqrVaflBLAMq/srcZIHynQPQgeyvkvXnjqq0k=
