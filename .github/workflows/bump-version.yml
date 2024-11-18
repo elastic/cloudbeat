@@ -24,11 +24,13 @@ jobs:
       - name: Setup Cloudbeat Versions
         run: |
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-
+          IFS='.' read -r major minor patch <<< "$current"
+          ((minor++))
+          next="$major.$minor.$patch"
           echo "current: $current"
-          
-          echo "CURRENT_CLOUDBEAT_VERSION=9.0.0" >> $GITHUB_ENV
-          echo "NEXT_CLOUDBEAT_VERSION=9.0.0" >> $GITHUB_ENV
+          echo "next: $next"
+          echo "CURRENT_CLOUDBEAT_VERSION=$current" >> $GITHUB_ENV
+          echo "NEXT_CLOUDBEAT_VERSION=$next" >> $GITHUB_ENV
 
       - name: Setup Git User
         run: |
