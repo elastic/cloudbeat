@@ -98,8 +98,8 @@ Infrastructure: 24% (18/73)
 
 ## AZURE Resources
 
-**Progress: 29% (15/51)**
-Identity: 0% (0/8)
+**Progress: 31% (16/51)**
+Identity: 12% (1/8)
 Infrastructure: 34% (15/43)
 
 <details> <summary>Full table</summary>
@@ -110,7 +110,7 @@ Infrastructure: 34% (15/43)
 | Identity | Access Management | Role | Azure Role | No ❌ |
 | Identity | Application | Application | Azure AD Application | No ❌ |
 | Identity | Digital Identity | Administrator | Azure Server AD Administrator | No ❌ |
-| Identity | Digital Identity | Principal | Azure Principal | No ❌ |
+| Identity | Digital Identity | Principal | Azure Principal | Yes ✅ |
 | Identity | Directory | Group | Azure AD Group | No ❌ |
 | Identity | Directory | User | Azure AD User | No ❌ |
 | Identity | Service Identity | Service Principal | Azure AD Service Principal | No ❌ |
