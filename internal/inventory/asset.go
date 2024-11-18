@@ -64,6 +64,7 @@ const (
 	TypeObjectStorage       AssetType = "object-storage"
 	TypePeering             AssetType = "peering"
 	TypePolicy              AssetType = "policy"
+	TypePrincipal           AssetType = "principal"
 	TypeRegistry            AssetType = "registry"
 	TypeRelationalDatabase  AssetType = "relational"
 	TypeResourceGroup       AssetType = "resource-group"
@@ -96,6 +97,7 @@ const (
 	SubTypeAzureCosmosDBSQLDatabase AssetSubType = "azure-cosmos-db-sql-database"
 	SubTypeAzureDisk                AssetSubType = "azure-disk"
 	SubTypeAzureElasticPool         AssetSubType = "azure-elastic-pool"
+	SubTypeAzurePrincipal           AssetSubType = "azure-principal"
 	SubTypeAzureResourceGroup       AssetSubType = "azure-resource-group"
 	SubTypeAzureSQLDatabase         AssetSubType = "azure-sql-database"
 	SubTypeAzureSQLServer           AssetSubType = "azure-sql-server"
@@ -196,6 +198,7 @@ var (
 	AssetClassificationAzureResourceGroup       = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeResourceGroup, SubType: SubTypeAzureResourceGroup}
 	AssetClassificationAzureSQLDatabase         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeAzureSQLDatabase}
 	AssetClassificationAzureSQLServer           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeAzureSQLServer}
+	AssetClassificationAzureServicePrincipal    = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypePrincipal, SubType: SubTypeAzurePrincipal}
 	AssetClassificationAzureSnapshot            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeSnapshot, SubType: SubTypeAzureSnapshot}
 	AssetClassificationAzureStorageAccount      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeStorage, SubType: SubTypeAzureStorageAccount}
 	AssetClassificationAzureStorageBlobService  = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeAzureStorageBlobService}
