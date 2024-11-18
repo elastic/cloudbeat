@@ -16,7 +16,7 @@ scms:
 
 actions:
   default:
-    title: '[updatecli] Update hermit and pre-commit dependencies'
+    title: '[updatecli] {{ requiredEnv "GIT_BRANCH" }} - Update hermit and pre-commit dependencies'
     kind: github/pullrequest
     scmid: default
     spec:
