@@ -23,6 +23,7 @@ jobs:
 
       - name: Setup Cloudbeat Versions
         run: |
+          cat version/version.go
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           IFS='.' read -r major minor patch <<< "$current"
           ((minor++))
