@@ -79,7 +79,7 @@ func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(preset.NewCisAwsFetchers(log, *awsConfig, ch, awsIdentity)),
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(ctx, log, *awsConfig, ch, awsIdentity)),
 	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 

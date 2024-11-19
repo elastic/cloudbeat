@@ -139,7 +139,6 @@ func TestGetAppServiceAuthSettings(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			mockWrapper := &mockAzureAppServiceWrapper{}
 			mockWrapper.Test(t)
@@ -284,7 +283,6 @@ func TestGetAppServiceSiteConfig(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			mockWrapper := &mockAzureAppServiceWrapper{}
 			mockWrapper.Test(t)

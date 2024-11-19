@@ -65,7 +65,7 @@ func NewCisAwsOrganizationFetchers(ctx context.Context, log *logp.Logger, rootCh
 }
 
 // awsFactory is the same function type as NewCisAwsFetchers, and it's used to mock the function in tests
-type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
+type awsFactory func(context.Context, *logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
 
 func newCisAwsOrganizationFetchers(
 	ctx context.Context,
@@ -117,6 +117,7 @@ func newCisAwsOrganizationFetchers(
 		}(account.Identity)
 
 		f := factory(
+			ctx,
 			log.Named("aws").WithOptions(zap.Fields(zap.String("cloud.account.id", account.Identity.Account))),
 			account.Config,
 			ch,

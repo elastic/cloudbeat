@@ -98,7 +98,6 @@ func TestFromMap(t *testing.T) {
 	}
 
 	for name, tc := range tests {
-		tc := tc
 		t.Run(name, func(t *testing.T) {
 			got := FromMap(tc.input, tc.inputKey)
 			require.Equal(t, tc.expected, got)
