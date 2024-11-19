@@ -20,5 +20,5 @@ steps:
       - slack:
           channels:
             - "#cloud-sec-ci"
-          message: "Test: ping @$slack_user"
+          message: "Test: ping <@$slack_user>"
 EOF
