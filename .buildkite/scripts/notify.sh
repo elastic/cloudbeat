@@ -3,24 +3,13 @@
 set -euo pipefail
 
 # Define a default Slack user
-# default_slack_user="cloudbeat-eng-team"
+# TODO: replacy DefaultSlackUser with cloudbeat-eng-team
 default_slack_user="DefaultSlackUser"
 
-# Check if BUILDKITE_BUILD_CREATOR is set, defaulting to an empty string
-build_author="${BUILDKITE_BUILD_CREATOR:-}"
+# Check if BUILDKITE_BUILD_CREATOR_EMAIL is set, defaulting to an empty string
+build_creator="${BUILDKITE_BUILD_CREATOR_EMAIL:-"MissingEmail"}"
 
-# Map GitHub usernames to Slack usernames using a case statement
-case "$build_author" in
-"Dmitry Gurevich")
-    slack_user="Dima Gurevich"
-    ;;
-"newuser")
-    slack_user="slack user2"
-    ;;
-*)
-    slack_user="$default_slack_user"
-    ;;
-esac
+slack_user=$(vault kv get -field="$build_creator" secret/ci/elastic-cloudbeat/slack-users 2>/dev/null || echo "$default_slack_user")
 
 # Output the YAML configuration
 cat <<EOF
@@ -31,6 +20,5 @@ steps:
       - slack:
           channels:
             - "#cloud-sec-ci"
-          message: "Test: ping <@$slack_user>"          
-      - slack: "@$slack_user"
+          message: "Test: ping @$slack_user"
 EOF
