@@ -4,14 +4,14 @@ set -euo pipefail
 
 # Define a default Slack user
 # default_slack_user="cloudbeat-eng-team"
-default_slack_user="Dima Gurevich"
+default_slack_user="DefaultSlackUser"
 
-# Check if BUILDKITE_BUILD_AUTHOR is set, defaulting to an empty string
-build_author="${BUILDKITE_BUILD_AUTHOR:-}"
+# Check if BUILDKITE_BUILD_CREATOR is set, defaulting to an empty string
+build_author="${BUILDKITE_BUILD_CREATOR:-}"
 
 # Map GitHub usernames to Slack usernames using a case statement
 case "$build_author" in
-"gurevichdmitry")
+"Dmitry Gurevich")
     slack_user="Dima Gurevich"
     ;;
 "newuser")
@@ -31,5 +31,6 @@ steps:
       - slack:
           channels:
             - "#cloud-sec-ci"
-          message: "Test: ping @$slack_user"
+          message: "Test: ping <@$slack_user>"          
+      - slack: "@$slack_user"
 EOF
