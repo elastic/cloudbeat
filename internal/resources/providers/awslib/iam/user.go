@@ -46,7 +46,6 @@ const (
 func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 	apiUsers, err := p.listUsers(ctx)
 	if err != nil {
-		p.log.Errorf("fail to list users, error: %v", err)
 		return nil, err
 	}
 
@@ -142,7 +141,7 @@ func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {
 	for {
 		users, err := p.client.ListUsers(ctx, input)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to list users: %w", err)
 		}
 		nativeUsers = append(nativeUsers, users.Users...)
 		if !users.IsTruncated {
@@ -239,7 +238,7 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 				// generate a new report
 				_, err = p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("failed to generate credential report: %w", err)
 				}
 			}
 		}
