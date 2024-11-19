@@ -34,7 +34,7 @@ steps:
     command: "./.buildkite/scripts/publish.sh"
     env:
       WORKFLOW: "staging"
-  
+
   - label: "Send Slack Notification"
     key: "slack-notification"
-    command: ".buildkite/user.sh | buildkite-agent pipeline upload"
+    command: ".buildkite/scripts/notify.sh | buildkite-agent pipeline upload"

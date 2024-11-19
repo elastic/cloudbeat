@@ -11,13 +11,13 @@ build_author="${BUILDKITE_BUILD_AUTHOR:-}"
 
 # Map GitHub usernames to Slack usernames using a case statement
 case "$build_author" in
-  "gurevichdmitry")
+"gurevichdmitry")
     slack_user="Dima Gurevich"
     ;;
-  "newuser")
+"newuser")
     slack_user="slack user2"
     ;;
-  *)
+*)
     slack_user="$default_slack_user"
     ;;
 esac
