@@ -43,5 +43,5 @@ steps:
 
   - label: "Send Slack Notification"
     key: "slack-notification"
-    if: build.state == "failed" || build.state == "failing"
+    if: build.state != "passed"
     command: ".buildkite/scripts/notify.sh | buildkite-agent pipeline upload"
