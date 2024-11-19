@@ -19,6 +19,7 @@ from package_policy import (
     generate_random_name,
 )
 
+
 def generate_aws_integration_data():
     """
     Generate data for creating CSPM AWS integration
