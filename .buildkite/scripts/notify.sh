@@ -41,4 +41,5 @@ notify:
       channels:
         - "$slack_channel"
       message: "$user_id"
+    if: build.state != "passed"
 EOF
