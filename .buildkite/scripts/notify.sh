@@ -36,12 +36,9 @@ fi
 
 # Output the YAML configuration
 cat <<EOF
-steps:
-  - label: "Slack notification"
-    command: echo "Notification test"
-    notify:
-      - slack:
-          channels:
-            - "$slack_channel"
-          message: "Test: ping $user_id"
+notify:
+  - slack:
+      channels:
+        - "$slack_channel"
+      message: "$user_id - <${BUILDKITE_BUILD_URL}|View Build>"
 EOF
