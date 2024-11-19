@@ -40,5 +40,5 @@ notify:
   - slack:
       channels:
         - "$slack_channel"
-      message: "$user_id - <${BUILDKITE_BUILD_URL}|View Build>"
+      message: "$user_id"
 EOF
