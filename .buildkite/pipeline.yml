@@ -36,10 +36,10 @@ steps:
       WORKFLOW: "staging"
 
   - command: exit -1
-    soft_fail: true
     key: 'todo-remove-test-failure'
 
   - wait: ~
+    continue_on_failure: true
 
   - label: "Send Slack Notification"
     key: "slack-notification"
