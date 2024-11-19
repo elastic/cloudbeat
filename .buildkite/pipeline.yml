@@ -35,6 +35,12 @@ steps:
     env:
       WORKFLOW: "staging"
 
+  - command: exit -1
+    soft_fail: true
+    key: 'todo-remove-test-failure'
+
+  - wait: ~
+
   - label: "Send Slack Notification"
     key: "slack-notification"
     if: build.state == "failed" || build.state == "failing"
