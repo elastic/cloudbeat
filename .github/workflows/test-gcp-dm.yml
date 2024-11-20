@@ -77,18 +77,8 @@ jobs:
         if: success()
         working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
-          terraform -v
-          terraform init
-          terraform validate
-          terraform apply --auto-approve -target="module.ec_deployment" -target="module.ec_project"
-          terraform output
-          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
-          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
-
-          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+          ./manage_infrastructure.sh "elk-stack" "apply"
+          ./manage_infrastructure.sh "elk-stack" "output"
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
@@ -121,7 +111,7 @@ jobs:
         if: always()
         working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
-          terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
+          ./manage_infrastructure.sh "elk-stack" "destroy"
 
       - name: Set up GCP Cloud SDK
         if: always()
@@ -188,18 +178,8 @@ jobs:
         if: success()
         working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
-          terraform -v
-          terraform init
-          terraform validate
-          terraform apply --auto-approve -target="module.ec_deployment" -target="module.ec_project"
-          terraform output
-          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
-          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
-
-          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+          ./manage_infrastructure.sh "elk-stack" "apply"
+          ./manage_infrastructure.sh "elk-stack" "output"
 
       - name: Set up GCP Cloud SDK
         if: always()
@@ -240,7 +220,7 @@ jobs:
         if: always()
         working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
-          terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
+          ./manage_infrastructure.sh "elk-stack" "destroy"
 
       - name: Delete GCP Deployments
         if: always()

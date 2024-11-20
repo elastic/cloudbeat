@@ -54,6 +54,7 @@ class AgentComponentMapping:
         cfg = Munch()
         cfg.auth = elasticsearch.basic_auth
         cfg.kibana_url = elasticsearch.kibana_url
+        cfg.stack_version = elasticsearch.stack_version
 
         active_agents = get_agents(cfg)
         logger.info(f"found {len(active_agents)} agents")
