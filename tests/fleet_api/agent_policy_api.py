@@ -152,8 +152,9 @@ def get_agents(cfg: Munch) -> list:
             url=url,
             auth=cfg.auth,
         )
-        response_obj = munchify(response)
-        return response_obj.list
+        if cfg.stack_version.startswith("9."):
+            return munchify(response.get("items", []))
+        return munchify(response.get("list", []))
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
