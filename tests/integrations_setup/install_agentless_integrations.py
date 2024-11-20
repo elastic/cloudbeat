@@ -10,7 +10,6 @@ The following steps are performed:
 import json
 
 import configuration_fleet as cnfg
-from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.package_policy_api import create_cspm_integration
 from loguru import logger
 from package_policy import (
@@ -18,6 +17,8 @@ from package_policy import (
     generate_policy_template,
     generate_random_name,
 )
+
+AGENT_POLICY_ID = "agentless"
 
 
 def generate_aws_integration_data():
@@ -70,6 +71,7 @@ def generate_gcp_integration_data():
         "posture": "cspm",
         "deployment": "gcp",
         "vars": {
+            "setup_access": "manual",
             "gcp.account_type": "single-account",
             "gcp.credentials.type": "credentials-json",
             "gcp.credentials.json": credentials_json,
@@ -81,19 +83,11 @@ if __name__ == "__main__":
     integrations = [
         generate_aws_integration_data(),
         generate_azure_integration_data(),
-        generate_gcp_integration_data(),
     ]
     cspm_template = generate_policy_template(cfg=cnfg.elk_config, stream_prefix="cloud_security_posture")
     for integration_data in integrations:
         NAME = integration_data["name"]
-        agentless_template = {
-            "name": "Agentless Policy - " + NAME,
-            "namespace": "default",
-            "monitoring_enabled": ["logs", "metrics"],
-            "supports_agentless": True,
-        }
-        policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agentless_template)
-        logger.info(f"Creating {NAME} integration for policy {policy_id}")
+        logger.info(f"Creating {NAME} integration for policy {AGENT_POLICY_ID}")
         package_policy = generate_package_policy(
             cspm_template,
             integration_data,
@@ -106,7 +100,7 @@ if __name__ == "__main__":
         create_cspm_integration(
             cfg=cnfg.elk_config,
             pkg_policy=package_policy,
-            agent_policy_id=policy_id,
+            agent_policy_id=AGENT_POLICY_ID,
             cspm_data={},
         )
         logger.info(f"Installation of {NAME} integration is done")
