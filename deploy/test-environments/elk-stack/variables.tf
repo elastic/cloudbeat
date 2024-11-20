@@ -1,44 +1,4 @@
-# AWS provider variable
-variable "region" {
-  description = "AWS region"
-  type        = string
-  default     = "eu-west-1"
-}
-
-# Azure provider variable
-variable "location" {
-  description = "Azure location"
-  type        = string
-  default     = "East US"
-}
-
-# EC2 variable
-variable "ami_map" {
-  description = "Mapping of regions to AMI IDs"
-  type        = map(any)
-  default = {
-    "eu-west-1" = "ami-0a5b3305c37e58e04"
-    "eu-west-3" = "ami-0532b3f7436b93d52"
-    # Add more regions and respective AMI IDs here
-  }
-}
-
-# GCP project ID
-variable "gcp_project_id" {
-  description = "GCP project ID"
-  type        = string
-  default     = "default"
-}
-
-variable "gcp_service_account_json" {
-  description = "GCP Service Account JSON"
-  type        = string
-  default     = "default"
-  sensitive   = true
-}
-
-# Elastic Cloud variables
-# ===========================================
+# ========Elastic Cloud Variables Section===============
 variable "ec_api_key" {
   description = "Provide Elastic Cloud API key or use export TF_VAR_ec_api_key={TOKEN}"
   type        = string
@@ -68,14 +28,8 @@ variable "serverless_mode" {
   type        = bool
 }
 
-variable "cdr_infra" {
-  default     = false
-  description = "Set to true to create a CDR infra deployment"
-  type        = bool
-}
-
 variable "deployment_template" {
-  default     = "gcp-compute-optimized-v2"
+  default     = "gcp-general-purpose"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"
   type        = string
 }
@@ -106,7 +60,9 @@ variable "docker_image_tag_override" {
   description = "Optional docker image tag override"
   type        = map(string)
 }
+# ========End Of Elastic Cloud Variables Section========
 
+# ============= Tags Section============================
 variable "division" {
   default     = "engineering"
   type        = string
@@ -136,4 +92,4 @@ variable "owner" {
   type        = string
   description = "Optional owner tag"
 }
-# ============================================
+# ======End Of Tags section=====================

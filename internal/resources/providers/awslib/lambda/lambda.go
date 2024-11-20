@@ -34,11 +34,11 @@ type Lambda interface {
 	ListLayers(context.Context, string, string) ([]awslib.AwsResource, error)
 }
 
-func NewLambdaProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewLambdaProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return lambda.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:     log,
 		clients: m.GetMultiRegionsClientMap(),

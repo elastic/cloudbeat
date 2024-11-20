@@ -20,8 +20,10 @@ package benchmark
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
@@ -86,7 +88,6 @@ func TestAzure_Initialize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt := tt
 			t.Parallel()
 
 			testInitialize(t, &Azure{
@@ -118,4 +119,47 @@ func mockAzureInventoryInitializerService(err error) azurelib.ProviderInitialize
 		initializerMock.Return(nil, err)
 	}
 	return initializer
+}
+
+func TestCalculateFetcherTimeout(t *testing.T) {
+	tests := map[string]struct {
+		inputPeriod time.Duration
+		expected    time.Duration
+	}{
+		"48h": {
+			inputPeriod: 48 * time.Hour,
+			expected:    34 * time.Hour,
+		},
+		"24h": {
+			inputPeriod: 24 * time.Hour,
+			expected:    17 * time.Hour,
+		},
+		"3h": {
+			inputPeriod: 3 * time.Hour,
+			expected:    3 * time.Hour,
+		},
+		"30m": {
+			inputPeriod: 30 * time.Minute,
+			expected:    3 * time.Hour,
+		},
+		"0": {
+			inputPeriod: 0,
+			expected:    3 * time.Hour,
+		},
+		"-30m": {
+			inputPeriod: -30 * time.Minute,
+			expected:    3 * time.Hour,
+		},
+		"-3h": {
+			inputPeriod: -3 * time.Hour,
+			expected:    3 * time.Hour,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := calculateFetcherTimeout(tc.inputPeriod)
+			require.Equal(t, tc.expected, got)
+		})
+	}
 }

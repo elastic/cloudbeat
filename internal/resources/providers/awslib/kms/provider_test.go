@@ -20,7 +20,6 @@ package kms
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	kmsClient "github.com/aws/aws-sdk-go-v2/service/kms"
@@ -35,8 +34,10 @@ import (
 type ProviderTestSuite struct {
 	suite.Suite
 }
-type mocks [2][]any
-type kmsClientMockReturnVals map[string][]mocks
+type (
+	mocks                   [2][]any
+	kmsClientMockReturnVals map[string][]mocks
+)
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
@@ -47,11 +48,13 @@ func (s *ProviderTestSuite) SetupTest() {}
 
 func (s *ProviderTestSuite) TearDownTest() {}
 
-var keyId1 = "21c0ba99-3a6c-4f72-8ef8-8118d4804710"
-var keyId2 = "21c0ba99-3a6c-4f72-8ef8-8118d4804711"
+var (
+	keyId1 = "21c0ba99-3a6c-4f72-8ef8-8118d4804710"
+	keyId2 = "21c0ba99-3a6c-4f72-8ef8-8118d4804711"
+)
 
 func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
-	var tests = []struct {
+	tests := []struct {
 		name                    string
 		regions                 []string
 		kmsClientMockReturnVals kmsClientMockReturnVals
@@ -181,7 +184,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 
 		// Using `ElementsMatch` instead of the usual `Equals` since iterating over the regions map does not produce a
 		//	guaranteed order
-		s.ElementsMatch(test.expected, results, fmt.Sprintf("Test '%s' failed, elements do not match", test.name))
+		s.ElementsMatch(test.expected, results, "Test '%s' failed, elements do not match", test.name)
 	}
 }
 

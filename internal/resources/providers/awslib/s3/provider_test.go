@@ -20,7 +20,6 @@ package s3
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -39,9 +38,11 @@ import (
 type ProviderTestSuite struct {
 	suite.Suite
 }
-type mocks [2][]any
-type s3ClientMockReturnVals map[string][]mocks
-type s3ControlClientMockReturnVals map[string]mocks
+type (
+	mocks                         [2][]any
+	s3ClientMockReturnVals        map[string][]mocks
+	s3ControlClientMockReturnVals map[string]mocks
+)
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
@@ -52,14 +53,16 @@ func (s *ProviderTestSuite) SetupTest() {}
 
 func (s *ProviderTestSuite) TearDownTest() {}
 
-var bucketName = "MyBucket"
-var secondBucketName = "MyAnotherBucket"
-var region types.BucketLocationConstraint = "eu-west-1"
-var bucketPolicy BucketPolicy = map[string]any{"foo": "bar"}
-var bucketPolicyString = "{\"foo\": \"bar\"}"
+var (
+	bucketName                                        = "MyBucket"
+	secondBucketName                                  = "MyAnotherBucket"
+	region             types.BucketLocationConstraint = "eu-west-1"
+	bucketPolicy       BucketPolicy                   = map[string]any{"foo": "bar"}
+	bucketPolicyString                                = "{\"foo\": \"bar\"}"
+)
 
 func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
-	var tests = []struct {
+	tests := []struct {
 		name                          string
 		regions                       []string
 		s3ClientMockReturnVals        s3ClientMockReturnVals
@@ -526,6 +529,6 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 
 		// Using `ElementsMatch` instead of the usual `Equals` since iterating over the regions map does not produce a
 		//	guaranteed order
-		s.ElementsMatch(test.expected, results, fmt.Sprintf("Test '%s' failed, elements do not match", test.name))
+		s.ElementsMatch(test.expected, results, "Test '%s' failed, elements do not match", test.name)
 	}
 }

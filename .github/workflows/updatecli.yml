@@ -43,22 +43,23 @@ env:
 
 jobs:
   updatecli:
-    name: Update ${{ matrix.pipeline-name }} dependencies
+    name: "[${{ matrix.git-branch }}] Update ${{ matrix.pipeline-name }} dependencies"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         pipeline-name: [ beats, golang, hermit, mods ]
+        git-branch: [ main, 8.x ]
     steps:
       - uses: actions/checkout@v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@6b8881a17fc8038e884ec94ff72a49e8e8a4069f # v0.76.1
+        uses: updatecli/updatecli-action@704a64517239e0993c5e3bf6749a063b8f950d9f # v0.76.1
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
-          GIT_BRANCH: main
+          GIT_BRANCH: ${{ matrix.git-branch }}
           GIT_USER: "Cloud Security Machine"
           GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
@@ -84,7 +85,7 @@ jobs:
 
           echo "GIT_BRANCH=$branchName" >> $GITHUB_ENV
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@6b8881a17fc8038e884ec94ff72a49e8e8a4069f # v0.76.1
+        uses: updatecli/updatecli-action@704a64517239e0993c5e3bf6749a063b8f950d9f # v0.76.1
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:

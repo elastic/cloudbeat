@@ -21,10 +21,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
-	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -67,7 +68,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cycleMetadata cycle.
 	var errAgg error
 	assets := []inventory.AzureAsset{}
 	for _, assetGroup := range AzureBatchAssetGroups {
-		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssets))
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, slices.Collect(maps.Keys(AzureBatchAssets)))
 		if err != nil {
 			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
 			errAgg = errors.Join(errAgg, err)

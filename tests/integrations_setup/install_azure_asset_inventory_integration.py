@@ -53,7 +53,10 @@ INTEGRATION_INPUT = {
     "input_name": "asset_inventory_azure",
     "vars": {
         "azure.account_type": "single-account",
-        "azure.credentials.type": "arm_template",
+        # managed_identity is treated by cloudbeat the same as arm_template.
+        # Change this variable back to arm_template once
+        # https://github.com/elastic/integrations/pull/11398 has been merged.
+        "azure.credentials.type": "managed_identity",
     },
 }
 AGENT_INPUT = {
@@ -71,7 +74,6 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
-    logger.info(f"Package version: {package_version}")
     update_package_version(
         cfg=cnfg.elk_config,
         package_name=PACKAGE_NAME,

@@ -28,14 +28,13 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/inventory/azurefetcher"
 	"github.com/elastic/cloudbeat/internal/inventory/gcpfetcher"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
 )
 
 type Strategy interface {
@@ -53,7 +52,12 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 
 	switch s.cfg.AssetInventoryProvider {
 	case config.ProviderAWS:
-		fetchers, err = s.initAwsFetchers(ctx)
+		switch s.cfg.CloudConfig.Aws.AccountType {
+		case config.SingleAccount, config.OrganizationAccount:
+			fetchers, err = s.initAwsFetchers(ctx)
+		default:
+			err = fmt.Errorf("unsupported account_type: %q", s.cfg.CloudConfig.Aws.AccountType)
+		}
 	case config.ProviderAzure:
 		fetchers, err = s.initAzureFetchers(ctx)
 	case config.ProviderGCP:
@@ -72,21 +76,6 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 	return inventory.NewAssetInventory(s.logger, fetchers, client, now), nil
 }
 
-func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
-	awsConfig, err := awslib.InitializeAWSConfig(s.cfg.CloudConfig.Aws.Cred)
-	if err != nil {
-		return nil, err
-	}
-
-	idProvider := awslib.IdentityProvider{Logger: s.logger}
-	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return awsfetcher.New(s.logger, awsIdentity, *awsConfig), nil
-}
-
 func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetcher, error) {
 	cfgProvider := &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}}
 	azureConfig, err := cfgProvider.GetAzureClientConfig(s.cfg.CloudConfig.Azure)
@@ -96,10 +85,15 @@ func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetche
 	initializer := &azurelib.ProviderInitializer{}
 	provider, err := initializer.Init(s.logger, *azureConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize azure config: %w", err)
+		return nil, fmt.Errorf("failed to initialize azure provider: %w", err)
 	}
 
-	return azurefetcher.New(s.logger, provider, azureConfig), nil
+	msgraphProvider, err := msgraph.NewProvider(s.logger, *azureConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize azure msgraph provider: %w", err)
+	}
+
+	return azurefetcher.New(s.logger, provider, msgraphProvider), nil
 }
 
 func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
