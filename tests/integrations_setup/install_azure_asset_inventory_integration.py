@@ -74,7 +74,6 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
-    logger.info(f"Package version: {package_version}")
     update_package_version(
         cfg=cnfg.elk_config,
         package_name=PACKAGE_NAME,

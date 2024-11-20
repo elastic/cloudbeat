@@ -1,0 +1,293 @@
+name: 'CDR Integrations Installation'
+description: 'Deploy CDR Integrations to Elastic Cloud'
+inputs:
+  deployment-name:
+    description: |
+      Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
+    required: true
+    type: string
+  env-s3-bucket:
+    description: "S3 bucket"
+    required: true
+    type: string
+  aws-region:
+    description: "AWS region"
+    default: "eu-west-1"
+    required: false
+    type: string
+  gcp-project-id:
+    description: "GCP project ID"
+    default: "default"
+    required: false
+    type: string
+  gcp-service-account-json:
+    description: "GCP Service Account JSON"
+    default: "default"
+    required: false
+    type: string
+  aws-cloudtrail-s3-bucket:
+    description: "AWS Cloudtrail S3 bucket"
+    default: "default"
+    required: false
+    type: string
+  azure-eventhub-connection-string:
+    description: "Azure EventHub connection string"
+    default: "default"
+    required: false
+    type: string
+  azure-storage-account-key:
+    description: "Azure Storage Account key"
+    default: "default"
+    required: false
+    type: string
+  es-user:
+    description: "Elasticsearch user"
+    default: "elastic"
+    required: false
+    type: string
+  es-password:
+    description: "Elasticsearch password"
+    default: "changeme"
+    required: false
+    type: string
+  elk-stack-version:
+    description: "ELK Stack version"
+    default: "8.16.0"
+    required: false
+    type: string
+  kibana-url:
+    description: "Kibana URL"
+    default: "default"
+    required: false
+    type: string
+  azure-tags:
+    description: "Azure default tags"
+    default: "Key=division,Value=engineering"
+    required: false
+    type: string
+  tag-project:
+    description: "Optional project resource tag"
+    default: "test-environments"
+    required: false
+    type: string
+  tag-owner:
+    description: "Optional owner tag"
+    default: "cloudbeat"
+    required: false
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Deploy CDR Infrastructure
+      id: deploy-cdr-infra
+      env:
+        TF_VAR_deployment_name: ${{ inputs.deployment-name }}
+        TF_VAR_region: ${{ inputs.aws-region }}
+        TF_VAR_gcp_project_id: ${{ inputs.gcp-project-id }}
+        TF_VAR_gcp_service_account_json: ${{ inputs.gcp-service-account-json }}
+        TF_VAR_project: ${{ inputs.tag-project }}
+        TF_VAR_owner: ${{ inputs.tag-owner }}
+      shell: bash
+      working-directory: "deploy/test-environments/cdr"
+      run: |
+        terraform init
+        terraform validate
+        terraform apply -auto-approve
+
+    - name: Get CDR Outputs
+      id: generate-data
+      if: success()
+      shell: bash
+      working-directory: "deploy/test-environments/cdr"
+      run: |
+        aws_ec2_cloudtrail_public_ip=$(terraform output -raw ec2_cloudtrail_public_ip)
+        echo "::add-mask::$aws_ec2_cloudtrail_public_ip"
+        echo "aws-ec2-cloudtrail-public-ip=$aws_ec2_cloudtrail_public_ip" >> "$GITHUB_OUTPUT"
+
+        aws_ec2_cloudtrail_key=$(terraform output -raw ec2_cloudtrail_key)
+        echo "::add-mask::$aws_ec2_cloudtrail_key"
+        echo "aws-ec2-cloudtrail-key=$aws_ec2_cloudtrail_key" >>"$GITHUB_OUTPUT"
+
+        az_vm_activity_logs_public_ip=$(terraform output -raw az_vm_activity_logs_public_ip)
+        echo "::add-mask::$az_vm_activity_logs_public_ip"
+        echo "az-vm-activity-logs-public-ip=$az_vm_activity_logs_public_ip" >> "$GITHUB_OUTPUT"
+
+        az_vm_activity_logs_key=$(terraform output -raw az_vm_activity_logs_key)
+        echo "::add-mask::$az_vm_activity_logs_key"
+        echo "az-vm-activity-logs-key=$az_vm_activity_logs_key" >> "$GITHUB_OUTPUT"
+
+        gcp_audit_logs_public_ip=$(terraform output -raw gcp_audit_logs_public_ip)
+        echo "::add-mask::$gcp_audit_logs_public_ip"
+        echo "gcp-audit-logs-public-ip=$gcp_audit_logs_public_ip" >> "$GITHUB_OUTPUT"
+
+        gcp_audit_logs_key=$(terraform output -raw gcp_audit_logs_key)
+        echo "::add-mask::$gcp_audit_logs_key"
+        echo "gcp-audit-logs-key=$gcp_audit_logs_key" >> "$GITHUB_OUTPUT"
+
+        ec2_asset_inv_key=$(terraform output -raw ec2_asset_inventory_key)
+        echo "::add-mask::$ec2_asset_inv_key"
+        echo "ec2-asset-inv-key=$ec2_asset_inv_key" >> "$GITHUB_OUTPUT"
+
+        asset_inv_public_ip=$(terraform output -raw ec2_asset_inventory_public_ip)
+        echo "::add-mask::$asset_inv_public_ip"
+        echo "asset-inv-public-ip=$asset_inv_public_ip" >> "$GITHUB_OUTPUT"
+
+    - name: Install AWS Cloudtrail integration
+      id: cloudtrail-integration
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        CLOUDTRAIL_S3: ${{ inputs.aws-cloudtrail-s3-bucket }}
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        poetry run python ./install_cloudtrail_integration.py
+
+    - name: Deploy AWS Cloudtrail agent
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success' }}
+      working-directory: deploy/test-environments/cdr
+      shell: bash
+      env:
+        CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws-ec2-cloudtrail-key }}
+        CLOUDTRAIL_PUBLIC_IP: ${{ steps.generate-data.outputs.aws-ec2-cloudtrail-public-ip }}
+      run: |
+        scriptname="cloudtrail-linux.sh"
+        src="../../../tests/integrations_setup/$scriptname"
+        cmd="chmod +x $scriptname && ./$scriptname"
+        ../remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+    - name: Install Azure Activity Logs integration
+      id: az-activity-logs-integration
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        EVENTHUB: "activity-logs"
+        CONNECTION_STRING: ${{ inputs.azure-eventhub-connection-string }}
+        STORAGE_ACCOUNT: "testenvsactivitylogs"
+        STORAGE_ACCOUNT_KEY: ${{ inputs.azure-storage-account-key }}
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        poetry run python ./install_az_activity_logs_integration.py
+
+    - name: Deploy Azure Activity Logs agent
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.az-activity-logs-integration.outcome == 'success' }}
+      working-directory: deploy/test-environments/cdr
+      shell: bash
+      env:
+        ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az-vm-activity-logs-key }}
+        ACTIVITY_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.az-vm-activity-logs-public-ip }}
+      run: |
+        scriptname="az_activity_logs.sh"
+        src="../../../tests/integrations_setup/$scriptname"
+        cmd="chmod +x $scriptname && ./$scriptname"
+        ../remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+    - name: Install GCP Audit Logs integration
+      id: gcp-audit-logs-integration
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        GCP_TOPIC_NAME: "test-envs-topic"
+        GCP_SUBSCRIPTION_NAME: "test-envs-topic-sub-id"
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        poetry run python ./install_gcp_audit_logs_integration.py
+
+    - name: Deploy GCP Audit Logs agent
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.gcp-audit-logs-integration.outcome == 'success' }}
+      working-directory: deploy/test-environments/cdr
+      shell: bash
+      env:
+        AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}
+        AUDIT_LOGS_PUBLIC_IP: ${{ steps.generate-data.outputs.gcp-audit-logs-public-ip }}
+      run: |
+        scriptname="gcp_audit_logs.sh"
+        src="../../../tests/integrations_setup/$scriptname"
+        cmd="chmod +x $scriptname && ./$scriptname"
+        ../remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+    - name: Check Asset Inventory supported version
+      id: asset-inventory-version-check
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      shell: bash
+      env:
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
+      run: |
+        MIN_VERSION="8.16.0"
+        if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
+          echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
+          echo "asset_inventory_supported=true" >> $GITHUB_OUTPUT
+        else
+          echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
+          echo "asset_inventory_supported=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Install Azure Asset Inventory integration
+      id: azure-asset-inventory-integration
+      working-directory: tests/integrations_setup
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'}}
+      shell: bash
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        poetry run python ./install_azure_asset_inventory_integration.py
+
+    - name: Deploy Azure Asset Inventory agent
+      id: azure-asset-inventory-agent
+      working-directory: deploy/azure
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      shell: bash
+      env:
+        AZURE_TAGS: ${{ inputs.azure-tags }}
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-inventory"
+      run: ./install_agent_az_cli.sh
+
+    - name: Install AWS Asset Inventory integration
+      id: aws-asset-inventory
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        poetry run python ./install_aws_asset_inventory_integration.py
+
+    - name: Deploy AWS Asset Inventory agent
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      working-directory: deploy/test-environments/cdr
+      shell: bash
+      env:
+        EC2_ASSET_INV_KEY: ${{ steps.generate-data.outputs.ec2-asset-inv-key }}
+        ASSET_INV_PUBLIC_IP: ${{ steps.generate-data.outputs.asset-inv-public-ip }}
+      run: |
+        scriptname="aws-asset-inventory-linux.sh"
+        src="../../../tests/integrations_setup/$scriptname"
+        cmd="chmod +x $scriptname && ./$scriptname"
+        ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+    - name: Upload CDR state
+      id: upload-state-cdr
+      if: always()
+      working-directory: deploy/test-environments
+      shell: bash
+      env:
+        S3_BUCKET: ${{ inputs.env-s3-bucket }}
+        CLOUDTRAIL_KEY: ${{ steps.generate-data.outputs.aws-ec2-cloudtrail-key }}
+        ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az-vm-activity-logs-key }}
+        AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}
+        EC2_ASSET_INV_KEY: ${{ steps.generate-data.outputs.ec2-asset-inv-key }}
+      run: |
+        ./manage_infrastructure.sh "cdr" "upload-state"

@@ -38,10 +38,11 @@ def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
             url=url,
             auth=cfg.auth,
         )
-        response_obj = munchify(response)
-
+        api_keys = munchify(response.get("list", []))
+        if cfg.stack_version.startswith("9."):
+            api_keys = munchify(response.get("items", []))
         api_key = ""
-        for item in response_obj.list:
+        for item in api_keys:
             if item.policy_id == policy_id:
                 api_key = item.api_key
                 break
@@ -318,7 +319,10 @@ def get_package_version(
         )
 
         cloud_security_posture_version = None
-        for package in response["response"]:
+        packages = response.get("response", [])
+        if cfg.stack_version.startswith("9."):
+            packages = response.get("items", [])
+        for package in packages:
             if package.get("name", "") == package_name:
                 cloud_security_posture_version = package.get("version", "")
                 break
@@ -365,7 +369,10 @@ def get_package(
             auth=cfg.auth,
             params={"params": request_params},
         )
-        return response.get("response", {})
+        package_data = response.get("response", {})
+        if cfg.stack_version.startswith("9."):
+            package_data = response.get("item", {})
+        return package_data
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",

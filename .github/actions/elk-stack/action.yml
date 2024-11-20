@@ -1,0 +1,126 @@
+name: 'ELK Cloud Stack Installation'
+description: 'Install ELK Cloud Stack ESS or Serverless'
+inputs:
+  ec-api-key:
+    description: "API key for authenticating with Elastic Cloud."
+    type: string
+    required: true
+  ess-region:
+    description: "Elastic Cloud deployment region"
+    default: "gcp-us-west2"
+    type: string
+    required: false
+  deployment-name:
+    description: |
+      Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
+    required: true
+    type: string
+  serverless-mode:
+    description: "Deploy a serverless project instead of an ESS deployment"
+    type: boolean
+    default: false
+    required: false
+  elk-stack-version:
+    description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
+    default: "latest"
+    type: string
+    required: false
+  docker-image-version-override:
+    description: "Optional Docker image version to override the default stack image. Accepts formats like 8.x.y, 8.x.y-hash, or 8.x.y-SNAPSHOT."
+    type: string
+    required: false
+  env-s3-bucket:
+    description: "S3 bucket"
+    required: true
+    type: string
+  tag-project:
+    description: "Optional project resource tag"
+    default: "test-environments"
+    required: false
+    type: string
+  tag-owner:
+    description: "Optional owner tag"
+    default: "cloudbeat"
+    required: false
+    type: string
+outputs:
+  kibana-url:
+    description: "Kibana URL"
+    value: ${{ steps.generate-data.outputs.kibana-url }}
+  es-url:
+    description: "Elasticsearch URL"
+    value: ${{ steps.generate-data.outputs.es-url }}
+  es-user:
+    description: "Elasticsearch username"
+    value: ${{ steps.generate-data.outputs.es-user }}
+  es-password:
+    description: "Elasticsearch password"
+    value: ${{ steps.generate-data.outputs.es-password }}
+  test-kibana-url:
+    description: "Test Kibana URL"
+    value: ${{ steps.generate-data.outputs.test-kibana-url }}
+  test-es-url:
+    description: "Test Elasticsearch URL"
+    value: ${{ steps.generate-data.outputs.test-es-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Deploy ELK Cloud Stack
+      id: deploy-elk-cloud-stack
+      env:
+        TF_VAR_deployment_name: ${{ inputs.deployment-name }}
+        TF_VAR_serverless_mode: ${{ inputs.serverless-mode }}
+        TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
+        TF_VAR_ess_region: ${{ inputs.ess-region }}
+        TF_VAR_pin_version: ${{ inputs.docker-image-version-override }}
+        TF_VAR_ec_api_key: ${{ inputs.ec-api-key }}
+        TF_VAR_project: ${{ inputs.tag-project }}
+        TF_VAR_owner: ${{ inputs.tag-owner }}
+      shell: bash
+      working-directory: "deploy/test-environments/elk-stack"
+      run: |
+        terraform init
+        terraform validate
+        terraform apply -auto-approve
+
+    - name: Get ELK Cloud Stack Outputs
+      id: generate-data
+      if: success()
+      shell: bash
+      working-directory: "deploy/test-environments/elk-stack"
+      run: |
+        kibana_url="$(terraform output -raw kibana_url)"
+        echo "kibana-url=$kibana_url" >> "$GITHUB_OUTPUT"
+
+        es_url="$(terraform output -raw elasticsearch_url)"
+        echo "es-url=$es_url" >> "$GITHUB_OUTPUT"
+
+        es_user="$(terraform output -raw elasticsearch_username)"
+        echo "es-user=$es_user" >> "$GITHUB_OUTPUT"
+
+        es_password=$(terraform output -raw elasticsearch_password)
+        echo "::add-mask::$es_password"
+        echo "es-password=$es_password" >>"$GITHUB_OUTPUT"
+
+        # Remove 'https://' from the URLs
+        kibana_url_stripped="${kibana_url//https:\/\//}"
+        es_url_stripped="${es_url//https:\/\//}"
+
+        # Create test URLs with credentials
+        test_kibana_url="https://${ES_USER}:${ES_PASSWORD}@${kibana_url_stripped}"
+        echo "::add-mask::${test_kibana_url}"
+        echo "test-kibana-url=${test_kibana_url}" >> "$GITHUB_OUTPUT"
+
+        test_es_url="https://${ES_USER}:${ES_PASSWORD}@${es_url_stripped}"
+        echo "::add-mask::${test_es_url}"
+        echo "test-es-url=${test_es_url}" >> "$GITHUB_OUTPUT"
+
+    - name: Upload tf state
+      id: upload-state-elk
+      working-directory: deploy/test-environments
+      env:
+        S3_BUCKET: ${{ inputs.env-s3-bucket }}
+      shell: bash
+      run: |
+        ./manage_infrastructure.sh "elk-stack" "upload-state"
