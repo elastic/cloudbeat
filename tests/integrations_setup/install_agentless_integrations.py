@@ -66,6 +66,7 @@ def generate_gcp_integration_data():
         "posture": "cspm",
         "deployment": "gcp",
         "vars": {
+            "setup_access": "manual",
             "gcp.account_type": "single-account",
             "gcp.credentials.type": "credentials-json",
             "gcp.credentials.json": credentials_json,
@@ -77,7 +78,6 @@ if __name__ == "__main__":
     integrations = [
         generate_aws_integration_data(),
         generate_azure_integration_data(),
-        generate_gcp_integration_data(),
     ]
     cspm_template = generate_policy_template(
         cfg=cnfg.elk_config,
