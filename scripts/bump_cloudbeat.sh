@@ -6,6 +6,7 @@ CURRENT_MINOR_VERSION=$(echo "$CURRENT_CLOUDBEAT_VERSION" | cut -d '.' -f1,2)
 export CURRENT_MINOR_VERSION
 
 # branches
+export BASE_BRANCH="${GIT_BASE_BRANCH:-main}"
 export NEXT_CLOUDBEAT_BRANCH="bump-to-$NEXT_CLOUDBEAT_VERSION"
 export NEXT_CLOUDBEAT_HERMIT_BRANCH="bump-hermit-to-$CURRENT_CLOUDBEAT_VERSION"
 export RELEASE_CLOUDBEAT_BRANCH="release-$CURRENT_MINOR_VERSION"
@@ -74,8 +75,8 @@ update_version_arm_template_default_value() {
 
 update_version_arm_template_file_uris() {
     echo "Replace fileUris git branch in ARM templates"
-    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$CURRENT_MINOR_VERSION/g" $ARM_SINGLE_ACCOUNT_FILE
-    sed -i'' -E "s/cloudbeat\/main/cloudbeat\/$CURRENT_MINOR_VERSION/g" $ARM_ORGANIZATION_ACCOUNT_FILE
+    sed -i'' -E "s/cloudbeat\/$BASE_BRANCH/cloudbeat\/$CURRENT_MINOR_VERSION/g" $ARM_SINGLE_ACCOUNT_FILE
+    sed -i'' -E "s/cloudbeat\/$BASE_BRANCH/cloudbeat\/$CURRENT_MINOR_VERSION/g" $ARM_ORGANIZATION_ACCOUNT_FILE
     git add $ARM_SINGLE_ACCOUNT_FILE $ARM_ORGANIZATION_ACCOUNT_FILE
     if git diff --cached --quiet; then
         echo "No changes to commit in ARM templates"
@@ -105,11 +106,11 @@ EOF
 
     pr_url="$(gh pr create --title "Bump cloudbeat version" \
         --body-file cloudbeat_pr_body \
-        --base "main" \
+        --base "$BASE_BRANCH" \
         --head "$NEXT_CLOUDBEAT_BRANCH" \
         --label "backport-skip")"
     # shellcheck disable=SC2086
-    echo "[Cloudbeat Version PR to main]($pr_url)" >>$GITHUB_STEP_SUMMARY
+    echo "[Cloudbeat Version PR to $BASE_BRANCH]($pr_url)" >>$GITHUB_STEP_SUMMARY
     rm cloudbeat_pr_body
 }
 
@@ -151,7 +152,7 @@ EOF
         echo "Create a PR for cloudbeat hermit version"
         pr_url="$(gh pr create --title "Bump hermit cloudbeat version" \
             --body-file hermit_pr_body \
-            --base "main" \
+            --base "$BASE_BRANCH" \
             --head "$NEXT_CLOUDBEAT_HERMIT_BRANCH" \
             --label "backport-skip")"
         # shellcheck disable=SC2086
@@ -170,11 +171,11 @@ upload_cloud_formation_templates() {
     set -x # enable debug log
 }
 
-# make changes to 'main' for next version
+# make changes to '$BASE_BRANCH' for next version
 run_version_changes_for_main() {
-    # create a new branch from the main branch
-    git fetch origin main
-    git checkout -b "$NEXT_CLOUDBEAT_BRANCH" origin/main
+    # create a new branch from the $BASE_BRANCH branch
+    git fetch origin "$BASE_BRANCH"
+    git checkout -b "$NEXT_CLOUDBEAT_BRANCH" "origin/$BASE_BRANCH"
 
     # commit
     update_version_beat
@@ -182,14 +183,14 @@ run_version_changes_for_main() {
     update_version_arm_template_default_value
 
     # push
-    if git diff origin/main..HEAD --quiet; then
-        echo "No commits to push to main $NEXT_CLOUDBEAT_BRANCH"
+    if git diff "origin/$BASE_BRANCH..HEAD" --quiet; then
+        echo "No commits to push to $BASE_BRANCH $NEXT_CLOUDBEAT_BRANCH"
     else
         create_cloudbeat_versions_pr_for_main
     fi
 
     # create, commit and push a separate PR for hermit
-    git checkout -b "$NEXT_CLOUDBEAT_HERMIT_BRANCH" origin/main
+    git checkout -b "$NEXT_CLOUDBEAT_HERMIT_BRANCH" "origin/$BASE_BRANCH"
     bump_hermit
 }
 
@@ -203,7 +204,7 @@ run_version_changes_for_release_branch() {
     update_version_arm_template_file_uris
 
     # push
-    if git diff origin/main..HEAD --quiet; then
+    if git diff "origin/$BASE_BRANCH..HEAD" --quiet; then
         echo "No commits to push to release $RELEASE_CLOUDBEAT_BRANCH"
     else
         create_cloudbeat_versions_pr_for_release
@@ -224,19 +225,19 @@ bump_snyk_branch_monitoring() {
         -H "accept: application/vnd.api+json" \
         -H "authorization: $SNYK_API_KEY"
 
-    # Import cloudbeat/main
+    # Import cloudbeat/$BASE_BRANCH
     curl -X POST \
         "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
         -H 'Content-Type: application/json; charset=utf-8' \
         -H "Authorization: token $SNYK_API_KEY" \
-        -d '{
-  "target": {
-    "owner": "elastic",
-    "name": "cloudbeat",
-    "branch": "main"
+        -d "{
+  \"target\": {
+    \"owner\": \"elastic\",
+    \"name\": \"cloudbeat\",
+    \"branch\": \"$BASE_BRANCH\"
   },
-  "exclusionGlobs": "deploy, scripts, tests, security-policies"
-}'
+  \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
+}"
     # Import cloudbeat/$CURRENT_MINOR_VERSION
     curl -X POST \
         "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \

@@ -19,6 +19,7 @@ jobs:
       - name: Checkout Cloudbeat Repo
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.base_ref || github.ref_name }}
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
       - name: Setup Cloudbeat Versions
@@ -39,8 +40,11 @@ jobs:
 
       - name: Bump Cloudbeat
         # bump_cloudbeat.sh will create multiple PRs with different HEAD branches
+        env:
+          GIT_BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
         run: scripts/bump_cloudbeat.sh
 
       - name: Bump Cloud Security Posture Integration
         # we need to run bump_integration.sh from the main branch
+        if: github.base_ref == 'main'
         run: git checkout origin/main && scripts/bump_integration.sh
