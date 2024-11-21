@@ -17,6 +17,28 @@ AWS_REGION="eu-west-1" # Add your desired default AWS region here
 DELETED_ENVS=()
 FAILED_ENVS=()
 
+# Function to delete all terraform states from given bucket
+function delete_all_states() {
+    local bucket_folder=$1
+    echo "Deleting all Terraform states from bucket: $bucket_folder"
+
+    states=("cdr" "cis" "elk-stack")
+    # Get all states
+    for state in "${states[@]}"; do
+        local state_file="./$state/terraform.tfstate"
+        aws s3 cp "$BUCKET/$bucket_folder/${state}-terraform.tfstate" "$state_file" || true
+    done
+    # Destroy all states and remove environment data from S3
+    if ./manage_infrastructure.sh "all" "destroy" &&
+        aws s3 rm "$BUCKET/$bucket_folder" --recursive; then
+        echo "Successfully deleted $bucket_folder"
+        DELETED_ENVS+=("$bucket_folder")
+    else
+        echo "Failed to delete $bucket_folder"
+        FAILED_ENVS+=("$bucket_folder")
+    fi
+}
+
 # Function to delete Terraform environment
 function delete_environment() {
     local ENV=$1
@@ -131,7 +153,11 @@ fi
 
 # Delete the Terraform environments
 for ENV in "${TO_DELETE_ENVS[@]}"; do
-    delete_environment "$ENV"
+    if aws s3 ls "$BUCKET/$ENV/terraform.tfstate" >/dev/null 2>&1; then
+        delete_environment "$ENV"
+    else
+        delete_all_states "$ENV"
+    fi
 done
 
 # Print summary of environment deletions

@@ -45,7 +45,7 @@ on:
       expiration_days:
         description: "Number of days until environment expiration"
         required: false
-        default: 14
+        default: 5
         type: string
       ec-api-key:
         type: string
@@ -92,17 +92,17 @@ on:
       expiration_days:
         description: "Number of days until environment expiration"
         required: false
-        default: 14
+        default: 5
         type: string
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
         required: false
-      cdr-infra:
-        description: "Flag to indicate that the CDR infrastructure is being created"
-        type: boolean
+      infra-type:
+        description: "Type of infrastructure to create"
+        type: string
         required: false
-        default: false
+        default: "cis"
     outputs:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
@@ -134,7 +134,7 @@ jobs:
       TF_VAR_ess_region: ${{ inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
       TF_VAR_serverless_mode: ${{ inputs.serverless_mode }}
-      TEST_AGENTLESS: ${{ inputs.serverless_mode }}
+      TEST_AGENTLESS: false # Change to true when creating an Agentless policy
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
@@ -216,15 +216,15 @@ jobs:
           echo "::add-mask::$enrollment_token"
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
 
-      - name: Init CDR Infra
-        id: init-cdr-infra
+      - name: Init Infra Type
+        id: init-infra-type
         env:
-          CDR_INFRA: ${{ inputs.cdr-infra }}
+          INPUT_INFRA_TYPE: ${{ inputs.infra-type }}
         run: |
-          if [[ "${CDR_INFRA:-}" == "true" ]]; then
-            echo "TF_VAR_cdr_infra=true" >> $GITHUB_ENV
+          if [[ -z "${INPUT_INFRA_TYPE}" ]]; then
+            echo "INFRA_TYPE=cis" >> $GITHUB_ENV
           else
-            echo "TF_VAR_cdr_infra=false" >> $GITHUB_ENV
+            echo "INFRA_TYPE=$INPUT_INFRA_TYPE" >> $GITHUB_ENV
           fi
 
       - name: Set up Python
@@ -268,279 +268,98 @@ jobs:
           echo "TF_VAR_gcp_project_id=$GCP_PROJECT" >> $GITHUB_ENV
           echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Deploy ELK Cloud Stack
+        id: elk-stack
+        uses: ./.github/actions/elk-stack
+        with:
+          deployment-name: ${{ env.DEPLOYMENT_NAME }}
+          serverless-mode: ${{ env.TEST_AGENTLESS }}
+          elk-stack-version: ${{ env.STACK_VERSION }}
+          ess-region: ${{ env.TF_VAR_ess_region }}
+          ec-api-key: ${{ env.TF_VAR_ec_api_key }}
+          docker-image-version-override: ${{ env.TF_VAR_pin_version }}
+          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          tag-project: ${{ github.actor }}
+          tag-owner: ${{ github.actor }}
 
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Provision Test Environment (EC + EC2 K8s + EC2 CSPM)
-        id: apply
-        if: success()
-        run: |
-          terraform apply --auto-approve \
-            -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
-            -var="region=${{ env.AWS_REGION }}" \
-            -var="project=${{ github.actor }}" \
-            -var="owner=${{ github.actor }}"
-
-      - name: Set Environment Output
-        id: env-output
-        run: ../../.ci/scripts/set_cloud_env_params.sh
-
-      - name: Upload tf state
+      - name: Upload environment info
         id: upload-state
         if: always()
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
         run: |
-          aws s3 cp "./terraform.tfstate" "${S3_BUCKET}/terraform.tfstate"
-          aws s3 cp "${EC2_CSPM_KEY}" "${S3_BUCKET}/cspm.pem"
-          aws s3 cp "${EC2_KSPM_KEY}" "${S3_BUCKET}/kspm.pem"
-          aws s3 cp "${EC2_ASSET_INV_KEY}" "${S3_BUCKET}/asset_inv.pem"
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
-          if [[ ${TF_VAR_cdr_infra:-} == "true" ]]; then
-            aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cloudtrail.pem"
-            aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
-            aws s3 cp "${AUDIT_LOGS_KEY}" "${S3_BUCKET}/gcp_audit_logs.pem"
-          fi
+
+      - name: Update Stack Vars
+        env:
+          STACK_ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          STACK_ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          STACK_KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          STACK_ES_URL: ${{ steps.elk-stack.outputs.es-url }}
+        run: |
+          echo "ES_USER=$STACK_ES_USER" >> $GITHUB_ENV
+          echo "ES_PASSWORD=$STACK_ES_PASSWORD" >> $GITHUB_ENV
+          echo "KIBANA_URL=$STACK_KIBANA_URL" >> $GITHUB_ENV
+          echo "ES_URL=$STACK_ES_URL" >> $GITHUB_ENV
 
       - name: Summary
         if: success()
         run: |
-          kibana_url=$(terraform output -raw kibana_url)
-          summary="Kibana URL: $kibana_url"
-          bucket_name="${{ env.S3_BASE_BUCKET }}"
+          summary="Kibana URL: $KIBANA_URL"
+          bucket_name="$S3_BASE_BUCKET"
           bucket_name="${bucket_name#s3://}"
           s3_bucket_link="[creds and keys](https://s3.console.aws.amazon.com/s3/buckets/$bucket_name)"
           summary=$(cat <<-EOF
-          Kibana URL: [kibana]($kibana_url)
+          Kibana URL: [kibana]($KIBANA_URL)
           Environment Details: $s3_bucket_link
           EOF
           )
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
-      - name: Install AWS Cloudtrail integration
-        id: cloudtrail-integration
-        if: env.TF_VAR_cdr_infra == 'true'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          CLOUDTRAIL_S3: ${{ secrets.CLOUDTRAIL_S3 }}
-        run: |
-          poetry run python ./install_cloudtrail_integration.py
+      - name: Deploy CDR Integrations
+        id: cdr-integrations
+        if: ${{ !cancelled() && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cis' }}
+        uses: ./.github/actions/cdr
+        with:
+          deployment-name: ${{ env.DEPLOYMENT_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+          gcp-project-id: ${{ env.GCP_PROJECT }}
+          gcp-service-account-json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
+          aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
+          azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+          azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          es-user: ${{ steps.elk-stack.outputs.es-user }}
+          es-password: ${{ steps.elk-stack.outputs.es-password }}
+          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          elk-stack-version: ${{ env.STACK_VERSION }}
+          azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
+          tag-project: ${{ github.actor }}
+          tag-owner: ${{ github.actor }}
 
-      - name: Deploy AWS Cloudtrail agent
-        if: env.TF_VAR_cdr_infra == 'true'
-        run: |
-          scriptname="cloudtrail-linux.sh"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$CLOUDTRAIL_KEY" -s "$src" -h "$CLOUDTRAIL_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-
-      - name: Install Azure Activity Logs integration
-        id: az-activity-logs-integration
-        if: env.TF_VAR_cdr_infra == 'true'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          EVENTHUB: "activity-logs"
-          CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
-          STORAGE_ACCOUNT: "testenvsactivitylogs"
-          STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
-        run: |
-          poetry run python ./install_az_activity_logs_integration.py
-
-      - name: Deploy Azure Activity Logs agent
-        if: env.TF_VAR_cdr_infra == 'true'
-        run: |
-          scriptname="az_activity_logs.sh"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$ACTIVITY_LOGS_KEY" -s "$src" -h "$ACTIVITY_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-
-      - name: Install GCP Audit Logs integration
-        id: gcp-audit-logs-integration
-        if: env.TF_VAR_cdr_infra == 'true'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          GCP_TOPIC_NAME: "test-envs-topic"
-          GCP_SUBSCRIPTION_NAME: "test-envs-topic-sub-id"
-        run: |
-          poetry run python ./install_gcp_audit_logs_integration.py
-
-      - name: Deploy GCP Audit Logs agent
-        if: env.TF_VAR_cdr_infra == 'true'
-        run: |
-          scriptname="gcp_audit_logs.sh"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-
-      - name: Install CNVM integration
-        id: cnvm
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cnvm_integration.py
-
-      - name: Deploy CNVM agent
-        env:
-          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: |
-          unset ENROLLMENT_TOKEN
-          just deploy-cloudformation
-
-      - name: Install CSPM GCP integration
-        id: cspm-gcp-integration
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cspm_gcp_integration.py
-
-      - name: Deploy CSPM GCP agent
-        id: cspm-gcp-agent
-        working-directory: deploy/deployment-manager
-        env:
-          ACTOR: ${{ github.actor }}
-        run: |
-          # GCP labeling rules:
-          # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
-          # Convert github.actor to lowercase, replace disallowed characters
-          GCP_LABEL=$(echo "$ACTOR" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/_/g')
-          GCP_DEFAULT_TAGS="division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=$GCP_LABEL"
-          . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${GCP_DEFAULT_TAGS}" --zone="${GCP_ZONE}"
-
-      - name: Install CSPM Azure integration
-        id: cspm-azure-integration
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cspm_azure_integration.py
-
-      - name: Deploy CSPM Azure agent
-        id: cspm-azure-agent
-        working-directory: deploy/azure
-        env:
-          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
-        run: ./install_agent_az_cli.sh
-
-      - name: Check Asset Inventory supported version
-        id: asset-inventory-version-check
-        run: |
-          MIN_VERSION="8.16.0"
-          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
-            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
-            echo "asset_inventory_supported=true" >> $GITHUB_ENV
-          else
-            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
-            echo "asset_inventory_supported=false" >> $GITHUB_ENV
-          fi
-
-      - name: Install Azure Asset Inventory integration
-        id: azure-asset-inventory-integration
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        if: env.asset_inventory_supported == 'true'
-        run: |
-          poetry run python ./install_azure_asset_inventory_integration.py
-
-      - name: Deploy Azure Asset Inventory agent
-        id: azure-asset-inventory-agent
-        working-directory: deploy/azure
-        if: env.asset_inventory_supported == 'true'
-        env:
-          AZURE_TAGS: ${{ env.AZURE_DEFAULT_TAGS }}
-          DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}-inventory"
-        run: ./install_agent_az_cli.sh
-
-      - name: Install D4C integration
-        id: kspm-d4c
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_d4c_integration.py
-
-      - name: Install KSPM EKS integration
-        id: kspm-eks
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_kspm_eks_integration.py
-
-      - name: Deploy KSPM EKS agent
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-        run: |
-          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
-              --name $(terraform output -raw deployment_name) --alias eks-config
-          echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
-          aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
-          kubectl config use-context eks-config
-          kubectl apply -f ../../${{ env.INTEGRATIONS_SETUP_DIR }}/kspm_d4c.yaml
-
-      - name: Install KSPM Unmanaged integration
-        id: kspm-unmanaged
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_kspm_unmanaged_integration.py
-
-      - name: Deploy KSPM Unmanaged agent
-        run: |
-          scriptname="kspm_unmanaged.yaml"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="kubectl apply -f $scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$EC2_KSPM_KEY" -s "$src" -h "$KSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-
-      - name: Install CSPM integration
-        id: cspm
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./install_cspm_integration.py
-
-      - name: Deploy CSPM agent
-        run: |
-          scriptname="cspm-linux.sh"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$EC2_CSPM_KEY" -s "$src" -h "$CSPM_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-
-      - name: Install AWS Asset Inventory integration
-        id: aws-asset-inventory
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        if: env.asset_inventory_supported == 'true'
-        run: |
-          poetry run python ./install_aws_asset_inventory_integration.py
-
-      - name: Deploy AWS Asset Inventory agent
-        if: env.asset_inventory_supported == 'true'
-        run: |
-          scriptname="aws-asset-inventory-linux.sh"
-          src="../../$INTEGRATIONS_SETUP_DIR/$scriptname"
-          cmd="chmod +x $scriptname && ./$scriptname"
-          ../../.ci/scripts/remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
-
-      - name: Upload Integrations data
-        if: always()
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-          ASSET_INVENTORY_SUPPORTED: "${{ env.asset_inventory_supported }}"
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          aws s3 cp "./kspm_unmanaged.yaml" "$S3_BUCKET/kspm_unmanaged.yaml"
-          aws s3 cp "./kspm_d4c.yaml" "$S3_BUCKET/kspm_d4c.yaml"
-          aws s3 cp "./kspm_eks.yaml" "$S3_BUCKET/kspm_eks.yaml"
-          aws s3 cp "./cspm-linux.sh" "$S3_BUCKET/cspm-linux.sh"
-          if [[ "${ASSET_INVENTORY_SUPPORTED}" == "true" ]]; then
-            aws s3 cp "./aws-asset-inventory-linux.sh" "$S3_BUCKET/aws-asset-inventory-linux.sh"
-          fi
-          aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
-
-      - name: Install Agentless integrations
-        id: agentless
-        if: env.TEST_AGENTLESS == 'true'
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-        run: |
-          poetry run python ./install_agentless_integrations.py
+      - name: Deploy CIS Integrations
+        id: cis-integrations
+        if: ${{ !cancelled() && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
+        uses: ./.github/actions/cis
+        with:
+          deployment-name: ${{ env.DEPLOYMENT_NAME }}
+          cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
+          cspm-gcp-zone: ${{ env.GCP_ZONE }}
+          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+          cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
+          stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}
+          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          es-user: ${{ steps.elk-stack.outputs.es-user }}
+          es-password: ${{ steps.elk-stack.outputs.es-password }}
+          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          test-agentless: ${{ env.TEST_AGENTLESS }}
+          tag-project: ${{ github.actor }}
+          tag-owner: ${{ github.actor }}
 
       - name: Wait for agents to enroll
         id: wait-for-agents
@@ -549,23 +368,23 @@ jobs:
           poetry run python ./agents_enrolled.py
 
       - name: Run Sanity checks
-        if: ${{ success() && inputs.run-sanity-tests == true }}
+        if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
         working-directory: ./tests
         run: |
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Run UI Sanity checks (Kibana)
         uses: ./.github/actions/kibana-ftr
-        if: ${{ success() && inputs.run-ui-sanity-tests == true }}
+        if: ${{ success() && inputs.run-ui-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
         with:
-          test_kibana_url: ${{ env.TEST_KIBANA_URL }}
-          test_es_url: ${{ env.TEST_ES_URL }}
+          test_kibana_url: ${{ steps.elk-stack.outputs.test-kibana-url }}
+          test_es_url: ${{ steps.elk-stack.outputs.test-es-url }}
           es_version: ${{ env.STACK_VERSION }}
           kibana_ref: ${{ inputs.kibana_ref }}
 
       - name: Create Slack Payload
         if: always()
-        id: prepare-data
+        id: prepare-slack-data
         working-directory: ./
         env:
           WORKFLOW: "${{ github.workflow }}"
@@ -585,4 +404,4 @@ jobs:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
           vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
-          slack-payload: ${{ steps.prepare-data.outputs.payload }}
+          slack-payload: ${{ steps.prepare-slack-data.outputs.payload }}

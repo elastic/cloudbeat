@@ -128,7 +128,10 @@ def create_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str, data:
             auth=cfg.auth,
             params={"json": pkg_policy},
         )
-        package_policy_id = munchify(response).item.id
+        policy_data = response.get("response", {}).get("item", {})
+        if cfg.stack_version.startswith("9."):
+            policy_data = response.get("item", {})
+        package_policy_id = policy_data.get("id", "")
         logger.info(f"Package policy '{package_policy_id}' created successfully")
         return package_policy_id
     except APICallException as api_ex:
