@@ -49,16 +49,31 @@ output "az_vm_activity_logs_key" {
 }
 
 output "ec2_asset_inventory_ssh_cmd" {
-  value     = module.aws_ec2_for_asset_inventory[0].cloudbeat_ssh_cmd
+  value     = var.deploy_aws_asset_inventory ? module.aws_ec2_for_asset_inventory[0].cloudbeat_ssh_cmd : null
   sensitive = true
 }
 
 output "ec2_asset_inventory_public_ip" {
-  value     = module.aws_ec2_for_asset_inventory[0].aws_instance_cloudbeat_public_ip
+  value     = var.deploy_aws_asset_inventory ? module.aws_ec2_for_asset_inventory[0].aws_instance_cloudbeat_public_ip : null
   sensitive = true
 }
 
 output "ec2_asset_inventory_key" {
-  value     = module.aws_ec2_for_asset_inventory[0].ec2_ssh_key
+  value     = var.deploy_aws_asset_inventory ? module.aws_ec2_for_asset_inventory[0].ec2_ssh_key : null
+  sensitive = true
+}
+
+output "ec2_wiz_ssh_cmd" {
+  value     = var.deploy_aws_ec2_wiz ? module.aws_ec2_for_wiz[0].cloudbeat_ssh_cmd : null
+  sensitive = true
+}
+
+output "ec2_wiz_public_ip" {
+  value     = var.deploy_aws_ec2_wiz ? module.aws_ec2_for_wiz[0].aws_instance_cloudbeat_public_ip : null
+  sensitive = true
+}
+
+output "ec2_wiz_key" {
+  value     = var.deploy_aws_ec2_wiz ? module.aws_ec2_for_wiz[0].ec2_ssh_key : null
   sensitive = true
 }
