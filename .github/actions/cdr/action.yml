@@ -40,6 +40,26 @@ inputs:
     default: "default"
     required: false
     type: string
+  wiz-client-id:
+    description: "Wiz client ID"
+    default: "default"
+    required: false
+    type: string
+  wiz-client-secret:
+    description: "Wiz client secret"
+    default: "default"
+    required: false
+    type: string
+  wiz-endpoint-url:
+    description: "Wiz endpoint URL"
+    default: "default"
+    required: false
+    type: string
+  wiz-token-url:
+    description: "Wiz token URL"
+    default: "default"
+    required: false
+    type: string
   es-user:
     description: "Elasticsearch user"
     default: "elastic"
@@ -133,6 +153,14 @@ runs:
         echo "::add-mask::$asset_inv_public_ip"
         echo "asset-inv-public-ip=$asset_inv_public_ip" >> "$GITHUB_OUTPUT"
 
+        ec2_wiz_key=$(terraform output -raw ec2_wiz_key)
+        echo "::add-mask::$ec2_wiz_key"
+        echo "ec2-wiz-key=$ec2_wiz_key" >> "$GITHUB_OUTPUT"
+
+        ec2_wiz_public_ip=$(terraform output -raw ec2_wiz_public_ip)
+        echo "::add-mask::$ec2_wiz_public_ip"
+        echo "ec2-wiz-public-ip=$ec2_wiz_public_ip" >> "$GITHUB_OUTPUT"
+
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
       if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
@@ -215,6 +243,35 @@ runs:
         cmd="chmod +x $scriptname && ./$scriptname"
         ../remote_setup.sh -k "$AUDIT_LOGS_KEY" -s "$src" -h "$AUDIT_LOGS_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
+    - name: Install WIZ integration
+      id: wiz-integration
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        WIZ_CLIENT_ID: ${{ inputs.wiz-client-id }}
+        WIZ_CLIENT_SECRET: ${{ inputs.wiz-client-secret }}
+        WIZ_URL: ${{ inputs.wiz-endpoint-url }}
+        WIZ_TOKEN_URL: ${{ inputs.wiz-token-url }}
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        poetry run python ./install_wiz_integration.py
+
+    - name: Deploy WIZ agent
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.wiz-integration.outcome == 'success' }}
+      working-directory: deploy/test-environments/cdr
+      shell: bash
+      env:
+        WIZ_KEY: ${{ steps.generate-data.outputs.ec2-wiz-key }}
+        WIZ_PUBLIC_IP: ${{ steps.generate-data.outputs.ec2-wiz-public-ip }}
+      run: |
+        scriptname="wiz.sh"
+        src="../../../tests/integrations_setup/$scriptname"
+        cmd="chmod +x $scriptname && ./$scriptname"
+        ../remote_setup.sh -k "$WIZ_KEY" -s "$src" -h "$WIZ_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
     - name: Check Asset Inventory supported version
       id: asset-inventory-version-check
       if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
@@ -289,5 +346,6 @@ runs:
         ACTIVITY_LOGS_KEY: ${{ steps.generate-data.outputs.az-vm-activity-logs-key }}
         AUDIT_LOGS_KEY: ${{ steps.generate-data.outputs.gcp-audit-logs-key }}
         EC2_ASSET_INV_KEY: ${{ steps.generate-data.outputs.ec2-asset-inv-key }}
+        EC2_WIZ_KEY: ${{ steps.generate-data.outputs.ec2-wiz-key }}
       run: |
         ./manage_infrastructure.sh "cdr" "upload-state"
