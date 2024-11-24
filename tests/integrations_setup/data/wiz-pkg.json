@@ -21,7 +21,7 @@
       },
       "streams": {
         "wiz.audit": {
-          "enabled": true,
+          "enabled": false,
           "vars": {
             "initial_interval": "24h",
             "interval": "5m",
@@ -39,7 +39,7 @@
           "enabled": true,
           "vars": {
             "initial_interval": "24h",
-            "interval": "5m",
+            "interval": "15m",
             "batch_size": 500,
             "http_client_timeout": "30s",
             "tags": [
@@ -51,7 +51,7 @@
           }
         },
         "wiz.issue": {
-          "enabled": true,
+          "enabled": false,
           "vars": {
             "initial_interval": "24h",
             "interval": "5m",
@@ -69,7 +69,7 @@
           "enabled": true,
           "vars": {
             "initial_interval": "24h",
-            "interval": "5m",
+            "interval": "15m",
             "batch_size": 500,
             "http_client_timeout": "30s",
             "tags": [
