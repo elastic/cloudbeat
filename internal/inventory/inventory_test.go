@@ -86,6 +86,14 @@ func TestAssetInventory_Run(t *testing.T) {
 					},
 				},
 				"related.entity": []string{"arn:aws:ec2:us-east::ec2/234567890"},
+				"entities": map[string]any{
+					"metadata": map[string]entityMetadata{
+						"arn:aws:ec2:us-east::ec2/234567890": {
+							Category: string(CategoryInfrastructure),
+							Type:     string(TypeVirtualMachine),
+						},
+					},
+				},
 			},
 		},
 	}
