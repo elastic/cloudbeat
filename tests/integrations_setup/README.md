@@ -98,9 +98,6 @@ Follow these steps to install the dependencies and execute the different scripts
     poetry run python ./integrations_setup/install_aws_asset_inventory_integration.py
     ```
 
-<<<<<<< HEAD
-11. To purge integrations, use the following command:
-=======
 11. To execute the Azure Asset Inventory integration, use the following command:
 
     ``` bash
@@ -114,7 +111,6 @@ Follow these steps to install the dependencies and execute the different scripts
     ```
 
 13. To purge integrations, use the following command:
->>>>>>> f0994513 (Add WIZ integration to the CDR flow (#2758))
 
     ``` bash
     poetry run python ./integrations_setup/purge_integrations.py
