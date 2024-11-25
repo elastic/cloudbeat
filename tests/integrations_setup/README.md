@@ -1,22 +1,36 @@
-# Automated Manifest Generation for KSPM and CSPM
+# Automated Manifest Generation
 
-This package provides scripts that automate the generation of KSPM (Kubernetes Security Posture Management) manifests, both for unmanaged and EKS (Elastic Kubernetes Service) setups, as well as CSPM (Cloud Security Posture Management) tasks. The purpose of these scripts is to streamline the generation process and make it more efficient.
+This package automates the generation and deployment of manifests for various integrations, including KSPM, CSPM, CNVM, Asset Inventory, and Wiz.
+
+### Key Features:
+
+- `Policy Creation`: Generates agent and package policies.
+- `Kibana Installation`: Installs the policies directly in Kibana.
+- `Manifest Generation`: Creates Elastic Agent manifests or scripts for deployment on environments like VMs or EC2 instances.
+
+### Supported Integrations:
+
+- `KSPM`: For unmanaged clusters and EKS.
+- `CSPM`: Supports AWS, Azure, and GCP cloud providers.
+- `CNVM`: Supports AWS cloud provider only.
+- `Asset Inventory`: For AWS, Azure cloud providers.
+- `Third-Party Integrations`:
+  - `Wiz`: Includes configuration for CSPM and CNVM.
 
 ## Prerequisites
 
 Before running the scripts, ensure that you have set the following environment variables:
 
-### EC (Elastic Cloud) Instance with ELK Configuration
+### Common Variables for All Integration Scripts
 
 - `ES_USER`: The username for the Elasticsearch instance.
 - `ES_PASSWORD`: The password for the Elasticsearch instance.
 - `KIBANA_URL`: The URL of the Kibana instance.
 - `STACK_VERSION`: The version of the Elastic Stack being used.
 
-### AWS Configuration
+### Integration-Specific Variables
 
-- `AWS_ACCESS_KEY_ID`: The access key ID for your AWS account.
-- `AWS_SECRET_ACCESS_KEY`: The secret access key for your AWS account.
+Each integration has its own environment variables related to the package being installed. These can be found in the [configuration_fleet](./configuration_fleet.py) file.
 
 Make sure to set these variables with the appropriate values based on your specific setup.
 
@@ -84,7 +98,23 @@ Follow these steps to install the dependencies and execute the different scripts
     poetry run python ./integrations_setup/install_aws_asset_inventory_integration.py
     ```
 
+<<<<<<< HEAD
 11. To purge integrations, use the following command:
+=======
+11. To execute the Azure Asset Inventory integration, use the following command:
+
+    ``` bash
+    poetry run python ./integrations_setup/install_azure_asset_inventory_integration.py
+    ```
+
+12. To execute the Wiz integration, use the following command:
+
+    ``` bash
+    poetry run python ./integrations_setup/install_wiz_integration.py
+    ```
+
+13. To purge integrations, use the following command:
+>>>>>>> f0994513 (Add WIZ integration to the CDR flow (#2758))
 
     ``` bash
     poetry run python ./integrations_setup/purge_integrations.py

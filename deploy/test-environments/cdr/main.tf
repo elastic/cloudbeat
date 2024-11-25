@@ -50,6 +50,17 @@ module "aws_ec2_for_cloudtrail" {
   specific_tags   = merge(local.common_tags, { "ec2_type" : "cloudtrail" })
 }
 
+module "aws_ec2_for_wiz" {
+  count           = var.deploy_aws_ec2_wiz ? 1 : 0
+  source          = "../../cloud/modules/ec2"
+  providers       = { aws : aws }
+  aws_ami         = var.ami_map[var.region]
+  deploy_k8s      = false
+  deploy_agent    = false
+  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
+  specific_tags   = merge(local.common_tags, { "ec2_type" : "wiz" })
+}
+
 module "azure_vm_activity_logs" {
   count           = var.deploy_az_vm ? 1 : 0
   source          = "../../cloud/modules/azure/vm"
