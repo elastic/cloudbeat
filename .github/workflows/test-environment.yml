@@ -339,6 +339,10 @@ jobs:
           aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
           azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
           azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+          wiz-client-id: ${{ secrets.WIZ_CLIENT_ID }}
+          wiz-client-secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+          wiz-endpoint-url: ${{ secrets.WIZ_ENDPOINT_URL }}
+          wiz-token-url: ${{ secrets.WIZ_TOKEN_URL }}
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           es-user: ${{ steps.elk-stack.outputs.es-user }}
           es-password: ${{ steps.elk-stack.outputs.es-password }}
