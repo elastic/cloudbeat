@@ -35,9 +35,6 @@ steps:
     env:
       WORKFLOW: "staging"
 
-  - command: exit -1
-    key: 'todo-remove-test-failure'
-
   - wait: ~
     continue_on_failure: true
 
