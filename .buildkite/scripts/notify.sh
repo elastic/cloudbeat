@@ -7,17 +7,18 @@
 
 set -euo pipefail
 
+default_team="cloudbeat-eng-team"
 # Check if BUILDKITE_BUILD_CREATOR_EMAIL is set, defaulting to user not found
-build_creator="${BUILDKITE_BUILD_CREATOR_EMAIL:-"user_not_found"}"
+build_creator="${BUILDKITE_BUILD_CREATOR_EMAIL:-$default_team}"
 build_message="${BUILDKITE_MESSAGE:-}"
 slack_channel="${SLACK_CHANNEL:-"#cloud-sec-ci"}"
 
-default_group_id="!subteam^$(vault kv get -field="cloudbeat-eng-team" secret/ci/elastic-cloudbeat/slack-users)"
+default_group_id=$(vault kv get -field=$default_team secret/ci/elastic-cloudbeat/slack-users)
 user_id=$(vault kv get -field="$build_creator" secret/ci/elastic-cloudbeat/slack-users 2>/dev/null || echo "$default_group_id")
 # If the Slack user is the default one, try to extract email from the BUILD_MESSAGE
 if [[ "$user_id" == "$default_group_id" ]]; then
     # Extract email from BUILDKITE_MESSAGE
-    email=$(echo "$build_message" | grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}' || echo "user_not_found")
+    email=$(echo "$build_message" | grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}' || echo $default_team)
     user_id=$(vault kv get -field="$email" secret/ci/elastic-cloudbeat/slack-users 2>/dev/null || echo "$default_group_id")
 fi
 
