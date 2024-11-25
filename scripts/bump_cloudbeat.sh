@@ -96,7 +96,7 @@ update_version_beat() {
     fi
 }
 
-create_cloudbeat_versions_pr_for_main() {
+create_cloudbeat_versions_pr_for_base_branch() {
     echo "Create PR for cloudbeat next version"
     git push origin "$NEXT_CLOUDBEAT_BRANCH"
     cat <<EOF >cloudbeat_pr_body
@@ -172,7 +172,7 @@ upload_cloud_formation_templates() {
 }
 
 # make changes to '$BASE_BRANCH' for next version
-run_version_changes_for_main() {
+run_version_changes_for_base_branch() {
     # create a new branch from the $BASE_BRANCH branch
     git fetch origin "$BASE_BRANCH"
     git checkout -b "$NEXT_CLOUDBEAT_BRANCH" "origin/$BASE_BRANCH"
@@ -186,7 +186,7 @@ run_version_changes_for_main() {
     if git diff "origin/$BASE_BRANCH..HEAD" --quiet; then
         echo "No commits to push to $BASE_BRANCH $NEXT_CLOUDBEAT_BRANCH"
     else
-        create_cloudbeat_versions_pr_for_main
+        create_cloudbeat_versions_pr_for_base_branch
     fi
 
     # create, commit and push a separate PR for hermit
@@ -254,6 +254,6 @@ bump_snyk_branch_monitoring() {
 
 }
 
-run_version_changes_for_main
+run_version_changes_for_base_branch
 run_version_changes_for_release_branch
 bump_snyk_branch_monitoring
