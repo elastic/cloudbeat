@@ -20,6 +20,7 @@ upload_cdr() {
     aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
     aws s3 cp "${AUDIT_LOGS_KEY}" "${S3_BUCKET}/gcp_audit_logs.pem"
     aws s3 cp "${EC2_ASSET_INV_KEY}" "${S3_BUCKET}/asset_inv.pem"
+    aws s3 cp "${EC2_WIZ_KEY}" "${S3_BUCKET}/wiz.pem"
     aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
 }
 
