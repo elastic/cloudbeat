@@ -76,22 +76,12 @@ jobs:
           TF_VAR_stack_version: ${{ env.ELK_VERSION }}
           TF_VAR_ess_region: "gcp-us-west2"
         run: |
-          terraform init
-          terraform validate
-          # To address the conditional statement outputting stack values in the deployment stack,
-          # we need to specify both targets: ec_project and ec_deployment.
-          terraform apply --auto-approve -target=module.ec_deployment -target="module.ec_project"
+          ./manage_infrastructure.sh "elk-stack" "apply"
 
       - name: Set Environment Output
         id: env-output
         run: |
-          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
-          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
-
-          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+          ./manage_infrastructure.sh "elk-stack" "output"
 
       - name: Install integrations
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
@@ -121,7 +111,7 @@ jobs:
       - name: Cleanup Environment
         if: always()
         run: |
-          terraform destroy --auto-approve -target="module.ec_deployment" -target="module.ec_project"
+          ./manage_infrastructure.sh "elk-stack" "destroy"
           aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
           aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
 
