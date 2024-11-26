@@ -73,3 +73,10 @@ azure_config.consumer_group = os.getenv("CONSUMER_GROUP", "$Default")
 azure_config.connection_string = os.getenv("CONNECTION_STRING", "")
 azure_config.storage_account = os.getenv("STORAGE_ACCOUNT", "")
 azure_config.storage_account_key = os.getenv("STORAGE_ACCOUNT_KEY", "")
+
+# Used for WIZ integration
+wiz_config = Munch()
+wiz_config.client_id = os.getenv("WIZ_CLIENT_ID", "")
+wiz_config.client_secret = os.getenv("WIZ_CLIENT_SECRET", "")
+wiz_config.url = os.getenv("WIZ_URL", "")
+wiz_config.token_url = os.getenv("WIZ_TOKEN_URL", "")
