@@ -27,4 +27,4 @@ commit_if_different() {
 
 find_current_cloudbeat_version
 set_hermit_cloudbeat_version
-create_pr_if_different
+commit_if_different
