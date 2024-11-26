@@ -254,6 +254,21 @@ bump_snyk_branch_monitoring() {
 
 }
 
+validate_base_branch() {
+    if [[ "$BASE_BRANCH" == "main" || "$BASE_BRANCH" == "8.x" || "$BASE_BRANCH" == "9.x" ]]; then
+        echo "Allowed to bump version for $BASE_BRANCH"
+        return
+    fi
+
+    if echo "$BASE_BRANCH" | grep -qE '^[89]\.[0-9]+\.[0-9]+$'; then
+        echo "Allowed to bump version for $BASE_BRANCH"
+        return
+    fi
+    echo "Not allowed to bump version for $BASE_BRANCH"
+    exit 1
+}
+
+validate_base_branch
 run_version_changes_for_base_branch
 run_version_changes_for_release_branch
 bump_snyk_branch_monitoring
