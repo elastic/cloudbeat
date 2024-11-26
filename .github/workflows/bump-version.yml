@@ -23,6 +23,7 @@ jobs:
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
       - name: Setup Cloudbeat Versions
+        shell: "bash -xeuo pipefail {0}"
         run: |
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           IFS='.' read -r major minor patch <<< "$current"
