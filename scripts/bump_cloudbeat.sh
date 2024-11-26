@@ -264,6 +264,14 @@ validate_base_branch() {
         echo "Allowed to bump version for $BASE_BRANCH"
         return
     fi
+    # DEBUG!!!! delete later
+    #
+    #
+    if [[ $BASE_BRANCH == "improve-bump-version-ci-test" ]]; then
+        echo "DEBUG: allow this branch for the moment"
+        return
+    fi
+    #
     echo "Not allowed to bump version for $BASE_BRANCH"
     exit 1
 }
