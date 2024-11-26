@@ -27,7 +27,7 @@ jobs:
         run: |
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           IFS='.' read -r major minor patch <<< "$current"
-          ((minor++))
+          let "minor++"
           next="$major.$minor.$patch"
           echo "current: $current"
           echo "next: $next"
