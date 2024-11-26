@@ -255,12 +255,7 @@ bump_snyk_branch_monitoring() {
 }
 
 validate_base_branch() {
-    if [[ "$BASE_BRANCH" == "main" || "$BASE_BRANCH" == "8.x" || "$BASE_BRANCH" == "9.x" ]]; then
-        echo "Allowed to bump version for $BASE_BRANCH"
-        return
-    fi
-
-    if echo "$BASE_BRANCH" | grep -qE '^[89]\.[0-9]+\.[0-9]+$'; then
+    if [[ "$BASE_BRANCH" == "main" || "$BASE_BRANCH" =~ ^[89].x$ || "$BASE_BRANCH" =~ ^[89]\.[0-9]+\.[0-9]+$ ]]; then
         echo "Allowed to bump version for $BASE_BRANCH"
         return
     fi
