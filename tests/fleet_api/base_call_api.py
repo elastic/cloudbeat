@@ -74,3 +74,16 @@ def perform_api_call(method, url, return_json=True, headers=None, auth=None, par
     if not return_json:
         return response.content
     return response.json()
+
+
+def uses_new_fleet_api_response(version: str) -> bool:
+    """
+    Determine if the specified version uses the new Fleet API response format.
+
+    Args:
+        version (str): Elastic stack version.
+
+    Returns:
+        bool: True if the version uses the new Fleet API response format, False otherwise.
+    """
+    return version.startswith("9.") or version.startswith("8.17")
