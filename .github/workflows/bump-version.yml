@@ -27,8 +27,7 @@ jobs:
         run: |
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           IFS='.' read -r major minor patch <<< "$current"
-          let "minor++"
-          next="$major.$minor.$patch"
+          next="$major.$((minor+1)).$patch"
           echo "current: $current"
           echo "next: $next"
           echo "CURRENT_CLOUDBEAT_VERSION=$current" >> $GITHUB_ENV
