@@ -279,7 +279,7 @@ jobs:
         uses: ./.github/actions/elk-stack
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
-          serverless-mode: ${{ env.TEST_AGENTLESS }}
+          serverless-mode: ${{ env.TF_VAR_serverless_mode }}
           elk-stack-version: ${{ env.STACK_VERSION }}
           ess-region: ${{ env.TF_VAR_ess_region }}
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
