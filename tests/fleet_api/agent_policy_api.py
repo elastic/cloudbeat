@@ -4,7 +4,11 @@ This module contains API calls related to the agent policy API.
 
 from typing import Optional
 
-from fleet_api.base_call_api import APICallException, perform_api_call
+from fleet_api.base_call_api import (
+    APICallException,
+    perform_api_call,
+    uses_new_fleet_api_response,
+)
 from loguru import logger
 from munch import Munch, munchify
 
@@ -152,7 +156,7 @@ def get_agents(cfg: Munch) -> list:
             url=url,
             auth=cfg.auth,
         )
-        if cfg.stack_version.startswith("9."):
+        if uses_new_fleet_api_response(cfg.stack_version):
             return munchify(response.get("items", []))
         return munchify(response.get("list", []))
     except APICallException as api_ex:
