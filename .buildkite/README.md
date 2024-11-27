@@ -23,3 +23,7 @@ After a successful build, the pipeline publishes the generated artifacts to the 
 ## Pipeline Configuration
 
 To view the pipeline and its configuration, click [here](https://buildkite.com/elastic/cloudbeat).
+
+## Notifications
+
+The pipeline is [configured](https://buildkite.com/organizations/elastic/services/68636/edit) to send Slack notifications to the `#cloud-sec-ci` channel. Additionally, it includes a custom notification [script](./scripts/notify.sh) that pings specific users in the event of a build failure.
