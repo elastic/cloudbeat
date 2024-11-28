@@ -68,6 +68,16 @@ func TestProvider_ListTopics(t *testing.T) {
 			},
 			topic: "topic-arn",
 		},
+		{
+			name: "with error",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, awslib.ErrMock},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -185,6 +195,47 @@ func TestProvider_ListTopicsWithSubscriptions(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "with error in ListTopics",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, awslib.ErrMock},
+				},
+				"ListSubscriptionsByTopic": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, awslib.ErrMock},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "with error in ListSubscriptionsByTopic",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{&sns.ListTopicsOutput{
+						Topics: []types.Topic{
+							{
+								TopicArn: aws.String("topic-arn"),
+							},
+						},
+					}, nil},
+				},
+				"ListSubscriptionsByTopic": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, awslib.ErrMock},
+				},
+			},
+			want: []awslib.AwsResource{
+				&TopicInfo{
+					Topic: types.Topic{
+						TopicArn: pointers.Ref("topic-arn"),
+					},
+					Subscriptions: []types.Subscription{},
+					region:        "us-east-1",
+				},
+			}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
