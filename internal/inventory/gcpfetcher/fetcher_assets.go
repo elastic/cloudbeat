@@ -165,7 +165,6 @@ func (f *assetsInventory) findRelatedAssetIdsForSubType(subType inventory.AssetS
 			ids = append(ids, binding.Members...)
 		}
 	default:
-		f.logger.Warnf("cannot find related asset IDs for unsupported sub-type %q", subType)
 		return ids
 	}
 
