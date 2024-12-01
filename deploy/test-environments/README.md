@@ -88,7 +88,7 @@ This directory includes modules for provisioning infrastructure for CDR, includi
 
 ### Modules
 
-All projects utilize a set of foundational modules specifically designed for [cloud deployment](../cloud/modules/).
+All projects utilize a set of foundational modules specifically designed for [cloud deployment](./modules/).
 
 
 ## Execution

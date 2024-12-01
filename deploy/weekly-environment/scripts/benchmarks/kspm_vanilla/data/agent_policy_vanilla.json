@@ -1,8 +1,0 @@
-{
-    "name": "weekly-environment-vanilla-policy",
-    "namespace": "default",
-    "monitoring_enabled": [
-        "logs",
-        "metrics"
-    ]
-}
