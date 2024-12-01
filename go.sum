@@ -475,12 +475,12 @@ github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.43.1 h1:FbjhJTRoTujDYDwTnnE46
 github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.43.1/go.mod h1:OwyCzHw6CH8pkLqT8uoCkOgUsgm11LTfexLZyRy6fBg=
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.44.0 h1:OREVd94+oXW5a+3SSUAo4K0L5ci8cucCLu+PSiek8OU=
 github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.44.0/go.mod h1:Qbr4yfpNqVNl69l/GEDK+8wxLf/vHi0ChoiSDzD7thU=
-github.com/aws/aws-sdk-go-v2/service/configservice v1.50.6 h1:GsIoN6f+LLTX/Sa70WO77Cy1GTrSF9xi7e8OwwOiGcs=
-github.com/aws/aws-sdk-go-v2/service/configservice v1.50.6/go.mod h1:5vbQi0lIP9T7RLGyjmQZhqf5Xv9WxHXk7qlHnhEqWKc=
+github.com/aws/aws-sdk-go-v2/service/configservice v1.51.0 h1:ompHhzoqHoW9NEGALahsBWUJa9Ra2VOEbgGlWNeGLqA=
+github.com/aws/aws-sdk-go-v2/service/configservice v1.51.0/go.mod h1:5vbQi0lIP9T7RLGyjmQZhqf5Xv9WxHXk7qlHnhEqWKc=
 github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10 h1:E32txvrH8iV3IEk6fU9uj4Ryp3VdauHHl/1LoWeIaYo=
 github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10/go.mod h1:NjSslvHZ7oYBz7foWl/cuDEailjdmp16Auy6pHz3R+g=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.193.0 h1:RhSoBFT5/8tTmIseJUXM6INTXTQDF8+0oyxWBnozIms=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.193.0/go.mod h1:mzj8EEjIHSN2oZRXiw1Dd+uB4HZTl7hC8nBzX9IZMWw=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.194.0 h1:56YXcRmryw9wiTrvdVeJEUwBCoN/+o33R52PA7CCi08=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.194.0/go.mod h1:mzj8EEjIHSN2oZRXiw1Dd+uB4HZTl7hC8nBzX9IZMWw=
 github.com/aws/aws-sdk-go-v2/service/ecr v1.36.6 h1:zg+3FGHA0PBs0KM25qE/rOf2o5zsjNa1g/Qq83+SDI0=
 github.com/aws/aws-sdk-go-v2/service/ecr v1.36.6/go.mod h1:ZSq54Z9SIsOTf1Efwgw1msilSs4XVEfVQiP9nYVnKpM=
 github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.18.2 h1:PpbXaecV3sLAS6rjQiaKw4/jyq3Z8gNzmoJupHAoBp0=
@@ -507,8 +507,8 @@ github.com/aws/aws-sdk-go-v2/service/organizations v1.35.1 h1:+QsuehAdI8oDvdbkSf
 github.com/aws/aws-sdk-go-v2/service/organizations v1.35.1/go.mod h1:Y4nD5yj/r634ux6MWgvZFWmwTofHrHvzYvX2nMnkMdY=
 github.com/aws/aws-sdk-go-v2/service/rds v1.91.0 h1:eqHz3Uih+gb0vLE5Cc4Xf733vOxsxDp6GFUUVQU4d7w=
 github.com/aws/aws-sdk-go-v2/service/rds v1.91.0/go.mod h1:h2jc7IleH3xHY7y+h8FH7WAZcz3IVLOB6/jXotIQ/qU=
-github.com/aws/aws-sdk-go-v2/service/s3 v1.68.0 h1:bFpcqdwtAEsgpZXvkTxIThFQx/EM0oV6kXmfFIGjxME=
-github.com/aws/aws-sdk-go-v2/service/s3 v1.68.0/go.mod h1:ralv4XawHjEMaHOWnTFushl0WRqim/gQWesAMF6hTow=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.69.0 h1:Q2ax8S21clKOnHhhr933xm3JxdJebql+R7aNo7p7GBQ=
+github.com/aws/aws-sdk-go-v2/service/s3 v1.69.0/go.mod h1:ralv4XawHjEMaHOWnTFushl0WRqim/gQWesAMF6hTow=
 github.com/aws/aws-sdk-go-v2/service/s3control v1.50.1 h1:WjVnnNd++hjjmuODULNfZaW2zEKZVrDGZvdQUK2dF8M=
 github.com/aws/aws-sdk-go-v2/service/s3control v1.50.1/go.mod h1:ymXHnBHIxM/iqrgGphFuoUfuczoy4inIr2LH8PRj8NQ=
 github.com/aws/aws-sdk-go-v2/service/securityhub v1.54.7 h1:pWQKR8guL3JKhJo4fzbez5TwcG6oNShKNv1cOlDX0KM=
