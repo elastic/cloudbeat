@@ -19,11 +19,13 @@ package sns
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -37,7 +39,9 @@ type (
 	clientMocks map[string][2]mocks
 )
 
+var errMock = errors.New("mock error")
 var regions = []string{"us-east-1"}
+var logger = logp.NewLogger("TestSNSProvider")
 
 func TestProvider_ListTopics(t *testing.T) {
 	tests := []struct {
@@ -68,6 +72,16 @@ func TestProvider_ListTopics(t *testing.T) {
 			},
 			topic: "topic-arn",
 		},
+		{
+			name: "with error",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, errMock},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -76,6 +90,7 @@ func TestProvider_ListTopics(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
+				log:     logger,
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.ListTopics(context.Background())
@@ -126,6 +141,7 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
+				log:     logger,
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.ListSubscriptionsByTopic(context.Background(), regions[0], tt.topic)
@@ -185,6 +201,47 @@ func TestProvider_ListTopicsWithSubscriptions(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "with error in ListTopics",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, errMock},
+				},
+				"ListSubscriptionsByTopic": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, errMock},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "with error in ListSubscriptionsByTopic",
+			mocks: clientMocks{
+				"ListTopics": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{&sns.ListTopicsOutput{
+						Topics: []types.Topic{
+							{
+								TopicArn: aws.String("topic-arn"),
+							},
+						},
+					}, nil},
+				},
+				"ListSubscriptionsByTopic": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{nil, errMock},
+				},
+			},
+			want: []awslib.AwsResource{
+				&TopicInfo{
+					Topic: types.Topic{
+						TopicArn: pointers.Ref("topic-arn"),
+					},
+					Subscriptions: nil,
+					region:        "us-east-1",
+				},
+			}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -193,6 +250,7 @@ func TestProvider_ListTopicsWithSubscriptions(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
+				log:     logger,
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.ListTopicsWithSubscriptions(context.Background())
