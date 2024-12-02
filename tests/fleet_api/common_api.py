@@ -7,7 +7,11 @@ import json
 import time
 from typing import Any, Dict, List
 
-from fleet_api.base_call_api import APICallException, perform_api_call
+from fleet_api.base_call_api import (
+    APICallException,
+    perform_api_call,
+    uses_new_fleet_api_response,
+)
 from fleet_api.utils import add_capabilities, add_tags, replace_image_field
 from loguru import logger
 from munch import Munch, munchify
@@ -39,7 +43,7 @@ def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
             auth=cfg.auth,
         )
         api_keys = munchify(response.get("list", []))
-        if cfg.stack_version.startswith("9."):
+        if uses_new_fleet_api_response(cfg.stack_version):
             api_keys = munchify(response.get("items", []))
         api_key = ""
         for item in api_keys:
@@ -320,7 +324,7 @@ def get_package_version(
 
         cloud_security_posture_version = None
         packages = response.get("response", [])
-        if cfg.stack_version.startswith("9."):
+        if uses_new_fleet_api_response(cfg.stack_version):
             packages = response.get("items", [])
         for package in packages:
             if package.get("name", "") == package_name:
@@ -370,7 +374,7 @@ def get_package(
             params={"params": request_params},
         )
         package_data = response.get("response", {})
-        if cfg.stack_version.startswith("9."):
+        if uses_new_fleet_api_response(cfg.stack_version):
             package_data = response.get("item", {})
         return package_data
     except APICallException as api_ex:
