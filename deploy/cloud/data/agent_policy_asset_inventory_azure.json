@@ -1,8 +1,0 @@
-{
-    "name": "tf-ap-asset-inventory-azure",
-    "namespace": "default",
-    "monitoring_enabled": [
-        "logs",
-        "metrics"
-    ]
-}

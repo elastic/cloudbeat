@@ -35,7 +35,7 @@ resource "random_string" "suffix" {
 module "ec_deployment" {
   count = var.serverless_mode ? 0 : 1
 
-  source        = "../../cloud/modules/ec"
+  source        = "../modules/ec"
   ec_api_key    = var.ec_api_key
   region        = var.ess_region
   stack_version = var.stack_version
@@ -64,7 +64,7 @@ module "ec_project" {
     restapi.elastic_cloud = restapi.ec
   }
   count        = var.serverless_mode ? 1 : 0
-  source       = "../../cloud/modules/serverless"
+  source       = "../modules/serverless"
   ec_apikey    = var.ec_api_key
   ec_url       = local.ec_url
   project_name = "${var.deployment_name}-${random_string.suffix.result}"

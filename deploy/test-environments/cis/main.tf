@@ -21,7 +21,7 @@ resource "random_string" "suffix" {
 # EC2 + kind deployment
 module "aws_ec2_for_kspm" {
   count           = var.deploy_aws_kspm ? 1 : 0
-  source          = "../../cloud/modules/ec2"
+  source          = "../modules/aws/ec2"
   providers       = { aws : aws }
   aws_ami         = var.ami_map[var.region]
   deploy_agent    = false # Agent will not be deployed
@@ -31,7 +31,7 @@ module "aws_ec2_for_kspm" {
 
 module "aws_ec2_for_cspm" {
   count           = var.deploy_aws_cspm ? 1 : 0
-  source          = "../../cloud/modules/ec2"
+  source          = "../modules/aws/ec2"
   providers       = { aws : aws }
   aws_ami         = var.ami_map[var.region]
   deploy_k8s      = false
@@ -41,7 +41,7 @@ module "aws_ec2_for_cspm" {
 }
 
 module "eks" {
-  source                      = "../../cloud/modules/provision-eks-cluster"
+  source                      = "../modules/aws/eks"
   region                      = var.region
   cluster_name                = var.deployment_name
   node_group_one_desired_size = 2
