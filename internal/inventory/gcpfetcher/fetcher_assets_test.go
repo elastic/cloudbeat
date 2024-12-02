@@ -53,6 +53,7 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 			[]string{"/projects/<project UUID>/some_resource"},
 			"/projects/<project UUID>/some_resource",
 			inventory.WithRawAsset(assets[0]),
+			inventory.WithRelatedAssetIds([]string{}),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.GcpCloudProvider,
 				Account: inventory.AssetCloudAccount{
