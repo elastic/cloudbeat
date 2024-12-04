@@ -103,6 +103,11 @@ func (a *AssetInventory) Run(ctx context.Context) {
 
 func (a *AssetInventory) publish(assets []AssetEvent) {
 	events := lo.Map(assets, func(e AssetEvent, _ int) beat.Event {
+		var relatedEntity []string
+		relatedEntity = append(relatedEntity, e.Asset.Id...)
+		if len(e.Asset.RelatedEntityId) > 0 {
+			relatedEntity = append(relatedEntity, e.Asset.RelatedEntityId...)
+		}
 		return beat.Event{
 			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Asset)},
 			Timestamp: a.now(),
@@ -113,7 +118,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 				"network":           e.Network,
 				"iam":               e.IAM,
 				"resource_policies": e.ResourcePolicies,
-				"related.entity":    e.Asset.Id,
+				"related.entity":    relatedEntity,
 			},
 		}
 	})

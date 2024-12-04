@@ -2,7 +2,11 @@
 This module contains API calls related to the package policy API.
 """
 
-from fleet_api.base_call_api import APICallException, perform_api_call
+from fleet_api.base_call_api import (
+    APICallException,
+    perform_api_call,
+    uses_new_fleet_api_response,
+)
 from fleet_api.utils import delete_key, update_key
 from loguru import logger
 from munch import Munch, munchify
@@ -129,7 +133,7 @@ def create_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str, data:
             params={"json": pkg_policy},
         )
         policy_data = response.get("response", {}).get("item", {})
-        if cfg.stack_version.startswith("9."):
+        if uses_new_fleet_api_response(cfg.stack_version):
             policy_data = response.get("item", {})
         package_policy_id = policy_data.get("id", "")
         logger.info(f"Package policy '{package_policy_id}' created successfully")

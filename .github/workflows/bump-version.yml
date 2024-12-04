@@ -19,14 +19,14 @@ jobs:
       - name: Checkout Cloudbeat Repo
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.ref_name }}
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
       - name: Setup Cloudbeat Versions
         run: |
           current=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           IFS='.' read -r major minor patch <<< "$current"
-          ((minor++))
-          next="$major.$minor.$patch"
+          next="$major.$((minor+1)).$patch"
           echo "current: $current"
           echo "next: $next"
           echo "CURRENT_CLOUDBEAT_VERSION=$current" >> $GITHUB_ENV
@@ -39,6 +39,8 @@ jobs:
 
       - name: Bump Cloudbeat
         # bump_cloudbeat.sh will create multiple PRs with different HEAD branches
+        env:
+          GIT_BASE_BRANCH: ${{ github.ref_name }}
         run: scripts/bump_cloudbeat.sh
 
       - name: Bump Cloud Security Posture Integration
