@@ -30,7 +30,7 @@ jobs:
       deployment_name: ${{ needs.naming.outputs.deployment_name }}
       # For now, the region is not used because it's overridden in the tf, but it's here for future compatibility.
       ess-region: "aws-us-east-1"
-      elk-stack-version: ${{ env.ELK_VERSION}}
+      elk-stack-version: 9.0.0-SNAPSHOT
       serverless_mode: true
       run-sanity-tests: true
       expiration_days: 0
