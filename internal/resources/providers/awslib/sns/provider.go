@@ -49,6 +49,7 @@ func (p *Provider) ListTopics(ctx context.Context) ([]types.Topic, error) {
 			output, err := c.ListTopics(ctx, input)
 			if err != nil {
 				p.log.Errorf("Could not list SNS Topics. Error: %s", err)
+				return nil, err
 			}
 			all = append(all, output.Topics...)
 			if output.NextToken == nil {
@@ -93,6 +94,7 @@ func (p *Provider) ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.Aw
 			output, err := c.ListTopics(ctx, input)
 			if err != nil {
 				p.log.Errorf("Could not list SNS Topics. Error: %s", err)
+				return nil, err
 			}
 
 			for _, topic := range output.Topics {
