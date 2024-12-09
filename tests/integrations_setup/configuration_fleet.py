@@ -53,6 +53,7 @@ gcp_dm_config.zone = os.getenv("ZONE", "us-central1-a")
 gcp_dm_config.allow_ssh = os.getenv("ALLOW_SSH", "false") == "true"
 gcp_dm_config.credentials_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
 gcp_dm_config.service_account_json_path = os.getenv("SERVICE_ACCOUNT_JSON_PATH", "")
+gcp_dm_config.project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "")
 
 gcp_audit_config = Munch()
 gcp_audit_config.credentials_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")

@@ -14,6 +14,7 @@ from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.package_policy_api import create_cspm_integration
 from loguru import logger
 from package_policy import generate_policy_template, generate_random_name, load_data
+from state_file_manager import HostType, PolicyState, state_manager
 
 
 def generate_aws_integration_data():
@@ -66,6 +67,7 @@ def generate_gcp_integration_data():
         "posture": "cspm",
         "deployment": "gcp",
         "vars": {
+            "gcp.project_id": cnfg.gcp_dm_config.project_id,
             "gcp.account_type": "single-account",
             "gcp.credentials.type": "credentials-json",
             "gcp.credentials.json": credentials_json,
@@ -107,6 +109,17 @@ if __name__ == "__main__":
             pkg_policy=package_data,
             agent_policy_id=agent_policy_id,
             cspm_data={},
+        )
+
+        state_manager.add_policy(
+            PolicyState(
+                agent_policy_id,
+                package_policy_id,
+                1,
+                [],
+                HostType.KUBERNETES.value,
+                integration_data["name"],
+            ),
         )
 
         logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
