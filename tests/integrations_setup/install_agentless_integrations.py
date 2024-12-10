@@ -12,6 +12,7 @@ import json
 import configuration_fleet as cnfg
 from fleet_api.package_policy_api import create_cspm_integration
 from loguru import logger
+<<<<<<< HEAD
 from package_policy import (
     generate_package_policy,
     generate_policy_template,
@@ -19,6 +20,10 @@ from package_policy import (
 )
 
 AGENT_POLICY_ID = "agentless"
+=======
+from package_policy import generate_policy_template, generate_random_name, load_data
+from state_file_manager import HostType, PolicyState, state_manager
+>>>>>>> a03de6f ( Update serverless workflow to use correct stack version (#2824))
 
 
 def generate_aws_integration_data():
@@ -71,7 +76,11 @@ def generate_gcp_integration_data():
         "posture": "cspm",
         "deployment": "gcp",
         "vars": {
+<<<<<<< HEAD
             "setup_access": "manual",
+=======
+            "gcp.project_id": cnfg.gcp_dm_config.project_id,
+>>>>>>> a03de6f ( Update serverless workflow to use correct stack version (#2824))
             "gcp.account_type": "single-account",
             "gcp.credentials.type": "credentials-json",
             "gcp.credentials.json": credentials_json,
@@ -103,4 +112,20 @@ if __name__ == "__main__":
             agent_policy_id=AGENT_POLICY_ID,
             cspm_data={},
         )
+<<<<<<< HEAD
         logger.info(f"Installation of {NAME} integration is done")
+=======
+
+        state_manager.add_policy(
+            PolicyState(
+                agent_policy_id,
+                package_policy_id,
+                1,
+                [],
+                HostType.KUBERNETES.value,
+                integration_data["name"],
+            ),
+        )
+
+        logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
+>>>>>>> a03de6f ( Update serverless workflow to use correct stack version (#2824))
