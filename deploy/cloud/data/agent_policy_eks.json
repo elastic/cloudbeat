@@ -1,5 +1,0 @@
-{
-    "name": "tf-ap-kspm-eks",
-    "namespace": "default",
-    "monitoring_enabled":["logs","metrics"]
-}

@@ -26,8 +26,8 @@ from loguru import logger
 from munch import Munch
 from state_file_manager import HostType, PolicyState, state_manager
 
-D4C_AGENT_POLICY = "../../deploy/cloud/data/agent_policy_d4c.json"
-D4C_PACKAGE_POLICY = "../../deploy/cloud/data/package_policy_d4c.json"
+D4C_AGENT_POLICY = "data/agent-policy-d4c.json"
+D4C_PACKAGE_POLICY = "data/package-policy-d4c.json"
 D4C_AGENT_POLICY_NAME = "tf-ap-d4c"
 D4C_EXPECTED_AGENTS = 2
 INTEGRATION_NAME = "D4C"
