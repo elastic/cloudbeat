@@ -1,5 +1,0 @@
-{
-    "name": "tf-ap-cspm-azure",
-    "namespace": "default",
-    "monitoring_enabled":["logs","metrics"]
-}
