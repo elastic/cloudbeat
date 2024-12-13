@@ -35,14 +35,10 @@ from package_policy import (
 from packaging import version
 from state_file_manager import HostType, PolicyState, state_manager
 
-CSPM_AZURE_AGENT_POLICY = "../../deploy/cloud/data/agent_policy_cspm_azure.json"
-CSPM_AZURE_PACKAGE_POLICY = "../../deploy/cloud/data/package_policy_cspm_azure.json"
 CSPM_AZURE_EXPECTED_AGENTS = 1
 AZURE_ARM_PARAMETERS = "../../deploy/azure/arm_parameters.json"
 AZURE_ARM_TEMPLATE = "../../deploy/azure/ARM-for-single-account.json"
 
-cspm_azure_agent_policy_data = Path(__file__).parent / CSPM_AZURE_AGENT_POLICY
-cspm_azure_pkg_policy_data = Path(__file__).parent / CSPM_AZURE_PACKAGE_POLICY
 cspm_azure_arm_parameters = Path(__file__).parent / AZURE_ARM_PARAMETERS
 cspm_azure_arm_template = Path(__file__).parent / AZURE_ARM_TEMPLATE
 INTEGRATION_NAME = "CSPM Azure"

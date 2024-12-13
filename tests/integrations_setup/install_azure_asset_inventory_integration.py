@@ -35,14 +35,10 @@ from package_policy import (
 from state_file_manager import HostType, PolicyState, state_manager
 
 EXPECTED_AGENTS = 1
-AGENT_POLICY = "../../deploy/cloud/data/agent_policy_asset_inventory_azure.json"
-PACKAGE_POLICY = "../../deploy/cloud/data/package_policy_asset_inventory_azure.json"
 ARM_PARAMETERS = "../../deploy/azure/arm_parameters.json"
 ARM_TEMPLATE = "../../deploy/azure/ARM-for-single-account.json"
 PACKAGE_NAME = "cloud_asset_inventory"
 
-path_agent_policy_data = Path(__file__).parent / AGENT_POLICY
-path_pkg_policy_data = Path(__file__).parent / PACKAGE_POLICY
 path_arm_parameters = Path(__file__).parent / ARM_PARAMETERS
 path_arm_template = Path(__file__).parent / ARM_TEMPLATE
 INTEGRATION_NAME = "Asset Inventory Azure"
