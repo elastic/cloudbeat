@@ -332,8 +332,9 @@ type AssetResourcePolicy struct {
 
 // EntityMetadata maps metadata required to use Entity Store
 type entityMetadata struct {
-	Category string `json:"category"`
-	Type     string `json:"type"`
+	Entity AssetClassification `json:"asset"`
+	Cloud  *AssetCloud         `json:"cloud,omitempty"`
+	Host   *AssetHost          `json:"host,omitempty"`
 }
 
 // AssetEnricher functional builder function
@@ -350,8 +351,9 @@ func (a *AssetEvent) getEntityMetadata() map[string]entityMetadata {
 	// have a "primary" id or if we duplicate data
 	return map[string]entityMetadata{
 		ids[0]: {
-			Category: string(a.Asset.Category),
-			Type:     string(a.Asset.Type),
+			Entity: a.Asset.AssetClassification,
+			Cloud:  a.Cloud,
+			Host:   a.Host,
 		},
 	}
 }

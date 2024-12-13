@@ -73,7 +73,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				},
 				"iam": &AssetIAM{
 					Id:  pointers.Ref("a123123"),
-					Arn: pointers.Ref("123123:123123:123123"),
+					Arn: pointers.Ref("123123:123123:123123`"),
 				},
 				"resource_policies": []AssetResourcePolicy{
 					{
