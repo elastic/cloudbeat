@@ -31,6 +31,7 @@ notice_overrides = [
     {"name": "github.com/spdx/tools-golang", "licenceFile": "LICENSE.code", "licenceType": "Apache-2.0"},
     {"name": "github.com/aquasecurity/trivy-policies", "licenceType": "MIT"},
     {"name": "github.com/csaf-poc/csaf_distribution/v3", "licenceType": "Apache-2.0"},
+    {"name": "github.com/gocsaf/csaf/v3", "licenceType": "Apache-2.0"},
     {"name": "github.com/xi2/xz", "licenceType": "Unlicense"},
 ]
 
