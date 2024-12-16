@@ -73,7 +73,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				},
 				"iam": &AssetIAM{
 					Id:  pointers.Ref("a123123"),
-					Arn: pointers.Ref("123123:123123:123123"),
+					Arn: pointers.Ref("123123:123123:123123`"),
 				},
 				"resource_policies": []AssetResourcePolicy{
 					{
@@ -86,6 +86,14 @@ func TestAssetInventory_Run(t *testing.T) {
 					},
 				},
 				"related.entity": []string{"arn:aws:ec2:us-east::ec2/234567890"},
+				"entities": map[string]any{
+					"metadata": map[string]entityMetadata{
+						"arn:aws:ec2:us-east::ec2/234567890": {
+							Category: string(CategoryInfrastructure),
+							Type:     string(TypeVirtualMachine),
+						},
+					},
+				},
 			},
 		},
 	}
