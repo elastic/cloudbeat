@@ -1,16 +1,17 @@
 name: Publish-CloudFormation
 
 on:
-  push:
-    branches:
-      - main
-      - "[0-9]+.[0-9]+"
-    paths:
-      - deploy/asset-inventory-cloudformation/*.yml
-      - deploy/cloudformation/*.yml
-      - scripts/publish_cft.sh
-      - .github/workflows/publish-cloudformation.yml
-      - version/version.go
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+  #     - "[0-9]+.[0-9]+"
+  #   paths:
+  #     - deploy/asset-inventory-cloudformation/*.yml
+  #     - deploy/cloudformation/*.yml
+  #     - scripts/publish_cft.sh
+  #     - .github/workflows/publish-cloudformation.yml
+  #     - version/version.go
 
 jobs:
   publish_cloudformation:
