@@ -4,10 +4,10 @@ import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 # Ensure CloudTrail logs are encrypted at rest using KMS CMKs.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_single_trail
 
