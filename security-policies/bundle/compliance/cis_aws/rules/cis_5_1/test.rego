@@ -86,7 +86,7 @@ test_pass if {
 	})
 }
 
-rule_input(entry) = test_data.generate_nacl(entry)
+rule_input(entry) := test_data.generate_nacl(entry)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

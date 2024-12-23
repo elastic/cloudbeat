@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_postgresql_server_db
 
@@ -15,7 +15,7 @@ finding = result if {
 	)
 }
 
-default firewall_rules_properly_configured = false
+default firewall_rules_properly_configured := false
 
 firewall_rules_properly_configured if {
 	not has_allow_all_firewall_rule

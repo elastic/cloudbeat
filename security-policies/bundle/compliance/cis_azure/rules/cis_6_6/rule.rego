@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_network_watcher
 
@@ -20,4 +20,4 @@ ensure_enabled if {
 
 	some i
 	data_adapter.resource.networkWatchers[i].properties.provisioningState == "Succeeded"
-} else = false
+} else := false

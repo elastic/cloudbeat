@@ -28,11 +28,11 @@ test_not_evaluated if {
 	not_eval with input as test_data.process_input("some_process", [])
 }
 
-rule_input(argument) = test_data.process_input_with_external_data("kubelet", [argument], {})
+rule_input(argument) := test_data.process_input_with_external_data("kubelet", [argument], {})
 
-rule_input_with_external(argument, external_data) = test_data.process_input_with_external_data("kubelet", [argument], external_data)
+rule_input_with_external(argument, external_data) := test_data.process_input_with_external_data("kubelet", [argument], external_data)
 
-create_process_config(connection_timeout) = {"config": {"streamingConnectionIdleTimeout": connection_timeout}}
+create_process_config(connection_timeout) := {"config": {"streamingConnectionIdleTimeout": connection_timeout}}
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

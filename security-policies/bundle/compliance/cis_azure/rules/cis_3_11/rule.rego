@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_storage_account
 	_ = data_adapter.resource.extension.blobService
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default soft_delete_is_enabled = false
+default soft_delete_is_enabled := false
 
 soft_delete_is_enabled if {
 	is_policy_valid(data_adapter.resource.extension.blobService.properties.deleteRetentionPolicy)
@@ -26,4 +26,4 @@ soft_delete_is_enabled if {
 is_policy_valid(policy) if {
 	policy.enabled == true
 	policy.days > 0
-} else = false
+} else := false

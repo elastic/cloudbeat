@@ -3,19 +3,19 @@ package kubernetes_common.test_data
 # input test data generater
 
 # input data that should not get evaluated
-not_evaluated_input = {
+not_evaluated_input := {
 	"type": "input",
 	"resource": {"kind": "some_kind"},
 }
 
 # kube-api input data that should not get evaluated
-not_evaluated_kube_api_input = {
+not_evaluated_kube_api_input := {
 	"type": "k8s_object",
 	"resource": {"kind": "some_kind"},
 }
 
 # genrates `file` type input data
-filesystem_input(filename, mode, user, group) = {
+filesystem_input(filename, mode, user, group) := {
 	"type": "file",
 	"resource": {
 		"path": sprintf("file/path/%s", [filename]),
@@ -27,10 +27,10 @@ filesystem_input(filename, mode, user, group) = {
 }
 
 # genrates `process` type input data
-process_input(process_name, arguments) = process_input_with_external_data(process_name, arguments, {})
+process_input(process_name, arguments) := process_input_with_external_data(process_name, arguments, {})
 
 # genrates `process` type input data
-process_input_with_external_data(process_name, arguments, external_data) = {
+process_input_with_external_data(process_name, arguments, external_data) := {
 	"type": "process",
 	"resource": {
 		"command": concat(" ", array.concat([process_name], arguments)),
@@ -39,18 +39,18 @@ process_input_with_external_data(process_name, arguments, external_data) = {
 	},
 }
 
-kube_api_input(resource) = {
+kube_api_input(resource) := {
 	"type": "k8s_object",
 	"resource": resource,
 }
 
-kube_api_role_rule(api_group, resource, verb) = {
+kube_api_role_rule(api_group, resource, verb) := {
 	"apiGroups": api_group,
 	"resources": resource,
 	"verbs": verb,
 }
 
-kube_api_role_input(kind, rules) = {
+kube_api_role_input(kind, rules) := {
 	"type": "k8s_object",
 	"resource": {
 		"kind": kind,
@@ -59,7 +59,7 @@ kube_api_role_input(kind, rules) = {
 	},
 }
 
-kube_api_pod_input(pod_name, service_account, automount_setting) = {
+kube_api_pod_input(pod_name, service_account, automount_setting) := {
 	"type": "k8s_object",
 	"resource": {
 		"kind": "Pod",
@@ -72,7 +72,7 @@ kube_api_pod_input(pod_name, service_account, automount_setting) = {
 	},
 }
 
-kube_api_service_account_input(name, automount_setting) = {
+kube_api_service_account_input(name, automount_setting) := {
 	"type": "k8s_object",
 	"resource": {
 		"kind": "ServiceAccount",
@@ -81,7 +81,7 @@ kube_api_service_account_input(name, automount_setting) = {
 	},
 }
 
-pod_security_ctx(entry) = {
+pod_security_ctx(entry) := {
 	"kind": "Pod",
 	"metadata": {"name": "pod-name"},
 	"spec": entry,

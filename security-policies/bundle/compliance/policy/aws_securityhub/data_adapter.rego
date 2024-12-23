@@ -6,4 +6,4 @@ is_securityhub_subType if {
 	input.subType == "aws-securityhub"
 }
 
-securityhub_resource = input.resource
+securityhub_resource := input.resource

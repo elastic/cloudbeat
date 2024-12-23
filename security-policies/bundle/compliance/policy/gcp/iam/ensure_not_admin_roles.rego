@@ -8,4 +8,4 @@ import future.keywords.in
 is_not_admin_roles(service_accounts) if {
 	admin_roles := {v | v := service_accounts[_].role; regex.match(`(.*Admin|.*admin|roles/(editor|owner))`, v)}
 	count(admin_roles) == 0
-} else = false
+} else := false

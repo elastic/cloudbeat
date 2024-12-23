@@ -6,7 +6,7 @@ import data.compliance.policy.gcp.sql.ensure_db_flag as audit
 import future.keywords.if
 
 # Ensure ‘Log_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set Appropriately.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_cloud_sql
 	data_adapter.is_postgres_sql

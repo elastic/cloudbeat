@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_vault
 
@@ -18,4 +18,4 @@ finding = result if {
 is_vault_recoverable if {
 	data_adapter.properties.enableSoftDelete
 	data_adapter.properties.enablePurgeProtection
-} else = false
+} else := false

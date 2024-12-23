@@ -14,10 +14,9 @@ finding(rule_evaluation) := lib_common.generate_result_without_expected(
 	{"process_args": process_args},
 )
 
-not_contains(entity) := assert.is_false(lib_common.contains_key(process_args, entity))
+arg_not_contains(entity) := assert.is_false(lib_common.contains_key(process_args, entity))
 
-# regal ignore:rule-shadows-builtin
-contains(entity) := entity in object.keys(process_args)
+arg_contains(entity) := entity in object.keys(process_args)
 
 apiserver_filter := data_adapter.is_kube_apiserver
 

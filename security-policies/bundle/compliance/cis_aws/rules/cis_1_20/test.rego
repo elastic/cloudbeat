@@ -4,7 +4,7 @@ import data.compliance.cis_aws.data_adapter
 import data.lib.test
 import future.keywords.if
 
-generate_input(analyzers, regions) = {
+generate_input(analyzers, regions) := {
 	"type": "identity-management",
 	"subType": "aws-access-analyzers",
 	"resource": {
@@ -13,7 +13,7 @@ generate_input(analyzers, regions) = {
 	},
 }
 
-analyzer(arn, status, region) = {
+analyzer(arn, status, region) := {
 	"Arn": arn,
 	"CreatedAt": "2023-01-09T15:06:39Z",
 	"Name": "Analyzer",

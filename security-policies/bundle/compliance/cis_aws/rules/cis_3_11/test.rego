@@ -5,9 +5,9 @@ import data.compliance.cis_aws.data_adapter
 import data.lib.test
 import future.keywords.if
 
-s3_object_type = "AWS::S3::Object"
+s3_object_type := "AWS::S3::Object"
 
-not_s3_object_type = "AWS::S3ObjectLambda::AccessPoint"
+not_s3_object_type := "AWS::S3ObjectLambda::AccessPoint"
 
 test_violation if {
 	eval_fail with input as rule_input(null, true)
@@ -30,7 +30,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_trail
 }
 
-rule_input(entries, is_multi_region) = test_data.generate_event_selectors(entries, is_multi_region)
+rule_input(entries, is_multi_region) := test_data.generate_event_selectors(entries, is_multi_region)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

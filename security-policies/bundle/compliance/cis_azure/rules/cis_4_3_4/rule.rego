@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_postgresql_server_db
 
@@ -15,7 +15,7 @@ finding = result if {
 	)
 }
 
-default config_enabled = false
+default config_enabled := false
 
 config_enabled if {
 	some i

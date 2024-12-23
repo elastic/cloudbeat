@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_document_db_database_account
 
@@ -17,4 +17,4 @@ finding = result if {
 
 is_virtual_network_filter_enabled if {
 	data_adapter.properties.isVirtualNetworkFilterEnabled
-} else = false
+} else := false

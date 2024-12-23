@@ -6,7 +6,7 @@ import data.compliance.policy.aws_iam.verify_keys_rotation as audit
 import future.keywords.if
 
 # Ensure access keys are rotated every 90 days or less
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_iam_user
 

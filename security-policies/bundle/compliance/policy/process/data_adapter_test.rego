@@ -3,7 +3,7 @@ package compliance.policy.process.data_adapter
 import data.kubernetes_common.test_data
 import future.keywords.if
 
-supported_delimiters = [" ", "="]
+supported_delimiters := [" ", "="]
 
 test_is_process if {
 	is_process with input as test_data.process_input("kube-api", [])
@@ -34,9 +34,9 @@ test_process_args_list_when_value_contain_delimiters if {
 	result == expected_result
 }
 
-process_input(extra_elements, delimiter) = test_data.process_input("kube-api", process_cmdLine_input(delimiter, extra_elements))
+process_input(extra_elements, delimiter) := test_data.process_input("kube-api", process_cmdLine_input(delimiter, extra_elements))
 
-process_cmdLine_input(delimiter, extra_elements) = result if {
+process_cmdLine_input(delimiter, extra_elements) := result if {
 	cmd_line_with_placeholders := ["--cloud-provider%0aws", "--config%0/etc/kubernetes/kubelet/kubelet-config.json"]
 	cmd_line_with_extra_elements := array.concat(cmd_line_with_placeholders, extra_elements)
 	result = [res | res = replace(cmd_line_with_extra_elements[_], "%0", delimiter)]

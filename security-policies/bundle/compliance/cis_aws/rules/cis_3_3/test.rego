@@ -5,9 +5,9 @@ import data.compliance.cis_aws.data_adapter
 import data.lib.test
 import future.keywords.if
 
-forbidden_principal1 = "http://acs.amazonaws.com/groups/global/AllUsers"
+forbidden_principal1 := "http://acs.amazonaws.com/groups/global/AllUsers"
 
-forbidden_principal2 = "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
+forbidden_principal2 := "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
 
 test_violation if {
 	# Fail with forbidden principal
@@ -40,7 +40,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_trail
 }
 
-rule_input(principal_uri, policy_statement) = test_data.generate_trail_bucket_info(principal_uri, policy_statement)
+rule_input(principal_uri, policy_statement) := test_data.generate_trail_bucket_info(principal_uri, policy_statement)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

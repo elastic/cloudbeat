@@ -18,7 +18,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_pwd_policy
 }
 
-rule_input(pwd_len, reuse_count) = test_data.generate_password_policy(pwd_len, reuse_count)
+rule_input(pwd_len, reuse_count) := test_data.generate_password_policy(pwd_len, reuse_count)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter
