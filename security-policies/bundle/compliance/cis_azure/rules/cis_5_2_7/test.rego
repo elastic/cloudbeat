@@ -44,13 +44,13 @@ not_eval if {
 
 # test data
 # alert rule that does not match the rule by operation and category
-mismatch_alert = test_data.generate_activity_log_alert("mismatch_opreation", "mismatch_category")
+mismatch_alert := test_data.generate_activity_log_alert("mismatch_opreation", "mismatch_category")
 
 # alert rule that does not match the rule by operation
-mismatch_alert_only_operation = test_data.generate_activity_log_alert("mismatch_opreation", "Administrative")
+mismatch_alert_only_operation := test_data.generate_activity_log_alert("mismatch_opreation", "Administrative")
 
 # alert rule that does not match the rule by category
-mismatch_alert_only_category = test_data.generate_activity_log_alert("Microsoft.Sql/servers/firewallRules/write", "mismatch_category")
+mismatch_alert_only_category := test_data.generate_activity_log_alert("Microsoft.Sql/servers/firewallRules/write", "mismatch_category")
 
 # alert rule that matches the rule
-matching_alert = test_data.generate_activity_log_alert("Microsoft.Sql/servers/firewallRules/write", "Administrative")
+matching_alert := test_data.generate_activity_log_alert("Microsoft.Sql/servers/firewallRules/write", "Administrative")

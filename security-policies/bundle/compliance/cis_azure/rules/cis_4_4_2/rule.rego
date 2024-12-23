@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_flexible_mysql_server_db
 
@@ -15,7 +15,7 @@ finding = result if {
 	)
 }
 
-default contains_tls_version_higher_than_1_2 = false
+default contains_tls_version_higher_than_1_2 := false
 
 contains_tls_version_higher_than_1_2 if {
 	some i

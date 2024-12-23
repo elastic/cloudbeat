@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_postgresql_single_server_db
 
@@ -15,7 +15,7 @@ finding = result if {
 	)
 }
 
-default infrastructure_encryption_enabled = false
+default infrastructure_encryption_enabled := false
 
 infrastructure_encryption_enabled if {
 	lower(data_adapter.properties.infrastructureEncryption) == "enabled"

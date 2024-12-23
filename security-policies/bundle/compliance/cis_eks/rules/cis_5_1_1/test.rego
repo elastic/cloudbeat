@@ -16,6 +16,6 @@ test_not_evaluated if {
 	not finding with input as test_data.not_evaluated_input
 }
 
-violating_input_scan_on_push_disabled = test_data.generate_ecr_input_with_one_repo(false)
+violating_input_scan_on_push_disabled := test_data.generate_ecr_input_with_one_repo(false)
 
-valid_input = test_data.generate_ecr_input_with_one_repo(true)
+valid_input := test_data.generate_ecr_input_with_one_repo(true)

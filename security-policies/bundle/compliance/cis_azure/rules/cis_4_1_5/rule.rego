@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.every
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default is_transaparent_data_encryption_enabled_for_all_dbs = false
+default is_transaparent_data_encryption_enabled_for_all_dbs := false
 
 is_transaparent_data_encryption_enabled_for_all_dbs if {
 	count(data_adapter.resource.extension.sqlTransparentDataEncryptions) > 0

@@ -5,9 +5,9 @@ import data.compliance.policy.gcp.data_adapter
 import data.lib.test
 import future.keywords.if
 
-type = "cloud-compute"
+type := "cloud-compute"
 
-subtype = "gcp-compute-firewall"
+subtype := "gcp-compute-firewall"
 
 test_violation if {
 	# specific port

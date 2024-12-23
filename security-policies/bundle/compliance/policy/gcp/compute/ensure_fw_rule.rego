@@ -6,7 +6,7 @@ import future.keywords.every
 import future.keywords.if
 import future.keywords.in
 
-is_valid_fw_rule(port) = false if {
+is_valid_fw_rule(port) := false if {
 	some range in data_adapter.resource.data.sourceRanges
 	range == "0.0.0.0/0"
 	data_adapter.resource.data.direction == "INGRESS"
@@ -14,7 +14,7 @@ is_valid_fw_rule(port) = false if {
 	some action in data_adapter.resource.data.allowed
 	action.IPProtocol in {"tcp", "all"}
 	is_port_effective(port, object.get(action, ["ports"], []))
-} else = true
+} else := true
 
 # The ports list can include both ranges, such as 80-90, and individual ports, such as 443.
 is_port_effective(port, ports) if {

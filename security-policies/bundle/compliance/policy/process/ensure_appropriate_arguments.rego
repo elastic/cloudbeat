@@ -16,7 +16,7 @@ finding(entities) := lib_common.generate_result_without_expected(
 rule_evaluation(entities) if {
 	process_args[entities[0]]
 	process_args[entities[1]]
-} else = false
+} else := false
 
 apiserver_filter := data_adapter.is_kube_apiserver
 

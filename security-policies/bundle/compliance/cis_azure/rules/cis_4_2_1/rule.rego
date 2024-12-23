@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.every
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default is_defender_on = false
+default is_defender_on := false
 
 is_defender_on if {
 	count(data_adapter.resource.extension.sqlAdvancedThreatProtectionSettings) > 0

@@ -24,7 +24,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_eval_resource
 }
 
-rule_input(log_metrics, alerts) = test_data.generate_monitoring_asset(log_metrics, alerts)
+rule_input(log_metrics, alerts) := test_data.generate_monitoring_asset(log_metrics, alerts)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

@@ -12,9 +12,9 @@ finding := common.generate_result_without_expected(
 
 ensure_sku_tier if {
 	data_adapter.resource.sku.tier != "Basic"
-} else = false
+} else := false
 
-ensure_sku_valid = r if {
+ensure_sku_valid := r if {
 	data_adapter.resource.sku != null
 	r = ensure_sku_tier
 }

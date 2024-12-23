@@ -6,9 +6,9 @@ import data.compliance.policy.aws_cloudtrail.pattern
 import data.compliance.policy.aws_cloudtrail.trail
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_multi_trails_type
 
@@ -20,7 +20,7 @@ finding = result if {
 }
 
 # { ($.eventName = CreateCustomerGateway) || ($.eventName = DeleteCustomerGateway) || ($.eventName = AttachInternetGateway) || ($.eventName = CreateInternetGateway) || ($.eventName = DeleteInternetGateway) || ($.eventName = DetachInternetGateway) }
-required_patterns = [pattern.complex_expression("||", [
+required_patterns := [pattern.complex_expression("||", [
 	pattern.simple_expression("$.eventName", "=", "CreateCustomerGateway"),
 	pattern.simple_expression("$.eventName", "=", "DeleteCustomerGateway"),
 	pattern.simple_expression("$.eventName", "=", "AttachInternetGateway"),
@@ -29,4 +29,4 @@ required_patterns = [pattern.complex_expression("||", [
 	pattern.simple_expression("$.eventName", "=", "DetachInternetGateway"),
 ])]
 
-rule_evaluation = trail.at_least_one_trail_satisfied(required_patterns)
+rule_evaluation := trail.at_least_one_trail_satisfied(required_patterns)
