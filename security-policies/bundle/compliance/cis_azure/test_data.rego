@@ -1,21 +1,21 @@
 package cis_azure.test_data
 
-not_eval_resource = {
+not_eval_resource := {
 	"type": "azure-resource-type",
 	"subType": "azure-resource-subtype",
 	"resource": {},
 }
 
-generate_disk_encryption_settings(type) = {"encryption": {
+generate_disk_encryption_settings(type) := {"encryption": {
 	"diskEncryptionSetId": "/subscriptions/dead-beef/resourceGroups/RESOURCEGROUP/providers/Microsoft.Compute/diskEncryptionSets/double-disk-encryption-set",
 	"type": type,
 }}
 
-generate_attached_disk_with_encryption(settings) = generate_disk_with_encryption("Attached", settings)
+generate_attached_disk_with_encryption(settings) := generate_disk_with_encryption("Attached", settings)
 
-generate_unattached_disk_with_encryption(settings) = generate_disk_with_encryption("Unattached", settings)
+generate_unattached_disk_with_encryption(settings) := generate_disk_with_encryption("Unattached", settings)
 
-generate_disk_with_encryption(state, settings) = {
+generate_disk_with_encryption(state, settings) := {
 	"subType": "azure-disk",
 	"resource": {
 		"id": "/subscriptions/dead-beef/resourceGroups/resourceGroup/providers/Microsoft.Compute/disks/unattached-disk",
@@ -45,32 +45,32 @@ generate_disk_with_encryption(state, settings) = {
 	},
 }
 
-generate_storage_account_with_property(key, value) = {
+generate_storage_account_with_property(key, value) := {
 	"subType": "azure-storage-account",
 	"resource": {"properties": {key: value}},
 }
 
-generate_storage_account_with_extensions(properties, extension) = {
+generate_storage_account_with_extensions(properties, extension) := {
 	"subType": "azure-storage-account",
 	"resource": {"properties": properties, "extension": extension},
 }
 
-generate_azure_asset(type, properties) = {
+generate_azure_asset(type, properties) := {
 	"subType": type,
 	"resource": {"properties": properties},
 }
 
-generate_azure_asset_with_ext(type, properties, ext) = {
+generate_azure_asset_with_ext(type, properties, ext) := {
 	"subType": type,
 	"resource": {"properties": properties, "extension": ext},
 }
 
-generate_azure_asset_resource(type, properties) = {
+generate_azure_asset_resource(type, properties) := {
 	"subType": type,
 	"resource": properties,
 }
 
-generate_azure_sku_asset_with_properties(type, properties) = {
+generate_azure_sku_asset_with_properties(type, properties) := {
 	"subType": type,
 	"resource": {
 		"sku": properties,
@@ -78,62 +78,62 @@ generate_azure_sku_asset_with_properties(type, properties) = {
 	},
 }
 
-generate_azure_non_sku_asset(type) = {
+generate_azure_non_sku_asset(type) := {
 	"subType": type,
 	"resource": {"properties": {}},
 }
 
-not_eval_storage_account_empty = {
+not_eval_storage_account_empty := {
 	"subType": "azure-storage-account",
 	"resource": {"properties": {}},
 }
 
-not_eval_non_exist_type = {
+not_eval_non_exist_type := {
 	"subType": "azure-non-exist",
 	"resource": {"properties": {}},
 }
 
-generate_postgresql_server_with_ssl_enforcement(enabled) = {
+generate_postgresql_server_with_ssl_enforcement(enabled) := {
 	"subType": "azure-postgresql-server-db",
 	"resource": {"properties": {"sslEnforcement": enabled}},
 }
 
-generate_postgresql_server_with_extension(ext) = {
+generate_postgresql_server_with_extension(ext) := {
 	"subType": "azure-postgresql-server-db",
 	"resource": {"extension": ext},
 }
 
-generate_postgresql_server_with_infrastructure_encryption(enabled) = {
+generate_postgresql_server_with_infrastructure_encryption(enabled) := {
 	"subType": "azure-postgresql-server-db",
 	"resource": {"properties": {"infrastructureEncryption": enabled}},
 }
 
-generate_flexible_postgresql_server_with_extension(ext) = {
+generate_flexible_postgresql_server_with_extension(ext) := {
 	"subType": "azure-flexible-postgresql-server-db",
 	"resource": {"extension": ext},
 }
 
-generate_mysql_server_with_ssl_enforcement(enabled) = {
+generate_mysql_server_with_ssl_enforcement(enabled) := {
 	"subType": "azure-mysql-server-db",
 	"resource": {"properties": {"sslEnforcement": enabled}},
 }
 
-generate_flexible_mysql_server_with_extension(extension) = {
+generate_flexible_mysql_server_with_extension(extension) := {
 	"subType": "azure-flexible-mysql-server-db",
 	"resource": {"extension": extension},
 }
 
-generate_activity_log_alerts_no_alerts = {
+generate_activity_log_alerts_no_alerts := {
 	"subType": "azure-activity-log-alert",
 	"resource": [],
 }
 
-generate_activity_log_alerts(rules) = {
+generate_activity_log_alerts(rules) := {
 	"subType": "azure-activity-log-alert",
 	"resource": rules,
 }
 
-generate_activity_log_alert(operation_name, category) = {
+generate_activity_log_alert(operation_name, category) := {
 	"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/activityLogAlerts/providers/microsoft.insights/activityLogAlerts/activityLogAlert",
 	"subType": "microsoft.insights/activitylogalerts",
 	"kind": "activityLogAlert",
@@ -160,18 +160,18 @@ generate_activity_log_alert(operation_name, category) = {
 	},
 }
 
-valid_managed_disk = {
+valid_managed_disk := {
 	"id": "/subscriptions/sub-id/resourceGroups/cloudbeat-resource-group-1695893762/providers/Microsoft.Compute/disks/cloudbeatVM_OsDisk_1_e736df07f12142a9a2784ea8de9084ce",
 	"resourceGroup": "cloudbeat-resource-group-1695893762",
 	"storageAccountType": "Standard_LRS",
 }
 
-generate_vm(managed_disk) = generate_vm_full(managed_disk, {})
+generate_vm(managed_disk) := generate_vm_full(managed_disk, {})
 
-generate_vm_with_extension(extension) = generate_vm_full({}, extension)
+generate_vm_with_extension(extension) := generate_vm_full({}, extension)
 
 # regal ignore:rule-length
-generate_vm_full(managed_disk, extension) = {
+generate_vm_full(managed_disk, extension) := {
 	"subType": "azure-vm",
 	"resource": {
 		"extendedLocation": null,
@@ -254,17 +254,17 @@ generate_vm_full(managed_disk, extension) = {
 	},
 }
 
-generate_insights_components_empty = {
+generate_insights_components_empty := {
 	"subType": "azure-insights-component",
 	"resource": [],
 }
 
-generate_insights_components(rules) = {
+generate_insights_components(rules) := {
 	"subType": "azure-insights-component",
 	"resource": rules,
 }
 
-generate_insights_component(resource_group, name) = {
+generate_insights_component(resource_group, name) := {
 	"id": sprintf("/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/%s/providers/microsoft.insights/components/%s", [resource_group, name]),
 	"name": name,
 	"type": "microsoft.insights/components",
@@ -294,17 +294,17 @@ generate_insights_component(resource_group, name) = {
 	},
 }
 
-generate_diagnostic_settings_empty = {
+generate_diagnostic_settings_empty := {
 	"subType": "azure-diagnostic-settings",
 	"resource": [],
 }
 
-generate_diagnostic_settings(rules) = {
+generate_diagnostic_settings(rules) := {
 	"subType": "azure-diagnostic-settings",
 	"resource": rules,
 }
 
-generate_diagnostic_setting_element(sub_id, resource_group, name, logs) = {
+generate_diagnostic_setting_element(sub_id, resource_group, name, logs) := {
 	"id": sprintf("/subscriptions/%s/providers/microsoft.insights/diagnosticSettings/%s", [sub_id, name]),
 	"name": name,
 	"properties": {
@@ -315,7 +315,7 @@ generate_diagnostic_setting_element(sub_id, resource_group, name, logs) = {
 	},
 }
 
-generate_diagnostic_setting_element_logs(flags) = [
+generate_diagnostic_setting_element_logs(flags) := [
 	generate_diagnostic_setting_element_log("Administrative", flags.Administrative),
 	generate_diagnostic_setting_element_log("Security", flags.Security),
 	generate_diagnostic_setting_element_log("Policy", flags.Policy),
@@ -326,7 +326,7 @@ generate_diagnostic_setting_element_logs(flags) = [
 	generate_diagnostic_setting_element_log("ResourceHealth", false),
 ]
 
-generate_diagnostic_setting_element_log(category, enabled) = {
+generate_diagnostic_setting_element_log(category, enabled) := {
 	"category": category,
 	"categoryGroup": null,
 	"enabled": enabled,
@@ -336,9 +336,9 @@ generate_diagnostic_setting_element_log(category, enabled) = {
 	},
 }
 
-generate_key_vault_extension_key(attributes) = {"properties": {"attributes": attributes}}
+generate_key_vault_extension_key(attributes) := {"properties": {"attributes": attributes}}
 
-generate_key_vault_rbac(extension) = {
+generate_key_vault_rbac(extension) := {
 	"subType": "azure-vault",
 	"resource": {
 		"properties": {"enableRbacAuthorization": true},
@@ -346,7 +346,7 @@ generate_key_vault_rbac(extension) = {
 	},
 }
 
-generate_key_vault(properties, extension) = {
+generate_key_vault(properties, extension) := {
 	"subType": "azure-vault",
 	"resource": {
 		"properties": properties,
@@ -354,17 +354,17 @@ generate_key_vault(properties, extension) = {
 	},
 }
 
-generate_security_contacts(resources) = {
+generate_security_contacts(resources) := {
 	"subType": "azure-security-contacts",
 	"resource": resources,
 }
 
-generate_single_security_contact(name, properties) = {
+generate_single_security_contact(name, properties) := {
 	"name": name,
 	"properties": properties,
 }
 
-generate_security_auto_provisioning_settings(resources) = {
+generate_security_auto_provisioning_settings(resources) := {
 	"subType": "azure-security-auto-provisioning-settings",
 	"resource": resources,
 }
