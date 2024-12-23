@@ -22,7 +22,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_eval_resource
 }
 
-rule_input(members) = test_data.generate_gcs_resource(members, false)
+rule_input(members) := test_data.generate_gcs_resource(members, false)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

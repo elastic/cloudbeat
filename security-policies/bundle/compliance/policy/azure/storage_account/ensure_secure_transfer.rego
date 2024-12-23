@@ -5,4 +5,4 @@ import future.keywords.if
 
 is_secure_transfer_enabled if {
 	data_adapter.properties.supportsHttpsTrafficOnly
-} else = false
+} else := false

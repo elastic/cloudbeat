@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_security_auto_provisioning_settings
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default auto_provisioning_on = false
+default auto_provisioning_on := false
 
 auto_provisioning_on if {
 	# Ensure at least one Auto Provisioning Settings exists and autoProvision is set to on.

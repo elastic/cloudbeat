@@ -18,7 +18,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.process_input("some_process", [])
 }
 
-rule_input(argument) = test_data.process_input("kube-scheduler", [argument])
+rule_input(argument) := test_data.process_input("kube-scheduler", [argument])
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

@@ -5,10 +5,10 @@ import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-default is_ip_forwarding_enabled = false
+default is_ip_forwarding_enabled := false
 
 # Ensure That IP Forwarding Is Not Enabled on Instances
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_compute_instance
 

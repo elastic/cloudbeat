@@ -32,14 +32,14 @@ is_kube_pod if {
 	input.resource.kind == "Pod"
 }
 
-pod = p if {
+pod := p if {
 	is_kube_pod
 	p := input.resource
 }
 
-is_service_account_or_pod = pod
+is_service_account_or_pod := pod
 
-is_service_account_or_pod = service_account
+is_service_account_or_pod := service_account
 
 containers := c if {
 	is_kube_pod
@@ -50,4 +50,4 @@ containers := c if {
 	}
 }
 
-status = input.resource.status
+status := input.resource.status

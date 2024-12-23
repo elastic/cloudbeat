@@ -4,9 +4,9 @@ import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-default has_cusomter_encrypted_key = false
+default has_cusomter_encrypted_key := false
 
-finding = result if {
+finding := result if {
 	data_adapter.is_dataproc_cluster
 
 	result := common.generate_result_without_expected(

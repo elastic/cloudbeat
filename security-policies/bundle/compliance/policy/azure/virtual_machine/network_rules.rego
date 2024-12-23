@@ -4,7 +4,7 @@ import future.keywords.if
 
 vm_has_closed_port(vm, targetPort, protocol) if {
 	not vm_has_open_port(vm, targetPort, protocol)
-} else = false
+} else := false
 
 vm_has_open_port(vm, targetPort, protocol) if {
 	some i

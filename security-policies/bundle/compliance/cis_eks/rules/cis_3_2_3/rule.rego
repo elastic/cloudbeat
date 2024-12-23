@@ -3,7 +3,7 @@ package compliance.cis_eks.rules.cis_3_2_3
 import data.compliance.policy.process.ensure_arguments_and_config as audit
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 rule_evaluation if {
 	audit.process_contains_key("--client-ca-file")
@@ -16,4 +16,4 @@ rule_evaluation if {
 }
 
 # Ensure that the --client-ca-file argument is set as appropriate (Automated)
-finding = audit.finding(rule_evaluation)
+finding := audit.finding(rule_evaluation)

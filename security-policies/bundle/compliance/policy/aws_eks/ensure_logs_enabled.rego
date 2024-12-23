@@ -6,7 +6,7 @@ import data.compliance.policy.aws_eks.data_adapter
 import future.keywords.if
 
 # Ensure that all audit logs are enabled
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_aws_eks
 

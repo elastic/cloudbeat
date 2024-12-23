@@ -10,12 +10,12 @@ is_single_trail if {
 	input.subType == "aws-trail"
 }
 
-trail = input.resource.Trail
+trail := input.resource.Trail
 
-trail_status = input.resource.Status
+trail_status := input.resource.Status
 
-trail_bucket_info = input.resource.bucket_info
+trail_bucket_info := input.resource.bucket_info
 
-event_selectors = input.resource.EventSelectors
+event_selectors := input.resource.EventSelectors
 
-trail_items = input.resource.Items
+trail_items := input.resource.Items

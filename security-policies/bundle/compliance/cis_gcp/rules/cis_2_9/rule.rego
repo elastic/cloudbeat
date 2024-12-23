@@ -9,4 +9,4 @@ pattern := `resource.type="gce_network"
  OR protoPayload.methodName:"compute.networks.removePeering"
  OR protoPayload.methodName:"compute.networks.addPeering")`
 
-finding = audit.finding(pattern)
+finding := audit.finding(pattern)

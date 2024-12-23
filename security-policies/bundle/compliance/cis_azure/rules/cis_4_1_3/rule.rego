@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.every
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default is_encryption_protector_key_vault = false
+default is_encryption_protector_key_vault := false
 
 is_encryption_protector_key_vault if {
 	count(data_adapter.resource.extension.sqlEncryptionProtectors) > 0

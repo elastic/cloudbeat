@@ -24,7 +24,7 @@ test_not_evaluated if {
 	not finding with input as rule_input("etc/kubernetes/pkii/file.txt", "root", "root")
 }
 
-rule_input(filename, user, group) = filesystem_input if {
+rule_input(filename, user, group) := filesystem_input if {
 	filemode := "644"
 	filesystem_input = test_data.filesystem_input(filename, filemode, user, group)
 }

@@ -20,11 +20,11 @@ test_not_evaluated if {
 	not_eval with input as test_data.process_input("some_process", [])
 }
 
-rule_input(argument) = test_data.process_input("kubelet", [argument])
+rule_input(argument) := test_data.process_input("kubelet", [argument])
 
-rule_input_with_external(argument, external_data) = test_data.process_input_with_external_data("kubelet", [argument], external_data)
+rule_input_with_external(argument, external_data) := test_data.process_input_with_external_data("kubelet", [argument], external_data)
 
-create_process_config(client_CA_path) = {"config": {"authentication": {
+create_process_config(client_CA_path) := {"config": {"authentication": {
 	"x509": {"clientCAFile": client_CA_path},
 	"anonymous": {"enabled": false},
 	"webhook": {
@@ -33,7 +33,7 @@ create_process_config(client_CA_path) = {"config": {"authentication": {
 	},
 }}}
 
-create_process_config_empty = {"config": {"authentication": {
+create_process_config_empty := {"config": {"authentication": {
 	"x509": {},
 	"anonymous": {"enabled": false},
 	"webhook": {

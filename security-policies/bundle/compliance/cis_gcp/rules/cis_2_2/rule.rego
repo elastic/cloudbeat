@@ -6,7 +6,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Ensure That Sinks Are Configured for All Log Entries.
-finding = result if {
+finding := result if {
 	data_adapter.is_logging_asset
 
 	result := common.generate_result_without_expected(
@@ -20,4 +20,4 @@ finding = result if {
 is_sink_without_filter if {
 	some sink in input.resource.log_sinks
 	not sink.resource.data.filter
-} else = false
+} else := false

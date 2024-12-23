@@ -8,7 +8,7 @@ import future.keywords.if
 
 process_args := benchmark_data_adapter.process_args
 
-finding(entity, value) = result if {
+finding(entity, value) := result if {
 	data_adapter.is_kube_apiserver
 
 	# set result
@@ -21,4 +21,4 @@ finding(entity, value) = result if {
 rule_evaluation(entity, value) if {
 	process_args[entity]
 	not process_common.arg_values_contains(process_args, entity, value)
-} else = false
+} else := false

@@ -20,7 +20,7 @@ test_not_evaluated if {
 	not finding with input as rule_input("var/lib/etcdd/some_file.txt", "710")
 }
 
-rule_input(filename, filemode) = filesystem_input if {
+rule_input(filename, filemode) := filesystem_input if {
 	user := "root"
 	group := "root"
 	filesystem_input = test_data.filesystem_input(filename, filemode, user, group)

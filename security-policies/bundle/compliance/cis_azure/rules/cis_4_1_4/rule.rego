@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -17,4 +17,4 @@ finding = result if {
 
 is_administrator_configured if {
 	data_adapter.properties.administrators.administratorType == "ActiveDirectory"
-} else = false
+} else := false

@@ -6,7 +6,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
 # Ensure “Block Project-Wide SSH Keys” Is Enabled for VM Instances
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_compute_instance
 
