@@ -21,7 +21,7 @@ finding(rule_violation) := result if {
 	)
 }
 
-default service_account_automount = false
+default service_account_automount := false
 
 # Review pod and service account objects in the cluster and ensure that automountServiceAccountToken is
 # set to false
@@ -35,7 +35,7 @@ service_account_automount if {
 	service_account.automountServiceAccountToken == true
 }
 
-default service_account_default = false
+default service_account_default := false
 
 # no roles or cluster roles bound to default service account apart from the defaults.
 service_account_default if {

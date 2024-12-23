@@ -18,7 +18,7 @@ test_not_evaluated if {
 	not_eval with input as rule_input({"name": "gke-node", "canIpForward": true})
 }
 
-rule_input(info) = test_data.generate_compute_resource("gcp-compute-instance", info)
+rule_input(info) := test_data.generate_compute_resource("gcp-compute-instance", info)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

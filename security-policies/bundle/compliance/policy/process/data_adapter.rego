@@ -6,12 +6,12 @@ is_process if {
 	input.type == "process"
 }
 
-process_name = name if {
+process_name := name if {
 	is_process
 	name = input.resource.stat.Name
 }
 
-process_args_list = args_list if {
+process_args_list := args_list if {
 	is_process
 
 	# Gets all the process arguments of the current process
@@ -21,7 +21,7 @@ process_args_list = args_list if {
 }
 
 # Parses a single argument and returns a tuple of the flag and the value
-parse_argument(argument) = [flag, value] if {
+parse_argument(argument) := [flag, value] if {
 	# We would like to split the argument by the first delimiter
 	# The dilimiter can be either a space or an equal sign
 	splitted_argument := regex.split(`\s|\=`, argument)
@@ -31,7 +31,7 @@ parse_argument(argument) = [flag, value] if {
 	value = concat("=", array.slice(splitted_argument, 1, count(splitted_argument) + 1))
 }
 
-process_config = config if {
+process_config := config if {
 	is_process
 	config := {key: value | value = input.resource.external_data[key]}
 }

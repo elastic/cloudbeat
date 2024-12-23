@@ -8,10 +8,10 @@ import future.keywords.if
 is_encrypted(cluster) if {
 	cluster.EncryptionConfig
 	count(cluster.EncryptionConfig) > 0
-} else = false
+} else := false
 
 # Ensure there Kuberenetes secrets are encrypted
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_aws_eks
 

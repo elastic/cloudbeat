@@ -41,7 +41,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_s3_bucket
 }
 
-rule_input(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets, account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets) = test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets), test_data.generate_s3_public_access_block_configuration(account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets))
+rule_input(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets, account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets) := test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets), test_data.generate_s3_public_access_block_configuration(account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets))
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

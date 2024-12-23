@@ -5,9 +5,9 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-default has_valid_apikey_restrictions = false
+default has_valid_apikey_restrictions := false
 
-finding = result if {
+finding := result if {
 	data_adapter.is_api_key
 
 	result := common.generate_result_without_expected(

@@ -49,13 +49,13 @@ not_eval if {
 
 # test data
 # alert rule that does not match the rule by operation and category
-mismatch_alert = test_data.generate_activity_log_alert("mismatch_opreation", "mismatch_category")
+mismatch_alert := test_data.generate_activity_log_alert("mismatch_opreation", "mismatch_category")
 
 # alert rule that does not match the rule by operation
-mismatch_alert_only_operation = test_data.generate_activity_log_alert("mismatch_opreation", "Security")
+mismatch_alert_only_operation := test_data.generate_activity_log_alert("mismatch_opreation", "Security")
 
 # alert rule that does not match the rule by category
-mismatch_alert_only_category = test_data.generate_activity_log_alert("Microsoft.Security/securitySolutions/write", "mismatch_category")
+mismatch_alert_only_category := test_data.generate_activity_log_alert("Microsoft.Security/securitySolutions/write", "mismatch_category")
 
 # alert rule that matches the rule
-matching_alert = test_data.generate_activity_log_alert("Microsoft.Security/securitySolutions/write", "Security")
+matching_alert := test_data.generate_activity_log_alert("Microsoft.Security/securitySolutions/write", "Security")

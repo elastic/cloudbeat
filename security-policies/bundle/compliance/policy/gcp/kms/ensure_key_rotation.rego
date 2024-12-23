@@ -4,11 +4,11 @@ import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-duration = sprintf("%dh", [90 * 24]) # 90 days converted to hours
+duration := sprintf("%dh", [90 * 24]) # 90 days converted to hours
 
-default rule_evaluation = false
+default rule_evaluation := false
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_cloudkms_crypto_key
 

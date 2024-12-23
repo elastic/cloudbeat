@@ -4,13 +4,13 @@ import data.compliance.lib.common
 import data.compliance.policy.aws_kms.data_adapter
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 rule_evaluation if {
 	data_adapter.key_rotation_enabled == true
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_kms
 
 	result := common.generate_result_without_expected(
