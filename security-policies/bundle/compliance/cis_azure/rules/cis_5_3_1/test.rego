@@ -35,6 +35,6 @@ not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
 
-component1 = test_data.generate_insights_component("rcg1", "cmp1")
+component1 := test_data.generate_insights_component("rcg1", "cmp1")
 
-component2 = test_data.generate_insights_component("rcg2", "cmp2")
+component2 := test_data.generate_insights_component("rcg2", "cmp2")

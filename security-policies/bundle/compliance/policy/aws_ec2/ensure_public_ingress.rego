@@ -6,9 +6,9 @@ import data.compliance.policy.aws_ec2.ports
 import future.keywords.every
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_nacl_policy
 

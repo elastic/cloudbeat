@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import data.compliance.policy.azure.storage_account.ensure_connection as audit
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_storage_account
 

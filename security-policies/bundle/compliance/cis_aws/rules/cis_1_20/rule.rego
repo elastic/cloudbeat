@@ -7,7 +7,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Ensure that IAM Access analyzer is enabled for all regions
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_access_analyzers
 
@@ -24,4 +24,4 @@ analyzer_exists if {
 		analyzer.Region == region
 		analyzer.Status == "ACTIVE"
 	}
-} else = false
+} else := false

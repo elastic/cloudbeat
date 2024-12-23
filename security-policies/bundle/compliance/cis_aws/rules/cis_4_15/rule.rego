@@ -6,9 +6,9 @@ import data.compliance.policy.aws_cloudtrail.pattern
 import data.compliance.policy.aws_cloudtrail.trail
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_multi_trails_type
 
@@ -20,7 +20,7 @@ finding = result if {
 }
 
 # { ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }
-required_patterns = [pattern.complex_expression("&&", [
+required_patterns := [pattern.complex_expression("&&", [
 	pattern.simple_expression("$.eventSource", "=", "organizations.amazonaws.com"),
 	pattern.complex_expression("||", [
 		pattern.simple_expression("$.eventName", "=", "\"AcceptHandshake\""),
@@ -44,4 +44,4 @@ required_patterns = [pattern.complex_expression("&&", [
 	]),
 ])]
 
-rule_evaluation = trail.at_least_one_trail_satisfied(required_patterns)
+rule_evaluation := trail.at_least_one_trail_satisfied(required_patterns)

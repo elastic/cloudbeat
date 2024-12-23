@@ -17,7 +17,7 @@ test_not_evaluated if {
 	not finding with input as test_data.not_evaluated_input
 }
 
-violating_input_all_logs_disabled = result if {
+violating_input_all_logs_disabled := result if {
 	logging = {"ClusterLogging": [{
 		"Enabled": false,
 		"Types": [
@@ -32,7 +32,7 @@ violating_input_all_logs_disabled = result if {
 	result = generate_eks_input_with_log(logging)
 }
 
-violating_input_some_disabled = result if {
+violating_input_some_disabled := result if {
 	logging = {"ClusterLogging": [
 		{
 			"Enabled": false,
@@ -54,7 +54,7 @@ violating_input_some_disabled = result if {
 	result = generate_eks_input_with_log(logging)
 }
 
-non_violating_input = result if {
+non_violating_input := result if {
 	logging = {"ClusterLogging": [{
 		"Enabled": true,
 		"Types": [
@@ -69,7 +69,7 @@ non_violating_input = result if {
 	result = generate_eks_input_with_log(logging)
 }
 
-generate_eks_input_with_log(logging) = result if {
+generate_eks_input_with_log(logging) := result if {
 	encryption_config = {"EncryptionConfig : null"}
 	result = test_data.generate_eks_input(logging, encryption_config, true, true, [])
 }

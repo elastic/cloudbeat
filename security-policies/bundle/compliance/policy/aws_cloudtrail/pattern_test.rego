@@ -2,15 +2,15 @@ package compliance.policy.aws_cloudtrail.pattern
 
 import future.keywords.if
 
-filter_1 = {"FilterPattern": "a=b", "FilterName": "filter_1"}
+filter_1 := {"FilterPattern": "a=b", "FilterName": "filter_1"}
 
-filter_2 = {"FilterPattern": "b=c", "FilterName": "filter_2"}
+filter_2 := {"FilterPattern": "b=c", "FilterName": "filter_2"}
 
-pattern_1 = "a=b"
+pattern_1 := "a=b"
 
-pattern_2 = "b=c"
+pattern_2 := "b=c"
 
-pattern_never_match = "not_match"
+pattern_never_match := "not_match"
 
 test_pass if {
 	get_filter_matched_to_pattern({"MetricFilters": [filter_1]}, [pattern_1])

@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_website_asset
 
@@ -17,4 +17,4 @@ finding = result if {
 
 is_latest_http if {
 	data_adapter.site_config.http20Enabled == true
-} else = false
+} else := false

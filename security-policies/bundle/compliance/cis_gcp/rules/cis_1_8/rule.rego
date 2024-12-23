@@ -19,7 +19,7 @@ members_with_both_roles contains m if {
 	m in user.members
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_cloud_resource_manager_project
 	data_adapter.has_policy
 

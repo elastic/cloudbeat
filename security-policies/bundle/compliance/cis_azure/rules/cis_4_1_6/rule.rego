@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.every
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default is_retention_long_enough = false
+default is_retention_long_enough := false
 
 is_retention_long_enough if {
 	data_adapter.resource.extension.sqlBlobAuditPolicy.properties.retentionDays > 90

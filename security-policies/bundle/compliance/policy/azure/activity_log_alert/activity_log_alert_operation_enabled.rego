@@ -30,4 +30,4 @@ activity_log_alert_operation_enabled(operation_names, categories) if {
 
 	# Ensure there is an action group assigned (Notification to the appropriate personnel)
 	activity_log_alert.properties.actions != null
-} else = false
+} else := false

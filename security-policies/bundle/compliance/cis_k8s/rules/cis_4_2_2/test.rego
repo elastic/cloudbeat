@@ -22,11 +22,11 @@ test_not_evaluated if {
 	not_eval with input as test_data.process_input("some_process", [])
 }
 
-rule_input(argument) = test_data.process_input("kubelet", [argument])
+rule_input(argument) := test_data.process_input("kubelet", [argument])
 
-rule_input_with_external(argument, external_data) = test_data.process_input_with_external_data("kubelet", [argument], external_data)
+rule_input_with_external(argument, external_data) := test_data.process_input_with_external_data("kubelet", [argument], external_data)
 
-create_process_config(authz_mode) = {"config": {"authorization": {
+create_process_config(authz_mode) := {"config": {"authorization": {
 	"mode": authz_mode,
 	"webhook": {
 		"cacheAuthorizedTTL": "0s",

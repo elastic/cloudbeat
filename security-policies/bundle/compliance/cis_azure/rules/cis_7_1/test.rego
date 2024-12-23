@@ -4,7 +4,7 @@ import data.compliance.policy.azure.data_adapter
 import data.lib.test
 import future.keywords.if
 
-valid_bastion = {
+valid_bastion := {
 	"extendedLocation": null,
 	"id": "/subscriptions/sub-id/resourceGroups/cloudbeat/providers/Microsoft.Network/bastionHosts/cloudbeat",
 	"identity": null,
@@ -51,7 +51,7 @@ valid_bastion = {
 	"zones": null,
 }
 
-generate_bastions(assets) = {
+generate_bastions(assets) := {
 	"subType": "azure-bastion",
 	"resource": assets,
 }

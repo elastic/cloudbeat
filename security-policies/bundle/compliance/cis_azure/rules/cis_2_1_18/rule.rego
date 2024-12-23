@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_security_contacts
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default owner_enabled = false
+default owner_enabled := false
 
 owner_enabled if {
 	# Ensure at least one Security Contact Settings exists and owner is selected.

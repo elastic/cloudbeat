@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import data.compliance.policy.azure.virtual_machine.network_rules as audit
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_vm
 

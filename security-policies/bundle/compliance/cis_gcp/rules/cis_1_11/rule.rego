@@ -5,9 +5,9 @@ import data.compliance.policy.gcp.data_adapter
 import data.compliance.policy.gcp.iam.ensure_admin_without_multiple_roles as audit
 import future.keywords.if
 
-default admin_has_other_role = false
+default admin_has_other_role := false
 
-finding = result if {
+finding := result if {
 	data_adapter.is_cloud_resource_manager_project
 	data_adapter.has_policy
 

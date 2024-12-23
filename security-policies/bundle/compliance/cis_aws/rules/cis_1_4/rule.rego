@@ -5,7 +5,7 @@ import data.compliance.policy.aws_iam.data_adapter
 import future.keywords.if
 
 # Ensure no 'root' user account access key exists.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_root_user
 

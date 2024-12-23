@@ -6,7 +6,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
 # Ensure That a Default Customer-Managed Encryption Key (CMEK) Is Specified for All BigQuery Data Sets.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_bigquery_dataset
 

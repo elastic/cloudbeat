@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	data_adapter.is_backend_service
 	data_adapter.is_https_lb
 
@@ -16,4 +16,4 @@ finding = result if {
 
 is_logging_enabled if {
 	data_adapter.resource.data.logConfig.enable
-} else = false
+} else := false

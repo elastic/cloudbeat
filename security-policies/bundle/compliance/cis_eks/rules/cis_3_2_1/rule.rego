@@ -4,7 +4,7 @@ import data.compliance.policy.process.ensure_arguments_and_config as audit
 import future.keywords.if
 
 # Ensure that the --anonymous-auth argument is set to false (Automated)
-default rule_evaluation = false
+default rule_evaluation := false
 
 rule_evaluation if {
 	audit.process_contains_key_with_value("--anonymous-auth", "false")
@@ -16,4 +16,4 @@ rule_evaluation if {
 	audit.not_process_arg_comparison("--anonymous-auth", ["authentication", "anonymous", "enabled"], false)
 }
 
-finding = audit.finding(rule_evaluation)
+finding := audit.finding(rule_evaluation)

@@ -3,7 +3,7 @@ package compliance.policy.gcp.iam.ensure_user_not_editor_or_owner
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-default is_user_owner_or_editor = false
+default is_user_owner_or_editor := false
 
 is_user_owner_or_editor if {
 	# at least one member that starts with "user:"

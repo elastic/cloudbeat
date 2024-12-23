@@ -9,4 +9,4 @@ all_enabled_items_have_expiration(items) if {
 	every item in enabled {
 		item.properties.attributes.exp > 0
 	}
-} else = false
+} else := false

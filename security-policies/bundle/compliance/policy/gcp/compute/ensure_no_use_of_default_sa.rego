@@ -18,10 +18,10 @@ sa_is_default if {
 	not data_adapter.is_gke_instance(data_adapter.resource.data)
 	some sa in data_adapter.resource.data.serviceAccounts
 	is_default_sa(sa)
-} else = false
+} else := false
 
 sa_is_default_with_full_access if {
 	not data_adapter.is_gke_instance(data_adapter.resource.data)
 	some sa in data_adapter.resource.data.serviceAccounts
 	is_default_sa_with_access(sa)
-} else = false
+} else := false
