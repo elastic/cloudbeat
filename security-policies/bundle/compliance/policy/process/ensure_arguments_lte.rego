@@ -7,7 +7,7 @@ import future.keywords.if
 
 process_args := benchmark_data_adapter.process_args
 
-finding(entity, value) = result if {
+finding(entity, value) := result if {
 	data_adapter.is_kube_apiserver
 
 	# set result
@@ -17,7 +17,7 @@ finding(entity, value) = result if {
 	)
 }
 
-rule_evaluation(entity, value) = false if {
+rule_evaluation(entity, value) := false if {
 	e := process_args[entity]
 	lib_common.duration_lte(e, value)
-} else = true
+} else := true

@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.data_adapter
 import data.compliance.policy.gcp.iam.ensure_role_not_service_account_user as audit
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	data_adapter.is_cloud_resource_manager_project
 	data_adapter.has_policy
 

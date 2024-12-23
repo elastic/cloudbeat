@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_bastion
 
@@ -18,4 +18,4 @@ finding = result if {
 at_least_one_bastion if {
 	some i
 	data_adapter.bastions[i].id != ""
-} else = false
+} else := false

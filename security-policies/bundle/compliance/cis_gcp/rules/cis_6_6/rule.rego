@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.data_adapter
 import data.compliance.policy.gcp.sql.ensure_private_ip as audit
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	data_adapter.is_sql_instance
 	is_clous_sql_instance_second_gen
 

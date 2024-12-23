@@ -96,4 +96,4 @@ not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
 
-prop_notification_sources(notificationsSource) = {"notificationsSources": notificationsSource}
+prop_notification_sources(notificationsSource) := {"notificationsSources": notificationsSource}

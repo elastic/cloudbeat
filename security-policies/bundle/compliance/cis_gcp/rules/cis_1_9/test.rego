@@ -22,7 +22,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_eval_resource
 }
 
-rule_input(members, nextRotationTime, rotationPeriod, primary) = test_data.generate_kms_resource(members, nextRotationTime, rotationPeriod, primary)
+rule_input(members, nextRotationTime, rotationPeriod, primary) := test_data.generate_kms_resource(members, nextRotationTime, rotationPeriod, primary)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

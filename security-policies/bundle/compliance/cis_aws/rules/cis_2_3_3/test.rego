@@ -37,7 +37,7 @@ test_not_evaluated if {
 	not_eval with input as rule_input(true, [test_data.generate_rds_db_instance_subnet_with_route("0.0.0.0/0", "igw-12345678"), {"ID": "subnet-abcdef12", "RouteTable": null}])
 }
 
-rule_input(publicly_accessible, subnets) = test_data.generate_rds_db_instance(true, true, publicly_accessible, subnets)
+rule_input(publicly_accessible, subnets) := test_data.generate_rds_db_instance(true, true, publicly_accessible, subnets)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

@@ -77,4 +77,4 @@ not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
 
-prop_notification_by_role(notificationsByRole) = {"notificationsByRole": notificationsByRole}
+prop_notification_by_role(notificationsByRole) := {"notificationsByRole": notificationsByRole}

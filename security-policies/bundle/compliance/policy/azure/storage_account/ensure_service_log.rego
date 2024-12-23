@@ -11,4 +11,4 @@ service_diagnostic_settings_log_rwd_enabled(serviceDiagnosticSettings) if {
 		log.enabled == true
 		log.category = category
 	}
-} else = false
+} else := false

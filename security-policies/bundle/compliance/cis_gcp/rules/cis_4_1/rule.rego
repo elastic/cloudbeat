@@ -7,7 +7,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
 # Ensure That Instances Are Not Configured To Use the Default Service Account.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_compute_instance
 

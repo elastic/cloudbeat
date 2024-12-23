@@ -4,10 +4,10 @@ import data.compliance.lib.common
 import data.compliance.policy.aws_ec2.data_adapter
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 # Ensure EBS Volume Encryption is Enabled in all Regions
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_ebs_policy
 

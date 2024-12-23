@@ -3,7 +3,7 @@ package compliance.policy.aws_iam.ensure_hardware_mfa
 import data.compliance.policy.aws_iam.data_adapter
 import future.keywords.if
 
-default ensure_hardware_mfa_device = false
+default ensure_hardware_mfa_device := false
 
 # Only one MFA device can be received as input,
 # even if a user has multiple MFA devices linked to their account.

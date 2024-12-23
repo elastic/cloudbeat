@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.every
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default is_audit_enabled = false
+default is_audit_enabled := false
 
 is_audit_enabled if {
 	data_adapter.resource.extension.sqlBlobAuditPolicy.properties.state == "Enabled"

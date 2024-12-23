@@ -6,7 +6,7 @@ import data.compliance.policy.gcp.sql.ensure_db_flag as audit
 import future.keywords.if
 
 # Ensure That 'cloudsql.enable_pgaudit' Database Flag for each Cloud Sql Postgresql Instance Is Set to 'on' For Centralized Logging.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_cloud_sql
 	data_adapter.is_postgres_sql

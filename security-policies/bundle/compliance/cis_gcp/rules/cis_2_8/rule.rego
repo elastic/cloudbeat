@@ -6,4 +6,4 @@ pattern := `resource.type="gce_route"
  AND (protoPayload.methodName:"compute.routes.delete"
  OR protoPayload.methodName:"compute.routes.insert")`
 
-finding = audit.finding(pattern)
+finding := audit.finding(pattern)

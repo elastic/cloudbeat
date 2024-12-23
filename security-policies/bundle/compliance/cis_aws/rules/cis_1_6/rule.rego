@@ -6,7 +6,7 @@ import data.compliance.policy.aws_iam.ensure_hardware_mfa as audit
 import future.keywords.if
 
 # Ensure hardware MFA is enabled for the 'root' user account.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_root_user
 

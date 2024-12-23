@@ -5,10 +5,10 @@ import data.compliance.policy.gcp.common as gcp_common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-default is_confidential_computing_enabled = false
+default is_confidential_computing_enabled := false
 
 # Ensure That Compute Instances Have Confidential Computing Enabled.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_compute_instance
 

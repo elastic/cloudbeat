@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_insights_component
 
@@ -19,4 +19,4 @@ finding = result if {
 component_exists if {
 	some insights_component in data_adapter.insights_components
 	insights_component.properties.provisioningState == "Succeeded"
-} else = false
+} else := false
