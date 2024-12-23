@@ -14,7 +14,6 @@ finding(rule_evaluation) := lib_common.generate_result_without_expected(
 
 arg_not_contains(entity, value) := assert.is_false(lib_common.contains_key_with_value(process_args, entity, value))
 
-# regal ignore:rule-shadows-builtin
 arg_contains(entity, value) := lib_common.contains_key_with_value(process_args, entity, value)
 
 apiserver_filter := data_adapter.is_kube_apiserver
