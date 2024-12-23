@@ -4,10 +4,10 @@ import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-default is_dnssec_enabled = false
+default is_dnssec_enabled := false
 
 # Ensure That DNSSEC Is Enabled for Cloud DNS.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_dns_managed_zone
 

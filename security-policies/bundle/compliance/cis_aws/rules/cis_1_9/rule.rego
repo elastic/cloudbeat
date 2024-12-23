@@ -4,10 +4,10 @@ import data.compliance.lib.common
 import data.compliance.policy.aws_iam.data_adapter
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 # Ensure that the number of previous passwords that IAM users are prevented from reusing is 24.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_pwd_policy
 

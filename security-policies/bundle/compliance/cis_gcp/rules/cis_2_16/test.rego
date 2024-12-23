@@ -5,9 +5,9 @@ import data.compliance.policy.gcp.data_adapter
 import data.lib.test
 import future.keywords.if
 
-type = "cloud-compute"
+type := "cloud-compute"
 
-subtype = "gcp-compute-region-backend-service"
+subtype := "gcp-compute-region-backend-service"
 
 test_violation if {
 	eval_fail with input as test_data.generate_gcp_asset(type, subtype, {"data": {"protocol": "HTTPS"}}, null)

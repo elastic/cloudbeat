@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_network_watchers_flow_log
 
@@ -18,4 +18,4 @@ finding = result if {
 ensure_retention_days if {
 	data_adapter.properties.retentionPolicy.enabled
 	data_adapter.properties.retentionPolicy.days >= 90
-} else = false
+} else := false

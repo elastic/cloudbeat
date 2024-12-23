@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import data.compliance.policy.azure.storage_account.ensure_service_log as audit
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_storage_account
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default logs_are_enabled = false
+default logs_are_enabled := false
 
 logs_are_enabled if {
 	audit.service_diagnostic_settings_log_rwd_enabled(data_adapter.resource.extension.blobDiagnosticSettings)

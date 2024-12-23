@@ -6,7 +6,7 @@ import data.compliance.policy.aws_cloudtrail.no_public_bucket_access as audit
 import future.keywords.if
 
 # Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_single_trail
 

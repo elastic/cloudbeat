@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding := result if {
 	audit.apiserver_filter
-	result := audit.finding(audit.not_contains("--token-auth-file"))
+	result := audit.finding(audit.arg_not_contains("--token-auth-file"))
 }

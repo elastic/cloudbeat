@@ -7,4 +7,4 @@ pattern := `resource.type="gce_firewall_rule"
  OR protoPayload.methodName:"compute.firewalls.insert"
  OR protoPayload.methodName:"compute.firewalls.delete")`
 
-finding = audit.finding(pattern)
+finding := audit.finding(pattern)

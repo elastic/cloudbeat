@@ -39,35 +39,35 @@ not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
 
-component1 = test_data.generate_diagnostic_setting_element(
+component1 := test_data.generate_diagnostic_setting_element(
 	"sub1",
 	"rcg1",
 	"name1",
 	test_data.generate_diagnostic_setting_element_logs({"Administrative": false, "Alert": false, "Policy": false, "Security": false}),
 )
 
-component2 = test_data.generate_diagnostic_setting_element(
+component2 := test_data.generate_diagnostic_setting_element(
 	"sub1",
 	"rcg1",
 	"name2",
 	test_data.generate_diagnostic_setting_element_logs({"Administrative": true, "Alert": false, "Policy": false, "Security": false}),
 )
 
-component3 = test_data.generate_diagnostic_setting_element(
+component3 := test_data.generate_diagnostic_setting_element(
 	"sub1",
 	"rcg1",
 	"name3",
 	test_data.generate_diagnostic_setting_element_logs({"Administrative": true, "Alert": true, "Policy": true, "Security": true}),
 )
 
-component4 = test_data.generate_diagnostic_setting_element(
+component4 := test_data.generate_diagnostic_setting_element(
 	"sub1",
 	"rcg1",
 	"name3",
 	test_data.generate_diagnostic_setting_element_logs({"Administrative": true, "Alert": true, "Policy": false, "Security": false}),
 )
 
-component5 = test_data.generate_diagnostic_setting_element(
+component5 := test_data.generate_diagnostic_setting_element(
 	"sub1",
 	"rcg1",
 	"name3",

@@ -6,21 +6,21 @@ import data.compliance.policy.aws_cloudtrail.pattern
 import data.lib.test
 import future.keywords.if
 
-equal_pattern = pattern.complex_expression("||", [
+equal_pattern := pattern.complex_expression("||", [
 	pattern.simple_expression("$.errorCode", "=", "\"*UnauthorizedOperation\""),
 	pattern.simple_expression("$.errorCode", "=", "\"AccessDenied*\""),
 	pattern.simple_expression("$.sourceIPAddress", "!=", "\"delivery.logs.amazonaws.com\""),
 	pattern.simple_expression("$.eventName", "!=", "\"HeadBucket\""),
 ])
 
-valid_different_order_pattern = pattern.complex_expression("||", [
+valid_different_order_pattern := pattern.complex_expression("||", [
 	pattern.simple_expression("$.eventName", "!=", "\"HeadBucket\""),
 	pattern.simple_expression("$.errorCode", "=", "\"AccessDenied*\""),
 	pattern.simple_expression("\"delivery.logs.amazonaws.com\"", "!=", "$.sourceIPAddress"),
 	pattern.simple_expression("$.errorCode", "=", "\"*UnauthorizedOperation\""),
 ])
 
-missing_wildcard_pattern = pattern.complex_expression("||", [
+missing_wildcard_pattern := pattern.complex_expression("||", [
 	pattern.simple_expression("$.errorCode", "=", "\"UnauthorizedOperation\""),
 	pattern.simple_expression("$.errorCode", "=", "\"AccessDenied*\""),
 	pattern.simple_expression("$.sourceIPAddress", "!=", "\"delivery.logs.amazonaws.com\""),
@@ -189,7 +189,7 @@ test_pass if {
 	])
 }
 
-rule_input(entry) = test_data.generate_monitoring_resources(entry)
+rule_input(entry) := test_data.generate_monitoring_resources(entry)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

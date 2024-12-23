@@ -4,4 +4,4 @@ import data.compliance.policy.gcp.monitoring.ensure_log_metric_and_alarm_exists 
 
 pattern := `protoPayload.methodName="SetIamPolicy" AND protoPayload.serviceData.policyDelta.auditConfigDeltas:*`
 
-finding = audit.finding(pattern)
+finding := audit.finding(pattern)

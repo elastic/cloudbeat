@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding(filter) = result if {
+finding(filter) := result if {
 	# filter
 	data_adapter.is_monitoring_asset
 
@@ -26,4 +26,4 @@ is_setup_exists(filter) if {
 
 	some condition in alert.resource.data.conditions
 	condition.conditionThreshold.filter == sprintf("metric.type=\"%s\"", [metric_type])
-} else = false
+} else := false

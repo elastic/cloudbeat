@@ -43,6 +43,6 @@ public_ipv4 := [entry | entry := security_groups_ip_permissions[_]; entry.IpRang
 # all the IpRangesv6 from security groups that has an open inbound for all ipv6 cidr notions
 public_ipv6 := [entry | entry := security_groups_ip_permissions[_]; entry.Ipv6Ranges[_].CidrIpv6 == "::/0"]
 
-security_group_inbound_rules = input.resource.IpPermissions
+security_group_inbound_rules := input.resource.IpPermissions
 
-security_group_outbound_rules = input.resource.IpPermissionsEgress
+security_group_outbound_rules := input.resource.IpPermissionsEgress

@@ -18,7 +18,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_trail
 }
 
-rule_input(flow_logs) = test_data.generate_vpc_resource(flow_logs)
+rule_input(flow_logs) := test_data.generate_vpc_resource(flow_logs)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

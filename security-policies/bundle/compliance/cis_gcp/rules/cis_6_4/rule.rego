@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	data_adapter.is_sql_instance
 	is_relevant_sql_instance
 
@@ -17,7 +17,7 @@ finding = result if {
 
 ssl_is_required if {
 	data_adapter.resource.data.settings.ipConfiguration.requireSsl == true
-} else = false
+} else := false
 
 is_relevant_sql_instance if {
 	startswith(data_adapter.resource.data.databaseVersion, "POSTGRES")
@@ -25,4 +25,4 @@ is_relevant_sql_instance if {
 	startswith(data_adapter.resource.data.databaseVersion, "MYSQL")
 } else if {
 	startswith(data_adapter.resource.data.databaseVersion, "SQLSERVER_2017")
-} else = false
+} else := false

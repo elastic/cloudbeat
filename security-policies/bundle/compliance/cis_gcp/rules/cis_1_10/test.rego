@@ -27,7 +27,7 @@ test_not_evaluated if {
 	not_eval with input as rule_input(["test.user@google.com"], "", "", {"state": "DISABLED"})
 }
 
-rule_input(members, rotationPeriod, nextRotationTime, primary) = test_data.generate_kms_resource(members, rotationPeriod, nextRotationTime, primary)
+rule_input(members, rotationPeriod, nextRotationTime, primary) := test_data.generate_kms_resource(members, rotationPeriod, nextRotationTime, primary)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

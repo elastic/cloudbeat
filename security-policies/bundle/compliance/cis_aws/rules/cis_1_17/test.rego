@@ -4,7 +4,7 @@ import data.compliance.cis_aws.data_adapter
 import data.lib.test
 import future.keywords.if
 
-generate_input(roles) = {
+generate_input(roles) := {
 	"subType": "aws-policy",
 	"resource": {
 		"Arn": "arn:aws:iam::aws:policy/AWSSupportAccess",

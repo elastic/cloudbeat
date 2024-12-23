@@ -34,6 +34,6 @@ finding(rule_evaluation) := lib_common.generate_result_without_expected(
 	},
 )
 
-apiserver_filter = data_adapter.is_kube_apiserver
+apiserver_filter := data_adapter.is_kube_apiserver
 
-kubelet_filter = data_adapter.is_kubelet
+kubelet_filter := data_adapter.is_kubelet
