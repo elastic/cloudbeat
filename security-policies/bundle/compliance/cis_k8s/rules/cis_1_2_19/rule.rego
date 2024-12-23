@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.apiserver_filter
-	result := audit.finding(audit.contains("--audit-log-path"))
+	result := audit.finding(audit.arg_contains("--audit-log-path"))
 }

@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.apiserver_filter
-	result := audit.finding(audit.contains("--client-ca-file"))
+	result := audit.finding(audit.arg_contains("--client-ca-file"))
 }

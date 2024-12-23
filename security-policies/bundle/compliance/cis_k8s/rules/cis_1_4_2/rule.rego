@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.scheduler_filter
-	result := audit.finding(audit.contains("--bind-address", "127.0.0.1"))
+	result := audit.finding(audit.arg_contains("--bind-address", "127.0.0.1"))
 }

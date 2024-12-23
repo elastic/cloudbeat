@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.apiserver_filter
-	result := audit.finding(audit.contains("--kubelet-certificate-authority"))
+	result := audit.finding(audit.arg_contains("--kubelet-certificate-authority"))
 }

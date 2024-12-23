@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.controller_manager_filter
-	result := audit.finding(audit.contains("--root-ca-file"))
+	result := audit.finding(audit.arg_contains("--root-ca-file"))
 }

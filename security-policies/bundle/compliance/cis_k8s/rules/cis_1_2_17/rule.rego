@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.apiserver_filter
-	result := audit.finding(audit.not_contains("--secure-port", "0"))
+	result := audit.finding(audit.arg_not_contains("--secure-port", "0"))
 }

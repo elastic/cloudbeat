@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.controller_manager_filter
-	result := audit.finding(audit.contains("--use-service-account-credentials", "true"))
+	result := audit.finding(audit.arg_contains("--use-service-account-credentials", "true"))
 }

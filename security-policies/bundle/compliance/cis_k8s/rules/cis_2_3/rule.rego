@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.etcd_filter
-	result := audit.finding(audit.not_contains("--auto-tls", "true"))
+	result := audit.finding(audit.arg_not_contains("--auto-tls", "true"))
 }

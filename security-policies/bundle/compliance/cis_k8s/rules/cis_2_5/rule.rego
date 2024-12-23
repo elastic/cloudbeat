@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.etcd_filter
-	result := audit.finding(audit.contains("--peer-client-cert-auth", "true"))
+	result := audit.finding(audit.arg_contains("--peer-client-cert-auth", "true"))
 }

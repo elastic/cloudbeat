@@ -19,7 +19,7 @@ finding(rule_evaluation) = result if {
 	)
 }
 
-not_contains(entity, value) := assert.is_false(process_common.arg_values_contains(process_args, entity, value))
+arg_not_contains(entity, value) := assert.is_false(process_common.arg_values_contains(process_args, entity, value))
 
-# regal ignore:rule-shadows-builtin
-contains(entity, value) := process_common.arg_values_contains(process_args, entity, value)
+
+arg_contains(entity, value) := process_common.arg_values_contains(process_args, entity, value)

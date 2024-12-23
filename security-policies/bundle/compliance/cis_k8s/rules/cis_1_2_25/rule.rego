@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.apiserver_filter
-	result := audit.finding(audit.contains("--service-account-key-file"))
+	result := audit.finding(audit.arg_contains("--service-account-key-file"))
 }

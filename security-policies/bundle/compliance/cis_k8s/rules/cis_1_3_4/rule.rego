@@ -5,5 +5,5 @@ import future.keywords.if
 
 finding = result if {
 	audit.controller_manager_filter
-	result := audit.finding(audit.contains("--service-account-private-key-file"))
+	result := audit.finding(audit.arg_contains("--service-account-private-key-file"))
 }
