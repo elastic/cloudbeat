@@ -21,7 +21,7 @@ test_not_evaluated if {
 	not_eval with input as rule_input("my bucket", null)
 }
 
-rule_input(name, sse_algorithm) = test_data.generate_s3_bucket(name, sse_algorithm, null, null, null, null)
+rule_input(name, sse_algorithm) := test_data.generate_s3_bucket(name, sse_algorithm, null, null, null, null)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

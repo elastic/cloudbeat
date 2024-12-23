@@ -6,7 +6,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Ensure a support role has been created to manage incidents with AWS Support
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_aws_support_access
 
@@ -22,4 +22,4 @@ aws_support_has_attached_roles if {
 	# a sanity test.
 	some role in data_adapter.roles
 	role.RoleId != ""
-} else = false
+} else := false

@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_security_contacts
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default notification_alert_high = false
+default notification_alert_high := false
 
 notification_alert_high if {
 	# Ensure at least one Security Contact Settings exists and alertNotifications severity is set to high, low, or medium.

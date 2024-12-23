@@ -5,7 +5,7 @@ import data.compliance.policy.aws_iam.data_adapter
 import future.keywords.if
 
 # Ensure IAM Users Receive Permissions Only Through Groups
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_iam_user
 

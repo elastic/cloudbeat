@@ -18,7 +18,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_eval_resource
 }
 
-rule_input(isBucketLevelAccessEnabled) = test_data.generate_gcs_resource([], isBucketLevelAccessEnabled)
+rule_input(isBucketLevelAccessEnabled) := test_data.generate_gcs_resource([], isBucketLevelAccessEnabled)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

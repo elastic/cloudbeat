@@ -24,7 +24,7 @@ test_not_evaluated if {
 	not_eval with input as rule_input({"GroupName": "custom", "IpPermissionsEgress": [{}]})
 }
 
-rule_input(entry) = test_data.generate_security_group(entry)
+rule_input(entry) := test_data.generate_security_group(entry)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

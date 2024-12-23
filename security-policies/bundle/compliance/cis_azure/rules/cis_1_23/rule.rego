@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_custom_role_definition
 
@@ -34,4 +34,4 @@ has_administrator_subscription_scope if {
 
 evaluation_results if {
 	not has_administrator_subscription_scope
-} else = false
+} else := false

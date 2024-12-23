@@ -4,7 +4,7 @@ import data.compliance.cis_aws.data_adapter
 import data.lib.test
 import future.keywords.if
 
-generate_input(statements) = {
+generate_input(statements) := {
 	"subType": "aws-policy",
 	"resource": {"document": {"Statement": statements}},
 }

@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import data.compliance.policy.azure.virtual_machine.network_rules as audit
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_vm
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default udp_ports_closed = false
+default udp_ports_closed := false
 
 udp_ports_closed if {
 	audit.vm_has_closed_port(data_adapter, "53", "UDP")

@@ -9,4 +9,4 @@ AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
 OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
 AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")`
 
-finding = audit.finding(pattern)
+finding := audit.finding(pattern)

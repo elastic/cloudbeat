@@ -91,7 +91,7 @@ test_fail if {
 	])
 }
 
-rule_input(entry) = test_data.generate_monitoring_resources(entry)
+rule_input(entry) := test_data.generate_monitoring_resources(entry)
 
 eval_pass if {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter

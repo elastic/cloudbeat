@@ -17,7 +17,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_rds_db_instance
 }
 
-rule_input(encryption_enabled) = test_data.generate_rds_db_instance(encryption_enabled, true, false, [])
+rule_input(encryption_enabled) := test_data.generate_rds_db_instance(encryption_enabled, true, false, [])
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

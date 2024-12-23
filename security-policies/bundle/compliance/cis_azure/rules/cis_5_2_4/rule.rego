@@ -5,7 +5,7 @@ import data.compliance.policy.azure.activity_log_alert.activity_log_alert_operat
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_activity_log_alerts
 

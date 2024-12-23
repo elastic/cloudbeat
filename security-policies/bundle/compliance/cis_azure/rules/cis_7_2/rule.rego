@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_vm
 
@@ -17,4 +17,4 @@ finding = result if {
 
 has_managed_disk if {
 	data_adapter.properties.storageProfile.osDisk.managedDisk.id != ""
-} else = false
+} else := false
