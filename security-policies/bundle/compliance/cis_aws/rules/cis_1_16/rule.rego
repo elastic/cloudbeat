@@ -22,4 +22,4 @@ policy_is_permissive if {
 	statement.Effect == "Allow"
 	"*" in common.ensure_array(statement.Action)
 	"*" in common.ensure_array(statement.Resource)
-} else = false
+} else := false

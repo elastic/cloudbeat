@@ -6,7 +6,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Ensure Cloud Asset Inventory Is Enabled
-finding = result if {
+finding := result if {
 	data_adapter.is_services_usage
 
 	result := common.generate_result_without_expected(
@@ -19,4 +19,4 @@ is_asset_inventory_enabled if {
 	some service in input.resource.services
 	service.resource.data.name == "cloudasset.googleapis.com"
 	service.resource.data.state == "ENABLED"
-} else = false
+} else := false

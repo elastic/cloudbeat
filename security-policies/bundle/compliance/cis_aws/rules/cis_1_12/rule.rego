@@ -6,7 +6,7 @@ import data.compliance.policy.aws_iam.validate_credentials as audit
 import future.keywords.if
 
 # Ensure credentials unused for 45 days or greater are disabled
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_iam_user
 

@@ -3,7 +3,7 @@ package compliance.policy.gcp.iam.ensure_no_public_access
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-default resource_is_public = false
+default resource_is_public := false
 
 resource_is_public if {
 	# Check if the IAM policy is not empty

@@ -8,15 +8,15 @@ import future.keywords.if
 
 process_args := benchmark_data_adapter.process_args
 
-default rule_evaluation = true
+default rule_evaluation := true
 
-rule_evaluation = false if {
+rule_evaluation := false if {
 	# Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used (Manual)
 	not process_common.arg_values_contains(process_args, "--enable-admission-plugins", "SecurityContextDeny")
 	not process_common.arg_values_contains(process_args, "--enable-admission-plugins", "PodSecurityPolicy")
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_kube_apiserver
 
 	# set result

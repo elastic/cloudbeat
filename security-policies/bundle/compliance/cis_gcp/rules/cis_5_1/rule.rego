@@ -7,7 +7,7 @@ import data.compliance.policy.gcp.iam.ensure_no_public_access as audit
 import future.keywords.if
 
 # Ensure That Cloud Storage Bucket Is Not Anonymously or Publicly Accessible.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_storage_bucket
 

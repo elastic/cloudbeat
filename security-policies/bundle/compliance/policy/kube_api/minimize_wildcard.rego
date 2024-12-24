@@ -6,14 +6,14 @@ import data.compliance.policy.kube_api.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-default rule_violation = false
+default rule_violation := false
 
 rule_violation if {
 	cluster_roles_rule := data_adapter.cluster_roles.rules[i]
 	is_using_wildcards(cluster_roles_rule)
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_cluster_roles
 
 	rule_evaluation := assert.is_false(rule_violation)

@@ -5,7 +5,7 @@ import data.compliance.policy.aws_rds.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-default has_public_access = false
+default has_public_access := false
 
 has_public_access if {
 	data_adapter.publicly_accessible == true
@@ -21,7 +21,7 @@ has_subnets_without_route_table if {
 	subnets.RouteTable == null
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_rds
 	not has_subnets_without_route_table
 

@@ -5,16 +5,16 @@ import data.compliance.lib.common
 import data.lib.test
 import future.keywords.if
 
-generate_certificate_resource(certificates) = {
+generate_certificate_resource(certificates) := {
 	"subType": "aws-iam-server-certificate",
 	"resource": {"certificates": certificates},
 }
 
-generate_expiration(expiration) = {"Expiration": expiration}
+generate_expiration(expiration) := {"Expiration": expiration}
 
-last_year = common.create_date_from_ns(time.add_date(time.now_ns(), -1, 0, 0))
+last_year := common.create_date_from_ns(time.add_date(time.now_ns(), -1, 0, 0))
 
-next_year = common.create_date_from_ns(time.add_date(time.now_ns(), 1, 0, 0))
+next_year := common.create_date_from_ns(time.add_date(time.now_ns(), 1, 0, 0))
 
 test_violation if {
 	# fails when an expired certificate exists

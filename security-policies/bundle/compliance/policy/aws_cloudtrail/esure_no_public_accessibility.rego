@@ -4,7 +4,7 @@ import data.compliance.policy.aws_cloudtrail.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-default bucket_is_public = false
+default bucket_is_public := false
 
 # Bucket is public if any ACL grant grantee is `AllUsers`
 bucket_is_public if {

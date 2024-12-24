@@ -18,7 +18,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_trail
 }
 
-rule_input(encryption_enabled) = test_data.generate_ebs_encryption_resource(encryption_enabled)
+rule_input(encryption_enabled) := test_data.generate_ebs_encryption_resource(encryption_enabled)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

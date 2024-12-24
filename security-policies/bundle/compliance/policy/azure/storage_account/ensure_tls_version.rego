@@ -5,9 +5,9 @@ import future.keywords.if
 
 is_tls_version(version) if {
 	data_adapter.properties.minimumTlsVersion == version
-} else = false
+} else := false
 
-is_tls_configured(version) = r if {
+is_tls_configured(version) := r if {
 	data_adapter.properties.minimumTlsVersion
 	r = is_tls_version(version)
 }

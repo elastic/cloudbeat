@@ -9,7 +9,7 @@ import data.compliance.policy.process.data_adapter
 
 process_args := benchmark_data_adapter.process_args
 
-finding(rule_evaluation) = result if {
+finding(rule_evaluation) := result if {
 	data_adapter.is_kubelet
 
 	result := lib_common.generate_result_without_expected(
@@ -78,7 +78,7 @@ process_filter_variable_multi_comparison(f_variable, s_variable, value) if {
 	not get_from_config(s_variable) == value
 }
 
-get_from_config(path) = r if {
+get_from_config(path) := r if {
 	# TODO: object.get needs to be provided with a default value to assign
 	# Decided to assign undefined string for non-existing process flag values
 	# Another option was to assign a non-string undefined value via "hack" (assign non-existent variable)

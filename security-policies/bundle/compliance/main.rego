@@ -6,11 +6,11 @@ import future.keywords.if
 
 # input contains the resource and the configuration
 # output is findings
-resource = input.resource
+resource := input.resource
 
 # METADATA
 # entrypoint: true
-findings = f if {
+findings := f if {
 	# iterate over activated benchmark rules
 	benchmark := input.benchmark
 
@@ -24,7 +24,7 @@ findings = f if {
 	}
 }
 
-findings = f if {
+findings := f if {
 	not input.benchmark
 
 	# aggregate findings from all benchmarks
@@ -37,4 +37,4 @@ findings = f if {
 	}
 }
 
-metadata = common.metadata
+metadata := common.metadata

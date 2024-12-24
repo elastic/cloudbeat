@@ -24,11 +24,11 @@ test_not_evaluated if {
 	not_eval with input as test_data.process_input("some_process", [])
 }
 
-rule_input(argument) = test_data.process_input_with_external_data("kubelet", [argument], {})
+rule_input(argument) := test_data.process_input_with_external_data("kubelet", [argument], {})
 
-rule_input_with_external(argument, external_data) = test_data.process_input_with_external_data("kubelet", [argument], external_data)
+rule_input_with_external(argument, external_data) := test_data.process_input_with_external_data("kubelet", [argument], external_data)
 
-create_process_config(anonymous_enabled) = {"config": {"authentication": {
+create_process_config(anonymous_enabled) := {"config": {"authentication": {
 	"x509": {"clientCAFile": "/etc/kubernetes/pki/ca.crt"},
 	"anonymous": {"enabled": anonymous_enabled},
 	"webhook": {

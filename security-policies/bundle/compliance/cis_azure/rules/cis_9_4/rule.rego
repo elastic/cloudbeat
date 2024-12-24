@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_website_asset
 
@@ -21,4 +21,4 @@ is_client_cert_enabled if {
 	# See: https://github.com/elastic/cloudbeat/issues/1828
 	data_adapter.properties.clientCertEnabled == true
 	data_adapter.properties.clientCertMode == "Required"
-} else = false
+} else := false

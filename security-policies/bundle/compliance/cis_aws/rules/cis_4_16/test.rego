@@ -15,7 +15,7 @@ test_pass if {
 	eval_pass with input as rule_input({"Enabled": true})
 }
 
-rule_input(entry) = test_data.generate_securityhub(entry)
+rule_input(entry) := test_data.generate_securityhub(entry)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

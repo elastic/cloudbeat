@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import data.compliance.policy.azure.disk.ensure_expiration as audit
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_vault
 	not data_adapter.properties.enableRbacAuthorization

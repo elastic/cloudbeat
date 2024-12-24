@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_vault
 
@@ -28,4 +28,4 @@ is_vault_logging_enabled if {
 	logs := entry.logs[i]
 	logs.enabled == true
 	is_audit_category(logs)
-} else = false
+} else := false

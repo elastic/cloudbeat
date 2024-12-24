@@ -22,4 +22,4 @@ test_not_evaluated if {
 	not finding with input as {"type": "k8s_object", "resource": {"kind": "Node"}}
 }
 
-rule_input(resource) = test_data.kube_api_input(resource)
+rule_input(resource) := test_data.kube_api_input(resource)

@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.every
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_sql_server
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default sql_access_config_is_permissive = false
+default sql_access_config_is_permissive := false
 
 sql_access_config_is_permissive if {
 	lower(data_adapter.properties.publicNetworkAccess) == "enabled"
@@ -27,7 +27,7 @@ sql_access_config_is_permissive if {
 	data_adapter.resource.extension.sqlFirewallRules[i].properties.startIpAddress == "0.0.0.0"
 }
 
-default is_public_access_disabled = false
+default is_public_access_disabled := false
 
 is_public_access_disabled if {
 	not sql_access_config_is_permissive
