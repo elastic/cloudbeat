@@ -6,9 +6,9 @@ import future.keywords.if
 
 verify_public_access if {
 	data_adapter.properties.publicNetworkAccess == "Disabled"
-} else = false
+} else := false
 
-is_public_access_disabled = r if {
+is_public_access_disabled := r if {
 	data_adapter.properties.publicNetworkAccess
 	r = verify_public_access
 }

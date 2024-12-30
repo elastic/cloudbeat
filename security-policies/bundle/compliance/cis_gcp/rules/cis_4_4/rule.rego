@@ -6,7 +6,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
 # Ensure Oslogin Is Enabled for a Project
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_compute_instance
 
@@ -20,4 +20,4 @@ finding = result if {
 	)
 }
 
-is_oslogin_enabled = audit.is_instance_metadata_valid("enable-oslogin", "true")
+is_oslogin_enabled := audit.is_instance_metadata_valid("enable-oslogin", "true")

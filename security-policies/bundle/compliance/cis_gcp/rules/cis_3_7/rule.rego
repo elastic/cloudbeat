@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.compute.ensure_fw_rule as audit
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_firewall_rule
 

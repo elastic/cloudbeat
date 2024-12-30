@@ -19,7 +19,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_iam_user
 }
 
-rule_input(inline_policies, attached_policies) = test_data.generate_iam_user_with_policies(inline_policies, attached_policies)
+rule_input(inline_policies, attached_policies) := test_data.generate_iam_user_with_policies(inline_policies, attached_policies)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

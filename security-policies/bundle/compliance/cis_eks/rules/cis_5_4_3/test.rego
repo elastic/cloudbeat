@@ -18,9 +18,9 @@ test_not_evaluated if {
 	not finding with input as eks_test_data.not_evaluated_input
 }
 
-rule_input(resource) = test_data.kube_api_input(resource)
+rule_input(resource) := test_data.kube_api_input(resource)
 
-violating_input_public_ip_and_public_address = {
+violating_input_public_ip_and_public_address := {
 	"kind": "Node",
 	"status": {"addresses": [
 		{
@@ -46,7 +46,7 @@ violating_input_public_ip_and_public_address = {
 	]},
 }
 
-valid_input_no_external_IP = {
+valid_input_no_external_IP := {
 	"kind": "Node",
 	"status": {"addresses": [
 		{
@@ -68,7 +68,7 @@ valid_input_no_external_IP = {
 	]},
 }
 
-valid_input_external_IP_set_to_local_host = {
+valid_input_external_IP_set_to_local_host := {
 	"kind": "Node",
 	"status": {"addresses": [
 		{

@@ -7,7 +7,7 @@ import future.keywords.if
 
 process_args := benchmark_data_adapter.process_args
 
-finding(entity, value) = result if {
+finding(entity, value) := result if {
 	data_adapter.is_kube_apiserver
 
 	# set result
@@ -20,4 +20,4 @@ finding(entity, value) = result if {
 rule_evaluation(entity, value) if {
 	e := process_args[entity]
 	lib_common.greater_or_equal(e, value)
-} else = false
+} else := false

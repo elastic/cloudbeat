@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_diagnostic_settings
 
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default required_categories_enabled = false
+default required_categories_enabled := false
 
 required_categories_enabled if {
 	diagnostic_settings_category_enabled("Administrative") == true
@@ -36,4 +36,4 @@ diagnostic_settings_category_enabled(category) if {
 		log.enabled == true
 	]
 	count(category_is_enabled) >= 1
-} else = false
+} else := false

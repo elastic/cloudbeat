@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
 # Ensure Compute Instances Are Launched With Shielded VM Enabled.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_compute_instance
 
@@ -20,4 +20,4 @@ is_shielded_vm if {
 	cfg := data_adapter.resource.data.shieldedInstanceConfig
 	cfg.enableIntegrityMonitoring
 	cfg.enableVtpm
-} else = false
+} else := false

@@ -17,7 +17,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_trail
 }
 
-rule_input(is_log_validation_enabled, cloudwatch_log_group_arn, log_delivery_time, is_bucket_logging_enabled, kms_key_id) = test_data.generate_enriched_trail(is_log_validation_enabled, cloudwatch_log_group_arn, log_delivery_time, is_bucket_logging_enabled, kms_key_id)
+rule_input(is_log_validation_enabled, cloudwatch_log_group_arn, log_delivery_time, is_bucket_logging_enabled, kms_key_id) := test_data.generate_enriched_trail(is_log_validation_enabled, cloudwatch_log_group_arn, log_delivery_time, is_bucket_logging_enabled, kms_key_id)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

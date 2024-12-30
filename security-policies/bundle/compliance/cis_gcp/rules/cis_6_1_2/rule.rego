@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	data_adapter.is_cloud_sql
 	data_adapter.is_cloud_my_sql
 
@@ -18,4 +18,4 @@ skip_show_database_enabled if {
 	flags := data_adapter.resource.data.settings.databaseFlags[_]
 	flags.name == "skip_show_database"
 	flags.value == "on"
-} else = false
+} else := false

@@ -6,7 +6,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 
 # Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption Keys (CMEK).
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_bigquery_table
 

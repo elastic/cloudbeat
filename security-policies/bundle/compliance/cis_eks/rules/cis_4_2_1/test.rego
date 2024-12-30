@@ -20,15 +20,15 @@ test_not_evaluated if {
 	not finding with input as {"type": "no-kube-api"}
 }
 
-rule_input(resource) = test_data.kube_api_input(resource)
+rule_input(resource) := test_data.kube_api_input(resource)
 
-violating_psp = {
+violating_psp := {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [{"name": "container_1", "securityContext": {"privileged": true}}]},
 }
 
-violating_psp2 = {
+violating_psp2 := {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [
@@ -37,7 +37,7 @@ violating_psp2 = {
 	]},
 }
 
-violating_psp3 = {
+violating_psp3 := {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [
@@ -46,7 +46,7 @@ violating_psp3 = {
 	]},
 }
 
-violating_psp4 = {
+violating_psp4 := {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [
@@ -56,13 +56,13 @@ violating_psp4 = {
 	]},
 }
 
-non_violating_psp = {
+non_violating_psp := {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [{"name": "container_1", "securityContext": {"privileged": false}}]},
 }
 
-non_violating_psp2 = {
+non_violating_psp2 := {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [{"name": "container_1", "securityContext": {}}]},

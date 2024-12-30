@@ -6,7 +6,7 @@ import data.compliance.policy.aws_cloudtrail.verify_s3_object_logging as audit
 import future.keywords.if
 
 # Ensure that Object-level logging for write events is enabled for S3 bucket.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_single_trail
 
@@ -17,4 +17,4 @@ finding = result if {
 	)
 }
 
-rule_evaluation = audit.ensure_s3_object_logging(["All", "WriteOnly"])
+rule_evaluation := audit.ensure_s3_object_logging(["All", "WriteOnly"])

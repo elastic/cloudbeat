@@ -5,7 +5,7 @@ import data.compliance.policy.aws_iam.data_adapter
 import future.keywords.if
 
 # Ensure that there is only a single active access key per user.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_iam_user
 

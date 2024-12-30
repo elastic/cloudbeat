@@ -7,7 +7,7 @@ import future.keywords.if
 
 # Eliminate use of the 'root' user for administrative and daily tasks
 # daily interpret as a day (24h)
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_root_user
 

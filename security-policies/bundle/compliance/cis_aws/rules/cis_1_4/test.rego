@@ -20,7 +20,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_iam_user
 }
 
-rule_input(access_keys, mfa_active, last_access, mfa_devices) = test_data.generate_root_user(access_keys, mfa_active, last_access, mfa_devices)
+rule_input(access_keys, mfa_active, last_access, mfa_devices) := test_data.generate_root_user(access_keys, mfa_active, last_access, mfa_devices)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

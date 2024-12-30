@@ -6,7 +6,7 @@ import data.compliance.policy.kube_api.data_adapter
 import future.keywords.every
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 rule_evaluation if {
 	every container in data_adapter.containers.app_containers {

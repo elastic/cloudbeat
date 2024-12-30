@@ -6,9 +6,9 @@ import data.compliance.policy.aws_cloudtrail.pattern
 import data.compliance.policy.aws_cloudtrail.trail
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_multi_trails_type
 
@@ -20,7 +20,7 @@ finding = result if {
 }
 
 # {($.eventName=DeleteGroupPolicy)||($.eventName=DeleteRolePolicy)||($.eventName=DeleteUserPolicy)||($.eventName=PutGroupPolicy)||($.eventName=PutRolePolicy)||($.eventName=PutUserPolicy)||($.eventName=CreatePolicy)||($.eventName=DeletePolicy)||($.eventName=CreatePolicyVersion)||($.eventName=DeletePolicyVersion)||($.eventName=AttachRolePolicy)||($.eventName=DetachRolePolicy)||($.eventName=AttachUserPolicy)||($.eventName=DetachUserPolicy)||($.eventName=AttachGroupPolicy)||($.eventName=DetachGroupPolicy)}
-required_patterns = [pattern.complex_expression("||", [
+required_patterns := [pattern.complex_expression("||", [
 	pattern.simple_expression("$.eventName", "=", "DeleteGroupPolicy"),
 	pattern.simple_expression("$.eventName", "=", "DeleteRolePolicy"),
 	pattern.simple_expression("$.eventName", "=", "DeleteUserPolicy"),
@@ -39,4 +39,4 @@ required_patterns = [pattern.complex_expression("||", [
 	pattern.simple_expression("$.eventName", "=", "DetachGroupPolicy"),
 ])]
 
-rule_evaluation = trail.at_least_one_trail_satisfied(required_patterns)
+rule_evaluation := trail.at_least_one_trail_satisfied(required_patterns)

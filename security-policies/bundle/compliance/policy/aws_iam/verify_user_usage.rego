@@ -4,7 +4,7 @@ import data.compliance.policy.aws_iam.common
 import data.compliance.policy.aws_iam.data_adapter
 import future.keywords.if
 
-default verify_user_usage = false
+default verify_user_usage := false
 
 verify_user_usage if {
 	not common.are_credentials_within_duration(data_adapter.active_access_keys, "last_access", "24h")

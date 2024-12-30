@@ -6,7 +6,7 @@ import data.compliance.policy.aws_cloudtrail.verify_s3_object_logging as audit
 import future.keywords.if
 
 # Ensure that Object-level logging for read events is enabled for S3 bucket.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_single_trail
 
@@ -17,4 +17,4 @@ finding = result if {
 	)
 }
 
-rule_eveluation = audit.ensure_s3_object_logging(["All", "ReadOnly"])
+rule_eveluation := audit.ensure_s3_object_logging(["All", "ReadOnly"])

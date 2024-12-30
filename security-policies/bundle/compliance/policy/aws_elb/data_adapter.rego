@@ -6,8 +6,8 @@ is_aws_elb if {
 	input.subType == "aws-elb"
 }
 
-cluster = input.resource.Cluster
+cluster := input.resource.Cluster
 
-listener_descriptions = input.resource.ListenerDescriptions
+listener_descriptions := input.resource.ListenerDescriptions
 
-load_balancer_name = input.resource.LoadBalancerName
+load_balancer_name := input.resource.LoadBalancerName

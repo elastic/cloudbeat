@@ -2,7 +2,7 @@ package cis_eks.test_data
 
 import future.keywords.if
 
-generate_eks_input(logging, encryption_config, endpoint_private_access, endpoint_public_access, public_access_cidrs) = {
+generate_eks_input(logging, encryption_config, endpoint_private_access, endpoint_public_access, public_access_cidrs) := {
 	"type": "caas",
 	"subType": "aws-eks",
 	"resource": {"Cluster": {
@@ -32,7 +32,7 @@ generate_eks_input(logging, encryption_config, endpoint_private_access, endpoint
 	}},
 }
 
-generate_eks_input_with_vpc_config(endpoint_private_access, endpoint_public_access, public_access_cidrs) = result if {
+generate_eks_input_with_vpc_config(endpoint_private_access, endpoint_public_access, public_access_cidrs) := result if {
 	logging = {"ClusterLogging": [
 		{
 			"Enabled": false,
@@ -55,7 +55,7 @@ generate_eks_input_with_vpc_config(endpoint_private_access, endpoint_public_acce
 	result = generate_eks_input(logging, encryption_config, endpoint_private_access, endpoint_public_access, public_access_cidrs)
 }
 
-generate_ecr_input_with_one_repo(image_scan_on_push) = {
+generate_ecr_input_with_one_repo(image_scan_on_push) := {
 	"resource": {
 		"CreatedAt": "2022-03-31T11:56:19Z",
 		"ImageScanningConfiguration": {"ScanOnPush": image_scan_on_push},
@@ -70,7 +70,7 @@ generate_ecr_input_with_one_repo(image_scan_on_push) = {
 }
 
 # regal ignore:rule-length
-generate_elb_input_with_two_load_balancers(first_protocol, first_ssl_cert, sec_protocol, sec_ssl_cert) = {
+generate_elb_input_with_two_load_balancers(first_protocol, first_ssl_cert, sec_protocol, sec_ssl_cert) := {
 	"resource": {
 		"AvailabilityZones": [
 			"us-east-2b",
@@ -136,7 +136,7 @@ generate_elb_input_with_two_load_balancers(first_protocol, first_ssl_cert, sec_p
 	"subType": "aws-elb",
 }
 
-not_evaluated_input = {
+not_evaluated_input := {
 	"type": "some type",
 	"subType": "some sub type",
 	"resource": {"Cluster": {
