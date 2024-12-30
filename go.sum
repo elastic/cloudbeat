@@ -716,8 +716,8 @@ github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 h1:YEetp8
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241218175401-8b9a76e3db69 h1:D2YsyF8NwQ9sZThdHHKSAbzdo+SkaX1rw8/FViU7UTc=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241218175401-8b9a76e3db69/go.mod h1:1KthaQNhHrOzQzVe0iogA5gkVQJr2a4+0KiUxZ3qAjM=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241230063435-e9a656591cf6 h1:tZTdnM1ZYXZ5bETxzs7/ARty6Uc2P8rxI03B7Gr0EOQ=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20241230063435-e9a656591cf6/go.mod h1:qwqHYirqMrBcpuj+wz+J8ZlHHcQ2HhfSV05z+StYr30=
 github.com/elastic/e2e-testing v1.2.3 h1:XKF91O+Y6RcrTuNc7kMM4/HE9pvkvjASIYhEWS5XkT0=
 github.com/elastic/e2e-testing v1.2.3/go.mod h1:TqP9TlnqFqKqd61etWkYgb8T+RulH7vmhg7lxQw/Yag=
 github.com/elastic/elastic-agent-autodiscover v0.9.0 h1:+iWIKh0u3e8I+CJa3FfWe9h0JojNasPgYIA47gpuuns=
@@ -726,8 +726,8 @@ github.com/elastic/elastic-agent-client/v7 v7.16.0 h1:yKGq2+CxAuW8Kh0EoNl202tqAy
 github.com/elastic/elastic-agent-client/v7 v7.16.0/go.mod h1:6h+f9QdIr3GO2ODC0Y8+aEXRwzbA5W4eV4dd/67z7nI=
 github.com/elastic/elastic-agent-libs v0.17.4 h1:kWK5Kn2EQjM97yHqbeXv+cFAIti4IiI9Qj8huM+lZzE=
 github.com/elastic/elastic-agent-libs v0.17.4/go.mod h1:5CR02awPrBr+tfmjBBK+JI+dMmHNQjpVY24J0wjbC7M=
-github.com/elastic/elastic-agent-system-metrics v0.11.5 h1:JSjXFEn8uYZ9hoC/GxZNMgJ622UoP96sjYP/49/Uvuo=
-github.com/elastic/elastic-agent-system-metrics v0.11.5/go.mod h1:nzkrGajQA29YNcfP62gfzhxX9an3/xdQ3RmfQNw9YTI=
+github.com/elastic/elastic-agent-system-metrics v0.11.6 h1:yAR9N1MMyf6rzVEuk+SZcuTzYnf5mM7Xlja9pwZlJzg=
+github.com/elastic/elastic-agent-system-metrics v0.11.6/go.mod h1:nzkrGajQA29YNcfP62gfzhxX9an3/xdQ3RmfQNw9YTI=
 github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4/go.mod h1:EWib/APOK0SL3dFbYqvxE3UYd8E6s1ouQ7iEp/0LWV4=
 github.com/elastic/go-concert v0.3.0 h1:Y66JFn3ENndpHErOhTASu8/Fz1SSsLZicPufCmvQD60=
 github.com/elastic/go-concert v0.3.0/go.mod h1:UWt1MB5HxxZ85hKynLaYl/AaLIKFx0WiBP2uJSRfduA=
