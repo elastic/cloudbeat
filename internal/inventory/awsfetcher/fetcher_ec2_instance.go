@@ -65,7 +65,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 
 		iamFetcher := inventory.EmptyEnricher()
 		if instance.IamInstanceProfile != nil {
-			iamFetcher = inventory.WithIAM(inventory.AssetIAM{
+			iamFetcher = inventory.WithUser(inventory.AssetIAM{
 				Id:  instance.IamInstanceProfile.Id,
 				Arn: instance.IamInstanceProfile.Arn,
 			})
@@ -81,7 +81,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			instance.GetResourceName(),
 
 			inventory.WithRawAsset(instance),
-			inventory.WithTags(e.getTags(instance)),
+			inventory.WithLabels(e.getTags(instance)),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           instance.Region,

@@ -79,7 +79,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 
 			inventory.WithRawAsset(policy),
 			inventory.WithResourcePolicies(convertPolicy(policy.Document)...),
-			inventory.WithTags(i.getTags(policy)),
+			inventory.WithLabels(i.getTags(policy)),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   awslib.GlobalRegion,

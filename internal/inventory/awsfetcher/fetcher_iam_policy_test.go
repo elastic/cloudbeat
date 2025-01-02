@@ -121,7 +121,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 			"policy-1",
 			inventory.WithRawAsset(policy1),
 			inventory.WithCloud(cloudField),
-			inventory.WithTags(map[string]string{
+			inventory.WithLabels(map[string]string{
 				"key-1": "value-1",
 				"key-2": "value-2",
 			}),
@@ -144,7 +144,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 			"policy-2",
 			inventory.WithRawAsset(policy2),
 			inventory.WithCloud(cloudField),
-			inventory.WithTags(map[string]string{
+			inventory.WithLabels(map[string]string{
 				"key-1": "value-1",
 			}),
 			inventory.WithResourcePolicies(inventory.AssetResourcePolicy{
