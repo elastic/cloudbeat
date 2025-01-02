@@ -20,6 +20,7 @@ package azurefetcher
 import (
 	"context"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
@@ -65,19 +66,15 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 		}
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureServicePrincipal,
-			[]string{pointers.Deref(item.GetId())},
+			pointers.Deref(item.GetId()),
 			pointers.Deref(item.GetDisplayName()),
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: tenantId,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   tenantId,
+				ServiceName: "Azure",
 			}),
 		)
 	}
