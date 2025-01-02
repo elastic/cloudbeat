@@ -244,6 +244,7 @@ var (
 // AssetEvent holds the whole asset
 type AssetEvent struct {
 	Entity        Entity
+	Event         ecs.Event
 	Network       *ecs.Network
 	Cloud         *ecs.Cloud
 	Host          *ecs.Host
@@ -271,6 +272,9 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 			Id:                  id,
 			Name:                name,
 			AssetClassification: c,
+		},
+		Event: ecs.Event{
+			Kind: "asset",
 		},
 	}
 
