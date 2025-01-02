@@ -25,20 +25,24 @@ import (
 type AssetCategory string
 
 const (
-	CategoryInfrastructure AssetCategory = "infrastructure"
-
-	CategoryAccessManagement AssetCategory = "Access Management"
-	CategoryServiceAccount   AssetCategory = "Service Account"
-	CategoryIdentity         AssetCategory = "Identity"
-	CategoryFaaS             AssetCategory = "FaaS"
-	CategoryHost             AssetCategory = "Host"
-	CategoryDatabase         AssetCategory = "Database"
-	CategoryMessagingService AssetCategory = "Messaging Service"
-	CategoryFirewall         AssetCategory = "Firewall"
-	CategoryGateway          AssetCategory = "Gateway"
-	CategoryNetworking       AssetCategory = "Networking"
-	CategoryLoadBalancer     AssetCategory = "Load Balancer"
-	CategoryStorageBucket    AssetCategory = "Storage Bucket"
+	CategoryAccessManagement  AssetCategory = "Access Management"
+	CategoryContainerRegistry AssetCategory = "Container Registry"
+	CategoryDatabase          AssetCategory = "Database"
+	CategoryFaaS              AssetCategory = "FaaS"
+	CategoryFirewall          AssetCategory = "Firewall"
+	CategoryGateway           AssetCategory = "Gateway"
+	CategoryHost              AssetCategory = "Host"
+	CategoryIdentity          AssetCategory = "Identity"
+	CategoryInfrastructure    AssetCategory = "infrastructure"
+	CategoryLoadBalancer      AssetCategory = "Load Balancer"
+	CategoryMessagingService  AssetCategory = "Messaging Service"
+	CategoryNetworking        AssetCategory = "Networking"
+	CategoryPrivateEndpoint   AssetCategory = "Private Endpoint"
+	CategoryServiceAccount    AssetCategory = "Service Account"
+	CategorySnapshot          AssetCategory = "Snapshot"
+	CategoryStorageBucket     AssetCategory = "Storage Bucket"
+	CategoryVolume            AssetCategory = "Volume"
+	CategoryWebService        AssetCategory = "Web Service"
 )
 
 // AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
@@ -204,24 +208,24 @@ var (
 	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryMessagingService, Type: "AWS SNS Topic"}
 
 	// Azure
-	AssetClassificationAzureAppService          = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryApplication */, Type: TypeWebApplication /* , SubType: SubTypeAzureAppService */}
-	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryContainer */, Type: TypeRegistry /* , SubType: SubTypeAzureContainerRegistry */}
-	AssetClassificationAzureCosmosDBAccount     = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeNoSQLDatabase /* , SubType: SubTypeAzureCosmosDBAccount */}
-	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeNoSQLDatabase /* , SubType: SubTypeAzureCosmosDBSQLDatabase */}
-	AssetClassificationAzureDisk                = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeDisk /* , SubType: SubTypeAzureDisk */}
-	AssetClassificationAzureElasticPool         = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeScalability /* , SubType: SubTypeAzureElasticPool */}
-	AssetClassificationAzureResourceGroup       = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeResourceGroup /* , SubType: SubTypeAzureResourceGroup */}
-	AssetClassificationAzureSQLDatabase         = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeRelationalDatabase /* , SubType: SubTypeAzureSQLDatabase */}
-	AssetClassificationAzureSQLServer           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeRelationalDatabase /* , SubType: SubTypeAzureSQLServer */}
-	AssetClassificationAzureServicePrincipal    = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypePrincipal /* , SubType: SubTypeAzurePrincipal */}
-	AssetClassificationAzureSnapshot            = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeSnapshot /* , SubType: SubTypeAzureSnapshot */}
-	AssetClassificationAzureStorageAccount      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeStorage /* , SubType: SubTypeAzureStorageAccount */}
-	AssetClassificationAzureStorageBlobService  = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeObjectStorage /* , SubType: SubTypeAzureStorageBlobService */}
-	AssetClassificationAzureStorageQueue        = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryApplicationIntegration */, Type: TypeMessageQueue /* , SubType: SubTypeAzureStorageQueue */}
-	AssetClassificationAzureStorageQueueService = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryApplicationIntegration */, Type: TypeMessageQueue /* , SubType: SubTypeAzureStorageQueueService */}
-	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeCloudAccount /* , SubType: SubTypeAzureSubscription */}
-	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeCloudAccount /* , SubType: SubTypeAzureTenant */}
-	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeVirtualMachine /* , SubType: SubTypeAzureVirtualMachine */}
+	AssetClassificationAzureAppService          = AssetClassification{Category: CategoryWebService, Type: "Azure App Service"}
+	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryContainerRegistry, Type: "Azure Container Registry"}
+	AssetClassificationAzureCosmosDBAccount     = AssetClassification{Category: CategoryInfrastructure, Type: "Azure Cosmos DB Account"}
+	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{Category: CategoryInfrastructure, Type: "Azure Cosmos DB SQL Database"}
+	AssetClassificationAzureDisk                = AssetClassification{Category: CategoryVolume, Type: "Azure Disk"}
+	AssetClassificationAzureElasticPool         = AssetClassification{Category: CategoryDatabase, Type: "Azure Elastic Pool"}
+	AssetClassificationAzureResourceGroup       = AssetClassification{Category: CategoryAccessManagement, Type: "Azure Resource Group"}
+	AssetClassificationAzureSQLDatabase         = AssetClassification{Category: CategoryDatabase, Type: "Azure SQL Database"}
+	AssetClassificationAzureSQLServer           = AssetClassification{Category: CategoryDatabase, Type: "Azure SQL Server"}
+	AssetClassificationAzureServicePrincipal    = AssetClassification{Category: CategoryIdentity, Type: "Azure Principal"}
+	AssetClassificationAzureSnapshot            = AssetClassification{Category: CategorySnapshot, Type: "Azure Snapshot"}
+	AssetClassificationAzureStorageAccount      = AssetClassification{Category: CategoryPrivateEndpoint, Type: "Azure Storage Account"}
+	AssetClassificationAzureStorageBlobService  = AssetClassification{Category: CategoryStorageBucket, Type: "Azure Storage Blob Service"}
+	AssetClassificationAzureStorageQueue        = AssetClassification{Category: CategoryMessagingService, Type: "Azure Storage Queue"}
+	AssetClassificationAzureStorageQueueService = AssetClassification{Category: CategoryMessagingService, Type: "Azure Storage Queue Service"}
+	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryAccessManagement, Type: "Azure Subscription"}
+	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryAccessManagement, Type: "Azure Tenant"}
+	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryHost, Type: "Azure Virtual Machine"}
 
 	// GCP
 	AssetClassificationGcpProject           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeCloudAccount /* , SubType: SubTypeGcpProject */}
