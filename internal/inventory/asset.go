@@ -17,6 +17,10 @@
 
 package inventory
 
+import (
+	"github.com/elastic/beats/v7/libbeat/ecs"
+)
+
 // AssetCategory is used to build the document index. Use only numbers, letters and dashes (-)
 type AssetCategory string
 
@@ -156,187 +160,102 @@ const (
 
 // AssetClassification holds the taxonomy of an asset
 type AssetClassification struct {
-	Category    AssetCategory    `json:"category"`
-	SubCategory AssetSubCategory `json:"sub_category"`
-	Type        AssetType        `json:"type"`
-	SubType     AssetSubType     `json:"sub_type"`
+	Category AssetCategory `json:"category"`
+	Type     AssetType     `json:"type"`
 }
 
 // AssetClassifications below are used to generate
 // 'internal/inventory/ASSETS.md'. Please keep formatting consistent.
 var (
 	// AWS
-	AssetClassificationAwsEc2Instance              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeEC2}
-	AssetClassificationAwsElbV1                    = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancer, SubType: SubTypeELBv1}
-	AssetClassificationAwsElbV2                    = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancer, SubType: SubTypeELBv2}
-	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypePolicy, SubType: SubTypeIAMPolicy}
-	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypeRole, SubType: SubTypeIAMRole}
-	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypeUser, SubType: SubTypeIAMUser}
-	AssetClassificationAwsLambdaEventSourceMapping = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryIntegration, Type: TypeEventSource, SubType: SubTypeLambdaEventSourceMapping}
-	AssetClassificationAwsLambdaFunction           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaFunction}
-	AssetClassificationAwsLambdaLayer              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeServerless, SubType: SubTypeLambdaLayer}
-	AssetClassificationAwsInternetGateway          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeGateway, SubType: SubTypeInternetGateway}
-	AssetClassificationAwsNatGateway               = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeGateway, SubType: SubTypeNatGateway}
-	AssetClassificationAwsNetworkAcl               = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryAuthorization, Type: TypeAcl, SubType: SubTypeVpcAcl}
-	AssetClassificationAwsNetworkInterface         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeInterface, SubType: SubTypeEC2NetworkInterface}
-	AssetClassificationAwsSecurityGroup            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeFirewall, SubType: SubTypeSecurityGroup}
-	AssetClassificationAwsSubnet                   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeSubnet, SubType: SubTypeEC2Subnet}
-	AssetClassificationAwsTransitGateway           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeVirtualNetwork, SubType: SubTypeTransitGateway}
-	AssetClassificationAwsTransitGatewayAttachment = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeVirtualNetwork, SubType: SubTypeTransitGatewayAttachment}
-	AssetClassificationAwsVpcPeeringConnection     = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypePeering, SubType: SubTypeVpcPeeringConnection}
-	AssetClassificationAwsVpc                      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeVirtualNetwork, SubType: SubTypeVpc}
-	AssetClassificationAwsRds                      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeRDS}
-	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeS3}
-	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryMessaging, Type: TypeNotificationService, SubType: SubTypeSNSTopic}
+	AssetClassificationAwsEc2Instance              = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeVirtualMachine /* , SubType: SubTypeEC2 */}
+	AssetClassificationAwsElbV1                    = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeLoadBalancer /* , SubType: SubTypeELBv1 */}
+	AssetClassificationAwsElbV2                    = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeLoadBalancer /* , SubType: SubTypeELBv2 */}
+	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypePolicy /* , SubType: SubTypeIAMPolicy */}
+	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypeRole /* , SubType: SubTypeIAMRole */}
+	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypeUser /* , SubType: SubTypeIAMUser */}
+	AssetClassificationAwsLambdaEventSourceMapping = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryIntegration */, Type: TypeEventSource /* , SubType: SubTypeLambdaEventSourceMapping */}
+	AssetClassificationAwsLambdaFunction           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeServerless /* , SubType: SubTypeLambdaFunction */}
+	AssetClassificationAwsLambdaLayer              = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeServerless /* , SubType: SubTypeLambdaLayer */}
+	AssetClassificationAwsInternetGateway          = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeGateway /* , SubType: SubTypeInternetGateway */}
+	AssetClassificationAwsNatGateway               = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeGateway /* , SubType: SubTypeNatGateway */}
+	AssetClassificationAwsNetworkAcl               = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryAuthorization */, Type: TypeAcl /* , SubType: SubTypeVpcAcl */}
+	AssetClassificationAwsNetworkInterface         = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeInterface /* , SubType: SubTypeEC2NetworkInterface */}
+	AssetClassificationAwsSecurityGroup            = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeFirewall /* , SubType: SubTypeSecurityGroup */}
+	AssetClassificationAwsSubnet                   = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeSubnet /* , SubType: SubTypeEC2Subnet */}
+	AssetClassificationAwsTransitGateway           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeVirtualNetwork /* , SubType: SubTypeTransitGateway */}
+	AssetClassificationAwsTransitGatewayAttachment = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeVirtualNetwork /* , SubType: SubTypeTransitGatewayAttachment */}
+	AssetClassificationAwsVpcPeeringConnection     = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypePeering /* , SubType: SubTypeVpcPeeringConnection */}
+	AssetClassificationAwsVpc                      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeVirtualNetwork /* , SubType: SubTypeVpc */}
+	AssetClassificationAwsRds                      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeRelationalDatabase /* , SubType: SubTypeRDS */}
+	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeObjectStorage /* , SubType: SubTypeS3 */}
+	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryMessaging */, Type: TypeNotificationService /* , SubType: SubTypeSNSTopic */}
 	// Azure
-	AssetClassificationAzureAppService          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryApplication, Type: TypeWebApplication, SubType: SubTypeAzureAppService}
-	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeRegistry, SubType: SubTypeAzureContainerRegistry}
-	AssetClassificationAzureCosmosDBAccount     = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeNoSQLDatabase, SubType: SubTypeAzureCosmosDBAccount}
-	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeNoSQLDatabase, SubType: SubTypeAzureCosmosDBSQLDatabase}
-	AssetClassificationAzureDisk                = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeDisk, SubType: SubTypeAzureDisk}
-	AssetClassificationAzureElasticPool         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeScalability, SubType: SubTypeAzureElasticPool}
-	AssetClassificationAzureResourceGroup       = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeResourceGroup, SubType: SubTypeAzureResourceGroup}
-	AssetClassificationAzureSQLDatabase         = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeAzureSQLDatabase}
-	AssetClassificationAzureSQLServer           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeRelationalDatabase, SubType: SubTypeAzureSQLServer}
-	AssetClassificationAzureServicePrincipal    = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryDigitalIdentity, Type: TypePrincipal, SubType: SubTypeAzurePrincipal}
-	AssetClassificationAzureSnapshot            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeSnapshot, SubType: SubTypeAzureSnapshot}
-	AssetClassificationAzureStorageAccount      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeStorage, SubType: SubTypeAzureStorageAccount}
-	AssetClassificationAzureStorageBlobService  = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeAzureStorageBlobService}
-	AssetClassificationAzureStorageQueue        = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryApplicationIntegration, Type: TypeMessageQueue, SubType: SubTypeAzureStorageQueue}
-	AssetClassificationAzureStorageQueueService = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryApplicationIntegration, Type: TypeMessageQueue, SubType: SubTypeAzureStorageQueueService}
-	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
-	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
-	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeAzureVirtualMachine}
+	AssetClassificationAzureAppService          = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryApplication */, Type: TypeWebApplication /* , SubType: SubTypeAzureAppService */}
+	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryContainer */, Type: TypeRegistry /* , SubType: SubTypeAzureContainerRegistry */}
+	AssetClassificationAzureCosmosDBAccount     = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeNoSQLDatabase /* , SubType: SubTypeAzureCosmosDBAccount */}
+	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeNoSQLDatabase /* , SubType: SubTypeAzureCosmosDBSQLDatabase */}
+	AssetClassificationAzureDisk                = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeDisk /* , SubType: SubTypeAzureDisk */}
+	AssetClassificationAzureElasticPool         = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeScalability /* , SubType: SubTypeAzureElasticPool */}
+	AssetClassificationAzureResourceGroup       = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeResourceGroup /* , SubType: SubTypeAzureResourceGroup */}
+	AssetClassificationAzureSQLDatabase         = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeRelationalDatabase /* , SubType: SubTypeAzureSQLDatabase */}
+	AssetClassificationAzureSQLServer           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeRelationalDatabase /* , SubType: SubTypeAzureSQLServer */}
+	AssetClassificationAzureServicePrincipal    = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypePrincipal /* , SubType: SubTypeAzurePrincipal */}
+	AssetClassificationAzureSnapshot            = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeSnapshot /* , SubType: SubTypeAzureSnapshot */}
+	AssetClassificationAzureStorageAccount      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeStorage /* , SubType: SubTypeAzureStorageAccount */}
+	AssetClassificationAzureStorageBlobService  = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeObjectStorage /* , SubType: SubTypeAzureStorageBlobService */}
+	AssetClassificationAzureStorageQueue        = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryApplicationIntegration */, Type: TypeMessageQueue /* , SubType: SubTypeAzureStorageQueue */}
+	AssetClassificationAzureStorageQueueService = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryApplicationIntegration */, Type: TypeMessageQueue /* , SubType: SubTypeAzureStorageQueueService */}
+	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeCloudAccount /* , SubType: SubTypeAzureSubscription */}
+	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeCloudAccount /* , SubType: SubTypeAzureTenant */}
+	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeVirtualMachine /* , SubType: SubTypeAzureVirtualMachine */}
 
 	// GCP
-	AssetClassificationGcpProject           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeGcpProject}
-	AssetClassificationGcpOrganization      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeGcpOrganization}
-	AssetClassificationGcpFolder            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeResourceHierarchy, SubType: SubTypeGcpFolder}
-	AssetClassificationGcpInstance          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeGcpInstance}
-	AssetClassificationGcpBucket            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeGcpBucket}
-	AssetClassificationGcpFirewall          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeFirewall, SubType: SubTypeGcpFirewall}
-	AssetClassificationGcpSubnet            = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeSubnet, SubType: SubTypeGcpSubnet}
-	AssetClassificationGcpServiceAccount    = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryServiceIdentity, Type: TypeServiceAccount, SubType: SubTypeGcpServiceAccount}
-	AssetClassificationGcpServiceAccountKey = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryServiceIdentity, Type: TypeServiceAccountKey, SubType: SubTypeGcpServiceAccountKey}
+	AssetClassificationGcpProject           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeCloudAccount /* , SubType: SubTypeGcpProject */}
+	AssetClassificationGcpOrganization      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeCloudAccount /* , SubType: SubTypeGcpOrganization */}
+	AssetClassificationGcpFolder            = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryManagement */, Type: TypeResourceHierarchy /* , SubType: SubTypeGcpFolder */}
+	AssetClassificationGcpInstance          = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeVirtualMachine /* , SubType: SubTypeGcpInstance */}
+	AssetClassificationGcpBucket            = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeObjectStorage /* , SubType: SubTypeGcpBucket */}
+	AssetClassificationGcpFirewall          = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeFirewall /* , SubType: SubTypeGcpFirewall */}
+	AssetClassificationGcpSubnet            = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeSubnet /* , SubType: SubTypeGcpSubnet */}
+	AssetClassificationGcpServiceAccount    = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryServiceIdentity */, Type: TypeServiceAccount /* , SubType: SubTypeGcpServiceAccount */}
+	AssetClassificationGcpServiceAccountKey = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryServiceIdentity */, Type: TypeServiceAccountKey /* , SubType: SubTypeGcpServiceAccountKey */}
 
-	AssetClassificationGcpGkeCluster      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeOrchestration, SubType: SubTypeGcpGkeCluster}
-	AssetClassificationGcpForwardingRule  = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryNetwork, Type: TypeLoadBalancing, SubType: SubTypeGcpForwardingRule}
-	AssetClassificationGcpIamRole         = AssetClassification{Category: CategoryIdentity, SubCategory: SubCategoryAccessManagement, Type: TypeIamRole, SubType: SubTypeGcpIamRole}
-	AssetClassificationGcpCloudFunction   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryServerless, Type: TypeFunction, SubType: SubTypeGcpCloudFunction}
-	AssetClassificationGcpCloudRunService = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeServerless, SubType: SubTypeGcpCloudRunService}
+	AssetClassificationGcpGkeCluster      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryContainer */, Type: TypeOrchestration /* , SubType: SubTypeGcpGkeCluster */}
+	AssetClassificationGcpForwardingRule  = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeLoadBalancing /* , SubType: SubTypeGcpForwardingRule */}
+	AssetClassificationGcpIamRole         = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryAccessManagement */, Type: TypeIamRole /* , SubType: SubTypeGcpIamRole */}
+	AssetClassificationGcpCloudFunction   = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryServerless */, Type: TypeFunction /* , SubType: SubTypeGcpCloudFunction */}
+	AssetClassificationGcpCloudRunService = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryContainer */, Type: TypeServerless /* , SubType: SubTypeGcpCloudRunService */}
 )
 
 // AssetEvent holds the whole asset
 type AssetEvent struct {
-	Asset            Asset
-	Network          *AssetNetwork
-	Cloud            *AssetCloud
-	Host             *AssetHost
-	IAM              *AssetIAM
-	ResourcePolicies []AssetResourcePolicy
+	Entity        Entity
+	Network       *ecs.Network
+	Cloud         *ecs.Cloud
+	Host          *ecs.Host
+	User          *ecs.User
+	Labels        map[string]string
+	RawAttributes *any
 }
 
-// Asset contains the identifiers of the asset
-type Asset struct {
-	Id              []string `json:"id"`
-	RelatedEntityId []string `json:"related_entity_id"`
-	Name            string   `json:"name"`
+// Entity contains the identifiers of the asset
+type Entity struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
 	AssetClassification
-	Tags map[string]string `json:"tags"`
-	Raw  any               `json:"raw"`
-}
 
-// AssetNetwork contains network information
-type AssetNetwork struct {
-	Ipv6Address         *string  `json:"ipv6_address,omitempty"`
-	NetworkId           *string  `json:"network_id,omitempty"`
-	NetworkInterfaceIds []string `json:"network_interface_ids,omitempty"`
-	PrivateDnsName      *string  `json:"private_dns_name,omitempty"`
-	PrivateIpAddress    *string  `json:"private_ip_address,omitempty"`
-	PublicDnsName       *string  `json:"public_dns_name,omitempty"`
-	PublicIpAddress     *string  `json:"public_ip_address,omitempty"`
-	RouteTableIds       []string `json:"route_table_ids,omitempty"`
-	SecurityGroupIds    []string `json:"security_group_ids,omitempty"`
-	SubnetIds           []string `json:"subnet_ids,omitempty"`
-	TransitGatewayIds   []string `json:"transit_gateway_ids,omitempty"`
-	VpcIds              []string `json:"vpc_ids,omitempty"`
-}
-
-// AssetCloud contains information about the cloud provider
-type AssetCloud struct {
-	AvailabilityZone *string                `json:"availability_zone,omitempty"`
-	Provider         string                 `json:"provider,omitempty"`
-	Region           string                 `json:"region,omitempty"`
-	Account          AssetCloudAccount      `json:"account"`
-	Organization     AssetCloudOrganization `json:"organization,omitempty"`
-	Instance         *AssetCloudInstance    `json:"instance,omitempty"`
-	Machine          *AssetCloudMachine     `json:"machine,omitempty"`
-	Project          *AssetCloudProject     `json:"project,omitempty"`
-	Service          *AssetCloudService     `json:"service,omitempty"`
-}
-
-type AssetCloudAccount struct {
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-
-type AssetCloudOrganization struct {
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-
-type AssetCloudInstance struct {
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-
-type AssetCloudMachine struct {
-	MachineType string `json:"machine_type,omitempty"`
-}
-
-type AssetCloudProject struct {
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-
-type AssetCloudService struct {
-	Name string `json:"name,omitempty"`
-}
-
-// AssetHost contains information of the asset in case it is a host
-type AssetHost struct {
-	Architecture    string  `json:"architecture"`
-	ImageId         *string `json:"imageId"`
-	InstanceType    string  `json:"instance_type"`
-	Platform        string  `json:"platform"`
-	PlatformDetails *string `json:"platform_details"`
-}
-
-type AssetIAM struct {
-	Id  *string `json:"id"`
-	Arn *string `json:"arn"`
-}
-
-// AssetResourcePolicy maps security policies applied directly on resources
-type AssetResourcePolicy struct {
-	Version    *string        `json:"version,omitempty"`
-	Id         *string        `json:"id,omitempty"`
-	Effect     string         `json:"effect,omitempty"`
-	Principal  map[string]any `json:"principal,omitempty"`
-	Action     []string       `json:"action,omitempty"`
-	NotAction  []string       `json:"notAction,omitempty"`
-	Resource   []string       `json:"resource,omitempty"`
-	NoResource []string       `json:"noResource,omitempty"`
-	Condition  map[string]any `json:"condition,omitempty"`
+	// non exported fields
+	relatedEntityId []string
 }
 
 // AssetEnricher functional builder function
 type AssetEnricher func(asset *AssetEvent)
 
-func NewAssetEvent(c AssetClassification, ids []string, name string, enrichers ...AssetEnricher) AssetEvent {
+func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...AssetEnricher) AssetEvent {
 	a := AssetEvent{
-		Asset: Asset{
-			Id:                  removeEmpty(ids),
+		Entity: Entity{
+			Id:                  id,
 			Name:                name,
 			AssetClassification: c,
 		},
@@ -351,57 +270,47 @@ func NewAssetEvent(c AssetClassification, ids []string, name string, enrichers .
 
 func WithRawAsset(raw any) AssetEnricher {
 	return func(a *AssetEvent) {
-		a.Asset.Raw = &raw
+		a.RawAttributes = &raw
 	}
 }
 
 func WithRelatedAssetIds(ids []string) AssetEnricher {
 	return func(a *AssetEvent) {
-		a.Asset.RelatedEntityId = ids
+		a.Entity.relatedEntityId = ids
 	}
 }
 
-func WithTags(tags map[string]string) AssetEnricher {
+func WithLabels(labels map[string]string) AssetEnricher {
 	return func(a *AssetEvent) {
-		if len(tags) == 0 {
+		if len(labels) == 0 {
 			return
 		}
 
-		a.Asset.Tags = tags
+		a.Labels = labels
 	}
 }
 
-func WithNetwork(network AssetNetwork) AssetEnricher {
+func WithNetwork(network ecs.Network) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Network = &network
 	}
 }
 
-func WithCloud(cloud AssetCloud) AssetEnricher {
+func WithCloud(cloud ecs.Cloud) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Cloud = &cloud
 	}
 }
 
-func WithHost(host AssetHost) AssetEnricher {
+func WithHost(host ecs.Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
 	}
 }
 
-func WithIAM(iam AssetIAM) AssetEnricher {
+func WithUser(user ecs.User) AssetEnricher {
 	return func(a *AssetEvent) {
-		a.IAM = &iam
-	}
-}
-
-func WithResourcePolicies(policies ...AssetResourcePolicy) AssetEnricher {
-	return func(a *AssetEvent) {
-		if len(policies) == 0 {
-			return
-		}
-
-		a.ResourcePolicies = policies
+		a.User = &user
 	}
 }
 

@@ -81,7 +81,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			[]string{"arn:aws:ec2:us-east::ec2/234567890", "234567890"},
 			"test-server",
 			inventory.WithRawAsset(instance1),
-			inventory.WithTags(map[string]string{"Name": "test-server", "key": "value"}),
+			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
@@ -108,7 +108,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				Platform:        "linux",
 				PlatformDetails: pointers.Ref("ubuntu"),
 			}),
-			inventory.WithIAM(inventory.AssetIAM{
+			inventory.WithUser(inventory.AssetIAM{
 				Id:  pointers.Ref("a123123"),
 				Arn: pointers.Ref("123123:123123:123123"),
 			}),
@@ -128,7 +128,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			[]string{},
 			"",
 			inventory.WithRawAsset(instance2),
-			inventory.WithTags(map[string]string{}),
+			inventory.WithLabels(map[string]string{}),
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AwsCloudProvider,
 				Region:   "us-east",

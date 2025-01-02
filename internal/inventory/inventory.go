@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	indexTemplate = "logs-cloud_asset_inventory.asset_inventory-%s_%s_%s_%s-default"
+	indexTemplate = "logs-cloud_asset_inventory.asset_inventory-%s_%s-default"
 	minimalPeriod = 30 * time.Second
 )
 
@@ -123,21 +123,22 @@ func (a *AssetInventory) runAllFetchersOnce(ctx context.Context) {
 func (a *AssetInventory) publish(assets []AssetEvent) {
 	events := lo.Map(assets, func(e AssetEvent, _ int) beat.Event {
 		var relatedEntity []string
-		relatedEntity = append(relatedEntity, e.Asset.Id...)
-		if len(e.Asset.RelatedEntityId) > 0 {
-			relatedEntity = append(relatedEntity, e.Asset.RelatedEntityId...)
+		relatedEntity = append(relatedEntity, e.Entity.Id)
+		if len(e.Entity.relatedEntityId) > 0 {
+			relatedEntity = append(relatedEntity, e.Entity.relatedEntityId...)
 		}
 		return beat.Event{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Asset)},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Entity)},
 			Timestamp: a.now(),
 			Fields: mapstr.M{
-				"asset":             e.Asset,
-				"cloud":             e.Cloud,
-				"host":              e.Host,
-				"network":           e.Network,
-				"iam":               e.IAM,
-				"resource_policies": e.ResourcePolicies,
-				"related.entity":    relatedEntity,
+				"entity":         e.Entity,
+				"cloud":          e.Cloud,
+				"host":           e.Host,
+				"network":        e.Network,
+				"user":           e.User,
+				"Attributes":     e.RawAttributes,
+				"labels":         e.Labels,
+				"related.entity": relatedEntity,
 			},
 		}
 	})
@@ -145,8 +146,8 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 	a.publisher.PublishAll(events)
 }
 
-func generateIndex(a Asset) string {
-	return fmt.Sprintf(indexTemplate, a.Category, a.SubCategory, a.Type, a.SubType)
+func generateIndex(a Entity) string {
+	return fmt.Sprintf(indexTemplate, a.Category, a.Type)
 }
 
 func (a *AssetInventory) Stop() {
