@@ -51,6 +51,9 @@ func TestAssetInventory_Run(t *testing.T) {
 						Type:     TypeVirtualMachine,
 					},
 				},
+				"event": ecs.Event{
+					Kind: "asset",
+				},
 				"labels": map[string]string{"Name": "test-server", "key": "value"},
 				"cloud": &ecs.Cloud{
 					Provider: AwsCloudProvider,

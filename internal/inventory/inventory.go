@@ -133,6 +133,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 			Timestamp: a.now(),
 			Fields: mapstr.M{
 				"entity":         e.Entity,
+				"event":          e.Event,
 				"cloud":          e.Cloud,
 				"host":           e.Host,
 				"network":        e.Network,
