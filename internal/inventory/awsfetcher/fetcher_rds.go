@@ -20,6 +20,7 @@ package awsfetcher
 import (
 	"context"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
@@ -68,19 +69,15 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	for _, item := range rdsInstances {
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
-			[]string{item.GetResourceArn(), item.Identifier},
+			item.GetResourceArn(),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "RDS",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS RDS",
 			}),
 		)
 	}

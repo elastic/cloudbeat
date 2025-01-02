@@ -20,6 +20,7 @@ package awsfetcher
 import (
 	"testing"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -84,34 +85,26 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
-			[]string{"arn:aws:rds:eu-west-1:123:db:db1", "db1"},
+			"arn:aws:rds:eu-west-1:123:db:db1",
 			"db1",
 			inventory.WithRawAsset(instance1),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "RDS",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS RDS",
 			}),
 		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
-			[]string{"arn:aws:rds:eu-west-1:123:db:db2", "db2"},
+			"arn:aws:rds:eu-west-1:123:db:db2",
 			"db2",
 			inventory.WithRawAsset(instance2),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "RDS",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS RDS",
 			}),
 		),
 	}

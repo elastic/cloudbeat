@@ -20,6 +20,7 @@ package awsfetcher
 import (
 	"context"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -74,22 +75,17 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamPolicy,
-			[]string{policy.GetResourceArn(), pointers.Deref(policy.PolicyId)},
+			policy.GetResourceArn(),
 			resource.GetResourceName(),
 
 			inventory.WithRawAsset(policy),
-			inventory.WithResourcePolicies(convertPolicy(policy.Document)...),
 			inventory.WithLabels(i.getTags(policy)),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   awslib.GlobalRegion,
-				Account: inventory.AssetCloudAccount{
-					Id:   i.AccountId,
-					Name: i.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      awslib.GlobalRegion,
+				AccountID:   i.AccountId,
+				AccountName: i.AccountName,
+				ServiceName: "AWS IAM",
 			}),
 		)
 	}
@@ -103,96 +99,4 @@ func (i *iamPolicyFetcher) getTags(policy iam.Policy) map[string]string {
 	}
 
 	return tags
-}
-
-func convertPolicy(policy map[string]any) []inventory.AssetResourcePolicy {
-	if len(policy) == 0 {
-		return nil
-	}
-
-	version, hasVersion := policy["Version"].(string)
-	if !hasVersion {
-		version = ""
-	}
-
-	switch statements := policy["Statement"].(type) {
-	case []map[string]any:
-		return convertStatements(statements, version)
-	case []any:
-		return convertAnyStatements(statements, version)
-	case map[string]any:
-		return []inventory.AssetResourcePolicy{convertStatement(statements, &version)}
-	}
-	return nil
-}
-
-func convertAnyStatements(statements []any, version string) []inventory.AssetResourcePolicy {
-	policies := make([]inventory.AssetResourcePolicy, 0, len(statements))
-	for _, statement := range statements {
-		policies = append(policies, convertStatement(statement.(map[string]any), &version))
-	}
-	return policies
-}
-
-func convertStatements(statements []map[string]any, version string) []inventory.AssetResourcePolicy {
-	policies := make([]inventory.AssetResourcePolicy, 0, len(statements))
-	for _, statement := range statements {
-		policies = append(policies, convertStatement(statement, &version))
-	}
-	return policies
-}
-
-func convertStatement(statement map[string]any, version *string) inventory.AssetResourcePolicy {
-	p := inventory.AssetResourcePolicy{}
-	p.Version = version
-
-	if sid, ok := statement["Sid"]; ok {
-		p.Id = pointers.Ref(sid.(string))
-	}
-
-	if effect, ok := statement["Effect"]; ok {
-		p.Effect = effect.(string)
-	}
-
-	if anyPrincipal, ok := statement["Principal"]; ok {
-		switch principal := anyPrincipal.(type) {
-		case string:
-			p.Principal = map[string]any{principal: principal}
-		case map[string]any:
-			p.Principal = principal
-		}
-	}
-
-	if action, ok := statement["Action"]; ok {
-		p.Action = anyToSliceString(action)
-	}
-
-	if notAction, ok := statement["NotAction"]; ok {
-		p.NotAction = anyToSliceString(notAction)
-	}
-
-	if resource, ok := statement["Resource"]; ok {
-		p.Resource = anyToSliceString(resource)
-	}
-
-	if noResource, ok := statement["NoResource"]; ok {
-		p.NoResource = anyToSliceString(noResource)
-	}
-
-	if condition, ok := statement["Condition"]; ok {
-		p.Condition = condition.(map[string]any)
-	}
-
-	return p
-}
-
-func anyToSliceString(anyString any) []string {
-	switch s := anyString.(type) {
-	case string:
-		return []string{s}
-	case []string:
-		return s
-	}
-
-	return nil
 }

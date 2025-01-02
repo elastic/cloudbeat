@@ -20,6 +20,7 @@ package awsfetcher
 import (
 	"context"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -81,19 +82,15 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.GetResourceArn()},
+			item.GetResourceArn(),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   f.AccountId,
-					Name: f.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Networking",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   f.AccountId,
+				AccountName: f.AccountName,
+				ServiceName: "AWS Networking",
 			}),
 		)
 	}

@@ -20,6 +20,7 @@ package inventory
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -147,7 +148,16 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 }
 
 func generateIndex(a Entity) string {
-	return fmt.Sprintf(indexTemplate, a.Category, a.Type)
+	return fmt.Sprintf(indexTemplate, slugfy(string(a.Category)), slugfy(string(a.Type)))
+}
+
+func slugfy(s string) string {
+	chunks := strings.Split(s, " ")
+	clean := make([]string, len(chunks))
+	for i, c := range chunks {
+		clean[i] = strings.ToLower(c)
+	}
+	return strings.Join(clean, "_")
 }
 
 func (a *AssetInventory) Stop() {
