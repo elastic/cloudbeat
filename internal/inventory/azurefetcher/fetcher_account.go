@@ -20,6 +20,7 @@ package azurefetcher
 import (
 	"context"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -73,17 +74,13 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 	for _, item := range azureAssets {
 		assetChan <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.Id},
+			item.Id,
 			item.DisplayName,
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: item.TenantId,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   item.TenantId,
+				ServiceName: "Azure",
 			}),
 		)
 	}
