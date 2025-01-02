@@ -20,6 +20,7 @@ package azurefetcher
 import (
 	"testing"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -45,32 +46,24 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureAppService,
-			[]string{appService.Id},
+			appService.Id,
 			appService.Name,
 			inventory.WithRawAsset(appService),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: "<tenant id>",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure",
 			}),
 		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureDisk,
-			[]string{disk.Id},
+			disk.Id,
 			disk.Name,
 			inventory.WithRawAsset(disk),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: "<tenant id>",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure",
 			}),
 		),
 	}

@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/google/uuid"
 	"github.com/microsoft/kiota-abstractions-go/store"
@@ -59,17 +60,13 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureServicePrincipal,
-			[]string{"id"},
+			"id",
 			"dn",
 			inventory.WithRawAsset(values),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: appOwnerOrganizationId.String(),
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(ecs.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   appOwnerOrganizationId.String(),
+				ServiceName: "Azure",
 			}),
 		),
 	}
