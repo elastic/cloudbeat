@@ -20,6 +20,7 @@ package awsfetcher
 import (
 	"context"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -65,9 +66,9 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 
 		iamFetcher := inventory.EmptyEnricher()
 		if instance.IamInstanceProfile != nil {
-			iamFetcher = inventory.WithUser(inventory.AssetIAM{
-				Id:  instance.IamInstanceProfile.Id,
-				Arn: instance.IamInstanceProfile.Arn,
+			iamFetcher = inventory.WithUser(ecs.User{
+				ID:   pointers.Deref(instance.IamInstanceProfile.Id),
+				Name: pointers.Deref(instance.IamInstanceProfile.Arn),
 			})
 		}
 
@@ -77,47 +78,29 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 		}
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
-			[]string{instance.GetResourceArn(), pointers.Deref(instance.InstanceId)},
+			instance.GetResourceArn(),
 			instance.GetResourceName(),
 
 			inventory.WithRawAsset(instance),
 			inventory.WithLabels(e.getTags(instance)),
-			inventory.WithCloud(inventory.AssetCloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           instance.Region,
 				AvailabilityZone: e.getAvailabilityZone(instance),
-				Account: inventory.AssetCloudAccount{
-					Id:   e.AccountId,
-					Name: e.AccountName,
-				},
-				Instance: &inventory.AssetCloudInstance{
-					Id:   pointers.Deref(instance.InstanceId),
-					Name: instance.GetResourceName(),
-				},
-				Machine: &inventory.AssetCloudMachine{
-					MachineType: string(instance.InstanceType),
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS EC2",
-				},
+				AccountID:        e.AccountId,
+				AccountName:      e.AccountName,
+				InstanceID:       pointers.Deref(instance.InstanceId),
+				InstanceName:     instance.GetResourceName(),
+				MachineType:      string(instance.InstanceType),
+				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.AssetHost{
-				Architecture:    string(instance.Architecture),
-				ImageId:         instance.ImageId,
-				InstanceType:    string(instance.InstanceType),
-				Platform:        string(instance.Platform),
-				PlatformDetails: instance.PlatformDetails,
+			inventory.WithHost(ecs.Host{
+				Name:         instance.GetResourceName(),
+				Architecture: string(instance.Architecture),
+				Type:         string(instance.InstanceType),
+				IP:           pointers.Deref(instance.PublicIpAddress),
 			}),
 			iamFetcher,
-			inventory.WithNetwork(inventory.AssetNetwork{
-				NetworkId:        instance.VpcId,
-				SubnetIds:        subnetIds,
-				Ipv6Address:      instance.Ipv6Address,
-				PublicIpAddress:  instance.PublicIpAddress,
-				PrivateIpAddress: instance.PrivateIpAddress,
-				PublicDnsName:    instance.PublicDnsName,
-				PrivateDnsName:   instance.PrivateDnsName,
-			}),
 		)
 	}
 }
@@ -134,10 +117,10 @@ func (e *ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]strin
 	return tags
 }
 
-func (e *ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) *string {
+func (e *ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) string {
 	if instance.Placement == nil {
-		return nil
+		return ""
 	}
 
-	return instance.Placement.AvailabilityZone
+	return pointers.Deref(instance.Placement.AvailabilityZone)
 }

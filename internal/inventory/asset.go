@@ -25,8 +25,20 @@ import (
 type AssetCategory string
 
 const (
-	CategoryIdentity       AssetCategory = "identity"
 	CategoryInfrastructure AssetCategory = "infrastructure"
+
+	CategoryAccessManagement AssetCategory = "Access Management"
+	CategoryServiceAccount   AssetCategory = "Service Account"
+	CategoryIdentity         AssetCategory = "Identity"
+	CategoryFaaS             AssetCategory = "FaaS"
+	CategoryHost             AssetCategory = "Host"
+	CategoryDatabase         AssetCategory = "Database"
+	CategoryMessagingService AssetCategory = "Messaging Service"
+	CategoryFirewall         AssetCategory = "Firewall"
+	CategoryGateway          AssetCategory = "Gateway"
+	CategoryNetworking       AssetCategory = "Networking"
+	CategoryLoadBalancer     AssetCategory = "Load Balancer"
+	CategoryStorageBucket    AssetCategory = "Storage Bucket"
 )
 
 // AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
@@ -168,28 +180,29 @@ type AssetClassification struct {
 // 'internal/inventory/ASSETS.md'. Please keep formatting consistent.
 var (
 	// AWS
-	AssetClassificationAwsEc2Instance              = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeVirtualMachine /* , SubType: SubTypeEC2 */}
-	AssetClassificationAwsElbV1                    = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeLoadBalancer /* , SubType: SubTypeELBv1 */}
-	AssetClassificationAwsElbV2                    = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeLoadBalancer /* , SubType: SubTypeELBv2 */}
-	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypePolicy /* , SubType: SubTypeIAMPolicy */}
-	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypeRole /* , SubType: SubTypeIAMRole */}
-	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryDigitalIdentity */, Type: TypeUser /* , SubType: SubTypeIAMUser */}
-	AssetClassificationAwsLambdaEventSourceMapping = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryIntegration */, Type: TypeEventSource /* , SubType: SubTypeLambdaEventSourceMapping */}
-	AssetClassificationAwsLambdaFunction           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeServerless /* , SubType: SubTypeLambdaFunction */}
-	AssetClassificationAwsLambdaLayer              = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryCompute */, Type: TypeServerless /* , SubType: SubTypeLambdaLayer */}
-	AssetClassificationAwsInternetGateway          = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeGateway /* , SubType: SubTypeInternetGateway */}
-	AssetClassificationAwsNatGateway               = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeGateway /* , SubType: SubTypeNatGateway */}
-	AssetClassificationAwsNetworkAcl               = AssetClassification{Category: CategoryIdentity /* , SubCategory: SubCategoryAuthorization */, Type: TypeAcl /* , SubType: SubTypeVpcAcl */}
-	AssetClassificationAwsNetworkInterface         = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeInterface /* , SubType: SubTypeEC2NetworkInterface */}
-	AssetClassificationAwsSecurityGroup            = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeFirewall /* , SubType: SubTypeSecurityGroup */}
-	AssetClassificationAwsSubnet                   = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeSubnet /* , SubType: SubTypeEC2Subnet */}
-	AssetClassificationAwsTransitGateway           = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeVirtualNetwork /* , SubType: SubTypeTransitGateway */}
-	AssetClassificationAwsTransitGatewayAttachment = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeVirtualNetwork /* , SubType: SubTypeTransitGatewayAttachment */}
-	AssetClassificationAwsVpcPeeringConnection     = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypePeering /* , SubType: SubTypeVpcPeeringConnection */}
-	AssetClassificationAwsVpc                      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryNetwork */, Type: TypeVirtualNetwork /* , SubType: SubTypeVpc */}
-	AssetClassificationAwsRds                      = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryDatabase */, Type: TypeRelationalDatabase /* , SubType: SubTypeRDS */}
-	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryStorage */, Type: TypeObjectStorage /* , SubType: SubTypeS3 */}
-	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryMessaging */, Type: TypeNotificationService /* , SubType: SubTypeSNSTopic */}
+	AssetClassificationAwsEc2Instance              = AssetClassification{Category: CategoryHost, Type: "AWS EC2 Instance"}
+	AssetClassificationAwsElbV1                    = AssetClassification{Category: CategoryLoadBalancer, Type: "AWS Elastic Load Balancer"}
+	AssetClassificationAwsElbV2                    = AssetClassification{Category: CategoryLoadBalancer, Type: "AWS Elastic Load Balancer v2"}
+	AssetClassificationAwsIamPolicy                = AssetClassification{Category: CategoryAccessManagement, Type: "AWS IAM Policy"}
+	AssetClassificationAwsIamRole                  = AssetClassification{Category: CategoryServiceAccount, Type: "AWS IAM Role"}
+	AssetClassificationAwsIamUser                  = AssetClassification{Category: CategoryIdentity, Type: "AWS IAM User"}
+	AssetClassificationAwsLambdaEventSourceMapping = AssetClassification{Category: CategoryFaaS, Type: "AWS Lambda Event Source Mapping"}
+	AssetClassificationAwsLambdaFunction           = AssetClassification{Category: CategoryFaaS, Type: "AWS Lambda Function"}
+	AssetClassificationAwsLambdaLayer              = AssetClassification{Category: CategoryFaaS, Type: "AWS Lambda Layer"}
+	AssetClassificationAwsInternetGateway          = AssetClassification{Category: CategoryGateway, Type: "AWS Internet Gateway"}
+	AssetClassificationAwsNatGateway               = AssetClassification{Category: CategoryGateway, Type: "AWS NAT Gateway"}
+	AssetClassificationAwsNetworkAcl               = AssetClassification{Category: CategoryNetworking, Type: "AWS EC2 Network ACL"}
+	AssetClassificationAwsNetworkInterface         = AssetClassification{Category: CategoryNetworking, Type: "AWS EC2 Network Interface"}
+	AssetClassificationAwsSecurityGroup            = AssetClassification{Category: CategoryFirewall, Type: "AWS EC2 Security Group"}
+	AssetClassificationAwsSubnet                   = AssetClassification{Category: CategoryNetworking, Type: "AWS EC2 Subnet"}
+	AssetClassificationAwsTransitGateway           = AssetClassification{Category: CategoryGateway, Type: "AWS Transit Gateway"}
+	AssetClassificationAwsTransitGatewayAttachment = AssetClassification{Category: CategoryGateway, Type: "AWS Transit Gateway Attachment"}
+	AssetClassificationAwsVpcPeeringConnection     = AssetClassification{Category: CategoryNetworking, Type: "AWS VPC Peering Connection"}
+	AssetClassificationAwsVpc                      = AssetClassification{Category: CategoryNetworking, Type: "AWS VPC"}
+	AssetClassificationAwsRds                      = AssetClassification{Category: CategoryDatabase, Type: "AWS RDS Instance"}
+	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryStorageBucket, Type: "AWS S3 Bucket"}
+	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryMessagingService, Type: "AWS SNS Topic"}
+
 	// Azure
 	AssetClassificationAzureAppService          = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryApplication */, Type: TypeWebApplication /* , SubType: SubTypeAzureAppService */}
 	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryInfrastructure /* , SubCategory: SubCategoryContainer */, Type: TypeRegistry /* , SubType: SubTypeAzureContainerRegistry */}
