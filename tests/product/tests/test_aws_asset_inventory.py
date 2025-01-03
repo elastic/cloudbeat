@@ -27,9 +27,7 @@ def test_aws_asset_inventory(
         asset_inventory_client,
         timeout=10,
         category=category,
-        sub_category=sub_category,
         type_=type_,
-        sub_type=sub_type,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
     )
 

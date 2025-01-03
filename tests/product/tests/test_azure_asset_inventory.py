@@ -17,9 +17,7 @@ from product.tests.parameters import Parameters, register_params
 def test_azure_asset_inventory(
     asset_inventory_client,
     category,
-    sub_category,
     type_,
-    sub_type,
 ):
     """
     This data driven test verifies assets published by cloudbeat agent.
@@ -28,9 +26,7 @@ def test_azure_asset_inventory(
         asset_inventory_client,
         timeout=10,
         category=category,
-        sub_category=sub_category,
         type_=type_,
-        sub_type=sub_type,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
     )
 
@@ -47,7 +43,7 @@ def test_azure_asset_inventory(
 register_params(
     test_azure_asset_inventory,
     Parameters(
-        ("category", "sub_category", "type_", "sub_type"),
+        ("category", "type_"),
         [*azure_tc.test_cases.values()],
         ids=[*azure_tc.test_cases.keys()],
     ),
