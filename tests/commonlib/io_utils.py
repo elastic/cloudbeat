@@ -59,18 +59,14 @@ def get_events_from_index(
 def get_assets_from_index(
     elastic_client,
     category: str,
-    sub_category: str,
     type_: str,
-    sub_type: str,
     time_after: datetime,
 ) -> list[Munch]:
     """
     Resturns assets from a given index matching given classification.
     @param elastic_client: Client to connect to Elasticsearch.
     @param category: Asset category used as a filter
-    @param sub_category: Asset subcategory used as a filter
     @param type: Asset type used as a filter
-    @param sub_type: Asset subtype used as a filter
     @param time_after: Filter events having timestamp > time_after
     @return: List of Munch objects
     """
@@ -78,9 +74,7 @@ def get_assets_from_index(
         "bool": {
             "must": [
                 {"match": {"asset.category": category}},
-                {"match": {"asset.sub_category": sub_category}},
                 {"match": {"asset.type": type_}},
-                {"match": {"asset.sub_type": sub_type}},
             ],
             "filter": [
                 {
