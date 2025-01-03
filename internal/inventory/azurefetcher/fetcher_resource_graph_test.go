@@ -20,7 +20,6 @@ package azurefetcher
 import (
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -49,7 +48,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			appService.Id,
 			appService.Name,
 			inventory.WithRawAsset(appService),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
 				ServiceName: "Azure",
@@ -60,7 +59,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			disk.Id,
 			disk.Name,
 			inventory.WithRawAsset(disk),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
 				ServiceName: "Azure",

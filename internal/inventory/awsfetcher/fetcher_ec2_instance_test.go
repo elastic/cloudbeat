@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -83,7 +82,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			"test-server",
 			inventory.WithRawAsset(instance1),
 			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
 				AvailabilityZone: "1a",
@@ -94,13 +93,13 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				MachineType:      "instance-type",
 				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(ecs.Host{
+			inventory.WithHost(inventory.Host{
 				Name:         "test-server",
 				Architecture: string(types.ArchitectureValuesX8664),
 				Type:         "instance-type",
 				IP:           "public-ip-addr",
 			}),
-			inventory.WithUser(ecs.User{
+			inventory.WithUser(inventory.User{
 				ID:   "a123123",
 				Name: "123123:123123:123123",
 			}),
@@ -112,7 +111,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			"",
 			inventory.WithRawAsset(instance2),
 			inventory.WithLabels(map[string]string{}),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
 				AvailabilityZone: "",
@@ -123,7 +122,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				MachineType:      "",
 				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(ecs.Host{}),
+			inventory.WithHost(inventory.Host{}),
 		),
 	}
 

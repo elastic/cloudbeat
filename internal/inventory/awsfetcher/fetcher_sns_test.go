@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -49,7 +48,7 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 			"topic:arn:test-topic",
 			"test-topic",
 			inventory.WithRawAsset(awsResource),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",

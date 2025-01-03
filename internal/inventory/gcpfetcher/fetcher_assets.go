@@ -20,7 +20,6 @@ package gcpfetcher
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -92,7 +91,7 @@ func (f *assetsInventory) fetch(ctx context.Context, assetChan chan<- inventory.
 			inventory.WithRelatedAssetIds(
 				f.findRelatedAssetIds(classification.Type, item),
 			),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.GcpCloudProvider,
 				AccountID:   item.CloudAccount.AccountId,
 				AccountName: item.CloudAccount.AccountName,

@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -103,7 +102,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 
 	in := []awslib.AwsResource{policy1, nil, policy2, policy3}
 
-	cloudField := ecs.Cloud{
+	cloudField := inventory.Cloud{
 		Provider:    inventory.AwsCloudProvider,
 		Region:      "global",
 		AccountID:   "123",

@@ -26,7 +26,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
@@ -40,7 +39,7 @@ func TestAssetInventory_Run(t *testing.T) {
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
 	expected := []beat.Event{
 		{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_inventory.asset_inventory-infrastructure_virtual-machine-default"},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_asset_inventory-infrastructure_virtual-machine-default"},
 			Timestamp: now(),
 			Fields: mapstr.M{
 				"entity": Entity{
@@ -51,23 +50,23 @@ func TestAssetInventory_Run(t *testing.T) {
 						Type:     "Virtual Machine",
 					},
 				},
-				"event": ecs.Event{
+				"event": Event{
 					Kind: "asset",
 				},
 				"labels": map[string]string{"Name": "test-server", "key": "value"},
-				"cloud": &ecs.Cloud{
+				"cloud": &Cloud{
 					Provider: AwsCloudProvider,
 					Region:   "us-east",
 				},
-				"host": &ecs.Host{
+				"host": &Host{
 					Architecture: string(types.ArchitectureValuesX8664),
 					Type:         "instance-type",
 					ID:           "i-a2",
 				},
-				"network": &ecs.Network{
+				"network": &Network{
 					Name: "vpc-id",
 				},
-				"user": &ecs.User{
+				"user": &User{
 					ID:   "a123123",
 					Name: "name",
 				},
@@ -93,20 +92,20 @@ func TestAssetInventory_Run(t *testing.T) {
 			"arn:aws:ec2:us-east::ec2/234567890",
 			"test-server",
 			WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
-			WithCloud(ecs.Cloud{
+			WithCloud(Cloud{
 				Provider: AwsCloudProvider,
 				Region:   "us-east",
 			}),
-			WithHost(ecs.Host{
+			WithHost(Host{
 				Architecture: string(types.ArchitectureValuesX8664),
 				Type:         "instance-type",
 				ID:           "i-a2",
 			}),
-			WithUser(ecs.User{
+			WithUser(User{
 				ID:   "a123123",
 				Name: "name",
 			}),
-			WithNetwork(ecs.Network{
+			WithNetwork(Network{
 				Name: "vpc-id",
 			}),
 		)

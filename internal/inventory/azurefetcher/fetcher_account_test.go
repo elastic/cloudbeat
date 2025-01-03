@@ -20,7 +20,6 @@ package azurefetcher
 import (
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -44,7 +43,7 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 			"/tenants/<tenant UUID>",
 			"Mario",
 			inventory.WithRawAsset(azureAssets[0]),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant UUID>",
 				ServiceName: "Azure",
@@ -77,7 +76,7 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 			"/subscriptions/<sub UUID>",
 			"Luigi",
 			inventory.WithRawAsset(azureAssets[0]),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<sub UUID>",
 				ServiceName: "Azure",

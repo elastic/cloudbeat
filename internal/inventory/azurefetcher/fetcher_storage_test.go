@@ -20,7 +20,6 @@ package azurefetcher
 import (
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -59,7 +58,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureBlobService.Id,
 			azureBlobService.Name,
 			inventory.WithRawAsset(azureBlobService),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -69,7 +68,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureQueueService.Id,
 			azureQueueService.Name,
 			inventory.WithRawAsset(azureQueueService),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -79,7 +78,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureQueue.Id,
 			azureQueue.Name,
 			inventory.WithRawAsset(azureQueue),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),

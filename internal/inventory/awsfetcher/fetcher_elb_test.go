@@ -23,7 +23,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	typesv2 "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -73,7 +72,7 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v1",
 			"my-elb-v1",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",
@@ -119,7 +118,7 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2",
 			"my-elb-v2",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",

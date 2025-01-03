@@ -22,7 +22,6 @@ import (
 
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	s3ctrltypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -108,7 +107,7 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 			"arn:aws:s3:::bucket-1",
 			"bucket-1",
 			inventory.WithRawAsset(bucket1),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "europe-west-1",
 				AccountID:   "123",
@@ -121,7 +120,7 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 			"arn:aws:s3:::bucket-2",
 			"bucket-2",
 			inventory.WithRawAsset(bucket2),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "europe-west-1",
 				AccountID:   "123",

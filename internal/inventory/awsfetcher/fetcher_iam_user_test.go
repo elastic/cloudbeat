@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -91,7 +90,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::000:user/user-1",
 			"user-1",
 			inventory.WithRawAsset(user1),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",
@@ -105,7 +104,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::000:user/user-2",
 			"user-2",
 			inventory.WithRawAsset(user2),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",

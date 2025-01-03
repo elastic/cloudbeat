@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
@@ -55,7 +54,7 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 			"/projects/<project UUID>/some_resource",
 			inventory.WithRawAsset(assets[0]),
 			inventory.WithRelatedAssetIds([]string{}),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.GcpCloudProvider,
 				AccountID:   "<project UUID>",
 				AccountName: "<project name>",

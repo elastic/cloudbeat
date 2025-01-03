@@ -20,7 +20,6 @@ package awsfetcher
 import (
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -88,7 +87,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 			"arn:aws:rds:eu-west-1:123:db:db1",
 			"db1",
 			inventory.WithRawAsset(instance1),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",
@@ -100,7 +99,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 			"arn:aws:rds:eu-west-1:123:db:db2",
 			"db2",
 			inventory.WithRawAsset(instance2),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",
