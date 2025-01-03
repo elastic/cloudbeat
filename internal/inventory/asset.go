@@ -33,7 +33,7 @@ const (
 	CategoryGateway           AssetCategory = "Gateway"
 	CategoryHost              AssetCategory = "Host"
 	CategoryIdentity          AssetCategory = "Identity"
-	CategoryInfrastructure    AssetCategory = "infrastructure"
+	CategoryInfrastructure    AssetCategory = "Infrastructure"
 	CategoryLoadBalancer      AssetCategory = "Load Balancer"
 	CategoryMessagingService  AssetCategory = "Messaging Service"
 	CategoryNetworking        AssetCategory = "Networking"
