@@ -86,17 +86,13 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 		}
 		assetChan <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.Id},
+			item.Id,
 			name,
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: item.TenantId,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   item.TenantId,
+				ServiceName: "Azure",
 			}),
 		)
 	}

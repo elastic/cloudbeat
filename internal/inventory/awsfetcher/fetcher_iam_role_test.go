@@ -72,37 +72,29 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamRole,
-			[]string{"arn:aws:iam::0000:role/role-name-1", "17823618723"},
+			"arn:aws:iam::0000:role/role-name-1",
 			"role-name-1",
 			inventory.WithRawAsset(role1),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "global",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "global",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS IAM",
 			}),
 		),
 
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamRole,
-			[]string{"arn:aws:iam::0000:role/role-name-2", "17823618723"},
+			"arn:aws:iam::0000:role/role-name-2",
 			"role-name-2",
 			inventory.WithRawAsset(role2),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "global",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "global",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS IAM",
 			}),
 		),
 	}

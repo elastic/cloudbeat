@@ -12,9 +12,7 @@ class AssetInventoryCase:
     """
 
     category: str
-    sub_category: str
     type_: str
-    sub_type: str
 
     def __iter__(self):
         return iter(astuple(self))
