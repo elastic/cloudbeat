@@ -206,6 +206,7 @@ func matchGroupIndexValue(value string, idx int) lineFunc {
 			return
 		}
 		if _, err := strconv.Atoi(parts[2]); err != nil {
+			//nolint:nilerr
 			return nil, nil
 		}
 		return &Group{Name: parts[0], Gid: parts[2]}, nil
@@ -240,9 +241,11 @@ func matchUserIndexValue(value string, idx int) lineFunc {
 			return
 		}
 		if _, err := strconv.Atoi(parts[2]); err != nil {
+			//nolint:nilerr
 			return nil, nil
 		}
 		if _, err := strconv.Atoi(parts[3]); err != nil {
+			//nolint:nilerr
 			return nil, nil
 		}
 		u := &User{
