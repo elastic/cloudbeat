@@ -48,7 +48,7 @@ func TestAssetInventory_Run(t *testing.T) {
 					Name: "test-server",
 					AssetClassification: AssetClassification{
 						Category: CategoryInfrastructure,
-						Type:     TypeVirtualMachine,
+						Type:     "Virtual Machine",
 					},
 				},
 				"event": ecs.Event{
@@ -88,7 +88,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		assetChannel <- NewAssetEvent(
 			AssetClassification{
 				Category: CategoryInfrastructure,
-				Type:     TypeVirtualMachine,
+				Type:     "Virtual Machine",
 			},
 			"arn:aws:ec2:us-east::ec2/234567890",
 			"test-server",

@@ -16,9 +16,7 @@ from product.tests.parameters import Parameters, register_params
 def test_aws_asset_inventory(
     asset_inventory_client,
     category,
-    sub_category,
     type_,
-    sub_type,
 ):
     """
     This data driven test verifies entities published by cloudbeat agent.
