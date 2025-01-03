@@ -17,10 +17,6 @@
 
 package inventory
 
-import (
-	"github.com/elastic/beats/v7/libbeat/ecs"
-)
-
 // AssetCategory is used to build the document index.
 type AssetCategory string
 
@@ -133,11 +129,11 @@ var (
 // AssetEvent holds the whole asset
 type AssetEvent struct {
 	Entity        Entity
-	Event         ecs.Event
-	Network       *ecs.Network
-	Cloud         *ecs.Cloud
-	Host          *ecs.Host
-	User          *ecs.User
+	Event         Event
+	Network       *Network
+	Cloud         *Cloud
+	Host          *Host
+	User          *User
 	Labels        map[string]string
 	RawAttributes *any
 }
@@ -152,6 +148,41 @@ type Entity struct {
 	relatedEntityId []string
 }
 
+type Event struct {
+	Kind string `json:"kind"`
+}
+
+type Network struct {
+	Name string `json:"name,omitempty"`
+}
+
+type Cloud struct {
+	Provider         string `json:"provider,omitempty"`
+	Region           string `json:"region,omitempty"`
+	AvailabilityZone string `json:"availability_zone,omitempty"`
+	AccountID        string `json:"account.id,omitempty"`
+	AccountName      string `json:"account.name,omitempty"`
+	InstanceID       string `json:"instance.id,omitempty"`
+	InstanceName     string `json:"instance.name,omitempty"`
+	MachineType      string `json:"machine.type,omitempty"`
+	ServiceName      string `json:"service.name,omitempty"`
+	ProjectID        string `json:"project.id,omitempty"`
+	ProjectName      string `json:"project.name,omitempty"`
+}
+
+type Host struct {
+	ID           string `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Architecture string `json:"architecture,omitempty"`
+	Type         string `json:"type,omitempty"`
+	IP           string `json:"ip,omitempty"`
+}
+
+type User struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
 // AssetEnricher functional builder function
 type AssetEnricher func(asset *AssetEvent)
 
@@ -162,7 +193,7 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 			Name:                name,
 			AssetClassification: c,
 		},
-		Event: ecs.Event{
+		Event: Event{
 			Kind: "asset",
 		},
 	}
@@ -196,25 +227,25 @@ func WithLabels(labels map[string]string) AssetEnricher {
 	}
 }
 
-func WithNetwork(network ecs.Network) AssetEnricher {
+func WithNetwork(network Network) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Network = &network
 	}
 }
 
-func WithCloud(cloud ecs.Cloud) AssetEnricher {
+func WithCloud(cloud Cloud) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Cloud = &cloud
 	}
 }
 
-func WithHost(host ecs.Host) AssetEnricher {
+func WithHost(host Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
 	}
 }
 
-func WithUser(user ecs.User) AssetEnricher {
+func WithUser(user User) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.User = &user
 	}

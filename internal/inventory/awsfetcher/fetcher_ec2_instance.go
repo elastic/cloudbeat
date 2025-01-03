@@ -20,7 +20,6 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -66,7 +65,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 
 		iamFetcher := inventory.EmptyEnricher()
 		if instance.IamInstanceProfile != nil {
-			iamFetcher = inventory.WithUser(ecs.User{
+			iamFetcher = inventory.WithUser(inventory.User{
 				ID:   pointers.Deref(instance.IamInstanceProfile.Id),
 				Name: pointers.Deref(instance.IamInstanceProfile.Arn),
 			})
@@ -83,7 +82,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 
 			inventory.WithRawAsset(instance),
 			inventory.WithLabels(e.getTags(instance)),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           instance.Region,
 				AvailabilityZone: e.getAvailabilityZone(instance),
@@ -94,7 +93,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 				MachineType:      string(instance.InstanceType),
 				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(ecs.Host{
+			inventory.WithHost(inventory.Host{
 				Name:         instance.GetResourceName(),
 				Architecture: string(instance.Architecture),
 				Type:         string(instance.InstanceType),

@@ -20,7 +20,6 @@ package azurefetcher
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
@@ -71,7 +70,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   tenantId,
 				ServiceName: "Azure",

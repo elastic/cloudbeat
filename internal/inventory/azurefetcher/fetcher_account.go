@@ -20,7 +20,6 @@ package azurefetcher
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -77,7 +76,7 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 			item.Id,
 			item.DisplayName,
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",

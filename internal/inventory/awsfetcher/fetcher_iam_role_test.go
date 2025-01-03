@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
@@ -76,7 +75,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::0000:role/role-name-1",
 			"role-name-1",
 			inventory.WithRawAsset(role1),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",
@@ -90,7 +89,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::0000:role/role-name-2",
 			"role-name-2",
 			inventory.WithRawAsset(role2),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",

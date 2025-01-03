@@ -24,7 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/google/uuid"
 	"github.com/microsoft/kiota-abstractions-go/store"
@@ -63,7 +62,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 			"id",
 			"dn",
 			inventory.WithRawAsset(values),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   appOwnerOrganizationId.String(),
 				ServiceName: "Azure",

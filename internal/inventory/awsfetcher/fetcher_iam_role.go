@@ -20,7 +20,6 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -73,7 +72,7 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 			pointers.Deref(role.RoleName),
 
 			inventory.WithRawAsset(*role),
-			inventory.WithCloud(ecs.Cloud{
+			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      awslib.GlobalRegion,
 				AccountID:   i.AccountId,
