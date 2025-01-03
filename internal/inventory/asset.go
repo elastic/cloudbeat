@@ -25,24 +25,30 @@ import (
 type AssetCategory string
 
 const (
-	CategoryAccessManagement  AssetCategory = "Access Management"
-	CategoryContainerRegistry AssetCategory = "Container Registry"
-	CategoryDatabase          AssetCategory = "Database"
-	CategoryFaaS              AssetCategory = "FaaS"
-	CategoryFirewall          AssetCategory = "Firewall"
-	CategoryGateway           AssetCategory = "Gateway"
-	CategoryHost              AssetCategory = "Host"
-	CategoryIdentity          AssetCategory = "Identity"
-	CategoryInfrastructure    AssetCategory = "Infrastructure"
-	CategoryLoadBalancer      AssetCategory = "Load Balancer"
-	CategoryMessagingService  AssetCategory = "Messaging Service"
-	CategoryNetworking        AssetCategory = "Networking"
-	CategoryPrivateEndpoint   AssetCategory = "Private Endpoint"
-	CategoryServiceAccount    AssetCategory = "Service Account"
-	CategorySnapshot          AssetCategory = "Snapshot"
-	CategoryStorageBucket     AssetCategory = "Storage Bucket"
-	CategoryVolume            AssetCategory = "Volume"
-	CategoryWebService        AssetCategory = "Web Service"
+	CategoryAccessManagement       AssetCategory = "Access Management"
+	CategoryAccount                AssetCategory = "Account"
+	CategoryContainerRegistry      AssetCategory = "Container Registry"
+	CategoryContainerService       AssetCategory = "Container Service"
+	CategoryDatabase               AssetCategory = "Database"
+	CategoryFaaS                   AssetCategory = "FaaS"
+	CategoryFirewall               AssetCategory = "Firewall"
+	CategoryGateway                AssetCategory = "Gateway"
+	CategoryHost                   AssetCategory = "Host"
+	CategoryIdentity               AssetCategory = "Identity"
+	CategoryInfrastructure         AssetCategory = "Infrastructure"
+	CategoryLoadBalancer           AssetCategory = "Load Balancer"
+	CategoryMessagingService       AssetCategory = "Messaging Service"
+	CategoryNetworking             AssetCategory = "Networking"
+	CategoryOrchestrator           AssetCategory = "Orchestrator"
+	CategoryOrganization           AssetCategory = "Organization"
+	CategoryPrivateEndpoint        AssetCategory = "Private Endpoint"
+	CategoryServiceAccount         AssetCategory = "Service Account"
+	CategoryServiceUsageTechnology AssetCategory = "Service Usage Technology"
+	CategorySnapshot               AssetCategory = "Snapshot"
+	CategoryStorageBucket          AssetCategory = "Storage Bucket"
+	CategorySubnet                 AssetCategory = "Subnet"
+	CategoryVolume                 AssetCategory = "Volume"
+	CategoryWebService             AssetCategory = "Web Service"
 )
 
 // AssetType is used to build the document index.
@@ -108,20 +114,20 @@ var (
 	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryHost, Type: "Azure Virtual Machine"}
 
 	// GCP
-	AssetClassificationGcpProject           = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Project"}
-	AssetClassificationGcpOrganization      = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Organization"}
-	AssetClassificationGcpFolder            = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Folder"}
-	AssetClassificationGcpInstance          = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Compute Instance"}
-	AssetClassificationGcpBucket            = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Bucket"}
-	AssetClassificationGcpFirewall          = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Firewall"}
-	AssetClassificationGcpSubnet            = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Subnet"}
-	AssetClassificationGcpServiceAccount    = AssetClassification{Category: CategoryIdentity, Type: "GCP Service Account"}
-	AssetClassificationGcpServiceAccountKey = AssetClassification{Category: CategoryIdentity, Type: "GCP Service Account Key"}
-	AssetClassificationGcpGkeCluster        = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Kubernetes Engine (GKE) Cluster"}
-	AssetClassificationGcpForwardingRule    = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Load Balancing Forwarding Rule"}
-	AssetClassificationGcpIamRole           = AssetClassification{Category: CategoryIdentity, Type: "GCP IAM Role"}
-	AssetClassificationGcpCloudFunction     = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Cloud Function"}
-	AssetClassificationGcpCloudRunService   = AssetClassification{Category: CategoryInfrastructure, Type: "GCP Cloud Run Service"}
+	AssetClassificationGcpProject           = AssetClassification{Category: CategoryAccount, Type: "GCP Project"}
+	AssetClassificationGcpOrganization      = AssetClassification{Category: CategoryOrganization, Type: "GCP Organization"}
+	AssetClassificationGcpFolder            = AssetClassification{Category: CategoryOrganization, Type: "GCP Folder"}
+	AssetClassificationGcpInstance          = AssetClassification{Category: CategoryHost, Type: "GCP Compute Instance"}
+	AssetClassificationGcpBucket            = AssetClassification{Category: CategoryStorageBucket, Type: "GCP Bucket"}
+	AssetClassificationGcpFirewall          = AssetClassification{Category: CategoryFirewall, Type: "GCP Firewall"}
+	AssetClassificationGcpSubnet            = AssetClassification{Category: CategorySubnet, Type: "GCP Subnet"}
+	AssetClassificationGcpServiceAccount    = AssetClassification{Category: CategoryAccessManagement, Type: "GCP Service Account"}
+	AssetClassificationGcpServiceAccountKey = AssetClassification{Category: CategoryAccessManagement, Type: "GCP Service Account Key"}
+	AssetClassificationGcpGkeCluster        = AssetClassification{Category: CategoryOrchestrator, Type: "GCP Kubernetes Engine (GKE) Cluster"}
+	AssetClassificationGcpForwardingRule    = AssetClassification{Category: CategoryLoadBalancer, Type: "GCP Load Balancing Forwarding Rule"}
+	AssetClassificationGcpIamRole           = AssetClassification{Category: CategoryServiceUsageTechnology, Type: "GCP IAM Role"}
+	AssetClassificationGcpCloudFunction     = AssetClassification{Category: CategoryFaaS, Type: "GCP Cloud Function"}
+	AssetClassificationGcpCloudRunService   = AssetClassification{Category: CategoryContainerService, Type: "GCP Cloud Run Service"}
 )
 
 // AssetEvent holds the whole asset
