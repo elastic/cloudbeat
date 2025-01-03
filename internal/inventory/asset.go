@@ -21,7 +21,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/ecs"
 )
 
-// AssetCategory is used to build the document index. Use only numbers, letters and dashes (-)
+// AssetCategory is used to build the document index.
 type AssetCategory string
 
 const (
@@ -45,128 +45,8 @@ const (
 	CategoryWebService        AssetCategory = "Web Service"
 )
 
-// AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
-type AssetSubCategory string
-
-const (
-	SubCategoryAccessManagement       AssetSubCategory = "access-management"
-	SubCategoryApplication            AssetSubCategory = "application"
-	SubCategoryApplicationIntegration AssetSubCategory = "application-integration"
-	SubCategoryAuthorization          AssetSubCategory = "authorization"
-	SubCategoryCompute                AssetSubCategory = "compute"
-	SubCategoryContainer              AssetSubCategory = "container"
-	SubCategoryDatabase               AssetSubCategory = "database"
-	SubCategoryDigitalIdentity        AssetSubCategory = "digital-identity"
-	SubCategoryIntegration            AssetSubCategory = "integration"
-	SubCategoryManagement             AssetSubCategory = "management"
-	SubCategoryMessaging              AssetSubCategory = "messaging"
-	SubCategoryNetwork                AssetSubCategory = "network"
-	SubCategoryServerless             AssetSubCategory = "serverless"
-	SubCategoryServiceIdentity        AssetSubCategory = "service-identity"
-	SubCategoryStorage                AssetSubCategory = "storage"
-)
-
-// AssetType is used to build the document index. Use only numbers, letters and dashes (-)
+// AssetType is used to build the document index.
 type AssetType string
-
-const (
-	TypeAcl                 AssetType = "acl"
-	TypeCloudAccount        AssetType = "cloud-account"
-	TypeDisk                AssetType = "disk"
-	TypeEventSource         AssetType = "event-source"
-	TypeFirewall            AssetType = "firewall"
-	TypeGateway             AssetType = "gateway"
-	TypeInterface           AssetType = "interface"
-	TypeLoadBalancer        AssetType = "load-balancer"
-	TypeMessageQueue        AssetType = "message-queue"
-	TypeNoSQLDatabase       AssetType = "nosql-database"
-	TypeNotificationService AssetType = "notification-service"
-	TypeObjectStorage       AssetType = "object-storage"
-	TypePeering             AssetType = "peering"
-	TypePolicy              AssetType = "policy"
-	TypePrincipal           AssetType = "principal"
-	TypeRegistry            AssetType = "registry"
-	TypeRelationalDatabase  AssetType = "relational"
-	TypeResourceGroup       AssetType = "resource-group"
-	TypeRole                AssetType = "role"
-	TypeScalability         AssetType = "scalability"
-	TypeServerless          AssetType = "serverless"
-	TypeServiceAccount      AssetType = "service-account"
-	TypeServiceAccountKey   AssetType = "service-account-key"
-	TypeSnapshot            AssetType = "snapshot"
-	TypeStorage             AssetType = "storage"
-	TypeSubnet              AssetType = "subnet"
-	TypeUser                AssetType = "user"
-	TypeVirtualMachine      AssetType = "virtual-machine"
-	TypeVirtualNetwork      AssetType = "virtual-network"
-	TypeWebApplication      AssetType = "web-application"
-	TypeResourceHierarchy   AssetType = "resource-hierarchy"
-	TypeOrchestration       AssetType = "orchestration"
-	TypeFunction            AssetType = "function"
-	TypeLoadBalancing       AssetType = "load-balancing"
-	TypeIamRole             AssetType = "iam-role"
-)
-
-// AssetSubType is used to build the document index. Use only numbers, letters and dashes (-)
-type AssetSubType string
-
-const (
-	SubTypeAzureAppService          AssetSubType = "azure-app-service"
-	SubTypeAzureContainerRegistry   AssetSubType = "azure-container-registry"
-	SubTypeAzureCosmosDBAccount     AssetSubType = "azure-cosmos-db-account"
-	SubTypeAzureCosmosDBSQLDatabase AssetSubType = "azure-cosmos-db-sql-database"
-	SubTypeAzureDisk                AssetSubType = "azure-disk"
-	SubTypeAzureElasticPool         AssetSubType = "azure-elastic-pool"
-	SubTypeAzurePrincipal           AssetSubType = "azure-principal"
-	SubTypeAzureResourceGroup       AssetSubType = "azure-resource-group"
-	SubTypeAzureSQLDatabase         AssetSubType = "azure-sql-database"
-	SubTypeAzureSQLServer           AssetSubType = "azure-sql-server"
-	SubTypeAzureSnapshot            AssetSubType = "azure-snapshot"
-	SubTypeAzureStorageAccount      AssetSubType = "azure-storage-account"
-	SubTypeAzureStorageBlobService  AssetSubType = "azure-storage-blob-service"
-	SubTypeAzureStorageQueue        AssetSubType = "azure-storage-queue"
-	SubTypeAzureStorageQueueService AssetSubType = "azure-storage-queue-service"
-	SubTypeAzureSubscription        AssetSubType = "azure-subscription"
-	SubTypeAzureTenant              AssetSubType = "azure-tenant"
-	SubTypeAzureVirtualMachine      AssetSubType = "azure-virtual-machine"
-	SubTypeEC2                      AssetSubType = "ec2-instance"
-	SubTypeEC2NetworkInterface      AssetSubType = "ec2-network-interface"
-	SubTypeEC2Subnet                AssetSubType = "ec2-subnet"
-	SubTypeELBv1                    AssetSubType = "elastic-load-balancer"
-	SubTypeELBv2                    AssetSubType = "elastic-load-balancer-v2"
-	SubTypeIAMPolicy                AssetSubType = "iam-policy"
-	SubTypeIAMRole                  AssetSubType = "iam-role"
-	SubTypeIAMUser                  AssetSubType = "iam-user"
-	SubTypeInternetGateway          AssetSubType = "internet-gateway"
-	SubTypeLambdaAlias              AssetSubType = "lambda-function-alias"
-	SubTypeLambdaEventSourceMapping AssetSubType = "lambda-event-source-mapping"
-	SubTypeLambdaFunction           AssetSubType = "lambda-function"
-	SubTypeLambdaLayer              AssetSubType = "lambda-layer"
-	SubTypeNatGateway               AssetSubType = "nat-gateway"
-	SubTypeRDS                      AssetSubType = "rds-instance"
-	SubTypeS3                       AssetSubType = "s3-bucket"
-	SubTypeSNSTopic                 AssetSubType = "sns-topic"
-	SubTypeSecurityGroup            AssetSubType = "ec2-security-group"
-	SubTypeTransitGateway           AssetSubType = "transit-gateway"
-	SubTypeTransitGatewayAttachment AssetSubType = "transit-gateway-attachment"
-	SubTypeVpc                      AssetSubType = "vpc"
-	SubTypeVpcAcl                   AssetSubType = "s3-access-control-list"
-	SubTypeVpcPeeringConnection     AssetSubType = "vpc-peering-connection"
-	SubTypeGcpProject               AssetSubType = "gcp-project"
-	SubTypeGcpInstance              AssetSubType = "gcp-instance"
-	SubTypeGcpSubnet                AssetSubType = "gcp-subnet"
-	SubTypeGcpFirewall              AssetSubType = "gcp-firewall"
-	SubTypeGcpBucket                AssetSubType = "gcp-bucket"
-	SubTypeGcpOrganization          AssetSubType = "gcp-organization"
-	SubTypeGcpFolder                AssetSubType = "gcp-folder"
-	SubTypeGcpServiceAccount        AssetSubType = "gcp-service-account"
-	SubTypeGcpServiceAccountKey     AssetSubType = "gcp-service-account-key"
-	SubTypeGcpGkeCluster            AssetSubType = "gke-cluster"
-	SubTypeGcpForwardingRule        AssetSubType = "gcp-forwarding-rule"
-	SubTypeGcpCloudFunction         AssetSubType = "gcp-cloud-function"
-	SubTypeGcpCloudRunService       AssetSubType = "gcp-cloud-run-service"
-	SubTypeGcpIamRole               AssetSubType = "gcp-iam-role"
-)
 
 const (
 	AwsCloudProvider   = "aws"
