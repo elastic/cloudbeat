@@ -65,16 +65,16 @@ def get_assets_from_index(
     """
     Resturns assets from a given index matching given classification.
     @param elastic_client: Client to connect to Elasticsearch.
-    @param category: Asset category used as a filter
-    @param type: Asset type used as a filter
+    @param category: Entity category used as a filter
+    @param type: Entity type used as a filter
     @param time_after: Filter events having timestamp > time_after
     @return: List of Munch objects
     """
     query = {
         "bool": {
             "must": [
-                {"match": {"asset.category": category}},
-                {"match": {"asset.type": type_}},
+                {"match": {"entity.category": category}},
+                {"match": {"entity.type": type_}},
             ],
             "filter": [
                 {

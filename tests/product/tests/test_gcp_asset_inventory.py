@@ -1,6 +1,6 @@
 """
 GCP Asset Inventory Elastic Compute Cloud verification.
-This module verifies presence and correctness of retrieved assets
+This module verifies presence and correctness of retrieved entities
 """
 
 from datetime import datetime, timedelta
@@ -19,10 +19,10 @@ def test_gcp_asset_inventory(
     type_,
 ):
     """
-    This data driven test verifies assets published by cloudbeat agent.
+    This data driven test verifies entities published by cloudbeat agent.
     """
     # pylint: disable=duplicate-code
-    assets = get_ES_assets(
+    entities = get_ES_assets(
         asset_inventory_client,
         timeout=10,
         category=category,
@@ -30,14 +30,14 @@ def test_gcp_asset_inventory(
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
     )
 
-    assert assets is not None, "Expected a list of assets, got None"
-    assert isinstance(assets, list) and len(assets) > 0, "Expected the list to be non-empty"
-    for asset in assets:
-        assert asset.cloud, "Expected .cloud section"
-        assert asset.cloud.provider == "gcp", f'Expected "gcp" provider, got {asset.cloud.provider}'
-        assert len(asset.asset.id) > 0, "Expected .asset.id list to contain an ID"
-        assert len(asset.asset.id[0]) > 0, "Expected the ID to be non-empty"
-        assert asset.asset.raw, "Expected the resource under .asset.raw"
+    assert entities is not None, "Expected a list of entities, got None"
+    assert isinstance(entities, list) and len(entities) > 0, "Expected the list to be non-empty"
+    for entity in entities:
+        assert entity.cloud, "Expected .cloud section"
+        assert entity.cloud.Provider == "gcp", f'Expected "gcp" provider, got {entity.cloud.Provider}'
+        assert len(entity.entity.id) > 0, "Expected .entity.id list to contain an ID"
+        assert len(entity.entity.id[0]) > 0, "Expected the ID to be non-empty"
+        assert entity.Attributes, "Expected the resource under .Attributes"
 
 
 register_params(

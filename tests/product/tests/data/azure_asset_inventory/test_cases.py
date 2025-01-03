@@ -17,8 +17,6 @@ test_cases = {
         category="Container Registry",
         type_="Azure Container Registry",
     ),
-
-    # KUBA: debug - new
     "[Asset Inventory][Azure][Azure Cosmos DB Account] assets found": AssetInventoryCase(
         category="Infrastructure",
         type_="Azure Cosmos DB Account",
@@ -27,7 +25,6 @@ test_cases = {
     #     category="Infrastructure",
     #     type_="Azure Cosmos DB SQL Database",
     # ),
-
     "[Asset Inventory][Azure][Azure SQL Database] assets found": AssetInventoryCase(
         category="Database",
         type_="Azure SQL Database",
@@ -36,13 +33,10 @@ test_cases = {
         category="Database",
         type_="Azure SQL Server",
     ),
-
-    # KUBA: debug - new
     "[Asset Inventory][Azure][Azure Principal] assets found": AssetInventoryCase(
         category="Identity",
         type_="Azure Principal",
     ),
-
     "[Asset Inventory][Azure][Azure Elastic Pool] assets found": AssetInventoryCase(
         category="Database",
         type_="Azure Elastic Pool",
