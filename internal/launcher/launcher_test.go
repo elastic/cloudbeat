@@ -304,7 +304,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			}(tt.configs)
 
 			err := sut.run()
-			s.Require().ErrorIs(err, ErrorGracefulExit)
+			s.Require().ErrorIs(err, ErrGracefulExit)
 			beater, ok := sut.beater.(*beaterMock)
 			s.Require().True(ok)
 			s.Equal(tt.expected, beater.cfg)
@@ -450,7 +450,7 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 		sut.Stop()
 	}()
 	err := sut.run()
-	s.Require().ErrorIs(err, ErrorGracefulExit)
+	s.Require().ErrorIs(err, ErrGracefulExit)
 }
 
 func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
@@ -461,7 +461,7 @@ func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 		sut.Stop()
 	}()
 	err := sut.run()
-	s.Require().ErrorIs(err, ErrorGracefulExit)
+	s.Require().ErrorIs(err, ErrGracefulExit)
 
 	s.Panics(func() {
 		sut.Stop()
@@ -481,7 +481,7 @@ func (s *LauncherTestSuite) TestLauncherStop() {
 	}()
 
 	err := sut.run()
-	s.Require().ErrorIs(err, ErrorGracefulExit)
+	s.Require().ErrorIs(err, ErrGracefulExit)
 }
 
 func (s *LauncherTestSuite) TestLauncherStopTimeout() {
@@ -496,7 +496,7 @@ func (s *LauncherTestSuite) TestLauncherStopTimeout() {
 	}()
 
 	err := sut.run()
-	s.Require().ErrorIs(err, ErrorTimeoutExit)
+	s.Require().ErrorIs(err, ErrTimeoutExit)
 }
 
 func (s *LauncherTestSuite) initMocks() *launcherMocks {

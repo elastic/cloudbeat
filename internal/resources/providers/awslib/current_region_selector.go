@@ -21,16 +21,11 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type currentRegionSelector struct {
-	client currentCloudRegion
-}
-
-type currentCloudRegion interface {
-	GetMetadata(ctx context.Context, cfg aws.Config) (*ec2imds.InstanceIdentityDocument, error)
+	client MetadataProvider
 }
 
 func (s *currentRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
