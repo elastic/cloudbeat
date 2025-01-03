@@ -40,14 +40,14 @@ const (
 	shutdownGracePeriod = 20 * time.Second
 )
 
-// ErrorStopSignal is used to indicate we got a stop signal
-var ErrorStopSignal = errors.New("stop beater")
+// ErrStopSignal is used to indicate we got a stop signal
+var ErrStopSignal = errors.New("stop beater")
 
-// ErrorGracefulExit is used when the launcher stops before shutdownGracePeriod, after waiting for the beater to stop
-var ErrorGracefulExit = beat.GracefulExit
+// ErrGracefulExit is used when the launcher stops before shutdownGracePeriod, after waiting for the beater to stop
+var ErrGracefulExit = beat.GracefulExit
 
-// ErrorTimeoutExit is used when the launcher stops after shutdownGracePeriod, without waiting for the beater to stop
-var ErrorTimeoutExit = errors.New("exit after timeout")
+// ErrTimeoutExit is used when the launcher stops after shutdownGracePeriod, without waiting for the beater to stop
+var ErrTimeoutExit = errors.New("exit after timeout")
 
 type launcher struct {
 	wg        sync.WaitGroup // WaitGroup used to wait for active beaters
@@ -115,9 +115,9 @@ func (l *launcher) run() error {
 	err := l.runLoop()
 
 	switch {
-	case errors.Is(err, ErrorGracefulExit):
+	case errors.Is(err, ErrGracefulExit):
 		l.log.Info("Launcher stopped successfully")
-	case errors.Is(err, ErrorTimeoutExit):
+	case errors.Is(err, ErrTimeoutExit):
 		l.log.Info("Launcher stopped after timeout")
 	case err == nil: // unexpected
 	default:
@@ -140,7 +140,7 @@ func (l *launcher) runLoop() error {
 
 		// Wait for something to happen:
 		// config update		(val, nil)
-		// stop signal			(nil, ErrorStopSignal)
+		// stop signal			(nil, ErrStopSignal)
 		// beater error			(nil, err)
 		cfg, err := l.waitForUpdates()
 
@@ -224,16 +224,16 @@ func (l *launcher) stopBeaterWithTimeout(duration time.Duration) error {
 	select {
 	case <-time.After(duration):
 		l.log.Infof("Grace period for %s ended", l.name)
-		return ErrorTimeoutExit
+		return ErrTimeoutExit
 	case <-wgCh:
 		l.log.Infof("Launcher shut %s down gracefully", l.name)
-		return ErrorGracefulExit
+		return ErrGracefulExit
 	}
 }
 
 // waitForUpdates is the function that keeps Launcher runLoop busy.
 // It will finish for one of following reasons:
-//  1. The Stop function got called 	(nil, ErrorStopSignal)
+//  1. The Stop function got called 	(nil, ErrStopSignal)
 //  2. The beater run has returned 		(nil, err)
 //  3. A config update received 		(val, nil)
 func (l *launcher) waitForUpdates() (*config.C, error) {
@@ -241,7 +241,7 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 	case err, ok := <-l.beaterErr:
 		if !ok {
 			l.log.Infof("Launcher received a stop signal")
-			return nil, ErrorStopSignal
+			return nil, ErrStopSignal
 		}
 		return nil, err
 
@@ -260,7 +260,7 @@ func isConfigUpdate(cfg *config.C, err error) bool {
 }
 
 func isStopSignal(cfg *config.C, err error) bool {
-	return cfg == nil && errors.Is(err, ErrorStopSignal)
+	return cfg == nil && errors.Is(err, ErrStopSignal)
 }
 
 func isBeaterError(cfg *config.C, err error) bool {

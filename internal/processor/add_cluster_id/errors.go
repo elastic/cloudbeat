@@ -22,26 +22,26 @@ import (
 )
 
 type (
-	errConfigUnpack struct{ cause error }
-	errComputeID    struct{ cause error }
+	configUnpackError struct{ cause error }
+	computeIDError    struct{ cause error }
 )
 
-func makeErrConfigUnpack(cause error) errConfigUnpack {
-	return errConfigUnpack{cause}
+func makeErrConfigUnpack(cause error) configUnpackError {
+	return configUnpackError{cause}
 }
-func (e errConfigUnpack) Error() string {
+func (e configUnpackError) Error() string {
 	return fmt.Sprintf("failed to unpack %v processor configuration: %v", processorName, e.cause)
 }
-func (e errConfigUnpack) Unwrap() error {
+func (e configUnpackError) Unwrap() error {
 	return e.cause
 }
 
-func makeErrComputeID(cause error) errComputeID {
-	return errComputeID{cause}
+func makeErrComputeID(cause error) computeIDError {
+	return computeIDError{cause}
 }
-func (e errComputeID) Error() string {
+func (e computeIDError) Error() string {
 	return fmt.Sprintf("failed to compute ID: %v", e.cause)
 }
-func (e errComputeID) Unwrap() error {
+func (e computeIDError) Unwrap() error {
 	return e.cause
 }

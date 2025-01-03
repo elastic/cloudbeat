@@ -4,26 +4,37 @@ run:
 
 linters:
   enable:
+    - bodyclose
     - canonicalheader
     - containedctx
     - contextcheck
-    - exhaustruct
     - copyloopvar
+    - errname
+    - exhaustruct
+    - exptostd
     - fatcontext
     - gci
     - gocritic
     - gocyclo
     - gofmt
     - gomodguard
+    - iface
+    - makezero
     - misspell
+    - nilerr
+    - nilnesserr
     - nolintlint
     - prealloc
+    - predeclared
     - reassign
+    - recvcheck
     - revive
     - testifylint
     - unconvert
     - unparam
     - unused
+    - usetesting
+    - wastedassign
     - whitespace
 
 issues:
