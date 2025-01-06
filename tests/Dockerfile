@@ -4,8 +4,6 @@ WORKDIR /usr/src/app
 
 RUN pip install poetry
 
-RUN poetry --version
-
 RUN pip install poetry-plugin-export
 
 COPY pyproject.toml poetry.lock ./
