@@ -78,7 +78,7 @@ func (f *storageFetcher) listStorageAccounts(ctx context.Context) ([]azurelib.Az
 		return nil, fmt.Errorf("error listing subscriptions: %v", err)
 	}
 
-	subscriptionIds := make([]string, len(subscriptions))
+	subscriptionIds := make([]string, 0, len(subscriptions))
 	for _, subscription := range subscriptions {
 		subscriptionIds = append(subscriptionIds, subscription.Name)
 	}

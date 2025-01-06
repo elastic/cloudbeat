@@ -35,7 +35,7 @@ var successfulCurrentCloudRegionOutput = &ec2imds.InstanceIdentityDocument{
 type CurrentRegionSelectorTestSuite struct {
 	suite.Suite
 	selector *currentRegionSelector
-	mock     *mockCurrentCloudRegion
+	mock     *MockMetadataProvider
 }
 
 func TestCurrentRegionSelectorTestSuite(t *testing.T) {
@@ -46,7 +46,7 @@ func TestCurrentRegionSelectorTestSuite(t *testing.T) {
 
 func (s *CurrentRegionSelectorTestSuite) SetupTest() {
 	s.selector = &currentRegionSelector{}
-	s.mock = &mockCurrentCloudRegion{}
+	s.mock = &MockMetadataProvider{}
 	s.selector.client = s.mock
 }
 
