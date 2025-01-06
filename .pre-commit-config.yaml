@@ -155,7 +155,7 @@ repos:
         name: Update rule status
         description: Update rule status in rules_table.md
         require_serial: true
-        entry: poetry run -C security-policies python security-policies/dev/update_rule_status.py
+        entry: poetry run -C security-policies python dev/update_rule_status.py
         pass_filenames: false
         language: system
         files: (.*\.rego|tests\/product\/.*\.py)$
@@ -164,7 +164,7 @@ repos:
         name: Update rule metadata
         description: Update rule status in rules_table.md
         require_serial: true
-        entry: poetry run -C security-policies python security-policies/dev/generate_rule_metadata.py
+        entry: poetry run -C security-policies python dev/generate_rule_metadata.py
         pass_filenames: false
         language: system
         files: (\.rego)$
