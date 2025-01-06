@@ -24,7 +24,7 @@ fi
 
 # generate the rule templates
 cd ../cloudbeat
-poetry run -C security-policies python security-policies/dev/generate_rule_templates.py
+poetry run -C security-policies python dev/generate_rule_templates.py
 
 # commit and push the changes
 cd ../integrations
