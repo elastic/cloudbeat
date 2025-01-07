@@ -177,7 +177,7 @@ func TestAssetInventory_Period(t *testing.T) {
 	testhelper.SkipLong(t)
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
 
-	var cycleCounter int64 = 0
+	var cycleCounter int64
 
 	publisher := NewMockAssetPublisher(t)
 	publisher.EXPECT().PublishAll(mock.Anything).Maybe()
