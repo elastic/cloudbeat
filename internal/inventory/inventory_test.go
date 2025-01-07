@@ -170,3 +170,40 @@ func TestAssetInventory_Run(t *testing.T) {
 		assert.ElementsMatch(t, received, expected)
 	}
 }
+
+func TestAssetInventory_Period(t *testing.T) {
+	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
+
+	var cycleCounter int = 0
+	publisher := NewMockAssetPublisher(t)
+
+	fetcher := NewMockAssetFetcher(t)
+	fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, _ chan<- AssetEvent) {
+		cycleCounter += 1
+	})
+
+	logger := logp.NewLogger("test_run")
+	inventory := AssetInventory{
+		logger:              logger,
+		fetchers:            []AssetFetcher{fetcher},
+		publisher:           publisher,
+		bufferFlushInterval: 10 * time.Millisecond,
+		bufferMaxSize:       1,
+		period:              500 * time.Millisecond,
+		assetCh:             make(chan AssetEvent),
+		now:                 now,
+	}
+
+	// Run it enough for 2 cycles to finish; one starts immediately, the other after 500 milliseconds
+	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Millisecond)
+	defer cancel()
+
+	go func() {
+		inventory.Run(ctx)
+	}()
+
+	select {
+	case <-ctx.Done():
+		assert.Equal(t, 2, cycleCounter, "Expected to run 2 cycles, got %d", cycleCounter)
+	}
+}
