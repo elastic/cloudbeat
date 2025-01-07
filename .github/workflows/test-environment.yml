@@ -415,7 +415,11 @@ jobs:
         if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
         working-directory: ./tests
         run: |
-          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+          test_marker="sanity"
+          if [[ "${AGENT_BASED}" == "false" ]]; then
+            test_marker="agentless"
+          fi
+          poetry run pytest -m "${test_marker}" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Run UI Sanity checks (Kibana)
         uses: ./.github/actions/kibana-ftr
