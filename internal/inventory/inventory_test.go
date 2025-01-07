@@ -32,6 +32,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestAssetInventory_Run(t *testing.T) {
@@ -173,6 +174,7 @@ func TestAssetInventory_Run(t *testing.T) {
 }
 
 func TestAssetInventory_Period(t *testing.T) {
+	testhelper.SkipLong(t)
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
 
 	var cycleCounter int64 = 0
