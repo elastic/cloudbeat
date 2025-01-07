@@ -29,13 +29,17 @@ import (
 	"github.com/samber/lo"
 )
 
-const indexTemplate = "logs-cloud_asset_inventory.asset_inventory-%s_%s_%s_%s-default"
+const (
+	indexTemplate = "logs-cloud_asset_inventory.asset_inventory-%s_%s_%s_%s-default"
+	minimalPeriod = 30 * time.Second
+)
 
 type AssetInventory struct {
 	fetchers            []AssetFetcher
 	publisher           AssetPublisher
 	bufferFlushInterval time.Duration
 	bufferMaxSize       int
+	period              time.Duration
 	logger              *logp.Logger
 	assetCh             chan AssetEvent
 	now                 func() time.Time
@@ -49,8 +53,11 @@ type AssetPublisher interface {
 	PublishAll([]beat.Event)
 }
 
-func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time) AssetInventory {
-	logger.Info("Initializing Asset Inventory POC")
+func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time, period time.Duration) AssetInventory {
+	if period < minimalPeriod {
+		period = minimalPeriod
+	}
+	logger.Infof("Initializing Asset Inventory POC with period of %s", period)
 	return AssetInventory{
 		logger:    logger,
 		fetchers:  fetchers,
@@ -58,6 +65,7 @@ func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher A
 		// move to a configuration parameter
 		bufferFlushInterval: 10 * time.Second,
 		bufferMaxSize:       1600,
+		period:              period,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
 	}
@@ -72,12 +80,21 @@ func (a *AssetInventory) Run(ctx context.Context) {
 
 	assetsBuffer := make([]AssetEvent, 0, a.bufferMaxSize)
 	flushTicker := time.NewTicker(a.bufferFlushInterval)
+	fetcherPeriod := time.NewTicker(a.period)
 	for {
 		select {
 		case <-ctx.Done():
 			a.logger.Warnf("Asset Inventory context is done: %v", ctx.Err())
 			a.publish(assetsBuffer)
 			return
+
+		case <-fetcherPeriod.C:
+			a.logger.Debug("starting a new fetch cycle")
+			for _, fetcher := range a.fetchers {
+				go func(fetcher AssetFetcher) {
+					fetcher.Fetch(ctx, a.assetCh)
+				}(fetcher)
+			}
 
 		case <-flushTicker.C:
 			if len(assetsBuffer) == 0 {
