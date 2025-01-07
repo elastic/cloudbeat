@@ -19,6 +19,7 @@ package inventory
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -174,13 +175,14 @@ func TestAssetInventory_Run(t *testing.T) {
 func TestAssetInventory_Period(t *testing.T) {
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
 
-	var cycleCounter int = 0
+	var cycleCounter int64 = 0
+
 	publisher := NewMockAssetPublisher(t)
 	publisher.EXPECT().PublishAll(mock.Anything).Maybe()
 
 	fetcher := NewMockAssetFetcher(t)
 	fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, _ chan<- AssetEvent) {
-		cycleCounter += 1
+		atomic.AddInt64(&cycleCounter, 1)
 	})
 
 	logger := logp.NewLogger("test_run")
@@ -203,8 +205,7 @@ func TestAssetInventory_Period(t *testing.T) {
 		inventory.Run(ctx)
 	}()
 
-	select {
-	case <-ctx.Done():
-		assert.Equal(t, 2, cycleCounter, "Expected to run 2 cycles, got %d", cycleCounter)
-	}
+	<-ctx.Done()
+	val := atomic.LoadInt64(&cycleCounter)
+	assert.Equal(t, val, cycleCounter, "Expected to run 2 cycles, got %d", cycleCounter)
 }
