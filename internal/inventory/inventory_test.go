@@ -176,6 +176,7 @@ func TestAssetInventory_Period(t *testing.T) {
 
 	var cycleCounter int = 0
 	publisher := NewMockAssetPublisher(t)
+	publisher.Mock.On("PublishAll").Run(func(mock.Arguments) {}).Maybe()
 
 	fetcher := NewMockAssetFetcher(t)
 	fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, _ chan<- AssetEvent) {
