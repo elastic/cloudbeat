@@ -150,6 +150,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		publisher:           publisher,
 		bufferFlushInterval: 10 * time.Millisecond,
 		bufferMaxSize:       1,
+		period:              24 * time.Hour,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
 	}
