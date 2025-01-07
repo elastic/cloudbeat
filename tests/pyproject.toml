@@ -1,36 +1,35 @@
-[tool.poetry]
+[project]
 name = "tests"
 version = "0.1.0"
 description = "Test project for cloudbeat agent"
-authors = ["Dmitry Gurevich <dmitry.gurevich@elastic.co>"]
+authors = [
+    {name = "Dmitry Gurevich", email = "dmitry.gurevich@elastic.co"}
+]
+requires-python = ">=3.9"
+dependencies = [
+    "pytest >= 7.1.1",
+    "munch ~= 3",
+    "kubernetes >= 23.3.0",
+    "elasticsearch >= 8.1.0",
+    "allure-pytest >= 2.9.45",
+    "pytest-xdist >= 2.5.0",
+    "docker >= 7.0.0",
+    "pytest-order >= 1.0.1",
+    "pytest-dependency >= 0.5.1",
+    "pylint >= 2.14.2",
+    "loguru ~= 0.7.0",
+    "requests >= 2.32.2",
+    "ruamel-yaml >= 0.18.5",
+    "jinja2 >= 3.1.5",
+]
+
+[tool.poetry]
 packages = [
     {include="fleet_api"}
 ]
 
-<<<<<<< HEAD
-
-[tool.poetry.dependencies]
-python = "^3.9"
-pytest = "^7.1.1"
-munch = "3"
-kubernetes = "^23.3.0"
-elasticsearch = "^8.1.0"
-allure-pytest = "^2.9.45"
-pytest-xdist = "^2.5.0"
-docker = "^7.0.0"
-pytest-order = "^1.0.1"
-pytest-dependency = "^0.5.1"
-pylint = "^2.14.2"
-loguru = "0.7.0"
-requests = "^2.32.2"
-ruamel-yaml = "^0.18.5"
-jinja2 = "^3.1.4"
-
-[tool.poetry.dev-dependencies]
-=======
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">1.8"
->>>>>>> 160183b1 (Install poetry export (#2889))
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
