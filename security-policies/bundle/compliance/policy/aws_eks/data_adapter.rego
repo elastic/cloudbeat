@@ -6,4 +6,4 @@ is_aws_eks if {
 	input.subType == "aws-eks"
 }
 
-cluster = input.resource.Cluster
+cluster := input.resource.Cluster

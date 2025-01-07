@@ -5,9 +5,9 @@ import data.compliance.policy.aws_iam.common
 import data.compliance.policy.aws_iam.data_adapter
 import future.keywords.if
 
-duration = sprintf("%dh", [45 * 24]) # 45 days converted to hours
+duration := sprintf("%dh", [45 * 24]) # 45 days converted to hours
 
-default validate_credentials = false
+default validate_credentials := false
 
 # checks if the user has a password enabled and if the user's last access date is within the specified duration.
 validate_credentials if {

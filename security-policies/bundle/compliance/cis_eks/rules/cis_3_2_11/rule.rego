@@ -4,7 +4,7 @@ import data.compliance.policy.process.ensure_arguments_and_config as audit
 import future.keywords.if
 
 # Verify that the RotateKubeletServerCertificate argument is set to true
-default rule_evaluation = false
+default rule_evaluation := false
 
 rule_evaluation if {
 	audit.process_contains_key_with_value("--feature-gates", "RotateKubeletServerCertificate=true")
@@ -19,4 +19,4 @@ rule_evaluation if {
 	audit.not_process_contains_variable("--feature-gates", "RotateKubeletServerCertificate", ["featureGates", "RotateKubeletServerCertificate"])
 }
 
-finding = audit.finding(rule_evaluation)
+finding := audit.finding(rule_evaluation)

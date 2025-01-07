@@ -8,4 +8,4 @@ is_instance_metadata_valid(key, expected_val) if {
 	some item in data_adapter.resource.data.metadata.items
 	item.key == key
 	item.value == expected_val
-} else = false
+} else := false

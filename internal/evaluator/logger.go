@@ -19,7 +19,7 @@ package evaluator
 
 import (
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/open-policy-agent/opa/logging"
+	"github.com/open-policy-agent/opa/v1/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

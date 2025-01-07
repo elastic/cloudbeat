@@ -4,7 +4,7 @@ import data.compliance.lib.common as lib_common
 import data.compliance.policy.aws_s3.data_adapter
 import future.keywords.if
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 rule_evaluation if {
 	data_adapter.sse_algorithm == "AES256"
@@ -14,7 +14,7 @@ rule_evaluation if {
 	data_adapter.sse_algorithm == "aws:kms"
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_s3
 	not data_adapter.sse_algorithm == null
 

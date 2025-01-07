@@ -4,7 +4,7 @@ import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_storage_account
 	data_adapter.resource.extension.usedForActivityLogs == true
@@ -16,7 +16,7 @@ finding = result if {
 	)
 }
 
-default is_blob_access_private = false
+default is_blob_access_private := false
 
 is_blob_access_private if {
 	data_adapter.resource.properties.allowBlobPublicAccess == false

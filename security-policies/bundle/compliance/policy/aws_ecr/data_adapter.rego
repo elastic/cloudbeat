@@ -6,8 +6,8 @@ is_aws_ecr if {
 	input.subType == "aws-ecr"
 }
 
-cluster = input.resource.Cluster
+cluster := input.resource.Cluster
 
-image_scan_config = input.resource.ImageScanningConfiguration
+image_scan_config := input.resource.ImageScanningConfiguration
 
-repository_name = input.resource.RepositoryName
+repository_name := input.resource.RepositoryName

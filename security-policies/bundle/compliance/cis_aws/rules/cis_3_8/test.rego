@@ -6,7 +6,7 @@ import data.compliance.policy.aws_kms.ensure_symmetric_key_rotation_enabled as a
 import data.lib.test
 import future.keywords.if
 
-finding = audit.finding
+finding := audit.finding
 
 test_violation if {
 	eval_fail with input as rule_input(false)
@@ -20,7 +20,7 @@ test_not_evaluated if {
 	not_eval with input as test_data.not_evaluated_trail
 }
 
-rule_input(symmetric_default_enabled) = test_data.generate_kms_resource(symmetric_default_enabled)
+rule_input(symmetric_default_enabled) := test_data.generate_kms_resource(symmetric_default_enabled)
 
 eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

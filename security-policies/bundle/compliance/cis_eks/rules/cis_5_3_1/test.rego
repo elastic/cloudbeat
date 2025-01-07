@@ -18,7 +18,7 @@ test_not_evaluated if {
 	not finding with input as test_data.not_evaluated_input
 }
 
-violating_input_no_encryption_configuration = {
+violating_input_no_encryption_configuration := {
 	"type": "caas",
 	"subType": "aws-eks",
 	"resource": {"Cluster": {
@@ -42,16 +42,16 @@ violating_input_no_encryption_configuration = {
 	}},
 }
 
-violating_input_empty_encryption_array = generate_eks_input_with_encryption_config([])
+violating_input_empty_encryption_array := generate_eks_input_with_encryption_config([])
 
-violating_input_null_encryption_array = generate_eks_input_with_encryption_config(null)
+violating_input_null_encryption_array := generate_eks_input_with_encryption_config(null)
 
-non_violating_input = generate_eks_input_with_encryption_config([{
+non_violating_input := generate_eks_input_with_encryption_config([{
 	"Provider": {},
 	"Resources": [],
 }])
 
-generate_eks_input_with_encryption_config(encryption_config) = result if {
+generate_eks_input_with_encryption_config(encryption_config) := result if {
 	logging = {"ClusterLogging": [
 		{
 			"Enabled": false,
