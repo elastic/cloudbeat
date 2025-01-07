@@ -209,5 +209,5 @@ func TestAssetInventory_Period(t *testing.T) {
 
 	<-ctx.Done()
 	val := atomic.LoadInt64(&cycleCounter)
-	assert.Equal(t, val, cycleCounter, "Expected to run 2 cycles, got %d", cycleCounter)
+	assert.Equal(t, int64(2), val, "Expected to run 2 cycles, got %d", cycleCounter)
 }
