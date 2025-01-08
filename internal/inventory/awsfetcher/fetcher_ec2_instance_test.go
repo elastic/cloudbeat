@@ -64,6 +64,14 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			Placement: &types.Placement{
 				AvailabilityZone: pointers.Ref("1a"),
 			},
+			NetworkInterfaces: []types.InstanceNetworkInterface{
+				{
+					MacAddress: pointers.Ref("mac1"),
+				},
+				{
+					MacAddress: pointers.Ref("mac2"),
+				},
+			},
 		},
 		Region: "us-east",
 	}
@@ -79,7 +87,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
 			"arn:aws:ec2:us-east::ec2/234567890",
-			"test-server",
+			"private-dns",
 			inventory.WithRawAsset(instance1),
 			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
 			inventory.WithCloud(inventory.Cloud{
@@ -94,14 +102,15 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				ServiceName:      "AWS EC2",
 			}),
 			inventory.WithHost(inventory.Host{
-				Name:         "test-server",
+				ID:           "234567890",
+				Name:         "private-dns",
 				Architecture: string(types.ArchitectureValuesX8664),
 				Type:         "instance-type",
 				IP:           "public-ip-addr",
+				MacAddress:   []string{"mac1", "mac2"},
 			}),
 			inventory.WithUser(inventory.User{
-				ID:   "a123123",
-				Name: "123123:123123:123123",
+				ID: "123123:123123:123123",
 			}),
 		),
 
@@ -122,7 +131,9 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				MachineType:      "",
 				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.Host{}),
+			inventory.WithHost(inventory.Host{
+				MacAddress: []string{},
+			}),
 		),
 	}
 

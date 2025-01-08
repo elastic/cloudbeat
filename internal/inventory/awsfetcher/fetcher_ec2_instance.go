@@ -58,46 +58,43 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 		return
 	}
 
-	for _, instance := range instances {
-		if instance == nil {
+	for _, i := range instances {
+		if i == nil {
 			continue
 		}
 
 		iamFetcher := inventory.EmptyEnricher()
-		if instance.IamInstanceProfile != nil {
+		if i.IamInstanceProfile != nil {
 			iamFetcher = inventory.WithUser(inventory.User{
-				ID:   pointers.Deref(instance.IamInstanceProfile.Id),
-				Name: pointers.Deref(instance.IamInstanceProfile.Arn),
+				ID: pointers.Deref(i.IamInstanceProfile.Arn),
 			})
 		}
 
-		subnetIds := []string{}
-		if id := pointers.Deref(instance.SubnetId); id != "" {
-			subnetIds = append(subnetIds, id)
-		}
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
-			instance.GetResourceArn(),
-			instance.GetResourceName(),
+			i.GetResourceArn(),
+			pointers.Deref(i.PrivateDnsName),
 
-			inventory.WithRawAsset(instance),
-			inventory.WithLabels(e.getTags(instance)),
+			inventory.WithRawAsset(i),
+			inventory.WithLabels(e.getTags(i)),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
-				Region:           instance.Region,
-				AvailabilityZone: e.getAvailabilityZone(instance),
+				Region:           i.Region,
+				AvailabilityZone: e.getAvailabilityZone(i),
 				AccountID:        e.AccountId,
 				AccountName:      e.AccountName,
-				InstanceID:       pointers.Deref(instance.InstanceId),
-				InstanceName:     instance.GetResourceName(),
-				MachineType:      string(instance.InstanceType),
+				InstanceID:       pointers.Deref(i.InstanceId),
+				InstanceName:     i.GetResourceName(),
+				MachineType:      string(i.InstanceType),
 				ServiceName:      "AWS EC2",
 			}),
 			inventory.WithHost(inventory.Host{
-				Name:         instance.GetResourceName(),
-				Architecture: string(instance.Architecture),
-				Type:         string(instance.InstanceType),
-				IP:           pointers.Deref(instance.PublicIpAddress),
+				ID:           pointers.Deref(i.InstanceId),
+				Name:         pointers.Deref(i.PrivateDnsName),
+				Architecture: string(i.Architecture),
+				Type:         string(i.InstanceType),
+				IP:           pointers.Deref(i.PublicIpAddress),
+				MacAddress:   i.GetResourceMacAddresses(),
 			}),
 			iamFetcher,
 		)
