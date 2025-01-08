@@ -72,11 +72,7 @@ func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher A
 }
 
 func (a *AssetInventory) Run(ctx context.Context) {
-	for _, fetcher := range a.fetchers {
-		go func(fetcher AssetFetcher) {
-			fetcher.Fetch(ctx, a.assetCh)
-		}(fetcher)
-	}
+	a.runAllFetchersOnce(ctx)
 
 	assetsBuffer := make([]AssetEvent, 0, a.bufferMaxSize)
 	flushTicker := time.NewTicker(a.bufferFlushInterval)
@@ -89,12 +85,7 @@ func (a *AssetInventory) Run(ctx context.Context) {
 			return
 
 		case <-fetcherPeriod.C:
-			a.logger.Debug("starting a new fetch cycle")
-			for _, fetcher := range a.fetchers {
-				go func(fetcher AssetFetcher) {
-					fetcher.Fetch(ctx, a.assetCh)
-				}(fetcher)
-			}
+			a.runAllFetchersOnce(ctx)
 
 		case <-flushTicker.C:
 			if len(assetsBuffer) == 0 {
@@ -115,6 +106,17 @@ func (a *AssetInventory) Run(ctx context.Context) {
 				assetsBuffer = assetsBuffer[:0] // clear keeping cap
 			}
 		}
+	}
+}
+
+// runAllFetchersOnce runs every fetcher to collect assets to assetCh ONCE. It
+// should be called every cycle, once every `a.period`.
+func (a *AssetInventory) runAllFetchersOnce(ctx context.Context) {
+	a.logger.Debug("Running all fetchers once")
+	for _, fetcher := range a.fetchers {
+		go func(fetcher AssetFetcher) {
+			fetcher.Fetch(ctx, a.assetCh)
+		}(fetcher)
 	}
 }
 
