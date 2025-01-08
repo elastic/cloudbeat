@@ -14,7 +14,7 @@ locals {
       echo "Project is available!"
       exit 0
     else
-      echo "Retry $i: Project phase is '$phase'. Waiting..."
+      echo "Project phase is '$phase'. Waiting..."
       sleep $sleep_timeout
     fi
   done
