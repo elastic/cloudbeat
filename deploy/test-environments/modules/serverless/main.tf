@@ -25,7 +25,7 @@ resource "null_resource" "wait_for_project" {
 
   provisioner "local-exec" {
     # command = local.wait_script
-    command = "./wait-for-project.sh"
+    command = "./wait_for_project.sh"
     interpreter = ["/bin/bash", "-c"]
     environment = {
       "API_KEY" = var.ec_apikey
