@@ -97,6 +97,10 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
 			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::000:user/user-1",
+				Name: "user-1",
+			}),
 		),
 
 		inventory.NewAssetEvent(
@@ -110,6 +114,10 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 				AccountID:   "123",
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::000:user/user-2",
+				Name: "user-2",
 			}),
 		),
 	}

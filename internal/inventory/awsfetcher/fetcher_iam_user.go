@@ -84,6 +84,10 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 				AccountName: i.AccountName,
 				ServiceName: "AWS IAM",
 			}),
+			inventory.WithUser(inventory.User{
+				ID:   user.GetResourceArn(),
+				Name: user.GetResourceName(),
+			}),
 		)
 	}
 }
