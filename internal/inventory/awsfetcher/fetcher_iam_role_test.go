@@ -82,6 +82,10 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
 			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::0000:role/role-name-1",
+				Name: "role-name-1",
+			}),
 		),
 
 		inventory.NewAssetEvent(
@@ -95,6 +99,10 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 				AccountID:   "123",
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::0000:role/role-name-2",
+				Name: "role-name-2",
 			}),
 		),
 	}

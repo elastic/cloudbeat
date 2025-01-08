@@ -79,6 +79,10 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 				AccountName: i.AccountName,
 				ServiceName: "AWS IAM",
 			}),
+			inventory.WithUser(inventory.User{
+				ID:   pointers.Deref(role.Arn),
+				Name: pointers.Deref(role.RoleName),
+			}),
 		)
 	}
 }
