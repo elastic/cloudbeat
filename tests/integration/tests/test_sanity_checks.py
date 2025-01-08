@@ -155,7 +155,7 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
 
 
 @pytest.mark.sanity
-@pytest.makr.agentless
+@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_aws"])
 def test_cspm_aws_findings(
     cspm_client,
