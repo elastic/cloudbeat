@@ -414,6 +414,8 @@ jobs:
       - name: Run Sanity checks
         if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
         working-directory: ./tests
+        env:
+          USE_K8S: "false"
         run: |
           test_marker="sanity"
           if [[ "${AGENT_BASED}" == "false" ]]; then
