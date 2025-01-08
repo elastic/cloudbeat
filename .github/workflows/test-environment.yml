@@ -419,7 +419,8 @@ jobs:
           if [[ "${AGENT_BASED}" == "false" ]]; then
             test_marker="agentless"
           fi
-          poetry run pytest -m "${test_marker}" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+          echo "Marker: $test_marker"
+          poetry run pytest -m "$test_marker" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Run UI Sanity checks (Kibana)
         uses: ./.github/actions/kibana-ftr
