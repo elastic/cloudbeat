@@ -5,9 +5,9 @@ import data.compliance.policy.gcp.data_adapter
 import data.lib.test
 import future.keywords.if
 
-type = "cloud-dns"
+type := "cloud-dns"
 
-subtype = "gcp-dns-managed-zone"
+subtype := "gcp-dns-managed-zone"
 
 test_violation if {
 	eval_fail with input as test_data.generate_gcp_asset(type, subtype, {"data": {"dnssecConfig": {"defaultKeySpecs": [{"algorithm": "RSASHA1", "keyType": "ZONE_SIGNING"}, {"algorithm": "RSASHA256", "keyType": "KEY_SIGNING"}]}, "visibility": "PUBLIC"}}, null)

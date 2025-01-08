@@ -6,7 +6,7 @@ import data.compliance.policy.aws_cloudtrail.ensure_cloudwatch as audit
 import future.keywords.if
 
 # Ensure CloudTrail trails are integrated with CloudWatch Logs.
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_single_trail
 

@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-finding = result if {
+finding := result if {
 	data_adapter.is_policies_resource
 
 	result := common.generate_result_without_expected(
@@ -18,7 +18,7 @@ cloud_logging_is_configured if {
 	policy := input.resource[_].iam_policy
 	has_read_write_logs(policy)
 	not has_exempted_members(policy)
-} else = false
+} else := false
 
 has_read_write_logs(policy) if {
 	log_types := {t | t = policy.audit_configs[i].audit_log_configs[j].log_type}
@@ -26,9 +26,9 @@ has_read_write_logs(policy) if {
 	2 in log_types # "DATA_WRITE"
 	3 in log_types # "DATA_READ"
 	policy.audit_configs[_].service == "allServices"
-} else = false
+} else := false
 
 has_exempted_members(policy) if {
 	configs := policy.audit_configs[_].audit_log_configs[_]
 	count(configs.exempted_members) > 0
-} else = false
+} else := false

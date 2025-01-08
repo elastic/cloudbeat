@@ -9,7 +9,7 @@ import data.compliance.policy.process.data_adapter
 
 process_args := benchmark_data_adapter.process_args
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 rule_evaluation if {
 	lib_common.contains_key_with_value(process_args, "--service-account-lookup", "true")
@@ -17,7 +17,7 @@ rule_evaluation if {
 	not "--service-account-lookup" in object.keys(process_args)
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_kube_apiserver
 
 	# set result

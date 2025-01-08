@@ -11,7 +11,7 @@ is_true(value) if {
 # regal ignore:equals-pattern-matching
 is_false(value) if {
 	value == false
-} else = false
+} else := false
 
 all_true(values) if {
 	not some_false(values)
@@ -33,4 +33,4 @@ some_true(values) if {
 
 array_is_empty(array) if {
 	count(array) == 0
-} else = false
+} else := false

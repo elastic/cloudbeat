@@ -43,6 +43,6 @@ test_not_evaluated if {
 	not finding with input as test_data.not_evaluated_kube_api_input
 }
 
-rule_input(kind, rules) = test_data.kube_api_role_input(kind, rules)
+rule_input(kind, rules) := test_data.kube_api_role_input(kind, rules)
 
-rule(api_group, resource, verb) = test_data.kube_api_role_rule(api_group, resource, verb)
+rule(api_group, resource, verb) := test_data.kube_api_role_rule(api_group, resource, verb)

@@ -5,7 +5,7 @@ import future.keywords.if
 
 # Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)
 # If the --authorization-mode argument is present check that it is not set to AlwaysAllow.
-default rule_evaluation = false
+default rule_evaluation := false
 
 is_authorization_allow_all if {
 	audit.process_arg_not_key_value("--authorization-mode", "--authorization-mode", "AlwaysAllow")
@@ -22,4 +22,4 @@ rule_evaluation if {
 	audit.process_filter_variable_multi_comparison(["authorization", "mode"], ["authorization", "mode"], "AlwaysAllow")
 }
 
-finding = audit.finding(rule_evaluation)
+finding := audit.finding(rule_evaluation)

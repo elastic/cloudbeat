@@ -34,22 +34,22 @@ is_access_analyzers if {
 	input.subType == "aws-access-analyzers"
 }
 
-pwd_policy = policy if {
+pwd_policy := policy if {
 	is_pwd_policy
 	policy := input.resource
 }
 
-iam_user = input.resource
+iam_user := input.resource
 
-policy_document = input.resource.document
+policy_document := input.resource.document
 
-roles = input.resource.roles
+roles := input.resource.roles
 
-server_certificates = input.resource.certificates
+server_certificates := input.resource.certificates
 
-analyzers = input.resource.Analyzers
+analyzers := input.resource.Analyzers
 
-analyzer_regions = input.resource.Regions
+analyzer_regions := input.resource.Regions
 
 used_active_access_keys contains access_key if {
 	access_key := iam_user.access_keys[_]

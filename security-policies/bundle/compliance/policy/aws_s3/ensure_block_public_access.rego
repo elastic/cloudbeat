@@ -11,9 +11,9 @@ public_access_block_config_is_blocked(config) if {
 	config.BlockPublicPolicy == true
 	config.IgnorePublicAcls == true
 	config.RestrictPublicBuckets == true
-} else = false
+} else := false
 
-default rule_evaluation = false
+default rule_evaluation := false
 
 # If we got public access block config for both account and bucket
 rule_evaluation if {
@@ -39,7 +39,7 @@ rule_evaluation if {
 	public_access_block_config_is_blocked(data_adapter.public_access_block_configuration)
 }
 
-finding = result if {
+finding := result if {
 	data_adapter.is_s3
 
 	result := lib_common.generate_result_without_expected(

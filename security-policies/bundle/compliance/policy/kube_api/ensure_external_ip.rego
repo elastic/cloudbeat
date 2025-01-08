@@ -10,13 +10,13 @@ verify_external_ip if {
 	data_adapter.status.addresses[address].address != "0.0.0.0"
 }
 
-evidence["external_ip"] = result if {
+evidence["external_ip"] := result if {
 	not data.rule_evaluation
 	data_adapter.status.addresses[address].type == "ExternalIP"
 	result = data_adapter.status.addresses[address]
 }
 
-finding(rule_evaluation) = result if {
+finding(rule_evaluation) := result if {
 	data_adapter.is_kube_node
 
 	result_evidence = evidence with data.rule_evaluation as rule_evaluation

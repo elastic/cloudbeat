@@ -8,10 +8,10 @@ arg_values_contains(arguments, key, value) if {
 	argument := arguments[key]
 	values := split(argument, ",")
 	value in values
-} else = false
+} else := false
 
 # splits key value string by first occurrence of =
-split_key_value(key_value_string, delimiter) = [key, value] if {
+split_key_value(key_value_string, delimiter) := [key, value] if {
 	seperator_index := indexof(key_value_string, delimiter)
 
 	# extract key

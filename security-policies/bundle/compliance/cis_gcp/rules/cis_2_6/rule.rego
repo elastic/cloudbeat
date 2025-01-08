@@ -7,4 +7,4 @@ pattern := `resource.type="iam_role"
  protoPayload.methodName="google.iam.admin.v1.DeleteRole" OR
  protoPayload.methodName="google.iam.admin.v1.UpdateRole")`
 
-finding = audit.finding(pattern)
+finding := audit.finding(pattern)

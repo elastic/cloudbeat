@@ -5,15 +5,15 @@ import future.keywords.if
 import future.keywords.in
 
 # get a filter from a trail has at least one metric filter pattern that matches at least one pattern
-get_filter_matched_to_pattern(trail, patterns) = name if {
+get_filter_matched_to_pattern(trail, patterns) := name if {
 	some i, j
 	filter := trail.MetricFilters[i]
 	pattern := patterns[j]
 	expressions_equivalent(filter.ParsedFilterPattern, pattern)
 	name := filter.FilterName
-} else = ""
+} else := ""
 
-complex_expression(op, expressions) = {
+complex_expression(op, expressions) := {
 	"ComparisonOperator": "",
 	"Complex": true,
 	"Expressions": expressions,
@@ -23,7 +23,7 @@ complex_expression(op, expressions) = {
 	"Simple": false,
 }
 
-simple_expression(left, op, right) = {
+simple_expression(left, op, right) := {
 	"ComparisonOperator": op,
 	"Complex": false,
 	"Expressions": null,
@@ -35,7 +35,7 @@ simple_expression(left, op, right) = {
 
 # Known limitations on checking expressions equivalence:
 #   - It supports only two levels deep expressions (2 levels are as deep as our uses cases go)
-default expressions_equivalent(_, _) = false
+default expressions_equivalent(_, _) := false
 
 expressions_equivalent(exp1, exp2) if {
 	compare_simple_expressions(exp1, exp2)
