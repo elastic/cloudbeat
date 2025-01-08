@@ -211,3 +211,45 @@ func TestAssetInventory_Period(t *testing.T) {
 	val := atomic.LoadInt64(&cycleCounter)
 	assert.Equal(t, int64(2), val, "Expected to run 2 cycles, got %d", val)
 }
+
+func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
+	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
+	publisher := NewMockAssetPublisher(t)
+	publisher.EXPECT().PublishAll(mock.Anything).Maybe()
+
+	fetchers := []AssetFetcher{}
+	fetcherCounters := [](*int64){}
+	for i := 0; i < 5; i++ {
+		fetcher := NewMockAssetFetcher(t)
+		counter := int64(0)
+		fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, _ chan<- AssetEvent) {
+			atomic.AddInt64(&counter, 1)
+		})
+		fetchers = append(fetchers, fetcher)
+		fetcherCounters = append(fetcherCounters, &counter)
+	}
+
+	logger := logp.NewLogger("test_run")
+	inventory := AssetInventory{
+		logger:              logger,
+		fetchers:            fetchers,
+		publisher:           publisher,
+		bufferFlushInterval: 10 * time.Millisecond,
+		bufferMaxSize:       1,
+		period:              24 * time.Hour,
+		assetCh:             make(chan AssetEvent),
+		now:                 now,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+
+	inventory.runAllFetchersOnce(ctx)
+	<-ctx.Done()
+
+	// Check that EVERY fetcher has been called EXACTLY ONCE
+	for _, counter := range fetcherCounters {
+		val := atomic.LoadInt64(counter)
+		assert.Equal(t, int64(1), val, "Expected to run once, got %d", val)
+	}
+}
