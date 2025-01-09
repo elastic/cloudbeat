@@ -164,7 +164,3 @@ func slugfy(s string) string {
 func (a *AssetInventory) Stop() {
 	close(a.assetCh)
 }
-
-func removeEmpty(list []string) []string {
-	return lo.Filter(list, func(item string, _ int) bool { return item != "" })
-}
