@@ -25,11 +25,11 @@ resource "null_resource" "wait_for_project" {
 
   provisioner "local-exec" {
     # command = local.wait_script
-    command = "./wait_for_project.sh"
+    command     = "./wait_for_project.sh"
     interpreter = ["/bin/bash", "-c"]
     environment = {
-      "API_KEY" = var.ec_apikey
-      "EC_URL"  = var.ec_url
+      "API_KEY"    = var.ec_apikey
+      "EC_URL"     = var.ec_url
       "PROJECT_ID" = restapi_object.ec_project.api_data.id
     }
   }
