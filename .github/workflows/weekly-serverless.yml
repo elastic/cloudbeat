@@ -34,7 +34,6 @@ jobs:
       serverless_mode: true
       run-sanity-tests: true
       expiration_days: 0
-      agent-based: false
 
   destroy_environment:
     needs: ["naming", "deploy"]
