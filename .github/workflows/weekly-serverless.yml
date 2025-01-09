@@ -38,13 +38,12 @@ jobs:
 
   destroy_environment:
     needs: ["naming", "deploy"]
-    runs-on: ubuntu-latest
-    if: success()
     uses: ./.github/workflows/destroy-environment.yml
     secrets: inherit
     # Required for the 'Destroy' job in the 'destroy-environment.yml'
     permissions:
       contents: 'read'
       id-token: 'write'
+    if: success()
     with:
       prefix: ${{ needs.naming.outputs.deployment_name }}
