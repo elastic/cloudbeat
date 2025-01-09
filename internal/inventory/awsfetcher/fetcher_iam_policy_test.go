@@ -115,6 +115,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 			inventory.AssetClassificationAwsIamPolicy,
 			"arn:aws:iam::0000:policy/policy-1",
 			"policy-1",
+			inventory.WithRelatedAssetIds([]string{"178263"}),
 			inventory.WithRawAsset(policy1),
 			inventory.WithCloud(cloudField),
 			inventory.WithLabels(map[string]string{

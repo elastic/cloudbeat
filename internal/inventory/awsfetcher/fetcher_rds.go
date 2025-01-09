@@ -70,6 +70,7 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 			inventory.AssetClassificationAwsRds,
 			item.GetResourceArn(),
 			item.GetResourceName(),
+			inventory.WithRelatedAssetIds([]string{item.Identifier}),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,

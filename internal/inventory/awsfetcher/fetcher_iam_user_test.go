@@ -89,6 +89,7 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 			inventory.AssetClassificationAwsIamUser,
 			"arn:aws:iam::000:user/user-1",
 			"user-1",
+			inventory.WithRelatedAssetIds([]string{"u-123123"}),
 			inventory.WithRawAsset(user1),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,

@@ -25,6 +25,8 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type networkingFetcher struct {
@@ -96,6 +98,7 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 			classification,
 			item.GetResourceArn(),
 			item.GetResourceName(),
+			inventory.WithRelatedAssetIds([]string{pointers.Deref(s.retrieveId(item))}),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
@@ -105,5 +108,33 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 				ServiceName: "AWS Networking",
 			}),
 		)
+	}
+}
+
+func (s *networkingFetcher) retrieveId(awsResource awslib.AwsResource) *string {
+	switch resource := awsResource.(type) {
+	case *ec2.InternetGatewayInfo:
+		return resource.InternetGateway.InternetGatewayId
+	case *ec2.NatGatewayInfo:
+		return resource.NatGateway.NatGatewayId
+	case *ec2.NACLInfo:
+		return resource.NetworkAclId
+	case *ec2.NetworkInterfaceInfo:
+		return resource.NetworkInterface.NetworkInterfaceId
+	case *ec2.SecurityGroup:
+		return resource.GroupId
+	case *ec2.SubnetInfo:
+		return resource.Subnet.SubnetId
+	case *ec2.TransitGatewayAttachmentInfo:
+		return resource.TransitGatewayAttachment.TransitGatewayAttachmentId
+	case *ec2.TransitGatewayInfo:
+		return resource.TransitGateway.TransitGatewayId
+	case *ec2.VpcPeeringConnectionInfo:
+		return resource.VpcPeeringConnection.VpcPeeringConnectionId
+	case *ec2.VpcInfo:
+		return resource.Vpc.VpcId
+	default:
+		s.logger.Warnf("Unsupported Networking Fetcher type %T (id)", resource)
+		return nil
 	}
 }

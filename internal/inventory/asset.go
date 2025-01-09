@@ -17,6 +17,8 @@
 
 package inventory
 
+import "github.com/samber/lo"
+
 // AssetCategory is used to build the document index.
 type AssetCategory string
 
@@ -214,7 +216,16 @@ func WithRawAsset(raw any) AssetEnricher {
 
 func WithRelatedAssetIds(ids []string) AssetEnricher {
 	return func(a *AssetEvent) {
-		a.Entity.relatedEntityId = ids
+		ids = lo.Filter(ids, func(id string, _ int) bool {
+			return id != ""
+		})
+
+		if len(ids) == 0 {
+			a.Entity.relatedEntityId = nil
+			return
+		}
+
+		a.Entity.relatedEntityId = lo.Uniq(ids)
 	}
 }
 

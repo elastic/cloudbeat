@@ -88,6 +88,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			inventory.AssetClassificationAwsEc2Instance,
 			"arn:aws:ec2:us-east::ec2/234567890",
 			"private-dns",
+			inventory.WithRelatedAssetIds([]string{"234567890"}),
 			inventory.WithRawAsset(instance1),
 			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
 			inventory.WithCloud(inventory.Cloud{

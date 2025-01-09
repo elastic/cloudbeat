@@ -77,6 +77,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 			policy.GetResourceArn(),
 			resource.GetResourceName(),
 
+			inventory.WithRelatedAssetIds([]string{pointers.Deref(policy.PolicyId)}),
 			inventory.WithRawAsset(policy),
 			inventory.WithLabels(i.getTags(policy)),
 			inventory.WithCloud(inventory.Cloud{

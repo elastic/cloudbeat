@@ -71,6 +71,7 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 			pointers.Deref(role.Arn),
 			pointers.Deref(role.RoleName),
 
+			inventory.WithRelatedAssetIds([]string{pointers.Deref(role.RoleId)}),
 			inventory.WithRawAsset(*role),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,

@@ -76,6 +76,7 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 			user.GetResourceArn(),
 			user.GetResourceName(),
 
+			inventory.WithRelatedAssetIds([]string{user.UserId}),
 			inventory.WithRawAsset(user),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,

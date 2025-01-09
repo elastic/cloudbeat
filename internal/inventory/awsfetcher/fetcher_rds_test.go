@@ -86,6 +86,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 			inventory.AssetClassificationAwsRds,
 			"arn:aws:rds:eu-west-1:123:db:db1",
 			"db1",
+			inventory.WithRelatedAssetIds([]string{"db1"}),
 			inventory.WithRawAsset(instance1),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
@@ -98,6 +99,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 			inventory.AssetClassificationAwsRds,
 			"arn:aws:rds:eu-west-1:123:db:db2",
 			"db2",
+			inventory.WithRelatedAssetIds([]string{"db2"}),
 			inventory.WithRawAsset(instance2),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,

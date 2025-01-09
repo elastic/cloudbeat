@@ -75,6 +75,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			i.GetResourceArn(),
 			pointers.Deref(i.PrivateDnsName),
 
+			inventory.WithRelatedAssetIds([]string{pointers.Deref(i.InstanceId)}),
 			inventory.WithRawAsset(i),
 			inventory.WithLabels(e.getTags(i)),
 			inventory.WithCloud(inventory.Cloud{
