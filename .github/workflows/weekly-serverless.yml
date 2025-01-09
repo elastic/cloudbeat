@@ -4,7 +4,7 @@ run-name: Creating Serverless Environment by @${{ github.actor }}
 on:
     workflow_dispatch: # TODO: remove
     schedule:
-      - cron: '0 0 * * *' # every day at 00:00
+      - cron: '0 2 * * *' # every day at 02:00
 
 jobs:
   naming:
@@ -15,7 +15,7 @@ jobs:
       - name: Set deployment name
         id: set_deployment_name
         run: |
-          date_name=$(echo "weekly-env-$(date +'%d-%b')" | tr '[:upper:]' '[:lower:]')
+          date_name=$(echo "prd-env-$(date +'%d%b%H%M')" | tr '[:upper:]' '[:lower:]')
           echo "date-name=$date_name" >> $GITHUB_OUTPUT
 
   deploy:
@@ -35,3 +35,16 @@ jobs:
       run-sanity-tests: true
       expiration_days: 0
       agent-based: false
+
+  destroy_environment:
+    needs: ["naming", "deploy"]
+    runs-on: ubuntu-latest
+    if: success()
+    uses: ./.github/workflows/destroy-environment.yml
+    secrets: inherit
+    # Required for the 'Destroy' job in the 'destroy-environment.yml'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    with:
+      prefix: ${{ needs.naming.outputs.deployment_name }}
