@@ -380,7 +380,7 @@ jobs:
       - name: Deploy CIS Agent Based Integrations
         id: cis-integrations
         if: ${{ !cancelled() && env.AGENT_BASED == 'true' && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
-        uses: ./.github/actions/cis
+        uses: ./.github/actions/cis-agent-based
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
           cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
@@ -392,6 +392,7 @@ jobs:
           es-user: ${{ steps.elk-stack.outputs.es-user }}
           es-password: ${{ steps.elk-stack.outputs.es-password }}
           kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 

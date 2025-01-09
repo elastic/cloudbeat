@@ -54,6 +54,10 @@ inputs:
     required: false
     description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
     type: string
+  serverless-mode:
+    required: false
+    description: "Set to true if the environment is serverless"
+    default: 'false'
   tag-project:
     description: "Optional project resource tag"
     default: "test-environments"
@@ -186,7 +190,7 @@ runs:
 
     - name: Install D4C integration
       id: kspm-d4c
-      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && startsWith(env.STACK_VERSION, '8') && inputs.serverless_mode == 'false' && steps.deploy-cis-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -217,11 +221,16 @@ runs:
         DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
         S3_BUCKET: "${{ inputs.env-s3-bucket }}"
         AWS_REGION: "${{ inputs.aws-region }}"
+        SERVERLESS: "${{ inputs.serverless-mode }}"
       run: |
         aws eks --region ${AWS_REGION} update-kubeconfig --name ${DEPLOYMENT_NAME} --alias eks-config
         echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
         kubectl config use-context eks-config
-        kubectl apply -f tests/integrations_setup/kspm_d4c.yaml
+        manifest_yaml=kspm_eks.yaml
+        if [[ "$STACK_VERSION" == 8.* && "$SERVERLESS" == "false" ]]; then
+          manifest_yaml=kspm_d4c.yaml
+        fi
+        kubectl apply -f "tests/integrations_setup/$manifest_yaml"
 
     - name: Install KSPM Unmanaged integration
       id: kspm-unmanaged
