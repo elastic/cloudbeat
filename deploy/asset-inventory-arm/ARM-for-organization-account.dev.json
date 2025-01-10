@@ -318,7 +318,8 @@
                                         "actions": [
                                             "Microsoft.Web/sites/*/read",
                                             "Microsoft.Web/sites/config/Read",
-                                            "Microsoft.Web/sites/config/list/Action"
+                                            "Microsoft.Web/sites/config/list/Action",
+                                            "microsoft.directory/servicePrincipals/read"
                                         ]
                                     }
                                 ],
