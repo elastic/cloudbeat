@@ -155,6 +155,7 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
 
 
 @pytest.mark.sanity
+@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_aws"])
 def test_cspm_aws_findings(
     cspm_client,
@@ -217,6 +218,7 @@ def test_cnvm_findings(cnvm_client, match_type):
 
 
 @pytest.mark.sanity
+@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_gcp"])
 def test_cspm_gcp_findings(
     cspm_client,
@@ -252,6 +254,7 @@ def test_cspm_gcp_findings(
 
 
 @pytest.mark.sanity
+@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_azure"])
 def test_cspm_azure_findings(
     cspm_client,

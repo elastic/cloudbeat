@@ -1,0 +1,37 @@
+name: 'CIS Agentless Integrations Installation'
+description: 'Deploy CIS Agentless Integrations to Elastic Cloud'
+inputs:
+  cspm-azure-creds:
+    description: "Azure credentials for CSPM agent deployment"
+    required: true
+    type: string
+  es-user:
+    description: "Elasticsearch user"
+    default: "elastic"
+    required: false
+    type: string
+  es-password:
+    description: "Elasticsearch password"
+    default: "changeme"
+    required: false
+    type: string
+  kibana-url:
+    description: "Kibana URL"
+    default: "default"
+    required: false
+    type: string
+
+runs:
+  using: composite
+  steps:
+    - name: Install Agentless integrations
+      id: agentless-integrations
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        AZURE_CREDENTIALS: ${{ inputs.cspm-azure-creds }}
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        poetry run python ./install_agentless_integrations.py
