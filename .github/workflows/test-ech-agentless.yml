@@ -2,7 +2,7 @@ name: Test ECH Environment
 run-name: Creating ECH Environment by @${{ github.actor }}
 
 on:
-    workflow_dispatch: # TODO: remove
+    workflow_dispatch:
     schedule:
       - cron: '0 4 * * *' # every day at 04:00
 
@@ -10,8 +10,8 @@ jobs:
   naming:
     runs-on: ubuntu-latest
     outputs:
-      deployment_name: ${{ steps.set_variables.outputs.date-name }}
-      stack_version: ${{ steps.set_variables.outputs.stack-version }}
+      deployment_name: ${{ steps.set-variables.outputs.date-name }}
+      stack_version: ${{ steps.set-variables.outputs.stack-version }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -20,9 +20,8 @@ jobs:
         uses: ./.github/actions/hermit
 
       - name: Set variables
-        id: set_variables
+        id: set-variables
         env:
-          # Use the latest main snapshot version of the ELK stack.
           STACK_VERSION: ${{ env.ELK_VERSION }}
         run: |
           date_name=$(echo "prd-ech-$(date +'%d%b%H%M')" | tr '[:upper:]' '[:lower:]')
