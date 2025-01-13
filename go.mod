@@ -47,11 +47,11 @@ require (
 	github.com/aws/smithy-go v1.22.1
 	github.com/dgraph-io/ristretto v0.2.0
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250106054554-a93092894645
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250110180349-1861acf98ede
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.9.0
 	github.com/elastic/elastic-agent-client/v7 v7.17.0
-	github.com/elastic/elastic-agent-libs v0.18.0
+	github.com/elastic/elastic-agent-libs v0.18.1
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/go-logr/zapr v1.3.0
@@ -125,7 +125,7 @@ require (
 	github.com/elastic/elastic-transport-go/v8 v8.6.0 // indirect
 	github.com/elastic/go-docappender/v2 v2.3.0 // indirect
 	github.com/elastic/go-elasticsearch/v7 v7.17.10 // indirect
-	github.com/elastic/go-elasticsearch/v8 v8.14.0 // indirect
+	github.com/elastic/go-elasticsearch/v8 v8.17.0 // indirect
 	github.com/elastic/pkcs8 v1.0.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
@@ -336,7 +336,7 @@ require (
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.11.6 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.11.7 // indirect
 	github.com/elastic/go-concert v0.3.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.5.0 // indirect
