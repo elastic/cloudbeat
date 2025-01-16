@@ -23,7 +23,7 @@ mage package
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"
 if [[ -n "$VERSION_QUALIFIER" ]]; then
-  CSV_FILE+="-${VERSION_QUALIFIER}"
+    CSV_FILE+="-${VERSION_QUALIFIER}"
 fi
 
 echo "Generating $CSV_FILE.csv"
