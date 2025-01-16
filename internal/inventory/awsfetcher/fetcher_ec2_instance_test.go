@@ -64,6 +64,14 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			Placement: &types.Placement{
 				AvailabilityZone: pointers.Ref("1a"),
 			},
+			NetworkInterfaces: []types.InstanceNetworkInterface{
+				{
+					MacAddress: pointers.Ref("mac1"),
+				},
+				{
+					MacAddress: pointers.Ref("mac2"),
+				},
+			},
 		},
 		Region: "us-east",
 	}
@@ -78,77 +86,55 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
-			[]string{"arn:aws:ec2:us-east::ec2/234567890", "234567890"},
-			"test-server",
+			"arn:aws:ec2:us-east::ec2/234567890",
+			"private-dns",
+			inventory.WithRelatedAssetIds([]string{"234567890"}),
 			inventory.WithRawAsset(instance1),
-			inventory.WithTags(map[string]string{"Name": "test-server", "key": "value"}),
-			inventory.WithCloud(inventory.AssetCloud{
+			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
+			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
-				AvailabilityZone: pointers.Ref("1a"),
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Instance: &inventory.AssetCloudInstance{
-					Id:   "234567890",
-					Name: "test-server",
-				},
-				Machine: &inventory.AssetCloudMachine{
-					MachineType: "instance-type",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS EC2",
-				},
+				AvailabilityZone: "1a",
+				AccountID:        "123",
+				AccountName:      "alias",
+				InstanceID:       "234567890",
+				InstanceName:     "test-server",
+				MachineType:      "instance-type",
+				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.AssetHost{
-				Architecture:    string(types.ArchitectureValuesX8664),
-				ImageId:         pointers.Ref("image-id"),
-				InstanceType:    "instance-type",
-				Platform:        "linux",
-				PlatformDetails: pointers.Ref("ubuntu"),
+			inventory.WithHost(inventory.Host{
+				ID:           "234567890",
+				Name:         "private-dns",
+				Architecture: string(types.ArchitectureValuesX8664),
+				Type:         "instance-type",
+				IP:           "public-ip-addr",
+				MacAddress:   []string{"mac1", "mac2"},
 			}),
-			inventory.WithIAM(inventory.AssetIAM{
-				Id:  pointers.Ref("a123123"),
-				Arn: pointers.Ref("123123:123123:123123"),
-			}),
-			inventory.WithNetwork(inventory.AssetNetwork{
-				NetworkId:        pointers.Ref("vpc-id"),
-				SubnetIds:        []string{"subnetId"},
-				Ipv6Address:      pointers.Ref("ipv6"),
-				PublicIpAddress:  pointers.Ref("public-ip-addr"),
-				PrivateIpAddress: pointers.Ref("private-ip-addre"),
-				PublicDnsName:    pointers.Ref("public-dns"),
-				PrivateDnsName:   pointers.Ref("private-dns"),
+			inventory.WithUser(inventory.User{
+				ID: "123123:123123:123123",
 			}),
 		),
 
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
-			[]string{},
+			"",
 			"",
 			inventory.WithRawAsset(instance2),
-			inventory.WithTags(map[string]string{}),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "us-east",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Instance: &inventory.AssetCloudInstance{
-					Id:   "",
-					Name: "",
-				},
-				Machine: &inventory.AssetCloudMachine{
-					MachineType: "",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS EC2",
-				},
+			inventory.WithLabels(map[string]string{}),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:         inventory.AwsCloudProvider,
+				Region:           "us-east",
+				AvailabilityZone: "",
+				AccountID:        "123",
+				AccountName:      "alias",
+				InstanceID:       "",
+				InstanceName:     "",
+				MachineType:      "",
+				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.AssetHost{}),
-			inventory.WithNetwork(inventory.AssetNetwork{SubnetIds: []string{}}),
+			inventory.WithHost(inventory.Host{
+				MacAddress: []string{},
+			}),
 		),
 	}
 

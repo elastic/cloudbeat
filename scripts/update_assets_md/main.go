@@ -43,18 +43,21 @@ const (
 )
 
 type Classification struct {
-	Category    string
-	SubCategory string
-	Type        string
-	SubType     string
+	Category string
+	OldType  string
+	Type     string
 }
 
 func (item Classification) ID() string {
-	return fmt.Sprintf("%s_%s_%s_%s",
+	if item.Type != "" {
+		return fmt.Sprintf("%s_%s",
+			strcase.ToKebab(item.Category),
+			strcase.ToKebab(item.Type),
+		)
+	}
+	return fmt.Sprintf("%s_%s",
 		strcase.ToKebab(item.Category),
-		strcase.ToKebab(item.SubCategory),
-		strcase.ToKebab(item.Type),
-		strcase.ToKebab(item.SubType),
+		strcase.ToKebab(item.OldType),
 	)
 }
 
@@ -162,7 +165,7 @@ func loadClassificationsFromExcel(filepath string) (*ByProvider, error) {
 		return nil, fmt.Errorf("failed to open Excel file: %w", err)
 	}
 
-	sheets := map[int]string{1: AWS_PREFIX, 2: AZURE_PREFIX, 3: GCP_PREFIX}
+	sheets := map[int]string{3: AWS_PREFIX, 4: AZURE_PREFIX, 5: GCP_PREFIX}
 	for sheetNo, provider := range sheets {
 		sheetName := f.GetSheetName(sheetNo)
 		rows, err := f.GetRows(sheetName)
@@ -173,10 +176,9 @@ func loadClassificationsFromExcel(filepath string) (*ByProvider, error) {
 		headers := rows[0]
 		for _, row := range rows[1:] {
 			cl := Classification{
-				Category:    row[getColumnIndex(headers, "asset.category")],
-				SubCategory: row[getColumnIndex(headers, "asset.subcategory")],
-				Type:        row[getColumnIndex(headers, "asset.type")],
-				SubType:     row[getColumnIndex(headers, "asset.subtype")],
+				Category: row[getColumnIndex(headers, "Category")],
+				OldType:  row[getColumnIndex(headers, "(current) Type")],
+				Type:     row[getColumnIndex(headers, "Updated Type")],
 			}
 			output.Assign(provider, cl)
 		}
@@ -205,8 +207,8 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 		// table of assets
 		table := []string{
 			"<details> <summary>Full table</summary>\n",
-			"| Category | SubCategory | Type | SubType | Implemented? |",
-			"|---|---|---|---|---|",
+			"| Category | Old Type | Type | Implemented? |",
+			"|---|---|---|---|",
 		}
 
 		for _, key := range sortedKeys {
@@ -221,8 +223,8 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 			}
 			table = append(table,
 				fmt.Sprintf(
-					"| %s | %s | %s | %s | %s |",
-					item.Category, item.SubCategory, item.Type, item.SubType, status,
+					"| %s | %s | %s | %s |",
+					item.Category, item.OldType, item.Type, status,
 				),
 			)
 		}
@@ -290,8 +292,8 @@ func extractClassification(expr ast.Expr) (Classification, error) {
 		return output, fmt.Errorf("value is not a composite literal, skipping")
 	}
 
-	if len(compLit.Elts) != 4 {
-		return output, fmt.Errorf("expected full, 4-field classification; got %d", len(compLit.Elts))
+	if len(compLit.Elts) != 2 {
+		return output, fmt.Errorf("expected full, 2-field classification; got %d", len(compLit.Elts))
 	}
 
 	classification := []string{}
@@ -304,9 +306,7 @@ func extractClassification(expr ast.Expr) (Classification, error) {
 	}
 
 	output.Category = classification[0]
-	output.SubCategory = classification[1]
-	output.Type = classification[2]
-	output.SubType = classification[3]
+	output.Type = classification[1]
 	return output, nil
 }
 

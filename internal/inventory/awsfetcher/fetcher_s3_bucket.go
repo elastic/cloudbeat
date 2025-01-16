@@ -36,13 +36,6 @@ type s3BucketFetcher struct {
 	AccountName string
 }
 
-var s3BucketClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryInfrastructure,
-	SubCategory: inventory.SubCategoryStorage,
-	Type:        inventory.TypeObjectStorage,
-	SubType:     inventory.SubTypeS3,
-}
-
 type s3BucketProvider interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 }
@@ -74,23 +67,18 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 
 	for _, bucket := range buckets {
 		assetChannel <- inventory.NewAssetEvent(
-			s3BucketClassification,
-			[]string{bucket.GetResourceArn()},
+			inventory.AssetClassificationAwsS3Bucket,
+			bucket.GetResourceArn(),
 			bucket.GetResourceName(),
 
 			inventory.WithRawAsset(bucket),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   bucket.Region,
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS S3",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      bucket.Region,
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS S3",
 			}),
-			inventory.WithResourcePolicies(convertPolicy(bucket.BucketPolicy)...),
 		)
 	}
 }
