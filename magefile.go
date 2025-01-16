@@ -99,6 +99,9 @@ func Clean() error {
 func GolangCrossBuild() error {
 	args := devtools.DefaultGolangCrossBuildArgs()
 	args.CGO = false
+	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
+		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
+	}
 	return devtools.GolangCrossBuild(args)
 }
 
