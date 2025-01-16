@@ -20,16 +20,19 @@ steps:
     env:
       WORKFLOW: "snapshot"
 
+    # Allow building staging from main when VERSION_QUALIFIER is set (allow prerelease testing)
+    # TODO remove || build.env('VERSION_QUALIFIER') != null
   - label: ":package: Package Cloudbeat - Staging"
-    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true" || build.env('VERSION_QUALIFIER') != null
     env:
       WORKFLOW: "staging"
     key: "package-staging"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
 
+  # TODO remove || build.env('VERSION_QUALIFIER') != null
   - label: ":rocket: Publishing Staging DRA artifacts"
-    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true" || build.env('VERSION_QUALIFIER') != null
     depends_on: "package-staging"
     command: "./.buildkite/scripts/publish.sh"
     env:
