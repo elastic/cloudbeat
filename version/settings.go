@@ -52,6 +52,9 @@ func cloudbeatCommitTime() string {
 
 // CloudbeatSemanticVersion returns the current cloudbeat version.
 func CloudbeatSemanticVersion() string {
+	if qualifier != "" {
+		return defaultBeatVersion + "-" + qualifier
+	}
 	return defaultBeatVersion
 }
 
