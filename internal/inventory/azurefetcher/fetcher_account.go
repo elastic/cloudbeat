@@ -73,17 +73,13 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 	for _, item := range azureAssets {
 		assetChan <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.Id},
+			item.Id,
 			item.DisplayName,
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: item.TenantId,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   item.TenantId,
+				ServiceName: "Azure",
 			}),
 		)
 	}

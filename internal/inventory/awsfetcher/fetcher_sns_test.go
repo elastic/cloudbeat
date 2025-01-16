@@ -45,18 +45,14 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsSnsTopic,
-			[]string{"topic:arn:test-topic"},
+			"topic:arn:test-topic",
 			"test-topic",
 			inventory.WithRawAsset(awsResource),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS SNS",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS SNS",
 			}),
 		),
 	}

@@ -59,17 +59,13 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureServicePrincipal,
-			[]string{"id"},
+			"id",
 			"dn",
 			inventory.WithRawAsset(values),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: appOwnerOrganizationId.String(),
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   appOwnerOrganizationId.String(),
+				ServiceName: "Azure",
 			}),
 		),
 	}
