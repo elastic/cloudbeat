@@ -138,6 +138,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 				"iam":               e.IAM,
 				"resource_policies": e.ResourcePolicies,
 				"related.entity":    relatedEntity,
+				"entities":          map[string]any{"metadata": e.getEntityMetadata()},
 			},
 		}
 	})

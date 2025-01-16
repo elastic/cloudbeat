@@ -330,8 +330,33 @@ type AssetResourcePolicy struct {
 	Condition  map[string]any `json:"condition,omitempty"`
 }
 
+// EntityMetadata maps metadata required to use Entity Store
+type entityMetadata struct {
+	Entity AssetClassification `json:"asset"`
+	Cloud  *AssetCloud         `json:"cloud,omitempty"`
+	Host   *AssetHost          `json:"host,omitempty"`
+}
+
 // AssetEnricher functional builder function
 type AssetEnricher func(asset *AssetEvent)
+
+func (a *AssetEvent) getEntityMetadata() map[string]entityMetadata {
+	ids := a.Asset.Id
+
+	if len(ids) == 0 {
+		return nil
+	}
+
+	// Picking up only first id, we need to make a decision on if we
+	// have a "primary" id or if we duplicate data
+	return map[string]entityMetadata{
+		ids[0]: {
+			Entity: a.Asset.AssetClassification,
+			Cloud:  a.Cloud,
+			Host:   a.Host,
+		},
+	}
+}
 
 func NewAssetEvent(c AssetClassification, ids []string, name string, enrichers ...AssetEnricher) AssetEvent {
 	a := AssetEvent{
