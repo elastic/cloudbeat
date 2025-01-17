@@ -5,6 +5,13 @@ agents:
   image: "family/platform-ingest-beats-ubuntu-2204"
 
 steps:
+  # TODO: this will be removed/changed for 9.0 branch
+  - label: ":writing_hand: Conditionally set VERSION_QUALIFIER for main branch"
+    if: build.branch == "main"
+    env:
+      VERSION_QUALIFIER: "alpha1"
+    command: "echo 'Setting VERSION_QUALIFIER for branch main'"
+
   - label: ":package: Package Cloudbeat - Snapshot"
     if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
     env:
