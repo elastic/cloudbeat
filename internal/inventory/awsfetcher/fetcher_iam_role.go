@@ -68,20 +68,21 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamRole,
-			[]string{pointers.Deref(role.Arn), pointers.Deref(role.RoleId)},
+			pointers.Deref(role.Arn),
 			pointers.Deref(role.RoleName),
 
+			inventory.WithRelatedAssetIds([]string{pointers.Deref(role.RoleId)}),
 			inventory.WithRawAsset(*role),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   awslib.GlobalRegion,
-				Account: inventory.AssetCloudAccount{
-					Id:   i.AccountId,
-					Name: i.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      awslib.GlobalRegion,
+				AccountID:   i.AccountId,
+				AccountName: i.AccountName,
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   pointers.Deref(role.Arn),
+				Name: pointers.Deref(role.RoleName),
 			}),
 		)
 	}

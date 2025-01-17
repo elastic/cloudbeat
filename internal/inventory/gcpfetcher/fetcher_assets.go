@@ -85,45 +85,39 @@ func (f *assetsInventory) fetch(ctx context.Context, assetChan chan<- inventory.
 	for _, item := range gcpAssets {
 		assetChan <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.Name},
+			item.Name,
 			item.Name,
 			inventory.WithRawAsset(item),
 			inventory.WithRelatedAssetIds(
-				f.findRelatedAssetIds(classification.SubType, item),
+				f.findRelatedAssetIds(classification.Type, item),
 			),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.GcpCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   item.CloudAccount.AccountId,
-					Name: item.CloudAccount.AccountName,
-				},
-				Organization: inventory.AssetCloudOrganization{
-					Id:   item.CloudAccount.OrganisationId,
-					Name: item.CloudAccount.OrganizationName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: assetType,
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.GcpCloudProvider,
+				AccountID:   item.CloudAccount.AccountId,
+				AccountName: item.CloudAccount.AccountName,
+				ProjectID:   item.CloudAccount.OrganisationId,
+				ProjectName: item.CloudAccount.OrganizationName,
+				ServiceName: assetType,
 			}),
 		)
 	}
 }
 
-func (f *assetsInventory) findRelatedAssetIds(subType inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
+func (f *assetsInventory) findRelatedAssetIds(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
 	ids = append(ids, item.Ancestors...)
 	if item.Resource != nil {
 		ids = append(ids, item.Resource.Parent)
 	}
 
-	ids = append(ids, f.findRelatedAssetIdsForSubType(subType, item)...)
+	ids = append(ids, f.findRelatedAssetIdsForType(t, item)...)
 
 	ids = lo.Compact(ids)
 	ids = lo.Uniq(ids)
 	return ids
 }
 
-func (f *assetsInventory) findRelatedAssetIdsForSubType(subType inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
+func (f *assetsInventory) findRelatedAssetIdsForType(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
 
 	var fields map[string]*structpb.Value
@@ -131,8 +125,8 @@ func (f *assetsInventory) findRelatedAssetIdsForSubType(subType inventory.AssetS
 		fields = item.GetResource().GetData().GetFields()
 	}
 
-	switch subType {
-	case inventory.SubTypeGcpInstance:
+	switch t {
+	case inventory.AssetClassificationGcpInstance.Type:
 		if v, ok := fields["networkInterfaces"]; ok {
 			for _, networkInterface := range v.GetListValue().GetValues() {
 				networkInterfaceFields := networkInterface.GetStructValue().GetFields()
@@ -154,9 +148,9 @@ func (f *assetsInventory) findRelatedAssetIdsForSubType(subType inventory.AssetS
 		}
 		ids = appendIfExists(ids, fields, "machineType")
 		ids = appendIfExists(ids, fields, "zone")
-	case inventory.SubTypeGcpFirewall, inventory.SubTypeGcpSubnet:
+	case inventory.AssetClassificationGcpFirewall.Type, inventory.AssetClassificationGcpSubnet.Type:
 		ids = appendIfExists(ids, fields, "network")
-	case inventory.SubTypeGcpProject, inventory.SubTypeGcpBucket:
+	case inventory.AssetClassificationGcpProject.Type, inventory.AssetClassificationGcpBucket.Type:
 		if item.IamPolicy == nil {
 			break
 		}

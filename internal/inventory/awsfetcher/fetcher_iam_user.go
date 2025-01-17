@@ -73,20 +73,21 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamUser,
-			[]string{user.GetResourceArn(), user.UserId},
+			user.GetResourceArn(),
 			user.GetResourceName(),
 
+			inventory.WithRelatedAssetIds([]string{user.UserId}),
 			inventory.WithRawAsset(user),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   user.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   i.AccountId,
-					Name: i.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      user.GetRegion(),
+				AccountID:   i.AccountId,
+				AccountName: i.AccountName,
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   user.GetResourceArn(),
+				Name: user.GetResourceName(),
 			}),
 		)
 	}

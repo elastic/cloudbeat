@@ -68,19 +68,16 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	for _, item := range rdsInstances {
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
-			[]string{item.GetResourceArn(), item.Identifier},
+			item.GetResourceArn(),
 			item.GetResourceName(),
+			inventory.WithRelatedAssetIds([]string{item.Identifier}),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "RDS",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS RDS",
 			}),
 		)
 	}

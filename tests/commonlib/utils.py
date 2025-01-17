@@ -84,9 +84,7 @@ def get_ES_assets(
     elastic_client,
     timeout,
     category,
-    sub_category,
     type_,
-    sub_type,
     exec_timestamp,
     resource_identifier=lambda r: True,
 ) -> Union[List[munch.Munch], None]:
@@ -99,9 +97,7 @@ def get_ES_assets(
             assets = get_assets_from_index(
                 elastic_client,
                 category,
-                sub_category,
                 type_,
-                sub_type,
                 latest_timestamp,
             )
         except Exception as e:

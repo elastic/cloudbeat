@@ -31,63 +31,47 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestAssetInventory_Run(t *testing.T) {
+	var emptyRef *any
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
 	expected := []beat.Event{
 		{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_inventory.asset_inventory-infrastructure_compute_virtual-machine_ec2-instance-default"},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_inventory.asset_inventory-infrastructure_virtual_machine-default"},
 			Timestamp: now(),
 			Fields: mapstr.M{
-				"asset": Asset{
-					Id:   []string{"arn:aws:ec2:us-east::ec2/234567890"},
+				"entity": Entity{
+					Id:   "arn:aws:ec2:us-east::ec2/234567890",
 					Name: "test-server",
 					AssetClassification: AssetClassification{
-						Category:    CategoryInfrastructure,
-						SubCategory: SubCategoryCompute,
-						Type:        TypeVirtualMachine,
-						SubType:     SubTypeEC2,
+						Category: CategoryInfrastructure,
+						Type:     "Virtual Machine",
 					},
-					Tags: map[string]string{"Name": "test-server", "key": "value"},
 				},
-				"cloud": &AssetCloud{
+				"event": Event{
+					Kind: "asset",
+				},
+				"labels": map[string]string{"Name": "test-server", "key": "value"},
+				"cloud": &Cloud{
 					Provider: AwsCloudProvider,
 					Region:   "us-east",
 				},
-				"host": &AssetHost{
-					Architecture:    string(types.ArchitectureValuesX8664),
-					ImageId:         pointers.Ref("image-id"),
-					InstanceType:    "instance-type",
-					Platform:        "linux",
-					PlatformDetails: pointers.Ref("ubuntu"),
+				"host": &Host{
+					Architecture: string(types.ArchitectureValuesX8664),
+					Type:         "instance-type",
+					ID:           "i-a2",
 				},
-				"network": &AssetNetwork{
-					NetworkId:        pointers.Ref("vpc-id"),
-					SubnetIds:        []string{"subnetId"},
-					Ipv6Address:      pointers.Ref("ipv6"),
-					PublicIpAddress:  pointers.Ref("public-ip-addr"),
-					PrivateIpAddress: pointers.Ref("private-ip-addre"),
-					PublicDnsName:    pointers.Ref("public-dns"),
-					PrivateDnsName:   pointers.Ref("private-dns"),
+				"network": &Network{
+					Name: "vpc-id",
 				},
-				"iam": &AssetIAM{
-					Id:  pointers.Ref("a123123"),
-					Arn: pointers.Ref("123123:123123:123123"),
-				},
-				"resource_policies": []AssetResourcePolicy{
-					{
-						Version:   pointers.Ref("2012-10-17"),
-						Id:        pointers.Ref("Test 1"),
-						Effect:    "Allow",
-						Principal: map[string]any{"*": "*"},
-						Action:    []string{"read"},
-						Resource:  []string{"s3/bucket"},
-					},
+				"user": &User{
+					ID:   "a123123",
+					Name: "name",
 				},
 				"related.entity": []string{"arn:aws:ec2:us-east::ec2/234567890"},
+				"Attributes":     emptyRef,
 			},
 		},
 	}
@@ -102,45 +86,27 @@ func TestAssetInventory_Run(t *testing.T) {
 	fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, assetChannel chan<- AssetEvent) {
 		assetChannel <- NewAssetEvent(
 			AssetClassification{
-				Category:    CategoryInfrastructure,
-				SubCategory: SubCategoryCompute,
-				Type:        TypeVirtualMachine,
-				SubType:     SubTypeEC2,
+				Category: CategoryInfrastructure,
+				Type:     "Virtual Machine",
 			},
-			[]string{"arn:aws:ec2:us-east::ec2/234567890"},
+			"arn:aws:ec2:us-east::ec2/234567890",
 			"test-server",
-			WithTags(map[string]string{"Name": "test-server", "key": "value"}),
-			WithCloud(AssetCloud{
+			WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
+			WithCloud(Cloud{
 				Provider: AwsCloudProvider,
 				Region:   "us-east",
 			}),
-			WithHost(AssetHost{
-				Architecture:    string(types.ArchitectureValuesX8664),
-				ImageId:         pointers.Ref("image-id"),
-				InstanceType:    "instance-type",
-				Platform:        "linux",
-				PlatformDetails: pointers.Ref("ubuntu"),
+			WithHost(Host{
+				Architecture: string(types.ArchitectureValuesX8664),
+				Type:         "instance-type",
+				ID:           "i-a2",
 			}),
-			WithIAM(AssetIAM{
-				Id:  pointers.Ref("a123123"),
-				Arn: pointers.Ref("123123:123123:123123"),
+			WithUser(User{
+				ID:   "a123123",
+				Name: "name",
 			}),
-			WithNetwork(AssetNetwork{
-				NetworkId:        pointers.Ref("vpc-id"),
-				SubnetIds:        []string{"subnetId"},
-				Ipv6Address:      pointers.Ref("ipv6"),
-				PublicIpAddress:  pointers.Ref("public-ip-addr"),
-				PrivateIpAddress: pointers.Ref("private-ip-addre"),
-				PublicDnsName:    pointers.Ref("public-dns"),
-				PrivateDnsName:   pointers.Ref("private-dns"),
-			}),
-			WithResourcePolicies(AssetResourcePolicy{
-				Version:   pointers.Ref("2012-10-17"),
-				Id:        pointers.Ref("Test 1"),
-				Effect:    "Allow",
-				Principal: map[string]any{"*": "*"},
-				Action:    []string{"read"},
-				Resource:  []string{"s3/bucket"},
+			WithNetwork(Network{
+				Name: "vpc-id",
 			}),
 		)
 	})
