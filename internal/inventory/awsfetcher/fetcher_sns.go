@@ -60,19 +60,15 @@ func (s *snsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsSnsTopic,
-			[]string{item.GetResourceArn()},
+			item.GetResourceArn(),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS SNS",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS SNS",
 			}),
 		)
 	}

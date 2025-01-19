@@ -49,8 +49,9 @@ import (
 )
 
 const (
-	snapshotEnv   = "SNAPSHOT"
-	agentDropPath = "AGENT_DROP_PATH"
+	snapshotEnv         = "SNAPSHOT"
+	agentDropPath       = "AGENT_DROP_PATH"
+	cloudbeatModulePath = "github.com/elastic/cloudbeat"
 )
 
 func init() {
@@ -80,6 +81,9 @@ func Build() error {
 
 	args := devtools.DefaultBuildArgs()
 	args.CGO = false
+	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
+		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
+	}
 	return devtools.Build(args)
 }
 
@@ -95,6 +99,9 @@ func Clean() error {
 func GolangCrossBuild() error {
 	args := devtools.DefaultGolangCrossBuildArgs()
 	args.CGO = false
+	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
+		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
+	}
 	return devtools.GolangCrossBuild(args)
 }
 

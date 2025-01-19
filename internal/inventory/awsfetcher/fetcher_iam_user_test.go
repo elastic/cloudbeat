@@ -87,37 +87,38 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamUser,
-			[]string{"arn:aws:iam::000:user/user-1", "u-123123"},
+			"arn:aws:iam::000:user/user-1",
 			"user-1",
+			inventory.WithRelatedAssetIds([]string{"u-123123"}),
 			inventory.WithRawAsset(user1),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "global",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "global",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::000:user/user-1",
+				Name: "user-1",
 			}),
 		),
 
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamUser,
-			[]string{"arn:aws:iam::000:user/user-2"},
+			"arn:aws:iam::000:user/user-2",
 			"user-2",
 			inventory.WithRawAsset(user2),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "global",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "global",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::000:user/user-2",
+				Name: "user-2",
 			}),
 		),
 	}

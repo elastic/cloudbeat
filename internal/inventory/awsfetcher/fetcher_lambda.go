@@ -85,19 +85,15 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 		}
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			[]string{id},
+			id,
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Lambda",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS Lambda",
 			}),
 		)
 	}
