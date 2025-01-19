@@ -103,6 +103,16 @@ on:
         type: string
         required: false
         default: "cis"
+      agent-based:
+        description: "Run agent-based integrations"
+        type: boolean
+        required: false
+        default: true
+      agentless:
+        description: "Run agentless integrations"
+        type: boolean
+        required: false
+        default: true
     outputs:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
@@ -134,7 +144,6 @@ jobs:
       TF_VAR_ess_region: ${{ inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
       TF_VAR_serverless_mode: ${{ inputs.serverless_mode }}
-      TEST_AGENTLESS: true
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
@@ -232,6 +241,28 @@ jobs:
           else
             echo "INFRA_TYPE=$INPUT_INFRA_TYPE" >> $GITHUB_ENV
           fi
+
+      - name: Init Agent Based
+        id: init-agent-based
+        env:
+          INPUT_AGENT_BASED: ${{ inputs.agent-based }}
+        run: |
+          agent_base_flag=true
+          if [[ -n "${INPUT_AGENT_BASED}" ]]; then
+            agent_base_flag=$INPUT_AGENT_BASED
+          fi
+          echo "AGENT_BASED=$agent_base_flag" >> $GITHUB_ENV
+
+      - name: Init Agentless
+        id: init-agentless
+        env:
+          INPUT_AGENTLESS: ${{ inputs.agentless }}
+        run: |
+          agentless_flag=true
+          if [[ -n "${INPUT_AGENTLESS}" ]]; then
+            agentless_flag=$INPUT_AGENTLESS
+          fi
+          echo "AGENTLESS=$agentless_flag" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -352,10 +383,10 @@ jobs:
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
-      - name: Deploy CIS Integrations
+      - name: Deploy CIS Agent Based Integrations
         id: cis-integrations
-        if: ${{ !cancelled() && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
-        uses: ./.github/actions/cis
+        if: ${{ !cancelled() && env.AGENT_BASED == 'true' && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
+        uses: ./.github/actions/cis-agent-based
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
           cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
@@ -367,9 +398,19 @@ jobs:
           es-user: ${{ steps.elk-stack.outputs.es-user }}
           es-password: ${{ steps.elk-stack.outputs.es-password }}
           kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
-          test-agentless: ${{ env.TEST_AGENTLESS }}
+          serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
+
+      - name: Deploy CIS Agentless Integrations
+        id: cis-agentless-integrations
+        if: ${{ !cancelled() && env.AGENTLESS == 'true' && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
+        uses: ./.github/actions/cis-agentless
+        with:
+          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+          es-user: ${{ steps.elk-stack.outputs.es-user }}
+          es-password: ${{ steps.elk-stack.outputs.es-password }}
+          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
 
       - name: Wait for agents to enroll
         id: wait-for-agents
@@ -380,8 +421,14 @@ jobs:
       - name: Run Sanity checks
         if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
         working-directory: ./tests
+        env:
+          USE_K8S: "false"
         run: |
-          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+          test_marker="sanity"
+          if [[ "${AGENT_BASED}" == "false" ]]; then
+            test_marker="agentless"
+          fi
+          poetry run pytest -m "$test_marker" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Run UI Sanity checks (Kibana)
         uses: ./.github/actions/kibana-ftr
