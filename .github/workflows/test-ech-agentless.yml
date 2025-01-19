@@ -2,9 +2,15 @@ name: Test ECH Environment
 run-name: Creating ECH Environment by @${{ github.actor }}
 
 on:
-    workflow_dispatch:
-    schedule:
-      - cron: '0 4 * * *' # every day at 04:00
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+      - "8.x"
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 4 * * *' # every day at 04:00
 
 jobs:
   naming:
@@ -28,28 +34,28 @@ jobs:
           echo "date-name=$date_name" >> $GITHUB_OUTPUT
           echo "stack-version=$STACK_VERSION" >> $GITHUB_OUTPUT
 
-  deploy:
-    needs: naming
-    uses: ./.github/workflows/test-environment.yml
-    secrets: inherit
-    # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    with:
-      deployment_name: ${{ needs.naming.outputs.deployment_name }}
-      elk-stack-version: ${{ needs.naming.outputs.stack_version }}
-      run-sanity-tests: true
-      expiration_days: 0
+  # deploy:
+  #   needs: naming
+  #   uses: ./.github/workflows/test-environment.yml
+  #   secrets: inherit
+  #   # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   with:
+  #     deployment_name: ${{ needs.naming.outputs.deployment_name }}
+  #     elk-stack-version: ${{ needs.naming.outputs.stack_version }}
+  #     run-sanity-tests: true
+  #     expiration_days: 0
 
-  destroy_environment:
-    needs: ["naming", "deploy"]
-    uses: ./.github/workflows/destroy-environment.yml
-    secrets: inherit
-    # Required for the 'Destroy' job in the 'destroy-environment.yml'
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    if: success()
-    with:
-      prefix: ${{ needs.naming.outputs.deployment_name }}
+  # destroy_environment:
+  #   needs: ["naming", "deploy"]
+  #   uses: ./.github/workflows/destroy-environment.yml
+  #   secrets: inherit
+  #   # Required for the 'Destroy' job in the 'destroy-environment.yml'
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   if: success()
+  #   with:
+  #     prefix: ${{ needs.naming.outputs.deployment_name }}
