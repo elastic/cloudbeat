@@ -20,6 +20,8 @@ package version
 // name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
 const defaultBeatVersion = "9.0.0"
 
+var qualifier = ""
+
 // Version represents version information for a package
 type Version struct {
 	Version    string `mapstructure:"version,omitempty"`     // Version is the semantic version of the package
