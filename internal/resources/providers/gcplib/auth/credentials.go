@@ -24,11 +24,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type GcpFactoryConfig struct {
@@ -38,7 +38,7 @@ type GcpFactoryConfig struct {
 }
 
 type ConfigProviderAPI interface {
-	GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error)
+	GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error)
 }
 
 type GoogleAuthProviderAPI interface {
@@ -53,7 +53,7 @@ var ErrMissingOrgId = errors.New("organization ID is required for organization a
 var ErrInvalidCredentialsJSON = errors.New("invalid credentials JSON")
 var ErrProjectNotFound = errors.New("no project ID was found")
 
-func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	// used in cloud shell flow (and development)
 	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
 		return p.getApplicationDefaultCredentials(ctx, cfg, log)
@@ -75,12 +75,12 @@ func (p *ConfigProvider) getGcpFactoryConfig(ctx context.Context, cfg config.Gcp
 }
 
 // https://cloud.google.com/docs/authentication/application-default-credentials
-func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getDefaultCredentialsConfig create credentials options")
 	return p.getGcpFactoryConfig(ctx, cfg, nil)
 }
 
-func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getCustomCredentialsConfig create credentials options")
 
 	var opts []option.ClientOption

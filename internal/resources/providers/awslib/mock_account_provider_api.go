@@ -25,7 +25,7 @@ import (
 	aws "github.com/aws/aws-sdk-go-v2/aws"
 	cloud "github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 
-	logp "github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -44,15 +44,15 @@ func (_m *MockAccountProviderAPI) EXPECT() *MockAccountProviderAPI_Expecter {
 }
 
 // ListAccounts provides a mock function with given fields: ctx, log, cfg
-func (_m *MockAccountProviderAPI) ListAccounts(ctx context.Context, log *logp.Logger, cfg aws.Config) ([]cloud.Identity, error) {
+func (_m *MockAccountProviderAPI) ListAccounts(ctx context.Context, log *clog.Logger, cfg aws.Config) ([]cloud.Identity, error) {
 	ret := _m.Called(ctx, log, cfg)
 
 	var r0 []cloud.Identity
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, aws.Config) ([]cloud.Identity, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, aws.Config) ([]cloud.Identity, error)); ok {
 		return rf(ctx, log, cfg)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, aws.Config) []cloud.Identity); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, aws.Config) []cloud.Identity); ok {
 		r0 = rf(ctx, log, cfg)
 	} else {
 		if ret.Get(0) != nil {
@@ -60,7 +60,7 @@ func (_m *MockAccountProviderAPI) ListAccounts(ctx context.Context, log *logp.Lo
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *logp.Logger, aws.Config) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *clog.Logger, aws.Config) error); ok {
 		r1 = rf(ctx, log, cfg)
 	} else {
 		r1 = ret.Error(1)
@@ -76,15 +76,15 @@ type MockAccountProviderAPI_ListAccounts_Call struct {
 
 // ListAccounts is a helper method to define mock.On call
 //   - ctx context.Context
-//   - log *logp.Logger
+//   - log *clog.Logger
 //   - cfg aws.Config
 func (_e *MockAccountProviderAPI_Expecter) ListAccounts(ctx interface{}, log interface{}, cfg interface{}) *MockAccountProviderAPI_ListAccounts_Call {
 	return &MockAccountProviderAPI_ListAccounts_Call{Call: _e.mock.On("ListAccounts", ctx, log, cfg)}
 }
 
-func (_c *MockAccountProviderAPI_ListAccounts_Call) Run(run func(ctx context.Context, log *logp.Logger, cfg aws.Config)) *MockAccountProviderAPI_ListAccounts_Call {
+func (_c *MockAccountProviderAPI_ListAccounts_Call) Run(run func(ctx context.Context, log *clog.Logger, cfg aws.Config)) *MockAccountProviderAPI_ListAccounts_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*logp.Logger), args[2].(aws.Config))
+		run(args[0].(context.Context), args[1].(*clog.Logger), args[2].(aws.Config))
 	})
 	return _c
 }
@@ -94,7 +94,7 @@ func (_c *MockAccountProviderAPI_ListAccounts_Call) Return(_a0 []cloud.Identity,
 	return _c
 }
 
-func (_c *MockAccountProviderAPI_ListAccounts_Call) RunAndReturn(run func(context.Context, *logp.Logger, aws.Config) ([]cloud.Identity, error)) *MockAccountProviderAPI_ListAccounts_Call {
+func (_c *MockAccountProviderAPI_ListAccounts_Call) RunAndReturn(run func(context.Context, *clog.Logger, aws.Config) ([]cloud.Identity, error)) *MockAccountProviderAPI_ListAccounts_Call {
 	_c.Call.Return(run)
 	return _c
 }

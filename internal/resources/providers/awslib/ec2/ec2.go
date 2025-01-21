@@ -23,9 +23,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ElasticCompute interface {
@@ -36,7 +36,7 @@ type ElasticCompute interface {
 	GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error)
 }
 
-func NewEC2Provider(ctx context.Context, log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewEC2Provider(ctx context.Context, log *clog.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return ec2.NewFromConfig(cfg)
 	}
@@ -48,7 +48,7 @@ func NewEC2Provider(ctx context.Context, log *logp.Logger, awsAccountID string, 
 	}
 }
 
-func NewCurrentRegionEC2Provider(ctx context.Context, log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewCurrentRegionEC2Provider(ctx context.Context, log *clog.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return ec2.NewFromConfig(cfg)
 	}

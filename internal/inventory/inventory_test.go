@@ -26,11 +26,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -111,7 +111,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		)
 	})
 
-	logger := logp.NewLogger("test_run")
+	logger := clog.NewLogger("test_run")
 	inventory := AssetInventory{
 		logger:              logger,
 		fetchers:            []AssetFetcher{fetcher},
@@ -153,7 +153,7 @@ func TestAssetInventory_Period(t *testing.T) {
 		atomic.AddInt64(&cycleCounter, 1)
 	})
 
-	logger := logp.NewLogger("test_run")
+	logger := clog.NewLogger("test_run")
 	inventory := AssetInventory{
 		logger:              logger,
 		fetchers:            []AssetFetcher{fetcher},
@@ -195,7 +195,7 @@ func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
 		fetcherCounters = append(fetcherCounters, &counter)
 	}
 
-	logger := logp.NewLogger("test_run")
+	logger := clog.NewLogger("test_run")
 	inventory := AssetInventory{
 		logger:              logger,
 		fetchers:            fetchers,

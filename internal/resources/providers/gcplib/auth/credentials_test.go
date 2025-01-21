@@ -23,7 +23,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -31,6 +30,7 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 const (
@@ -290,7 +290,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 		}
 		t.Run(tt.name, func(t *testing.T) {
 			for idx, cfg := range tt.cfg {
-				got, err := p.GetGcpClientConfig(context.Background(), cfg, logp.NewLogger("gcp credentials test"))
+				got, err := p.GetGcpClientConfig(context.Background(), cfg, clog.NewLogger("gcp credentials test"))
 				if tt.wantErr {
 					require.Error(t, err)
 				} else {

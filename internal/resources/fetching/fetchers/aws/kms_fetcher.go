@@ -21,16 +21,16 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/kms"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type KmsFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	kms        kms.KMS
 	resourceCh chan fetching.ResourceInfo
 }
@@ -39,7 +39,7 @@ type KmsResource struct {
 	key awslib.AwsResource
 }
 
-func NewKMSFetcher(log *logp.Logger, provider kms.KMS, ch chan fetching.ResourceInfo) *KmsFetcher {
+func NewKMSFetcher(log *clog.Logger, provider kms.KMS, ch chan fetching.ResourceInfo) *KmsFetcher {
 	return &KmsFetcher{
 		log:        log,
 		kms:        provider,

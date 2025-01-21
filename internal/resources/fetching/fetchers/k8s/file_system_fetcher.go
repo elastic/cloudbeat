@@ -32,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/user"
 )
 
@@ -83,13 +84,13 @@ type FSResource struct {
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	osUser     user.OSUser
 	resourceCh chan fetching.ResourceInfo
 	patterns   []string
 }
 
-func NewFsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, patterns []string) *FileSystemFetcher {
+func NewFsFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, patterns []string) *FileSystemFetcher {
 	return &FileSystemFetcher{
 		log:        log,
 		resourceCh: ch,

@@ -27,6 +27,13 @@ func (c *Logger) Named(name string) *Logger {
 	return &Logger{logger}
 }
 
+func (l *Logger) WithOptions(options ...logp.LogOption) *Logger {
+	return &Logger{l.Logger.WithOptions(options...)}
+}
+func (l *Logger) With(args ...any) *Logger {
+	return &Logger{l.Logger.With(args...)}
+}
+
 func NewLogger(selector string, options ...logp.LogOption) *Logger {
 	options = append(options, zap.AddCallerSkip(1))
 	logger := logp.NewLogger(selector).WithOptions(options...)

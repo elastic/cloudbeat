@@ -22,10 +22,10 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 const (
@@ -39,6 +39,6 @@ type flavorBase struct {
 	cancel    context.CancelFunc
 	config    *config.Config
 	client    beat.Client
-	log       *logp.Logger
+	log       *clog.Logger
 	publisher *Publisher
 }

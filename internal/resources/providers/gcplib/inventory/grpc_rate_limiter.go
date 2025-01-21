@@ -21,7 +21,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/googleapis/gax-go/v2"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
@@ -39,7 +39,7 @@ var RetryOnResourceExhausted = gax.WithRetry(func() gax.Retryer {
 
 type AssetsInventoryRateLimiter struct {
 	methods map[string]*rate.Limiter
-	log     *logp.Logger
+	log     *clog.Logger
 }
 
 // a map of asset inventory client methods and their quotas.
@@ -49,7 +49,7 @@ var methods = map[string]*rate.Limiter{
 	"/google.cloud.asset.v1.AssetService/ListAssets": rate.NewLimiter(rate.Every(time.Minute/100), 1),
 }
 
-func NewAssetsInventoryRateLimiter(log *logp.Logger) *AssetsInventoryRateLimiter {
+func NewAssetsInventoryRateLimiter(log *clog.Logger) *AssetsInventoryRateLimiter {
 	return &AssetsInventoryRateLimiter{
 		log:     log,
 		methods: methods,

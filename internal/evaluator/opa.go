@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/v1/plugins"
 	"github.com/open-policy-agent/opa/v1/sdk"
@@ -31,12 +30,13 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	dlogger "github.com/elastic/cloudbeat/internal/evaluator/debug_logger"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 var now = func() time.Time { return time.Now().UTC() }
 
 type OpaEvaluator struct {
-	log       *logp.Logger
+	log       *clog.Logger
 	opa       *sdk.OPA
 	benchmark string
 }
@@ -63,7 +63,7 @@ var logPlugin = `
 		"%s": {}
 	}`
 
-func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg *config.Config) (*OpaEvaluator, error) {
+func NewOpaEvaluator(ctx context.Context, log *clog.Logger, cfg *config.Config) (*OpaEvaluator, error) {
 	// provide the OPA configuration which specifies
 	// fetching policy bundle and logging decisions locally to the console
 

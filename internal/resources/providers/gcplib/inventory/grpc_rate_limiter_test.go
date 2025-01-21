@@ -22,14 +22,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/time/rate"
 )
 
 type RateLimiterTestSuite struct {
 	suite.Suite
-	logger      *logp.Logger
+	logger      *clog.Logger
 	rateLimiter *AssetsInventoryRateLimiter
 }
 
@@ -38,7 +38,7 @@ func TestInventoryRateLimiterTestSuite(t *testing.T) {
 }
 
 func (s *RateLimiterTestSuite) SetupTest() {
-	s.logger = logp.NewLogger("test")
+	s.logger = clog.NewLogger("test")
 	s.rateLimiter = NewAssetsInventoryRateLimiter(s.logger)
 }
 

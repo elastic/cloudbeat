@@ -20,17 +20,16 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type iamPolicyFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    iamPolicyProvider
 	AccountId   string
 	AccountName string
@@ -40,7 +39,7 @@ type iamPolicyProvider interface {
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newIamPolicyFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamPolicyProvider) inventory.AssetFetcher {
+func newIamPolicyFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamPolicyProvider) inventory.AssetFetcher {
 	return &iamPolicyFetcher{
 		logger:      logger,
 		provider:    provider,

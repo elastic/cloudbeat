@@ -23,9 +23,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Client interface {
@@ -38,13 +38,13 @@ type LoadBalancerDescriber interface {
 }
 
 type Provider struct {
-	log          *logp.Logger
+	log          *clog.Logger
 	client       Client
 	clients      map[string]Client
 	awsAccountID string
 }
 
-func NewElbProvider(ctx context.Context, log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewElbProvider(ctx context.Context, log *clog.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return elb.NewFromConfig(cfg)
 	}

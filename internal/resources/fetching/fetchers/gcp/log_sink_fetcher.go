@@ -21,16 +21,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type GcpLogSinkFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
 }
@@ -42,7 +41,7 @@ type GcpLoggingAsset struct {
 	Asset *inventory.LoggingAsset `json:"asset,omitempty"`
 }
 
-func NewGcpLogSinkFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpLogSinkFetcher {
+func NewGcpLogSinkFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpLogSinkFetcher {
 	return &GcpLogSinkFetcher{
 		log:        log,
 		resourceCh: ch,

@@ -24,13 +24,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	cloudwatch_types "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 	cloudwatchlogs_types "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch/logs"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -39,7 +39,7 @@ type Provider struct {
 	Cloudwatch     cloudwatch.Cloudwatch
 	Cloudwatchlogs logs.CloudwatchLogs
 	Sns            sns.SNS
-	Log            *logp.Logger
+	Log            *clog.Logger
 }
 
 type Client interface {
@@ -64,7 +64,7 @@ type (
 	}
 )
 
-func NewProvider(ctx context.Context, log *logp.Logger, awsConfig aws.Config, trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client], cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client], cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client], snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client]) *Provider {
+func NewProvider(ctx context.Context, log *clog.Logger, awsConfig aws.Config, trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client], cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client], cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client], snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client]) *Provider {
 	return &Provider{
 		Cloudtrail:     cloudtrail.NewProvider(ctx, log, awsConfig, trailCrossRegionFactory),
 		Cloudwatch:     cloudwatch.NewProvider(ctx, log, awsConfig, cloudwatchCrossResignFactory),

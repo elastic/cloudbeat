@@ -21,16 +21,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type GcpPoliciesFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
 }
@@ -42,7 +41,7 @@ type GcpPoliciesAsset struct {
 	Asset *inventory.ProjectPoliciesAsset `json:"assets,omitempty"`
 }
 
-func NewGcpPoliciesFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpPoliciesFetcher {
+func NewGcpPoliciesFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpPoliciesFetcher {
 	return &GcpPoliciesFetcher{
 		log:        log,
 		resourceCh: ch,

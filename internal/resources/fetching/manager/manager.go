@@ -23,14 +23,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Manager struct {
-	log *logp.Logger
+	log *clog.Logger
 
 	// Duration of a single fetcher
 	timeout time.Duration
@@ -44,7 +43,7 @@ type Manager struct {
 	cancel context.CancelFunc
 }
 
-func NewManager(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
+func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	return &Manager{

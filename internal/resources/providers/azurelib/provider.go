@@ -22,11 +22,11 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ProviderAPI interface {
@@ -46,10 +46,10 @@ type ProviderInitializer struct{}
 
 type ProviderInitializerAPI interface {
 	// Init initializes the Azure clients
-	Init(log *logp.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error)
+	Init(log *clog.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error)
 }
 
-func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error) {
+func (p *ProviderInitializer) Init(log *clog.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error) {
 	log = log.Named("azure")
 
 	factory, err := armresourcegraph.NewClientFactory(azureConfig.Credentials, nil)

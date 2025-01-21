@@ -20,17 +20,17 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type s3BucketFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    s3BucketProvider
 	AccountId   string
 	AccountName string
@@ -40,7 +40,7 @@ type s3BucketProvider interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
+func newS3BucketFetcher(logger *clog.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
 	return &s3BucketFetcher{
 		logger:      logger,
 		provider:    provider,

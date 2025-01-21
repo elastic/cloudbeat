@@ -22,12 +22,12 @@ package launcher
 
 import (
 	"github.com/elastic/beats/v7/libbeat/common/reload"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Listener struct {
-	log  *logp.Logger
+	log  *clog.Logger
 	done chan struct{}
 	ch   chan *config.C
 }
@@ -61,7 +61,7 @@ func (l *Listener) Stop() {
 	close(l.ch)
 }
 
-func NewListener(log *logp.Logger) *Listener {
+func NewListener(log *clog.Logger) *Listener {
 	return &Listener{
 		log:  log,
 		done: make(chan struct{}),

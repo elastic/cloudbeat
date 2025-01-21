@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -35,6 +34,7 @@ import (
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Strategy interface {
@@ -42,7 +42,7 @@ type Strategy interface {
 }
 
 type strategy struct {
-	logger *logp.Logger
+	logger *clog.Logger
 	cfg    *config.Config
 }
 
@@ -110,7 +110,7 @@ func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetche
 	return gcpfetcher.New(s.logger, provider), nil
 }
 
-func GetStrategy(logger *logp.Logger, cfg *config.Config) Strategy {
+func GetStrategy(logger *clog.Logger, cfg *config.Config) Strategy {
 	return &strategy{
 		logger: logger,
 		cfg:    cfg,

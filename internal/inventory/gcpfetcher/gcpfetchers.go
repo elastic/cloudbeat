@@ -18,13 +18,12 @@
 package gcpfetcher
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/inventory"
 	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
-func New(logger *logp.Logger, provider gcpinventory.ServiceAPI) []inventory.AssetFetcher {
+func New(logger *clog.Logger, provider gcpinventory.ServiceAPI) []inventory.AssetFetcher {
 	return []inventory.AssetFetcher{
 		newAssetsInventoryFetcher(logger, provider),
 	}

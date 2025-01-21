@@ -20,17 +20,16 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type networkingFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    networkingProvider
 	AccountId   string
 	AccountName string
@@ -52,7 +51,7 @@ type (
 	}
 )
 
-func newNetworkingFetcher(logger *logp.Logger, identity *cloud.Identity, provider networkingProvider) inventory.AssetFetcher {
+func newNetworkingFetcher(logger *clog.Logger, identity *cloud.Identity, provider networkingProvider) inventory.AssetFetcher {
 	return &networkingFetcher{
 		logger:      logger,
 		provider:    provider,

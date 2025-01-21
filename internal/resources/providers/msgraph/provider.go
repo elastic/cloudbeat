@@ -21,13 +21,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	graph "github.com/microsoftgraph/msgraph-sdk-go"
 	graphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ProviderAPI interface {
@@ -35,7 +35,7 @@ type ProviderAPI interface {
 }
 
 type provider struct {
-	log    *logp.Logger
+	log    *clog.Logger
 	client interface {
 		ServicePrincipals() *serviceprincipals.ServicePrincipalsRequestBuilder
 	}
@@ -43,7 +43,7 @@ type provider struct {
 
 // Second argument is scopes. Leave nil, then it selects default; Adjust if in trouble
 // Docs: https://learn.microsoft.com/en-us/graph/sdks/create-client?from=snippets&tabs=go
-func NewProvider(log *logp.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error) {
+func NewProvider(log *clog.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error) {
 	// Requires 'Directory.Read.All' API permission
 	c, err := graph.NewGraphServiceClientWithCredentials(azureConfig.Credentials, nil)
 	if err != nil {

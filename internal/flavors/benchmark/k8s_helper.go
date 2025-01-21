@@ -22,22 +22,22 @@ import (
 	"fmt"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client_gokubernetes "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/k8s"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type K8SBenchmarkHelper struct {
-	log    *logp.Logger
+	log    *clog.Logger
 	cfg    *config.Config
 	client client_gokubernetes.Interface
 }
 
-func NewK8sBenchmarkHelper(log *logp.Logger, cfg *config.Config, client client_gokubernetes.Interface) *K8SBenchmarkHelper {
+func NewK8sBenchmarkHelper(log *clog.Logger, cfg *config.Config, client client_gokubernetes.Interface) *K8SBenchmarkHelper {
 	return &K8SBenchmarkHelper{
 		log:    log,
 		cfg:    cfg,
@@ -93,7 +93,7 @@ func (h *K8SBenchmarkHelper) getK8sClusterId(ctx context.Context) (string, error
 }
 
 func (h *K8SBenchmarkHelper) getK8sNodeId(ctx context.Context) (string, error) {
-	nodeName, err := kubernetes.DiscoverKubernetesNode(h.log, &kubernetes.DiscoverKubernetesNodeParams{
+	nodeName, err := kubernetes.DiscoverKubernetesNode(h.log.Logger, &kubernetes.DiscoverKubernetesNodeParams{
 		ConfigHost:  "",
 		Client:      h.client,
 		IsInCluster: true,

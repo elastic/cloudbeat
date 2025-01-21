@@ -20,16 +20,15 @@ package fetchers
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type S3Fetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	s3         s3.S3
 	resourceCh chan fetching.ResourceInfo
 }
@@ -38,7 +37,7 @@ type S3Resource struct {
 	bucket awslib.AwsResource
 }
 
-func NewS3Fetcher(log *logp.Logger, s3 s3.S3, ch chan fetching.ResourceInfo) *S3Fetcher {
+func NewS3Fetcher(log *clog.Logger, s3 s3.S3, ch chan fetching.ResourceInfo) *S3Fetcher {
 	return &S3Fetcher{
 		log:        log,
 		s3:         s3,

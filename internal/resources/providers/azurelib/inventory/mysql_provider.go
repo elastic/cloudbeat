@@ -24,8 +24,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -47,10 +47,10 @@ type MysqlProviderAPI interface {
 
 type mysqlProvider struct {
 	client mysqlAzureClientWrapper
-	log    *logp.Logger //nolint:unused
+	log    *clog.Logger //nolint:unused
 }
 
-func NewMysqlProvider(log *logp.Logger, credentials azcore.TokenCredential) MysqlProviderAPI {
+func NewMysqlProvider(log *clog.Logger, credentials azcore.TokenCredential) MysqlProviderAPI {
 	// We wrap the client, so we can mock it in tests
 	client := mysqlAzureClientWrapper{
 		AssetFlexibleConfiguration: func(ctx context.Context, subID, resourceGroup, serverName, configName string, clientOptions *arm.ClientOptions, options *armmysqlflexibleservers.ConfigurationsClientGetOptions) (armmysqlflexibleservers.ConfigurationsClientGetResponse, error) {

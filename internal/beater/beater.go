@@ -22,15 +22,15 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors"
 	"github.com/elastic/cloudbeat/internal/launcher"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
-	log := logp.NewLogger("launcher")
+	log := clog.NewLogger("launcher")
 	reloader := launcher.NewListener(log)
 	validator := &validator{}
 

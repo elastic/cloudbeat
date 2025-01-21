@@ -20,16 +20,15 @@ package fetchers
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type RdsFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   rds.Rds
 }
@@ -42,7 +41,7 @@ type RdsResource struct {
 	dbInstance awslib.AwsResource
 }
 
-func NewRdsFetcher(log *logp.Logger, provider rds.Rds, ch chan fetching.ResourceInfo) *RdsFetcher {
+func NewRdsFetcher(log *clog.Logger, provider rds.Rds, ch chan fetching.ResourceInfo) *RdsFetcher {
 	return &RdsFetcher{
 		log:        log,
 		resourceCh: ch,

@@ -18,6 +18,7 @@
 package evaluator
 
 import (
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
 	"go.uber.org/zap"
@@ -25,7 +26,7 @@ import (
 )
 
 type logger struct {
-	log *logp.Logger
+	log *clog.Logger
 	lvl zap.AtomicLevel
 }
 
@@ -84,7 +85,7 @@ func mapToArray(m map[string]any) []any {
 
 func newLogger() logging.Logger {
 	lvl := zap.NewAtomicLevelAt(logp.GetLevel())
-	log := logp.NewLogger("opa").WithOptions(
+	log := clog.NewLogger("opa").WithOptions(
 		zap.IncreaseLevel(lvl),
 		zap.AddCallerSkip(1),
 	)

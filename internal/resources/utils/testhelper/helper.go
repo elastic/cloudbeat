@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
 )
@@ -85,20 +86,20 @@ func CreateMockClients[T any](client T, regions []string) map[string]T {
 	return m
 }
 
-func NewLogger(t *testing.T) *logp.Logger {
+func NewLogger(t *testing.T) *clog.Logger {
 	t.Helper()
 
 	require.NoError(t, logp.TestingSetup())
 
-	return logp.NewLogger(t.Name())
+	return clog.NewLogger(t.Name())
 }
 
-func NewObserverLogger(t *testing.T) *logp.Logger {
+func NewObserverLogger(t *testing.T) *clog.Logger {
 	t.Helper()
 
 	require.NoError(t, logp.DevelopmentSetup(logp.ToObserverOutput()))
 
-	return logp.NewLogger(t.Name())
+	return clog.NewLogger(t.Name())
 }
 
 func SkipLong(t *testing.T) {

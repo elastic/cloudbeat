@@ -25,7 +25,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,7 +42,7 @@ func mockLocationsAsset(fn locationsFn) SubscriptionProviderAPI {
 		},
 	}
 
-	return &subscriptionProvider{locationClient: wrapper, log: logp.NewLogger("mock_subscriptions_locations_asset_provider")}
+	return &subscriptionProvider{locationClient: wrapper, log: clog.NewLogger("mock_subscriptions_locations_asset_provider")}
 }
 
 func mockTenantAsset(fn tenantsFn) SubscriptionProviderAPI {
@@ -52,7 +52,7 @@ func mockTenantAsset(fn tenantsFn) SubscriptionProviderAPI {
 		},
 	}
 
-	return &subscriptionProvider{tenantClient: tenantClientWrapper, log: logp.NewLogger("mock_subscriptions_tenants_asset_provider")}
+	return &subscriptionProvider{tenantClient: tenantClientWrapper, log: clog.NewLogger("mock_subscriptions_tenants_asset_provider")}
 }
 
 func mockSubscriptionAsset(fn subscriptionsFn) SubscriptionProviderAPI {
@@ -62,7 +62,7 @@ func mockSubscriptionAsset(fn subscriptionsFn) SubscriptionProviderAPI {
 		},
 	}
 
-	return &subscriptionProvider{subscriptionClient: subscriptionClientWrapper, log: logp.NewLogger("mock_subscriptions_subscription_asset_provider")}
+	return &subscriptionProvider{subscriptionClient: subscriptionClientWrapper, log: clog.NewLogger("mock_subscriptions_subscription_asset_provider")}
 }
 
 func TestSubscriptionProvider_ListLocations(t *testing.T) {

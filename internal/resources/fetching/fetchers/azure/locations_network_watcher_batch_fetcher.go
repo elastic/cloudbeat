@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -30,15 +29,16 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type AzureLocationsNetworkWatcherAssetBatchFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   azurelib.ProviderAPI
 }
 
-func NewAzureLocationsNetworkWatcherAssetBatchFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureLocationsNetworkWatcherAssetBatchFetcher {
+func NewAzureLocationsNetworkWatcherAssetBatchFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureLocationsNetworkWatcherAssetBatchFetcher {
 	return &AzureLocationsNetworkWatcherAssetBatchFetcher{
 		log:        log,
 		resourceCh: ch,

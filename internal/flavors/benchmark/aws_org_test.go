@@ -27,7 +27,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -39,6 +38,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -163,7 +163,7 @@ func Test_getAwsAccounts(t *testing.T) {
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
 			}
-			log := logp.NewLogger("test")
+			log := clog.NewLogger("test")
 			got, err := a.getAwsAccounts(context.Background(), log, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
@@ -239,7 +239,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 			}
 
 			// set up log capture
-			var log *logp.Logger
+			var log *clog.Logger
 			logCaptureBuf := &bytes.Buffer{}
 			{
 				replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
@@ -249,7 +249,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 						zapcore.DebugLevel,
 					)
 				})
-				log = logp.NewLogger("test").WithOptions(replacement)
+				log = clog.NewLogger("test").WithOptions(replacement)
 			}
 
 			stsClient := &mockStsClient{}

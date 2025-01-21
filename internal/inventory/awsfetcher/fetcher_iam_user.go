@@ -20,16 +20,15 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type iamUserFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    iamUserProvider
 	AccountId   string
 	AccountName string
@@ -39,7 +38,7 @@ type iamUserProvider interface {
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamUserProvider) inventory.AssetFetcher {
+func newIamUserFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamUserProvider) inventory.AssetFetcher {
 	return &iamUserFetcher{
 		logger:      logger,
 		provider:    provider,

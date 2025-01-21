@@ -24,9 +24,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type AccessManagement interface {
@@ -66,7 +66,7 @@ type AccessAnalyzerClient interface {
 }
 
 type Provider struct {
-	log                   *logp.Logger
+	log                   *clog.Logger
 	client                Client
 	accessAnalyzerClients map[string]AccessAnalyzerClient
 }
@@ -153,7 +153,7 @@ type PolicyDocument struct {
 	Policy     string `json:"policy,omitempty"`
 }
 
-func NewIAMProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzerClient]) *Provider {
+func NewIAMProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzerClient]) *Provider {
 	provider := Provider{
 		log:    log,
 		client: iamsdk.NewFromConfig(cfg),

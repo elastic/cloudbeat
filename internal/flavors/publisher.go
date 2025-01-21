@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 const (
@@ -36,13 +36,13 @@ type client interface {
 }
 
 type Publisher struct {
-	log       *logp.Logger
+	log       *clog.Logger
 	interval  time.Duration
 	threshold int
 	client    client
 }
 
-func NewPublisher(log *logp.Logger, interval time.Duration, threshold int, client client) *Publisher {
+func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client) *Publisher {
 	return &Publisher{
 		log:       log,
 		interval:  interval,

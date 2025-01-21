@@ -21,7 +21,7 @@ package k8s
 
 import (
 	kubernetes "github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	logp "github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	client_gokubernetes "k8s.io/client-go/kubernetes"
 
 	mock "github.com/stretchr/testify/mock"
@@ -41,15 +41,15 @@ func (_m *MockClientGetterAPI) EXPECT() *MockClientGetterAPI_Expecter {
 }
 
 // GetClient provides a mock function with given fields: log, kubeConfig, options
-func (_m *MockClientGetterAPI) GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (client_gokubernetes.Interface, error) {
+func (_m *MockClientGetterAPI) GetClient(log *clog.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (client_gokubernetes.Interface, error) {
 	ret := _m.Called(log, kubeConfig, options)
 
 	var r0 client_gokubernetes.Interface
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*logp.Logger, string, kubernetes.KubeClientOptions) (client_gokubernetes.Interface, error)); ok {
+	if rf, ok := ret.Get(0).(func(*clog.Logger, string, kubernetes.KubeClientOptions) (client_gokubernetes.Interface, error)); ok {
 		return rf(log, kubeConfig, options)
 	}
-	if rf, ok := ret.Get(0).(func(*logp.Logger, string, kubernetes.KubeClientOptions) client_gokubernetes.Interface); ok {
+	if rf, ok := ret.Get(0).(func(*clog.Logger, string, kubernetes.KubeClientOptions) client_gokubernetes.Interface); ok {
 		r0 = rf(log, kubeConfig, options)
 	} else {
 		if ret.Get(0) != nil {
@@ -57,7 +57,7 @@ func (_m *MockClientGetterAPI) GetClient(log *logp.Logger, kubeConfig string, op
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*logp.Logger, string, kubernetes.KubeClientOptions) error); ok {
+	if rf, ok := ret.Get(1).(func(*clog.Logger, string, kubernetes.KubeClientOptions) error); ok {
 		r1 = rf(log, kubeConfig, options)
 	} else {
 		r1 = ret.Error(1)
@@ -72,16 +72,16 @@ type MockClientGetterAPI_GetClient_Call struct {
 }
 
 // GetClient is a helper method to define mock.On call
-//   - log *logp.Logger
+//   - log *clog.Logger
 //   - kubeConfig string
 //   - options kubernetes.KubeClientOptions
 func (_e *MockClientGetterAPI_Expecter) GetClient(log interface{}, kubeConfig interface{}, options interface{}) *MockClientGetterAPI_GetClient_Call {
 	return &MockClientGetterAPI_GetClient_Call{Call: _e.mock.On("GetClient", log, kubeConfig, options)}
 }
 
-func (_c *MockClientGetterAPI_GetClient_Call) Run(run func(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions)) *MockClientGetterAPI_GetClient_Call {
+func (_c *MockClientGetterAPI_GetClient_Call) Run(run func(log *clog.Logger, kubeConfig string, options kubernetes.KubeClientOptions)) *MockClientGetterAPI_GetClient_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*logp.Logger), args[1].(string), args[2].(kubernetes.KubeClientOptions))
+		run(args[0].(*clog.Logger), args[1].(string), args[2].(kubernetes.KubeClientOptions))
 	})
 	return _c
 }
@@ -91,7 +91,7 @@ func (_c *MockClientGetterAPI_GetClient_Call) Return(_a0 client_gokubernetes.Int
 	return _c
 }
 
-func (_c *MockClientGetterAPI_GetClient_Call) RunAndReturn(run func(*logp.Logger, string, kubernetes.KubeClientOptions) (client_gokubernetes.Interface, error)) *MockClientGetterAPI_GetClient_Call {
+func (_c *MockClientGetterAPI_GetClient_Call) RunAndReturn(run func(*clog.Logger, string, kubernetes.KubeClientOptions) (client_gokubernetes.Interface, error)) *MockClientGetterAPI_GetClient_Call {
 	_c.Call.Return(run)
 	return _c
 }

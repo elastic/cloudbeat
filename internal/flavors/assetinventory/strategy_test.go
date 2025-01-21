@@ -23,12 +23,12 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func TestStrategyPicks(t *testing.T) {
@@ -113,7 +113,7 @@ func TestStrategyPicks(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			s := strategy{
-				logger: logp.NewLogger("strategy_test"),
+				logger: clog.NewLogger("strategy_test"),
 				cfg:    tc.cfg,
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)

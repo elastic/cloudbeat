@@ -22,16 +22,16 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	trailClient "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type TrailService interface {
 	DescribeTrails(ctx context.Context) ([]TrailInfo, error)
 }
 
-func NewProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return trailClient.NewFromConfig(cfg)
 	}

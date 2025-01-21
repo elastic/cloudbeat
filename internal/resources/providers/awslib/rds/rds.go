@@ -21,10 +21,10 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/service/rds"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type DBInstance struct {
@@ -57,7 +57,7 @@ type Rds interface {
 }
 
 type Provider struct {
-	log     *logp.Logger
+	log     *clog.Logger
 	clients map[string]Client
 	ec2     ec2.ElasticCompute
 }

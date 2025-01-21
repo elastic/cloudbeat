@@ -21,18 +21,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/configservice"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type LoggingFetcher struct {
-	log                   *logp.Logger
+	log                   *clog.Logger
 	loggingProvider       logging.Client
 	configserviceProvider configservice.ConfigService
 	resourceCh            chan fetching.ResourceInfo
@@ -49,7 +48,7 @@ type ConfigResource struct {
 }
 
 func NewLoggingFetcher(
-	log *logp.Logger,
+	log *clog.Logger,
 	loggingProvider logging.Client,
 	configserviceProvider configservice.ConfigService,
 	ch chan fetching.ResourceInfo,

@@ -21,11 +21,11 @@ import (
 	"context"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/pipeline"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Manager interface {
@@ -42,7 +42,7 @@ type Transformer interface {
 }
 
 type basebenchmark struct {
-	log         *logp.Logger
+	log         *clog.Logger
 	manager     Manager
 	evaluator   Evaluator
 	transformer Transformer

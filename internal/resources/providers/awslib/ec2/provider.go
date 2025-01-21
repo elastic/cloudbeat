@@ -24,10 +24,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 var (
@@ -37,7 +37,7 @@ var (
 )
 
 type Provider struct {
-	log          *logp.Logger
+	log          *clog.Logger
 	clients      map[string]Client
 	awsAccountID string
 }

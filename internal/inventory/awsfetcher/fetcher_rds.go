@@ -20,17 +20,17 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type rdsFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    rdsProvider
 	AccountId   string
 	AccountName string
@@ -40,7 +40,7 @@ type rdsProvider interface {
 	DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newRDSFetcher(logger *logp.Logger, identity *cloud.Identity, provider rdsProvider) inventory.AssetFetcher {
+func newRDSFetcher(logger *clog.Logger, identity *cloud.Identity, provider rdsProvider) inventory.AssetFetcher {
 	return &rdsFetcher{
 		logger:      logger,
 		provider:    provider,

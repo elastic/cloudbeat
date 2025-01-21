@@ -29,11 +29,11 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql/fake"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -53,7 +53,7 @@ func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 	}
 
 	return &sqlProvider{
-		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    clog.NewLogger("mock_asset_sql_encryption_protector"),
 		client: wrapper,
 	}
 }
@@ -66,7 +66,7 @@ func mockAssetBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
 	}
 
 	return &sqlProvider{
-		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    clog.NewLogger("mock_asset_sql_encryption_protector"),
 		client: wrapper,
 	}
 }
@@ -82,7 +82,7 @@ func mockAssetTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsF
 	}
 
 	return &sqlProvider{
-		log:    logp.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    clog.NewLogger("mock_asset_sql_encryption_protector"),
 		client: wrapper,
 	}
 }
@@ -95,7 +95,7 @@ func mockAssetThreatProtection(f threatProtectionFn) SQLProviderAPI {
 	}
 
 	return &sqlProvider{
-		log:    logp.NewLogger("mock_asset_sql_advanced_threat_protection"),
+		log:    clog.NewLogger("mock_asset_sql_advanced_threat_protection"),
 		client: wrapper,
 	}
 }

@@ -24,7 +24,6 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 
@@ -32,10 +31,11 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ElbFetcher struct {
-	log             *logp.Logger
+	log             *clog.Logger
 	elbProvider     elb.LoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
@@ -48,7 +48,7 @@ type ElbResource struct {
 	identity *cloud.Identity
 }
 
-func NewElbFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, provider elb.LoadBalancerDescriber, identity *cloud.Identity, matchers string) *ElbFetcher {
+func NewElbFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, provider elb.LoadBalancerDescriber, identity *cloud.Identity, matchers string) *ElbFetcher {
 	return &ElbFetcher{
 		log:             log,
 		elbProvider:     provider,

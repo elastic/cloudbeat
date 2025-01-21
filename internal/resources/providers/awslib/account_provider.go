@@ -24,14 +24,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type AccountProviderAPI interface {
-	ListAccounts(ctx context.Context, log *logp.Logger, cfg aws.Config) ([]cloud.Identity, error)
+	ListAccounts(ctx context.Context, log *clog.Logger, cfg aws.Config) ([]cloud.Identity, error)
 }
 
 type organizationsAPI interface {
@@ -42,11 +42,11 @@ type organizationsAPI interface {
 
 type AccountProvider struct{}
 
-func (a AccountProvider) ListAccounts(ctx context.Context, log *logp.Logger, cfg aws.Config) ([]cloud.Identity, error) {
+func (a AccountProvider) ListAccounts(ctx context.Context, log *clog.Logger, cfg aws.Config) ([]cloud.Identity, error) {
 	return listAccounts(ctx, log, organizations.NewFromConfig(cfg))
 }
 
-func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI) ([]cloud.Identity, error) {
+func listAccounts(ctx context.Context, log *clog.Logger, client organizationsAPI) ([]cloud.Identity, error) {
 	organizationIdToName := make(map[string]string)
 
 	input := organizations.ListAccountsInput{}

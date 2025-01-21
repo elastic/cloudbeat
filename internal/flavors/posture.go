@@ -23,12 +23,12 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type posture struct {
@@ -47,7 +47,7 @@ func NewPosture(b *beat.Beat, agentConfig *agentconfig.C) (beat.Beater, error) {
 
 // NewPosture creates an instance of posture.
 func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
-	log := logp.NewLogger("posture")
+	log := clog.NewLogger("posture")
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -118,7 +118,7 @@ func (bt *posture) Stop() {
 
 // ensureAdditionalProcessors modifies cfg.Processors list to ensure 'host'
 // processor is present for K8s and EKS benchmarks.
-func ensureHostProcessor(log *logp.Logger, cfg *config.Config) error {
+func ensureHostProcessor(log *clog.Logger, cfg *config.Config) error {
 	if cfg.Benchmark != config.CIS_EKS && cfg.Benchmark != config.CIS_K8S {
 		return nil
 	}

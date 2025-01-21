@@ -24,17 +24,16 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type AzureAssetsFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   azurelib.ProviderAPI
 	enrichers  []AssetsEnricher
@@ -83,7 +82,7 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 // Because this is done with an "|"" this means that we won't get irrelevant data
 var AzureAssetGroups = []string{inventory.AssetGroupResources, inventory.AssetGroupAuthorizationResources}
 
-func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureAssetsFetcher {
+func NewAzureAssetsFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureAssetsFetcher {
 	return &AzureAssetsFetcher{
 		log:        log,
 		resourceCh: ch,

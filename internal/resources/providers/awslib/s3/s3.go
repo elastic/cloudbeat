@@ -24,9 +24,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3control"
 	s3ContorlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type BucketDescription struct {
@@ -60,7 +60,7 @@ type S3 interface {
 }
 
 type Provider struct {
-	log           *logp.Logger
+	log           *clog.Logger
 	clients       map[string]Client
 	controlClient ControlClient
 	accountId     string
