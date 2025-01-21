@@ -9,18 +9,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type CustomLogger struct {
+type Logger struct {
 	*logp.Logger
 }
 
-type Logger interface {
-	Debugf(template string, args ...any)
-	Infof(template string, args ...any)
-	Warnf(template string, args ...any)
-	Errorf(template string, args ...any)
-}
-
-func (c *CustomLogger) Errorf(template string, args ...any) {
+func (c *Logger) Errorf(template string, args ...any) {
 	// Downgrade context.Canceled errors to warning level
 	if hasErrorType(context.Canceled, args...) {
 		c.Warnf(template, args...)
@@ -29,11 +22,15 @@ func (c *CustomLogger) Errorf(template string, args ...any) {
 	c.Logger.Errorf(template, args...)
 }
 
-func NewLogger(selector string, options ...logp.LogOption) *CustomLogger {
+func (c *Logger) Named(name string) *Logger {
+	logger := c.Logger.Named(name)
+	return &Logger{logger}
+}
+
+func NewLogger(selector string, options ...logp.LogOption) *Logger {
 	options = append(options, zap.AddCallerSkip(1))
 	logger := logp.NewLogger(selector).WithOptions(options...)
-
-	l := &CustomLogger{logger}
+	l := &Logger{logger}
 	return l
 }
 
@@ -51,4 +48,29 @@ func hasErrorType(errorType error, args ...any) bool {
 		}
 	}
 	return false
+}
+
+type lkey string
+
+const loggerKey lkey = "cloudbeat_logger"
+
+func WithLogger(ctx context.Context, name string) (context.Context, *Logger) {
+	log := NewLogger(name)
+	return context.WithValue(ctx, loggerKey, log), log
+}
+
+func GetLogger(ctx context.Context) *Logger {
+	loggerValue := ctx.Value(loggerKey)
+	if loggerValue == nil {
+		log := NewLogger("cloudbeat")
+		log.Warn("Context did not have logger key")
+		return log
+	}
+	log, ok := loggerValue.(*Logger)
+	if !ok {
+		log = NewLogger("cloudbeat")
+		log.Errorf("Unexpected logger type %T", loggerValue)
+		return log
+	}
+	return log
 }
