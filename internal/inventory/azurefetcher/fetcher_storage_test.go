@@ -51,6 +51,11 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		Name:        "queue",
 		DisplayName: "queue",
 	}
+	azureTableService := azurelib_inventory.AzureAsset{
+		Id:          "queue",
+		Name:        "queue",
+		DisplayName: "queue",
+	}
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
@@ -78,6 +83,16 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureQueue.Id,
 			azureQueue.Name,
 			inventory.WithRawAsset(azureQueue),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageTableService,
+			azureQueue.Id,
+			azureQueue.Name,
+			inventory.WithRawAsset(azureTableService),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
@@ -117,6 +132,12 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		mock.Anything, mock.Anything,
 	).Return(
 		[]azurelib_inventory.AzureAsset{azureQueue}, nil,
+	)
+
+	provider.EXPECT().ListStorageAccountTableServices(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureTableService}, nil,
 	)
 
 	fetcher := newStorageFetcher(logger, provider)
