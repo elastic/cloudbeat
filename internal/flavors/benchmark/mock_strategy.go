@@ -20,12 +20,12 @@
 package benchmark
 
 import (
-	config "github.com/elastic/cloudbeat/internal/config"
 	builder "github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
+	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
+
+	config "github.com/elastic/cloudbeat/internal/config"
 
 	context "context"
-
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 
 	mock "github.com/stretchr/testify/mock"
 )

@@ -20,8 +20,8 @@
 package k8s
 
 import (
+	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	kubernetes "github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	client_gokubernetes "k8s.io/client-go/kubernetes"
 
 	mock "github.com/stretchr/testify/mock"

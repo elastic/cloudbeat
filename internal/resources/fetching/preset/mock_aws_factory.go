@@ -20,14 +20,13 @@
 package preset
 
 import (
-	context "context"
-
 	aws "github.com/aws/aws-sdk-go-v2/aws"
 	cloud "github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
+
+	context "context"
 
 	fetching "github.com/elastic/cloudbeat/internal/resources/fetching"
-
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 
 	mock "github.com/stretchr/testify/mock"
 

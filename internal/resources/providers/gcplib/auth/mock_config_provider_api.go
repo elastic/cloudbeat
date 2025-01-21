@@ -20,11 +20,10 @@
 package auth
 
 import (
-	context "context"
-
 	config "github.com/elastic/cloudbeat/internal/config"
+	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	context "context"
 
 	mock "github.com/stretchr/testify/mock"
 )

@@ -20,11 +20,10 @@
 package inventory
 
 import (
-	context "context"
-
 	auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
+	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	context "context"
 
 	mock "github.com/stretchr/testify/mock"
 )
