@@ -214,7 +214,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: allure_results-${{ matrix.test-target}}
+          name: allure_results-${{ matrix.k8s_context}}
           path: ${{ env.REPORTS_DIR }}
 
       - name: Purge tests environment
