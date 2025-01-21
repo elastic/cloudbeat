@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1" // revive:disable-line
 	client_gokubernetes "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/internal/config"

@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+
 	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 

@@ -28,14 +28,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/gofrs/uuid"
-	v1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1" // revive:disable-line
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type LeaderelectionManager struct {

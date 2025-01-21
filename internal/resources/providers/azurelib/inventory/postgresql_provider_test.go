@@ -26,9 +26,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type (

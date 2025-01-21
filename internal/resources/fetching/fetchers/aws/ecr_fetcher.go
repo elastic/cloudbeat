@@ -23,7 +23,7 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
-	v1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1" // revive:disable-line
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 

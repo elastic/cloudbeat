@@ -21,11 +21,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/googleapis/gax-go/v2"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 // a gax.CallOption that defines a retry strategy which retries the request on ResourceExhausted error.

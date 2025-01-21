@@ -25,9 +25,10 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/samber/lo"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 const (

@@ -18,11 +18,12 @@
 package evaluator
 
 import (
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type logger struct {

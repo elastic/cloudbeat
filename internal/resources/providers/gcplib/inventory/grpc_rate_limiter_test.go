@@ -22,9 +22,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/time/rate"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type RateLimiterTestSuite struct {

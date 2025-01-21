@@ -22,8 +22,9 @@ package launcher
 
 import (
 	"github.com/elastic/beats/v7/libbeat/common/reload"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-libs/config"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Listener struct {

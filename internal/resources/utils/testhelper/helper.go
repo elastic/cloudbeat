@@ -21,9 +21,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 // CollectResources fetches items from a channel and returns them in a slice.

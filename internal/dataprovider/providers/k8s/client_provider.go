@@ -20,12 +20,13 @@ package k8s
 import (
 	"os"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ClientGetterAPI interface {
