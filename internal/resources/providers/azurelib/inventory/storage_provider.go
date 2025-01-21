@@ -51,7 +51,7 @@ type StorageAccountProviderAPI interface {
 	ListStorageAccountQueueServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
-	ListStorageAccountsTableServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountTableServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]AzureAsset, error)
 }
@@ -87,6 +87,13 @@ func NewStorageAccountProvider(log *logp.Logger, diagnosticSettingsClient *armmo
 			cl, err := armstorage.NewQueueServicesClient(subID, credentials, clientOptions)
 			if err != nil {
 				return armstorage.QueueServicesClientListResponse{}, err
+			}
+			return cl.List(ctx, resourceGroupName, storageAccountName, options)
+		},
+		AssetTableServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.TableServicesClientListOptions) (armstorage.TableServicesClientListResponse, error) {
+			cl, err := armstorage.NewTableServicesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return armstorage.TableServicesClientListResponse{}, err
 			}
 			return cl.List(ctx, resourceGroupName, storageAccountName, options)
 		},

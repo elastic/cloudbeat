@@ -60,7 +60,7 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 		{"Storage Blob Services", f.provider.ListStorageAccountBlobServices, inventory.AssetClassificationAzureStorageBlobService},
 		{"Storage Queue Services", f.provider.ListStorageAccountQueueServices, inventory.AssetClassificationAzureStorageQueueService},
 		{"Storage Queues", f.provider.ListStorageAccountQueues, inventory.AssetClassificationAzureStorageQueue},
-		{"Storage Tables", f.provider.ListStorageAccountTableServices, inventory.AssetClassificationAzureStorageTableService},
+		{"Storage Table Services", f.provider.ListStorageAccountTableServices, inventory.AssetClassificationAzureStorageTableService},
 	}
 
 	storageAccounts, err := f.listStorageAccounts(ctx)
