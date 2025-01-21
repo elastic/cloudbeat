@@ -40,6 +40,7 @@ type storageAccountAzureClientWrapper struct {
 	AssetBlobServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error)
 	AssetQueues             func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error)
 	AssetQueueServices      func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueServicesClientListOptions) (armstorage.QueueServicesClientListResponse, error)
+	AssetTableServices      func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.TableServicesClientListOptions) (armstorage.TableServicesClientListResponse, error)
 	AssetAccountStorage     func(ctx context.Context, subID string, clientOptions *arm.ClientOptions) ([]armstorage.AccountsClientListResponse, error)
 }
 
@@ -50,6 +51,7 @@ type StorageAccountProviderAPI interface {
 	ListStorageAccountQueueServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountsTableServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]AzureAsset, error)
 }
@@ -211,6 +213,38 @@ func (p *storageAccountProvider) ListStorageAccountQueueServices(ctx context.Con
 			properties, err := maps.AsMapStringAny(item.QueueServiceProperties)
 			if err != nil {
 				p.log.Errorf("error while transforming azure queue services for storage accounts %s: %v", sa.Id, err)
+			}
+
+			assets = append(assets, AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  sa.ResourceGroup,
+				SubscriptionId: sa.SubscriptionId,
+				TenantId:       sa.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   sa.Id,
+					ExtensionStorageAccountName: sa.Name,
+				},
+			})
+		}
+	}
+	return assets, nil
+}
+
+func (p *storageAccountProvider) ListStorageAccountTableServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		response, err := p.client.AssetTableServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure table services for storage accounts %s: %w", sa.Id, err)
+		}
+
+		for _, item := range response.Value {
+			properties, err := maps.AsMapStringAny(item.TableServiceProperties)
+			if err != nil {
+				p.log.Errorf("error while transforming azure table services for storage accounts %s: %v", sa.Id, err)
 			}
 
 			assets = append(assets, AzureAsset{
