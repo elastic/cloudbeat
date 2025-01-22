@@ -39,6 +39,15 @@ func (l *Logger) Errorf(template string, args ...any) {
 	l.Logger.Errorf(template, args...)
 }
 
+func (l *Logger) Error(args ...any) {
+	// Downgrade context.Canceled errors to warning level
+	if hasErrorType(context.Canceled, args...) {
+		l.Warn(args...)
+		return
+	}
+	l.Logger.Error(args...)
+}
+
 func (l *Logger) Named(name string) *Logger {
 	return &Logger{l.Logger.Named(name)}
 }
@@ -46,6 +55,7 @@ func (l *Logger) Named(name string) *Logger {
 func (l *Logger) WithOptions(options ...logp.LogOption) *Logger {
 	return &Logger{l.Logger.WithOptions(options...)}
 }
+
 func (l *Logger) With(args ...any) *Logger {
 	return &Logger{l.Logger.With(args...)}
 }
