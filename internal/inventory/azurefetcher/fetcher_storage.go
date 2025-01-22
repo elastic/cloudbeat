@@ -40,6 +40,7 @@ type (
 		ListStorageAccountFileServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueues(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueueServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountTables(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountTableServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]azurelib.AzureAsset, error)
 	}
@@ -62,6 +63,7 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 		{"Storage File Services", f.provider.ListStorageAccountFileServices, inventory.AssetClassificationAzureStorageFileService},
 		{"Storage Queue Services", f.provider.ListStorageAccountQueueServices, inventory.AssetClassificationAzureStorageQueueService},
 		{"Storage Queues", f.provider.ListStorageAccountQueues, inventory.AssetClassificationAzureStorageQueue},
+		{"Storage Tables", f.provider.ListStorageAccountTables, inventory.AssetClassificationAzureStorageTable},
 		{"Storage Table Services", f.provider.ListStorageAccountTableServices, inventory.AssetClassificationAzureStorageTableService},
 	}
 

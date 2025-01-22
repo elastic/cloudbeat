@@ -108,6 +108,7 @@ var (
 	AssetClassificationAzureStorageFileService  = AssetClassification{CategoryStorageBucket, "Azure Storage File Service"}
 	AssetClassificationAzureStorageQueue        = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
 	AssetClassificationAzureStorageQueueService = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
+	AssetClassificationAzureStorageTable        = AssetClassification{CategoryDatabase, "Azure Storage Table"}
 	AssetClassificationAzureStorageTableService = AssetClassification{CategoryDatabase, "Azure Storage Table Service"}
 	AssetClassificationAzureSubscription        = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
 	AssetClassificationAzureTenant              = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
