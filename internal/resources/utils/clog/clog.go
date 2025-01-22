@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"go.uber.org/zap"
 )
 
 type Logger struct {
@@ -50,6 +51,7 @@ func (l *Logger) With(args ...any) *Logger {
 }
 
 func NewLogger(selector string, options ...logp.LogOption) *Logger {
+	options = append(options, zap.AddCallerSkip(1))
 	logger := logp.NewLogger(selector).WithOptions(options...)
 	return &Logger{logger}
 }

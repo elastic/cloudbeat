@@ -135,7 +135,7 @@ func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle
 		case context.DeadlineExceeded:
 			return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, m.timeout.Seconds())
 		case context.Canceled:
-			return fmt.Errorf("fetcher %s was canceled", k)
+			return fmt.Errorf("fetcher %s %s", k, ctx.Err().Error())
 		default:
 			return fmt.Errorf("fetcher %s failed with an unknown error: %v", k, ctx.Err())
 		}
