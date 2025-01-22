@@ -109,7 +109,7 @@ Storage Bucket: 100% (1/1)
 
 ## AZURE Resources
 
-**Progress: 40% (22/54)**
+**Progress: 42% (23/54)**
 Access Management: 100% (3/3)
 Container Registry: 100% (1/1)
 Database: 100% (5/5)
@@ -119,7 +119,7 @@ Infrastructure: 8% (2/23)
 Messaging Service: 100% (2/2)
 Private Endpoint: 100% (1/1)
 Snapshot: 100% (1/1)
-Storage Bucket: 75% (3/4)
+Storage Bucket: 100% (4/4)
 Volume: 100% (1/1)
 Web Service: 100% (1/1)
 
@@ -175,7 +175,7 @@ Web Service: 100% (1/1)
 | Messaging Service | Azure Storage Queue Service | Azure Storage Queue Service | Yes ✅ |
 | Private Endpoint | Azure Storage Account | Azure Storage Account | Yes ✅ |
 | Snapshot | Azure Snapshot | Azure Snapshot | Yes ✅ |
-| Storage Bucket | Azure Storage Blob Container |  | No ❌ |
+| Storage Bucket | Azure Storage Blob Container |  | Yes ✅ |
 | Storage Bucket | Azure Storage Blob Service | Azure Storage Blob Service | Yes ✅ |
 | Storage Bucket | Azure Storage File Service |  | Yes ✅ |
 | Storage Bucket | Azure Storage File Share |  | Yes ✅ |
