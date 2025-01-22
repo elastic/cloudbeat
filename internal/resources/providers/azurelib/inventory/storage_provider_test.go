@@ -34,6 +34,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
+func NewBlobContainersClientListResponse(items ...*armstorage.ListContainerItem) armstorage.BlobContainersClientListResponse {
+	return armstorage.BlobContainersClientListResponse{
+		ListContainerItems: armstorage.ListContainerItems{
+			Value: items,
+		},
+	}
+}
+
 func newBlobServicesClientListResponse(items ...*armstorage.BlobServiceProperties) armstorage.BlobServicesClientListResponse {
 	return armstorage.BlobServicesClientListResponse{
 		BlobServiceItems: armstorage.BlobServiceItems{
@@ -153,6 +161,63 @@ func TestTransformBlobServices(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			got, err := transformBlobServices(tc.inputServicesPages, tc.inputStorageAccount)
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestTransformBlobContainers(t *testing.T) {
+	tests := map[string]struct {
+		inputPages          []armstorage.BlobContainersClientListResponse
+		inputStorageAccount AzureAsset
+		expected            []AzureAsset
+		expectError         bool
+	}{
+		"noop": {},
+		"transform response": {
+			inputPages: []armstorage.BlobContainersClientListResponse{
+				NewBlobContainersClientListResponse(
+					&armstorage.ListContainerItem{
+						ID:         to.Ptr("id1"),
+						Name:       to.Ptr("name1"),
+						Type:       to.Ptr("Microsoft.Storage/storageaccounts/containers"),
+						Properties: &armstorage.ContainerProperties{Deleted: to.Ptr(false)},
+					},
+				),
+			},
+			inputStorageAccount: AzureAsset{
+				Id:            "sa1",
+				Name:          "sa name",
+				ResourceGroup: "rg1",
+				TenantId:      "t1",
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "id1",
+					Name:       "name1",
+					Properties: map[string]any{"deleted": false},
+					Extension: map[string]any{
+						ExtensionStorageAccountID:   "sa1",
+						ExtensionStorageAccountName: "sa name",
+					},
+					ResourceGroup: "rg1",
+					TenantId:      "t1",
+					Type:          BlobContainerAssetType,
+				},
+			},
+			expectError: false,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := transformBlobContainers(tc.inputPages, tc.inputStorageAccount)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
