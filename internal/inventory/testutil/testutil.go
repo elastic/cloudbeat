@@ -19,12 +19,9 @@ package testutil
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -51,11 +48,5 @@ func CollectResourcesAndMatch(t *testing.T, fetcher inventory.AssetFetcher, expe
 		}
 	}
 
-	if !assert.ElementsMatch(t, expected, received) {
-		a, _ := json.Marshal(expected)
-		b, _ := json.Marshal(received)
-		fmt.Println("------------------------------------------------------------")
-		fmt.Println(cmp.Diff(a, b))
-		fmt.Println("------------------------------------------------------------")
-	}
+	assert.ElementsMatch(t, expected, received)
 }
