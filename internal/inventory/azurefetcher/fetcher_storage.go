@@ -36,6 +36,7 @@ type (
 	storageProviderFunc func(context.Context, []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 	storageProvider     interface {
 		ListSubscriptions(ctx context.Context) ([]azurelib.AzureAsset, error)
+		ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountFileServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountFileShares(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
@@ -60,6 +61,7 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 		function       storageProviderFunc
 		classification inventory.AssetClassification
 	}{
+		{"Storage Blob Containers", f.provider.ListStorageAccountBlobContainers, inventory.AssetClassificationAzureStorageBlobContainer},
 		{"Storage Blob Services", f.provider.ListStorageAccountBlobServices, inventory.AssetClassificationAzureStorageBlobService},
 		{"Storage File Services", f.provider.ListStorageAccountFileServices, inventory.AssetClassificationAzureStorageFileService},
 		{"Storage File Shares", f.provider.ListStorageAccountFileShares, inventory.AssetClassificationAzureStorageFileShare},
