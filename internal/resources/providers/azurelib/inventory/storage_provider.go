@@ -38,6 +38,7 @@ import (
 type storageAccountAzureClientWrapper struct {
 	AssetDiagnosticSettings func(ctx context.Context, subID string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error)
 	AssetBlobServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error)
+	AssetFileServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error)
 	AssetQueues             func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error)
 	AssetQueueServices      func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueServicesClientListOptions) (armstorage.QueueServicesClientListResponse, error)
 	AssetTableServices      func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.TableServicesClientListOptions) (armstorage.TableServicesClientListResponse, error)
@@ -47,6 +48,7 @@ type storageAccountAzureClientWrapper struct {
 type StorageAccountProviderAPI interface {
 	ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]AzureAsset, error)
 	ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountFileServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountQueues(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountQueueServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
@@ -75,6 +77,13 @@ func NewStorageAccountProvider(log *logp.Logger, diagnosticSettingsClient *armmo
 				return nil, err
 			}
 			return readPager(ctx, cl.NewListPager(resourceGroupName, storageAccountName, options))
+		},
+		AssetFileServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error) {
+			cl, err := armstorage.NewFileServicesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return armstorage.FileServicesClientListResponse{}, err
+			}
+			return cl.List(ctx, resourceGroupName, storageAccountName, options)
 		},
 		AssetQueues: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error) {
 			cl, err := armstorage.NewQueueClient(subID, credentials, clientOptions)
@@ -184,6 +193,39 @@ func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Cont
 		}
 
 		assets = append(assets, blobServices...)
+	}
+
+	return assets, nil
+}
+
+func (p *storageAccountProvider) ListStorageAccountFileServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		response, err := p.client.AssetFileServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure blob services for storage accounts %s: %w", sa.Id, err)
+		}
+
+		for _, item := range response.Value {
+			properties, err := maps.AsMapStringAny(item.FileServiceProperties)
+			if err != nil {
+				p.log.Errorf("error while transforming azure queue services for storage accounts %s: %v", sa.Id, err)
+			}
+
+			assets = append(assets, AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  sa.ResourceGroup,
+				SubscriptionId: sa.SubscriptionId,
+				TenantId:       sa.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   sa.Id,
+					ExtensionStorageAccountName: sa.Name,
+				},
+			})
+		}
 	}
 
 	return assets, nil

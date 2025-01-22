@@ -379,6 +379,77 @@ func TestListStorageAccountBlobServices(t *testing.T) {
 	}
 }
 
+func TestListStorageAccountFileServices(t *testing.T) {
+	response := func(v []*armstorage.FileServiceProperties) armstorage.FileServicesClientListResponse {
+		return armstorage.FileServicesClientListResponse{
+			FileServiceItems: armstorage.FileServiceItems{
+				Value: v,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.FileServiceProperties
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list file services": {
+			input: []*armstorage.FileServiceProperties{
+				{
+					ID:                    pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileServices/file1"),
+					Name:                  pointers.Ref("file1"),
+					Type:                  pointers.Ref("microsoft.storage/storageaccounts/fileservices"),
+					FileServiceProperties: nil,
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileServices/file1",
+					Name:       "file1",
+					Properties: nil,
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/fileservices",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetFileServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error) {
+						x := tc
+						return response(x.input), nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountFileServices(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
 func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 	log := testhelper.NewLogger(t)
 

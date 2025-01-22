@@ -41,6 +41,11 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		Name:        "blob_service",
 		DisplayName: "blob_service",
 	}
+	azureFileService := azurelib_inventory.AzureAsset{
+		Id:          "file_service",
+		Name:        "file_service",
+		DisplayName: "file_service",
+	}
 	azureQueueService := azurelib_inventory.AzureAsset{
 		Id:          "queue_service",
 		Name:        "queue_service",
@@ -63,6 +68,16 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureBlobService.Id,
 			azureBlobService.Name,
 			inventory.WithRawAsset(azureBlobService),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageFileService,
+			azureFileService.Id,
+			azureFileService.Name,
+			inventory.WithRawAsset(azureFileService),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
@@ -120,6 +135,12 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		mock.Anything, mock.Anything,
 	).Return(
 		[]azurelib_inventory.AzureAsset{azureBlobService}, nil,
+	)
+
+	provider.EXPECT().ListStorageAccountFileServices(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureFileService}, nil,
 	)
 
 	provider.EXPECT().ListStorageAccountQueueServices(

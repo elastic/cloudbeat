@@ -105,9 +105,10 @@ var (
 	AssetClassificationAzureSnapshot            = AssetClassification{CategorySnapshot, "Azure Snapshot"}
 	AssetClassificationAzureStorageAccount      = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
 	AssetClassificationAzureStorageBlobService  = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
+	AssetClassificationAzureStorageFileService  = AssetClassification{CategoryStorageBucket, "Azure Storage File Service"}
 	AssetClassificationAzureStorageQueue        = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
 	AssetClassificationAzureStorageQueueService = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
-	AssetClassificationAzureStorageTableService = AssetClassification{CategoryMessagingService, "Azure Storage Table Service"}
+	AssetClassificationAzureStorageTableService = AssetClassification{CategoryDatabase, "Azure Storage Table Service"}
 	AssetClassificationAzureSubscription        = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
 	AssetClassificationAzureTenant              = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
 	AssetClassificationAzureVirtualMachine      = AssetClassification{CategoryHost, "Azure Virtual Machine"}
