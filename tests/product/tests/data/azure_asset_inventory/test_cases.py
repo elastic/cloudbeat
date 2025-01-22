@@ -81,6 +81,10 @@ test_cases = {
         category="Storage Bucket",
         type_="Azure Storage File Service",
     ),
+    "[Asset Inventory][Azure][Azure Storage File Share] assets found": AssetInventoryCase(
+        category="Storage Bucket",
+        type_="Azure Storage File Share",
+    ),
     "[Asset Inventory][Azure][Azure Table] assets found": AssetInventoryCase(
         category="Database",
         type_="Azure Storage Table",

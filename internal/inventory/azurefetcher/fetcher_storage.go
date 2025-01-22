@@ -38,6 +38,7 @@ type (
 		ListSubscriptions(ctx context.Context) ([]azurelib.AzureAsset, error)
 		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountFileServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountFileShares(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueues(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueueServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountTables(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
@@ -61,6 +62,7 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 	}{
 		{"Storage Blob Services", f.provider.ListStorageAccountBlobServices, inventory.AssetClassificationAzureStorageBlobService},
 		{"Storage File Services", f.provider.ListStorageAccountFileServices, inventory.AssetClassificationAzureStorageFileService},
+		{"Storage File Shares", f.provider.ListStorageAccountFileShares, inventory.AssetClassificationAzureStorageFileShare},
 		{"Storage Queue Services", f.provider.ListStorageAccountQueueServices, inventory.AssetClassificationAzureStorageQueueService},
 		{"Storage Queues", f.provider.ListStorageAccountQueues, inventory.AssetClassificationAzureStorageQueue},
 		{"Storage Tables", f.provider.ListStorageAccountTables, inventory.AssetClassificationAzureStorageTable},
