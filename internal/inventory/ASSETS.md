@@ -109,17 +109,17 @@ Storage Bucket: 100% (1/1)
 
 ## AZURE Resources
 
-**Progress: 33% (18/54)**
+**Progress: 40% (22/54)**
 Access Management: 100% (3/3)
 Container Registry: 100% (1/1)
-Database: 100% (3/3)
+Database: 100% (5/5)
 Host: 100% (1/1)
 Identity: 9% (1/11)
-Infrastructure: 7% (2/28)
+Infrastructure: 8% (2/23)
 Messaging Service: 100% (2/2)
 Private Endpoint: 100% (1/1)
 Snapshot: 100% (1/1)
-Storage Bucket: 100% (1/1)
+Storage Bucket: 75% (3/4)
 Volume: 100% (1/1)
 Web Service: 100% (1/1)
 
@@ -134,6 +134,8 @@ Web Service: 100% (1/1)
 | Database | Azure Elastic Pool | Azure Elastic Pool | Yes ✅ |
 | Database | Azure SQL Database | Azure SQL Database | Yes ✅ |
 | Database | Azure SQL Server | Azure SQL Server | Yes ✅ |
+| Database | Azure Storage Table |  | Yes ✅ |
+| Database | Azure Storage Table Service |  | Yes ✅ |
 | Host | Azure Virtual Machine | Azure Virtual Machine | Yes ✅ |
 | Identity | Access Key |  | No ❌ |
 | Identity | API Gateway Client Certificate |  | No ❌ |
@@ -168,17 +170,15 @@ Web Service: 100% (1/1)
 | Infrastructure | Azure Restorable Dropped Database |  | No ❌ |
 | Infrastructure | Azure Restore Point |  | No ❌ |
 | Infrastructure | Azure Server DNS Alias |  | No ❌ |
-| Infrastructure | Azure Storage Blob Container |  | No ❌ |
-| Infrastructure | Azure Storage File Service |  | No ❌ |
-| Infrastructure | Azure Storage File Share |  | No ❌ |
-| Infrastructure | Azure Storage Table |  | No ❌ |
-| Infrastructure | Azure Storage Table Service |  | No ❌ |
 | Infrastructure | Azure Transparent Data Encryption |  | No ❌ |
 | Messaging Service | Azure Storage Queue | Azure Storage Queue | Yes ✅ |
 | Messaging Service | Azure Storage Queue Service | Azure Storage Queue Service | Yes ✅ |
 | Private Endpoint | Azure Storage Account | Azure Storage Account | Yes ✅ |
 | Snapshot | Azure Snapshot | Azure Snapshot | Yes ✅ |
+| Storage Bucket | Azure Storage Blob Container |  | No ❌ |
 | Storage Bucket | Azure Storage Blob Service | Azure Storage Blob Service | Yes ✅ |
+| Storage Bucket | Azure Storage File Service |  | Yes ✅ |
+| Storage Bucket | Azure Storage File Share |  | Yes ✅ |
 | Volume | Azure Disk | Azure Disk | Yes ✅ |
 | Web Service | Azure App Service | Azure App Service | Yes ✅ |
 
