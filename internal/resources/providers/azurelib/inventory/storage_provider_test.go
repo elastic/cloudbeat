@@ -379,6 +379,77 @@ func TestListStorageAccountBlobServices(t *testing.T) {
 	}
 }
 
+func TestListStorageAccountFileShares(t *testing.T) {
+	response := func(v []*armstorage.FileShareItem) armstorage.FileSharesClientListResponse {
+		return armstorage.FileSharesClientListResponse{
+			FileShareItems: armstorage.FileShareItems{
+				Value: v,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.FileShareItem
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list file shares": {
+			input: []*armstorage.FileShareItem{
+				{
+					ID:         pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileshares/fileshare1"),
+					Name:       pointers.Ref("fileshare1"),
+					Type:       pointers.Ref("microsoft.storage/storageaccounts/fileshares"),
+					Properties: &armstorage.FileShareProperties{},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileshares/fileshare1",
+					Name:       "fileshare1",
+					Properties: map[string]any{},
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/fileshares",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetFileShares: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.FileSharesClientListOptions) ([]armstorage.FileSharesClientListResponse, error) {
+						x := tc
+						return []armstorage.FileSharesClientListResponse{response(x.input)}, nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountFileShares(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
 func TestListStorageAccountTables(t *testing.T) {
 	response := func(v []*armstorage.Table) armstorage.TableClientListResponse {
 		return armstorage.TableClientListResponse{
