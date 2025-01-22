@@ -73,6 +73,10 @@ test_cases = {
         category="Messaging Service",
         type_="Azure Storage Queue Service",
     ),
+    "[Asset Inventory][Azure][Azure Storage Blob Container] assets found": AssetInventoryCase(
+        category="Storage Bucket",
+        type_="Azure Storage Blob Container",
+    ),
     "[Asset Inventory][Azure][Azure Storage Blob Service] assets found": AssetInventoryCase(
         category="Storage Bucket",
         type_="Azure Storage Blob Service",
