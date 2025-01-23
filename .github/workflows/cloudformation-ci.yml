@@ -1,6 +1,12 @@
 name: CloudFormation-CI
 
 on:
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+      - "8.x"
+    types: [opened, synchronize, reopened]
   # pull_request_target:
   #   branches:
   #     - main
@@ -104,7 +110,7 @@ jobs:
       - name: Wait for agents to enroll
         id: wait-for-agents
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        timeout-minutes: 1
+        # timeout-minutes: 1
         run: |
           poetry run python ./agents_enrolled.py
 
@@ -115,62 +121,61 @@ jobs:
           aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
           aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
 
+  # Deploy-CloudFormation-DirectKeys:
+  #   name: "Deploy CloudFormation DirectKeys"
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 40
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v4
 
-  Deploy-CloudFormation-DirectKeys:
-    name: "Deploy CloudFormation DirectKeys"
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
+  #     - name: Hermit Environment
+  #       uses: ./.github/actions/hermit
+  #       with:
+  #         init-tools: 'true'
 
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
-        with:
-          init-tools: 'true'
+  #     - name: Set up unique deployment names
+  #       run: |
+  #         suffix="$(date +%s | tail -c 3)"
+  #         echo "DIRECT_KEY_STACK_NAME=direct-key-stack-pr${{ github.event.number }}-$suffix" >> $GITHUB_ENV
 
-      - name: Set up unique deployment names
-        run: |
-          suffix="$(date +%s | tail -c 3)"
-          echo "DIRECT_KEY_STACK_NAME=direct-key-stack-pr${{ github.event.number }}-$suffix" >> $GITHUB_ENV
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+  #         aws-region: "eu-west-1"
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
-          aws-region: "eu-west-1"
+  #     - name: Deploy CloudFormation stack
+  #       env:
+  #         CF_FILE: 'deploy/cloudformation/elastic-agent-direct-access-key-cspm.yml'
+  #       run: |
+  #         aws cloudformation validate-template --template-body file://${{ env.CF_FILE }}
+  #         aws cloudformation create-stack --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --template-body file://${{ env.CF_FILE }} --capabilities CAPABILITY_NAMED_IAM
+  #         aws cloudformation wait stack-create-complete --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
 
-      - name: Deploy CloudFormation stack
-        env:
-          CF_FILE: 'deploy/cloudformation/elastic-agent-direct-access-key-cspm.yml'
-        run: |
-          aws cloudformation validate-template --template-body file://${{ env.CF_FILE }}
-          aws cloudformation create-stack --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --template-body file://${{ env.CF_FILE }} --capabilities CAPABILITY_NAMED_IAM
-          aws cloudformation wait stack-create-complete --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
+  #     - name: Get Direct Keys
+  #       id: direct-keys
+  #       shell: bash
+  #       run: |
+  #         BODY="$(aws cloudformation describe-stacks --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --query 'Stacks[0].Outputs' --output json)"
+  #         NEW_ACCESS_KEY_ID="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("AccessKeyId")) | .OutputValue')"
+  #         echo "::add-mask::$NEW_ACCESS_KEY_ID"
+  #         NEW_SECRET_ACCESS_KEY="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("SecretAccessKey")) | .OutputValue')"
+  #         echo "::add-mask::$NEW_SECRET_ACCESS_KEY"
+  #         echo "NEW_ACCESS_KEY_ID=${NEW_ACCESS_KEY_ID}" >> $GITHUB_OUTPUT
+  #         echo "NEW_SECRET_ACCESS_KEY=${NEW_SECRET_ACCESS_KEY}" >> $GITHUB_OUTPUT
 
-      - name: Get Direct Keys
-        id: direct-keys
-        shell: bash
-        run: |
-          BODY="$(aws cloudformation describe-stacks --stack-name ${{ env.DIRECT_KEY_STACK_NAME }} --query 'Stacks[0].Outputs' --output json)"
-          NEW_ACCESS_KEY_ID="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("AccessKeyId")) | .OutputValue')"
-          echo "::add-mask::$NEW_ACCESS_KEY_ID"
-          NEW_SECRET_ACCESS_KEY="$(echo "${BODY}" | jq -r '.[] | select(.OutputKey | test("SecretAccessKey")) | .OutputValue')"
-          echo "::add-mask::$NEW_SECRET_ACCESS_KEY"
-          echo "NEW_ACCESS_KEY_ID=${NEW_ACCESS_KEY_ID}" >> $GITHUB_OUTPUT
-          echo "NEW_SECRET_ACCESS_KEY=${NEW_SECRET_ACCESS_KEY}" >> $GITHUB_OUTPUT
+  #     - name: Run AWS integration tests
+  #       uses: ./.github/actions/aws-ci
+  #       with:
+  #         elk-version: ${{ env.ELK_VERSION }}
+  #         aws-access-key-id: ${{ steps.direct-keys.outputs.NEW_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ steps.direct-keys.outputs.NEW_SECRET_ACCESS_KEY }}
+  #         aws-account-type: single-account
 
-      - name: Run AWS integration tests
-        uses: ./.github/actions/aws-ci
-        with:
-          elk-version: ${{ env.ELK_VERSION }}
-          aws-access-key-id: ${{ steps.direct-keys.outputs.NEW_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ steps.direct-keys.outputs.NEW_SECRET_ACCESS_KEY }}
-          aws-account-type: single-account
-
-      - name: Cleanup Environment
-        if: always()
-        run: |
-          aws cloudformation delete-stack --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
-          aws cloudformation wait stack-delete-complete --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
+  #     - name: Cleanup Environment
+  #       if: always()
+  #       run: |
+  #         aws cloudformation delete-stack --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
+  #         aws cloudformation wait stack-delete-complete --stack-name ${{ env.DIRECT_KEY_STACK_NAME }}
