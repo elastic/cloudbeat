@@ -110,7 +110,9 @@ jobs:
       - name: Wait for agents to enroll
         id: wait-for-agents
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        # timeout-minutes: 1
+        timeout-minutes: 1
+        env:
+          STACK_VERSION: "${{ env.ELK_VERSION }}"
         run: |
           poetry run python ./agents_enrolled.py
 
