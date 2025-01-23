@@ -86,4 +86,6 @@ def uses_new_fleet_api_response(version: str) -> bool:
     Returns:
         bool: True if the version uses the new Fleet API response format, False otherwise.
     """
+    if not version:
+        return ValueError("Stack version must be provided.")
     return version.startswith("9.") or version.startswith("8.17")
