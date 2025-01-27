@@ -8,7 +8,9 @@ source ./bin/activate-hermit
 CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
 PYTHON_BIN=./build/ve/$(go env GOOS)/bin
 PYTHON=$PYTHON_BIN/python
-VERSION_QUALIFIER="${VERSION_QUALIFIER:-""}"
+
+source .buildkite/scripts/qualifier.sh
+echo "VERSION_QUALIFIER: ${VERSION_QUALIFIER}"
 
 if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
@@ -22,7 +24,7 @@ mage package
 
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"
-if [[ -n "$VERSION_QUALIFIER" ]]; then
+if [[ -n "${VERSION_QUALIFIER}" ]]; then
     CSV_FILE+="-${VERSION_QUALIFIER}"
 fi
 
