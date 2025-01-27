@@ -16,6 +16,9 @@ fi
 
 source .buildkite/scripts/qualifier.sh
 echo "VERSION_QUALIFIER: ${VERSION_QUALIFIER}"
+if [ "$WORKFLOW" = "snapshot" ]; then
+    VERSION_QUALIFIER=''
+fi
 
 # Download artifacts from other stages
 echo "Downloading artifacts..."
