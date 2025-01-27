@@ -112,14 +112,16 @@ Storage Bucket: 100% (1/1)
 **Progress: 42% (23/54)**
 Access Management: 100% (3/3)
 Container Registry: 100% (1/1)
-Database: 100% (5/5)
+Database: 100% (4/4)
+File System Service: 100% (2/2)
 Host: 100% (1/1)
 Identity: 9% (1/11)
 Infrastructure: 8% (2/23)
 Messaging Service: 100% (2/2)
 Private Endpoint: 100% (1/1)
+Service Usage Technology: 100% (2/2)
 Snapshot: 100% (1/1)
-Storage Bucket: 100% (4/4)
+Storage Bucket: 100% (1/1)
 Volume: 100% (1/1)
 Web Service: 100% (1/1)
 
@@ -135,7 +137,8 @@ Web Service: 100% (1/1)
 | Database | Azure SQL Database | Azure SQL Database | Yes ✅ |
 | Database | Azure SQL Server | Azure SQL Server | Yes ✅ |
 | Database | Azure Storage Table |  | Yes ✅ |
-| Database | Azure Storage Table Service |  | Yes ✅ |
+| File System Service | Azure Storage File Service |  | Yes ✅ |
+| File System Service | Azure Storage File Share |  | Yes ✅ |
 | Host | Azure Virtual Machine | Azure Virtual Machine | Yes ✅ |
 | Identity | Access Key |  | No ❌ |
 | Identity | API Gateway Client Certificate |  | No ❌ |
@@ -174,11 +177,10 @@ Web Service: 100% (1/1)
 | Messaging Service | Azure Storage Queue | Azure Storage Queue | Yes ✅ |
 | Messaging Service | Azure Storage Queue Service | Azure Storage Queue Service | Yes ✅ |
 | Private Endpoint | Azure Storage Account | Azure Storage Account | Yes ✅ |
+| Service Usage Technology | Azure Storage Blob Service | Azure Storage Blob Service | Yes ✅ |
+| Service Usage Technology | Azure Storage Table Service |  | Yes ✅ |
 | Snapshot | Azure Snapshot | Azure Snapshot | Yes ✅ |
 | Storage Bucket | Azure Storage Blob Container |  | Yes ✅ |
-| Storage Bucket | Azure Storage Blob Service | Azure Storage Blob Service | Yes ✅ |
-| Storage Bucket | Azure Storage File Service |  | Yes ✅ |
-| Storage Bucket | Azure Storage File Share |  | Yes ✅ |
 | Volume | Azure Disk | Azure Disk | Yes ✅ |
 | Web Service | Azure App Service | Azure App Service | Yes ✅ |
 
