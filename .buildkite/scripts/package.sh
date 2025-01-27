@@ -11,6 +11,7 @@ PYTHON=$PYTHON_BIN/python
 
 source .buildkite/scripts/qualifier.sh
 echo "VERSION_QUALIFIER: ${VERSION_QUALIFIER}"
+export VERSION_QUALIFIER
 
 if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
