@@ -12,14 +12,13 @@ fetch_elastic_qualifier() {
     echo "${qualifier}"
 }
 
-# If the VERSION_QUALIFIER is already set (e.g. buildkite custom run), use that
-# else try to fetch from google bucket for the current branch
-if [ -z "${VERSION_QUALIFIER+x}" ]; then
-    # VERSION_QUALIFIER is not set, get from bucket
-    VERSION_QUALIFIER="$(fetch_elastic_qualifier "${BUILDKITE_BRANCH}")"
-fi
-
 # If this is a snapshot build, omit VERSION_QUALIFIER
 if [ "${WORKFLOW}" = "snapshot" ]; then
     VERSION_QUALIFIER=''
+
+# If the VERSION_QUALIFIER is already set (e.g. buildkite custom run), don't modify it.
+# Else try to fetch from google bucket for the current branch
+elif [ -z "${VERSION_QUALIFIER+x}" ]; then
+    # VERSION_QUALIFIER is not set, get from bucket
+    VERSION_QUALIFIER="$(fetch_elastic_qualifier "${BUILDKITE_BRANCH}")"
 fi
