@@ -1,0 +1,76 @@
+name: Install Integrations
+run-name: Install integrations by @${{ github.actor }}
+
+on:
+  # TODO: remove pull_request
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      deployment-name:
+        type: string
+        description: |
+          Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
+        required: true
+      kibana-url:
+        type: string
+        description: "The Kibana URL to install the integrations"
+        required: true
+      kibana-username:
+        type: string
+        description: "The Kibana username to install the integrations"
+        required: true
+      kibana-password:
+        type: string
+        description: "The Kibana password to install the integrations"
+        required: true
+      infra-type:
+        description: 'Choose an option (all, cdr, cis)'
+        required: true
+        type: choice
+        options:
+          - all
+          - cdr
+          - cis
+      docker-image-override:
+        required: false
+        description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+        type: string
+
+jobs:
+  naming:
+    runs-on: ubuntu-latest
+    outputs:
+      kbn-password: ${{ steps.password.outputs.kbn-password }}
+    steps:
+      - name: Mask Sensitive Data
+        id: password
+        run: |
+          kbn_password=$(jq -r '.inputs["kibana-password"]' $GITHUB_EVENT_PATH)
+          echo "::add-mask::$kbn_password"
+          echo "kbn-password=$kbn_password" >> $GITHUB_OUTPUT
+
+  # deploy:
+  #   needs: naming
+  #   uses: ./.github/workflows/test-environment.yml
+  #   secrets: inherit
+  #   # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   with:
+  #     deployment_name: ${{ inputs.deployment-name }}
+  #     # For now, the region is not used because it's overridden in the tf, but it's here for future compatibility.
+  #     ess-region: "gcp-us-west2"
+  #     elk-stack-version: 8.18.0-SNAPSHOT
+  #     serverless_mode: false
+  #     expiration_days: 14
+  #     infra-type: ${{ inputs.infra-type }}
+  #     deploy-stack: false
+  #     ext-kibana-url: ${{ inputs.kibana-url }}
+  #     ext-kibana-username: ${{ inputs.kibana-username }}
+  #     ext-kibana-password: ${{ needs.naming.outputs.kbn-password }}
+  #     docker-image-override: ${{ inputs.docker-image-override }}
