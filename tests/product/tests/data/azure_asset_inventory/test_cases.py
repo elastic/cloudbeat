@@ -78,15 +78,15 @@ test_cases = {
         type_="Azure Storage Blob Container",
     ),
     "[Asset Inventory][Azure][Azure Storage Blob Service] assets found": AssetInventoryCase(
-        category="Storage Bucket",
+        category="Service Usage Technology",
         type_="Azure Storage Blob Service",
     ),
     "[Asset Inventory][Azure][Azure Storage File Service] assets found": AssetInventoryCase(
-        category="Storage Bucket",
+        category="File System Service",
         type_="Azure Storage File Service",
     ),
     "[Asset Inventory][Azure][Azure Storage File Share] assets found": AssetInventoryCase(
-        category="Storage Bucket",
+        category="File System Service",
         type_="Azure Storage File Share",
     ),
     "[Asset Inventory][Azure][Azure Table] assets found": AssetInventoryCase(
@@ -94,7 +94,7 @@ test_cases = {
         type_="Azure Storage Table",
     ),
     "[Asset Inventory][Azure][Azure Table Service] assets found": AssetInventoryCase(
-        category="Database",
+        category="Service Usage Technology",
         type_="Azure Storage Table Service",
     ),
 }
