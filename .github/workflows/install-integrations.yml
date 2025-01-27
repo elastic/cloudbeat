@@ -2,12 +2,6 @@ name: Install Integrations
 run-name: Install integrations by @${{ github.actor }}
 
 on:
-  # TODO: remove pull_request
-  pull_request:
-    branches:
-      - main
-      - "[0-9]+.[0-9]+"
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       deployment-name:
@@ -53,24 +47,24 @@ jobs:
           echo "::add-mask::$kbn_password"
           echo "kbn-password=$kbn_password" >> $GITHUB_OUTPUT
 
-  # deploy:
-  #   needs: naming
-  #   uses: ./.github/workflows/test-environment.yml
-  #   secrets: inherit
-  #   # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
-  #   permissions:
-  #     contents: 'read'
-  #     id-token: 'write'
-  #   with:
-  #     deployment_name: ${{ inputs.deployment-name }}
-  #     # For now, the region is not used because it's overridden in the tf, but it's here for future compatibility.
-  #     ess-region: "gcp-us-west2"
-  #     elk-stack-version: 8.18.0-SNAPSHOT
-  #     serverless_mode: false
-  #     expiration_days: 14
-  #     infra-type: ${{ inputs.infra-type }}
-  #     deploy-stack: false
-  #     ext-kibana-url: ${{ inputs.kibana-url }}
-  #     ext-kibana-username: ${{ inputs.kibana-username }}
-  #     ext-kibana-password: ${{ needs.naming.outputs.kbn-password }}
-  #     docker-image-override: ${{ inputs.docker-image-override }}
+  deploy:
+    needs: naming
+    uses: ./.github/workflows/test-environment.yml
+    secrets: inherit
+    # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    with:
+      deployment_name: ${{ inputs.deployment-name }}
+      # For now, the region is not used because it's overridden in the tf, but it's here for future compatibility.
+      ess-region: "gcp-us-west2"
+      elk-stack-version: 8.18.0-SNAPSHOT
+      serverless_mode: false
+      expiration_days: 14
+      infra-type: ${{ inputs.infra-type }}
+      deploy-stack: false
+      ext-kibana-url: ${{ inputs.kibana-url }}
+      ext-kibana-username: ${{ inputs.kibana-username }}
+      ext-kibana-password: ${{ needs.naming.outputs.kbn-password }}
+      docker-image-override: ${{ inputs.docker-image-override }}
