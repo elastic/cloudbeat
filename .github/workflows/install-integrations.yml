@@ -65,6 +65,6 @@ jobs:
       infra-type: ${{ inputs.infra-type }}
       deploy-stack: false
       ext-kibana-url: ${{ inputs.kibana-url }}
-      ext-kibana-username: ${{ inputs.kibana-username }}
-      ext-kibana-password: ${{ needs.naming.outputs.kbn-password }}
+      ext-es-user: ${{ inputs.kibana-username }}
+      ext-es-password: ${{ needs.naming.outputs.kbn-password }}
       docker-image-override: ${{ inputs.docker-image-override }}
