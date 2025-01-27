@@ -18,3 +18,8 @@ if [ -z "${VERSION_QUALIFIER+x}" ]; then
     # VERSION_QUALIFIER is not set, get from bucket
     VERSION_QUALIFIER="$(fetch_elastic_qualifier "${BUILDKITE_BRANCH}")"
 fi
+
+# If this is a snapshot build, omit VERSION_QUALIFIER
+if [ "${WORKFLOW}" = "snapshot" ]; then
+    VERSION_QUALIFIER=''
+fi

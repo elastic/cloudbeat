@@ -14,7 +14,6 @@ echo "VERSION_QUALIFIER: ${VERSION_QUALIFIER}"
 
 if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
-    VERSION_QUALIFIER=''
 fi
 
 # debug command to verify
