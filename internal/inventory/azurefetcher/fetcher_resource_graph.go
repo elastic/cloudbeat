@@ -20,14 +20,13 @@ package azurefetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 )
 
 type resourceGraphFetcher struct {
-	logger   *logp.Logger
+	logger   *clog.Logger
 	provider resourceGraphProvider
 }
 
@@ -37,7 +36,7 @@ type (
 	}
 )
 
-func newResourceGraphFetcher(logger *logp.Logger, provider resourceGraphProvider) inventory.AssetFetcher {
+func newResourceGraphFetcher(logger *clog.Logger, provider resourceGraphProvider) inventory.AssetFetcher {
 	return &resourceGraphFetcher{
 		logger:   logger,
 		provider: provider,

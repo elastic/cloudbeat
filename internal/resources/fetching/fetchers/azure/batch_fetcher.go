@@ -24,9 +24,9 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
@@ -35,7 +35,7 @@ import (
 )
 
 type AzureBatchAssetFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   azurelib.ProviderAPI
 }
@@ -50,7 +50,7 @@ var AzureBatchAssets = map[string]typePair{
 // Because this is done with an "|"" this means that we won't get irrelevant data
 var AzureBatchAssetGroups = []string{inventory.AssetGroupResources}
 
-func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureBatchAssetFetcher {
+func NewAzureBatchAssetFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureBatchAssetFetcher {
 	return &AzureBatchAssetFetcher{
 		log:        log,
 		resourceCh: ch,
