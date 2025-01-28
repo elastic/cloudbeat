@@ -21,13 +21,9 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-<<<<<<< HEAD
 	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
-	"github.com/elastic/elastic-agent-libs/logp"
-=======
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
->>>>>>> 8963da3d (Use custom logger to downgrade canceled context errors to warnings (#2936))
 )
 
 type currentRegionSelector struct {

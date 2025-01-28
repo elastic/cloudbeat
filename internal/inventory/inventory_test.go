@@ -30,11 +30,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-<<<<<<< HEAD
-	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
-=======
 	"github.com/elastic/cloudbeat/internal/infra/clog"
->>>>>>> 8963da3d (Use custom logger to downgrade canceled context errors to warnings (#2936))
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
