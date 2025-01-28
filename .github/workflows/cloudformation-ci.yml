@@ -27,7 +27,7 @@ env:
 jobs:
   Deploy-CloudFormation:
     name: "Deploy CloudFormation"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 40
     defaults:
       run:
@@ -105,6 +105,8 @@ jobs:
         id: wait-for-agents
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         timeout-minutes: 1
+        env:
+          STACK_VERSION: "${{ env.ELK_VERSION }}"
         run: |
           poetry run python ./agents_enrolled.py
 
@@ -114,7 +116,6 @@ jobs:
           ./manage_infrastructure.sh "elk-stack" "destroy"
           aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
           aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}
-
 
   Deploy-CloudFormation-DirectKeys:
     name: "Deploy CloudFormation DirectKeys"

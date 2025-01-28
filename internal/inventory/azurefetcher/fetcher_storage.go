@@ -21,14 +21,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 )
 
 type storageFetcher struct {
-	logger   *logp.Logger
+	logger   *clog.Logger
 	provider storageProvider
 }
 
@@ -48,7 +47,7 @@ type (
 	}
 )
 
-func newStorageFetcher(logger *logp.Logger, provider storageProvider) inventory.AssetFetcher {
+func newStorageFetcher(logger *clog.Logger, provider storageProvider) inventory.AssetFetcher {
 	return &storageFetcher{
 		logger:   logger,
 		provider: provider,

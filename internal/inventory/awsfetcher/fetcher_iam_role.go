@@ -20,9 +20,8 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
@@ -30,7 +29,7 @@ import (
 )
 
 type iamRoleFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    iamRoleProvider
 	AccountId   string
 	AccountName string
@@ -40,7 +39,7 @@ type iamRoleProvider interface {
 	ListRoles(ctx context.Context) ([]*iam.Role, error)
 }
 
-func newIamRoleFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamRoleProvider) inventory.AssetFetcher {
+func newIamRoleFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamRoleProvider) inventory.AssetFetcher {
 	return &iamRoleFetcher{
 		logger:      logger,
 		provider:    provider,

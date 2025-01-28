@@ -13,7 +13,9 @@ elif [ -n "$(git ls-remote --heads origin $MAJOR.x)" ]; then
 else
     BRANCH=main
 fi
-VERSION_QUALIFIER="${VERSION_QUALIFIER:-""}"
+
+source .buildkite/scripts/qualifier.sh
+echo "VERSION_QUALIFIER: ${VERSION_QUALIFIER}"
 
 # Download artifacts from other stages
 echo "Downloading artifacts..."

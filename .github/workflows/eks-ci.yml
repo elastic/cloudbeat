@@ -171,7 +171,7 @@ jobs:
             k8s_context: "test-eks-config-2"
             label: "EKS functional tests: config 2"
     name: ${{ matrix.label }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
       - name: Check out the repo
@@ -227,7 +227,7 @@ jobs:
     name: Publish Results
     needs: Test_Matrix
     if: always()
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v4

@@ -24,8 +24,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -40,10 +40,10 @@ type ResourceGraphProviderAPI interface {
 
 type ResourceGraphProvider struct {
 	client *ResourceGraphAzureClientWrapper
-	log    *logp.Logger
+	log    *clog.Logger
 }
 
-func NewResourceGraphProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client) ResourceGraphProviderAPI {
+func NewResourceGraphProvider(log *clog.Logger, resourceGraphClient *armresourcegraph.Client) ResourceGraphProviderAPI {
 	// We wrap the client, so we can mock it in tests
 	wrapper := &ResourceGraphAzureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {

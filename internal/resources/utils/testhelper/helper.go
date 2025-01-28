@@ -23,6 +23,8 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 // CollectResources fetches items from a channel and returns them in a slice.
@@ -85,20 +87,20 @@ func CreateMockClients[T any](client T, regions []string) map[string]T {
 	return m
 }
 
-func NewLogger(t *testing.T) *logp.Logger {
+func NewLogger(t *testing.T) *clog.Logger {
 	t.Helper()
 
 	require.NoError(t, logp.TestingSetup())
 
-	return logp.NewLogger(t.Name())
+	return clog.NewLogger(t.Name())
 }
 
-func NewObserverLogger(t *testing.T) *logp.Logger {
+func NewObserverLogger(t *testing.T) *clog.Logger {
 	t.Helper()
 
 	require.NoError(t, logp.DevelopmentSetup(logp.ToObserverOutput()))
 
-	return logp.NewLogger(t.Name())
+	return clog.NewLogger(t.Name())
 }
 
 func SkipLong(t *testing.T) {
