@@ -23,7 +23,6 @@ import (
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"cloud.google.com/go/iam/apiv1/iampb"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
@@ -32,13 +31,14 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 )
 
 type ProviderTestSuite struct {
 	suite.Suite
-	logger          *logp.Logger
+	logger          *clog.Logger
 	mockedInventory *AssetsInventoryWrapper
 	mockedIterator  *MockIterator
 }
@@ -50,7 +50,7 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.logger = logp.NewLogger("test")
+	s.logger = clog.NewLogger("test")
 	s.mockedIterator = new(MockIterator)
 	s.mockedInventory = &AssetsInventoryWrapper{
 		Close: func() error { return nil },
@@ -366,7 +366,7 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 	}
 
 	provider := &Provider{
-		log: logp.NewLogger("test"),
+		log: clog.NewLogger("test"),
 		inventory: &AssetsInventoryWrapper{
 			Close: func() error { return nil },
 			ListAssets: func(_ context.Context, _ *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
@@ -450,7 +450,7 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 	}
 
 	provider := &Provider{
-		log: logp.NewLogger("test"),
+		log: clog.NewLogger("test"),
 		inventory: &AssetsInventoryWrapper{
 			Close: func() error { return nil },
 			ListAssets: func(_ context.Context, _ *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {

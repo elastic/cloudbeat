@@ -21,10 +21,10 @@ import (
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -32,7 +32,7 @@ import (
 )
 
 func TestAccountFetcher_Fetch_Assets(t *testing.T) {
-	logger := logp.NewLogger("gcpfetcher_test")
+	logger := clog.NewLogger("gcpfetcher_test")
 	assets := []*gcpinventory.ExtendedGcpAsset{
 		{
 			Asset: &assetpb.Asset{

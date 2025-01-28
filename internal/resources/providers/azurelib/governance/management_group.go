@@ -21,9 +21,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
@@ -66,7 +66,7 @@ type provider struct {
 	client inventory.ResourceGraphProviderAPI
 }
 
-func NewProvider(log *logp.Logger, client inventory.ResourceGraphProviderAPI) ProviderAPI {
+func NewProvider(log *clog.Logger, client inventory.ResourceGraphProviderAPI) ProviderAPI {
 	p := provider{
 		client: client,
 	}

@@ -20,11 +20,10 @@
 package inventory
 
 import (
-	context "context"
-
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 	auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 
-	logp "github.com/elastic/elastic-agent-libs/logp"
+	context "context"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -43,15 +42,15 @@ func (_m *MockProviderInitializerAPI) EXPECT() *MockProviderInitializerAPI_Expec
 }
 
 // Init provides a mock function with given fields: ctx, log, gcpConfig
-func (_m *MockProviderInitializerAPI) Init(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
+func (_m *MockProviderInitializerAPI) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
 	ret := _m.Called(ctx, log, gcpConfig)
 
 	var r0 ServiceAPI
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, auth.GcpFactoryConfig) (ServiceAPI, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig) (ServiceAPI, error)); ok {
 		return rf(ctx, log, gcpConfig)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, auth.GcpFactoryConfig) ServiceAPI); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig) ServiceAPI); ok {
 		r0 = rf(ctx, log, gcpConfig)
 	} else {
 		if ret.Get(0) != nil {
@@ -59,7 +58,7 @@ func (_m *MockProviderInitializerAPI) Init(ctx context.Context, log *logp.Logger
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *logp.Logger, auth.GcpFactoryConfig) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig) error); ok {
 		r1 = rf(ctx, log, gcpConfig)
 	} else {
 		r1 = ret.Error(1)
@@ -75,15 +74,15 @@ type MockProviderInitializerAPI_Init_Call struct {
 
 // Init is a helper method to define mock.On call
 //   - ctx context.Context
-//   - log *logp.Logger
+//   - log *clog.Logger
 //   - gcpConfig auth.GcpFactoryConfig
 func (_e *MockProviderInitializerAPI_Expecter) Init(ctx interface{}, log interface{}, gcpConfig interface{}) *MockProviderInitializerAPI_Init_Call {
 	return &MockProviderInitializerAPI_Init_Call{Call: _e.mock.On("Init", ctx, log, gcpConfig)}
 }
 
-func (_c *MockProviderInitializerAPI_Init_Call) Run(run func(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig)) *MockProviderInitializerAPI_Init_Call {
+func (_c *MockProviderInitializerAPI_Init_Call) Run(run func(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig)) *MockProviderInitializerAPI_Init_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*logp.Logger), args[2].(auth.GcpFactoryConfig))
+		run(args[0].(context.Context), args[1].(*clog.Logger), args[2].(auth.GcpFactoryConfig))
 	})
 	return _c
 }
@@ -93,7 +92,7 @@ func (_c *MockProviderInitializerAPI_Init_Call) Return(_a0 ServiceAPI, _a1 error
 	return _c
 }
 
-func (_c *MockProviderInitializerAPI_Init_Call) RunAndReturn(run func(context.Context, *logp.Logger, auth.GcpFactoryConfig) (ServiceAPI, error)) *MockProviderInitializerAPI_Init_Call {
+func (_c *MockProviderInitializerAPI_Init_Call) RunAndReturn(run func(context.Context, *clog.Logger, auth.GcpFactoryConfig) (ServiceAPI, error)) *MockProviderInitializerAPI_Init_Call {
 	_c.Call.Return(run)
 	return _c
 }

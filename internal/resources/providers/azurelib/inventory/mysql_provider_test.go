@@ -25,8 +25,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type flexibleConfigFn func(configName string) (armmysqlflexibleservers.ConfigurationsClientGetResponse, error)
@@ -38,7 +39,7 @@ func mockAssetFlexibleConfigurationMysqlProvider(f flexibleConfigFn) MysqlProvid
 		},
 	}
 
-	return &mysqlProvider{client: wrapper, log: logp.NewLogger("mock_asset_flexible_config")}
+	return &mysqlProvider{client: wrapper, log: clog.NewLogger("mock_asset_flexible_config")}
 }
 
 func TestMysqlProvider_GetFlexibleTLSVersionConfiguration(t *testing.T) {

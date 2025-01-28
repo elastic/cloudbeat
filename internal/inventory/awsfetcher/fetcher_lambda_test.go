@@ -21,10 +21,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -71,7 +71,7 @@ func TestLambdaFunction_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_lambda")
+	logger := clog.NewLogger("test_fetcher_lambda")
 	provider := newMockLambdaProvider(t)
 
 	provider.On("ListEventSourceMappings", mock.Anything, mock.Anything).Return([]awslib.AwsResource{}, nil)

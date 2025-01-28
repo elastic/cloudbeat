@@ -21,9 +21,9 @@ import (
 	"context"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/uniqueness"
@@ -34,7 +34,7 @@ type k8sbenchmark struct {
 	leaderElector uniqueness.Manager
 }
 
-func (b *Builder) BuildK8s(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, k8sLeaderElector uniqueness.Manager) (Benchmark, error) {
+func (b *Builder) BuildK8s(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, k8sLeaderElector uniqueness.Manager) (Benchmark, error) {
 	base, err := b.buildBase(ctx, log, cfg, resourceCh, reg)
 	if err != nil {
 		return nil, err
