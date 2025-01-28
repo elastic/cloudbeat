@@ -22,7 +22,7 @@ package awslib
 import (
 	aws "github.com/aws/aws-sdk-go-v2/aws"
 	cloud "github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 
 	context "context"
 

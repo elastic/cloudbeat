@@ -22,10 +22,10 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func TestAccountFetcher_Fetch_Tenants(t *testing.T) {

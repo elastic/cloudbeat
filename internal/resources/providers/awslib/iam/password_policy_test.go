@@ -26,8 +26,8 @@ import (
 	"github.com/aws/smithy-go/ptr"
 	"github.com/stretchr/testify/require"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func Test_GetPasswordPolicy(t *testing.T) {

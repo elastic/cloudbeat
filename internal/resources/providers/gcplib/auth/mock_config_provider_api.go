@@ -21,7 +21,7 @@ package auth
 
 import (
 	config "github.com/elastic/cloudbeat/internal/config"
-	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 
 	context "context"
 

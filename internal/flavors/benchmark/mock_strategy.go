@@ -21,7 +21,7 @@ package benchmark
 
 import (
 	builder "github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
-	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 
 	config "github.com/elastic/cloudbeat/internal/config"
 

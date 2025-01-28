@@ -23,7 +23,7 @@ import (
 	context "context"
 
 	aws "github.com/aws/aws-sdk-go-v2/aws"
-	clog "github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 
 	mock "github.com/stretchr/testify/mock"
 )
