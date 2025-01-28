@@ -21,9 +21,9 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
@@ -43,7 +43,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
 )
 
-func NewCisAwsFetchers(ctx context.Context, log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
+func NewCisAwsFetchers(ctx context.Context, log *clog.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
 	log.Infof("Initializing AWS fetchers for account: '%s'", identity.Account)
 
 	m := make(registry.FetchersMap)

@@ -22,17 +22,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/huandu/xstrings"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
 type GcpAssetsFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
 }
@@ -85,7 +85,7 @@ var GcpAssetTypes = map[string][]string{
 	},
 }
 
-func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpAssetsFetcher {
+func NewGcpAssetsFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpAssetsFetcher {
 	return &GcpAssetsFetcher{
 		log:        log,
 		resourceCh: ch,

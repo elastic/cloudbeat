@@ -24,11 +24,11 @@ import (
 	"time"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
@@ -84,7 +84,7 @@ type requiredResource struct {
 }
 
 type KubeFetcher struct {
-	log         *logp.Logger
+	log         *clog.Logger
 	resourceCh  chan fetching.ResourceInfo
 	watchers    []kubernetes.Watcher
 	k8sProvider k8s.Interface
@@ -97,7 +97,7 @@ type KubeApiFetcherConfig struct {
 	KubeConfig string        `config:"kubeconfig"`
 }
 
-func NewKubeFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider k8s.Interface) *KubeFetcher {
+func NewKubeFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, provider k8s.Interface) *KubeFetcher {
 	return &KubeFetcher{
 		log:         log,
 		resourceCh:  ch,

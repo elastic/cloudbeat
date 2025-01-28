@@ -23,8 +23,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
@@ -32,7 +32,7 @@ type CloudwatchLogs interface {
 	DescribeMetricFilters(ctx context.Context, region *string, logGroup string) ([]types.MetricFilter, error)
 }
 
-func NewCloudwatchLogsProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewCloudwatchLogsProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return cloudwatchlogs.NewFromConfig(cfg)
 	}
