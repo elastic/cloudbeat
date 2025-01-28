@@ -38,14 +38,17 @@ jobs:
   naming:
     runs-on: ubuntu-latest
     outputs:
-      kbn-password: ${{ steps.password.outputs.kbn-password }}
+      es-password: ${{ steps.password.outputs.kbn-password }}
     steps:
       - name: Mask Sensitive Data
         id: password
+        env:
+          SECRET: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           kbn_password=$(jq -r '.inputs["kibana-password"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$kbn_password"
-          echo "kbn-password=$kbn_password" >> $GITHUB_OUTPUT
+          kbn_password_encrypted=$(gpg --symmetric --batch --passphrase "$SECRET" --output - <(echo "$kbn_password") | base64 -w0)
+          echo "kbn-password=$kbn_password_encrypted" >> $GITHUB_OUTPUT
 
   deploy:
     needs: naming
@@ -61,10 +64,11 @@ jobs:
       ess-region: "gcp-us-west2"
       elk-stack-version: 8.18.0-SNAPSHOT
       serverless_mode: false
+      agentless: false
       expiration_days: 14
       infra-type: ${{ inputs.infra-type }}
       deploy-stack: false
       ext-kibana-url: ${{ inputs.kibana-url }}
       ext-es-user: ${{ inputs.kibana-username }}
-      ext-es-password: ${{ needs.naming.outputs.kbn-password }}
+      ext-es-password: ${{ needs.naming.outputs.es-password }}
       docker-image-override: ${{ inputs.docker-image-override }}

@@ -375,13 +375,16 @@ jobs:
         if: ${{ env.DEPLOY_STACK == 'false' }}
         env:
           USER_ES_USER: ${{ inputs.ext-es-user || '' }}
-          USER_ES_PASSWORD: ${{ inputs.ext-es-password || '' }}
+          USER_ES_PASSWORD: ${{ inputs.ext-es-password }}
           USER_KIBANA_URL: ${{ inputs.ext-kibana-url || '' }}
           USER_ES_URL: ${{ inputs.ext-es-url || '' }}
+          SECRET: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           echo "Using user-provided environment values..."
           echo "ES_USER=$USER_ES_USER" >> $GITHUB_ENV
-          echo "ES_PASSWORD=$USER_ES_PASSWORD" >> $GITHUB_ENV
+          user_password=$(gpg --decrypt --quiet --batch --passphrase "$SECRET" --output - <(echo "$USER_ES_PASSWORD" | base64 --decode))
+          echo "::add-mask::$user_password"
+          echo "ES_PASSWORD=$user_password" >> $GITHUB_ENV
           echo "KIBANA_URL=$USER_KIBANA_URL" >> $GITHUB_ENV
           echo "ES_URL=$USER_ES_URL" >> $GITHUB_ENV
 
