@@ -29,11 +29,11 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -129,7 +129,7 @@ func (v *validatorMock) Validate(cfg *config.C) error {
 type LauncherTestSuite struct {
 	suite.Suite
 
-	log  *logp.Logger
+	log  *clog.Logger
 	opts goleak.Option
 }
 

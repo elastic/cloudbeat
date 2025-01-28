@@ -29,24 +29,25 @@ import (
 	"time"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1" // revive:disable-line
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type LeaderelectionManager struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	leader     *le.LeaderElector
 	wg         *sync.WaitGroup
 	cancelFunc context.CancelFunc
 	kubeClient k8s.Interface
 }
 
-func NewLeaderElector(log *logp.Logger, client k8s.Interface) Manager {
+func NewLeaderElector(log *clog.Logger, client k8s.Interface) Manager {
 	if client == nil {
 		log.Errorf("NewLeaderElector returned default client")
 		return &DefaultUniqueManager{}

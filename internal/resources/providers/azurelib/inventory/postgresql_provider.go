@@ -25,9 +25,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -47,10 +47,10 @@ type PostgresqlProviderAPI interface {
 
 type psqlProvider struct {
 	client *psqlAzureClientWrapper
-	log    *logp.Logger //nolint:unused
+	log    *clog.Logger //nolint:unused
 }
 
-func NewPostgresqlProvider(log *logp.Logger, credentials azcore.TokenCredential) PostgresqlProviderAPI {
+func NewPostgresqlProvider(log *clog.Logger, credentials azcore.TokenCredential) PostgresqlProviderAPI {
 	// We wrap the client, so we can mock it in tests
 	wrapper := &psqlAzureClientWrapper{
 		AssetSingleServerConfigurations: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {

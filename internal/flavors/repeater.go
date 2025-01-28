@@ -21,12 +21,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type RepeaterFunc func() error
 
-func NewRepeater(log *logp.Logger, interval time.Duration) *Repeater {
+func NewRepeater(log *clog.Logger, interval time.Duration) *Repeater {
 	return &Repeater{
 		log:      log,
 		interval: interval,
@@ -34,7 +34,7 @@ func NewRepeater(log *logp.Logger, interval time.Duration) *Repeater {
 }
 
 type Repeater struct {
-	log      *logp.Logger
+	log      *clog.Logger
 	interval time.Duration
 }
 

@@ -24,9 +24,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/smithy-go/ptr"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
@@ -84,7 +84,7 @@ func Test_GetPasswordPolicy(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.tcName, func(t *testing.T) {
 			ctx := context.Background()
-			log := logp.NewLogger("test")
+			log := clog.NewLogger("test")
 			client := &MockClient{}
 			provider := Provider{
 				log:                   log,

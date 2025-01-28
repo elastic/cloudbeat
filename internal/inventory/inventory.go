@@ -25,9 +25,10 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/samber/lo"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 const (
@@ -41,7 +42,7 @@ type AssetInventory struct {
 	bufferFlushInterval time.Duration
 	bufferMaxSize       int
 	period              time.Duration
-	logger              *logp.Logger
+	logger              *clog.Logger
 	assetCh             chan AssetEvent
 	now                 func() time.Time
 }
@@ -54,7 +55,7 @@ type AssetPublisher interface {
 	PublishAll([]beat.Event)
 }
 
-func NewAssetInventory(logger *logp.Logger, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time, period time.Duration) AssetInventory {
+func NewAssetInventory(logger *clog.Logger, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time, period time.Duration) AssetInventory {
 	if period < minimalPeriod {
 		period = minimalPeriod
 	}
