@@ -21,10 +21,10 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"go.uber.org/zap"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 )
@@ -60,16 +60,16 @@ func (w *wrapResource) GetElasticCommonData() (map[string]any, error) {
 	return w.wrapped.GetElasticCommonData()
 }
 
-func NewCisAwsOrganizationFetchers(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
+func NewCisAwsOrganizationFetchers(ctx context.Context, log *clog.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
 	return newCisAwsOrganizationFetchers(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers)
 }
 
 // awsFactory is the same function type as NewCisAwsFetchers, and it's used to mock the function in tests
-type awsFactory func(context.Context, *logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
+type awsFactory func(context.Context, *clog.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
 
 func newCisAwsOrganizationFetchers(
 	ctx context.Context,
-	log *logp.Logger,
+	log *clog.Logger,
 	rootCh chan fetching.ResourceInfo,
 	accounts []AwsAccount,
 	cache map[string]registry.FetchersMap,

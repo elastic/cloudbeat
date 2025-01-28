@@ -22,10 +22,10 @@ import (
 
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	s3ctrltypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -164,7 +164,7 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_s3_bucket")
+	logger := clog.NewLogger("test_fetcher_s3_bucket")
 	provider := newMockS3BucketProvider(t)
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 

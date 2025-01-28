@@ -21,8 +21,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib"
@@ -30,7 +29,7 @@ import (
 )
 
 type GcpServiceUsageFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
 }
@@ -42,7 +41,7 @@ type GcpServiceUsageAsset struct {
 	Asset *inventory.ServiceUsageAsset `json:"assets,omitempty"`
 }
 
-func NewGcpServiceUsageFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpServiceUsageFetcher {
+func NewGcpServiceUsageFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpServiceUsageFetcher {
 	return &GcpServiceUsageFetcher{
 		log:        log,
 		resourceCh: ch,

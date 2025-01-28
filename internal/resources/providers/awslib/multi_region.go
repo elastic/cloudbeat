@@ -25,7 +25,8 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type RegionsSelector interface {
@@ -37,7 +38,7 @@ type CrossRegionFetcher[T any] interface {
 }
 
 type CrossRegionFactory[T any] interface {
-	NewMultiRegionClients(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(cfg aws.Config) T, log *logp.Logger) CrossRegionFetcher[T]
+	NewMultiRegionClients(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(cfg aws.Config) T, log *clog.Logger) CrossRegionFetcher[T]
 }
 
 type (
@@ -48,7 +49,7 @@ type (
 )
 
 // NewMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
-func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(cfg aws.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
+func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(cfg aws.Config) T, log *clog.Logger) CrossRegionFetcher[T] {
 	clientsMap := make(map[string]T, 0)
 	regionList, err := selector.Regions(ctx, cfg)
 	if err != nil {

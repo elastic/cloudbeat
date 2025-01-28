@@ -18,14 +18,13 @@
 package azurefetcher
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
 )
 
-func New(logger *logp.Logger, provider azurelib.ProviderAPI, msgraphProvider msgraph.ProviderAPI) []inventory.AssetFetcher {
+func New(logger *clog.Logger, provider azurelib.ProviderAPI, msgraphProvider msgraph.ProviderAPI) []inventory.AssetFetcher {
 	return []inventory.AssetFetcher{
 		newAccountFetcher(logger, provider),
 		newActiveDirectoryFetcher(logger, msgraphProvider),

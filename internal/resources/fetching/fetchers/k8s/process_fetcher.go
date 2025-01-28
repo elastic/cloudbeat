@@ -30,11 +30,11 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
@@ -108,7 +108,7 @@ type ProcResource struct {
 }
 
 type ProcessesFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	Fs         fs.FS
 	resourceCh chan fetching.ResourceInfo
 	processes  ProcessesConfigMap
@@ -120,7 +120,7 @@ type ProcessInputConfiguration struct {
 
 type ProcessesConfigMap map[string]ProcessInputConfiguration
 
-func NewProcessFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, processes ProcessesConfigMap) *ProcessesFetcher {
+func NewProcessFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, processes ProcessesConfigMap) *ProcessesFetcher {
 	return &ProcessesFetcher{
 		log:        log,
 		Fs:         os.DirFS(directory),

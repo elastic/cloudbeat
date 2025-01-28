@@ -22,7 +22,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
-	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type currentRegionSelector struct {
@@ -34,7 +35,7 @@ type currentCloudRegion interface {
 }
 
 func (s *currentRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
-	log := logp.NewLogger("aws")
+	log := clog.NewLogger("aws")
 	log.Info("Getting current region of the instance")
 
 	if s.client == nil {

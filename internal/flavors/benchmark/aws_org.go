@@ -25,12 +25,12 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
@@ -52,7 +52,7 @@ type AWSOrg struct {
 	AccountProvider  awslib.AccountProviderAPI
 }
 
-func (a *AWSOrg) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
@@ -65,7 +65,7 @@ func (a *AWSOrg) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config
 }
 
 //revive:disable-next-line:function-result-limit
-func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
@@ -112,7 +112,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 	return reg, cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 
-func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
+func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
 	rootCfg := assumeRole(
 		sts.NewFromConfig(initialCfg),
 		initialCfg,
@@ -165,7 +165,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 
 // pickManagementAccountRole selects role used to fetch resources from the
 // Management Account (and decides if they should be fetched at all).
-func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *logp.Logger, stsClient stscreds.AssumeRoleAPIClient, rootCfg awssdk.Config, identity cloud.Identity) (awssdk.Config, error) {
+func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger, stsClient stscreds.AssumeRoleAPIClient, rootCfg awssdk.Config, identity cloud.Identity) (awssdk.Config, error) {
 	// We will check for a tag on 'cloudbeat-root' role. If it is missing, we
 	// will try to be backward compatible and use the "cloudbeat-root" role to
 	// scan the Management Account. In previous CF templates, "cloudbeat-root"

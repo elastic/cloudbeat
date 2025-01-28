@@ -20,9 +20,9 @@ package azurefetcher
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
@@ -76,7 +76,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 	}
 
 	// setup
-	logger := logp.NewLogger("azurefetcher_test")
+	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockResourceGraphProvider(t)
 
 	provider.EXPECT().ListAllAssetTypesByName(
