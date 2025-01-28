@@ -9,6 +9,10 @@ on:
         description: |
           Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
         required: true
+      stack-version:
+        type: string
+        description: "The version of the stack to deploy"
+        required: true
       kibana-url:
         type: string
         description: "The Kibana URL to install the integrations"
@@ -62,7 +66,7 @@ jobs:
       deployment_name: ${{ inputs.deployment-name }}
       # For now, the region is not used because it's overridden in the tf, but it's here for future compatibility.
       ess-region: "gcp-us-west2"
-      elk-stack-version: 8.18.0-SNAPSHOT
+      elk-stack-version: ${{ inputs.stack-version }}
       serverless_mode: false
       agentless: false
       expiration_days: 14
