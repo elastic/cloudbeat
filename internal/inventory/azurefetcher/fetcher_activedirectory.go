@@ -35,6 +35,7 @@ type activedirectoryFetcher struct {
 type (
 	activedirectoryProvider interface {
 		ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error)
+		ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
 	}
 )
 
@@ -47,6 +48,7 @@ func newActiveDirectoryFetcher(logger *logp.Logger, provider activedirectoryProv
 
 func (f *activedirectoryFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
 	f.fetchServicePrincipals(ctx, assetChan)
+	f.fetchDirectoryRoles(ctx, assetChan)
 }
 
 func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
@@ -73,6 +75,32 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   tenantId,
+				ServiceName: "Azure",
+			}),
+		)
+	}
+}
+
+func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
+	f.logger.Info("Fetching Directory Roles")
+	defer f.logger.Info("Fetching Directory Roles - Finished")
+
+	items, err := f.provider.ListDirectoryRoles(ctx)
+	if err != nil {
+		f.logger.Errorf("Could not fetch Directory Roles: %v", err)
+	}
+
+	for _, item := range items {
+		assetChan <- inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureRoleDefinition,
+			pointers.Deref(item.GetId()),
+			pointers.Deref(item.GetDisplayName()),
+			inventory.WithRawAsset(
+				item.GetBackingStore().Enumerate(),
+			),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "",
 				ServiceName: "Azure",
 			}),
 		)

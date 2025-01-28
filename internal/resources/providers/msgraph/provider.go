@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	graph "github.com/microsoftgraph/msgraph-sdk-go"
 	graphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
+	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
 
@@ -32,12 +33,14 @@ import (
 
 type ProviderAPI interface {
 	ListServicePrincipals(context.Context) ([]*models.ServicePrincipal, error)
+	ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
 }
 
 type provider struct {
 	log    *logp.Logger
 	client interface {
 		ServicePrincipals() *serviceprincipals.ServicePrincipalsRequestBuilder
+		DirectoryRoles() *directoryroles.DirectoryRolesRequestBuilder
 	}
 }
 
@@ -86,6 +89,34 @@ func (p *provider) ListServicePrincipals(ctx context.Context) ([]*models.Service
 	})
 	if err != nil {
 		p.log.Errorf("error iterating over Service Principals: %v", err)
+	}
+	return items, nil
+}
+
+func (p *provider) ListDirectoryRoles(ctx context.Context) ([]*models.DirectoryRole, error) {
+	requestConfig := &directoryroles.DirectoryRolesRequestBuilderGetRequestConfiguration{}
+
+	response, err := p.client.DirectoryRoles().Get(ctx, requestConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error listing Azure Directory Roles: %w", err)
+	}
+
+	pageIterator, err := graphcore.NewPageIterator[*models.DirectoryRole](
+		response,
+		p.client.DirectoryRoles().RequestAdapter,
+		models.CreateDirectoryRoleCollectionResponseFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error paging Azure Directory Roles: %w", err)
+	}
+
+	items := []*models.DirectoryRole{}
+	err = pageIterator.Iterate(ctx, func(pageItem *models.DirectoryRole) bool {
+		items = append(items, pageItem)
+		return true // to continue the iteration
+	})
+	if err != nil {
+		p.log.Errorf("error iterating over Directory Roles: %v", err)
 	}
 	return items, nil
 }
