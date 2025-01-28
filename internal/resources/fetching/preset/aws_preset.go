@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
@@ -40,7 +41,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func NewCisAwsFetchers(ctx context.Context, log *clog.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {

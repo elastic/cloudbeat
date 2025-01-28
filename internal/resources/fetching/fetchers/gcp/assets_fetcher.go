@@ -25,10 +25,10 @@ import (
 	"github.com/huandu/xstrings"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type GcpAssetsFetcher struct {

@@ -25,12 +25,12 @@ import (
 	cloudwatch_types "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 	cloudwatchlogs_types "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudwatch/logs"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 

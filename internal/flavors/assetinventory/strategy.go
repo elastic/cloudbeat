@@ -26,6 +26,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/azurefetcher"
 	"github.com/elastic/cloudbeat/internal/inventory/gcpfetcher"
@@ -34,7 +35,6 @@ import (
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Strategy interface {

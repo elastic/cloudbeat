@@ -21,11 +21,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type GcpPoliciesFetcher struct {

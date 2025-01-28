@@ -18,9 +18,9 @@
 package gcpfetcher
 
 import (
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func New(logger *clog.Logger, provider gcpinventory.ServiceAPI) []inventory.AssetFetcher {

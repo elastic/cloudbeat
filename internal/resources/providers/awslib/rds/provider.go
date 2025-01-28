@@ -25,10 +25,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	ec2Provider "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func NewProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], ec2Provider ec2Provider.ElasticCompute) *Provider {

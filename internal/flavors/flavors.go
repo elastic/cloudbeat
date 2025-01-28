@@ -24,8 +24,8 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 const (

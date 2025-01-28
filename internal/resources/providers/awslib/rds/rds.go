@@ -22,9 +22,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type DBInstance struct {

@@ -21,7 +21,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 // Cache is a thread-safe generic struct that you can use to cache values for the current cycle. On a new cycle,

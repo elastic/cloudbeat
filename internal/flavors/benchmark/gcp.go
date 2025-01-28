@@ -26,12 +26,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type GCP struct {

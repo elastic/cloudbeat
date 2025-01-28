@@ -28,10 +28,10 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ElbFetcher struct {

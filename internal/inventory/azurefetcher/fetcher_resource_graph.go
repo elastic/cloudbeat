@@ -20,9 +20,9 @@ package azurefetcher
 import (
 	"context"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type resourceGraphFetcher struct {

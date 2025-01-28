@@ -24,12 +24,12 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type AzureAssetsFetcher struct {

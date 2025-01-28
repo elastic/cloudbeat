@@ -23,10 +23,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ProviderAPI interface {

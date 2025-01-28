@@ -20,11 +20,11 @@ package preset
 import (
 	k8s "k8s.io/client-go/kubernetes"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/condition"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 

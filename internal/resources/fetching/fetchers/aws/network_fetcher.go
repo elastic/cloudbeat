@@ -20,11 +20,11 @@ package fetchers
 import (
 	"context"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type NetworkFetcher struct {

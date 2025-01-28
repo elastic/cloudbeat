@@ -26,7 +26,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/samber/lo"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/maps"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )

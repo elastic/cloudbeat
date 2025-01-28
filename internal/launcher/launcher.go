@@ -31,7 +31,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/go-ucfg"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 const (

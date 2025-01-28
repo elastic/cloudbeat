@@ -23,7 +23,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 const (

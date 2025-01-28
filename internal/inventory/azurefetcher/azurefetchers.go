@@ -18,10 +18,10 @@
 package azurefetcher
 
 import (
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func New(logger *clog.Logger, provider azurelib.ProviderAPI, msgraphProvider msgraph.ProviderAPI) []inventory.AssetFetcher {

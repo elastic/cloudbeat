@@ -22,10 +22,10 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Client interface {

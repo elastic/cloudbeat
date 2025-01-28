@@ -23,9 +23,9 @@ import (
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type K8sResource struct {

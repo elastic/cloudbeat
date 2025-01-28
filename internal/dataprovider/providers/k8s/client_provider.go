@@ -26,7 +26,7 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type ClientGetterAPI interface {

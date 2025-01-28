@@ -32,9 +32,9 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Provider struct {

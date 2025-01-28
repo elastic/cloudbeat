@@ -26,8 +26,8 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type ProviderAPI interface {

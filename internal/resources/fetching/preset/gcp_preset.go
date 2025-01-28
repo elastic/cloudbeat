@@ -21,11 +21,11 @@ import (
 	"context"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func NewCisGcpFetchers(ctx context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {

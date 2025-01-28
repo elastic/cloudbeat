@@ -18,11 +18,11 @@
 package preset
 
 import (
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/azure"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 func NewCisAzureFactory(log *clog.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) (registry.FetchersMap, error) {

@@ -26,6 +26,7 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/condition"
 	awsfetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/aws"
@@ -34,7 +35,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 

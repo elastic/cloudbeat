@@ -23,9 +23,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/internal/resources/utils/clog"
 )
 
 type Manager struct {
