@@ -24,9 +24,9 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/maps"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
@@ -64,10 +64,10 @@ func (w *defaultSecurityClientWrapper) ListAutoProvisioningSettings(ctx context.
 
 type securityContactsProvider struct {
 	client securityClientWrapper
-	log    *logp.Logger //nolint:unused
+	log    *clog.Logger //nolint:unused
 }
 
-func NewSecurityContacts(log *logp.Logger, credential azcore.TokenCredential) SecurityContactsProviderAPI {
+func NewSecurityContacts(log *clog.Logger, credential azcore.TokenCredential) SecurityContactsProviderAPI {
 	return &securityContactsProvider{
 		log: log,
 		client: &defaultSecurityClientWrapper{

@@ -23,12 +23,12 @@ import (
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
@@ -41,7 +41,7 @@ type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
 }
 
-func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (a *AWS) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
@@ -54,7 +54,7 @@ func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 }
 
 //revive:disable-next-line:function-result-limit
-func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *AWS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}

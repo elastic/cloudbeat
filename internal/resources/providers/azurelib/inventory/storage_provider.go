@@ -27,9 +27,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/utils/maps"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -56,11 +56,11 @@ type StorageAccountProviderAPI interface {
 
 type storageAccountProvider struct {
 	client                  *storageAccountAzureClientWrapper
-	log                     *logp.Logger
+	log                     *clog.Logger
 	diagnosticSettingsCache *cycle.Cache[[]AzureAsset]
 }
 
-func NewStorageAccountProvider(log *logp.Logger, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient, credentials azcore.TokenCredential) StorageAccountProviderAPI {
+func NewStorageAccountProvider(log *clog.Logger, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient, credentials azcore.TokenCredential) StorageAccountProviderAPI {
 	// We wrap the client, so we can mock it in tests
 	wrapper := &storageAccountAzureClientWrapper{
 		AssetDiagnosticSettings: func(ctx context.Context, resourceURI string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {

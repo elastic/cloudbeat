@@ -20,15 +20,21 @@ package gcpfetcher
 import (
 	"context"
 
+<<<<<<< HEAD
 	"github.com/elastic/elastic-agent-libs/logp"
+=======
+	"github.com/samber/lo"
+	"google.golang.org/protobuf/types/known/structpb"
+>>>>>>> 8963da3d (Use custom logger to downgrade canceled context errors to warnings (#2936))
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
 type (
 	assetsInventory struct {
-		logger   *logp.Logger
+		logger   *clog.Logger
 		provider inventoryProvider
 	}
 	inventoryProvider interface {
@@ -57,7 +63,7 @@ var ResourcesToFetch = []ResourcesClassification{
 	{gcpinventory.IamRoleAssetType, inventory.AssetClassificationGcpIamRole},
 }
 
-func newAssetsInventoryFetcher(logger *logp.Logger, provider inventoryProvider) inventory.AssetFetcher {
+func newAssetsInventoryFetcher(logger *clog.Logger, provider inventoryProvider) inventory.AssetFetcher {
 	return &assetsInventory{
 		logger:   logger,
 		provider: provider,
