@@ -20,8 +20,8 @@
 package azurelib
 
 import (
-	auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	clog "github.com/elastic/cloudbeat/internal/infra/clog"
+	auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 
 	mock "github.com/stretchr/testify/mock"
 )

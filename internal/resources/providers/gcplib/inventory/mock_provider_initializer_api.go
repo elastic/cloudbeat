@@ -20,8 +20,8 @@
 package inventory
 
 import (
-	auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	clog "github.com/elastic/cloudbeat/internal/infra/clog"
+	auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 
 	context "context"
 
