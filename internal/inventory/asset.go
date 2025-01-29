@@ -105,7 +105,7 @@ var (
 	AssetClassificationAzureRoleDefinition      = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
 	AssetClassificationAzureSQLDatabase         = AssetClassification{CategoryDatabase, "Azure SQL Database"}
 	AssetClassificationAzureSQLServer           = AssetClassification{CategoryDatabase, "Azure SQL Server"}
-	AssetClassificationAzureServicePrincipal    = AssetClassification{CategoryIdentity, "Azure Principal"}
+	AssetClassificationAzureServicePrincipal    = AssetClassification{CategoryServiceAccount, "Azure Principal"}
 	AssetClassificationAzureSnapshot            = AssetClassification{CategorySnapshot, "Azure Snapshot"}
 	AssetClassificationAzureStorageAccount      = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
 	AssetClassificationAzureStorageBlobService  = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
