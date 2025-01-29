@@ -1220,6 +1220,61 @@ func (_c *MockProviderAPI_ListSinglePostgresFirewallRules_Call) RunAndReturn(run
 	return _c
 }
 
+// ListStorageAccountBlobContainers provides a mock function with given fields: ctx, storageAccounts
+func (_m *MockProviderAPI) ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, storageAccounts)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, storageAccounts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, storageAccounts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, storageAccounts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListStorageAccountBlobContainers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListStorageAccountBlobContainers'
+type MockProviderAPI_ListStorageAccountBlobContainers_Call struct {
+	*mock.Call
+}
+
+// ListStorageAccountBlobContainers is a helper method to define mock.On call
+//   - ctx context.Context
+//   - storageAccounts []inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) ListStorageAccountBlobContainers(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountBlobContainers_Call {
+	return &MockProviderAPI_ListStorageAccountBlobContainers_Call{Call: _e.mock.On("ListStorageAccountBlobContainers", ctx, storageAccounts)}
+}
+
+func (_c *MockProviderAPI_ListStorageAccountBlobContainers_Call) Run(run func(ctx context.Context, storageAccounts []inventory.AzureAsset)) *MockProviderAPI_ListStorageAccountBlobContainers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountBlobContainers_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListStorageAccountBlobContainers_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountBlobContainers_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountBlobContainers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListStorageAccountBlobServices provides a mock function with given fields: ctx, storageAccounts
 func (_m *MockProviderAPI) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
 	ret := _m.Called(ctx, storageAccounts)
@@ -1271,6 +1326,116 @@ func (_c *MockProviderAPI_ListStorageAccountBlobServices_Call) Return(_a0 []inve
 }
 
 func (_c *MockProviderAPI_ListStorageAccountBlobServices_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountBlobServices_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListStorageAccountFileServices provides a mock function with given fields: ctx, storageAccounts
+func (_m *MockProviderAPI) ListStorageAccountFileServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, storageAccounts)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, storageAccounts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, storageAccounts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, storageAccounts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListStorageAccountFileServices_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListStorageAccountFileServices'
+type MockProviderAPI_ListStorageAccountFileServices_Call struct {
+	*mock.Call
+}
+
+// ListStorageAccountFileServices is a helper method to define mock.On call
+//   - ctx context.Context
+//   - storageAccounts []inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) ListStorageAccountFileServices(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountFileServices_Call {
+	return &MockProviderAPI_ListStorageAccountFileServices_Call{Call: _e.mock.On("ListStorageAccountFileServices", ctx, storageAccounts)}
+}
+
+func (_c *MockProviderAPI_ListStorageAccountFileServices_Call) Run(run func(ctx context.Context, storageAccounts []inventory.AzureAsset)) *MockProviderAPI_ListStorageAccountFileServices_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountFileServices_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListStorageAccountFileServices_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountFileServices_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountFileServices_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListStorageAccountFileShares provides a mock function with given fields: ctx, storageAccounts
+func (_m *MockProviderAPI) ListStorageAccountFileShares(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, storageAccounts)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, storageAccounts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, storageAccounts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, storageAccounts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListStorageAccountFileShares_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListStorageAccountFileShares'
+type MockProviderAPI_ListStorageAccountFileShares_Call struct {
+	*mock.Call
+}
+
+// ListStorageAccountFileShares is a helper method to define mock.On call
+//   - ctx context.Context
+//   - storageAccounts []inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) ListStorageAccountFileShares(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountFileShares_Call {
+	return &MockProviderAPI_ListStorageAccountFileShares_Call{Call: _e.mock.On("ListStorageAccountFileShares", ctx, storageAccounts)}
+}
+
+func (_c *MockProviderAPI_ListStorageAccountFileShares_Call) Run(run func(ctx context.Context, storageAccounts []inventory.AzureAsset)) *MockProviderAPI_ListStorageAccountFileShares_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountFileShares_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListStorageAccountFileShares_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountFileShares_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountFileShares_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1381,6 +1546,116 @@ func (_c *MockProviderAPI_ListStorageAccountQueues_Call) Return(_a0 []inventory.
 }
 
 func (_c *MockProviderAPI_ListStorageAccountQueues_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountQueues_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListStorageAccountTableServices provides a mock function with given fields: ctx, storageAccounts
+func (_m *MockProviderAPI) ListStorageAccountTableServices(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, storageAccounts)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, storageAccounts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, storageAccounts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, storageAccounts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListStorageAccountTableServices_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListStorageAccountTableServices'
+type MockProviderAPI_ListStorageAccountTableServices_Call struct {
+	*mock.Call
+}
+
+// ListStorageAccountTableServices is a helper method to define mock.On call
+//   - ctx context.Context
+//   - storageAccounts []inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) ListStorageAccountTableServices(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountTableServices_Call {
+	return &MockProviderAPI_ListStorageAccountTableServices_Call{Call: _e.mock.On("ListStorageAccountTableServices", ctx, storageAccounts)}
+}
+
+func (_c *MockProviderAPI_ListStorageAccountTableServices_Call) Run(run func(ctx context.Context, storageAccounts []inventory.AzureAsset)) *MockProviderAPI_ListStorageAccountTableServices_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountTableServices_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListStorageAccountTableServices_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountTableServices_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountTableServices_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListStorageAccountTables provides a mock function with given fields: ctx, storageAccounts
+func (_m *MockProviderAPI) ListStorageAccountTables(ctx context.Context, storageAccounts []inventory.AzureAsset) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, storageAccounts)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, storageAccounts)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []inventory.AzureAsset) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, storageAccounts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []inventory.AzureAsset) error); ok {
+		r1 = rf(ctx, storageAccounts)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListStorageAccountTables_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListStorageAccountTables'
+type MockProviderAPI_ListStorageAccountTables_Call struct {
+	*mock.Call
+}
+
+// ListStorageAccountTables is a helper method to define mock.On call
+//   - ctx context.Context
+//   - storageAccounts []inventory.AzureAsset
+func (_e *MockProviderAPI_Expecter) ListStorageAccountTables(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountTables_Call {
+	return &MockProviderAPI_ListStorageAccountTables_Call{Call: _e.mock.On("ListStorageAccountTables", ctx, storageAccounts)}
+}
+
+func (_c *MockProviderAPI_ListStorageAccountTables_Call) Run(run func(ctx context.Context, storageAccounts []inventory.AzureAsset)) *MockProviderAPI_ListStorageAccountTables_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]inventory.AzureAsset))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountTables_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListStorageAccountTables_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListStorageAccountTables_Call) RunAndReturn(run func(context.Context, []inventory.AzureAsset) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListStorageAccountTables_Call {
 	_c.Call.Return(run)
 	return _c
 }
