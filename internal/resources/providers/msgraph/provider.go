@@ -25,6 +25,7 @@ import (
 	graph "github.com/microsoftgraph/msgraph-sdk-go"
 	graphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles"
+	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
 
@@ -34,6 +35,7 @@ import (
 type ProviderAPI interface {
 	ListServicePrincipals(context.Context) ([]*models.ServicePrincipal, error)
 	ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
+	ListGroups(context.Context) ([]*models.Group, error)
 }
 
 type provider struct {
@@ -41,6 +43,7 @@ type provider struct {
 	client interface {
 		ServicePrincipals() *serviceprincipals.ServicePrincipalsRequestBuilder
 		DirectoryRoles() *directoryroles.DirectoryRolesRequestBuilder
+		Groups() *groups.GroupsRequestBuilder
 	}
 }
 
@@ -119,4 +122,33 @@ func (p *provider) ListDirectoryRoles(ctx context.Context) ([]*models.DirectoryR
 		p.log.Errorf("error iterating over Directory Roles: %v", err)
 	}
 	return items, nil
+}
+
+func (p *provider) ListGroups(ctx context.Context) ([]*models.Group, error) {
+	requestConfig := &groups.GroupsRequestBuilderGetRequestConfiguration{}
+
+	response, err := p.client.Groups().Get(ctx, requestConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error listing Azure Groups: %w", err)
+	}
+
+	pageIterator, err := graphcore.NewPageIterator[*models.Group](
+		response,
+		p.client.Groups().RequestAdapter,
+		models.CreateGroupCollectionResponseFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error paging Azure Groups: %w", err)
+	}
+
+	items := []*models.Group{}
+	err = pageIterator.Iterate(ctx, func(pageItem *models.Group) bool {
+		items = append(items, pageItem)
+		return true // to continue the iteration
+	})
+	if err != nil {
+		p.log.Errorf("error iterating over Groups: %v", err)
+	}
+	return items, nil
+
 }

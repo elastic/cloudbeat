@@ -31,6 +31,7 @@ const (
 	CategoryFaaS                   AssetCategory = "FaaS"
 	CategoryFirewall               AssetCategory = "Firewall"
 	CategoryGateway                AssetCategory = "Gateway"
+	CategoryGroup                  AssetCategory = "Group"
 	CategoryHost                   AssetCategory = "Host"
 	CategoryIdentity               AssetCategory = "Identity"
 	CategoryInfrastructure         AssetCategory = "Infrastructure"
@@ -98,11 +99,12 @@ var (
 	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
 	AssetClassificationAzureDisk                = AssetClassification{CategoryVolume, "Azure Disk"}
 	AssetClassificationAzureElasticPool         = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
+	AssetClassificationAzureEntraGroup          = AssetClassification{CategoryGroup, "Azure Microsoft Entra ID Group"}
 	AssetClassificationAzureResourceGroup       = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
+	AssetClassificationAzureRoleDefinition      = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
 	AssetClassificationAzureSQLDatabase         = AssetClassification{CategoryDatabase, "Azure SQL Database"}
 	AssetClassificationAzureSQLServer           = AssetClassification{CategoryDatabase, "Azure SQL Server"}
 	AssetClassificationAzureServicePrincipal    = AssetClassification{CategoryIdentity, "Azure Principal"}
-	AssetClassificationAzureRoleDefinition      = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
 	AssetClassificationAzureSnapshot            = AssetClassification{CategorySnapshot, "Azure Snapshot"}
 	AssetClassificationAzureStorageAccount      = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
 	AssetClassificationAzureStorageBlobService  = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
