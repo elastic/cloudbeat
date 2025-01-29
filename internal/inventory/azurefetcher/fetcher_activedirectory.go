@@ -37,6 +37,7 @@ type (
 		ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error)
 		ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
 		ListGroups(context.Context) ([]*models.Group, error)
+		ListUsers(context.Context) ([]*models.User, error)
 	}
 )
 
@@ -51,6 +52,7 @@ func (f *activedirectoryFetcher) Fetch(ctx context.Context, assetChan chan<- inv
 	f.fetchServicePrincipals(ctx, assetChan)
 	f.fetchDirectoryRoles(ctx, assetChan)
 	f.fetchGroups(ctx, assetChan)
+	f.fetchUsers(ctx, assetChan)
 }
 
 func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
@@ -121,6 +123,32 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 	for _, item := range items {
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureEntraGroup,
+			pointers.Deref(item.GetId()),
+			pointers.Deref(item.GetDisplayName()),
+			inventory.WithRawAsset(
+				item.GetBackingStore().Enumerate(),
+			),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "",
+				ServiceName: "Azure",
+			}),
+		)
+	}
+}
+
+func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
+	f.logger.Info("Fetching Users")
+	defer f.logger.Info("Fetching Users - Finished")
+
+	items, err := f.provider.ListUsers(ctx)
+	if err != nil {
+		f.logger.Errorf("Could not fetch Users: %v", err)
+	}
+
+	for _, item := range items {
+		assetChan <- inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraUser,
 			pointers.Deref(item.GetId()),
 			pointers.Deref(item.GetDisplayName()),
 			inventory.WithRawAsset(

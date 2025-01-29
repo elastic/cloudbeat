@@ -28,6 +28,7 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
+	"github.com/microsoftgraph/msgraph-sdk-go/users"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 )
@@ -36,6 +37,7 @@ type ProviderAPI interface {
 	ListServicePrincipals(context.Context) ([]*models.ServicePrincipal, error)
 	ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
 	ListGroups(context.Context) ([]*models.Group, error)
+	ListUsers(context.Context) ([]*models.User, error)
 }
 
 type provider struct {
@@ -44,6 +46,7 @@ type provider struct {
 		ServicePrincipals() *serviceprincipals.ServicePrincipalsRequestBuilder
 		DirectoryRoles() *directoryroles.DirectoryRolesRequestBuilder
 		Groups() *groups.GroupsRequestBuilder
+		Users() *users.UsersRequestBuilder
 	}
 }
 
@@ -148,6 +151,34 @@ func (p *provider) ListGroups(ctx context.Context) ([]*models.Group, error) {
 	})
 	if err != nil {
 		p.log.Errorf("error iterating over Groups: %v", err)
+	}
+	return items, nil
+}
+
+func (p *provider) ListUsers(ctx context.Context) ([]*models.User, error) {
+	requestConfig := &users.UsersRequestBuilderGetRequestConfiguration{}
+
+	response, err := p.client.Users().Get(ctx, requestConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error listing Azure Users: %w", err)
+	}
+
+	pageIterator, err := graphcore.NewPageIterator[*models.User](
+		response,
+		p.client.Users().RequestAdapter,
+		models.CreateUserCollectionResponseFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error paging Azure Users: %w", err)
+	}
+
+	items := []*models.User{}
+	err = pageIterator.Iterate(ctx, func(pageItem *models.User) bool {
+		items = append(items, pageItem)
+		return true // to continue the iteration
+	})
+	if err != nil {
+		p.log.Errorf("error iterating over Users: %v", err)
 	}
 	return items, nil
 

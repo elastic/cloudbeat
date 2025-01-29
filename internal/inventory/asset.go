@@ -100,6 +100,7 @@ var (
 	AssetClassificationAzureDisk                = AssetClassification{CategoryVolume, "Azure Disk"}
 	AssetClassificationAzureElasticPool         = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
 	AssetClassificationAzureEntraGroup          = AssetClassification{CategoryGroup, "Azure Microsoft Entra ID Group"}
+	AssetClassificationAzureEntraUser           = AssetClassification{CategoryIdentity, "Azure Microsoft Entra ID User"}
 	AssetClassificationAzureResourceGroup       = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
 	AssetClassificationAzureRoleDefinition      = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
 	AssetClassificationAzureSQLDatabase         = AssetClassification{CategoryDatabase, "Azure SQL Database"}
