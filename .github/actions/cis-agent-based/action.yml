@@ -190,7 +190,7 @@ runs:
 
     - name: Install D4C integration
       id: kspm-d4c
-      if: ${{ !cancelled() && startsWith(env.STACK_VERSION, '8') && inputs.serverless_mode == 'false' && steps.deploy-cis-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && startsWith(env.STACK_VERSION, '8') && inputs.serverless-mode == 'false' && steps.deploy-cis-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
