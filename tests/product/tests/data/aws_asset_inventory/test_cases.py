@@ -14,8 +14,6 @@ test_cases = {
         category="Service Account",
         type_="AWS IAM Role",
     ),
-<<<<<<< HEAD
-=======
     "[Asset Inventory][AWS][ELBv1] assets found": AssetInventoryCase(
         category="Load Balancer",
         type_="AWS Elastic Load Balancer",
@@ -96,5 +94,4 @@ test_cases = {
         category="Messaging Service",
         type_="AWS SNS Topic",
     ),
->>>>>>> cbadcb77 (Refactor asset inventory (#2879))
 }
