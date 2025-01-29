@@ -24,8 +24,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	configSDK "github.com/aws/aws-sdk-go-v2/service/configservice"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
@@ -40,7 +40,7 @@ type ConfigService interface {
 }
 
 type Provider struct {
-	log          *logp.Logger
+	log          *clog.Logger
 	awsAccountId string
 	clients      map[string]Client
 }
@@ -57,7 +57,7 @@ type Recorder struct {
 	Status []types.ConfigurationRecorderStatus `json:"statuses"`
 }
 
-func NewProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
+func NewProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
 	f := func(cfg aws.Config) Client {
 		return configSDK.NewFromConfig(cfg)
 	}

@@ -24,9 +24,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/maps"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
@@ -65,7 +65,7 @@ type KeyVaultProviderAPI interface {
 	ListKeyVaultDiagnosticSettings(ctx context.Context, vault AzureAsset) ([]AzureAsset, error)
 }
 
-func NewKeyVaultProvider(log *logp.Logger, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient, credentials azcore.TokenCredential) KeyVaultProviderAPI {
+func NewKeyVaultProvider(log *clog.Logger, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient, credentials azcore.TokenCredential) KeyVaultProviderAPI {
 	return &keyVaultProvider{
 		log:    log,
 		client: defaultAzureKeyVaultWrapper(diagnosticSettingsClient, credentials),
@@ -73,7 +73,7 @@ func NewKeyVaultProvider(log *logp.Logger, diagnosticSettingsClient *armmonitor.
 }
 
 type keyVaultProvider struct {
-	log    *logp.Logger
+	log    *clog.Logger
 	client *azureKeyVaultWrapper
 }
 

@@ -25,7 +25,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/dgraph-io/ristretto"
-	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 var (
@@ -79,7 +80,7 @@ func newCachedRegionSelector(selector RegionsSelector, cache string, keep time.D
 }
 
 func (s *cachedRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
-	log := logp.NewLogger("aws")
+	log := clog.NewLogger("aws")
 
 	// Make sure that consequent calls to the function will keep trying to retrieve the regions list until it succeeds.
 	cachedObject := s.getCache()

@@ -23,8 +23,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -57,7 +57,7 @@ type AppServiceProviderAPI interface {
 	GetAppServiceSiteConfig(ctx context.Context, webApp AzureAsset) ([]AzureAsset, error)
 }
 
-func NewAppServiceProvider(log *logp.Logger, credentials azcore.TokenCredential) AppServiceProviderAPI {
+func NewAppServiceProvider(log *clog.Logger, credentials azcore.TokenCredential) AppServiceProviderAPI {
 	return &azureAppServiceProvider{
 		log:    log,
 		client: defaultAzureAppServiceWrapper(credentials),
@@ -65,7 +65,7 @@ func NewAppServiceProvider(log *logp.Logger, credentials azcore.TokenCredential)
 }
 
 type azureAppServiceProvider struct {
-	log    *logp.Logger
+	log    *clog.Logger
 	client *azureAppServiceWrapper
 }
 

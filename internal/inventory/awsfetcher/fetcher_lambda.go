@@ -20,15 +20,14 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type lambdaFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    lambdaProvider
 	AccountId   string
 	AccountName string
@@ -44,7 +43,7 @@ type (
 	}
 )
 
-func newLambdaFetcher(logger *logp.Logger, identity *cloud.Identity, provider lambdaProvider) inventory.AssetFetcher {
+func newLambdaFetcher(logger *clog.Logger, identity *cloud.Identity, provider lambdaProvider) inventory.AssetFetcher {
 	return &lambdaFetcher{
 		logger:      logger,
 		provider:    provider,
