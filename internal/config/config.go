@@ -67,8 +67,9 @@ type CloudConfig struct {
 }
 
 type AwsConfig struct {
-	Cred        aws.ConfigAWS `config:"credentials"`
-	AccountType string        `config:"account_type"`
+	Cred            aws.ConfigAWS `config:"credentials"`
+	AccountType     string        `config:"account_type"`
+	CloudConnectors bool          `config:"supports_cloud_connectors"`
 }
 
 type GcpConfig struct {
