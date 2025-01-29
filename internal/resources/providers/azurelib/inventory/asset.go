@@ -26,6 +26,7 @@ const (
 	ActivityLogAlertAssetType            = "microsoft.insights/activitylogalerts"
 	ApplicationInsights                  = "microsoft.insights/components"
 	BastionAssetType                     = "microsoft.network/bastionhosts"
+	BlobContainerAssetType               = "microsoft.storage/storageaccounts/containers"
 	BlobServiceAssetType                 = "microsoft.storage/storageaccounts/blobservices"
 	ClassicStorageAccountAssetType       = "microsoft.classicstorage/storageaccounts"
 	ContainerRegistryAssetType           = "microsoft.containerregistry/registries"

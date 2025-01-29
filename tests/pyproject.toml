@@ -27,9 +27,13 @@ dependencies = [
 packages = [
     {include="fleet_api"}
 ]
+name = "tests"
+version = "0.1.0"
+description = "Test project for cloudbeat agent"
+authors = ["Cloudbeat Team"]
 
-[tool.poetry.requires-plugins]
-poetry-plugin-export = ">=1.8"
+#[tool.poetry.requires-plugins]
+#poetry-plugin-export = ">=1.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

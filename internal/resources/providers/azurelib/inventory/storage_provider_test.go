@@ -34,6 +34,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
+func NewBlobContainersClientListResponse(items ...*armstorage.ListContainerItem) armstorage.BlobContainersClientListResponse {
+	return armstorage.BlobContainersClientListResponse{
+		ListContainerItems: armstorage.ListContainerItems{
+			Value: items,
+		},
+	}
+}
+
 func newBlobServicesClientListResponse(items ...*armstorage.BlobServiceProperties) armstorage.BlobServicesClientListResponse {
 	return armstorage.BlobServicesClientListResponse{
 		BlobServiceItems: armstorage.BlobServiceItems{
@@ -153,6 +161,63 @@ func TestTransformBlobServices(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			got, err := transformBlobServices(tc.inputServicesPages, tc.inputStorageAccount)
+			if tc.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestTransformBlobContainers(t *testing.T) {
+	tests := map[string]struct {
+		inputPages          []armstorage.BlobContainersClientListResponse
+		inputStorageAccount AzureAsset
+		expected            []AzureAsset
+		expectError         bool
+	}{
+		"noop": {},
+		"transform response": {
+			inputPages: []armstorage.BlobContainersClientListResponse{
+				NewBlobContainersClientListResponse(
+					&armstorage.ListContainerItem{
+						ID:         to.Ptr("id1"),
+						Name:       to.Ptr("name1"),
+						Type:       to.Ptr("Microsoft.Storage/storageaccounts/containers"),
+						Properties: &armstorage.ContainerProperties{Deleted: to.Ptr(false)},
+					},
+				),
+			},
+			inputStorageAccount: AzureAsset{
+				Id:            "sa1",
+				Name:          "sa name",
+				ResourceGroup: "rg1",
+				TenantId:      "t1",
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "id1",
+					Name:       "name1",
+					Properties: map[string]any{"deleted": false},
+					Extension: map[string]any{
+						ExtensionStorageAccountID:   "sa1",
+						ExtensionStorageAccountName: "sa name",
+					},
+					ResourceGroup: "rg1",
+					TenantId:      "t1",
+					Type:          BlobContainerAssetType,
+				},
+			},
+			expectError: false,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := transformBlobContainers(tc.inputPages, tc.inputStorageAccount)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
@@ -362,6 +427,217 @@ func TestListStorageAccountBlobServices(t *testing.T) {
 			}
 
 			got, err := provider.ListStorageAccountBlobServices(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestListStorageAccountFileShares(t *testing.T) {
+	response := func(v []*armstorage.FileShareItem) armstorage.FileSharesClientListResponse {
+		return armstorage.FileSharesClientListResponse{
+			FileShareItems: armstorage.FileShareItems{
+				Value: v,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.FileShareItem
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list file shares": {
+			input: []*armstorage.FileShareItem{
+				{
+					ID:         pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileshares/fileshare1"),
+					Name:       pointers.Ref("fileshare1"),
+					Type:       pointers.Ref("microsoft.storage/storageaccounts/fileshares"),
+					Properties: &armstorage.FileShareProperties{},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileshares/fileshare1",
+					Name:       "fileshare1",
+					Properties: map[string]any{},
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/fileshares",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetFileShares: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.FileSharesClientListOptions) ([]armstorage.FileSharesClientListResponse, error) {
+						x := tc
+						return []armstorage.FileSharesClientListResponse{response(x.input)}, nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountFileShares(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestListStorageAccountTables(t *testing.T) {
+	response := func(v []*armstorage.Table) armstorage.TableClientListResponse {
+		return armstorage.TableClientListResponse{
+			ListTableResource: armstorage.ListTableResource{Value: v},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.Table
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list tables": {
+			input: []*armstorage.Table{
+				{
+					ID:              pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/tables/table1"),
+					Name:            pointers.Ref("table1"),
+					Type:            pointers.Ref("microsoft.storage/storageaccounts/tables"),
+					TableProperties: &armstorage.TableProperties{},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/tables/table1",
+					Name:       "table1",
+					Properties: map[string]any{},
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/tables",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetTables: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.TableClientListOptions) ([]armstorage.TableClientListResponse, error) {
+						x := tc
+						return []armstorage.TableClientListResponse{response(x.input)}, nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountTables(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestListStorageAccountFileServices(t *testing.T) {
+	response := func(v []*armstorage.FileServiceProperties) armstorage.FileServicesClientListResponse {
+		return armstorage.FileServicesClientListResponse{
+			FileServiceItems: armstorage.FileServiceItems{
+				Value: v,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.FileServiceProperties
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list file services": {
+			input: []*armstorage.FileServiceProperties{
+				{
+					ID:                    pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileServices/file1"),
+					Name:                  pointers.Ref("file1"),
+					Type:                  pointers.Ref("microsoft.storage/storageaccounts/fileservices"),
+					FileServiceProperties: nil,
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:         "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/fileServices/file1",
+					Name:       "file1",
+					Properties: nil,
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/fileservices",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetFileServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error) {
+						x := tc
+						return response(x.input), nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountFileServices(context.Background(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",

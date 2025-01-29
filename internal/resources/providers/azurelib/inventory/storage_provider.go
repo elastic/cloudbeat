@@ -37,19 +37,29 @@ import (
 
 type storageAccountAzureClientWrapper struct {
 	AssetDiagnosticSettings func(ctx context.Context, subID string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error)
+	AssetBlobContainers     func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error)
 	AssetBlobServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error)
+	AssetFileServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error)
+	AssetFileShares         func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.FileSharesClientListOptions) ([]armstorage.FileSharesClientListResponse, error)
 	AssetQueues             func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error)
 	AssetQueueServices      func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueServicesClientListOptions) (armstorage.QueueServicesClientListResponse, error)
+	AssetTables             func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.TableClientListOptions) ([]armstorage.TableClientListResponse, error)
+	AssetTableServices      func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.TableServicesClientListOptions) (armstorage.TableServicesClientListResponse, error)
 	AssetAccountStorage     func(ctx context.Context, subID string, clientOptions *arm.ClientOptions) ([]armstorage.AccountsClientListResponse, error)
 }
 
 type StorageAccountProviderAPI interface {
 	ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]AzureAsset, error)
+	ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountFileServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountFileShares(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountQueues(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountQueueServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsTableDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountTables(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountTableServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsQueueDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]AzureAsset, error)
 }
@@ -67,8 +77,29 @@ func NewStorageAccountProvider(log *clog.Logger, diagnosticSettingsClient *armmo
 			pager := diagnosticSettingsClient.NewListPager(resourceURI, options)
 			return readPager(ctx, pager)
 		},
+		AssetBlobContainers: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error) {
+			cl, err := armstorage.NewBlobContainersClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListPager(resourceGroupName, storageAccountName, options))
+		},
 		AssetBlobServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
 			cl, err := armstorage.NewBlobServicesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListPager(resourceGroupName, storageAccountName, options))
+		},
+		AssetFileServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error) {
+			cl, err := armstorage.NewFileServicesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return armstorage.FileServicesClientListResponse{}, err
+			}
+			return cl.List(ctx, resourceGroupName, storageAccountName, options)
+		},
+		AssetFileShares: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.FileSharesClientListOptions) ([]armstorage.FileSharesClientListResponse, error) {
+			cl, err := armstorage.NewFileSharesClient(subID, credentials, clientOptions)
 			if err != nil {
 				return nil, err
 			}
@@ -85,6 +116,21 @@ func NewStorageAccountProvider(log *clog.Logger, diagnosticSettingsClient *armmo
 			cl, err := armstorage.NewQueueServicesClient(subID, credentials, clientOptions)
 			if err != nil {
 				return armstorage.QueueServicesClientListResponse{}, err
+			}
+			return cl.List(ctx, resourceGroupName, storageAccountName, options)
+		},
+		AssetTables: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.TableClientListOptions) ([]armstorage.TableClientListResponse, error) {
+			cl, err := armstorage.NewTableClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+
+			return readPager(ctx, cl.NewListPager(resourceGroupName, storageAccountName, options))
+		},
+		AssetTableServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.TableServicesClientListOptions) (armstorage.TableServicesClientListResponse, error) {
+			cl, err := armstorage.NewTableServicesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return armstorage.TableServicesClientListResponse{}, err
 			}
 			return cl.List(ctx, resourceGroupName, storageAccountName, options)
 		},
@@ -161,6 +207,25 @@ func transformStorageAccounts(accountPages []armstorage.AccountsClientListRespon
 	}), errs
 }
 
+func (p *storageAccountProvider) ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		responses, err := p.client.AssetBlobContainers(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure blob containers for storage accounts %s: %w", sa.Id, err)
+		}
+
+		blobContainers, err := transformBlobContainers(responses, sa)
+		if err != nil {
+			return nil, fmt.Errorf("error while transforming azure blob containers for storage accounts %s: %w", sa.Id, err)
+		}
+
+		assets = append(assets, blobContainers...)
+	}
+
+	return assets, nil
+}
+
 func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
 	var assets []AzureAsset
 	for _, sa := range storageAccounts {
@@ -175,6 +240,58 @@ func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Cont
 		}
 
 		assets = append(assets, blobServices...)
+	}
+
+	return assets, nil
+}
+
+func (p *storageAccountProvider) ListStorageAccountFileServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		response, err := p.client.AssetFileServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure blob services for storage accounts %s: %w", sa.Id, err)
+		}
+
+		for _, item := range response.Value {
+			properties, err := maps.AsMapStringAny(item.FileServiceProperties)
+			if err != nil {
+				p.log.Errorf("error while transforming azure queue services for storage accounts %s: %v", sa.Id, err)
+			}
+
+			assets = append(assets, AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  sa.ResourceGroup,
+				SubscriptionId: sa.SubscriptionId,
+				TenantId:       sa.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   sa.Id,
+					ExtensionStorageAccountName: sa.Name,
+				},
+			})
+		}
+	}
+
+	return assets, nil
+}
+
+func (p *storageAccountProvider) ListStorageAccountFileShares(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		responses, err := p.client.AssetFileShares(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure file share for storage accounts %s: %w", sa.Id, err)
+		}
+
+		fileShares, err := transformFileShares(responses, sa)
+		if err != nil {
+			p.log.Errorf("error while transforming azure file share for storage accounts %s: %v", sa.Id, err)
+		}
+
+		assets = append(assets, fileShares...)
 	}
 
 	return assets, nil
@@ -231,6 +348,82 @@ func (p *storageAccountProvider) ListStorageAccountQueueServices(ctx context.Con
 	return assets, nil
 }
 
+func (p *storageAccountProvider) ListStorageAccountTables(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		responses, err := p.client.AssetTables(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure table services for storage accounts %s: %w", sa.Id, err)
+		}
+
+		tables, err := transformTables(responses, sa)
+		if err != nil {
+			p.log.Errorf("error while transforming azure tables for storage accounts %s: %v", sa.Id, err)
+		}
+
+		assets = append(assets, tables...)
+	}
+	return assets, nil
+}
+
+func (p *storageAccountProvider) ListStorageAccountTableServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		response, err := p.client.AssetTableServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure table services for storage accounts %s: %w", sa.Id, err)
+		}
+
+		for _, item := range response.Value {
+			properties, err := maps.AsMapStringAny(item.TableServiceProperties)
+			if err != nil {
+				p.log.Errorf("error while transforming azure table services for storage accounts %s: %v", sa.Id, err)
+			}
+
+			assets = append(assets, AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  sa.ResourceGroup,
+				SubscriptionId: sa.SubscriptionId,
+				TenantId:       sa.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   sa.Id,
+					ExtensionStorageAccountName: sa.Name,
+				},
+			})
+		}
+	}
+	return assets, nil
+}
+
+func transformBlobContainers(servicesPages []armstorage.BlobContainersClientListResponse, storageAccount AzureAsset) ([]AzureAsset, error) {
+	var errs error
+	return lo.FlatMap(servicesPages, func(response armstorage.BlobContainersClientListResponse, _ int) []AzureAsset {
+		return lo.Map(response.Value, func(item *armstorage.ListContainerItem, _ int) AzureAsset {
+			properties, err := maps.AsMapStringAny(item.Properties)
+			if err != nil {
+				errs = errors.Join(errs, err)
+			}
+
+			return AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  storageAccount.ResourceGroup,
+				SubscriptionId: storageAccount.SubscriptionId,
+				TenantId:       storageAccount.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   storageAccount.Id,
+					ExtensionStorageAccountName: storageAccount.Name,
+				},
+			}
+		})
+	}), errs
+}
+
 func transformBlobServices(servicesPages []armstorage.BlobServicesClientListResponse, storageAccount AzureAsset) ([]AzureAsset, error) {
 	var errs error
 	return lo.FlatMap(servicesPages, func(response armstorage.BlobServicesClientListResponse, _ int) []AzureAsset {
@@ -257,11 +450,63 @@ func transformBlobServices(servicesPages []armstorage.BlobServicesClientListResp
 	}), errs
 }
 
+func transformFileShares(pages []armstorage.FileSharesClientListResponse, storageAccount AzureAsset) ([]AzureAsset, error) {
+	var errs error
+	return lo.FlatMap(pages, func(response armstorage.FileSharesClientListResponse, _ int) []AzureAsset {
+		return lo.Map(response.Value, func(item *armstorage.FileShareItem, _ int) AzureAsset {
+			properties, err := maps.AsMapStringAny(item.Properties)
+			if err != nil {
+				errs = errors.Join(errs, err)
+			}
+
+			return AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  storageAccount.ResourceGroup,
+				SubscriptionId: storageAccount.SubscriptionId,
+				TenantId:       storageAccount.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   storageAccount.Id,
+					ExtensionStorageAccountName: storageAccount.Name,
+				},
+			}
+		})
+	}), errs
+}
+
 func transformQueues(pages []armstorage.QueueClientListResponse, storageAccount AzureAsset) ([]AzureAsset, error) {
 	var errs error
 	return lo.FlatMap(pages, func(response armstorage.QueueClientListResponse, _ int) []AzureAsset {
 		return lo.Map(response.Value, func(item *armstorage.ListQueue, _ int) AzureAsset {
 			properties, err := maps.AsMapStringAny(item.QueueProperties)
+			if err != nil {
+				errs = errors.Join(errs, err)
+			}
+
+			return AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  storageAccount.ResourceGroup,
+				SubscriptionId: storageAccount.SubscriptionId,
+				TenantId:       storageAccount.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   storageAccount.Id,
+					ExtensionStorageAccountName: storageAccount.Name,
+				},
+			}
+		})
+	}), errs
+}
+
+func transformTables(pages []armstorage.TableClientListResponse, storageAccount AzureAsset) ([]AzureAsset, error) {
+	var errs error
+	return lo.FlatMap(pages, func(response armstorage.TableClientListResponse, _ int) []AzureAsset {
+		return lo.Map(response.Value, func(item *armstorage.Table, _ int) AzureAsset {
+			properties, err := maps.AsMapStringAny(item.TableProperties)
 			if err != nil {
 				errs = errors.Join(errs, err)
 			}

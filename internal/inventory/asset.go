@@ -21,8 +21,36 @@ package inventory
 type AssetCategory string
 
 const (
+<<<<<<< HEAD
 	CategoryIdentity       AssetCategory = "identity"
 	CategoryInfrastructure AssetCategory = "infrastructure"
+=======
+	CategoryAccessManagement       AssetCategory = "Access Management"
+	CategoryAccount                AssetCategory = "Account"
+	CategoryContainerRegistry      AssetCategory = "Container Registry"
+	CategoryContainerService       AssetCategory = "Container Service"
+	CategoryDatabase               AssetCategory = "Database"
+	CategoryFaaS                   AssetCategory = "FaaS"
+	CategoryFileSystemService      AssetCategory = "File System Service"
+	CategoryFirewall               AssetCategory = "Firewall"
+	CategoryGateway                AssetCategory = "Gateway"
+	CategoryHost                   AssetCategory = "Host"
+	CategoryIdentity               AssetCategory = "Identity"
+	CategoryInfrastructure         AssetCategory = "Infrastructure"
+	CategoryLoadBalancer           AssetCategory = "Load Balancer"
+	CategoryMessagingService       AssetCategory = "Messaging Service"
+	CategoryNetworking             AssetCategory = "Networking"
+	CategoryOrchestrator           AssetCategory = "Orchestrator"
+	CategoryOrganization           AssetCategory = "Organization"
+	CategoryPrivateEndpoint        AssetCategory = "Private Endpoint"
+	CategoryServiceAccount         AssetCategory = "Service Account"
+	CategoryServiceUsageTechnology AssetCategory = "Service Usage Technology"
+	CategorySnapshot               AssetCategory = "Snapshot"
+	CategoryStorageBucket          AssetCategory = "Storage Bucket"
+	CategorySubnet                 AssetCategory = "Subnet"
+	CategoryVolume                 AssetCategory = "Volume"
+	CategoryWebService             AssetCategory = "Web Service"
+>>>>>>> 57ecd035 ([Asset Inventory][Azure] Add storage asset fetchers (#2938))
 )
 
 // AssetSubCategory is used to build the document index. Use only numbers, letters and dashes (-)
@@ -189,6 +217,7 @@ var (
 	AssetClassificationAwsS3Bucket                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryStorage, Type: TypeObjectStorage, SubType: SubTypeS3}
 	AssetClassificationAwsSnsTopic                 = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryMessaging, Type: TypeNotificationService, SubType: SubTypeSNSTopic}
 	// Azure
+<<<<<<< HEAD
 	AssetClassificationAzureAppService          = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryApplication, Type: TypeWebApplication, SubType: SubTypeAzureAppService}
 	AssetClassificationAzureContainerRegistry   = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryContainer, Type: TypeRegistry, SubType: SubTypeAzureContainerRegistry}
 	AssetClassificationAzureCosmosDBAccount     = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryDatabase, Type: TypeNoSQLDatabase, SubType: SubTypeAzureCosmosDBAccount}
@@ -207,6 +236,31 @@ var (
 	AssetClassificationAzureSubscription        = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureSubscription}
 	AssetClassificationAzureTenant              = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeAzureTenant}
 	AssetClassificationAzureVirtualMachine      = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryCompute, Type: TypeVirtualMachine, SubType: SubTypeAzureVirtualMachine}
+=======
+	AssetClassificationAzureAppService           = AssetClassification{CategoryWebService, "Azure App Service"}
+	AssetClassificationAzureContainerRegistry    = AssetClassification{CategoryContainerRegistry, "Azure Container Registry"}
+	AssetClassificationAzureCosmosDBAccount      = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB Account"}
+	AssetClassificationAzureCosmosDBSQLDatabase  = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
+	AssetClassificationAzureDisk                 = AssetClassification{CategoryVolume, "Azure Disk"}
+	AssetClassificationAzureElasticPool          = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
+	AssetClassificationAzureResourceGroup        = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
+	AssetClassificationAzureSQLDatabase          = AssetClassification{CategoryDatabase, "Azure SQL Database"}
+	AssetClassificationAzureSQLServer            = AssetClassification{CategoryDatabase, "Azure SQL Server"}
+	AssetClassificationAzureServicePrincipal     = AssetClassification{CategoryIdentity, "Azure Principal"}
+	AssetClassificationAzureSnapshot             = AssetClassification{CategorySnapshot, "Azure Snapshot"}
+	AssetClassificationAzureStorageAccount       = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
+	AssetClassificationAzureStorageBlobContainer = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Container"}
+	AssetClassificationAzureStorageBlobService   = AssetClassification{CategoryServiceUsageTechnology, "Azure Storage Blob Service"}
+	AssetClassificationAzureStorageFileService   = AssetClassification{CategoryFileSystemService, "Azure Storage File Service"}
+	AssetClassificationAzureStorageFileShare     = AssetClassification{CategoryFileSystemService, "Azure Storage File Share"}
+	AssetClassificationAzureStorageQueue         = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
+	AssetClassificationAzureStorageQueueService  = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
+	AssetClassificationAzureStorageTable         = AssetClassification{CategoryDatabase, "Azure Storage Table"}
+	AssetClassificationAzureStorageTableService  = AssetClassification{CategoryServiceUsageTechnology, "Azure Storage Table Service"}
+	AssetClassificationAzureSubscription         = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
+	AssetClassificationAzureTenant               = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
+	AssetClassificationAzureVirtualMachine       = AssetClassification{CategoryHost, "Azure Virtual Machine"}
+>>>>>>> 57ecd035 ([Asset Inventory][Azure] Add storage asset fetchers (#2938))
 
 	// GCP
 	AssetClassificationGcpProject           = AssetClassification{Category: CategoryInfrastructure, SubCategory: SubCategoryManagement, Type: TypeCloudAccount, SubType: SubTypeGcpProject}

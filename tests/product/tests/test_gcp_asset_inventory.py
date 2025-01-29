@@ -34,6 +34,7 @@ def test_gcp_asset_inventory(
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
     )
 
+<<<<<<< HEAD
     assert assets is not None, "Expected a list of assets, got None"
     assert isinstance(assets, list) and len(assets) > 0, "Expected the list to be non-empty"
     for asset in assets:
@@ -42,6 +43,16 @@ def test_gcp_asset_inventory(
         assert len(asset.asset.id) > 0, "Expected .asset.id list to contain an ID"
         assert len(asset.asset.id[0]) > 0, "Expected the ID to be non-empty"
         assert asset.asset.raw, "Expected the resource under .asset.raw"
+=======
+    assert entities is not None, "Expected a list of entities, got None"
+    assert isinstance(entities, list) and len(entities) > 0, "Expected the list to be non-empty"
+    for entity in entities:
+        assert entity.cloud, "Expected .cloud section"
+        assert entity.cloud.provider == "gcp", f'Expected "gcp" provider, got {entity.cloud.provider}'
+        assert len(entity.entity.id) > 0, "Expected .entity.id list to contain an ID"
+        assert len(entity.entity.id[0]) > 0, "Expected the ID to be non-empty"
+        assert entity.Attributes, "Expected the resource under .Attributes"
+>>>>>>> 57ecd035 ([Asset Inventory][Azure] Add storage asset fetchers (#2938))
 
 
 register_params(
