@@ -18,10 +18,16 @@
 package awslib
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 )
 
@@ -42,4 +48,72 @@ func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
 	}
 
 	return &awsConfig, nil
+}
+
+func CloudConnectorsExternalID(resourceID, externalIDPart string) string {
+	return fmt.Sprintf("%s-%s", resourceID, externalIDPart)
+}
+
+func InitializeAWSConfigCloudConnectors(
+	ctx context.Context,
+	elasticSuperRoleLocalARN string,
+	elasticSuperRoleGlobalARN string,
+	resourceID string,
+	cfg libbeataws.ConfigAWS,
+) (aws.Config, error) {
+	// 1. Load initial config
+	// (TODO: check directly assuming the first role in chain and/or libbeataws.InitializeAWSConfig(cfg))
+	// (TODO: consider os.Setenv("AWS_EC2_METADATA_DISABLED", "true"))
+	awsConfig, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return aws.Config{}, err
+	}
+
+	// Create an STS client using the base credentials
+	firstClient := sts.NewFromConfig(awsConfig)
+
+	const defaultDuration = 5 * time.Minute
+
+	// Chain Part 1 - Elastic Super Role Local
+	localSuperRoleProvider := stscreds.NewAssumeRoleProvider(
+		firstClient,
+		elasticSuperRoleLocalARN,
+		func(aro *stscreds.AssumeRoleOptions) {
+			aro.RoleSessionName = "cloudbeat-super-role-local"
+			aro.Duration = defaultDuration
+		},
+	)
+	localSuperRoleCredentialsCache := aws.NewCredentialsCache(localSuperRoleProvider)
+
+	// Chain Part 2 - Elastic Super Role Global
+	globalSuperRoleCfg := awsConfig
+	globalSuperRoleCfg.Credentials = localSuperRoleCredentialsCache
+	globalSuperRoleProvider := stscreds.NewAssumeRoleProvider(
+		sts.NewFromConfig(globalSuperRoleCfg),
+		elasticSuperRoleGlobalARN,
+		func(aro *stscreds.AssumeRoleOptions) {
+			aro.RoleSessionName = "cloudbeat-super-role-global"
+			aro.Duration = defaultDuration
+		},
+	)
+	globalSuperRoleCredentialsCache := aws.NewCredentialsCache(globalSuperRoleProvider)
+
+	// Chain Part 3 - Elastic Super Role Local
+	customerRemoteRoleCfg := awsConfig
+	customerRemoteRoleCfg.Credentials = globalSuperRoleCredentialsCache
+	customerRemoteRoleProvider := stscreds.NewAssumeRoleProvider(
+		sts.NewFromConfig(customerRemoteRoleCfg),
+		cfg.RoleArn, // Customer Remote Role passed in package policy.
+		func(aro *stscreds.AssumeRoleOptions) {
+			aro.RoleSessionName = "cloudbeat-remote-role"
+			aro.Duration = cfg.AssumeRoleDuration
+			aro.ExternalID = aws.String(CloudConnectorsExternalID(resourceID, cfg.ExternalID))
+		},
+	)
+	customerRemoteRoleCredentialsCache := aws.NewCredentialsCache(customerRemoteRoleProvider)
+
+	ret := awsConfig
+	ret.Credentials = customerRemoteRoleCredentialsCache
+
+	return ret, nil
 }
