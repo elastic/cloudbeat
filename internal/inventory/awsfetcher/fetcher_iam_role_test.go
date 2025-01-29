@@ -63,7 +63,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 			AssumeRolePolicyDocument: pointers.Ref("document"),
 			Description:              pointers.Ref("EKS managed node group IAM role"),
 			Path:                     pointers.Ref("/"),
-			RoleId:                   pointers.Ref("17823618723"),
+			RoleId:                   pointers.Ref("17823618724"),
 		},
 	}
 
@@ -72,37 +72,39 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamRole,
-			[]string{"arn:aws:iam::0000:role/role-name-1", "17823618723"},
+			"arn:aws:iam::0000:role/role-name-1",
 			"role-name-1",
+			inventory.WithRelatedAssetIds([]string{"17823618723"}),
 			inventory.WithRawAsset(role1),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "global",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "global",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::0000:role/role-name-1",
+				Name: "role-name-1",
 			}),
 		),
 
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamRole,
-			[]string{"arn:aws:iam::0000:role/role-name-2", "17823618723"},
+			"arn:aws:iam::0000:role/role-name-2",
 			"role-name-2",
+			inventory.WithRelatedAssetIds([]string{"17823618724"}),
 			inventory.WithRawAsset(role2),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "global",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "global",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "arn:aws:iam::0000:role/role-name-2",
+				Name: "role-name-2",
 			}),
 		),
 	}

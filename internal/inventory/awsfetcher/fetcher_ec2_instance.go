@@ -57,66 +57,46 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 		return
 	}
 
-	for _, instance := range instances {
-		if instance == nil {
+	for _, i := range instances {
+		if i == nil {
 			continue
 		}
 
 		iamFetcher := inventory.EmptyEnricher()
-		if instance.IamInstanceProfile != nil {
-			iamFetcher = inventory.WithIAM(inventory.AssetIAM{
-				Id:  instance.IamInstanceProfile.Id,
-				Arn: instance.IamInstanceProfile.Arn,
+		if i.IamInstanceProfile != nil {
+			iamFetcher = inventory.WithUser(inventory.User{
+				ID: pointers.Deref(i.IamInstanceProfile.Arn),
 			})
 		}
 
-		subnetIds := []string{}
-		if id := pointers.Deref(instance.SubnetId); id != "" {
-			subnetIds = append(subnetIds, id)
-		}
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
-			[]string{instance.GetResourceArn(), pointers.Deref(instance.InstanceId)},
-			instance.GetResourceName(),
+			i.GetResourceArn(),
+			pointers.Deref(i.PrivateDnsName),
 
-			inventory.WithRawAsset(instance),
-			inventory.WithTags(e.getTags(instance)),
-			inventory.WithCloud(inventory.AssetCloud{
+			inventory.WithRelatedAssetIds([]string{pointers.Deref(i.InstanceId)}),
+			inventory.WithRawAsset(i),
+			inventory.WithLabels(e.getTags(i)),
+			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
-				Region:           instance.Region,
-				AvailabilityZone: e.getAvailabilityZone(instance),
-				Account: inventory.AssetCloudAccount{
-					Id:   e.AccountId,
-					Name: e.AccountName,
-				},
-				Instance: &inventory.AssetCloudInstance{
-					Id:   pointers.Deref(instance.InstanceId),
-					Name: instance.GetResourceName(),
-				},
-				Machine: &inventory.AssetCloudMachine{
-					MachineType: string(instance.InstanceType),
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS EC2",
-				},
+				Region:           i.Region,
+				AvailabilityZone: e.getAvailabilityZone(i),
+				AccountID:        e.AccountId,
+				AccountName:      e.AccountName,
+				InstanceID:       pointers.Deref(i.InstanceId),
+				InstanceName:     i.GetResourceName(),
+				MachineType:      string(i.InstanceType),
+				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.AssetHost{
-				Architecture:    string(instance.Architecture),
-				ImageId:         instance.ImageId,
-				InstanceType:    string(instance.InstanceType),
-				Platform:        string(instance.Platform),
-				PlatformDetails: instance.PlatformDetails,
+			inventory.WithHost(inventory.Host{
+				ID:           pointers.Deref(i.InstanceId),
+				Name:         pointers.Deref(i.PrivateDnsName),
+				Architecture: string(i.Architecture),
+				Type:         string(i.InstanceType),
+				IP:           pointers.Deref(i.PublicIpAddress),
+				MacAddress:   i.GetResourceMacAddresses(),
 			}),
 			iamFetcher,
-			inventory.WithNetwork(inventory.AssetNetwork{
-				NetworkId:        instance.VpcId,
-				SubnetIds:        subnetIds,
-				Ipv6Address:      instance.Ipv6Address,
-				PublicIpAddress:  instance.PublicIpAddress,
-				PrivateIpAddress: instance.PrivateIpAddress,
-				PublicDnsName:    instance.PublicDnsName,
-				PrivateDnsName:   instance.PrivateDnsName,
-			}),
 		)
 	}
 }
@@ -133,10 +113,10 @@ func (e *ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]strin
 	return tags
 }
 
-func (e *ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) *string {
+func (e *ec2InstanceFetcher) getAvailabilityZone(instance *ec2.Ec2Instance) string {
 	if instance.Placement == nil {
-		return nil
+		return ""
 	}
 
-	return instance.Placement.AvailabilityZone
+	return pointers.Deref(instance.Placement.AvailabilityZone)
 }

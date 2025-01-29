@@ -69,18 +69,14 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsElbV1,
-			[]string{"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v1"},
+			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v1",
 			"my-elb-v1",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Networking",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS Networking",
 			}),
 		),
 	}
@@ -119,18 +115,14 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsElbV2,
-			[]string{"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2"},
+			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2",
 			"my-elb-v2",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Networking",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS Networking",
 			}),
 		),
 	}
