@@ -299,7 +299,7 @@ config:
 				t.Helper()
 				t.Setenv(CloudConnectorsLocalRoleEnvVar, "abc123")
 				t.Setenv(CloudConnectorsGlobalRoleEnvVar, "abc456")
-				t.Setenv(ResourceIDEnvVar, "abc789")
+				t.Setenv(CloudResourceIDEnvVar, "abc789")
 			},
 			expectedType: "cis_aws",
 			expectedCloudConfig: CloudConfig{
