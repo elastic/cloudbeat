@@ -138,6 +138,7 @@ type AssetEvent struct {
 	Event         Event
 	Network       *Network
 	Cloud         *Cloud
+	Group         *Group
 	Host          *Host
 	User          *User
 	Labels        map[string]string
@@ -174,6 +175,12 @@ type Cloud struct {
 	ServiceName      string `json:"service.name,omitempty"`
 	ProjectID        string `json:"project.id,omitempty"`
 	ProjectName      string `json:"project.name,omitempty"`
+}
+
+type Group struct {
+	ID     string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Domain string `json:"domain,omitempty"`
 }
 
 type Host struct {
@@ -252,6 +259,12 @@ func WithNetwork(network Network) AssetEnricher {
 func WithCloud(cloud Cloud) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Cloud = &cloud
+	}
+}
+
+func WithGroup(group Group) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Group = &group
 	}
 }
 
