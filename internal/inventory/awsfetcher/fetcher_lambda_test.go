@@ -21,10 +21,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -55,23 +55,19 @@ func TestLambdaFunction_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsLambdaFunction,
-			[]string{"arn:aws:lambda:us-east-1:378890115541:function:kuba-test-func"},
+			"arn:aws:lambda:us-east-1:378890115541:function:kuba-test-func",
 			"kuba-test-func",
 			inventory.WithRawAsset(function1),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Lambda",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS Lambda",
 			}),
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_lambda")
+	logger := clog.NewLogger("test_fetcher_lambda")
 	provider := newMockLambdaProvider(t)
 
 	provider.On("ListEventSourceMappings", mock.Anything, mock.Anything).Return([]awslib.AwsResource{}, nil)

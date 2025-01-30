@@ -20,10 +20,10 @@ package awsfetcher
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -84,39 +84,33 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
-			[]string{"arn:aws:rds:eu-west-1:123:db:db1", "db1"},
+			"arn:aws:rds:eu-west-1:123:db:db1",
 			"db1",
+			inventory.WithRelatedAssetIds([]string{"db1"}),
 			inventory.WithRawAsset(instance1),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "RDS",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS RDS",
 			}),
 		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
-			[]string{"arn:aws:rds:eu-west-1:123:db:db2", "db2"},
+			"arn:aws:rds:eu-west-1:123:db:db2",
 			"db2",
+			inventory.WithRelatedAssetIds([]string{"db2"}),
 			inventory.WithRawAsset(instance2),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "RDS",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS RDS",
 			}),
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_rds_instance")
+	logger := clog.NewLogger("test_fetcher_rds_instance")
 	provider := newMockRdsProvider(t)
 	provider.EXPECT().DescribeDBInstances(mock.Anything).Return(in, nil)
 

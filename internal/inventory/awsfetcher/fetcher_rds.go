@@ -20,17 +20,17 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
 )
 
 type rdsFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    rdsProvider
 	AccountId   string
 	AccountName string
@@ -40,7 +40,7 @@ type rdsProvider interface {
 	DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newRDSFetcher(logger *logp.Logger, identity *cloud.Identity, provider rdsProvider) inventory.AssetFetcher {
+func newRDSFetcher(logger *clog.Logger, identity *cloud.Identity, provider rdsProvider) inventory.AssetFetcher {
 	return &rdsFetcher{
 		logger:      logger,
 		provider:    provider,
@@ -68,19 +68,16 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	for _, item := range rdsInstances {
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
-			[]string{item.GetResourceArn(), item.Identifier},
+			item.GetResourceArn(),
 			item.GetResourceName(),
+			inventory.WithRelatedAssetIds([]string{item.Identifier}),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "RDS",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS RDS",
 			}),
 		)
 	}

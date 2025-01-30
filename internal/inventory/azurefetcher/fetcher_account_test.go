@@ -20,9 +20,9 @@ package azurefetcher
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
@@ -40,23 +40,19 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureTenant,
-			[]string{"/tenants/<tenant UUID>"},
+			"/tenants/<tenant UUID>",
 			"Mario",
 			inventory.WithRawAsset(azureAssets[0]),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: "<tenant UUID>",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant UUID>",
+				ServiceName: "Azure",
 			}),
 		),
 	}
 
 	// setup
-	logger := logp.NewLogger("azurefetcher_test")
+	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(azureAssets, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(nil, nil)
@@ -77,23 +73,19 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureSubscription,
-			[]string{"/subscriptions/<sub UUID>"},
+			"/subscriptions/<sub UUID>",
 			"Luigi",
 			inventory.WithRawAsset(azureAssets[0]),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: "<sub UUID>",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<sub UUID>",
+				ServiceName: "Azure",
 			}),
 		),
 	}
 
 	// setup
-	logger := logp.NewLogger("azurefetcher_test")
+	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(nil, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(azureAssets, nil)

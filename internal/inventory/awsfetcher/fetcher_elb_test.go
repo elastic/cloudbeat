@@ -23,10 +23,10 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	typesv2 "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -69,23 +69,19 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsElbV1,
-			[]string{"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v1"},
+			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v1",
 			"my-elb-v1",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Networking",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS Networking",
 			}),
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_elb_v1")
+	logger := clog.NewLogger("test_fetcher_elb_v1")
 	providerv1 := newMockV1Provider(t)
 	providerv1.EXPECT().DescribeAllLoadBalancers(mock.Anything).Return(in, nil)
 	providerv2 := newMockV2Provider(t)
@@ -119,23 +115,19 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsElbV2,
-			[]string{"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2"},
+			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2",
 			"my-elb-v2",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Networking",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS Networking",
 			}),
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_elb_v2")
+	logger := clog.NewLogger("test_fetcher_elb_v2")
 	providerv1 := newMockV1Provider(t)
 	providerv1.EXPECT().DescribeAllLoadBalancers(mock.Anything).Return(nil, nil)
 	providerv2 := newMockV2Provider(t)

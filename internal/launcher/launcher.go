@@ -29,8 +29,9 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/management/status"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/go-ucfg"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 const (
@@ -54,7 +55,7 @@ type launcher struct {
 	beater    beat.Beater
 	beaterErr chan error
 	reloader  Reloader
-	log       *logp.Logger
+	log       *clog.Logger
 	latest    *config.C
 	beat      *beat.Beat
 	creator   beat.Creator
@@ -71,7 +72,7 @@ type Validator interface {
 	Validate(*config.C) error
 }
 
-func New(log *logp.Logger, name string, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) beat.Beater {
+func New(log *clog.Logger, name string, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) beat.Beater {
 	return &launcher{
 		beaterErr: make(chan error, 1),
 		wg:        sync.WaitGroup{},

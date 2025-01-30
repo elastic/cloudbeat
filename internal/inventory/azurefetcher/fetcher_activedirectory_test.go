@@ -24,7 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/google/uuid"
 	"github.com/microsoft/kiota-abstractions-go/store"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -33,6 +32,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -59,23 +59,19 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureServicePrincipal,
-			[]string{"id"},
+			"id",
 			"dn",
 			inventory.WithRawAsset(values),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: appOwnerOrganizationId.String(),
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   appOwnerOrganizationId.String(),
+				ServiceName: "Azure",
 			}),
 		),
 	}
 
 	// setup
-	logger := logp.NewLogger("azurefetcher_test")
+	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockActivedirectoryProvider(t)
 
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
@@ -89,7 +85,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 
 func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	// set up log capture
-	var log *logp.Logger
+	var log *clog.Logger
 	logCaptureBuf := &bytes.Buffer{}
 	{
 		replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
@@ -99,7 +95,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 				zapcore.DebugLevel,
 			)
 		})
-		log = logp.NewLogger("test").WithOptions(replacement)
+		log = clog.NewLogger("test").WithOptions(replacement)
 	}
 
 	provider := newMockActivedirectoryProvider(t)

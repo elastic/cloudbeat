@@ -20,34 +20,27 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 )
 
 type s3BucketFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    s3BucketProvider
 	AccountId   string
 	AccountName string
-}
-
-var s3BucketClassification = inventory.AssetClassification{
-	Category:    inventory.CategoryInfrastructure,
-	SubCategory: inventory.SubCategoryStorage,
-	Type:        inventory.TypeObjectStorage,
-	SubType:     inventory.SubTypeS3,
 }
 
 type s3BucketProvider interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newS3BucketFetcher(logger *logp.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
+func newS3BucketFetcher(logger *clog.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
 	return &s3BucketFetcher{
 		logger:      logger,
 		provider:    provider,
@@ -74,23 +67,18 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 
 	for _, bucket := range buckets {
 		assetChannel <- inventory.NewAssetEvent(
-			s3BucketClassification,
-			[]string{bucket.GetResourceArn()},
+			inventory.AssetClassificationAwsS3Bucket,
+			bucket.GetResourceArn(),
 			bucket.GetResourceName(),
 
 			inventory.WithRawAsset(bucket),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   bucket.Region,
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS S3",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      bucket.Region,
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS S3",
 			}),
-			inventory.WithResourcePolicies(convertPolicy(bucket.BucketPolicy)...),
 		)
 	}
 }

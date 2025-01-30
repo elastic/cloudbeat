@@ -21,10 +21,10 @@ import (
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -32,7 +32,7 @@ import (
 )
 
 func TestAccountFetcher_Fetch_Assets(t *testing.T) {
-	logger := logp.NewLogger("gcpfetcher_test")
+	logger := clog.NewLogger("gcpfetcher_test")
 	assets := []*gcpinventory.ExtendedGcpAsset{
 		{
 			Asset: &assetpb.Asset{
@@ -50,23 +50,17 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 	expected := lo.Map(ResourcesToFetch, func(r ResourcesClassification, _ int) inventory.AssetEvent {
 		return inventory.NewAssetEvent(
 			r.classification,
-			[]string{"/projects/<project UUID>/some_resource"},
+			"/projects/<project UUID>/some_resource",
 			"/projects/<project UUID>/some_resource",
 			inventory.WithRawAsset(assets[0]),
 			inventory.WithRelatedAssetIds([]string{}),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.GcpCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "<project UUID>",
-					Name: "<project name>",
-				},
-				Organization: inventory.AssetCloudOrganization{
-					Id:   "<org UUID>",
-					Name: "<org name>",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: r.assetType,
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.GcpCloudProvider,
+				AccountID:   "<project UUID>",
+				AccountName: "<project name>",
+				ProjectID:   "<org UUID>",
+				ProjectName: "<org name>",
+				ServiceName: r.assetType,
 			}),
 		)
 	})

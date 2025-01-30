@@ -24,7 +24,6 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/gofrs/uuid"
 	"github.com/samber/lo"
@@ -32,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/evaluator"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
@@ -43,7 +43,7 @@ const (
 )
 
 type Transformer struct {
-	log                   *logp.Logger
+	log                   *clog.Logger
 	index                 string
 	idProvider            dataprovider.IdProvider
 	benchmarkDataProvider dataprovider.CommonDataProvider
@@ -64,7 +64,7 @@ type Related struct {
 	Entity []string `json:"entity,omitempty"`
 }
 
-func NewTransformer(log *logp.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
+func NewTransformer(log *clog.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
 	return &Transformer{
 		log:                   log,
 		index:                 cfg.Datastream(),

@@ -20,14 +20,13 @@
 package preset
 
 import (
-	context "context"
-
 	aws "github.com/aws/aws-sdk-go-v2/aws"
 	cloud "github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
+
+	context "context"
 
 	fetching "github.com/elastic/cloudbeat/internal/resources/fetching"
-
-	logp "github.com/elastic/elastic-agent-libs/logp"
 
 	mock "github.com/stretchr/testify/mock"
 
@@ -48,11 +47,11 @@ func (_m *mockAwsFactory) EXPECT() *mockAwsFactory_Expecter {
 }
 
 // Execute provides a mock function with given fields: _a0, _a1, _a2, _a3, _a4
-func (_m *mockAwsFactory) Execute(_a0 context.Context, _a1 *logp.Logger, _a2 aws.Config, _a3 chan fetching.ResourceInfo, _a4 *cloud.Identity) registry.FetchersMap {
+func (_m *mockAwsFactory) Execute(_a0 context.Context, _a1 *clog.Logger, _a2 aws.Config, _a3 chan fetching.ResourceInfo, _a4 *cloud.Identity) registry.FetchersMap {
 	ret := _m.Called(_a0, _a1, _a2, _a3, _a4)
 
 	var r0 registry.FetchersMap
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap); ok {
 		r0 = rf(_a0, _a1, _a2, _a3, _a4)
 	} else {
 		if ret.Get(0) != nil {
@@ -70,7 +69,7 @@ type mockAwsFactory_Execute_Call struct {
 
 // Execute is a helper method to define mock.On call
 //   - _a0 context.Context
-//   - _a1 *logp.Logger
+//   - _a1 *clog.Logger
 //   - _a2 aws.Config
 //   - _a3 chan fetching.ResourceInfo
 //   - _a4 *cloud.Identity
@@ -78,9 +77,9 @@ func (_e *mockAwsFactory_Expecter) Execute(_a0 interface{}, _a1 interface{}, _a2
 	return &mockAwsFactory_Execute_Call{Call: _e.mock.On("Execute", _a0, _a1, _a2, _a3, _a4)}
 }
 
-func (_c *mockAwsFactory_Execute_Call) Run(run func(_a0 context.Context, _a1 *logp.Logger, _a2 aws.Config, _a3 chan fetching.ResourceInfo, _a4 *cloud.Identity)) *mockAwsFactory_Execute_Call {
+func (_c *mockAwsFactory_Execute_Call) Run(run func(_a0 context.Context, _a1 *clog.Logger, _a2 aws.Config, _a3 chan fetching.ResourceInfo, _a4 *cloud.Identity)) *mockAwsFactory_Execute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*logp.Logger), args[2].(aws.Config), args[3].(chan fetching.ResourceInfo), args[4].(*cloud.Identity))
+		run(args[0].(context.Context), args[1].(*clog.Logger), args[2].(aws.Config), args[3].(chan fetching.ResourceInfo), args[4].(*cloud.Identity))
 	})
 	return _c
 }
@@ -90,7 +89,7 @@ func (_c *mockAwsFactory_Execute_Call) Return(_a0 registry.FetchersMap) *mockAws
 	return _c
 }
 
-func (_c *mockAwsFactory_Execute_Call) RunAndReturn(run func(context.Context, *logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap) *mockAwsFactory_Execute_Call {
+func (_c *mockAwsFactory_Execute_Call) RunAndReturn(run func(context.Context, *clog.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap) *mockAwsFactory_Execute_Call {
 	_c.Call.Return(run)
 	return _c
 }

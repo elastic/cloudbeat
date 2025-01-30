@@ -20,9 +20,8 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
@@ -30,7 +29,7 @@ import (
 )
 
 type iamRoleFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    iamRoleProvider
 	AccountId   string
 	AccountName string
@@ -40,7 +39,7 @@ type iamRoleProvider interface {
 	ListRoles(ctx context.Context) ([]*iam.Role, error)
 }
 
-func newIamRoleFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamRoleProvider) inventory.AssetFetcher {
+func newIamRoleFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamRoleProvider) inventory.AssetFetcher {
 	return &iamRoleFetcher{
 		logger:      logger,
 		provider:    provider,
@@ -68,20 +67,21 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamRole,
-			[]string{pointers.Deref(role.Arn), pointers.Deref(role.RoleId)},
+			pointers.Deref(role.Arn),
 			pointers.Deref(role.RoleName),
 
+			inventory.WithRelatedAssetIds([]string{pointers.Deref(role.RoleId)}),
 			inventory.WithRawAsset(*role),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   awslib.GlobalRegion,
-				Account: inventory.AssetCloudAccount{
-					Id:   i.AccountId,
-					Name: i.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      awslib.GlobalRegion,
+				AccountID:   i.AccountId,
+				AccountName: i.AccountName,
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   pointers.Deref(role.Arn),
+				Name: pointers.Deref(role.RoleName),
 			}),
 		)
 	}
