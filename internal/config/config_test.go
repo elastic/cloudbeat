@@ -47,25 +47,25 @@ func (s *ConfigTestSuite) TestNew() {
 		expectedCloudConfig CloudConfig
 	}{
 		{
-			`
+			config: `
 config:
   v1:
     benchmark: cis_k8s
 `,
-			"cis_k8s",
-			CloudConfig{},
+			expectedType:        "cis_k8s",
+			expectedCloudConfig: CloudConfig{},
 		},
 		{
-			`
+			config: `
 config:
   v1:
     benchmark: cis_azure
 `,
-			"cis_azure",
-			CloudConfig{},
+			expectedType:        "cis_azure",
+			expectedCloudConfig: CloudConfig{},
 		},
 		{
-			`
+			config: `
 config:
   v1:
     benchmark: cis_eks
@@ -79,8 +79,8 @@ config:
         credential_profile_name: credential_profile_name
         role_arn: role_arn
 `,
-			"cis_eks",
-			CloudConfig{
+			expectedType: "cis_eks",
+			expectedCloudConfig: CloudConfig{
 				Aws: AwsConfig{
 					Cred: aws.ConfigAWS{
 						AccessKeyID:          "key",
@@ -226,6 +226,112 @@ revision: 1`,
 
 			s.Equal(test.expectedPackagePolicyID, c.PackagePolicyId)
 			s.Equal(test.expectedPackagePolicyRevision, c.PackagePolicyRevision)
+		})
+	}
+}
+
+func (s *ConfigTestSuite) TestCloudConnectorsConfig() {
+	tests := map[string]struct {
+		config              string
+		overwriteEnv        func(t *testing.T)
+		expectedType        string
+		expectedCloudConfig CloudConfig
+	}{
+		"happy path cloud connectors enabled": {
+			config: `
+config:
+  v1:
+    benchmark: cis_aws
+    aws:
+        supports_cloud_connectors: true
+        credentials:
+            external_id: abc123
+`,
+			expectedType: "cis_aws",
+			expectedCloudConfig: CloudConfig{
+				Aws: AwsConfig{
+					CloudConnectors: true,
+					Cred: aws.ConfigAWS{
+						ExternalID: "abc123",
+					},
+					CloudConnectorsConfig: CloudConnectorsConfig{},
+				},
+			},
+		},
+		"happy path cloud connectors enabled - attempt overwrite roles": {
+			config: `
+config:
+  v1:
+    benchmark: cis_aws
+    aws:
+        account_type: single-account
+        supports_cloud_connectors: true
+        credentials:
+            external_id: abc123
+        CloudConnectorsConfig:
+            LocalRoleARN: "abc123"
+            LocalRoleARN: "abc123"
+`,
+			expectedType: "cis_aws",
+			expectedCloudConfig: CloudConfig{
+				Aws: AwsConfig{
+					AccountType:     SingleAccount,
+					CloudConnectors: true,
+					Cred: aws.ConfigAWS{
+						ExternalID: "abc123",
+					},
+					CloudConnectorsConfig: CloudConnectorsConfig{},
+				},
+			},
+		},
+		"happy path cloud connectors enabled - env vars set": {
+			config: `
+config:
+  v1:
+    benchmark: cis_aws
+    aws:
+        account_type: single-account
+        supports_cloud_connectors: true
+        credentials:
+            external_id: abc123
+`,
+			overwriteEnv: func(t *testing.T) {
+				t.Helper()
+				t.Setenv(CloudConnectorsLocalRoleEnvVar, "abc123")
+				t.Setenv(CloudConnectorsGlobalRoleEnvVar, "abc456")
+				t.Setenv(ResourceIDEnvVar, "abc789")
+			},
+			expectedType: "cis_aws",
+			expectedCloudConfig: CloudConfig{
+				Aws: AwsConfig{
+					AccountType:     SingleAccount,
+					CloudConnectors: true,
+					Cred: aws.ConfigAWS{
+						ExternalID: "abc123",
+					},
+					CloudConnectorsConfig: CloudConnectorsConfig{
+						LocalRoleARN:  "abc123",
+						GlobalRoleARN: "abc456",
+						ResourceID:    "abc789",
+					},
+				},
+			},
+		},
+	}
+
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			if test.overwriteEnv != nil {
+				test.overwriteEnv(s.T())
+			}
+			cfg, err := config.NewConfigFrom(test.config)
+			s.Require().NoError(err)
+
+			c, err := New(cfg)
+			s.Require().NoError(err)
+
+			s.Equal(test.expectedType, c.Benchmark)
+			s.Equal(test.expectedCloudConfig, c.CloudConfig)
 		})
 	}
 }

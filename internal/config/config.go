@@ -67,9 +67,10 @@ type CloudConfig struct {
 }
 
 type AwsConfig struct {
-	Cred            aws.ConfigAWS `config:"credentials"`
-	AccountType     string        `config:"account_type"`
-	CloudConnectors bool          `config:"supports_cloud_connectors"`
+	Cred                  aws.ConfigAWS `config:"credentials"`
+	AccountType           string        `config:"account_type"`
+	CloudConnectors       bool          `config:"supports_cloud_connectors"`
+	CloudConnectorsConfig CloudConnectorsConfig
 }
 
 type GcpConfig struct {
@@ -170,6 +171,10 @@ func New(cfg *config.C) (*Config, error) {
 		))
 	}
 
+	if c.CloudConfig.Aws.CloudConnectors {
+		c.CloudConfig.Aws.CloudConnectorsConfig = newCloudConnectorsConfig()
+	}
+
 	return c, nil
 }
 
@@ -203,4 +208,27 @@ func isSupportedBenchmark(benchmark string) bool {
 		}
 	}
 	return false
+}
+
+// Cloud Connectors roles and resource id must be provided by the system (controller)
+// and not user input (package policy) for security reasons.
+
+const (
+	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
+	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
+	ResourceIDEnvVar                = "RESOURCE_ID"
+)
+
+type CloudConnectorsConfig struct {
+	LocalRoleARN  string
+	GlobalRoleARN string
+	ResourceID    string
+}
+
+func newCloudConnectorsConfig() CloudConnectorsConfig {
+	return CloudConnectorsConfig{
+		LocalRoleARN:  os.Getenv(CloudConnectorsLocalRoleEnvVar),
+		GlobalRoleARN: os.Getenv(CloudConnectorsGlobalRoleEnvVar),
+		ResourceID:    os.Getenv(ResourceIDEnvVar),
+	}
 }
