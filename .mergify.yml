@@ -353,6 +353,22 @@ pull_request_rules:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
   - name: backport patches to 8.18 branch
+<<<<<<< HEAD
+=======
+    conditions:
+      - merged
+      - label=backport-v8.18.0
+    actions:
+      backport:
+        assignees:
+          - "{{ author }}"
+        branches:
+          - "8.18"
+        labels:
+          - "backport"
+        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+  - name: backport patches to 9.0 branch
+>>>>>>> 7fc29482 ([mergify] add 8.18 label to main (#2969))
     conditions:
       - merged
       - label=backport-v8.18.0
