@@ -15,7 +15,7 @@ public_access_is_restricted(cluster, _) if {
 }
 
 public_access_is_restricted(cluster, cidr_allowed) if {
-	cidr_allowed
+	cidr_allowed == true
 
 	cluster.ResourcesVpcConfig.EndpointPublicAccess
 	public_access_cidrs := cluster.ResourcesVpcConfig.PublicAccessCidrs
@@ -48,6 +48,6 @@ finding(cidr_allowed) := result if {
 }
 
 cidr_evidence(config, cidr_allowed) := result if {
-	cidr_allowed
+	cidr_allowed == true
 	result := {"public_access_cidrs": config.PublicAccessCidrs}
 } else := {}

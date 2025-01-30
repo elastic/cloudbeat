@@ -31,7 +31,7 @@ ConvertDaysToHours(duration) := result if {
 
 # set the rule result
 calculate_result(evaluation) := "passed" if {
-	evaluation
+	evaluation != false
 } else := "failed"
 
 # Safely evaluate evidence. In case a key is undefined, it will be defaulted.
