@@ -28,6 +28,7 @@ import (
 
 type accountFetcher struct {
 	logger   *logp.Logger
+	tenantID string
 	provider accountProvider
 }
 
@@ -39,9 +40,10 @@ type (
 	}
 )
 
-func newAccountFetcher(logger *logp.Logger, provider accountProvider) inventory.AssetFetcher {
+func newAccountFetcher(logger *logp.Logger, tenantID string, provider accountProvider) inventory.AssetFetcher {
 	return &accountFetcher{
 		logger:   logger,
+		tenantID: tenantID,
 		provider: provider,
 	}
 }

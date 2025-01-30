@@ -29,6 +29,7 @@ import (
 
 type activedirectoryFetcher struct {
 	logger   *logp.Logger
+	tenantID string
 	provider activedirectoryProvider
 }
 
@@ -41,9 +42,10 @@ type (
 	}
 )
 
-func newActiveDirectoryFetcher(logger *logp.Logger, provider activedirectoryProvider) inventory.AssetFetcher {
+func newActiveDirectoryFetcher(logger *logp.Logger, tenantID string, provider activedirectoryProvider) inventory.AssetFetcher {
 	return &activedirectoryFetcher{
 		logger:   logger,
+		tenantID: tenantID,
 		provider: provider,
 	}
 }
@@ -104,7 +106,7 @@ func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetC
 			),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				AccountID:   "",
+				AccountID:   f.tenantID,
 				ServiceName: "Azure",
 			}),
 		)
@@ -130,7 +132,7 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 			),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				AccountID:   "",
+				AccountID:   f.tenantID,
 				ServiceName: "Azure",
 			}),
 		)
@@ -156,7 +158,7 @@ func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<
 			),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				AccountID:   "",
+				AccountID:   f.tenantID,
 				ServiceName: "Azure",
 			}),
 		)

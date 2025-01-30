@@ -28,6 +28,7 @@ import (
 
 type resourceGraphFetcher struct {
 	logger   *logp.Logger
+	tenantID string
 	provider resourceGraphProvider
 }
 
@@ -37,9 +38,10 @@ type (
 	}
 )
 
-func newResourceGraphFetcher(logger *logp.Logger, provider resourceGraphProvider) inventory.AssetFetcher {
+func newResourceGraphFetcher(logger *logp.Logger, tenantID string, provider resourceGraphProvider) inventory.AssetFetcher {
 	return &resourceGraphFetcher{
 		logger:   logger,
+		tenantID: tenantID,
 		provider: provider,
 	}
 }
