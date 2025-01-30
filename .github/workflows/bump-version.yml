@@ -3,6 +3,11 @@ name: Bump Cloudbeat version
 on:
   workflow_dispatch:
     inputs:
+      bump_cloudbeat:
+        description: "Bump cloudbeat version"
+        type: boolean
+        required: true
+        default: true
       bump_integration:
         description: "Bump cloud security posture integration version"
         type: boolean
@@ -45,6 +50,7 @@ jobs:
           git config --global user.name "Cloud Security Machine"
 
       - name: Bump Cloudbeat
+        if: ${{ github.event.inputs.bump_cloudbeat }}
         # bump_cloudbeat.sh will create multiple PRs with different HEAD branches
         env:
           GIT_BASE_BRANCH: ${{ github.ref_name }}
