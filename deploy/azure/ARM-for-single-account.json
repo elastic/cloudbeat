@@ -341,7 +341,7 @@
                                 "typeHandlerVersion": "2.1",
                                 "settings": {
                                     "fileUris": [
-                                        "https://raw.githubusercontent.com/elastic/cloudbeat/main/deploy/azure/install-agent.sh"
+                                        "https://raw.githubusercontent.com/elastic/cloudbeat/8.18/deploy/azure/install-agent.sh"
                                     ],
                                     "commandToExecute": "[concat('bash install-agent.sh ', parameters('ElasticAgentVersion'), ' ', parameters('ElasticArtifactServer'), ' ', parameters('FleetUrl'), ' ', parameters('EnrollmentToken'))]"
                                 }
