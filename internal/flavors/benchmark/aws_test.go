@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/stretchr/testify/mock"
@@ -90,6 +91,46 @@ func TestAWS_Initialize(t *testing.T) {
 						return false
 					}
 					return c.IsCredentialsProvider(&stscreds.AssumeRoleProvider{})
+				})
+				identityProvider := &awslib.MockIdentityProviderGetter{}
+				identityProvider.EXPECT().GetIdentity(mock.Anything, cfgMatcher).Return(
+					&cloud.Identity{
+						Account: "test-account",
+					},
+					nil,
+				)
+
+				return identityProvider
+			}(),
+			want: []string{
+				fetching.IAMType,
+				fetching.KmsType,
+				fetching.TrailType,
+				fetching.AwsMonitoringType,
+				fetching.EC2NetworkingType,
+				fetching.RdsType,
+				fetching.S3Type,
+			},
+		},
+		{
+			name: "no credential cache in non cloud connectors setup",
+			cfg: config.Config{
+				Benchmark: "cis_aws",
+				CloudConfig: config.CloudConfig{
+					Aws: config.AwsConfig{
+						AccountType: config.SingleAccount,
+						Cred: libbeataws.ConfigAWS{
+							AccessKeyID:     "keyid",
+							SecretAccessKey: "key",
+						},
+						CloudConnectors: false,
+					},
+				},
+			},
+			identityProvider: func() awslib.IdentityProviderGetter {
+				cfgMatcher := mock.MatchedBy(func(cfg aws.Config) bool {
+					_, is := cfg.Credentials.(credentials.StaticCredentialsProvider)
+					return is
 				})
 				identityProvider := &awslib.MockIdentityProviderGetter{}
 				identityProvider.EXPECT().GetIdentity(mock.Anything, cfgMatcher).Return(
