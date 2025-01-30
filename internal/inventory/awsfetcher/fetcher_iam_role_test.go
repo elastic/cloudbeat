@@ -22,10 +22,10 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
@@ -109,7 +109,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_iam_role")
+	logger := clog.NewLogger("test_fetcher_iam_role")
 	provider := newMockIamRoleProvider(t)
 	provider.EXPECT().ListRoles(mock.Anything).Return(in, nil)
 

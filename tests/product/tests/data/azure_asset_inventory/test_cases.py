@@ -73,8 +73,28 @@ test_cases = {
         category="Messaging Service",
         type_="Azure Storage Queue Service",
     ),
-    "[Asset Inventory][Azure][Azure Storage Blob Service] assets found": AssetInventoryCase(
+    "[Asset Inventory][Azure][Azure Storage Blob Container] assets found": AssetInventoryCase(
         category="Storage Bucket",
+        type_="Azure Storage Blob Container",
+    ),
+    "[Asset Inventory][Azure][Azure Storage Blob Service] assets found": AssetInventoryCase(
+        category="Service Usage Technology",
         type_="Azure Storage Blob Service",
+    ),
+    "[Asset Inventory][Azure][Azure Storage File Service] assets found": AssetInventoryCase(
+        category="File System Service",
+        type_="Azure Storage File Service",
+    ),
+    "[Asset Inventory][Azure][Azure Storage File Share] assets found": AssetInventoryCase(
+        category="File System Service",
+        type_="Azure Storage File Share",
+    ),
+    "[Asset Inventory][Azure][Azure Table] assets found": AssetInventoryCase(
+        category="Database",
+        type_="Azure Storage Table",
+    ),
+    "[Asset Inventory][Azure][Azure Table Service] assets found": AssetInventoryCase(
+        category="Service Usage Technology",
+        type_="Azure Storage Table Service",
     ),
 }

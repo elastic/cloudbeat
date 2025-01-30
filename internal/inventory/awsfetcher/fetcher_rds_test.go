@@ -20,10 +20,10 @@ package awsfetcher
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -110,7 +110,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_rds_instance")
+	logger := clog.NewLogger("test_fetcher_rds_instance")
 	provider := newMockRdsProvider(t)
 	provider.EXPECT().DescribeDBInstances(mock.Anything).Return(in, nil)
 

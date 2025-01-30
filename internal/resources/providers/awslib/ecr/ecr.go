@@ -23,8 +23,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ecrClient "github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
@@ -41,7 +41,7 @@ type Client interface {
 	DescribeRepositories(ctx context.Context, params *ecrClient.DescribeRepositoriesInput, optFns ...func(*ecrClient.Options)) (*ecrClient.DescribeRepositoriesOutput, error)
 }
 
-func NewEcrProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewEcrProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return ecrClient.NewFromConfig(cfg)
 	}

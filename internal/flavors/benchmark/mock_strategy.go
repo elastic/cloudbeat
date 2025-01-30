@@ -20,12 +20,12 @@
 package benchmark
 
 import (
-	config "github.com/elastic/cloudbeat/internal/config"
 	builder "github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
+
+	config "github.com/elastic/cloudbeat/internal/config"
 
 	context "context"
-
-	logp "github.com/elastic/elastic-agent-libs/logp"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -44,15 +44,15 @@ func (_m *MockStrategy) EXPECT() *MockStrategy_Expecter {
 }
 
 // NewBenchmark provides a mock function with given fields: ctx, log, cfg
-func (_m *MockStrategy) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (_m *MockStrategy) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	ret := _m.Called(ctx, log, cfg)
 
 	var r0 builder.Benchmark
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config) (builder.Benchmark, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, *config.Config) (builder.Benchmark, error)); ok {
 		return rf(ctx, log, cfg)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config) builder.Benchmark); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, *config.Config) builder.Benchmark); ok {
 		r0 = rf(ctx, log, cfg)
 	} else {
 		if ret.Get(0) != nil {
@@ -60,7 +60,7 @@ func (_m *MockStrategy) NewBenchmark(ctx context.Context, log *logp.Logger, cfg 
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *logp.Logger, *config.Config) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *clog.Logger, *config.Config) error); ok {
 		r1 = rf(ctx, log, cfg)
 	} else {
 		r1 = ret.Error(1)
@@ -76,15 +76,15 @@ type MockStrategy_NewBenchmark_Call struct {
 
 // NewBenchmark is a helper method to define mock.On call
 //   - ctx context.Context
-//   - log *logp.Logger
+//   - log *clog.Logger
 //   - cfg *config.Config
 func (_e *MockStrategy_Expecter) NewBenchmark(ctx interface{}, log interface{}, cfg interface{}) *MockStrategy_NewBenchmark_Call {
 	return &MockStrategy_NewBenchmark_Call{Call: _e.mock.On("NewBenchmark", ctx, log, cfg)}
 }
 
-func (_c *MockStrategy_NewBenchmark_Call) Run(run func(ctx context.Context, log *logp.Logger, cfg *config.Config)) *MockStrategy_NewBenchmark_Call {
+func (_c *MockStrategy_NewBenchmark_Call) Run(run func(ctx context.Context, log *clog.Logger, cfg *config.Config)) *MockStrategy_NewBenchmark_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*logp.Logger), args[2].(*config.Config))
+		run(args[0].(context.Context), args[1].(*clog.Logger), args[2].(*config.Config))
 	})
 	return _c
 }
@@ -94,7 +94,7 @@ func (_c *MockStrategy_NewBenchmark_Call) Return(_a0 builder.Benchmark, _a1 erro
 	return _c
 }
 
-func (_c *MockStrategy_NewBenchmark_Call) RunAndReturn(run func(context.Context, *logp.Logger, *config.Config) (builder.Benchmark, error)) *MockStrategy_NewBenchmark_Call {
+func (_c *MockStrategy_NewBenchmark_Call) RunAndReturn(run func(context.Context, *clog.Logger, *config.Config) (builder.Benchmark, error)) *MockStrategy_NewBenchmark_Call {
 	_c.Call.Return(run)
 	return _c
 }

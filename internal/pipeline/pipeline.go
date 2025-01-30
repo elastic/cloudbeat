@@ -20,14 +20,14 @@ package pipeline
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 const (
 	chBuffer = 10
 )
 
-func Step[In any, Out any](ctx context.Context, log *logp.Logger, inputChannel chan In, fn func(context.Context, In) (Out, error)) chan Out {
+func Step[In any, Out any](ctx context.Context, log *clog.Logger, inputChannel chan In, fn func(context.Context, In) (Out, error)) chan Out {
 	outputCh := make(chan Out, chBuffer)
 	ctx, cancel := context.WithCancel(ctx)
 

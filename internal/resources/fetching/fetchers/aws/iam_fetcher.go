@@ -21,9 +21,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -31,7 +30,7 @@ import (
 )
 
 type IAMFetcher struct {
-	log           *logp.Logger
+	log           *clog.Logger
 	iamProvider   iam.AccessManagement
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *cloud.Identity
@@ -46,7 +45,7 @@ type IAMResource struct {
 	identity *cloud.Identity
 }
 
-func NewIAMFetcher(log *logp.Logger, provider iam.AccessManagement, ch chan fetching.ResourceInfo, identity *cloud.Identity) *IAMFetcher {
+func NewIAMFetcher(log *clog.Logger, provider iam.AccessManagement, ch chan fetching.ResourceInfo, identity *cloud.Identity) *IAMFetcher {
 	return &IAMFetcher{
 		log:           log,
 		iamProvider:   provider,
