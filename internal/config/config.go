@@ -216,7 +216,7 @@ func isSupportedBenchmark(benchmark string) bool {
 const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
 	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
-	ResourceIDEnvVar                = "RESOURCE_ID"
+	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
 )
 
 type CloudConnectorsConfig struct {
@@ -229,6 +229,6 @@ func newCloudConnectorsConfig() CloudConnectorsConfig {
 	return CloudConnectorsConfig{
 		LocalRoleARN:  os.Getenv(CloudConnectorsLocalRoleEnvVar),
 		GlobalRoleARN: os.Getenv(CloudConnectorsGlobalRoleEnvVar),
-		ResourceID:    os.Getenv(ResourceIDEnvVar),
+		ResourceID:    os.Getenv(CloudResourceIDEnvVar),
 	}
 }
