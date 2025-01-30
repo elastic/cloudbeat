@@ -86,7 +86,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 		if name == "" {
 			name = item.DisplayName
 		}
-		assetChan <- inventory.NewAssetEvent(
+		asset := inventory.NewAssetEvent(
 			classification,
 			item.Id,
 			name,
@@ -97,5 +97,16 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 				ServiceName: "Azure",
 			}),
 		)
+
+		if resourceType == azurelib.VirtualMachineAssetType {
+			asset.Host = &inventory.Host{
+				ID: item.Id,
+				// TODO(kuba) - unpack nested maps
+				Name: ".properties.extended.instanceView.computerName",
+				Type: ".properties.hardwareProfile.vmSize",
+			}
+		}
+
+		assetChan <- asset
 	}
 }

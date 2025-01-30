@@ -19,6 +19,7 @@ package azurefetcher
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -127,6 +128,11 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 	}
 
 	for _, item := range items {
+		// TODO(kuba): How to test this without being able to test Groups?
+		var labels map[string]string
+		for _, l := range item.GetAssignedLabels() {
+			fmt.Println(l)
+		}
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureEntraGroup,
 			pointers.Deref(item.GetId()),
@@ -139,6 +145,11 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 				AccountID:   f.tenantID,
 				ServiceName: "Azure",
 			}),
+			inventory.WithGroup(inventory.Group{
+				ID:   pointers.Deref(item.GetId()),
+				Name: pointers.Deref(item.GetDisplayName()),
+			}),
+			inventory.WithLabels(labels),
 		)
 	}
 }
