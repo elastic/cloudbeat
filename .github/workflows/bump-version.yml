@@ -2,6 +2,13 @@ name: Bump Cloudbeat version
 
 on:
   workflow_dispatch:
+    inputs:
+      bump_integration:
+        description: "Bump cloud security posture integration version"
+        type: boolean
+        required: true
+        default: false
+
 
 env:
   GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
@@ -44,5 +51,6 @@ jobs:
         run: scripts/bump_cloudbeat.sh
 
       - name: Bump Cloud Security Posture Integration
+        if: ${{ github.event.inputs.bump_integration }}
         # we need to run bump_integration.sh from the main branch
         run: git checkout origin/main && scripts/bump_integration.sh
