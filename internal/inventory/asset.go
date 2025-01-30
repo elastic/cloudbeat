@@ -29,6 +29,7 @@ const (
 	CategoryContainerService       AssetCategory = "Container Service"
 	CategoryDatabase               AssetCategory = "Database"
 	CategoryFaaS                   AssetCategory = "FaaS"
+	CategoryFileSystemService      AssetCategory = "File System Service"
 	CategoryFirewall               AssetCategory = "Firewall"
 	CategoryGateway                AssetCategory = "Gateway"
 	CategoryHost                   AssetCategory = "Host"
@@ -92,24 +93,29 @@ var (
 	AssetClassificationAwsSnsTopic                 = AssetClassification{CategoryMessagingService, "AWS SNS Topic"}
 
 	// Azure
-	AssetClassificationAzureAppService          = AssetClassification{CategoryWebService, "Azure App Service"}
-	AssetClassificationAzureContainerRegistry   = AssetClassification{CategoryContainerRegistry, "Azure Container Registry"}
-	AssetClassificationAzureCosmosDBAccount     = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB Account"}
-	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
-	AssetClassificationAzureDisk                = AssetClassification{CategoryVolume, "Azure Disk"}
-	AssetClassificationAzureElasticPool         = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
-	AssetClassificationAzureResourceGroup       = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
-	AssetClassificationAzureSQLDatabase         = AssetClassification{CategoryDatabase, "Azure SQL Database"}
-	AssetClassificationAzureSQLServer           = AssetClassification{CategoryDatabase, "Azure SQL Server"}
-	AssetClassificationAzureServicePrincipal    = AssetClassification{CategoryIdentity, "Azure Principal"}
-	AssetClassificationAzureSnapshot            = AssetClassification{CategorySnapshot, "Azure Snapshot"}
-	AssetClassificationAzureStorageAccount      = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
-	AssetClassificationAzureStorageBlobService  = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
-	AssetClassificationAzureStorageQueue        = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
-	AssetClassificationAzureStorageQueueService = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
-	AssetClassificationAzureSubscription        = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
-	AssetClassificationAzureTenant              = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
-	AssetClassificationAzureVirtualMachine      = AssetClassification{CategoryHost, "Azure Virtual Machine"}
+	AssetClassificationAzureAppService           = AssetClassification{CategoryWebService, "Azure App Service"}
+	AssetClassificationAzureContainerRegistry    = AssetClassification{CategoryContainerRegistry, "Azure Container Registry"}
+	AssetClassificationAzureCosmosDBAccount      = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB Account"}
+	AssetClassificationAzureCosmosDBSQLDatabase  = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
+	AssetClassificationAzureDisk                 = AssetClassification{CategoryVolume, "Azure Disk"}
+	AssetClassificationAzureElasticPool          = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
+	AssetClassificationAzureResourceGroup        = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
+	AssetClassificationAzureSQLDatabase          = AssetClassification{CategoryDatabase, "Azure SQL Database"}
+	AssetClassificationAzureSQLServer            = AssetClassification{CategoryDatabase, "Azure SQL Server"}
+	AssetClassificationAzureServicePrincipal     = AssetClassification{CategoryIdentity, "Azure Principal"}
+	AssetClassificationAzureSnapshot             = AssetClassification{CategorySnapshot, "Azure Snapshot"}
+	AssetClassificationAzureStorageAccount       = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
+	AssetClassificationAzureStorageBlobContainer = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Container"}
+	AssetClassificationAzureStorageBlobService   = AssetClassification{CategoryServiceUsageTechnology, "Azure Storage Blob Service"}
+	AssetClassificationAzureStorageFileService   = AssetClassification{CategoryFileSystemService, "Azure Storage File Service"}
+	AssetClassificationAzureStorageFileShare     = AssetClassification{CategoryFileSystemService, "Azure Storage File Share"}
+	AssetClassificationAzureStorageQueue         = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
+	AssetClassificationAzureStorageQueueService  = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
+	AssetClassificationAzureStorageTable         = AssetClassification{CategoryDatabase, "Azure Storage Table"}
+	AssetClassificationAzureStorageTableService  = AssetClassification{CategoryServiceUsageTechnology, "Azure Storage Table Service"}
+	AssetClassificationAzureSubscription         = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
+	AssetClassificationAzureTenant               = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
+	AssetClassificationAzureVirtualMachine       = AssetClassification{CategoryHost, "Azure Virtual Machine"}
 
 	// GCP
 	AssetClassificationGcpProject           = AssetClassification{CategoryAccount, "GCP Project"}

@@ -31,6 +31,7 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
@@ -56,7 +57,7 @@ func (d *DummyResource) GetElasticCommonData() (map[string]any, error) {
 
 type OpaTestSuite struct {
 	suite.Suite
-	log *logp.Logger
+	log *clog.Logger
 }
 
 func TestOpaTestSuite(t *testing.T) {

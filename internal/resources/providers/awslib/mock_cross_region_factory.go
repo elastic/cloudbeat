@@ -23,8 +23,7 @@ import (
 	context "context"
 
 	aws "github.com/aws/aws-sdk-go-v2/aws"
-
-	logp "github.com/elastic/elastic-agent-libs/logp"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -43,11 +42,11 @@ func (_m *MockCrossRegionFactory[T]) EXPECT() *MockCrossRegionFactory_Expecter[T
 }
 
 // NewMultiRegionClients provides a mock function with given fields: ctx, selector, cfg, factory, log
-func (_m *MockCrossRegionFactory[T]) NewMultiRegionClients(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
+func (_m *MockCrossRegionFactory[T]) NewMultiRegionClients(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(aws.Config) T, log *clog.Logger) CrossRegionFetcher[T] {
 	ret := _m.Called(ctx, selector, cfg, factory, log)
 
 	var r0 CrossRegionFetcher[T]
-	if rf, ok := ret.Get(0).(func(context.Context, RegionsSelector, aws.Config, func(aws.Config) T, *logp.Logger) CrossRegionFetcher[T]); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, RegionsSelector, aws.Config, func(aws.Config) T, *clog.Logger) CrossRegionFetcher[T]); ok {
 		r0 = rf(ctx, selector, cfg, factory, log)
 	} else {
 		if ret.Get(0) != nil {
@@ -68,14 +67,14 @@ type MockCrossRegionFactory_NewMultiRegionClients_Call[T interface{}] struct {
 //   - selector RegionsSelector
 //   - cfg aws.Config
 //   - factory func(aws.Config) T
-//   - log *logp.Logger
+//   - log *clog.Logger
 func (_e *MockCrossRegionFactory_Expecter[T]) NewMultiRegionClients(ctx interface{}, selector interface{}, cfg interface{}, factory interface{}, log interface{}) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
 	return &MockCrossRegionFactory_NewMultiRegionClients_Call[T]{Call: _e.mock.On("NewMultiRegionClients", ctx, selector, cfg, factory, log)}
 }
 
-func (_c *MockCrossRegionFactory_NewMultiRegionClients_Call[T]) Run(run func(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger)) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
+func (_c *MockCrossRegionFactory_NewMultiRegionClients_Call[T]) Run(run func(ctx context.Context, selector RegionsSelector, cfg aws.Config, factory func(aws.Config) T, log *clog.Logger)) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(RegionsSelector), args[2].(aws.Config), args[3].(func(aws.Config) T), args[4].(*logp.Logger))
+		run(args[0].(context.Context), args[1].(RegionsSelector), args[2].(aws.Config), args[3].(func(aws.Config) T), args[4].(*clog.Logger))
 	})
 	return _c
 }
@@ -85,7 +84,7 @@ func (_c *MockCrossRegionFactory_NewMultiRegionClients_Call[T]) Return(_a0 Cross
 	return _c
 }
 
-func (_c *MockCrossRegionFactory_NewMultiRegionClients_Call[T]) RunAndReturn(run func(context.Context, RegionsSelector, aws.Config, func(aws.Config) T, *logp.Logger) CrossRegionFetcher[T]) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
+func (_c *MockCrossRegionFactory_NewMultiRegionClients_Call[T]) RunAndReturn(run func(context.Context, RegionsSelector, aws.Config, func(aws.Config) T, *clog.Logger) CrossRegionFetcher[T]) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
 	_c.Call.Return(run)
 	return _c
 }

@@ -24,12 +24,12 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -48,7 +48,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 	type args struct {
 		selector func() RegionsSelector
 		cfg      aws.Config
-		log      *logp.Logger
+		log      *clog.Logger
 	}
 	tests := []struct {
 		name string

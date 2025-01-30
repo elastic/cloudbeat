@@ -21,9 +21,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
@@ -31,12 +31,12 @@ import (
 )
 
 type AzureInsightsBatchAssetFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   azurelib.ProviderAPI
 }
 
-func NewAzureInsightsBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureInsightsBatchAssetFetcher {
+func NewAzureInsightsBatchAssetFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureInsightsBatchAssetFetcher {
 	return &AzureInsightsBatchAssetFetcher{
 		log:        log,
 		resourceCh: ch,

@@ -33,7 +33,7 @@ def test_aws_asset_inventory(
     assert isinstance(entities, list) and len(entities) > 0, "Expected the list to be non-empty"
     for entity in entities:
         assert entity.cloud, "Expected .cloud section"
-        assert entity.cloud.Provider == "aws", f'Expected "aws" provider, got {entity.cloud.Provider}'
+        assert entity.cloud.provider == "aws", f'Expected "aws" provider, got {entity.cloud.provider}'
         assert len(entity.entity.id) > 0, "Expected .entity.id list to contain an ID"
         assert len(entity.entity.id[0]) > 0, "Expected the ID to be non-empty"
         assert entity.Attributes, "Expected the resource under .Attributes"
