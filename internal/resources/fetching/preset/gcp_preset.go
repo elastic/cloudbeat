@@ -20,16 +20,15 @@ package preset
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
-func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {
+func NewCisGcpFetchers(ctx context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {
 	log.Infof("Initializing GCP fetchers")
 	m := make(registry.FetchersMap)
 

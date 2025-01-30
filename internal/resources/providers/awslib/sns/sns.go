@@ -23,8 +23,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
@@ -34,7 +34,7 @@ type SNS interface {
 	ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewSNSProvider(ctx context.Context, log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewSNSProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return sns.NewFromConfig(cfg)
 	}

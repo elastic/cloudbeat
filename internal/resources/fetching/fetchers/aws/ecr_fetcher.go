@@ -23,11 +23,11 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1" // revive:disable-line
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ecr"
@@ -43,7 +43,7 @@ const (
 )
 
 type EcrFetcher struct {
-	log          *logp.Logger
+	log          *clog.Logger
 	kubeClient   k8s.Interface
 	PodDescriber PodDescriber
 	resourceCh   chan fetching.ResourceInfo
@@ -58,7 +58,7 @@ type EcrResource struct {
 	ecr.Repository
 }
 
-func NewEcrFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, podDescriber PodDescriber) *EcrFetcher {
+func NewEcrFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, podDescriber PodDescriber) *EcrFetcher {
 	return &EcrFetcher{
 		log:          log,
 		kubeClient:   kubeProvider,

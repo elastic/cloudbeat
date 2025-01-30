@@ -20,8 +20,8 @@
 package azurelib
 
 import (
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 	auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
-	logp "github.com/elastic/elastic-agent-libs/logp"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -40,15 +40,15 @@ func (_m *MockProviderInitializerAPI) EXPECT() *MockProviderInitializerAPI_Expec
 }
 
 // Init provides a mock function with given fields: log, azureConfig
-func (_m *MockProviderInitializerAPI) Init(log *logp.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error) {
+func (_m *MockProviderInitializerAPI) Init(log *clog.Logger, azureConfig auth.AzureFactoryConfig) (ProviderAPI, error) {
 	ret := _m.Called(log, azureConfig)
 
 	var r0 ProviderAPI
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*logp.Logger, auth.AzureFactoryConfig) (ProviderAPI, error)); ok {
+	if rf, ok := ret.Get(0).(func(*clog.Logger, auth.AzureFactoryConfig) (ProviderAPI, error)); ok {
 		return rf(log, azureConfig)
 	}
-	if rf, ok := ret.Get(0).(func(*logp.Logger, auth.AzureFactoryConfig) ProviderAPI); ok {
+	if rf, ok := ret.Get(0).(func(*clog.Logger, auth.AzureFactoryConfig) ProviderAPI); ok {
 		r0 = rf(log, azureConfig)
 	} else {
 		if ret.Get(0) != nil {
@@ -56,7 +56,7 @@ func (_m *MockProviderInitializerAPI) Init(log *logp.Logger, azureConfig auth.Az
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*logp.Logger, auth.AzureFactoryConfig) error); ok {
+	if rf, ok := ret.Get(1).(func(*clog.Logger, auth.AzureFactoryConfig) error); ok {
 		r1 = rf(log, azureConfig)
 	} else {
 		r1 = ret.Error(1)
@@ -71,15 +71,15 @@ type MockProviderInitializerAPI_Init_Call struct {
 }
 
 // Init is a helper method to define mock.On call
-//   - log *logp.Logger
+//   - log *clog.Logger
 //   - azureConfig auth.AzureFactoryConfig
 func (_e *MockProviderInitializerAPI_Expecter) Init(log interface{}, azureConfig interface{}) *MockProviderInitializerAPI_Init_Call {
 	return &MockProviderInitializerAPI_Init_Call{Call: _e.mock.On("Init", log, azureConfig)}
 }
 
-func (_c *MockProviderInitializerAPI_Init_Call) Run(run func(log *logp.Logger, azureConfig auth.AzureFactoryConfig)) *MockProviderInitializerAPI_Init_Call {
+func (_c *MockProviderInitializerAPI_Init_Call) Run(run func(log *clog.Logger, azureConfig auth.AzureFactoryConfig)) *MockProviderInitializerAPI_Init_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*logp.Logger), args[1].(auth.AzureFactoryConfig))
+		run(args[0].(*clog.Logger), args[1].(auth.AzureFactoryConfig))
 	})
 	return _c
 }
@@ -89,7 +89,7 @@ func (_c *MockProviderInitializerAPI_Init_Call) Return(_a0 ProviderAPI, _a1 erro
 	return _c
 }
 
-func (_c *MockProviderInitializerAPI_Init_Call) RunAndReturn(run func(*logp.Logger, auth.AzureFactoryConfig) (ProviderAPI, error)) *MockProviderInitializerAPI_Init_Call {
+func (_c *MockProviderInitializerAPI_Init_Call) RunAndReturn(run func(*clog.Logger, auth.AzureFactoryConfig) (ProviderAPI, error)) *MockProviderInitializerAPI_Init_Call {
 	_c.Call.Return(run)
 	return _c
 }

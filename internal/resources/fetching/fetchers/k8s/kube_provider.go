@@ -21,15 +21,15 @@ import (
 	"reflect"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
 
 type K8sResource struct {
-	log  *logp.Logger
+	log  *clog.Logger
 	Data any
 }
 
@@ -43,7 +43,7 @@ const (
 	ecsResourceNameField = "orchestrator.resource.name"
 )
 
-func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
+func getKubeData(log *clog.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
 	log.Debug("Starting getKubeData")
 
 	for _, watcher := range watchers {
@@ -105,7 +105,7 @@ func (r K8sResource) GetElasticCommonData() (map[string]any, error) {
 	return fields, nil
 }
 
-func getK8sObjectMeta(log *logp.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
+func getK8sObjectMeta(log *clog.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
 	if !ok {
 		log.Errorf("Failed to retrieve object metadata, Resource: %#v", k8sObj)
@@ -115,7 +115,7 @@ func getK8sObjectMeta(log *logp.Logger, k8sObj reflect.Value) metav1.ObjectMeta 
 	return metadata
 }
 
-func getK8sSubType(log *logp.Logger, k8sObj reflect.Value) string {
+func getK8sSubType(log *clog.Logger, k8sObj reflect.Value) string {
 	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
 	if !ok {
 		log.Errorf("Failed to retrieve type metadata, Resource: %#v", k8sObj)

@@ -26,9 +26,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -51,11 +51,11 @@ type SQLProviderAPI interface {
 
 type sqlProvider struct {
 	client        *sqlAzureClientWrapper
-	log           *logp.Logger //nolint:unused
+	log           *clog.Logger //nolint:unused
 	clientOptions *arm.ClientOptions
 }
 
-func NewSQLProvider(log *logp.Logger, credentials azcore.TokenCredential) SQLProviderAPI {
+func NewSQLProvider(log *clog.Logger, credentials azcore.TokenCredential) SQLProviderAPI {
 	// We wrap the client, so we can mock it in tests
 	wrapper := &sqlAzureClientWrapper{
 		AssetEncryptionProtector: func(ctx context.Context, subID, resourceGroup, serverName string, clientOptions *arm.ClientOptions, options *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
