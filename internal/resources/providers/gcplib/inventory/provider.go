@@ -25,7 +25,6 @@ import (
 
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
 	"google.golang.org/api/cloudresourcemanager/v3"
@@ -33,12 +32,13 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 )
 
 type Provider struct {
-	log                       *logp.Logger
+	log                       *clog.Logger
 	config                    auth.GcpFactoryConfig
 	inventory                 *AssetsInventoryWrapper
 	crm                       *ResourceManagerWrapper
@@ -119,10 +119,10 @@ type ServiceAPI interface {
 
 type ProviderInitializerAPI interface {
 	// Init initializes the GCP asset client
-	Init(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error)
+	Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error)
 }
 
-func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
+func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
 	limiter := NewAssetsInventoryRateLimiter(log)
 	// initialize GCP assets inventory client
 	client, err := asset.NewClient(ctx, append(gcpConfig.ClientOpts, option.WithGRPCDialOption(limiter.GetInterceptorDialOption()))...)
@@ -368,7 +368,7 @@ func decodeDnsPolicies(dnsPolicyAssets []*assetpb.Asset) []*dnsPolicyFields {
 }
 
 // getAssetsByProject groups assets by project, extracts metadata for each project, and adds folder and organization-level resources for each group.
-func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *logp.Logger, f TypeGenerator[T]) []*T {
+func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *clog.Logger, f TypeGenerator[T]) []*T {
 	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.CloudAccount.AccountId })
 	enrichedAssets := make([]*T, 0, len(assetsByProject))
 	for projectId, projectAssets := range assetsByProject {

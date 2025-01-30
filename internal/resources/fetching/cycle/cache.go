@@ -21,21 +21,21 @@ import (
 	"context"
 	"sync"
 
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 // Cache is a thread-safe generic struct that you can use to cache values for the current cycle. On a new cycle,
 // determined by cycle metadata, the callback function is called and a new value is initialized. If the callback fails
 // and an old value exists, it is re-used.
 type Cache[T any] struct {
-	log       *logp.Logger
+	log       *clog.Logger
 	lastCycle Metadata
 
 	cachedValue T
 	mu          sync.RWMutex
 }
 
-func NewCache[T any](log *logp.Logger) *Cache[T] {
+func NewCache[T any](log *clog.Logger) *Cache[T] {
 	return &Cache[T]{
 		log:       log.Named("cycle.cache"),
 		lastCycle: Metadata{Sequence: -1},

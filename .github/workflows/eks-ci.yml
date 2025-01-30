@@ -171,7 +171,7 @@ jobs:
             k8s_context: "test-eks-config-2"
             label: "EKS functional tests: config 2"
     name: ${{ matrix.label }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
       - name: Check out the repo
@@ -214,7 +214,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure_results-${{ matrix.test-target}}
+          name: allure_results-${{ matrix.k8s_context}}
           path: ${{ env.REPORTS_DIR }}
 
       - name: Purge tests environment
@@ -227,7 +227,7 @@ jobs:
     name: Publish Results
     needs: Test_Matrix
     if: always()
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v4

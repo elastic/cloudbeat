@@ -21,20 +21,21 @@ import (
 	"os"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type ClientGetterAPI interface {
-	GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error)
+	GetClient(log *clog.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error)
 }
 
 type ClientGetter struct{}
 
-func (ClientGetter) GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+func (ClientGetter) GetClient(log *clog.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	// Prevent klog from writing anything other than errors to stderr
 	if replacementLogger, err := zap.NewProduction(); err != nil {
 		replacementLogger = replacementLogger.WithOptions(zap.IncreaseLevel(zap.ErrorLevel))

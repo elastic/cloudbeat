@@ -23,12 +23,12 @@ import (
 	"fmt"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
@@ -41,7 +41,7 @@ type K8S struct {
 	leaderElector uniqueness.Manager
 }
 
-func (k *K8S) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (k *K8S) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, idp, err := k.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
@@ -55,7 +55,7 @@ func (k *K8S) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 }
 
 //revive:disable-next-line:function-result-limit
-func (k *K8S) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (k *K8S) initialize(ctx context.Context, log *clog.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := k.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}

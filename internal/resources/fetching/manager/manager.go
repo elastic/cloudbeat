@@ -23,14 +23,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 )
 
 type Manager struct {
-	log *logp.Logger
+	log *clog.Logger
 
 	// Duration of a single fetcher
 	timeout time.Duration
@@ -44,7 +43,7 @@ type Manager struct {
 	cancel context.CancelFunc
 }
 
-func NewManager(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
+func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	return &Manager{
@@ -136,7 +135,7 @@ func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle
 		case context.DeadlineExceeded:
 			return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, m.timeout.Seconds())
 		case context.Canceled:
-			return fmt.Errorf("fetcher %s was canceled", k)
+			return fmt.Errorf("fetcher %s %s", k, ctx.Err().Error())
 		default:
 			return fmt.Errorf("fetcher %s failed with an unknown error: %v", k, ctx.Err())
 		}

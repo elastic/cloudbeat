@@ -20,11 +20,10 @@
 package auth
 
 import (
-	context "context"
-
 	config "github.com/elastic/cloudbeat/internal/config"
+	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 
-	logp "github.com/elastic/elastic-agent-libs/logp"
+	context "context"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -43,15 +42,15 @@ func (_m *MockConfigProviderAPI) EXPECT() *MockConfigProviderAPI_Expecter {
 }
 
 // GetGcpClientConfig provides a mock function with given fields: ctx, cfg, log
-func (_m *MockConfigProviderAPI) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+func (_m *MockConfigProviderAPI) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	ret := _m.Called(ctx, cfg, log)
 
 	var r0 *GcpFactoryConfig
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, config.GcpConfig, *logp.Logger) (*GcpFactoryConfig, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, config.GcpConfig, *clog.Logger) (*GcpFactoryConfig, error)); ok {
 		return rf(ctx, cfg, log)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, config.GcpConfig, *logp.Logger) *GcpFactoryConfig); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, config.GcpConfig, *clog.Logger) *GcpFactoryConfig); ok {
 		r0 = rf(ctx, cfg, log)
 	} else {
 		if ret.Get(0) != nil {
@@ -59,7 +58,7 @@ func (_m *MockConfigProviderAPI) GetGcpClientConfig(ctx context.Context, cfg con
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, config.GcpConfig, *logp.Logger) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, config.GcpConfig, *clog.Logger) error); ok {
 		r1 = rf(ctx, cfg, log)
 	} else {
 		r1 = ret.Error(1)
@@ -76,14 +75,14 @@ type MockConfigProviderAPI_GetGcpClientConfig_Call struct {
 // GetGcpClientConfig is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cfg config.GcpConfig
-//   - log *logp.Logger
+//   - log *clog.Logger
 func (_e *MockConfigProviderAPI_Expecter) GetGcpClientConfig(ctx interface{}, cfg interface{}, log interface{}) *MockConfigProviderAPI_GetGcpClientConfig_Call {
 	return &MockConfigProviderAPI_GetGcpClientConfig_Call{Call: _e.mock.On("GetGcpClientConfig", ctx, cfg, log)}
 }
 
-func (_c *MockConfigProviderAPI_GetGcpClientConfig_Call) Run(run func(ctx context.Context, cfg config.GcpConfig, log *logp.Logger)) *MockConfigProviderAPI_GetGcpClientConfig_Call {
+func (_c *MockConfigProviderAPI_GetGcpClientConfig_Call) Run(run func(ctx context.Context, cfg config.GcpConfig, log *clog.Logger)) *MockConfigProviderAPI_GetGcpClientConfig_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(config.GcpConfig), args[2].(*logp.Logger))
+		run(args[0].(context.Context), args[1].(config.GcpConfig), args[2].(*clog.Logger))
 	})
 	return _c
 }
@@ -93,7 +92,7 @@ func (_c *MockConfigProviderAPI_GetGcpClientConfig_Call) Return(_a0 *GcpFactoryC
 	return _c
 }
 
-func (_c *MockConfigProviderAPI_GetGcpClientConfig_Call) RunAndReturn(run func(context.Context, config.GcpConfig, *logp.Logger) (*GcpFactoryConfig, error)) *MockConfigProviderAPI_GetGcpClientConfig_Call {
+func (_c *MockConfigProviderAPI_GetGcpClientConfig_Call) RunAndReturn(run func(context.Context, config.GcpConfig, *clog.Logger) (*GcpFactoryConfig, error)) *MockConfigProviderAPI_GetGcpClientConfig_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -21,8 +21,8 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
@@ -33,14 +33,14 @@ type Client interface {
 }
 
 type Provider struct {
-	log           *logp.Logger
+	log           *clog.Logger
 	s3Provider    s3.S3
 	trailProvider cloudtrail.TrailService
 }
 
 func NewProvider(
 	ctx context.Context,
-	log *logp.Logger,
+	log *clog.Logger,
 	cfg aws.Config,
 	multiRegionTrailFactory awslib.CrossRegionFactory[cloudtrail.Client],
 	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
