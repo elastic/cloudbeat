@@ -109,6 +109,10 @@ func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetC
 				AccountID:   f.tenantID,
 				ServiceName: "Azure",
 			}),
+			inventory.WithUser(inventory.User{
+				ID:   pointers.Deref(item.GetId()),
+				Name: pointers.Deref(item.GetDisplayName()),
+			}),
 		)
 	}
 }
