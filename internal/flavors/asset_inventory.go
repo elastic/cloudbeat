@@ -23,10 +23,10 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors/assetinventory"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 )
 
@@ -44,7 +44,7 @@ func NewAssetInventory(b *beat.Beat, agentConfig *agentconfig.C) (beat.Beater, e
 }
 
 func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory, error) {
-	logger := logp.NewLogger("asset_inventory")
+	logger := clog.NewLogger("asset_inventory")
 	ctx, cancel := context.WithCancel(context.Background())
 
 	beatClient, err := NewClient(b.Publisher, cfg.Processors)

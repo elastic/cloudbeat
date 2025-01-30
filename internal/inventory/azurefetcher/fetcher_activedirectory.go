@@ -20,15 +20,15 @@ package azurefetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type activedirectoryFetcher struct {
-	logger   *logp.Logger
+	logger   *clog.Logger
 	provider activedirectoryProvider
 }
 
@@ -38,7 +38,7 @@ type (
 	}
 )
 
-func newActiveDirectoryFetcher(logger *logp.Logger, provider activedirectoryProvider) inventory.AssetFetcher {
+func newActiveDirectoryFetcher(logger *clog.Logger, provider activedirectoryProvider) inventory.AssetFetcher {
 	return &activedirectoryFetcher{
 		logger:   logger,
 		provider: provider,
@@ -65,19 +65,15 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 		}
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureServicePrincipal,
-			[]string{pointers.Deref(item.GetId())},
+			pointers.Deref(item.GetId()),
 			pointers.Deref(item.GetDisplayName()),
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: tenantId,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   tenantId,
+				ServiceName: "Azure",
 			}),
 		)
 	}

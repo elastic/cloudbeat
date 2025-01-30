@@ -20,14 +20,13 @@ package azurefetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 )
 
 type accountFetcher struct {
-	logger   *logp.Logger
+	logger   *clog.Logger
 	provider accountProvider
 }
 
@@ -39,7 +38,7 @@ type (
 	}
 )
 
-func newAccountFetcher(logger *logp.Logger, provider accountProvider) inventory.AssetFetcher {
+func newAccountFetcher(logger *clog.Logger, provider accountProvider) inventory.AssetFetcher {
 	return &accountFetcher{
 		logger:   logger,
 		provider: provider,
@@ -73,17 +72,13 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 	for _, item := range azureAssets {
 		assetChan <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.Id},
+			item.Id,
 			item.DisplayName,
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id: item.TenantId,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   item.TenantId,
+				ServiceName: "Azure",
 			}),
 		)
 	}

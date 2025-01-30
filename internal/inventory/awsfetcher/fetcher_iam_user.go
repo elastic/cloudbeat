@@ -20,16 +20,15 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 )
 
 type iamUserFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    iamUserProvider
 	AccountId   string
 	AccountName string
@@ -39,7 +38,7 @@ type iamUserProvider interface {
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newIamUserFetcher(logger *logp.Logger, identity *cloud.Identity, provider iamUserProvider) inventory.AssetFetcher {
+func newIamUserFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamUserProvider) inventory.AssetFetcher {
 	return &iamUserFetcher{
 		logger:      logger,
 		provider:    provider,
@@ -73,20 +72,21 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamUser,
-			[]string{user.GetResourceArn(), user.UserId},
+			user.GetResourceArn(),
 			user.GetResourceName(),
 
+			inventory.WithRelatedAssetIds([]string{user.UserId}),
 			inventory.WithRawAsset(user),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   user.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   i.AccountId,
-					Name: i.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS IAM",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      user.GetRegion(),
+				AccountID:   i.AccountId,
+				AccountName: i.AccountName,
+				ServiceName: "AWS IAM",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   user.GetResourceArn(),
+				Name: user.GetResourceName(),
 			}),
 		)
 	}

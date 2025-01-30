@@ -22,10 +22,12 @@ import (
 	"github.com/open-policy-agent/opa/v1/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type logger struct {
-	log *logp.Logger
+	log *clog.Logger
 	lvl zap.AtomicLevel
 }
 
@@ -84,7 +86,7 @@ func mapToArray(m map[string]any) []any {
 
 func newLogger() logging.Logger {
 	lvl := zap.NewAtomicLevelAt(logp.GetLevel())
-	log := logp.NewLogger("opa").WithOptions(
+	log := clog.NewLogger("opa").WithOptions(
 		zap.IncreaseLevel(lvl),
 		zap.AddCallerSkip(1),
 	)

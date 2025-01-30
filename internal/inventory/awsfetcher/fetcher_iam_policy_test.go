@@ -22,10 +22,10 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -102,69 +102,49 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 
 	in := []awslib.AwsResource{policy1, nil, policy2, policy3}
 
-	cloudField := inventory.AssetCloud{
-		Provider: inventory.AwsCloudProvider,
-		Region:   "global",
-		Account: inventory.AssetCloudAccount{
-			Id:   "123",
-			Name: "alias",
-		},
-		Service: &inventory.AssetCloudService{
-			Name: "AWS IAM",
-		},
+	cloudField := inventory.Cloud{
+		Provider:    inventory.AwsCloudProvider,
+		Region:      "global",
+		AccountID:   "123",
+		AccountName: "alias",
+		ServiceName: "AWS IAM",
 	}
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamPolicy,
-			[]string{"arn:aws:iam::0000:policy/policy-1", "178263"},
+			"arn:aws:iam::0000:policy/policy-1",
 			"policy-1",
+			inventory.WithRelatedAssetIds([]string{"178263"}),
 			inventory.WithRawAsset(policy1),
 			inventory.WithCloud(cloudField),
-			inventory.WithTags(map[string]string{
+			inventory.WithLabels(map[string]string{
 				"key-1": "value-1",
 				"key-2": "value-2",
 			}),
-			inventory.WithResourcePolicies(inventory.AssetResourcePolicy{
-				Version:  pointers.Ref("2012-10-17"),
-				Effect:   "Allow",
-				Action:   []string{"read", "update", "delete"},
-				Resource: []string{"s3/bucket", "s3/bucket/*"},
-			}, inventory.AssetResourcePolicy{
-				Version:  pointers.Ref("2012-10-17"),
-				Effect:   "Deny",
-				Action:   []string{"delete"},
-				Resource: []string{"s3/bucket"},
-			}),
 		),
 
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamPolicy,
-			[]string{"arn:aws:iam::0000:policy/policy-2"},
+			"arn:aws:iam::0000:policy/policy-2",
 			"policy-2",
 			inventory.WithRawAsset(policy2),
 			inventory.WithCloud(cloudField),
-			inventory.WithTags(map[string]string{
+			inventory.WithLabels(map[string]string{
 				"key-1": "value-1",
-			}),
-			inventory.WithResourcePolicies(inventory.AssetResourcePolicy{
-				Version:  pointers.Ref("2012-10-17"),
-				Effect:   "Allow",
-				Action:   []string{"read"},
-				Resource: []string{"*"},
 			}),
 		),
 
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsIamPolicy,
-			[]string{"arn:aws:iam::0000:policy/policy-3"},
+			"arn:aws:iam::0000:policy/policy-3",
 			"policy-3",
 			inventory.WithRawAsset(policy3),
 			inventory.WithCloud(cloudField),
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_iam_role")
+	logger := clog.NewLogger("test_fetcher_iam_role")
 	provider := newMockIamPolicyProvider(t)
 	provider.EXPECT().GetPolicies(mock.Anything).Return(in, nil)
 

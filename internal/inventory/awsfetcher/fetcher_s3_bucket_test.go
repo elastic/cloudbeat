@@ -22,10 +22,10 @@ import (
 
 	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	s3ctrltypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -104,67 +104,33 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsS3Bucket,
-			[]string{"arn:aws:s3:::bucket-1"},
+			"arn:aws:s3:::bucket-1",
 			"bucket-1",
 			inventory.WithRawAsset(bucket1),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "europe-west-1",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS S3",
-				},
-			}),
-			inventory.WithResourcePolicies(inventory.AssetResourcePolicy{
-				Version: pointers.Ref("2012-10-17"),
-				Id:      pointers.Ref("Test 1"),
-				Effect:  "Allow",
-				Principal: map[string]any{
-					"AWS":     "dima",
-					"service": "aws.com",
-				},
-				Action:   []string{"read", "update", "delete"},
-				Resource: []string{"s3/bucket", "s3/bucket/*"},
-			}, inventory.AssetResourcePolicy{
-				Version:   pointers.Ref("2012-10-17"),
-				Id:        pointers.Ref("Test 2"),
-				Effect:    "Deny",
-				Principal: map[string]any{"AWS": "romulo"},
-				Action:    []string{"delete"},
-				Resource:  []string{"s3/bucket"},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "europe-west-1",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS S3",
 			}),
 		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsS3Bucket,
-			[]string{"arn:aws:s3:::bucket-2"},
+			"arn:aws:s3:::bucket-2",
 			"bucket-2",
 			inventory.WithRawAsset(bucket2),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   "europe-west-1",
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS S3",
-				},
-			}),
-			inventory.WithResourcePolicies(inventory.AssetResourcePolicy{
-				Version:   pointers.Ref("2012-10-17"),
-				Id:        pointers.Ref("Test 1"),
-				Effect:    "Allow",
-				Principal: map[string]any{"*": "*"},
-				Action:    []string{"read"},
-				Resource:  []string{"s3/bucket"},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      "europe-west-1",
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS S3",
 			}),
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_s3_bucket")
+	logger := clog.NewLogger("test_fetcher_s3_bucket")
 	provider := newMockS3BucketProvider(t)
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 

@@ -21,10 +21,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -45,23 +45,19 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsSnsTopic,
-			[]string{"topic:arn:test-topic"},
+			"topic:arn:test-topic",
 			"test-topic",
 			inventory.WithRawAsset(awsResource),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Account: inventory.AssetCloudAccount{
-					Id:   "123",
-					Name: "alias",
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS SNS",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				AccountID:   "123",
+				AccountName: "alias",
+				ServiceName: "AWS SNS",
 			}),
 		),
 	}
 
-	logger := logp.NewLogger("test_fetcher_sns_instance")
+	logger := clog.NewLogger("test_fetcher_sns_instance")
 	provider := newMockSnsProvider(t)
 	provider.EXPECT().ListTopicsWithSubscriptions(mock.Anything).Return(in, nil)
 

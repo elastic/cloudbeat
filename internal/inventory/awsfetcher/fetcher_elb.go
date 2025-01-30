@@ -20,15 +20,14 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type elbFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	v1          v1Provider
 	v2          v2Provider
 	AccountId   string
@@ -42,7 +41,7 @@ type v2Provider interface {
 	DescribeLoadBalancers(context.Context) ([]awslib.AwsResource, error)
 }
 
-func newElbFetcher(logger *logp.Logger, identity *cloud.Identity, v1Provider v1Provider, v2Provider v2Provider) inventory.AssetFetcher {
+func newElbFetcher(logger *clog.Logger, identity *cloud.Identity, v1Provider v1Provider, v2Provider v2Provider) inventory.AssetFetcher {
 	return &elbFetcher{
 		logger:      logger,
 		v1:          v1Provider,
@@ -81,19 +80,15 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.GetResourceArn()},
+			item.GetResourceArn(),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   f.AccountId,
-					Name: f.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Networking",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   f.AccountId,
+				AccountName: f.AccountName,
+				ServiceName: "AWS Networking",
 			}),
 		)
 	}

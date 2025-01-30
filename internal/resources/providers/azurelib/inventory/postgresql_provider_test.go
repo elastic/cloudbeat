@@ -26,9 +26,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type (
@@ -46,7 +47,7 @@ func mockAssetSinglePSQLConfiguration(f assetSingleConfigFn) PostgresqlProviderA
 	}
 
 	return &psqlProvider{
-		log:    logp.NewLogger("mock_single_psql_config"),
+		log:    clog.NewLogger("mock_single_psql_config"),
 		client: cl,
 	}
 }
@@ -59,7 +60,7 @@ func mockAssetFlexPSQLConfiguration(f assetFlexConfigFn) PostgresqlProviderAPI {
 	}
 
 	return &psqlProvider{
-		log:    logp.NewLogger("mock_flex_psql_config"),
+		log:    clog.NewLogger("mock_flex_psql_config"),
 		client: cl,
 	}
 }
@@ -72,7 +73,7 @@ func mockAssetSinglePSQLFirewallRule(f assetSingleFirewallRuleFn) PostgresqlProv
 	}
 
 	return &psqlProvider{
-		log:    logp.NewLogger("mock_single_psql_firewall_rules"),
+		log:    clog.NewLogger("mock_single_psql_firewall_rules"),
 		client: cl,
 	}
 }
@@ -85,7 +86,7 @@ func mockAssetFlexPSQLFirewallRule(f assetFlexFirewallRuleFn) PostgresqlProvider
 	}
 
 	return &psqlProvider{
-		log:    logp.NewLogger("mock_flexs_psql_firewall_rules"),
+		log:    clog.NewLogger("mock_flexs_psql_firewall_rules"),
 		client: cl,
 	}
 }

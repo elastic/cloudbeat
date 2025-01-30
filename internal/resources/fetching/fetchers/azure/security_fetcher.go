@@ -22,8 +22,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
@@ -31,12 +30,12 @@ import (
 )
 
 type AzureSecurityAssetFetcher struct {
-	log        *logp.Logger
+	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   azurelib.ProviderAPI
 }
 
-func NewAzureSecurityAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureSecurityAssetFetcher {
+func NewAzureSecurityAssetFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureSecurityAssetFetcher {
 	return &AzureSecurityAssetFetcher{
 		log:        log,
 		resourceCh: ch,

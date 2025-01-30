@@ -20,9 +20,9 @@ package azurefetcher
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
@@ -55,44 +55,38 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureStorageBlobService,
-			[]string{azureBlobService.Id},
+			azureBlobService.Id,
 			azureBlobService.Name,
 			inventory.WithRawAsset(azureBlobService),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
 			}),
 		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureStorageQueueService,
-			[]string{azureQueueService.Id},
+			azureQueueService.Id,
 			azureQueueService.Name,
 			inventory.WithRawAsset(azureQueueService),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
 			}),
 		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureStorageQueue,
-			[]string{azureQueue.Id},
+			azureQueue.Id,
 			azureQueue.Name,
 			inventory.WithRawAsset(azureQueue),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AzureCloudProvider,
-				Service: &inventory.AssetCloudService{
-					Name: "Azure",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
 			}),
 		),
 	}
 
 	// setup
-	logger := logp.NewLogger("azurefetcher_test")
+	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockStorageProvider(t)
 
 	provider.EXPECT().ListSubscriptions(

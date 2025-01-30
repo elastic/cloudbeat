@@ -20,15 +20,14 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type lambdaFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	provider    lambdaProvider
 	AccountId   string
 	AccountName string
@@ -44,7 +43,7 @@ type (
 	}
 )
 
-func newLambdaFetcher(logger *logp.Logger, identity *cloud.Identity, provider lambdaProvider) inventory.AssetFetcher {
+func newLambdaFetcher(logger *clog.Logger, identity *cloud.Identity, provider lambdaProvider) inventory.AssetFetcher {
 	return &lambdaFetcher{
 		logger:      logger,
 		provider:    provider,
@@ -81,19 +80,15 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 	for _, item := range awsResources {
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			[]string{item.GetResourceArn()},
+			item.GetResourceArn(),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.AssetCloud{
-				Provider: inventory.AwsCloudProvider,
-				Region:   item.GetRegion(),
-				Account: inventory.AssetCloudAccount{
-					Id:   s.AccountId,
-					Name: s.AccountName,
-				},
-				Service: &inventory.AssetCloudService{
-					Name: "AWS Lambda",
-				},
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AwsCloudProvider,
+				Region:      item.GetRegion(),
+				AccountID:   s.AccountId,
+				AccountName: s.AccountName,
+				ServiceName: "AWS Lambda",
 			}),
 		)
 	}

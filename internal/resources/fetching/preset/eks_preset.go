@@ -23,10 +23,10 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/condition"
 	awsfetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/aws"
@@ -50,7 +50,7 @@ var (
 	}
 )
 
-func NewCisEksFetchers(ctx context.Context, log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) registry.FetchersMap {
+func NewCisEksFetchers(ctx context.Context, log *clog.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) registry.FetchersMap {
 	log.Infof("Initializing EKS fetchers")
 	m := make(registry.FetchersMap)
 
