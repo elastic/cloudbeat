@@ -19,6 +19,7 @@ package azurefetcher
 
 import (
 	"context"
+	"strings"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -101,12 +102,41 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 		if resourceType == azurelib.VirtualMachineAssetType {
 			asset.Host = &inventory.Host{
 				ID: item.Id,
-				// TODO(kuba) - unpack nested maps
-				Name: ".properties.extended.instanceView.computerName",
-				Type: ".properties.hardwareProfile.vmSize",
+				// TODO(kuba): check what is overriding this with pure resource ID?
+				Name: tryUnpackingNestedString(item.Properties, "extended.instanceView.computerName"),
+				Type: tryUnpackingNestedString(item.Properties, "hardwareProfile.vmSize"),
 			}
 		}
 
 		assetChan <- asset
 	}
+}
+
+func tryUnpackingNestedString(m map[string]any, path string) string {
+	keys := strings.Split(path, ".")
+	if len(keys) < 2 || m == nil {
+		return ""
+	}
+	lastKey := keys[len(keys)-1]
+	keys = keys[:len(keys)-1]
+	for _, k := range keys {
+		nestedMap, ok := m[k]
+		if !ok {
+			return ""
+		}
+		castMap, ok := nestedMap.(map[string]any)
+		if !ok {
+			return ""
+		}
+		m = castMap
+	}
+	rawString, ok := m[lastKey]
+	if !ok {
+		return ""
+	}
+	s, ok := rawString.(string)
+	if !ok {
+		return ""
+	}
+	return s
 }
