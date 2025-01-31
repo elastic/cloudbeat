@@ -96,6 +96,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",
 			}),
+			inventory.WithLabelsFromAny(item.Tags),
 		)
 
 		if resourceType == azurelib.VirtualMachineAssetType {

@@ -84,6 +84,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 				AccountID:   tenantId,
 				ServiceName: "Azure",
 			}),
+			inventory.WithTags(item.GetTags()),
 		)
 	}
 }

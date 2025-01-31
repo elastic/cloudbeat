@@ -38,6 +38,7 @@ type (
 	storageProvider     interface {
 		ListSubscriptions(ctx context.Context) ([]azurelib.AzureAsset, error)
 		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueues(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueueServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]azurelib.AzureAsset, error)
@@ -59,6 +60,7 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 		classification inventory.AssetClassification
 	}{
 		{"Storage Blob Services", f.provider.ListStorageAccountBlobServices, inventory.AssetClassificationAzureStorageBlobService},
+		{"Storage Blob Containers", f.provider.ListStorageAccountBlobContainers, inventory.AssetClassificationAzureStorageBlobService},
 		{"Storage Queue Services", f.provider.ListStorageAccountQueueServices, inventory.AssetClassificationAzureStorageQueueService},
 		{"Storage Queues", f.provider.ListStorageAccountQueues, inventory.AssetClassificationAzureStorageQueue},
 	}
@@ -114,6 +116,7 @@ func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.A
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",
 			}),
+			inventory.WithLabelsFromAny(item.Tags),
 		)
 	}
 }

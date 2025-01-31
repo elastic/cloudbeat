@@ -38,6 +38,7 @@ import (
 type storageAccountAzureClientWrapper struct {
 	AssetDiagnosticSettings func(ctx context.Context, subID string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error)
 	AssetBlobServices       func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error)
+	AssetBlobContainers     func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error)
 	AssetQueues             func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error)
 	AssetQueueServices      func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroup, storageAccountName string, options *armstorage.QueueServicesClientListOptions) (armstorage.QueueServicesClientListResponse, error)
 	AssetAccountStorage     func(ctx context.Context, subID string, clientOptions *arm.ClientOptions) ([]armstorage.AccountsClientListResponse, error)
@@ -46,6 +47,7 @@ type storageAccountAzureClientWrapper struct {
 type StorageAccountProviderAPI interface {
 	ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]AzureAsset, error)
 	ListStorageAccountBlobServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
+	ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountQueues(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountQueueServices(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
 	ListStorageAccountsBlobDiagnosticSettings(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error)
@@ -69,6 +71,13 @@ func NewStorageAccountProvider(log *logp.Logger, diagnosticSettingsClient *armmo
 		},
 		AssetBlobServices: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
 			cl, err := armstorage.NewBlobServicesClient(subID, credentials, clientOptions)
+			if err != nil {
+				return nil, err
+			}
+			return readPager(ctx, cl.NewListPager(resourceGroupName, storageAccountName, options))
+		},
+		AssetBlobContainers: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, resourceGroupName, storageAccountName string, options *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error) {
+			cl, err := armstorage.NewBlobContainersClient(subID, credentials, clientOptions)
 			if err != nil {
 				return nil, err
 			}
@@ -180,6 +189,25 @@ func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Cont
 	return assets, nil
 }
 
+func (p *storageAccountProvider) ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
+	var assets []AzureAsset
+	for _, sa := range storageAccounts {
+		responses, err := p.client.AssetBlobContainers(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error while fetching azure blob containers for storage accounts %s: %w", sa.Id, err)
+		}
+
+		blobContainers, err := transformBlobContainers(responses, sa)
+		if err != nil {
+			return nil, fmt.Errorf("error while transforming azure blob containers for storage accounts %s: %w", sa.Id, err)
+		}
+
+		assets = append(assets, blobContainers...)
+	}
+
+	return assets, nil
+}
+
 func (p *storageAccountProvider) ListStorageAccountQueues(ctx context.Context, storageAccounts []AzureAsset) ([]AzureAsset, error) {
 	var assets []AzureAsset
 	for _, sa := range storageAccounts {
@@ -252,6 +280,37 @@ func transformBlobServices(servicesPages []armstorage.BlobServicesClientListResp
 					ExtensionStorageAccountID:   storageAccount.Id,
 					ExtensionStorageAccountName: storageAccount.Name,
 				},
+			}
+		})
+	}), errs
+}
+
+func transformBlobContainers(servicesPages []armstorage.BlobContainersClientListResponse, storageAccount AzureAsset) ([]AzureAsset, error) {
+	var errs error
+	return lo.FlatMap(servicesPages, func(response armstorage.BlobContainersClientListResponse, _ int) []AzureAsset {
+		return lo.Map(response.Value, func(item *armstorage.ListContainerItem, _ int) AzureAsset {
+			properties, err := maps.AsMapStringAny(item.Properties)
+			if err != nil {
+				errs = errors.Join(errs, err)
+			}
+			tags, ok := properties["metadata"].(map[string]any)
+			if !ok {
+				tags = nil
+			}
+
+			return AzureAsset{
+				Id:             pointers.Deref(item.ID),
+				Name:           pointers.Deref(item.Name),
+				Type:           strings.ToLower(pointers.Deref(item.Type)),
+				ResourceGroup:  storageAccount.ResourceGroup,
+				SubscriptionId: storageAccount.SubscriptionId,
+				TenantId:       storageAccount.TenantId,
+				Properties:     properties,
+				Extension: map[string]any{
+					ExtensionStorageAccountID:   storageAccount.Id,
+					ExtensionStorageAccountName: storageAccount.Name,
+				},
+				Tags: tags,
 			}
 		})
 	}), errs

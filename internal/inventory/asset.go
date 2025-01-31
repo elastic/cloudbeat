@@ -93,27 +93,28 @@ var (
 	AssetClassificationAwsSnsTopic                 = AssetClassification{CategoryMessagingService, "AWS SNS Topic"}
 
 	// Azure
-	AssetClassificationAzureAppService          = AssetClassification{CategoryWebService, "Azure App Service"}
-	AssetClassificationAzureContainerRegistry   = AssetClassification{CategoryContainerRegistry, "Azure Container Registry"}
-	AssetClassificationAzureCosmosDBAccount     = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB Account"}
-	AssetClassificationAzureCosmosDBSQLDatabase = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
-	AssetClassificationAzureDisk                = AssetClassification{CategoryVolume, "Azure Disk"}
-	AssetClassificationAzureElasticPool         = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
-	AssetClassificationAzureEntraGroup          = AssetClassification{CategoryGroup, "Azure Microsoft Entra ID Group"}
-	AssetClassificationAzureEntraUser           = AssetClassification{CategoryIdentity, "Azure Microsoft Entra ID User"}
-	AssetClassificationAzureResourceGroup       = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
-	AssetClassificationAzureRoleDefinition      = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
-	AssetClassificationAzureSQLDatabase         = AssetClassification{CategoryDatabase, "Azure SQL Database"}
-	AssetClassificationAzureSQLServer           = AssetClassification{CategoryDatabase, "Azure SQL Server"}
-	AssetClassificationAzureServicePrincipal    = AssetClassification{CategoryServiceAccount, "Azure Principal"}
-	AssetClassificationAzureSnapshot            = AssetClassification{CategorySnapshot, "Azure Snapshot"}
-	AssetClassificationAzureStorageAccount      = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
-	AssetClassificationAzureStorageBlobService  = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
-	AssetClassificationAzureStorageQueue        = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
-	AssetClassificationAzureStorageQueueService = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
-	AssetClassificationAzureSubscription        = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
-	AssetClassificationAzureTenant              = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
-	AssetClassificationAzureVirtualMachine      = AssetClassification{CategoryHost, "Azure Virtual Machine"}
+	AssetClassificationAzureAppService           = AssetClassification{CategoryWebService, "Azure App Service"}
+	AssetClassificationAzureContainerRegistry    = AssetClassification{CategoryContainerRegistry, "Azure Container Registry"}
+	AssetClassificationAzureCosmosDBAccount      = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB Account"}
+	AssetClassificationAzureCosmosDBSQLDatabase  = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
+	AssetClassificationAzureDisk                 = AssetClassification{CategoryVolume, "Azure Disk"}
+	AssetClassificationAzureElasticPool          = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
+	AssetClassificationAzureEntraGroup           = AssetClassification{CategoryGroup, "Azure Microsoft Entra ID Group"}
+	AssetClassificationAzureEntraUser            = AssetClassification{CategoryIdentity, "Azure Microsoft Entra ID User"}
+	AssetClassificationAzureResourceGroup        = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
+	AssetClassificationAzureRoleDefinition       = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
+	AssetClassificationAzureSQLDatabase          = AssetClassification{CategoryDatabase, "Azure SQL Database"}
+	AssetClassificationAzureSQLServer            = AssetClassification{CategoryDatabase, "Azure SQL Server"}
+	AssetClassificationAzureServicePrincipal     = AssetClassification{CategoryServiceAccount, "Azure Principal"}
+	AssetClassificationAzureSnapshot             = AssetClassification{CategorySnapshot, "Azure Snapshot"}
+	AssetClassificationAzureStorageAccount       = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
+	AssetClassificationAzureStorageBlobService   = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
+	AssetClassificationAzureStorageBlobContainer = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Container"}
+	AssetClassificationAzureStorageQueue         = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
+	AssetClassificationAzureStorageQueueService  = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
+	AssetClassificationAzureSubscription         = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
+	AssetClassificationAzureTenant               = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
+	AssetClassificationAzureVirtualMachine       = AssetClassification{CategoryHost, "Azure Virtual Machine"}
 
 	// GCP
 	AssetClassificationGcpProject           = AssetClassification{CategoryAccount, "GCP Project"}
@@ -142,6 +143,7 @@ type AssetEvent struct {
 	Host          *Host
 	User          *User
 	Labels        map[string]string
+	Tags          []string
 	RawAttributes *any
 }
 
@@ -250,6 +252,25 @@ func WithLabels(labels map[string]string) AssetEnricher {
 	}
 }
 
+func WithLabelsFromAny(labels map[string]any) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(labels) == 0 {
+			return
+		}
+		a.Labels = map[string]string{}
+		for k, v := range labels {
+			sv, ok := v.(string)
+			if ok {
+				a.Labels[k] = sv
+			}
+			spv, ok := v.(*string)
+			if ok {
+				a.Labels[k] = *spv
+			}
+		}
+	}
+}
+
 func WithNetwork(network Network) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Network = &network
@@ -271,6 +292,15 @@ func WithGroup(group Group) AssetEnricher {
 func WithHost(host Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
+	}
+}
+
+func WithTags(tags []string) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(tags) == 0 {
+			return
+		}
+		a.Tags = tags
 	}
 }
 

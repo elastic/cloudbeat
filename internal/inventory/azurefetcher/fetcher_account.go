@@ -83,6 +83,7 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",
 			}),
+			inventory.WithLabelsFromAny(item.Tags),
 		)
 	}
 }
