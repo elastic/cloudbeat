@@ -77,6 +77,15 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
 		[]*models.ServicePrincipal{servicePrincipal}, nil,
 	)
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Return(
+		[]*models.DirectoryRole{}, nil,
+	)
+	provider.EXPECT().ListGroups(mock.Anything).Return(
+		[]*models.Group{}, nil,
+	)
+	provider.EXPECT().ListUsers(mock.Anything).Return(
+		[]*models.User{}, nil,
+	)
 
 	fetcher := newActiveDirectoryFetcher(logger, "id", provider)
 	// test & compare
@@ -101,6 +110,15 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	provider := newMockActivedirectoryProvider(t)
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
 		[]*models.ServicePrincipal{}, fmt.Errorf("! error listing service principals"),
+	)
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Return(
+		[]*models.DirectoryRole{}, nil,
+	)
+	provider.EXPECT().ListGroups(mock.Anything).Return(
+		[]*models.Group{}, nil,
+	)
+	provider.EXPECT().ListUsers(mock.Anything).Return(
+		[]*models.User{}, nil,
 	)
 
 	fetcher := newActiveDirectoryFetcher(log, "id", provider)
