@@ -115,10 +115,11 @@ Container Registry: 100% (1/1)
 Database: 100% (4/4)
 File System Service: 100% (2/2)
 Host: 100% (1/1)
-Identity: 9% (1/11)
+Identity: 0% (0/10)
 Infrastructure: 8% (2/23)
 Messaging Service: 100% (2/2)
 Private Endpoint: 100% (1/1)
+Service Account: 100% (1/1)
 Service Usage Technology: 100% (2/2)
 Snapshot: 100% (1/1)
 Storage Bucket: 100% (1/1)
@@ -146,7 +147,6 @@ Web Service: 100% (1/1)
 | Identity | Azure AD Group |  | No ❌ |
 | Identity | Azure AD Service Principal |  | No ❌ |
 | Identity | Azure AD User |  | No ❌ |
-| Identity | Azure Principal | Azure Principal | Yes ✅ |
 | Identity | Azure Role |  | No ❌ |
 | Identity | Azure Role Assignment |  | No ❌ |
 | Identity | Azure Server AD Administrator |  | No ❌ |
@@ -177,6 +177,7 @@ Web Service: 100% (1/1)
 | Messaging Service | Azure Storage Queue | Azure Storage Queue | Yes ✅ |
 | Messaging Service | Azure Storage Queue Service | Azure Storage Queue Service | Yes ✅ |
 | Private Endpoint | Azure Storage Account | Azure Storage Account | Yes ✅ |
+| Service Account | Azure Principal | Azure Principal | Yes ✅ |
 | Service Usage Technology | Azure Storage Blob Service | Azure Storage Blob Service | Yes ✅ |
 | Service Usage Technology | Azure Storage Table Service |  | Yes ✅ |
 | Snapshot | Azure Snapshot | Azure Snapshot | Yes ✅ |
