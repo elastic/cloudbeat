@@ -19,7 +19,6 @@ package azurefetcher
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
@@ -130,10 +129,10 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 
 	for _, item := range items {
 		// TODO(kuba): How to test this without being able to test Groups?
-		var labels map[string]string
-		for _, l := range item.GetAssignedLabels() {
-			fmt.Println(l)
-		}
+		// var labels map[string]string
+		// for _, l := range item.GetAssignedLabels() {
+		// 	fmt.Println(l)
+		// }
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureEntraGroup,
 			pointers.Deref(item.GetId()),
@@ -150,7 +149,7 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 				ID:   pointers.Deref(item.GetId()),
 				Name: pointers.Deref(item.GetDisplayName()),
 			}),
-			inventory.WithLabels(labels),
+			// inventory.WithLabels(labels),
 		)
 	}
 }

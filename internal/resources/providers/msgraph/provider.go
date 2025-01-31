@@ -181,5 +181,4 @@ func (p *provider) ListUsers(ctx context.Context) ([]*models.User, error) {
 		p.log.Errorf("error iterating over Users: %v", err)
 	}
 	return items, nil
-
 }

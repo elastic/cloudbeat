@@ -27,7 +27,7 @@ import (
 
 type accountFetcher struct {
 	logger   *clog.Logger
-	tenantID string
+	tenantID string //nolint:unused
 	provider accountProvider
 }
 

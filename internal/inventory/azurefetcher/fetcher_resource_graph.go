@@ -28,7 +28,7 @@ import (
 
 type resourceGraphFetcher struct {
 	logger   *clog.Logger
-	tenantID string
+	tenantID string //nolint:unused
 	provider resourceGraphProvider
 }
 
