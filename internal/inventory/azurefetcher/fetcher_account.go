@@ -20,14 +20,13 @@ package azurefetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 )
 
 type accountFetcher struct {
-	logger   *logp.Logger
+	logger   *clog.Logger
 	tenantID string
 	provider accountProvider
 }
@@ -40,7 +39,7 @@ type (
 	}
 )
 
-func newAccountFetcher(logger *logp.Logger, tenantID string, provider accountProvider) inventory.AssetFetcher {
+func newAccountFetcher(logger *clog.Logger, tenantID string, provider accountProvider) inventory.AssetFetcher {
 	return &accountFetcher{
 		logger:   logger,
 		tenantID: tenantID,

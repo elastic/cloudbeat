@@ -20,15 +20,14 @@ package awsfetcher
 import (
 	"context"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type elbFetcher struct {
-	logger      *logp.Logger
+	logger      *clog.Logger
 	v1          v1Provider
 	v2          v2Provider
 	AccountId   string
@@ -42,7 +41,7 @@ type v2Provider interface {
 	DescribeLoadBalancers(context.Context) ([]awslib.AwsResource, error)
 }
 
-func newElbFetcher(logger *logp.Logger, identity *cloud.Identity, v1Provider v1Provider, v2Provider v2Provider) inventory.AssetFetcher {
+func newElbFetcher(logger *clog.Logger, identity *cloud.Identity, v1Provider v1Provider, v2Provider v2Provider) inventory.AssetFetcher {
 	return &elbFetcher{
 		logger:      logger,
 		v1:          v1Provider,

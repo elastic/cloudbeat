@@ -18,15 +18,14 @@
 package preset
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/azure"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 )
 
-func NewCisAzureFactory(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) (registry.FetchersMap, error) {
+func NewCisAzureFactory(log *clog.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) (registry.FetchersMap, error) {
 	log.Infof("Initializing Azure fetchers")
 	m := make(registry.FetchersMap)
 

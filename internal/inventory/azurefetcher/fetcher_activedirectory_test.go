@@ -24,7 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/google/uuid"
 	"github.com/microsoft/kiota-abstractions-go/store"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -33,6 +32,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -71,21 +71,21 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	}
 
 	// setup
-	logger := logp.NewLogger("azurefetcher_test")
+	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockActivedirectoryProvider(t)
 
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
 		[]*models.ServicePrincipal{servicePrincipal}, nil,
 	)
 
-	fetcher := newActiveDirectoryFetcher(logger, provider)
+	fetcher := newActiveDirectoryFetcher(logger, "id", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
 
 func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	// set up log capture
-	var log *logp.Logger
+	var log *clog.Logger
 	logCaptureBuf := &bytes.Buffer{}
 	{
 		replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
@@ -95,7 +95,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 				zapcore.DebugLevel,
 			)
 		})
-		log = logp.NewLogger("test").WithOptions(replacement)
+		log = clog.NewLogger("test").WithOptions(replacement)
 	}
 
 	provider := newMockActivedirectoryProvider(t)
@@ -103,7 +103,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 		[]*models.ServicePrincipal{}, fmt.Errorf("! error listing service principals"),
 	)
 
-	fetcher := newActiveDirectoryFetcher(log, provider)
+	fetcher := newActiveDirectoryFetcher(log, "id", provider)
 
 	// collect
 	ch := make(chan inventory.AssetEvent)

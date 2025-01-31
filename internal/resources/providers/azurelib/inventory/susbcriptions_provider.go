@@ -23,9 +23,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -51,10 +51,10 @@ type subscriptionProvider struct {
 	locationClient     locationAzureClientWrapper
 	tenantClient       tenantAzureClientWrapper
 	subscriptionClient subscriptionAzureClientWrapper
-	log                *logp.Logger //nolint:unused
+	log                *clog.Logger //nolint:unused
 }
 
-func NewSubscriptionProvider(log *logp.Logger, credentials azcore.TokenCredential) SubscriptionProviderAPI {
+func NewSubscriptionProvider(log *clog.Logger, credentials azcore.TokenCredential) SubscriptionProviderAPI {
 	locationClient := locationAzureClientWrapper{
 		AssetLocations: func(ctx context.Context, subID string, clientOptions *arm.ClientOptions, options *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error) {
 			cl, err := armsubscriptions.NewClient(credentials, clientOptions)

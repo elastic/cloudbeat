@@ -29,6 +29,7 @@ const (
 	CategoryContainerService       AssetCategory = "Container Service"
 	CategoryDatabase               AssetCategory = "Database"
 	CategoryFaaS                   AssetCategory = "FaaS"
+	CategoryFileSystemService      AssetCategory = "File System Service"
 	CategoryFirewall               AssetCategory = "Firewall"
 	CategoryGateway                AssetCategory = "Gateway"
 	CategoryGroup                  AssetCategory = "Group"
@@ -108,10 +109,14 @@ var (
 	AssetClassificationAzureServicePrincipal     = AssetClassification{CategoryServiceAccount, "Azure Principal"}
 	AssetClassificationAzureSnapshot             = AssetClassification{CategorySnapshot, "Azure Snapshot"}
 	AssetClassificationAzureStorageAccount       = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
-	AssetClassificationAzureStorageBlobService   = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
 	AssetClassificationAzureStorageBlobContainer = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Container"}
+	AssetClassificationAzureStorageBlobService   = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Service"}
+	AssetClassificationAzureStorageFileService   = AssetClassification{CategoryFileSystemService, "Azure Storage File Service"}
+	AssetClassificationAzureStorageFileShare     = AssetClassification{CategoryFileSystemService, "Azure Storage File Share"}
 	AssetClassificationAzureStorageQueue         = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
 	AssetClassificationAzureStorageQueueService  = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
+	AssetClassificationAzureStorageTable         = AssetClassification{CategoryDatabase, "Azure Storage Table"}
+	AssetClassificationAzureStorageTableService  = AssetClassification{CategoryServiceUsageTechnology, "Azure Storage Table Service"}
 	AssetClassificationAzureSubscription         = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
 	AssetClassificationAzureTenant               = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
 	AssetClassificationAzureVirtualMachine       = AssetClassification{CategoryHost, "Azure Virtual Machine"}

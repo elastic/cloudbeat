@@ -21,14 +21,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
 )
 
 type storageFetcher struct {
-	logger   *logp.Logger
+	logger   *clog.Logger
 	tenantID string
 	provider storageProvider
 }
@@ -37,15 +36,19 @@ type (
 	storageProviderFunc func(context.Context, []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 	storageProvider     interface {
 		ListSubscriptions(ctx context.Context) ([]azurelib.AzureAsset, error)
-		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountBlobContainers(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountBlobServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountFileServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountFileShares(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueues(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccountQueueServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountTables(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
+		ListStorageAccountTableServices(ctx context.Context, storageAccounts []azurelib.AzureAsset) ([]azurelib.AzureAsset, error)
 		ListStorageAccounts(ctx context.Context, storageAccountsSubscriptionsIds []string) ([]azurelib.AzureAsset, error)
 	}
 )
 
-func newStorageFetcher(logger *logp.Logger, tenantID string, provider storageProvider) inventory.AssetFetcher {
+func newStorageFetcher(logger *clog.Logger, tenantID string, provider storageProvider) inventory.AssetFetcher {
 	return &storageFetcher{
 		logger:   logger,
 		tenantID: tenantID,
@@ -59,10 +62,14 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 		function       storageProviderFunc
 		classification inventory.AssetClassification
 	}{
+		{"Storage Blob Containers", f.provider.ListStorageAccountBlobContainers, inventory.AssetClassificationAzureStorageBlobContainer},
 		{"Storage Blob Services", f.provider.ListStorageAccountBlobServices, inventory.AssetClassificationAzureStorageBlobService},
-		{"Storage Blob Containers", f.provider.ListStorageAccountBlobContainers, inventory.AssetClassificationAzureStorageBlobService},
+		{"Storage File Services", f.provider.ListStorageAccountFileServices, inventory.AssetClassificationAzureStorageFileService},
+		{"Storage File Shares", f.provider.ListStorageAccountFileShares, inventory.AssetClassificationAzureStorageFileShare},
 		{"Storage Queue Services", f.provider.ListStorageAccountQueueServices, inventory.AssetClassificationAzureStorageQueueService},
 		{"Storage Queues", f.provider.ListStorageAccountQueues, inventory.AssetClassificationAzureStorageQueue},
+		{"Storage Tables", f.provider.ListStorageAccountTables, inventory.AssetClassificationAzureStorageTable},
+		{"Storage Table Services", f.provider.ListStorageAccountTableServices, inventory.AssetClassificationAzureStorageTableService},
 	}
 
 	storageAccounts, err := f.listStorageAccounts(ctx)

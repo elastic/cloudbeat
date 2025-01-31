@@ -22,12 +22,12 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/common"
 	"github.com/elastic/cloudbeat/internal/evaluator"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
@@ -62,11 +62,11 @@ func New(options ...Option) *Builder {
 	return b
 }
 
-func (b *Builder) Build(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
+func (b *Builder) Build(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
 	return b.buildBase(ctx, log, cfg, resourceCh, reg)
 }
 
-func (b *Builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
+func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
 	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg)
 	if err != nil {
 		return nil, err

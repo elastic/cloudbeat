@@ -21,8 +21,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
 
@@ -35,7 +34,7 @@ type Registry interface {
 }
 
 type registry struct {
-	log     *logp.Logger
+	log     *clog.Logger
 	reg     FetchersMap
 	updater UpdaterFunc
 }
@@ -56,7 +55,7 @@ func WithFetchersMap(f FetchersMap) Option {
 	}
 }
 
-func NewRegistry(log *logp.Logger, options ...Option) Registry {
+func NewRegistry(log *clog.Logger, options ...Option) Registry {
 	r := &registry{
 		log: log,
 	}

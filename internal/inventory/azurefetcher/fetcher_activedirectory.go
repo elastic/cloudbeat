@@ -21,15 +21,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 type activedirectoryFetcher struct {
-	logger   *logp.Logger
+	logger   *clog.Logger
 	tenantID string
 	provider activedirectoryProvider
 }
@@ -43,7 +43,7 @@ type (
 	}
 )
 
-func newActiveDirectoryFetcher(logger *logp.Logger, tenantID string, provider activedirectoryProvider) inventory.AssetFetcher {
+func newActiveDirectoryFetcher(logger *clog.Logger, tenantID string, provider activedirectoryProvider) inventory.AssetFetcher {
 	return &activedirectoryFetcher{
 		logger:   logger,
 		tenantID: tenantID,

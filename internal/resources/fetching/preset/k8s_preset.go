@@ -18,9 +18,9 @@
 package preset
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/condition"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
@@ -52,7 +52,7 @@ var vanillaRequiredProcesses = fetchers.ProcessesConfigMap{
 	"kubelet":                 {ConfigFileArguments: []string{"config"}},
 }
 
-func NewCisK8sFetchers(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) registry.FetchersMap {
+func NewCisK8sFetchers(log *clog.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) registry.FetchersMap {
 	log.Infof("Initializing K8s fetchers")
 	m := make(registry.FetchersMap)
 	fsFetcher := fetchers.NewFsFetcher(log, ch, vanillaFsPatterns)
