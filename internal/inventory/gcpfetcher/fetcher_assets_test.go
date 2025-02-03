@@ -35,10 +35,11 @@ import (
 
 func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 	logger := clog.NewLogger("gcpfetcher_test")
-	assets := []*gcpinventory.ExtendedGcpAsset{
-		{
+	createAsset := func(assetType string) *gcpinventory.ExtendedGcpAsset {
+		return &gcpinventory.ExtendedGcpAsset{
 			Asset: &assetpb.Asset{
-				Name: "/projects/<project UUID>/some_resource", // name is the ID
+				Name:      "/projects/<project UUID>/some_resource",
+				AssetType: assetType,
 			},
 			CloudAccount: &fetching.CloudAccountMetadata{
 				AccountId:        "<project UUID>",
@@ -46,15 +47,14 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 				OrganisationId:   "<org UUID>",
 				OrganizationName: "<org name>",
 			},
-		},
+		}
 	}
-
 	expected := lo.Map(ResourcesToFetch, func(r ResourcesClassification, _ int) inventory.AssetEvent {
 		return inventory.NewAssetEvent(
 			r.classification,
 			"/projects/<project UUID>/some_resource",
 			"/projects/<project UUID>/some_resource",
-			inventory.WithRawAsset(assets[0]),
+			inventory.WithRawAsset(createAsset(r.assetType)),
 			inventory.WithRelatedAssetIds([]string{}),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.GcpCloudProvider,
@@ -64,11 +64,15 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 				ProjectName: "<org name>",
 				ServiceName: r.assetType,
 			}),
+			inventory.WithLabels(map[string]string{}),
+			inventory.WithTags([]string{}),
 		)
 	})
 
 	provider := newMockInventoryProvider(t)
-	provider.EXPECT().ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).Return(assets, nil)
+	for _, resource := range ResourcesToFetch {
+		provider.EXPECT().mock.On("ListAllAssetTypesByName", mock.Anything, []string{resource.assetType}).Return([]*gcpinventory.ExtendedGcpAsset{createAsset(resource.assetType)}, nil)
+	}
 	fetcher := newAssetsInventoryFetcher(logger, provider)
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
