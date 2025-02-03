@@ -74,16 +74,16 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockActivedirectoryProvider(t)
 
-	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
+	provider.EXPECT().ListServicePrincipals(mock.Anything).Maybe().Return(
 		[]*models.ServicePrincipal{servicePrincipal}, nil,
 	)
-	provider.EXPECT().ListDirectoryRoles(mock.Anything).Return(
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
 		[]*models.DirectoryRole{}, nil,
 	)
-	provider.EXPECT().ListGroups(mock.Anything).Return(
+	provider.EXPECT().ListGroups(mock.Anything).Maybe().Return(
 		[]*models.Group{}, nil,
 	)
-	provider.EXPECT().ListUsers(mock.Anything).Return(
+	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(
 		[]*models.User{}, nil,
 	)
 
@@ -111,13 +111,13 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
 		[]*models.ServicePrincipal{}, fmt.Errorf("! error listing service principals"),
 	)
-	provider.EXPECT().ListDirectoryRoles(mock.Anything).Return(
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
 		[]*models.DirectoryRole{}, nil,
 	)
-	provider.EXPECT().ListGroups(mock.Anything).Return(
+	provider.EXPECT().ListGroups(mock.Anything).Maybe().Return(
 		[]*models.Group{}, nil,
 	)
-	provider.EXPECT().ListUsers(mock.Anything).Return(
+	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(
 		[]*models.User{}, nil,
 	)
 
