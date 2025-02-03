@@ -48,6 +48,9 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 				AccountID:   "<tenant UUID>",
 				ServiceName: "Azure",
 			}),
+			inventory.WithOrganization(inventory.Organization{
+				ID: "<tenant UUID>",
+			}),
 		),
 	}
 
@@ -80,6 +83,9 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<sub UUID>",
 				ServiceName: "Azure",
+			}),
+			inventory.WithOrganization(inventory.Organization{
+				ID: "<sub UUID>",
 			}),
 		),
 	}
