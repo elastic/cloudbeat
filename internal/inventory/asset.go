@@ -146,6 +146,7 @@ type AssetEvent struct {
 	Cloud         *Cloud
 	Group         *Group
 	Host          *Host
+	Organization  *Organization
 	User          *User
 	Labels        map[string]string
 	Tags          []string
@@ -197,6 +198,11 @@ type Host struct {
 	Type         string   `json:"type,omitempty"`
 	IP           string   `json:"ip,omitempty"`
 	MacAddress   []string `json:"mac,omitempty"`
+}
+
+type Organization struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 type User struct {
@@ -297,6 +303,12 @@ func WithGroup(group Group) AssetEnricher {
 func WithHost(host Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
+	}
+}
+
+func WithOrganization(org Organization) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Organization = &org
 	}
 }
 

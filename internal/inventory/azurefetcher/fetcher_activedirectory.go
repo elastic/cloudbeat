@@ -176,6 +176,10 @@ func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<
 				AccountID:   f.tenantID,
 				ServiceName: "Azure",
 			}),
+			inventory.WithUser(inventory.User{
+				ID:   pointers.Deref(item.GetId()),
+				Name: pointers.Deref(item.GetDisplayName()),
+			}),
 		)
 	}
 }
