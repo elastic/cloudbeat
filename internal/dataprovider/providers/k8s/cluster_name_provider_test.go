@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/fake"
@@ -64,7 +64,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 		},
 		BinaryData: nil,
 	}
-	cfg := &config.Config{}
+	cfg := &config.Config{KubeConfig: "!invalidkubeconfig"}
 	client := fake.NewSimpleClientset(ns, cfgMap)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
@@ -81,7 +81,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoCluster
 			UID:  types.UID(kubeSystemNamespaceId),
 		},
 	}
-	cfg := &config.Config{}
+	cfg := &config.Config{KubeConfig: "!invalidkubeconfig"}
 	client := fake.NewSimpleClientset(ns)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
