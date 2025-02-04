@@ -101,8 +101,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 
 		if resourceType == azurelib.VirtualMachineAssetType {
 			asset.Host = &inventory.Host{
-				ID: item.Id,
-				// TODO(kuba): check what is overriding this with pure resource ID?
+				ID:   item.Id,
 				Name: tryUnpackingNestedString(item.Properties, "extended.instanceView.computerName"),
 				Type: tryUnpackingNestedString(item.Properties, "hardwareProfile.vmSize"),
 			}
