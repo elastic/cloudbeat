@@ -20,6 +20,7 @@ package azurefetcher
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -92,4 +93,47 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 	fetcher := newResourceGraphFetcher(logger, "<tenant id>", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
+}
+
+func TestHelperMethod_UnpackNestedStrings(t *testing.T) {
+	playground := map[string]any{
+		"a": map[string]any{
+			"a1": "x",
+			"a2": "y",
+		},
+		"b": nil,
+		"c": map[string]any{
+			"d": map[string]any{
+				"e": map[string]any{
+					"f": map[string]any{
+						"g": map[string]any{
+							"HEY": "THERE",
+						},
+					},
+				},
+			},
+		},
+		"d": "NOPE",
+	}
+	// path -> expected return
+	cases := map[string]string{
+		// Expected failures
+		"x":        "",
+		".":        "",
+		"..":       "",
+		">><<@@!!": "",
+		"d":        "", // This function handles ONLY nested strings
+		"b":        "",
+		"c.d.e":    "",
+
+		// Expected success
+		"a.a1":          "x",
+		"a.a2":          "y",
+		"c.d.e.f.g.HEY": "THERE",
+	}
+
+	for path, expected := range cases {
+		got := tryUnpackingNestedString(playground, path)
+		assert.Equal(t, expected, got)
+	}
 }
