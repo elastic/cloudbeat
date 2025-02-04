@@ -42,6 +42,16 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 		DisplayName: "<name2>",
 		TenantId:    "<tenant id>",
 	}
+	vm := azurelib_inventory.AzureAsset{
+		Id:          "/vm",
+		DisplayName: "<name3>",
+		TenantId:    "<tenant id>",
+		Properties: map[string]any{
+			"hardwareProfile": map[string]any{
+				"vmSize": "xlarge",
+			},
+		},
+	}
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
@@ -66,6 +76,21 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 				ServiceName: "Azure",
 			}),
 		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureVirtualMachine,
+			vm.Id,
+			vm.DisplayName,
+			inventory.WithRawAsset(vm),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure",
+			}),
+			inventory.WithHost(inventory.Host{
+				ID:   vm.Id,
+				Type: "xlarge",
+			}),
+		),
 	}
 
 	// setup
@@ -85,6 +110,12 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 	)
 
 	provider.EXPECT().ListAllAssetTypesByName(
+		mock.Anything, mock.Anything, []string{azurelib_inventory.VirtualMachineAssetType},
+	).Return(
+		[]azurelib_inventory.AzureAsset{vm}, nil,
+	)
+
+	provider.EXPECT().ListAllAssetTypesByName(
 		mock.Anything, mock.Anything, mock.Anything,
 	).Return(
 		[]azurelib_inventory.AzureAsset{}, nil,
@@ -98,8 +129,9 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 func TestHelperMethod_UnpackNestedStrings(t *testing.T) {
 	playground := map[string]any{
 		"a": map[string]any{
-			"a1": "x",
-			"a2": "y",
+			"a1":        "x",
+			"a2":        "y",
+			"not-a-map": []string{},
 		},
 		"b": nil,
 		"c": map[string]any{
@@ -118,13 +150,15 @@ func TestHelperMethod_UnpackNestedStrings(t *testing.T) {
 	// path -> expected return
 	cases := map[string]string{
 		// Expected failures
-		"x":        "",
-		".":        "",
-		"..":       "",
-		">><<@@!!": "",
-		"d":        "", // This function handles ONLY nested strings
-		"b":        "",
-		"c.d.e":    "",
+		"x":           "",
+		".":           "",
+		"..":          "",
+		">><<@@!!":    "",
+		"d":           "", // This function handles ONLY nested strings
+		"b":           "",
+		"c.d.e":       "",
+		"a.not-a-map": "",
+		"a.not-there": "",
 
 		// Expected success
 		"a.a1":          "x",
