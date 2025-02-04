@@ -63,6 +63,20 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	}
 	role.SetBackingStore(store)
 
+	group := &models.Group{
+		DirectoryObject: models.DirectoryObject{
+			Entity: models.Entity{},
+		},
+	}
+	group.SetBackingStore(store)
+
+	user := &models.User{
+		DirectoryObject: models.DirectoryObject{
+			Entity: models.Entity{},
+		},
+	}
+	user.SetBackingStore(store)
+
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureServicePrincipal,
@@ -90,6 +104,36 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 				Name: "dn",
 			}),
 		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraGroup,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure",
+			}),
+			inventory.WithGroup(inventory.Group{
+				ID:   "id",
+				Name: "dn",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraUser,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "id",
+				Name: "dn",
+			}),
+		),
 	}
 
 	// setup
@@ -102,11 +146,11 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
 		[]*models.DirectoryRole{role}, nil,
 	)
-	provider.EXPECT().ListGroups(mock.Anything).Maybe().Return(
-		[]*models.Group{}, nil,
+	provider.EXPECT().ListGroups(mock.Anything).Return(
+		[]*models.Group{group}, nil,
 	)
 	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(
-		[]*models.User{}, nil,
+		[]*models.User{user}, nil,
 	)
 
 	fetcher := newActiveDirectoryFetcher(logger, "id", provider)
