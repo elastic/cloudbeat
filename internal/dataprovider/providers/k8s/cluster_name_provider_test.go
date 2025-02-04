@@ -64,7 +64,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 		},
 		BinaryData: nil,
 	}
-	cfg := &config.Config{KubeConfig: "!invalidkubeconfig"}
+	cfg := &config.Config{KubeConfig: "/dev/null"}
 	client := fake.NewSimpleClientset(ns, cfgMap)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
@@ -81,7 +81,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoCluster
 			UID:  types.UID(kubeSystemNamespaceId),
 		},
 	}
-	cfg := &config.Config{KubeConfig: "!invalidkubeconfig"}
+	cfg := &config.Config{KubeConfig: "/dev/null"}
 	client := fake.NewSimpleClientset(ns)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
