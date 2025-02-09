@@ -20,12 +20,12 @@ package gcpfetcher
 import (
 	"context"
 
-	"github.com/samber/lo"
-	"google.golang.org/protobuf/types/known/structpb"
-
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/samber/lo"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type (
@@ -91,7 +91,7 @@ func (f *assetsInventory) fetch(ctx context.Context, assetChan chan<- inventory.
 			inventory.WithRelatedAssetIds(
 				f.findRelatedAssetIds(classification.Type, item),
 			),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.GcpCloudProvider,
 				AccountID:   item.CloudAccount.AccountId,
 				AccountName: item.CloudAccount.AccountName,

@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -76,14 +77,14 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 			"role-name-1",
 			inventory.WithRelatedAssetIds([]string{"17823618723"}),
 			inventory.WithRawAsset(role1),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
 			}),
-			inventory.WithUser(inventory.User{
+			inventory.WithUser(ecs.User{
 				ID:   "arn:aws:iam::0000:role/role-name-1",
 				Name: "role-name-1",
 			}),
@@ -95,14 +96,14 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 			"role-name-2",
 			inventory.WithRelatedAssetIds([]string{"17823618724"}),
 			inventory.WithRawAsset(role2),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
 			}),
-			inventory.WithUser(inventory.User{
+			inventory.WithUser(ecs.User{
 				ID:   "arn:aws:iam::0000:role/role-name-2",
 				Name: "role-name-2",
 			}),

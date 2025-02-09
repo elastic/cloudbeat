@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -102,7 +103,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 
 	in := []awslib.AwsResource{policy1, nil, policy2, policy3}
 
-	cloudField := inventory.Cloud{
+	cloudField := ecs.Cloud{
 		Provider:    inventory.AwsCloudProvider,
 		Region:      "global",
 		AccountID:   "123",

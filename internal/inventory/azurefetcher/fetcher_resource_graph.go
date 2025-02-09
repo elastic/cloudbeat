@@ -20,6 +20,7 @@ package azurefetcher
 import (
 	"context"
 
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
@@ -88,7 +89,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 			item.Id,
 			name,
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",

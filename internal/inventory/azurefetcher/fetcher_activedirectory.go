@@ -22,6 +22,7 @@ import (
 
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
@@ -70,7 +71,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   tenantId,
 				ServiceName: "Azure",

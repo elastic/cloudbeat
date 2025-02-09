@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -62,7 +63,7 @@ func (s *snsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 			item.GetResourceArn(),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      item.GetRegion(),
 				AccountID:   s.AccountId,

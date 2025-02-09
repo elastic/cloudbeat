@@ -23,6 +23,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -72,7 +73,7 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 			bucket.GetResourceName(),
 
 			inventory.WithRawAsset(bucket),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      bucket.Region,
 				AccountID:   s.AccountId,

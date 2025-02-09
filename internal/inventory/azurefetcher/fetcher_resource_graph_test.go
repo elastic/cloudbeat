@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -48,7 +49,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			appService.Id,
 			appService.Name,
 			inventory.WithRawAsset(appService),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
 				ServiceName: "Azure",
@@ -59,7 +60,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			disk.Id,
 			disk.Name,
 			inventory.WithRawAsset(disk),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
 				ServiceName: "Azure",

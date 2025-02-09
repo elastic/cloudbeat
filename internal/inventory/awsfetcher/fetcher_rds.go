@@ -23,6 +23,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -72,7 +73,7 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 			item.GetResourceName(),
 			inventory.WithRelatedAssetIds([]string{item.Identifier}),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      item.GetRegion(),
 				AccountID:   s.AccountId,

@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -83,7 +84,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureBlobContainer.Id,
 			azureBlobContainer.Name,
 			inventory.WithRawAsset(azureBlobContainer),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -93,7 +94,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureBlobService.Id,
 			azureBlobService.Name,
 			inventory.WithRawAsset(azureBlobService),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -103,7 +104,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureFileService.Id,
 			azureFileService.Name,
 			inventory.WithRawAsset(azureFileService),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -113,7 +114,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureFileShare.Id,
 			azureFileShare.Name,
 			inventory.WithRawAsset(azureFileShare),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -123,7 +124,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureQueueService.Id,
 			azureQueueService.Name,
 			inventory.WithRawAsset(azureQueueService),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -133,7 +134,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureQueue.Id,
 			azureQueue.Name,
 			inventory.WithRawAsset(azureQueue),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -143,7 +144,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureTable.Id,
 			azureTable.Name,
 			inventory.WithRawAsset(azureTable),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),
@@ -153,7 +154,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureTableService.Id,
 			azureTableService.Name,
 			inventory.WithRawAsset(azureTableService),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
 			}),

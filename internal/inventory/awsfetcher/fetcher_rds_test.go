@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -88,7 +89,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 			"db1",
 			inventory.WithRelatedAssetIds([]string{"db1"}),
 			inventory.WithRawAsset(instance1),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",
@@ -101,7 +102,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 			"db2",
 			inventory.WithRelatedAssetIds([]string{"db2"}),
 			inventory.WithRawAsset(instance2),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",

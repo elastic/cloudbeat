@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -48,7 +49,7 @@ func TestSNSFetcher_Fetch(t *testing.T) {
 			"topic:arn:test-topic",
 			"test-topic",
 			inventory.WithRawAsset(awsResource),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",

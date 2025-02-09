@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -91,7 +92,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			inventory.WithRelatedAssetIds([]string{"234567890"}),
 			inventory.WithRawAsset(instance1),
 			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
 				AvailabilityZone: "1a",
@@ -102,15 +103,15 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				MachineType:      "instance-type",
 				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.Host{
+			inventory.WithHost(ecs.Host{
 				ID:           "234567890",
 				Name:         "private-dns",
 				Architecture: string(types.ArchitectureValuesX8664),
 				Type:         "instance-type",
 				IP:           "public-ip-addr",
-				MacAddress:   []string{"mac1", "mac2"},
+				MAC:          []string{"mac1", "mac2"},
 			}),
-			inventory.WithUser(inventory.User{
+			inventory.WithUser(ecs.User{
 				ID: "123123:123123:123123",
 			}),
 		),
@@ -121,7 +122,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			"",
 			inventory.WithRawAsset(instance2),
 			inventory.WithLabels(map[string]string{}),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
 				AvailabilityZone: "",
@@ -132,8 +133,8 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				MachineType:      "",
 				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.Host{
-				MacAddress: []string{},
+			inventory.WithHost(ecs.Host{
+				MAC: []string{},
 			}),
 		),
 	}

@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
@@ -64,7 +65,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 
 		iamFetcher := inventory.EmptyEnricher()
 		if i.IamInstanceProfile != nil {
-			iamFetcher = inventory.WithUser(inventory.User{
+			iamFetcher = inventory.WithUser(ecs.User{
 				ID: pointers.Deref(i.IamInstanceProfile.Arn),
 			})
 		}
@@ -77,7 +78,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			inventory.WithRelatedAssetIds([]string{pointers.Deref(i.InstanceId)}),
 			inventory.WithRawAsset(i),
 			inventory.WithLabels(e.getTags(i)),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           i.Region,
 				AvailabilityZone: e.getAvailabilityZone(i),
@@ -88,13 +89,13 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 				MachineType:      string(i.InstanceType),
 				ServiceName:      "AWS EC2",
 			}),
-			inventory.WithHost(inventory.Host{
+			inventory.WithHost(ecs.Host{
 				ID:           pointers.Deref(i.InstanceId),
 				Name:         pointers.Deref(i.PrivateDnsName),
 				Architecture: string(i.Architecture),
 				Type:         string(i.InstanceType),
 				IP:           pointers.Deref(i.PublicIpAddress),
-				MacAddress:   i.GetResourceMacAddresses(),
+				MAC:          i.GetResourceMacAddresses(),
 			}),
 			iamFetcher,
 		)

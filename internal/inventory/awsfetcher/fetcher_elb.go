@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -83,7 +84,7 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 			item.GetResourceArn(),
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      item.GetRegion(),
 				AccountID:   f.AccountId,

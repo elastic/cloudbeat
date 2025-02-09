@@ -30,6 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
@@ -50,23 +51,23 @@ func TestAssetInventory_Run(t *testing.T) {
 						Type:     "Virtual Machine",
 					},
 				},
-				"event": Event{
+				"event": ecs.Event{
 					Kind: "asset",
 				},
 				"labels": map[string]string{"Name": "test-server", "key": "value"},
-				"cloud": &Cloud{
+				"cloud": &ecs.Cloud{
 					Provider: AwsCloudProvider,
 					Region:   "us-east",
 				},
-				"host": &Host{
+				"host": &ecs.Host{
 					Architecture: string(types.ArchitectureValuesX8664),
 					Type:         "instance-type",
 					ID:           "i-a2",
 				},
-				"network": &Network{
+				"network": &ecs.Network{
 					Name: "vpc-id",
 				},
-				"user": &User{
+				"user": &ecs.User{
 					ID:   "a123123",
 					Name: "name",
 				},
@@ -92,20 +93,20 @@ func TestAssetInventory_Run(t *testing.T) {
 			"arn:aws:ec2:us-east::ec2/234567890",
 			"test-server",
 			WithLabels(map[string]string{"Name": "test-server", "key": "value"}),
-			WithCloud(Cloud{
+			WithCloud(ecs.Cloud{
 				Provider: AwsCloudProvider,
 				Region:   "us-east",
 			}),
-			WithHost(Host{
+			WithHost(ecs.Host{
 				Architecture: string(types.ArchitectureValuesX8664),
 				Type:         "instance-type",
 				ID:           "i-a2",
 			}),
-			WithUser(User{
+			WithUser(ecs.User{
 				ID:   "a123123",
 				Name: "name",
 			}),
-			WithNetwork(Network{
+			WithNetwork(ecs.Network{
 				Name: "vpc-id",
 			}),
 		)

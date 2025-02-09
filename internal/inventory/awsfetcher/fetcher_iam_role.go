@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -72,14 +73,14 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 			inventory.WithRelatedAssetIds([]string{pointers.Deref(role.RoleId)}),
 			inventory.WithRawAsset(*role),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      awslib.GlobalRegion,
 				AccountID:   i.AccountId,
 				AccountName: i.AccountName,
 				ServiceName: "AWS IAM",
 			}),
-			inventory.WithUser(inventory.User{
+			inventory.WithUser(ecs.User{
 				ID:   pointers.Deref(role.Arn),
 				Name: pointers.Deref(role.RoleName),
 			}),

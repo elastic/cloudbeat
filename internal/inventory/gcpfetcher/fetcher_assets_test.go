@@ -21,14 +21,14 @@ import (
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/samber/lo"
-	"github.com/stretchr/testify/mock"
-
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestAccountFetcher_Fetch_Assets(t *testing.T) {
@@ -54,7 +54,7 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 			"/projects/<project UUID>/some_resource",
 			inventory.WithRawAsset(assets[0]),
 			inventory.WithRelatedAssetIds([]string{}),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.GcpCloudProvider,
 				AccountID:   "<project UUID>",
 				AccountName: "<project name>",

@@ -32,6 +32,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -62,7 +63,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 			"id",
 			"dn",
 			inventory.WithRawAsset(values),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   appOwnerOrganizationId.String(),
 				ServiceName: "Azure",

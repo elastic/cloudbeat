@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -72,7 +73,7 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v1",
 			"my-elb-v1",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",
@@ -118,7 +119,7 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 			"arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2",
 			"my-elb-v2",
 			inventory.WithRawAsset(asset),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				AccountID:   "123",
 				AccountName: "alias",

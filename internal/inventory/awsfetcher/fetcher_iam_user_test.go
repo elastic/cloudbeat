@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -91,14 +92,14 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 			"user-1",
 			inventory.WithRelatedAssetIds([]string{"u-123123"}),
 			inventory.WithRawAsset(user1),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
 			}),
-			inventory.WithUser(inventory.User{
+			inventory.WithUser(ecs.User{
 				ID:   "arn:aws:iam::000:user/user-1",
 				Name: "user-1",
 			}),
@@ -109,14 +110,14 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 			"arn:aws:iam::000:user/user-2",
 			"user-2",
 			inventory.WithRawAsset(user2),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      "global",
 				AccountID:   "123",
 				AccountName: "alias",
 				ServiceName: "AWS IAM",
 			}),
-			inventory.WithUser(inventory.User{
+			inventory.WithUser(ecs.User{
 				ID:   "arn:aws:iam::000:user/user-2",
 				Name: "user-2",
 			}),

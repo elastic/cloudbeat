@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/internal/ecs"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
@@ -43,7 +44,7 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 			"/tenants/<tenant UUID>",
 			"Mario",
 			inventory.WithRawAsset(azureAssets[0]),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant UUID>",
 				ServiceName: "Azure",
@@ -76,7 +77,7 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 			"/subscriptions/<sub UUID>",
 			"Luigi",
 			inventory.WithRawAsset(azureAssets[0]),
-			inventory.WithCloud(inventory.Cloud{
+			inventory.WithCloud(ecs.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<sub UUID>",
 				ServiceName: "Azure",
