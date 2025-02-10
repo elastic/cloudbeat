@@ -186,7 +186,7 @@ runs:
       shell: bash
       env:
         AZURE_TAGS: "${{ inputs.cspm-azure-tags }}"
-      run: ./install_agent_az_cli.sh
+      run: DEPLOYMENT_NAME="$DEPLOYMENT_NAME-$(openssl rand -hex 3)" ./install_agent_az_cli.sh
 
     - name: Install D4C integration
       id: kspm-d4c
