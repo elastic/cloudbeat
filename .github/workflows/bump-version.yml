@@ -14,7 +14,6 @@ on:
         required: true
         default: false
 
-
 env:
   GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
   AWS_ACCESS_KEY_ID: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
@@ -33,6 +32,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup Cloudbeat Versions
         run: |
@@ -56,7 +56,7 @@ jobs:
           GIT_BASE_BRANCH: ${{ github.ref_name }}
         run: scripts/bump_cloudbeat.sh
 
-      - name: Bump Cloud Security Posture Integration
-        if: ${{ github.event.inputs.bump_integration }}
-        # we need to run bump_integration.sh from the main branch
-        run: git checkout origin/main && scripts/bump_integration.sh
+      # - name: Bump Cloud Security Posture Integration
+      #   if: ${{ github.event.inputs.bump_integration }}
+      #   # we need to run bump_integration.sh from the main branch
+      #   run: git checkout origin/main && scripts/bump_integration.sh

@@ -215,6 +215,12 @@ run_version_changes_for_release_branch() {
 }
 
 bump_snyk_branch_monitoring() {
+
+    # Extract latest major and previous major
+    branches=$(git branch -r | grep -Eo '[0-9]+\.[0-9]+' | sort -V | uniq | tail -2)
+    latest=$(echo "$branches" | tail -1)
+    previous=$(echo "$branches" | head -1)
+
     # Get cloudbeat target ID
     SNYK_CLOUDBEAT_ID=$(curl -X GET "https://api.snyk.io/rest/orgs/$SNYK_ORG_ID/targets?version=2024-05-23&display_name=cloudbeat" \
         -H "accept: application/vnd.api+json" \
@@ -225,7 +231,7 @@ bump_snyk_branch_monitoring() {
         -H "accept: application/vnd.api+json" \
         -H "authorization: $SNYK_API_KEY"
 
-    # Import cloudbeat/$BASE_BRANCH
+    # Import cloudbeat/main
     curl -X POST \
         "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
         -H 'Content-Type: application/json; charset=utf-8' \
@@ -234,11 +240,11 @@ bump_snyk_branch_monitoring() {
   \"target\": {
     \"owner\": \"elastic\",
     \"name\": \"cloudbeat\",
-    \"branch\": \"$BASE_BRANCH\"
+    \"branch\": \"main\"
   },
   \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
 }"
-    # Import cloudbeat/$CURRENT_MINOR_VERSION
+    # Import cloudbeat/latest_major
     curl -X POST \
         "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
         -H 'Content-Type: application/json; charset=utf-8' \
@@ -247,7 +253,20 @@ bump_snyk_branch_monitoring() {
   \"target\": {
     \"owner\": \"elastic\",
     \"name\": \"cloudbeat\",
-    \"branch\": \"$CURRENT_MINOR_VERSION\"
+    \"branch\": \"$latest\"
+  },
+  \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
+}"
+    # Import cloudbeat/previous_major
+    curl -X POST \
+        "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
+        -H 'Content-Type: application/json; charset=utf-8' \
+        -H "Authorization: token $SNYK_API_KEY" \
+        -d "{
+  \"target\": {
+    \"owner\": \"elastic\",
+    \"name\": \"cloudbeat\",
+    \"branch\": \"$previous\"
   },
   \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
 }"
@@ -263,7 +282,7 @@ validate_base_branch() {
     exit 1
 }
 
-validate_base_branch
-run_version_changes_for_base_branch
-run_version_changes_for_release_branch
+# validate_base_branch
+# run_version_changes_for_base_branch
+# run_version_changes_for_release_branch
 bump_snyk_branch_monitoring
