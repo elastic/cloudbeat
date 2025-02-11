@@ -282,7 +282,7 @@ validate_base_branch() {
     exit 1
 }
 
-# validate_base_branch
-# run_version_changes_for_base_branch
-# run_version_changes_for_release_branch
+validate_base_branch
+run_version_changes_for_base_branch
+run_version_changes_for_release_branch
 bump_snyk_branch_monitoring

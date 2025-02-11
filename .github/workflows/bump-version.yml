@@ -56,7 +56,7 @@ jobs:
           GIT_BASE_BRANCH: ${{ github.ref_name }}
         run: scripts/bump_cloudbeat.sh
 
-      # - name: Bump Cloud Security Posture Integration
-      #   if: ${{ github.event.inputs.bump_integration }}
-      #   # we need to run bump_integration.sh from the main branch
-      #   run: git checkout origin/main && scripts/bump_integration.sh
+      - name: Bump Cloud Security Posture Integration
+        if: ${{ github.event.inputs.bump_integration }}
+        # we need to run bump_integration.sh from the main branch
+        run: git checkout origin/main && scripts/bump_integration.sh
