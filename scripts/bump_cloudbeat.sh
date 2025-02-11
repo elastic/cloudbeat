@@ -217,8 +217,11 @@ run_version_changes_for_release_branch() {
 bump_snyk_branch_monitoring() {
 
     # Extract latest major and previous major
+    # shellcheck disable=SC2178
     branches=$(git branch -r | grep -Eo '[0-9]+\.[0-9]+' | sort -V | uniq | tail -2)
+    # shellcheck disable=SC2128
     latest=$(echo "$branches" | tail -1)
+    # shellcheck disable=SC2128
     previous=$(echo "$branches" | head -1)
 
     # Get cloudbeat target ID
