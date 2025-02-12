@@ -184,8 +184,6 @@ type Network struct {
 	Name      string `json:"name,omitempty"`
 	Direction string `json:"direction,omitempty"`
 	Type      string `json:"type,omitempty"`
-	// Protocol string `json:"protocol,omitempty"`
-	// Transport []string `json:"transport,omitempty"`
 }
 
 type Cloud struct {
