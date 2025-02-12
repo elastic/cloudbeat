@@ -145,15 +145,33 @@ var (
 type AssetEvent struct {
 	Entity        Entity
 	Event         Event
-	Network       *Network
 	Cloud         *Cloud
+	Container     *Container
+	Fass          *Fass
 	Group         *Group
 	Host          *Host
+	Network       *Network
+	Orchestrator  *Orchestrator
 	Organization  *Organization
+	URL           *URL
 	User          *User
 	Labels        map[string]string
 	Tags          []string
 	RawAttributes *any
+}
+
+type Organization struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type Fass struct {
+	Name    string `json:"name,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
+type URL struct {
+	Full string `json:"full"`
 }
 
 // Entity contains the identifiers of the asset
@@ -171,7 +189,9 @@ type Event struct {
 }
 
 type Network struct {
-	Name string `json:"name,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Direction string `json:"direction,omitempty"`
+	Type      string `json:"type,omitempty"`
 }
 
 type Cloud struct {
@@ -203,14 +223,23 @@ type Host struct {
 	MacAddress   []string `json:"mac,omitempty"`
 }
 
-type Organization struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+type User struct {
+	ID    string   `json:"id,omitempty"`
+	Name  string   `json:"name,omitempty"`
+	Email string   `json:"email,omitempty"`
+	Roles []string `json:"roles,omitempty"`
 }
 
-type User struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+type Orchestrator struct {
+	ClusterID   string `json:"cluster.id,omitempty"`
+	ClusterName string `json:"cluster.name,omitempty"`
+	Type        string `json:"type,omitempty"`
+}
+
+type Container struct {
+	ID        string `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	ImageName string `json:"image.name,omitempty"`
 }
 
 // AssetEnricher functional builder function
@@ -303,12 +332,6 @@ func WithHost(host Host) AssetEnricher {
 	}
 }
 
-func WithOrganization(org Organization) AssetEnricher {
-	return func(a *AssetEvent) {
-		a.Organization = &org
-	}
-}
-
 func WithTags(tags []string) AssetEnricher {
 	return func(a *AssetEvent) {
 		if len(tags) == 0 {
@@ -326,4 +349,34 @@ func WithUser(user User) AssetEnricher {
 
 func EmptyEnricher() AssetEnricher {
 	return func(_ *AssetEvent) {}
+}
+
+func WithOrganization(org Organization) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Organization = &org
+	}
+}
+
+func WithFass(fass Fass) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Fass = &fass
+	}
+}
+
+func WithURL(url URL) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.URL = &url
+	}
+}
+
+func WithOrchestrator(orchestrator Orchestrator) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Orchestrator = &orchestrator
+	}
+}
+
+func WithContainer(container Container) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Container = &container
+	}
 }
