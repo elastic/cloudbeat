@@ -41,9 +41,9 @@ type AzureBatchAssetFetcher struct {
 }
 
 var AzureBatchAssets = map[string]typePair{
-	inventory.ActivityLogAlertAssetType: newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
-	inventory.ApplicationInsights:       newPair(fetching.AzureInsightsComponentType, fetching.MonitoringIdentity),
-	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
+	inventory.ActivityLogAlertAssetType: {fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity},
+	inventory.ApplicationInsights:       {fetching.AzureInsightsComponentType, fetching.MonitoringIdentity},
+	inventory.BastionAssetType:          {fetching.AzureBastionType, fetching.CloudDns},
 }
 
 // In order to simplify the mappings, we are trying to query all AzureBatchAssets on every asset group

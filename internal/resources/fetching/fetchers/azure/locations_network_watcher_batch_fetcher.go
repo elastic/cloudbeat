@@ -92,7 +92,10 @@ func (f *AzureLocationsNetworkWatcherAssetBatchFetcher) fetchNetworkWatchersPerL
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: metadata,
 			Resource: &NetworkWatchersBatchedByLocationResource{
-				typePair:        newPair(fetching.AzureNetworkWatchersType, fetching.MonitoringIdentity),
+				typePair: typePair{
+					SubType: fetching.AzureNetworkWatchersType,
+					Type:    fetching.MonitoringIdentity,
+				},
 				Subscription:    subscription,
 				Location:        location,
 				NetworkWatchers: groupedWatchers[location.Name],

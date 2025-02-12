@@ -19,6 +19,7 @@ package benchmark
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -127,16 +128,16 @@ func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.C
 
 func (k *EKS) checkDependencies() error {
 	if k.AWSIdentityProvider == nil {
-		return fmt.Errorf("aws identity provider is uninitialized")
+		return errors.New("aws identity provider is uninitialized")
 	}
 	if k.ClientProvider == nil {
-		return fmt.Errorf("kubernetes client provider is uninitialized")
+		return errors.New("kubernetes client provider is uninitialized")
 	}
 	if k.EKSClusterNameProvider == nil {
-		return fmt.Errorf("eks cluster name provider is uninitialized")
+		return errors.New("eks cluster name provider is uninitialized")
 	}
 	if k.AWSMetadataProvider == nil {
-		return fmt.Errorf("aws metadata provider is uninitialized")
+		return errors.New("aws metadata provider is uninitialized")
 	}
 	return nil
 }
