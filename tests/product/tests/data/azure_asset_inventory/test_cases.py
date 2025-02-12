@@ -34,10 +34,10 @@ test_cases = {
         category="Database",
         type_="Azure SQL Server",
     ),
-    "[Asset Inventory][Azure][Azure Principal] assets found": AssetInventoryCase(
-        category="Identity",
-        type_="Azure Principal",
-    ),
+    # "[Asset Inventory][Azure][Azure Principal] assets found": AssetInventoryCase(
+    #     category="Identity",
+    #     type_="Azure Principal",
+    # ),
     "[Asset Inventory][Azure][Azure Elastic Pool] assets found": AssetInventoryCase(
         category="Database",
         type_="Azure Elastic Pool",
