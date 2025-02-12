@@ -44,8 +44,8 @@ func NewAzureSecurityAssetFetcher(log *clog.Logger, ch chan fetching.ResourceInf
 }
 
 var AzureSecurityAssetTypeToTypePair = map[string]typePair{
-	inventory.SecurityContactsAssetType:            newPair(fetching.AzureSecurityContactsType, fetching.MonitoringIdentity),
-	inventory.SecurityAutoProvisioningSettingsType: newPair(fetching.AzureAutoProvisioningSettingsType, fetching.MonitoringIdentity),
+	inventory.SecurityContactsAssetType:            {fetching.AzureSecurityContactsType, fetching.MonitoringIdentity},
+	inventory.SecurityAutoProvisioningSettingsType: {fetching.AzureAutoProvisioningSettingsType, fetching.MonitoringIdentity},
 }
 
 func (f *AzureSecurityAssetFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
