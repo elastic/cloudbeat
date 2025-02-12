@@ -24,11 +24,11 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
 )
 
-func New(logger *clog.Logger, provider azurelib.ProviderAPI, msgraphProvider msgraph.ProviderAPI) []inventory.AssetFetcher {
+func New(logger *clog.Logger, tenantID string, provider azurelib.ProviderAPI, msgraphProvider msgraph.ProviderAPI) []inventory.AssetFetcher {
 	return []inventory.AssetFetcher{
-		newAccountFetcher(logger, provider),
-		newActiveDirectoryFetcher(logger, msgraphProvider),
-		newResourceGraphFetcher(logger, provider),
-		newStorageFetcher(logger, provider),
+		newAccountFetcher(logger, tenantID, provider),
+		newActiveDirectoryFetcher(logger, tenantID, msgraphProvider),
+		newResourceGraphFetcher(logger, tenantID, provider),
+		newStorageFetcher(logger, tenantID, provider),
 	}
 }

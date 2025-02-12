@@ -18,9 +18,12 @@
 package azurefetcher
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -40,6 +43,21 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 		Name:        "<name2>",
 		DisplayName: "<name2>",
 		TenantId:    "<tenant id>",
+	}
+	vm := azurelib_inventory.AzureAsset{
+		Id:          "/vm",
+		DisplayName: "<name3>",
+		TenantId:    "<tenant id>",
+		Properties: map[string]any{
+			"extended": map[string]any{
+				"instanceView": map[string]any{
+					"computerName": "localhost",
+				},
+			},
+			"hardwareProfile": map[string]any{
+				"vmSize": "xlarge",
+			},
+		},
 	}
 
 	expected := []inventory.AssetEvent{
@@ -65,6 +83,22 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 				ServiceName: "Azure",
 			}),
 		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureVirtualMachine,
+			vm.Id,
+			vm.DisplayName,
+			inventory.WithRawAsset(vm),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure",
+			}),
+			inventory.WithHost(inventory.Host{
+				ID:   vm.Id,
+				Name: "localhost",
+				Type: "xlarge",
+			}),
+		),
 	}
 
 	// setup
@@ -84,12 +118,66 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 	)
 
 	provider.EXPECT().ListAllAssetTypesByName(
+		mock.Anything, mock.Anything, []string{azurelib_inventory.VirtualMachineAssetType},
+	).Return(
+		[]azurelib_inventory.AzureAsset{vm}, nil,
+	)
+
+	provider.EXPECT().ListAllAssetTypesByName(
 		mock.Anything, mock.Anything, mock.Anything,
 	).Return(
 		[]azurelib_inventory.AzureAsset{}, nil,
 	)
 
-	fetcher := newResourceGraphFetcher(logger, provider)
+	fetcher := newResourceGraphFetcher(logger, "<tenant id>", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
+}
+
+func TestHelperMethod_UnpackVMProperties(t *testing.T) {
+	cases := []struct {
+		name                   string
+		input                  string
+		expectedComputerName   string
+		expectedVmSize         string
+		expectedErrorUnpacking bool
+	}{
+		{
+			name:  "no overlap with vmProperties",
+			input: `{"this is not a matching map": "nope"}`,
+		},
+		{
+			name:                   "types do not match vmProperties but keys do",
+			input:                  `{"extended": {"instanceView": "this is wrong"}}`,
+			expectedErrorUnpacking: true,
+		},
+		{
+			name:                 "missing data does not break the flow",
+			input:                `{"extended": {"instanceView": {"computerName": "localhost"}}}`,
+			expectedComputerName: "localhost",
+			expectedVmSize:       "",
+		},
+		{
+			name:                 "happy path",
+			input:                `{"extended": {"instanceView": {"computerName": "localhost"}}, "hardwareProfile": {"vmSize": "xlarge"}}`,
+			expectedComputerName: "localhost",
+			expectedVmSize:       "xlarge",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			m := map[string]any{}
+			err := json.Unmarshal([]byte(tc.input), &m)
+			require.NoError(t, err)
+			got := tryUnpackingVMProperties(m)
+
+			if tc.expectedErrorUnpacking {
+				assert.Nil(t, got)
+			} else {
+				assert.NotNil(t, got)
+				assert.Equal(t, tc.expectedComputerName, got.Extended.InstanceView.ComputerName)
+				assert.Equal(t, tc.expectedVmSize, got.HardwareProfile.VmSize)
+			}
+		})
+	}
 }

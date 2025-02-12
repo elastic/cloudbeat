@@ -109,16 +109,18 @@ Storage Bucket: 100% (1/1)
 
 ## AZURE Resources
 
-**Progress: 42% (23/54)**
+**Progress: 44% (24/54)**
 Access Management: 100% (3/3)
 Container Registry: 100% (1/1)
 Database: 100% (4/4)
 File System Service: 100% (2/2)
+Group: 100% (1/1)
 Host: 100% (1/1)
-Identity: 9% (1/11)
+Identity: 0% (0/9)
 Infrastructure: 8% (2/23)
 Messaging Service: 100% (2/2)
 Private Endpoint: 100% (1/1)
+Service Account: 100% (1/1)
 Service Usage Technology: 100% (2/2)
 Snapshot: 100% (1/1)
 Storage Bucket: 100% (1/1)
@@ -139,14 +141,13 @@ Web Service: 100% (1/1)
 | Database | Azure Storage Table |  | Yes ✅ |
 | File System Service | Azure Storage File Service |  | Yes ✅ |
 | File System Service | Azure Storage File Share |  | Yes ✅ |
+| Group | Azure AD Group | Azure Microsoft Entra ID Group | Yes ✅ |
 | Host | Azure Virtual Machine | Azure Virtual Machine | Yes ✅ |
 | Identity | Access Key |  | No ❌ |
 | Identity | API Gateway Client Certificate |  | No ❌ |
 | Identity | Azure AD Application |  | No ❌ |
-| Identity | Azure AD Group |  | No ❌ |
 | Identity | Azure AD Service Principal |  | No ❌ |
 | Identity | Azure AD User |  | No ❌ |
-| Identity | Azure Principal | Azure Principal | Yes ✅ |
 | Identity | Azure Role |  | No ❌ |
 | Identity | Azure Role Assignment |  | No ❌ |
 | Identity | Azure Server AD Administrator |  | No ❌ |
@@ -177,6 +178,7 @@ Web Service: 100% (1/1)
 | Messaging Service | Azure Storage Queue | Azure Storage Queue | Yes ✅ |
 | Messaging Service | Azure Storage Queue Service | Azure Storage Queue Service | Yes ✅ |
 | Private Endpoint | Azure Storage Account | Azure Storage Account | Yes ✅ |
+| Service Account | Azure Principal | Azure Principal | Yes ✅ |
 | Service Usage Technology | Azure Storage Blob Service | Azure Storage Blob Service | Yes ✅ |
 | Service Usage Technology | Azure Storage Table Service |  | Yes ✅ |
 | Snapshot | Azure Snapshot | Azure Snapshot | Yes ✅ |
