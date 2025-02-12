@@ -39,6 +39,114 @@ func (_m *mockActivedirectoryProvider) EXPECT() *mockActivedirectoryProvider_Exp
 	return &mockActivedirectoryProvider_Expecter{mock: &_m.Mock}
 }
 
+// ListDirectoryRoles provides a mock function with given fields: _a0
+func (_m *mockActivedirectoryProvider) ListDirectoryRoles(_a0 context.Context) ([]*models.DirectoryRole, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []*models.DirectoryRole
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*models.DirectoryRole, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*models.DirectoryRole); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.DirectoryRole)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// mockActivedirectoryProvider_ListDirectoryRoles_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListDirectoryRoles'
+type mockActivedirectoryProvider_ListDirectoryRoles_Call struct {
+	*mock.Call
+}
+
+// ListDirectoryRoles is a helper method to define mock.On call
+//   - _a0 context.Context
+func (_e *mockActivedirectoryProvider_Expecter) ListDirectoryRoles(_a0 interface{}) *mockActivedirectoryProvider_ListDirectoryRoles_Call {
+	return &mockActivedirectoryProvider_ListDirectoryRoles_Call{Call: _e.mock.On("ListDirectoryRoles", _a0)}
+}
+
+func (_c *mockActivedirectoryProvider_ListDirectoryRoles_Call) Run(run func(_a0 context.Context)) *mockActivedirectoryProvider_ListDirectoryRoles_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *mockActivedirectoryProvider_ListDirectoryRoles_Call) Return(_a0 []*models.DirectoryRole, _a1 error) *mockActivedirectoryProvider_ListDirectoryRoles_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *mockActivedirectoryProvider_ListDirectoryRoles_Call) RunAndReturn(run func(context.Context) ([]*models.DirectoryRole, error)) *mockActivedirectoryProvider_ListDirectoryRoles_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListGroups provides a mock function with given fields: _a0
+func (_m *mockActivedirectoryProvider) ListGroups(_a0 context.Context) ([]*models.Group, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []*models.Group
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*models.Group, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*models.Group); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.Group)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// mockActivedirectoryProvider_ListGroups_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListGroups'
+type mockActivedirectoryProvider_ListGroups_Call struct {
+	*mock.Call
+}
+
+// ListGroups is a helper method to define mock.On call
+//   - _a0 context.Context
+func (_e *mockActivedirectoryProvider_Expecter) ListGroups(_a0 interface{}) *mockActivedirectoryProvider_ListGroups_Call {
+	return &mockActivedirectoryProvider_ListGroups_Call{Call: _e.mock.On("ListGroups", _a0)}
+}
+
+func (_c *mockActivedirectoryProvider_ListGroups_Call) Run(run func(_a0 context.Context)) *mockActivedirectoryProvider_ListGroups_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *mockActivedirectoryProvider_ListGroups_Call) Return(_a0 []*models.Group, _a1 error) *mockActivedirectoryProvider_ListGroups_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *mockActivedirectoryProvider_ListGroups_Call) RunAndReturn(run func(context.Context) ([]*models.Group, error)) *mockActivedirectoryProvider_ListGroups_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListServicePrincipals provides a mock function with given fields: ctx
 func (_m *mockActivedirectoryProvider) ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error) {
 	ret := _m.Called(ctx)
@@ -89,6 +197,60 @@ func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Return(_a0 []*
 }
 
 func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) RunAndReturn(run func(context.Context) ([]*models.ServicePrincipal, error)) *mockActivedirectoryProvider_ListServicePrincipals_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListUsers provides a mock function with given fields: _a0
+func (_m *mockActivedirectoryProvider) ListUsers(_a0 context.Context) ([]*models.User, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []*models.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*models.User, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*models.User); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// mockActivedirectoryProvider_ListUsers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListUsers'
+type mockActivedirectoryProvider_ListUsers_Call struct {
+	*mock.Call
+}
+
+// ListUsers is a helper method to define mock.On call
+//   - _a0 context.Context
+func (_e *mockActivedirectoryProvider_Expecter) ListUsers(_a0 interface{}) *mockActivedirectoryProvider_ListUsers_Call {
+	return &mockActivedirectoryProvider_ListUsers_Call{Call: _e.mock.On("ListUsers", _a0)}
+}
+
+func (_c *mockActivedirectoryProvider_ListUsers_Call) Run(run func(_a0 context.Context)) *mockActivedirectoryProvider_ListUsers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *mockActivedirectoryProvider_ListUsers_Call) Return(_a0 []*models.User, _a1 error) *mockActivedirectoryProvider_ListUsers_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *mockActivedirectoryProvider_ListUsers_Call) RunAndReturn(run func(context.Context) ([]*models.User, error)) *mockActivedirectoryProvider_ListUsers_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -20,6 +20,8 @@ package azurefetcher
 import (
 	"context"
 
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
@@ -27,6 +29,7 @@ import (
 
 type resourceGraphFetcher struct {
 	logger   *clog.Logger
+	tenantID string //nolint:unused
 	provider resourceGraphProvider
 }
 
@@ -36,9 +39,10 @@ type (
 	}
 )
 
-func newResourceGraphFetcher(logger *clog.Logger, provider resourceGraphProvider) inventory.AssetFetcher {
+func newResourceGraphFetcher(logger *clog.Logger, tenantID string, provider resourceGraphProvider) inventory.AssetFetcher {
 	return &resourceGraphFetcher{
 		logger:   logger,
+		tenantID: tenantID,
 		provider: provider,
 	}
 }
@@ -83,7 +87,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 		if name == "" {
 			name = item.DisplayName
 		}
-		assetChan <- inventory.NewAssetEvent(
+		asset := inventory.NewAssetEvent(
 			classification,
 			item.Id,
 			name,
@@ -93,6 +97,41 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",
 			}),
+			inventory.WithLabelsFromAny(item.Tags),
 		)
+
+		if resourceType == azurelib.VirtualMachineAssetType {
+			vmProperties := tryUnpackingVMProperties(item.Properties)
+			if vmProperties != nil {
+				asset.Host = &inventory.Host{
+					ID:   item.Id,
+					Name: vmProperties.Extended.InstanceView.ComputerName,
+					Type: vmProperties.HardwareProfile.VmSize,
+				}
+			}
+		}
+
+		assetChan <- asset
 	}
+}
+
+//nolint:revive
+type vmProperties struct {
+	Extended struct {
+		InstanceView struct {
+			ComputerName string
+		}
+	}
+	HardwareProfile struct {
+		VmSize string
+	}
+}
+
+func tryUnpackingVMProperties(m map[string]any) *vmProperties {
+	o := &vmProperties{}
+	err := mapstructure.Decode(m, o)
+	if err != nil {
+		return nil
+	}
+	return o
 }
