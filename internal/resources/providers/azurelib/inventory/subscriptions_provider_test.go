@@ -304,6 +304,7 @@ func TestSubscriptionProvider_ListSubscriptions(t *testing.T) {
 					SubscriptionId: "uuid",
 					TenantId:       "uuid2",
 					Type:           SubscriptionAssetType,
+					Tags:           map[string]any{},
 				},
 			},
 		},

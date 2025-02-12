@@ -17,7 +17,10 @@
 
 package inventory
 
-import "github.com/samber/lo"
+import (
+	"github.com/mitchellh/mapstructure"
+	"github.com/samber/lo"
+)
 
 // AssetCategory is used to build the document index.
 type AssetCategory string
@@ -31,6 +34,7 @@ const (
 	CategoryFaaS                   AssetCategory = "FaaS"
 	CategoryFirewall               AssetCategory = "Firewall"
 	CategoryGateway                AssetCategory = "Gateway"
+	CategoryGroup                  AssetCategory = "Group"
 	CategoryHost                   AssetCategory = "Host"
 	CategoryIdentity               AssetCategory = "Identity"
 	CategoryInfrastructure         AssetCategory = "Infrastructure"
@@ -92,6 +96,7 @@ var (
 	AssetClassificationAwsSnsTopic                 = AssetClassification{CategoryMessagingService, "AWS SNS Topic"}
 
 	// Azure
+<<<<<<< HEAD
 	AssetClassificationAzureAppService          = AssetClassification{CategoryWebService, "Azure App Service"}
 	AssetClassificationAzureContainerRegistry   = AssetClassification{CategoryContainerRegistry, "Azure Container Registry"}
 	AssetClassificationAzureCosmosDBAccount     = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB Account"}
@@ -110,6 +115,34 @@ var (
 	AssetClassificationAzureSubscription        = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
 	AssetClassificationAzureTenant              = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
 	AssetClassificationAzureVirtualMachine      = AssetClassification{CategoryHost, "Azure Virtual Machine"}
+=======
+	AssetClassificationAzureAppService           = AssetClassification{CategoryWebService, "Azure App Service"}
+	AssetClassificationAzureContainerRegistry    = AssetClassification{CategoryContainerRegistry, "Azure Container Registry"}
+	AssetClassificationAzureCosmosDBAccount      = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB Account"}
+	AssetClassificationAzureCosmosDBSQLDatabase  = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
+	AssetClassificationAzureDisk                 = AssetClassification{CategoryVolume, "Azure Disk"}
+	AssetClassificationAzureElasticPool          = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
+	AssetClassificationAzureEntraGroup           = AssetClassification{CategoryGroup, "Azure Microsoft Entra ID Group"}
+	AssetClassificationAzureEntraUser            = AssetClassification{CategoryIdentity, "Azure Microsoft Entra ID User"}
+	AssetClassificationAzureResourceGroup        = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
+	AssetClassificationAzureRoleDefinition       = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
+	AssetClassificationAzureSQLDatabase          = AssetClassification{CategoryDatabase, "Azure SQL Database"}
+	AssetClassificationAzureSQLServer            = AssetClassification{CategoryDatabase, "Azure SQL Server"}
+	AssetClassificationAzureServicePrincipal     = AssetClassification{CategoryServiceAccount, "Azure Principal"}
+	AssetClassificationAzureSnapshot             = AssetClassification{CategorySnapshot, "Azure Snapshot"}
+	AssetClassificationAzureStorageAccount       = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
+	AssetClassificationAzureStorageBlobContainer = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Container"}
+	AssetClassificationAzureStorageBlobService   = AssetClassification{CategoryServiceUsageTechnology, "Azure Storage Blob Service"}
+	AssetClassificationAzureStorageFileService   = AssetClassification{CategoryFileSystemService, "Azure Storage File Service"}
+	AssetClassificationAzureStorageFileShare     = AssetClassification{CategoryFileSystemService, "Azure Storage File Share"}
+	AssetClassificationAzureStorageQueue         = AssetClassification{CategoryMessagingService, "Azure Storage Queue"}
+	AssetClassificationAzureStorageQueueService  = AssetClassification{CategoryMessagingService, "Azure Storage Queue Service"}
+	AssetClassificationAzureStorageTable         = AssetClassification{CategoryDatabase, "Azure Storage Table"}
+	AssetClassificationAzureStorageTableService  = AssetClassification{CategoryServiceUsageTechnology, "Azure Storage Table Service"}
+	AssetClassificationAzureSubscription         = AssetClassification{CategoryAccessManagement, "Azure Subscription"}
+	AssetClassificationAzureTenant               = AssetClassification{CategoryAccessManagement, "Azure Tenant"}
+	AssetClassificationAzureVirtualMachine       = AssetClassification{CategoryHost, "Azure Virtual Machine"}
+>>>>>>> da397ba4 ([Asset Inventory][Azure] Add missing resources and ECS fields required for GA (#2954))
 
 	// GCP
 	AssetClassificationGcpProject           = AssetClassification{CategoryAccount, "GCP Project"}
@@ -132,14 +165,15 @@ var (
 type AssetEvent struct {
 	Entity        Entity
 	Event         Event
-	Network       *Network
-	URL           *URL
-	Organization  *Organization
 	Cloud         *Cloud
-	Fass          *Fass
-	Orchestrator  *Orchestrator
 	Container     *Container
+	Fass          *Fass
+	Group         *Group
 	Host          *Host
+	Network       *Network
+	Orchestrator  *Orchestrator
+	Organization  *Organization
+	URL           *URL
 	User          *User
 	Labels        map[string]string
 	Tags          []string
@@ -192,6 +226,12 @@ type Cloud struct {
 	ServiceName      string `json:"service.name,omitempty"`
 	ProjectID        string `json:"project.id,omitempty"`
 	ProjectName      string `json:"project.name,omitempty"`
+}
+
+type Group struct {
+	ID     string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Domain string `json:"domain,omitempty"`
 }
 
 type Host struct {
@@ -275,13 +315,16 @@ func WithLabels(labels map[string]string) AssetEnricher {
 	}
 }
 
-func WithTags(tags []string) AssetEnricher {
+func WithLabelsFromAny(labels map[string]any) AssetEnricher {
 	return func(a *AssetEvent) {
-		if len(tags) == 0 {
+		if len(labels) == 0 {
 			return
 		}
-
-		a.Tags = tags
+		output := map[string]string{}
+		if err := mapstructure.Decode(labels, &output); err != nil {
+			return
+		}
+		a.Labels = output
 	}
 }
 
@@ -297,9 +340,24 @@ func WithCloud(cloud Cloud) AssetEnricher {
 	}
 }
 
+func WithGroup(group Group) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Group = &group
+	}
+}
+
 func WithHost(host Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
+	}
+}
+
+func WithTags(tags []string) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(tags) == 0 {
+			return
+		}
+		a.Tags = tags
 	}
 }
 

@@ -28,6 +28,7 @@ import (
 
 type storageFetcher struct {
 	logger   *clog.Logger
+	tenantID string //nolint:unused
 	provider storageProvider
 }
 
@@ -42,9 +43,10 @@ type (
 	}
 )
 
-func newStorageFetcher(logger *clog.Logger, provider storageProvider) inventory.AssetFetcher {
+func newStorageFetcher(logger *clog.Logger, tenantID string, provider storageProvider) inventory.AssetFetcher {
 	return &storageFetcher{
 		logger:   logger,
+		tenantID: tenantID,
 		provider: provider,
 	}
 }
@@ -111,6 +113,7 @@ func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.A
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",
 			}),
+			inventory.WithLabelsFromAny(item.Tags),
 		)
 	}
 }
