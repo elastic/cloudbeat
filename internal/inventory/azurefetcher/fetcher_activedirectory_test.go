@@ -20,7 +20,7 @@ package azurefetcher
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 	"time"
 
@@ -175,7 +175,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 
 	provider := newMockActivedirectoryProvider(t)
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
-		[]*models.ServicePrincipal{}, fmt.Errorf("! error listing service principals"),
+		[]*models.ServicePrincipal{}, errors.New("! error listing service principals"),
 	)
 	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
 		[]*models.DirectoryRole{}, nil,

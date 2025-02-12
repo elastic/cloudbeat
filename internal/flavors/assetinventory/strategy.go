@@ -19,6 +19,7 @@ package assetinventory
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -63,7 +64,7 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 	case config.ProviderGCP:
 		fetchers, err = s.initGcpFetchers(ctx)
 	case "":
-		err = fmt.Errorf("missing config.v1.asset_inventory_provider setting")
+		err = errors.New("missing config.v1.asset_inventory_provider setting")
 	default:
 		err = fmt.Errorf("unsupported Asset Inventory provider %q", s.cfg.AssetInventoryProvider)
 	}

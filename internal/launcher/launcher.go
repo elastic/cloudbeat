@@ -248,7 +248,7 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 
 	case update, ok := <-l.reloader.Channel():
 		if !ok {
-			return nil, fmt.Errorf("reloader channel unexpectedly closed")
+			return nil, errors.New("reloader channel unexpectedly closed")
 		}
 
 		l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
@@ -285,14 +285,14 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 	for {
 		select {
 		case <-l.beaterErr:
-			return nil, fmt.Errorf("error channel closed")
+			return nil, errors.New("error channel closed")
 
 		case <-timer:
 			return nil, fmt.Errorf("timed out waiting for reconfiguration after %s", time.Since(start))
 
 		case update, ok := <-l.reloader.Channel():
 			if !ok {
-				return nil, fmt.Errorf("reconfiguration channel is closed")
+				return nil, errors.New("reconfiguration channel is closed")
 			}
 
 			if l.validator != nil {
