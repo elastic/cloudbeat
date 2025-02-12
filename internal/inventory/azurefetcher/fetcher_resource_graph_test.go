@@ -18,6 +18,7 @@
 package azurefetcher
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,6 +48,11 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 		DisplayName: "<name3>",
 		TenantId:    "<tenant id>",
 		Properties: map[string]any{
+			"extended": map[string]any{
+				"instanceView": map[string]any{
+					"computerName": "localhost",
+				},
+			},
 			"hardwareProfile": map[string]any{
 				"vmSize": "xlarge",
 			},
@@ -88,6 +94,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			}),
 			inventory.WithHost(inventory.Host{
 				ID:   vm.Id,
+				Name: "localhost",
 				Type: "xlarge",
 			}),
 		),
@@ -126,48 +133,51 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
 
-func TestHelperMethod_UnpackNestedStrings(t *testing.T) {
-	playground := map[string]any{
-		"a": map[string]any{
-			"a1":        "x",
-			"a2":        "y",
-			"not-a-map": []string{},
+func TestHelperMethod_UnpackVMProperties(t *testing.T) {
+	cases := []struct {
+		name                   string
+		input                  string
+		expectedComputerName   string
+		expectedVmSize         string
+		expectedErrorUnpacking bool
+	}{
+		{
+			name:  "no overlap with vmProperties",
+			input: `{"this is not a matching map": "nope"}`,
 		},
-		"b": nil,
-		"c": map[string]any{
-			"d": map[string]any{
-				"e": map[string]any{
-					"f": map[string]any{
-						"g": map[string]any{
-							"HEY": "THERE",
-						},
-					},
-				},
-			},
+		{
+			name:                   "types do not match vmProperties but keys do",
+			input:                  `{"extended": {"instanceView": "this is wrong"}}`,
+			expectedErrorUnpacking: true,
 		},
-		"d": "NOPE",
+		{
+			name:                 "missing data does not break the flow",
+			input:                `{"extended": {"instanceView": {"computerName": "localhost"}}}`,
+			expectedComputerName: "localhost",
+			expectedVmSize:       "",
+		},
+		{
+			name:                 "happy path",
+			input:                `{"extended": {"instanceView": {"computerName": "localhost"}}, "hardwareProfile": {"vmSize": "xlarge"}}`,
+			expectedComputerName: "localhost",
+			expectedVmSize:       "xlarge",
+		},
 	}
-	// path -> expected return
-	cases := map[string]string{
-		// Expected failures
-		"x":           "",
-		".":           "",
-		"..":          "",
-		">><<@@!!":    "",
-		"d":           "", // This function handles ONLY nested strings
-		"b":           "",
-		"c.d.e":       "",
-		"a.not-a-map": "",
-		"a.not-there": "",
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			m := map[string]any{}
+			err := json.Unmarshal([]byte(tc.input), &m)
+			assert.NoError(t, err)
+			got := tryUnpackingVMProperties(m)
 
-		// Expected success
-		"a.a1":          "x",
-		"a.a2":          "y",
-		"c.d.e.f.g.HEY": "THERE",
-	}
+			if tc.expectedErrorUnpacking {
+				assert.Nil(t, got)
+			} else {
+				assert.NotNil(t, got)
+				assert.Equal(t, got.Extended.InstanceView.ComputerName, tc.expectedComputerName)
+				assert.Equal(t, got.HardwareProfile.VmSize, tc.expectedVmSize)
+			}
 
-	for path, expected := range cases {
-		got := tryUnpackingNestedString(playground, path)
-		assert.Equal(t, expected, got)
+		})
 	}
 }

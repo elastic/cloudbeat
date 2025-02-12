@@ -19,11 +19,11 @@ package azurefetcher
 
 import (
 	"context"
-	"strings"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/mitchellh/mapstructure"
 )
 
 type resourceGraphFetcher struct {
@@ -100,10 +100,13 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 		)
 
 		if resourceType == azurelib.VirtualMachineAssetType {
-			asset.Host = &inventory.Host{
-				ID:   item.Id,
-				Name: tryUnpackingNestedString(item.Properties, "extended.instanceView.computerName"),
-				Type: tryUnpackingNestedString(item.Properties, "hardwareProfile.vmSize"),
+			vmProperties := tryUnpackingVMProperties(item.Properties)
+			if vmProperties != nil {
+				asset.Host = &inventory.Host{
+					ID:   item.Id,
+					Name: vmProperties.Extended.InstanceView.ComputerName,
+					Type: vmProperties.HardwareProfile.VmSize,
+				}
 			}
 		}
 
@@ -111,31 +114,22 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 	}
 }
 
-func tryUnpackingNestedString(m map[string]any, path string) string {
-	keys := strings.Split(path, ".")
-	if len(keys) < 2 || m == nil {
-		return ""
-	}
-	lastKey := keys[len(keys)-1]
-	keys = keys[:len(keys)-1]
-	for _, k := range keys {
-		nestedMap, ok := m[k]
-		if !ok {
-			return ""
+type vmProperties struct {
+	Extended struct {
+		InstanceView struct {
+			ComputerName string
 		}
-		castMap, ok := nestedMap.(map[string]any)
-		if !ok {
-			return ""
-		}
-		m = castMap
 	}
-	rawString, ok := m[lastKey]
-	if !ok {
-		return ""
+	HardwareProfile struct {
+		VmSize string
 	}
-	s, ok := rawString.(string)
-	if !ok {
-		return ""
+}
+
+func tryUnpackingVMProperties(m map[string]any) *vmProperties {
+	o := &vmProperties{}
+	err := mapstructure.Decode(m, o)
+	if err != nil {
+		return nil
 	}
-	return s
+	return o
 }
