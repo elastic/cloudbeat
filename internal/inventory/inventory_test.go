@@ -71,7 +71,21 @@ func TestAssetInventory_Run(t *testing.T) {
 					Name: "name",
 				},
 				"related.entity": []string{"arn:aws:ec2:us-east::ec2/234567890"},
-				"Attributes":     emptyRef,
+				"tags":           []string{"foo", "bar"},
+				"orchestrator": &Orchestrator{
+					Type: "kubernetes",
+				},
+				"container": &Container{},
+				"organization": &Organization{
+					ID: "org-id",
+				},
+				"fass": &Fass{
+					Name: "fass",
+				},
+				"url": &URL{
+					Full: "https://example.com",
+				},
+				"Attributes": emptyRef,
 			},
 		},
 	}
@@ -108,6 +122,20 @@ func TestAssetInventory_Run(t *testing.T) {
 			WithNetwork(Network{
 				Name: "vpc-id",
 			}),
+			WithContainer(Container{}),
+			WithOrchestrator(Orchestrator{
+				Type: "kubernetes",
+			}),
+			WithOrganization(Organization{
+				ID: "org-id",
+			}),
+			WithFass(Fass{
+				Name: "fass",
+			}),
+			WithURL(URL{
+				Full: "https://example.com",
+			}),
+			WithTags([]string{"foo", "bar"}),
 		)
 	})
 
