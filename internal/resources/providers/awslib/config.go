@@ -60,8 +60,6 @@ func CloudConnectorsExternalID(resourceID, externalIDPart string) string {
 
 func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfig) (*aws.Config, error) {
 	// 1. Load initial config - Chain Part 1 - Elastic Super Role Local implicitly assumed.
-	// (TODO: check directly assuming the first role in chain and/or libbeataws.InitializeAWSConfig(cfg))
-	// (TODO: consider os.Setenv("AWS_EC2_METADATA_DISABLED", "true"))
 	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
