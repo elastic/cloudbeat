@@ -23,6 +23,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	azurelib "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -114,6 +115,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 	}
 }
 
+//nolint:revive
 type vmProperties struct {
 	Extended struct {
 		InstanceView struct {

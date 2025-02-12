@@ -23,6 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -167,17 +168,16 @@ func TestHelperMethod_UnpackVMProperties(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			m := map[string]any{}
 			err := json.Unmarshal([]byte(tc.input), &m)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			got := tryUnpackingVMProperties(m)
 
 			if tc.expectedErrorUnpacking {
 				assert.Nil(t, got)
 			} else {
 				assert.NotNil(t, got)
-				assert.Equal(t, got.Extended.InstanceView.ComputerName, tc.expectedComputerName)
-				assert.Equal(t, got.HardwareProfile.VmSize, tc.expectedVmSize)
+				assert.Equal(t, tc.expectedComputerName, got.Extended.InstanceView.ComputerName)
+				assert.Equal(t, tc.expectedVmSize, got.HardwareProfile.VmSize)
 			}
-
 		})
 	}
 }
