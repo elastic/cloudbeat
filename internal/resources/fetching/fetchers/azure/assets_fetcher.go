@@ -51,31 +51,23 @@ type typePair struct {
 	Type    string
 }
 
-func newPair(subType string, tpe string) typePair {
-	return typePair{
-		SubType: subType,
-		Type:    tpe,
-	}
-}
-
 var AzureAssetTypeToTypePair = map[string]typePair{
-	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
-	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
-	inventory.DocumentDBDatabaseAccountAssetType: newPair(fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase),
-	inventory.MySQLDBAssetType:                   newPair(fetching.AzureMySQLDBType, fetching.CloudDatabase),
-	inventory.FlexibleMySQLDBAssetType:           newPair(fetching.AzureFlexibleMySQLDBType, fetching.CloudDatabase),
-	inventory.NetworkWatchersFlowLogAssetType:    newPair(fetching.AzureNetworkWatchersFlowLogType, fetching.MonitoringIdentity),
-	inventory.FlexiblePostgreSQLDBAssetType:      newPair(fetching.AzureFlexiblePostgreSQLDBType, fetching.CloudDatabase),
-	inventory.PostgreSQLDBAssetType:              newPair(fetching.AzurePostgreSQLDBType, fetching.CloudDatabase),
-	inventory.SQLServersAssetType:                newPair(fetching.AzureSQLServerType, fetching.CloudDatabase),
-	inventory.StorageAccountAssetType:            newPair(fetching.AzureStorageAccountType, fetching.CloudStorage),
-	inventory.VirtualMachineAssetType:            newPair(fetching.AzureVMType, fetching.CloudCompute),
-	inventory.WebsitesAssetType:                  newPair(fetching.AzureWebSiteType, fetching.CloudCompute),
-	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
-	inventory.RoleDefinitionsType:                newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
-
+	inventory.ClassicStorageAccountAssetType:     {fetching.AzureClassicStorageAccountType, fetching.CloudStorage},
+	inventory.DiskAssetType:                      {fetching.AzureDiskType, fetching.CloudCompute},
+	inventory.DocumentDBDatabaseAccountAssetType: {fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase},
+	inventory.MySQLDBAssetType:                   {fetching.AzureMySQLDBType, fetching.CloudDatabase},
+	inventory.FlexibleMySQLDBAssetType:           {fetching.AzureFlexibleMySQLDBType, fetching.CloudDatabase},
+	inventory.NetworkWatchersFlowLogAssetType:    {fetching.AzureNetworkWatchersFlowLogType, fetching.MonitoringIdentity},
+	inventory.FlexiblePostgreSQLDBAssetType:      {fetching.AzureFlexiblePostgreSQLDBType, fetching.CloudDatabase},
+	inventory.PostgreSQLDBAssetType:              {fetching.AzurePostgreSQLDBType, fetching.CloudDatabase},
+	inventory.SQLServersAssetType:                {fetching.AzureSQLServerType, fetching.CloudDatabase},
+	inventory.StorageAccountAssetType:            {fetching.AzureStorageAccountType, fetching.CloudStorage},
+	inventory.VirtualMachineAssetType:            {fetching.AzureVMType, fetching.CloudCompute},
+	inventory.WebsitesAssetType:                  {fetching.AzureWebSiteType, fetching.CloudCompute},
+	inventory.VaultAssetType:                     {fetching.AzureVaultType, fetching.KeyManagement},
+	inventory.RoleDefinitionsType:                {fetching.AzureRoleDefinitionType, fetching.CloudIdentity},
 	// This asset type is used only for enrichment purposes, but is sent to OPA layer, producing no findings.
-	inventory.NetworkSecurityGroupAssetType: newPair(fetching.AzureNetworkSecurityGroupType, fetching.MonitoringIdentity),
+	inventory.NetworkSecurityGroupAssetType: {fetching.AzureNetworkSecurityGroupType, fetching.MonitoringIdentity},
 }
 
 // In order to simplify the mappings, we are trying to query all AzureAssetTypeToTypePair on every asset group
