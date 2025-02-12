@@ -19,7 +19,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  init-hermit:
+    name: Init Hermit Tools
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: 'true'
+  
   check-asset-inventory-supported-version:
+    needs: [ init-hermit ]    
     name: Check Asset Inventory supported version
     runs-on: ubuntu-22.04
     outputs:
@@ -27,6 +40,9 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
 
       - name: Check Asset Inventory supported version
         id: check-asset-inventory-supported-version
@@ -41,18 +57,6 @@ jobs:
             echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
             echo "asset_inventory_supported=false" >> $GITHUB_ENV
           fi
-
-  init-hermit:
-    name: Init Hermit Tools
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
-        with:
-          init-tools: 'true'
 
   ci-azure:
     needs: [ init-hermit ]
