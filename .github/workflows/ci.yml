@@ -30,7 +30,7 @@ jobs:
         uses: ./.github/actions/hermit
         with:
           init-tools: 'true'
-  
+
   check-asset-inventory-supported-version:
     needs: [ init-hermit ]    
     name: Check Asset Inventory supported version
