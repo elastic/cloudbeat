@@ -32,7 +32,7 @@ jobs:
           init-tools: 'true'
 
   check-asset-inventory-supported-version:
-    needs: [ init-hermit ]    
+    needs: [ init-hermit ]
     name: Check Asset Inventory supported version
     runs-on: ubuntu-22.04
     outputs:
