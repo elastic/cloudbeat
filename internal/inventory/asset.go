@@ -17,7 +17,10 @@
 
 package inventory
 
-import "github.com/samber/lo"
+import (
+	"github.com/mitchellh/mapstructure"
+	"github.com/samber/lo"
+)
 
 // AssetCategory is used to build the document index.
 type AssetCategory string
@@ -268,17 +271,11 @@ func WithLabelsFromAny(labels map[string]any) AssetEnricher {
 		if len(labels) == 0 {
 			return
 		}
-		a.Labels = map[string]string{}
-		for k, v := range labels {
-			sv, ok := v.(string)
-			if ok {
-				a.Labels[k] = sv
-			}
-			spv, ok := v.(*string)
-			if ok {
-				a.Labels[k] = *spv
-			}
+		output := map[string]string{}
+		if err := mapstructure.Decode(labels, &output); err != nil {
+			return
 		}
+		a.Labels = output
 	}
 }
 
