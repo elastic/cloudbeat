@@ -18,6 +18,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/elastic/beats/v7/libbeat/cmd"
@@ -57,12 +58,12 @@ func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) 
 	config := rawIn.Source.AsMap()
 	packagePolicyID, ok := config["package_policy_id"]
 	if !ok {
-		return nil, fmt.Errorf("'package_policy_id' element does not exist")
+		return nil, errors.New("'package_policy_id' element does not exist")
 	}
 
 	packagePolicyRevision, ok := config["revision"]
 	if !ok {
-		return nil, fmt.Errorf("'revision' element does not exist")
+		return nil, errors.New("'revision' element does not exist")
 	}
 
 	for i := range modules {

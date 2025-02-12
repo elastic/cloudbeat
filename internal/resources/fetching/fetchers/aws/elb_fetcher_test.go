@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
@@ -169,7 +170,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
 				},
 			},
-			fmt.Errorf("elb error")},
+			errors.New("elb error")},
 	}
 	for _, test := range tests {
 		kubeclient := k8sfake.NewSimpleClientset()
