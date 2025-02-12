@@ -59,7 +59,7 @@ func CloudConnectorsExternalID(resourceID, externalIDPart string) string {
 }
 
 func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfig) (*aws.Config, error) {
-	// 1. Load initial config
+	// 1. Load initial config - Chain Part 1 - Elastic Super Role Local implicitly assumed.
 	// (TODO: check directly assuming the first role in chain and/or libbeataws.InitializeAWSConfig(cfg))
 	// (TODO: consider os.Setenv("AWS_EC2_METADATA_DISABLED", "true"))
 	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
@@ -72,22 +72,9 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 
 	const defaultDuration = 20 * time.Minute
 
-	// Chain Part 1 - Elastic Super Role Local
-	localSuperRoleProvider := stscreds.NewAssumeRoleProvider(
-		firstClient,
-		cfg.CloudConnectorsConfig.LocalRoleARN,
-		func(aro *stscreds.AssumeRoleOptions) {
-			aro.RoleSessionName = "cloudbeat-super-role-local"
-			aro.Duration = defaultDuration
-		},
-	)
-	localSuperRoleCredentialsCache := aws.NewCredentialsCache(localSuperRoleProvider)
-
 	// Chain Part 2 - Elastic Super Role Global
-	globalSuperRoleCfg := awsConfig
-	globalSuperRoleCfg.Credentials = localSuperRoleCredentialsCache
 	globalSuperRoleProvider := stscreds.NewAssumeRoleProvider(
-		sts.NewFromConfig(globalSuperRoleCfg),
+		firstClient,
 		cfg.CloudConnectorsConfig.GlobalRoleARN,
 		func(aro *stscreds.AssumeRoleOptions) {
 			aro.RoleSessionName = "cloudbeat-super-role-global"
@@ -105,7 +92,7 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 		func(aro *stscreds.AssumeRoleOptions) {
 			aro.RoleSessionName = "cloudbeat-remote-role"
 			aro.Duration = cfg.Cred.AssumeRoleDuration
-			aro.ExternalID = aws.String(CloudConnectorsExternalID(cfg.CloudConnectorsConfig.LocalRoleARN, cfg.Cred.ExternalID))
+			aro.ExternalID = aws.String(CloudConnectorsExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
 		},
 	)
 	customerRemoteRoleCredentialsCache := aws.NewCredentialsCache(customerRemoteRoleProvider)
