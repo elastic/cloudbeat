@@ -70,7 +70,7 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 	// Create an STS client using the base credentials
 	firstClient := sts.NewFromConfig(awsConfig)
 
-	const defaultDuration = 5 * time.Minute
+	const defaultDuration = 20 * time.Minute
 
 	// Chain Part 1 - Elastic Super Role Local
 	localSuperRoleProvider := stscreds.NewAssumeRoleProvider(
