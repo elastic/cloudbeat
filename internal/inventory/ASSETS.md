@@ -109,13 +109,14 @@ Storage Bucket: 100% (1/1)
 
 ## AZURE Resources
 
-**Progress: 42% (23/54)**
+**Progress: 44% (24/54)**
 Access Management: 100% (3/3)
 Container Registry: 100% (1/1)
 Database: 100% (4/4)
 File System Service: 100% (2/2)
+Group: 100% (1/1)
 Host: 100% (1/1)
-Identity: 0% (0/10)
+Identity: 0% (0/9)
 Infrastructure: 8% (2/23)
 Messaging Service: 100% (2/2)
 Private Endpoint: 100% (1/1)
@@ -140,11 +141,11 @@ Web Service: 100% (1/1)
 | Database | Azure Storage Table |  | Yes ✅ |
 | File System Service | Azure Storage File Service |  | Yes ✅ |
 | File System Service | Azure Storage File Share |  | Yes ✅ |
+| Group | Azure AD Group | Azure Microsoft Entra ID Group | Yes ✅ |
 | Host | Azure Virtual Machine | Azure Virtual Machine | Yes ✅ |
 | Identity | Access Key |  | No ❌ |
 | Identity | API Gateway Client Certificate |  | No ❌ |
 | Identity | Azure AD Application |  | No ❌ |
-| Identity | Azure AD Group |  | No ❌ |
 | Identity | Azure AD Service Principal |  | No ❌ |
 | Identity | Azure AD User |  | No ❌ |
 | Identity | Azure Role |  | No ❌ |
