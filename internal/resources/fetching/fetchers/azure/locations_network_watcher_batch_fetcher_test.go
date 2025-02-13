@@ -330,7 +330,10 @@ func batchedNetworkWatcherByLocationResourceInfo(cycle cycle.Metadata, subscript
 	return fetching.ResourceInfo{
 		CycleMetadata: cycle,
 		Resource: &NetworkWatchersBatchedByLocationResource{
-			typePair:        newPair(fetching.AzureNetworkWatchersType, fetching.MonitoringIdentity),
+			typePair: typePair{
+				SubType: fetching.AzureNetworkWatchersType,
+				Type:    fetching.MonitoringIdentity,
+			},
 			Subscription:    subscription,
 			Location:        azAssetLocation(subscription.ShortID, location),
 			NetworkWatchers: networkWatchers,
