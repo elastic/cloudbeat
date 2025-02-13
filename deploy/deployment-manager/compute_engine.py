@@ -90,7 +90,7 @@ def generate_config(context):
                                 "tar xzvf $ElasticAgentArtifact.tar.gz\n",
                                 "cd $ElasticAgentArtifact\n",
                                 f"sudo ./elastic-agent install "
-                                f"--non-interactive --url={fleet_url} --enrollment-token={enrollment_token}",
+                                f"--non-interactive --install-servers --url={fleet_url} --enrollment-token={enrollment_token}",
                             ],
                         ),
                     },
