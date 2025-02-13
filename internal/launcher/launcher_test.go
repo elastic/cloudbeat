@@ -22,7 +22,6 @@ package launcher
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -120,7 +119,7 @@ type validatorMock struct {
 func (v *validatorMock) Validate(cfg *config.C) error {
 	var err error
 	if !reflect.DeepEqual(cfg, v.expected) {
-		err = fmt.Errorf("mock validation failed")
+		err = errors.New("mock validation failed")
 	}
 
 	return err

@@ -48,6 +48,9 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 				AccountID:   "<tenant UUID>",
 				ServiceName: "Azure",
 			}),
+			inventory.WithOrganization(inventory.Organization{
+				ID: "<tenant UUID>",
+			}),
 		),
 	}
 
@@ -56,7 +59,7 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(azureAssets, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(nil, nil)
-	fetcher := newAccountFetcher(logger, provider)
+	fetcher := newAccountFetcher(logger, "<tenant UUID>", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
@@ -81,6 +84,9 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 				AccountID:   "<sub UUID>",
 				ServiceName: "Azure",
 			}),
+			inventory.WithOrganization(inventory.Organization{
+				ID: "<sub UUID>",
+			}),
 		),
 	}
 
@@ -89,7 +95,7 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(nil, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(azureAssets, nil)
-	fetcher := newAccountFetcher(logger, provider)
+	fetcher := newAccountFetcher(logger, "<tenant UUID>", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
