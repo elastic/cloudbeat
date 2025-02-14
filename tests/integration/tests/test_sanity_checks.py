@@ -10,6 +10,8 @@ verifying that there are findings of 'resource.type' for each feature.
 import time
 
 import pytest
+from loguru import logger
+
 from commonlib.agents_map import (
     CIS_AWS_COMPONENT,
     CIS_AZURE_COMPONENT,
@@ -19,7 +21,6 @@ from commonlib.agents_map import (
 )
 from commonlib.utils import get_findings
 from configuration import elasticsearch
-from loguru import logger
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 1200
@@ -320,8 +321,13 @@ def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedM
 
     return actual.component_map[component]
 
+
 def try_loading_map(actual: AgentComponentMapping) -> None:
+    """
+    A convenient wrapper to catch errors when the actual map that is supposed to be loaded
+    is not ready yet.
+    """
     try:
         actual.load_map()
-    except Exception as ex:
+    except (AttributeError, KeyError, IndexError) as ex:
         logger.warning(ex)
