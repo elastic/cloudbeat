@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -142,5 +143,5 @@ func (provider EKSClusterNameProvider) getClusterNameFromAutoscalingGroup(ctx co
 		}
 		input.NextToken = r.NextToken
 	}
-	return "", fmt.Errorf("cluster name not found from autoscaling groups")
+	return "", errors.New("cluster name not found from autoscaling groups")
 }
