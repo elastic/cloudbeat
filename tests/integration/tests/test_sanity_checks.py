@@ -304,14 +304,14 @@ def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedM
     if not elasticsearch.kibana_url:
         return [""]
 
-    actual.load_map()
+    try_loading_map(actual)
     start_time = time.time()
     while time.time() - start_time < COMPONENTS_TIMEOUT:
         if len(actual.component_map[component]) == expected.expected_map[component]:
             break
 
         time.sleep(COMPONENTS_BACKOFF)
-        actual.load_map()
+        try_loading_map(actual)
 
     assert expected.expected_map[component] == len(
         actual.component_map[component],
@@ -319,3 +319,9 @@ def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedM
  {component}, but got {len(actual.component_map[component])}"
 
     return actual.component_map[component]
+
+def try_loading_map(actual: AgentComponentMapping) -> None:
+    try:
+        actual.load_map()
+    except Exception as ex:
+        logger.warning(ex)
