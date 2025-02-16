@@ -84,6 +84,18 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 	}{
 		gcpinventory.IamRoleAssetType:   {},
 		gcpinventory.CrmFolderAssetType: {},
+		gcpinventory.ComputeNetworkAssetType: {
+			resource: &assetpb.Resource{
+				Data: NewStructMap(map[string]any{
+					"name": "network1",
+				}),
+			},
+			enrichments: inventory.AssetEvent{
+				Network: &inventory.Network{
+					Name: "network1",
+				},
+			},
+		},
 		gcpinventory.CrmProjectAssetType: {
 			resource: &assetpb.Resource{
 				Data: NewStructMap(map[string]any{
