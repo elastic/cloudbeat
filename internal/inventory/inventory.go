@@ -141,6 +141,12 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 				"user":           e.User,
 				"Attributes":     e.RawAttributes,
 				"labels":         e.Labels,
+				"tags":           e.Tags,
+				"organization":   e.Organization,
+				"fass":           e.Fass,
+				"url":            e.URL,
+				"orchestrator":   e.Orchestrator,
+				"container":      e.Container,
 				"related.entity": relatedEntity,
 			},
 		}

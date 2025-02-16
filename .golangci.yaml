@@ -148,9 +148,9 @@ linters-settings:
     exported-fields-are-used: false
     # Mark all local variables as used.
     local-variables-are-used: false
-  tenv:
-    all: true
-
+  usetesting:
+    os-setenv: true
+    os-temp-dir: true
   prealloc:
     simple: true
     range-loops: true

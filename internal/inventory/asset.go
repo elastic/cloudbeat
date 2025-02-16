@@ -17,7 +17,10 @@
 
 package inventory
 
-import "github.com/samber/lo"
+import (
+	"github.com/mitchellh/mapstructure"
+	"github.com/samber/lo"
+)
 
 // AssetCategory is used to build the document index.
 type AssetCategory string
@@ -32,6 +35,7 @@ const (
 	CategoryFileSystemService      AssetCategory = "File System Service"
 	CategoryFirewall               AssetCategory = "Firewall"
 	CategoryGateway                AssetCategory = "Gateway"
+	CategoryGroup                  AssetCategory = "Group"
 	CategoryHost                   AssetCategory = "Host"
 	CategoryIdentity               AssetCategory = "Identity"
 	CategoryInfrastructure         AssetCategory = "Infrastructure"
@@ -99,10 +103,13 @@ var (
 	AssetClassificationAzureCosmosDBSQLDatabase  = AssetClassification{CategoryInfrastructure, "Azure Cosmos DB SQL Database"}
 	AssetClassificationAzureDisk                 = AssetClassification{CategoryVolume, "Azure Disk"}
 	AssetClassificationAzureElasticPool          = AssetClassification{CategoryDatabase, "Azure Elastic Pool"}
+	AssetClassificationAzureEntraGroup           = AssetClassification{CategoryGroup, "Azure Microsoft Entra ID Group"}
+	AssetClassificationAzureEntraUser            = AssetClassification{CategoryIdentity, "Azure Microsoft Entra ID User"}
 	AssetClassificationAzureResourceGroup        = AssetClassification{CategoryAccessManagement, "Azure Resource Group"}
+	AssetClassificationAzureRoleDefinition       = AssetClassification{CategoryAccessManagement, "Azure RoleDefinition"}
 	AssetClassificationAzureSQLDatabase          = AssetClassification{CategoryDatabase, "Azure SQL Database"}
 	AssetClassificationAzureSQLServer            = AssetClassification{CategoryDatabase, "Azure SQL Server"}
-	AssetClassificationAzureServicePrincipal     = AssetClassification{CategoryIdentity, "Azure Principal"}
+	AssetClassificationAzureServicePrincipal     = AssetClassification{CategoryServiceAccount, "Azure Principal"}
 	AssetClassificationAzureSnapshot             = AssetClassification{CategorySnapshot, "Azure Snapshot"}
 	AssetClassificationAzureStorageAccount       = AssetClassification{CategoryPrivateEndpoint, "Azure Storage Account"}
 	AssetClassificationAzureStorageBlobContainer = AssetClassification{CategoryStorageBucket, "Azure Storage Blob Container"}
@@ -138,12 +145,33 @@ var (
 type AssetEvent struct {
 	Entity        Entity
 	Event         Event
-	Network       *Network
 	Cloud         *Cloud
+	Container     *Container
+	Fass          *Fass
+	Group         *Group
 	Host          *Host
+	Network       *Network
+	Orchestrator  *Orchestrator
+	Organization  *Organization
+	URL           *URL
 	User          *User
 	Labels        map[string]string
+	Tags          []string
 	RawAttributes *any
+}
+
+type Organization struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type Fass struct {
+	Name    string `json:"name,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
+type URL struct {
+	Full string `json:"full"`
 }
 
 // Entity contains the identifiers of the asset
@@ -161,7 +189,9 @@ type Event struct {
 }
 
 type Network struct {
-	Name string `json:"name,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Direction string `json:"direction,omitempty"`
+	Type      string `json:"type,omitempty"`
 }
 
 type Cloud struct {
@@ -178,6 +208,12 @@ type Cloud struct {
 	ProjectName      string `json:"project.name,omitempty"`
 }
 
+type Group struct {
+	ID     string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	Domain string `json:"domain,omitempty"`
+}
+
 type Host struct {
 	ID           string   `json:"id,omitempty"`
 	Name         string   `json:"name,omitempty"`
@@ -188,8 +224,22 @@ type Host struct {
 }
 
 type User struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID    string   `json:"id,omitempty"`
+	Name  string   `json:"name,omitempty"`
+	Email string   `json:"email,omitempty"`
+	Roles []string `json:"roles,omitempty"`
+}
+
+type Orchestrator struct {
+	ClusterID   string `json:"cluster.id,omitempty"`
+	ClusterName string `json:"cluster.name,omitempty"`
+	Type        string `json:"type,omitempty"`
+}
+
+type Container struct {
+	ID        string `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	ImageName string `json:"image.name,omitempty"`
 }
 
 // AssetEnricher functional builder function
@@ -245,6 +295,19 @@ func WithLabels(labels map[string]string) AssetEnricher {
 	}
 }
 
+func WithLabelsFromAny(labels map[string]any) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(labels) == 0 {
+			return
+		}
+		output := map[string]string{}
+		if err := mapstructure.Decode(labels, &output); err != nil {
+			return
+		}
+		a.Labels = output
+	}
+}
+
 func WithNetwork(network Network) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Network = &network
@@ -257,9 +320,24 @@ func WithCloud(cloud Cloud) AssetEnricher {
 	}
 }
 
+func WithGroup(group Group) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Group = &group
+	}
+}
+
 func WithHost(host Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
+	}
+}
+
+func WithTags(tags []string) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(tags) == 0 {
+			return
+		}
+		a.Tags = tags
 	}
 }
 
@@ -271,4 +349,34 @@ func WithUser(user User) AssetEnricher {
 
 func EmptyEnricher() AssetEnricher {
 	return func(_ *AssetEvent) {}
+}
+
+func WithOrganization(org Organization) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Organization = &org
+	}
+}
+
+func WithFass(fass Fass) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Fass = &fass
+	}
+}
+
+func WithURL(url URL) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.URL = &url
+	}
+}
+
+func WithOrchestrator(orchestrator Orchestrator) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Orchestrator = &orchestrator
+	}
+}
+
+func WithContainer(container Container) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Container = &container
+	}
 }

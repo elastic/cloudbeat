@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -292,7 +293,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 					Name:  "cloudbeat",
 				},
 			},
-			fmt.Errorf("ecr error"),
+			errors.New("ecr error"),
 		},
 	}
 	for _, test := range tests {
