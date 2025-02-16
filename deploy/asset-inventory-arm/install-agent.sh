@@ -19,6 +19,6 @@ ElasticAgentArtifact="elastic-agent-$ElasticAgentVersion-linux-x86_64"
 curl -L -O "${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz"
 tar xzf "${ElasticAgentArtifact}.tar.gz"
 cd "${ElasticAgentArtifact}"
-sudo ./elastic-agent install --non-interactive --url="${FleetUrl}" --enrollment-token="${EnrollmentToken}"
+sudo ./elastic-agent install --non-interactive --install-servers --url="${FleetUrl}" --enrollment-token="${EnrollmentToken}"
 
 wait
