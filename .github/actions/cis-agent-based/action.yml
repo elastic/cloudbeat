@@ -186,11 +186,11 @@ runs:
       shell: bash
       env:
         AZURE_TAGS: "${{ inputs.cspm-azure-tags }}"
-      run: ./install_agent_az_cli.sh
+      run: DEPLOYMENT_NAME="$DEPLOYMENT_NAME-$(openssl rand -hex 3)" ./install_agent_az_cli.sh
 
     - name: Install D4C integration
       id: kspm-d4c
-      if: ${{ !cancelled() && startsWith(env.STACK_VERSION, '8') && inputs.serverless_mode == 'false' && steps.deploy-cis-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && startsWith(env.STACK_VERSION, '8') && inputs.serverless-mode == 'false' && steps.deploy-cis-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
