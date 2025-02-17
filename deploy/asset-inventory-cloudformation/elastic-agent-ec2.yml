@@ -130,11 +130,16 @@ Resources:
             sudo yum install -y aws-cfn-bootstrap || { sudo apt-get update && sudo apt-get -y install python3-pip && sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz; }
             cfn-signal --exit-code "$1" --stack ${AWS::StackName} --resource ElasticAgentEc2Instance --region ${AWS::Region}
           }
+          install_servers_opt=""
+          major_version=$(echo "${ElasticAgentVersion}" | cut -d'.' -f1)
+          if [ "$major_version" -ge 9 ]; then
+              install_servers_opt="--install-servers"
+          fi
           ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
           curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
           tar xzvf $ElasticAgentArtifact.tar.gz
           cd $ElasticAgentArtifact
-          sudo ./elastic-agent install --non-interactive --install-servers --url=${FleetUrl} --enrollment-token=${EnrollmentToken} --tag=cft_version:cloudformation-asset-inventory-single-account-CFT_VERSION.yml --tag=cft_arn:${AWS::StackId}
+          sudo ./elastic-agent install --non-interactive ${install_servers_opt:+$install_servers_opt} --url=${FleetUrl} --enrollment-token=${EnrollmentToken} --tag=cft_version:cloudformation-asset-inventory-single-account-CFT_VERSION.yml --tag=cft_arn:${AWS::StackId}
           signal $?
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
