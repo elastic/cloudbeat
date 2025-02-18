@@ -155,11 +155,7 @@ Resources:
           curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
           tar xzvf $ElasticAgentArtifact.tar.gz
           cd $ElasticAgentArtifact
-<<<<<<< HEAD
-          sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken} --tag=cft_version:cloudformation-cnvm-CFT_VERSION.yml --tag=cft_arn:${AWS::StackId}
-=======
           sudo ./elastic-agent install --non-interactive $install_servers_opt --url=${FleetUrl} --enrollment-token=${EnrollmentToken} --tag=cft_version:cloudformation-cnvm-CFT_VERSION.yml --tag=cft_arn:${AWS::StackId}
->>>>>>> 8ec9f094 (Fix CloudFormation templates to support installation on both 8.x and 9.x versions (#3032))
           signal $?
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
