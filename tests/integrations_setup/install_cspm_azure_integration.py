@@ -126,11 +126,11 @@ if __name__ == "__main__":
     }
 
     azure_arm_parameters["parameters"]["ElasticArtifactServer"] = {
-        "value": get_artifact_server(cnfg.elk_config.stack_version),
+        "value": get_artifact_server(cnfg.elk_config.agent_version),
     }
 
     azure_arm_parameters["parameters"]["ElasticAgentVersion"] = {
-        "value": cnfg.elk_config.stack_version,
+        "value": cnfg.elk_config.agent_version,
     }
 
     if version.parse(package_version) < version.parse("1.7"):

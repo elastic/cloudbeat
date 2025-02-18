@@ -18,7 +18,12 @@ from fleet_api.common_api import (
     get_package_version,
 )
 from fleet_api.package_policy_api import create_cspm_integration
-from fleet_api.utils import read_json, render_template, update_key_value
+from fleet_api.utils import (
+    get_install_servers_option,
+    read_json,
+    render_template,
+    update_key_value,
+)
 from loguru import logger
 from munch import Munch
 from package_policy import SIMPLIFIED_AGENT_POLICY, generate_random_name
@@ -77,9 +82,11 @@ if __name__ == "__main__":
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     manifest_params.file_path = Path(__file__).parent / "cloudtrail.sh"
-    manifest_params.agent_version = cnfg.elk_config.stack_version
-    manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
-
+    manifest_params.agent_version = cnfg.elk_config.agent_version
+    manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.agent_version)
+    install_servers = get_install_servers_option(cnfg.elk_config.agent_version)
+    if install_servers:
+        manifest_params.install_servers = install_servers
     # Render the template and get the replaced content
     rendered_content = render_template(cloudtrail_template, manifest_params.toDict())
 
