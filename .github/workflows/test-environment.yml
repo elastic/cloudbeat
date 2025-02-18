@@ -395,6 +395,7 @@ jobs:
           es-user: ${{ steps.elk-stack.outputs.es-user }}
           es-password: ${{ steps.elk-stack.outputs.es-password }}
           kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          docker-image-override: ${{ env.DOCKER_IMAGE_OVERRIDE }}
           serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
