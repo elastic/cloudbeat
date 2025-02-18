@@ -94,6 +94,7 @@ jobs:
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
         env:
+          STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
