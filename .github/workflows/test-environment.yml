@@ -191,16 +191,6 @@ jobs:
         run: |
           # Extract the stack version
           stack_version="${{ inputs.elk-stack-version }}"
-<<<<<<< HEAD
-          is_serverless_mode="${{ inputs.serverless_mode }}"
-          if [[ $is_serverless_mode == "true" ]]; then
-            # Stack version is not relevant for serverless deployments
-            # Therefore, we set it to the latest snapshot version
-            stack_version="${{ env.ELK_VERSION }}"
-          fi
-
-=======
->>>>>>> d11abd38 (Add support for bundling Cloudbeat in Agent 9.x within CI workflows and installation scripts. (#3029))
           echo "TF_VAR_stack_version=$stack_version" >> $GITHUB_ENV
           echo "STACK_VERSION=$stack_version" >> $GITHUB_ENV
           echo "AGENT_VERSION=$stack_version" >> $GITHUB_ENV
