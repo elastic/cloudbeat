@@ -59,46 +59,65 @@ func CloudConnectorsExternalID(resourceID, externalIDPart string) string {
 }
 
 func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfig) (*aws.Config, error) {
-	// 1. Load initial config - Chain Part 1 - Elastic Super Role Local implicitly assumed.
+	const defaultDuration = 20 * time.Minute
+
+	// 1. Load initial config - Chain Step 1 - Elastic Super Role Local implicitly assumed through IRSA.
 	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create an STS client using the base credentials
-	firstClient := sts.NewFromConfig(awsConfig)
-
-	const defaultDuration = 20 * time.Minute
-
-	// Chain Part 2 - Elastic Super Role Global
-	globalSuperRoleProvider := stscreds.NewAssumeRoleProvider(
-		firstClient,
-		cfg.CloudConnectorsConfig.GlobalRoleARN,
-		func(aro *stscreds.AssumeRoleOptions) {
-			aro.RoleSessionName = "cloudbeat-super-role-global"
-			aro.Duration = defaultDuration
+	chain := []AWSRoleChainingStep{
+		// Chain Step 2 - Elastic Super Role Global
+		{
+			RoleARN: cfg.CloudConnectorsConfig.GlobalRoleARN,
+			Options: func(aro *stscreds.AssumeRoleOptions) {
+				aro.RoleSessionName = "cloudbeat-super-role-global"
+				aro.Duration = defaultDuration
+			},
 		},
-	)
-	globalSuperRoleCredentialsCache := aws.NewCredentialsCache(globalSuperRoleProvider)
-
-	// Chain Part 3 - Elastic Super Role Local
-	customerRemoteRoleCfg := awsConfig
-	customerRemoteRoleCfg.Credentials = globalSuperRoleCredentialsCache
-	customerRemoteRoleProvider := stscreds.NewAssumeRoleProvider(
-		sts.NewFromConfig(customerRemoteRoleCfg),
-		cfg.Cred.RoleArn, // Customer Remote Role passed in package policy.
-		func(aro *stscreds.AssumeRoleOptions) {
-			aro.RoleSessionName = "cloudbeat-remote-role"
-			aro.Duration = cfg.Cred.AssumeRoleDuration
-			aro.ExternalID = aws.String(CloudConnectorsExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
+		// Chain Step 3 - Elastic Super Role Local
+		{
+			RoleARN: cfg.Cred.RoleArn,
+			Options: func(aro *stscreds.AssumeRoleOptions) {
+				aro.RoleSessionName = "cloudbeat-remote-role"
+				aro.Duration = cfg.Cred.AssumeRoleDuration
+				aro.ExternalID = aws.String(CloudConnectorsExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
+			},
 		},
-	)
-	customerRemoteRoleCredentialsCache := aws.NewCredentialsCache(customerRemoteRoleProvider)
+	}
 
-	ret := awsConfig
-	ret.Credentials = customerRemoteRoleCredentialsCache
+	retConf := AWSConfigRoleChaining(awsConfig, chain)
+	retConf.Retryer = awsConfigRetrier
 
-	ret.Retryer = awsConfigRetrier
+	return retConf, nil
+}
 
-	return &ret, nil
+// AWSConfigRoleChaining initializes an assume role provider and an credential cache for each step on the chain, using the previous one as client.
+func AWSConfigRoleChaining(initialConfig aws.Config, chain []AWSRoleChainingStep) *aws.Config {
+	var client *sts.Client
+	var assumeRoleProvider *stscreds.AssumeRoleProvider
+	var credentialsCache *aws.CredentialsCache
+	cnf := initialConfig
+
+	for _, c := range chain {
+		client = sts.NewFromConfig(cnf) // create client using the credentials from previous or initial step.
+
+		// create a assume role provider for the current chain part role.
+		assumeRoleProvider = stscreds.NewAssumeRoleProvider(
+			client,
+			c.RoleARN,
+			c.Options,
+		)
+		credentialsCache = aws.NewCredentialsCache(assumeRoleProvider)
+
+		cnf.Credentials = credentialsCache
+	}
+
+	return &cnf
+}
+
+type AWSRoleChainingStep struct {
+	RoleARN string
+	Options func(aro *stscreds.AssumeRoleOptions)
 }
