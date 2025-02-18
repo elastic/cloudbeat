@@ -20,7 +20,7 @@ from fleet_api.common_api import (
     update_package_version,
 )
 from fleet_api.package_policy_api import create_cspm_integration
-from fleet_api.utils import render_template
+from fleet_api.utils import get_install_servers_option, render_template
 from loguru import logger
 from munch import Munch
 from package_policy import (
@@ -112,8 +112,11 @@ if __name__ == "__main__":
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     manifest_params.file_path = Path(__file__).parent / "cspm.sh"
-    manifest_params.agent_version = cnfg.elk_config.stack_version
-    manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
+    manifest_params.agent_version = cnfg.elk_config.agent_version
+    manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.agent_version)
+    install_servers = get_install_servers_option(cnfg.elk_config.agent_version)
+    if install_servers:
+        manifest_params.install_servers = install_servers
 
     # Render the template and get the replaced content
     rendered_content = render_template(cspm_template, manifest_params.toDict())

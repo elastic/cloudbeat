@@ -25,5 +25,11 @@ done
 
 cd "elastic-agent-${ELASTIC_AGENT_VERSION}-linux-x86_64" || exit
 
+install_servers_opt=""
+major_version=$(echo "${ELASTIC_AGENT_VERSION}" | cut -d'.' -f1)
+if [ "$major_version" -ge 9 ]; then
+    install_servers_opt="--install-servers"
+fi
+
 # Install the Elastic Agent
-sudo ./elastic-agent install -f
+sudo ./elastic-agent install -f ${install_servers_opt:+$install_servers_opt}
