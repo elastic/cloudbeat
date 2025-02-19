@@ -93,12 +93,7 @@ def generate_config(context):
                                 f"curl -L -O {artifact_server}/$ElasticAgentArtifact.tar.gz\n",
                                 "tar xzvf $ElasticAgentArtifact.tar.gz\n",
                                 "cd $ElasticAgentArtifact\n",
-<<<<<<< HEAD
-                                f"sudo ./elastic-agent install "
-                                f"--non-interactive --url={fleet_url} --enrollment-token={enrollment_token}",
-=======
                                 f"{cmnd} --url={fleet_url} --enrollment-token={enrollment_token}",
->>>>>>> 581c2072 (Update compute engine script (#3040))
                             ],
                         ),
                     },
