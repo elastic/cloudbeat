@@ -108,11 +108,11 @@ runs:
         es_url_stripped="${es_url//https:\/\//}"
 
         # Create test URLs with credentials
-        test_kibana_url="https://${ES_USER}:${ES_PASSWORD}@${kibana_url_stripped}"
+        test_kibana_url="https://${es_user}:${es_password}@${kibana_url_stripped}"
         echo "::add-mask::${test_kibana_url}"
         echo "test-kibana-url=${test_kibana_url}" >> "$GITHUB_OUTPUT"
 
-        test_es_url="https://${ES_USER}:${ES_PASSWORD}@${es_url_stripped}"
+        test_es_url="https://${es_user}:${es_password}@${es_url_stripped}"
         echo "::add-mask::${test_es_url}"
         echo "test-es-url=${test_es_url}" >> "$GITHUB_OUTPUT"
 
