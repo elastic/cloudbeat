@@ -64,7 +64,7 @@ func TestAssetInventory_Run(t *testing.T) {
 					ID:           "i-a2",
 				},
 				"network": &Network{
-					Name: "vpc-id",
+					Name: []string{"vpc-id"},
 				},
 				"user": &User{
 					ID:   "a123123",
@@ -120,7 +120,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				Name: "name",
 			}),
 			WithNetwork(Network{
-				Name: "vpc-id",
+				Name: []string{"vpc-id"},
 			}),
 			WithContainer(Container{}),
 			WithOrchestrator(Orchestrator{
