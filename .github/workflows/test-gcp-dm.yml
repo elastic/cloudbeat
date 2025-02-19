@@ -84,6 +84,7 @@ jobs:
         id: cspm-gcp-integration
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
+          AGENT_VERSION: ${{ env.ELK_VERSION }}
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
@@ -188,6 +189,7 @@ jobs:
       - name: Deploy GCP Service Account and Agent
         id: gcp_deploy
         env:
+          AGENT_VERSION: ${{ env.ELK_VERSION }}
           STACK_VERSION: ${{ env.ELK_VERSION }}
         run: |
           # Deploys a GCP Service Account
