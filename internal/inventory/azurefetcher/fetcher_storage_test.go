@@ -119,7 +119,23 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		[]azurelib_inventory.AzureAsset{azureQueue}, nil,
 	)
 
+<<<<<<< HEAD
 	fetcher := newStorageFetcher(logger, provider)
+=======
+	provider.EXPECT().ListStorageAccountTables(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureTable}, nil,
+	)
+
+	provider.EXPECT().ListStorageAccountTableServices(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureTableService}, nil,
+	)
+
+	fetcher := newStorageFetcher(logger, "<tenant id>", provider)
+>>>>>>> da397ba4 ([Asset Inventory][Azure] Add missing resources and ECS fields required for GA (#2954))
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
