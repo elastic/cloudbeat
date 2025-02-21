@@ -116,7 +116,7 @@ func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.A
 		assetChan <- inventory.NewAssetEvent(
 			classification,
 			item.Id,
-			item.DisplayName,
+			pickName(item.DisplayName, item.Name, item.Id),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
