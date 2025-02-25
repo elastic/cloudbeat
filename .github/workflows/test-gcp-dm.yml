@@ -26,7 +26,7 @@ env:
   DEPLOYMENT_MANAGER_DIR: deploy/deployment-manager
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
-  GCP_LABELS: "ci=integration,owner=${{ github.actor }}"
+  GCP_LABELS: "ci=integration"
 
 jobs:
   # Test a GCP Deployment Manager deployment using Application Default Credentials
@@ -84,6 +84,7 @@ jobs:
         id: cspm-gcp-integration
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
+          AGENT_VERSION: ${{ env.ELK_VERSION }}
           STACK_VERSION: ${{ env.ELK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
@@ -188,6 +189,7 @@ jobs:
       - name: Deploy GCP Service Account and Agent
         id: gcp_deploy
         env:
+          AGENT_VERSION: ${{ env.ELK_VERSION }}
           STACK_VERSION: ${{ env.ELK_VERSION }}
         run: |
           # Deploys a GCP Service Account
