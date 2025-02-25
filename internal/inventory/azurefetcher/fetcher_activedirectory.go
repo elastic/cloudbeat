@@ -74,7 +74,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureServicePrincipal,
 			pointers.Deref(item.GetId()),
-			pointers.Deref(item.GetDisplayName()),
+			pickName(pointers.Deref(item.GetDisplayName()), pointers.Deref(item.GetId())),
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
@@ -101,7 +101,7 @@ func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetC
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureRoleDefinition,
 			pointers.Deref(item.GetId()),
-			pointers.Deref(item.GetDisplayName()),
+			pickName(pointers.Deref(item.GetDisplayName()), pointers.Deref(item.GetId())),
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
@@ -136,7 +136,7 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureEntraGroup,
 			pointers.Deref(item.GetId()),
-			pointers.Deref(item.GetDisplayName()),
+			pickName(pointers.Deref(item.GetDisplayName()), pointers.Deref(item.GetId())),
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
@@ -167,7 +167,7 @@ func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureEntraUser,
 			pointers.Deref(item.GetId()),
-			pointers.Deref(item.GetDisplayName()),
+			pickName(pointers.Deref(item.GetDisplayName()), pointers.Deref(item.GetId())),
 			inventory.WithRawAsset(
 				item.GetBackingStore().Enumerate(),
 			),
