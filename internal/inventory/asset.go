@@ -158,6 +158,11 @@ type AssetEvent struct {
 	Labels        map[string]string
 	Tags          []string
 	RawAttributes *any
+	Related       *Related
+}
+
+type Related struct {
+	Entity []string `json:"id,omitempty"`
 }
 
 type Organization struct {
@@ -179,9 +184,6 @@ type Entity struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 	AssetClassification
-
-	// non exported fields
-	relatedEntityId []string
 }
 
 type Event struct {
@@ -189,9 +191,9 @@ type Event struct {
 }
 
 type Network struct {
-	Name      string `json:"name,omitempty"`
-	Direction string `json:"direction,omitempty"`
-	Type      string `json:"type,omitempty"`
+	Name      []string `json:"name,omitempty"`
+	Direction string   `json:"direction,omitempty"`
+	Type      string   `json:"type,omitempty"`
 }
 
 type Cloud struct {
@@ -237,9 +239,9 @@ type Orchestrator struct {
 }
 
 type Container struct {
-	ID        string `json:"id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	ImageName string `json:"image.name,omitempty"`
+	ID        string   `json:"id,omitempty"`
+	Name      []string `json:"name,omitempty"`
+	ImageName []string `json:"image.name,omitempty"`
 }
 
 // AssetEnricher functional builder function
@@ -272,16 +274,13 @@ func WithRawAsset(raw any) AssetEnricher {
 
 func WithRelatedAssetIds(ids []string) AssetEnricher {
 	return func(a *AssetEvent) {
-		ids = lo.Filter(ids, func(id string, _ int) bool {
-			return id != ""
-		})
-
+		ids = lo.Compact(ids)
 		if len(ids) == 0 {
-			a.Entity.relatedEntityId = nil
 			return
 		}
-
-		a.Entity.relatedEntityId = lo.Uniq(ids)
+		a.Related = &Related{
+			Entity: lo.Uniq(ids),
+		}
 	}
 }
 
