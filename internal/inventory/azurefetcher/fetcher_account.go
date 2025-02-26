@@ -75,7 +75,7 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 		assetChan <- inventory.NewAssetEvent(
 			classification,
 			item.Id,
-			item.DisplayName,
+			pickName(item.DisplayName, item.Name, item.Id),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
