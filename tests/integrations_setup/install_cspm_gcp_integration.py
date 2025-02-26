@@ -123,11 +123,11 @@ if __name__ == "__main__":
     )
 
     deploy_manager_params.FLEET_URL = get_fleet_server_host(cfg=cnfg.elk_config)
-    deploy_manager_params.ELASTIC_ARTIFACT_SERVER = get_artifact_server(cnfg.elk_config.stack_version)
+    deploy_manager_params.ELASTIC_ARTIFACT_SERVER = get_artifact_server(cnfg.elk_config.agent_version)
     deploy_manager_params.DEPLOYMENT_NAME = cnfg.gcp_dm_config.deployment_name
     deploy_manager_params.ZONE = cnfg.gcp_dm_config.zone
     deploy_manager_params.ALLOW_SSH = cnfg.gcp_dm_config.allow_ssh
-    deploy_manager_params.STACK_VERSION = cnfg.elk_config.stack_version
+    deploy_manager_params.STACK_VERSION = cnfg.elk_config.agent_version
 
     with open(cspm_gcp_deployment_manager_config, "w") as file:
         json.dump(deploy_manager_params, file)
