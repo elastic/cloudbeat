@@ -123,7 +123,7 @@ Resources:
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
       SecurityGroupIds:
-        - !Ref ElasticAgentSecurityGroup
+        - !GetAtt ElasticAgentSecurityGroup.GroupId
       UserData: !Base64
         Fn::Sub: |
           #!/bin/bash -x
