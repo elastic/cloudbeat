@@ -146,6 +146,21 @@ The [`Create Environment with Cloud Logs`](https://github.com/elastic/cloudbeat/
 
 The workflow requires a subset of input parameters. All required inputs are described [here](#how-to-run-the-workflow).
 
+## Install Integrations Worfklow
+
+The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workflows/install-integrations.yml) GitHub workflow is used when the Elastic Stack is already installed, and the user wants to add `CIS` and/or `CDR` integrations.
+
+### Workflow Inputs
+
+- **`stack-version`** - The version of the stack to deploy.
+- **`kibana-url`** - The Kibana URL where the integrations will be installed.
+- **`kibana-username`** - The username for Kibana login.
+- **`kibana-password`** - The password for Kibana login.
+- **`infra-type`** - The type of integrations to install, with three allow options:
+  - **`all`** - Installs both `CIS` and `CDR` integrations.
+  - **`cis`** - Installs `CSPM`, `KSPM`, and `CNVM` integrations.
+  - **`cdr`** - Installs `Audit Logs`, `Asset Inventory`, and `Wiz` integrations.
+- **`docker-image-override`** - For build candidate versions, specifies a custom Docker image path for agent installations.
 
 ## Cleanup Procedure
 
