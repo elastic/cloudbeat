@@ -18,6 +18,7 @@
 package inventory
 
 import (
+	"github.com/mitchellh/mapstructure"
 	"github.com/samber/lo"
 )
 
@@ -294,13 +295,16 @@ func WithLabels(labels map[string]string) AssetEnricher {
 	}
 }
 
-func WithTags(tags []string) AssetEnricher {
+func WithLabelsFromAny(labels map[string]any) AssetEnricher {
 	return func(a *AssetEvent) {
-		if len(tags) == 0 {
+		if len(labels) == 0 {
 			return
 		}
-
-		a.Tags = tags
+		output := map[string]string{}
+		if err := mapstructure.Decode(labels, &output); err != nil {
+			return
+		}
+		a.Labels = output
 	}
 }
 
@@ -325,6 +329,15 @@ func WithGroup(group Group) AssetEnricher {
 func WithHost(host Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
+	}
+}
+
+func WithTags(tags []string) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(tags) == 0 {
+			return
+		}
+		a.Tags = tags
 	}
 }
 
