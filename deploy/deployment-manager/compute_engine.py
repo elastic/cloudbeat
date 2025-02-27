@@ -33,6 +33,10 @@ def generate_config(context):
         },
     }
 
+    cmnd = "sudo ./elastic-agent install --non-interactive"
+    if agent_version.startswith("9."):
+        cmnd = f"{cmnd} --install-servers"
+
     instance = {
         "name": deployment_name,
         "type": "compute.v1.instance",
@@ -89,9 +93,7 @@ def generate_config(context):
                                 f"curl -L -O {artifact_server}/$ElasticAgentArtifact.tar.gz\n",
                                 "tar xzvf $ElasticAgentArtifact.tar.gz\n",
                                 "cd $ElasticAgentArtifact\n",
-                                "sudo ./elastic-agent install ",
-                                "--non-interactive --install-servers ",
-                                f"--url={fleet_url} --enrollment-token={enrollment_token}",
+                                f"{cmnd} --url={fleet_url} --enrollment-token={enrollment_token}",
                             ],
                         ),
                     },
