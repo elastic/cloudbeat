@@ -11,6 +11,7 @@ EXPOSE 8080
 
 COPY ./cloudbeat /cloudbeat
 COPY ./cloudbeat.yml /cloudbeat.yml
+COPY ./cloudbeat.spec.yml /cloudbeat.spec.yml
 COPY ./bundle.tar.gz /bundle.tar.gz
 
 ENTRYPOINT ["/go/bin/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--wd=/", "exec", "/cloudbeat"]
