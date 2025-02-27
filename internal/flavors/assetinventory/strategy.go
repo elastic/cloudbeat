@@ -19,6 +19,7 @@ package assetinventory
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -63,7 +64,7 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 	case config.ProviderGCP:
 		fetchers, err = s.initGcpFetchers(ctx)
 	case "":
-		err = fmt.Errorf("missing config.v1.asset_inventory_provider setting")
+		err = errors.New("missing config.v1.asset_inventory_provider setting")
 	default:
 		err = fmt.Errorf("unsupported Asset Inventory provider %q", s.cfg.AssetInventoryProvider)
 	}
@@ -93,7 +94,7 @@ func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetche
 		return nil, fmt.Errorf("failed to initialize azure msgraph provider: %w", err)
 	}
 
-	return azurefetcher.New(s.logger, provider, msgraphProvider), nil
+	return azurefetcher.New(s.logger, s.cfg.CloudConfig.Azure.Credentials.TenantID, provider, msgraphProvider), nil
 }
 
 func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {

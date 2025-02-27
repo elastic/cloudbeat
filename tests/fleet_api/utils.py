@@ -346,3 +346,12 @@ def add_tags(tags: str, yaml_content: str):
     modified_content = output_stream.getvalue()
 
     return modified_content
+
+
+def get_install_servers_option(stack_version: str):
+    """
+    Returns "--install-servers" if stack_version starts with "9.", otherwise returns None.
+    """
+    if stack_version.startswith("9."):
+        return "--install-servers"
+    return None

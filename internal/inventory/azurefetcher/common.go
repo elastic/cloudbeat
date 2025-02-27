@@ -17,18 +17,11 @@
 
 package azurefetcher
 
-import (
-	"github.com/elastic/cloudbeat/internal/infra/clog"
-	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
-	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
-)
-
-func New(logger *clog.Logger, tenantID string, provider azurelib.ProviderAPI, msgraphProvider msgraph.ProviderAPI) []inventory.AssetFetcher {
-	return []inventory.AssetFetcher{
-		newAccountFetcher(logger, tenantID, provider),
-		newActiveDirectoryFetcher(logger, tenantID, msgraphProvider),
-		newResourceGraphFetcher(logger, tenantID, provider),
-		newStorageFetcher(logger, tenantID, provider),
+func pickName(sortedOptions ...string) string {
+	for _, option := range sortedOptions {
+		if option != "" {
+			return option
+		}
 	}
+	return ""
 }

@@ -168,6 +168,14 @@ func (p *subscriptionProvider) ListSubscriptions(ctx context.Context) ([]AzureAs
 			continue
 		}
 
+		tags := map[string]any{}
+		for k, v := range s.Tags {
+			if v == nil {
+				continue
+			}
+			tags[k] = *v
+		}
+
 		assets = append(assets, AzureAsset{
 			Id:             pointers.Deref(s.ID),
 			Name:           pointers.Deref(s.SubscriptionID),
@@ -175,6 +183,7 @@ func (p *subscriptionProvider) ListSubscriptions(ctx context.Context) ([]AzureAs
 			TenantId:       pointers.Deref(s.TenantID),
 			SubscriptionId: pointers.Deref(s.SubscriptionID),
 			Type:           SubscriptionAssetType,
+			Tags:           tags,
 		})
 	}
 

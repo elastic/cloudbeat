@@ -3,4 +3,4 @@
 curl -L -O {{ artifacts_url }}/elastic-agent-{{ agent_version }}-linux-x86_64.tar.gz
 tar xzvf elastic-agent-{{ agent_version }}-linux-x86_64.tar.gz
 cd elastic-agent-{{ agent_version }}-linux-x86_64
-sudo ./elastic-agent install -f --url={{ fleet_url }} --enrollment-token={{ enrollment_token }}
+sudo ./elastic-agent install -f{% if install_servers %} {{ install_servers }}{% endif %} --url={{ fleet_url }} --enrollment-token={{ enrollment_token }}

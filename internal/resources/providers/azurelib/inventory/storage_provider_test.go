@@ -369,6 +369,81 @@ func TestListStorageAccountQueueServices(t *testing.T) {
 	}
 }
 
+func TestListStorageAccountBlobContainers(t *testing.T) {
+	response := func(v []*armstorage.ListContainerItem) armstorage.BlobContainersClientListResponse {
+		return armstorage.BlobContainersClientListResponse{
+			ListContainerItems: armstorage.ListContainerItems{
+				Value: v,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input         []*armstorage.ListContainerItem
+		expected      []AzureAsset
+		expectedError bool
+	}{
+		"list blob services": {
+			input: []*armstorage.ListContainerItem{
+				{
+					ID:   pointers.Ref("/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/blobContainers/blob1"),
+					Name: pointers.Ref("blob1"),
+					Type: pointers.Ref("microsoft.storage/storageaccounts/blobcontainers"),
+					Properties: &armstorage.ContainerProperties{
+						HasImmutabilityPolicy: pointers.Ref(false),
+					},
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:   "/subscriptions/<subid>/resourceGroups/<rgname>/providers/Microsoft.Storage/storageAccounts/<storageid>/blobContainers/blob1",
+					Name: "blob1",
+					Properties: map[string]any{
+						"hasImmutabilityPolicy": false,
+					},
+					Extension: map[string]any{
+						"storageAccountId":   "<storageid>",
+						"storageAccountName": "<storageid>",
+					},
+					Type: "microsoft.storage/storageaccounts/blobcontainers",
+				},
+			},
+			expectedError: false,
+		},
+	}
+
+	log := testhelper.NewLogger(t)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			provider := &storageAccountProvider{
+				log: log,
+				client: &storageAccountAzureClientWrapper{
+					AssetBlobContainers: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error) {
+						x := tc
+						return []armstorage.BlobContainersClientListResponse{response(x.input)}, nil
+					},
+				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			got, err := provider.ListStorageAccountBlobContainers(context.Background(), []AzureAsset{
+				{
+					Type: "Storage Account",
+					Id:   "<storageid>",
+					Name: "<storageid>",
+				},
+			})
+			if tc.expectedError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
 func TestListStorageAccountBlobServices(t *testing.T) {
 	response := func(v []*armstorage.BlobServiceProperties) armstorage.BlobServicesClientListResponse {
 		return armstorage.BlobServicesClientListResponse{
