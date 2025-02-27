@@ -39,11 +39,6 @@ import (
 )
 
 func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
-	servicePrincipal := &models.ServicePrincipal{
-		DirectoryObject: models.DirectoryObject{
-			Entity: models.Entity{},
-		},
-	}
 	appOwnerOrganizationId, _ := uuid.NewUUID()
 	values := map[string]any{
 		"id":                     pointers.Ref("id"),
@@ -54,7 +49,33 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	for k, v := range values {
 		_ = store.Set(k, v)
 	}
+	servicePrincipal := &models.ServicePrincipal{
+		DirectoryObject: models.DirectoryObject{
+			Entity: models.Entity{},
+		},
+	}
 	servicePrincipal.SetBackingStore(store)
+
+	role := &models.DirectoryRole{
+		DirectoryObject: models.DirectoryObject{
+			Entity: models.Entity{},
+		},
+	}
+	role.SetBackingStore(store)
+
+	group := &models.Group{
+		DirectoryObject: models.DirectoryObject{
+			Entity: models.Entity{},
+		},
+	}
+	group.SetBackingStore(store)
+
+	user := &models.User{
+		DirectoryObject: models.DirectoryObject{
+			Entity: models.Entity{},
+		},
+	}
+	user.SetBackingStore(store)
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
@@ -68,17 +89,71 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 				ServiceName: "Azure",
 			}),
 		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureRoleDefinition,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "id",
+				Name: "dn",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraGroup,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure",
+			}),
+			inventory.WithGroup(inventory.Group{
+				ID:   "id",
+				Name: "dn",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraUser,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "id",
+				Name: "dn",
+			}),
+		),
 	}
 
 	// setup
 	logger := clog.NewLogger("azurefetcher_test")
 	provider := newMockActivedirectoryProvider(t)
 
-	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
+	provider.EXPECT().ListServicePrincipals(mock.Anything).Maybe().Return(
 		[]*models.ServicePrincipal{servicePrincipal}, nil,
 	)
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
+		[]*models.DirectoryRole{role}, nil,
+	)
+	provider.EXPECT().ListGroups(mock.Anything).Return(
+		[]*models.Group{group}, nil,
+	)
+	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(
+		[]*models.User{user}, nil,
+	)
 
-	fetcher := newActiveDirectoryFetcher(logger, provider)
+	fetcher := newActiveDirectoryFetcher(logger, "id", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
@@ -102,8 +177,17 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
 		[]*models.ServicePrincipal{}, errors.New("! error listing service principals"),
 	)
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
+		[]*models.DirectoryRole{}, nil,
+	)
+	provider.EXPECT().ListGroups(mock.Anything).Maybe().Return(
+		[]*models.Group{}, nil,
+	)
+	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(
+		[]*models.User{}, nil,
+	)
 
-	fetcher := newActiveDirectoryFetcher(log, provider)
+	fetcher := newActiveDirectoryFetcher(log, "id", provider)
 
 	// collect
 	ch := make(chan inventory.AssetEvent)

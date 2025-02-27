@@ -27,6 +27,7 @@ import (
 
 type accountFetcher struct {
 	logger   *clog.Logger
+	tenantID string //nolint:unused
 	provider accountProvider
 }
 
@@ -38,9 +39,10 @@ type (
 	}
 )
 
-func newAccountFetcher(logger *clog.Logger, provider accountProvider) inventory.AssetFetcher {
+func newAccountFetcher(logger *clog.Logger, tenantID string, provider accountProvider) inventory.AssetFetcher {
 	return &accountFetcher{
 		logger:   logger,
+		tenantID: tenantID,
 		provider: provider,
 	}
 }
@@ -73,12 +75,16 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 		assetChan <- inventory.NewAssetEvent(
 			classification,
 			item.Id,
-			item.DisplayName,
+			pickName(item.DisplayName, item.Name, item.Id),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   item.TenantId,
 				ServiceName: "Azure",
+			}),
+			inventory.WithLabelsFromAny(item.Tags),
+			inventory.WithOrganization(inventory.Organization{
+				ID: item.TenantId,
 			}),
 		)
 	}
