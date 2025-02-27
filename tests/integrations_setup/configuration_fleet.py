@@ -35,6 +35,7 @@ elk_config.user = os.getenv("ES_USER", "NA")
 elk_config.password = os.getenv("ES_PASSWORD", "NA")
 elk_config.kibana_url = os.getenv("KIBANA_URL", "")
 elk_config.stack_version = os.getenv("STACK_VERSION", "NA")
+elk_config.agent_version = os.getenv("AGENT_VERSION", "")
 elk_config.auth = (elk_config.user, elk_config.password)
 
 kspm_config = Munch()
