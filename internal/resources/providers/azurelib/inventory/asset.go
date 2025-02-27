@@ -26,6 +26,7 @@ const (
 	ActivityLogAlertAssetType            = "microsoft.insights/activitylogalerts"
 	ApplicationInsights                  = "microsoft.insights/components"
 	BastionAssetType                     = "microsoft.network/bastionhosts"
+	BlobContainerAssetType               = "microsoft.storage/storageaccounts/containers"
 	BlobServiceAssetType                 = "microsoft.storage/storageaccounts/blobservices"
 	ClassicStorageAccountAssetType       = "microsoft.classicstorage/storageaccounts"
 	ContainerRegistryAssetType           = "microsoft.containerregistry/registries"
@@ -106,6 +107,7 @@ type AzureAsset struct {
 	Type           string         `json:"type,omitempty"`
 	Sku            map[string]any `json:"sku,omitempty"`
 	Identity       map[string]any `json:"identity,omitempty"`
+	Tags           map[string]any `json:"tags,omitempty"`
 }
 
 func (a *AzureAsset) AddExtension(key string, value any) {
@@ -126,6 +128,10 @@ func getAssetFromData(data map[string]any) AzureAsset {
 	if !ok {
 		sku = nil
 	}
+	tags, ok := data["tags"].(map[string]any)
+	if !ok {
+		tags = nil
+	}
 	return AzureAsset{
 		Id:             strings.FromMap(data, "id"),
 		Name:           strings.FromMap(data, "name"),
@@ -138,5 +144,6 @@ func getAssetFromData(data map[string]any) AzureAsset {
 		Sku:            sku,
 		Identity:       identity,
 		Type:           strings.FromMap(data, "type"),
+		Tags:           tags,
 	}
 }
