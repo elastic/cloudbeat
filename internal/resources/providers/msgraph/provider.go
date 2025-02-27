@@ -23,8 +23,11 @@ import (
 
 	graph "github.com/microsoftgraph/msgraph-sdk-go"
 	graphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
+	"github.com/microsoftgraph/msgraph-sdk-go/directoryroles"
+	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
+	"github.com/microsoftgraph/msgraph-sdk-go/users"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
@@ -32,12 +35,18 @@ import (
 
 type ProviderAPI interface {
 	ListServicePrincipals(context.Context) ([]*models.ServicePrincipal, error)
+	ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
+	ListGroups(context.Context) ([]*models.Group, error)
+	ListUsers(context.Context) ([]*models.User, error)
 }
 
 type provider struct {
 	log    *clog.Logger
 	client interface {
 		ServicePrincipals() *serviceprincipals.ServicePrincipalsRequestBuilder
+		DirectoryRoles() *directoryroles.DirectoryRolesRequestBuilder
+		Groups() *groups.GroupsRequestBuilder
+		Users() *users.UsersRequestBuilder
 	}
 }
 
@@ -86,6 +95,90 @@ func (p *provider) ListServicePrincipals(ctx context.Context) ([]*models.Service
 	})
 	if err != nil {
 		p.log.Errorf("error iterating over Service Principals: %v", err)
+	}
+	return items, nil
+}
+
+func (p *provider) ListDirectoryRoles(ctx context.Context) ([]*models.DirectoryRole, error) {
+	requestConfig := &directoryroles.DirectoryRolesRequestBuilderGetRequestConfiguration{}
+
+	response, err := p.client.DirectoryRoles().Get(ctx, requestConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error listing Azure Directory Roles: %w", err)
+	}
+
+	pageIterator, err := graphcore.NewPageIterator[*models.DirectoryRole](
+		response,
+		p.client.DirectoryRoles().RequestAdapter,
+		models.CreateDirectoryRoleCollectionResponseFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error paging Azure Directory Roles: %w", err)
+	}
+
+	items := []*models.DirectoryRole{}
+	err = pageIterator.Iterate(ctx, func(pageItem *models.DirectoryRole) bool {
+		items = append(items, pageItem)
+		return true // to continue the iteration
+	})
+	if err != nil {
+		p.log.Errorf("error iterating over Directory Roles: %v", err)
+	}
+	return items, nil
+}
+
+func (p *provider) ListGroups(ctx context.Context) ([]*models.Group, error) {
+	requestConfig := &groups.GroupsRequestBuilderGetRequestConfiguration{}
+
+	response, err := p.client.Groups().Get(ctx, requestConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error listing Azure Groups: %w", err)
+	}
+
+	pageIterator, err := graphcore.NewPageIterator[*models.Group](
+		response,
+		p.client.Groups().RequestAdapter,
+		models.CreateGroupCollectionResponseFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error paging Azure Groups: %w", err)
+	}
+
+	items := []*models.Group{}
+	err = pageIterator.Iterate(ctx, func(pageItem *models.Group) bool {
+		items = append(items, pageItem)
+		return true // to continue the iteration
+	})
+	if err != nil {
+		p.log.Errorf("error iterating over Groups: %v", err)
+	}
+	return items, nil
+}
+
+func (p *provider) ListUsers(ctx context.Context) ([]*models.User, error) {
+	requestConfig := &users.UsersRequestBuilderGetRequestConfiguration{}
+
+	response, err := p.client.Users().Get(ctx, requestConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error listing Azure Users: %w", err)
+	}
+
+	pageIterator, err := graphcore.NewPageIterator[*models.User](
+		response,
+		p.client.Users().RequestAdapter,
+		models.CreateUserCollectionResponseFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error paging Azure Users: %w", err)
+	}
+
+	items := []*models.User{}
+	err = pageIterator.Iterate(ctx, func(pageItem *models.User) bool {
+		items = append(items, pageItem)
+		return true // to continue the iteration
+	})
+	if err != nil {
+		p.log.Errorf("error iterating over Users: %v", err)
 	}
 	return items, nil
 }

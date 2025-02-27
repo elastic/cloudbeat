@@ -224,7 +224,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		[]azurelib_inventory.AzureAsset{azureTableService}, nil,
 	)
 
-	fetcher := newStorageFetcher(logger, provider)
+	fetcher := newStorageFetcher(logger, "<tenant id>", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
