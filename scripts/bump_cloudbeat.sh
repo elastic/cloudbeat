@@ -215,6 +215,21 @@ run_version_changes_for_release_branch() {
 }
 
 bump_snyk_branch_monitoring() {
+
+    # Extract latest major and previous major
+    # shellcheck disable=SC2178
+    branches=$(git branch -r | grep -Eo '[0-9]+\.[0-9]+' | sort -V | uniq)
+    # shellcheck disable=SC2128
+    latest_major=$(echo "$branches" | cut -d. -f1 | uniq | tail -1)
+    # shellcheck disable=SC2128
+    previous_major=$(echo "$branches" | cut -d. -f1 | uniq | tail -2 | head -1)
+    # shellcheck disable=SC2128
+    latest_major_latest_minor=$(echo "$branches" | grep -E "^$latest_major\." | tail -1)
+    # shellcheck disable=SC2128
+    previous_major_latest_minor=$(echo "$branches" | grep -E "^$previous_major\." | tail -1)
+    echo "latest_major_latest_minor: $latest_major_latest_minor"
+    echo "previous_major_latest_minor: $previous_major_latest_minor"
+
     # Get cloudbeat target ID
     SNYK_CLOUDBEAT_ID=$(curl -X GET "https://api.snyk.io/rest/orgs/$SNYK_ORG_ID/targets?version=2024-05-23&display_name=cloudbeat" \
         -H "accept: application/vnd.api+json" \
@@ -225,7 +240,7 @@ bump_snyk_branch_monitoring() {
         -H "accept: application/vnd.api+json" \
         -H "authorization: $SNYK_API_KEY"
 
-    # Import cloudbeat/$BASE_BRANCH
+    # Import cloudbeat/main
     curl -X POST \
         "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
         -H 'Content-Type: application/json; charset=utf-8' \
@@ -234,11 +249,11 @@ bump_snyk_branch_monitoring() {
   \"target\": {
     \"owner\": \"elastic\",
     \"name\": \"cloudbeat\",
-    \"branch\": \"$BASE_BRANCH\"
+    \"branch\": \"main\"
   },
   \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
 }"
-    # Import cloudbeat/$CURRENT_MINOR_VERSION
+    # Import cloudbeat/latest_major.latest_minor
     curl -X POST \
         "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
         -H 'Content-Type: application/json; charset=utf-8' \
@@ -247,7 +262,20 @@ bump_snyk_branch_monitoring() {
   \"target\": {
     \"owner\": \"elastic\",
     \"name\": \"cloudbeat\",
-    \"branch\": \"$CURRENT_MINOR_VERSION\"
+    \"branch\": \"$latest_major_latest_minor\"
+  },
+  \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
+}"
+    # Import cloudbeat/previous_major.latest_minor
+    curl -X POST \
+        "https://api.snyk.io/v1/org/$SNYK_ORG_ID/integrations/$SNYK_INTEGRATION_ID/import" \
+        -H 'Content-Type: application/json; charset=utf-8' \
+        -H "Authorization: token $SNYK_API_KEY" \
+        -d "{
+  \"target\": {
+    \"owner\": \"elastic\",
+    \"name\": \"cloudbeat\",
+    \"branch\": \"$previous_major_latest_minor\"
   },
   \"exclusionGlobs\": \"deploy, scripts, tests, security-policies\"
 }"
