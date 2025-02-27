@@ -126,6 +126,7 @@ var (
 	AssetClassificationGcpIamRole           = AssetClassification{CategoryServiceUsageTechnology, "GCP IAM Role"}
 	AssetClassificationGcpCloudFunction     = AssetClassification{CategoryFaaS, "GCP Cloud Function"}
 	AssetClassificationGcpCloudRunService   = AssetClassification{CategoryContainerService, "GCP Cloud Run Service"}
+	AssetClassificationGcpNetwork           = AssetClassification{CategoryNetworking, "GCP VPC Network"}
 )
 
 // AssetEvent holds the whole asset
