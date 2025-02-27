@@ -36,10 +36,25 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		Id:   "storage_account",
 		Name: "storage_account",
 	}
+	azureBlobContainer := azurelib_inventory.AzureAsset{
+		Id:          "blob_container",
+		Name:        "blob_container",
+		DisplayName: "blob_container",
+	}
 	azureBlobService := azurelib_inventory.AzureAsset{
 		Id:          "blob_service",
 		Name:        "blob_service",
 		DisplayName: "blob_service",
+	}
+	azureFileService := azurelib_inventory.AzureAsset{
+		Id:          "file_service",
+		Name:        "file_service",
+		DisplayName: "file_service",
+	}
+	azureFileShare := azurelib_inventory.AzureAsset{
+		Id:          "file_share",
+		Name:        "file_share",
+		DisplayName: "file_share",
 	}
 	azureQueueService := azurelib_inventory.AzureAsset{
 		Id:          "queue_service",
@@ -51,13 +66,53 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		Name:        "queue",
 		DisplayName: "queue",
 	}
+	azureTable := azurelib_inventory.AzureAsset{
+		Id:          "table",
+		Name:        "table",
+		DisplayName: "table",
+	}
+	azureTableService := azurelib_inventory.AzureAsset{
+		Id:          "table_service",
+		Name:        "table_service",
+		DisplayName: "table_service",
+	}
 
 	expected := []inventory.AssetEvent{
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageBlobContainer,
+			azureBlobContainer.Id,
+			azureBlobContainer.Name,
+			inventory.WithRawAsset(azureBlobContainer),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureStorageBlobService,
 			azureBlobService.Id,
 			azureBlobService.Name,
 			inventory.WithRawAsset(azureBlobService),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageFileService,
+			azureFileService.Id,
+			azureFileService.Name,
+			inventory.WithRawAsset(azureFileService),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageFileShare,
+			azureFileShare.Id,
+			azureFileShare.Name,
+			inventory.WithRawAsset(azureFileShare),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				ServiceName: "Azure",
@@ -83,6 +138,26 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 				ServiceName: "Azure",
 			}),
 		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageTable,
+			azureTable.Id,
+			azureTable.Name,
+			inventory.WithRawAsset(azureTable),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageTableService,
+			azureTableService.Id,
+			azureTableService.Name,
+			inventory.WithRawAsset(azureTableService),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
 	}
 
 	// setup
@@ -101,10 +176,28 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		[]azurelib_inventory.AzureAsset{storageAccount}, nil,
 	)
 
+	provider.EXPECT().ListStorageAccountBlobContainers(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureBlobContainer}, nil,
+	)
+
 	provider.EXPECT().ListStorageAccountBlobServices(
 		mock.Anything, mock.Anything,
 	).Return(
 		[]azurelib_inventory.AzureAsset{azureBlobService}, nil,
+	)
+
+	provider.EXPECT().ListStorageAccountFileServices(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureFileService}, nil,
+	)
+
+	provider.EXPECT().ListStorageAccountFileShares(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureFileShare}, nil,
 	)
 
 	provider.EXPECT().ListStorageAccountQueueServices(
@@ -119,7 +212,19 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 		[]azurelib_inventory.AzureAsset{azureQueue}, nil,
 	)
 
-	fetcher := newStorageFetcher(logger, provider)
+	provider.EXPECT().ListStorageAccountTables(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureTable}, nil,
+	)
+
+	provider.EXPECT().ListStorageAccountTableServices(
+		mock.Anything, mock.Anything,
+	).Return(
+		[]azurelib_inventory.AzureAsset{azureTableService}, nil,
+	)
+
+	fetcher := newStorageFetcher(logger, "<tenant id>", provider)
 	// test & compare
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
