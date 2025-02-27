@@ -19,29 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-asset-inventory-supported-version:
-    name: Check Asset Inventory supported version
-    runs-on: ubuntu-22.04
-    outputs:
-      asset_inventory_supported: ${{ steps.check-asset-inventory-supported-version.outputs.asset_inventory_supported }}
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Check Asset Inventory supported version
-        id: check-asset-inventory-supported-version
-        env:
-          STACK_VERSION: ${{ env.ELK_VERSION }}
-        run: |
-          MIN_VERSION="8.16.0"
-          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
-            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
-            echo "asset_inventory_supported=true" >> $GITHUB_ENV
-          else
-            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
-            echo "asset_inventory_supported=false" >> $GITHUB_ENV
-          fi
-
   init-hermit:
     name: Init Hermit Tools
     runs-on: ubuntu-22.04
@@ -53,6 +30,33 @@ jobs:
         uses: ./.github/actions/hermit
         with:
           init-tools: 'true'
+
+  check-asset-inventory-supported-version:
+    needs: [ init-hermit ]
+    name: Check Asset Inventory supported version
+    runs-on: ubuntu-22.04
+    outputs:
+      asset_inventory_supported: ${{ steps.check-asset-inventory-supported-version.outputs.asset_inventory_supported }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Check Asset Inventory supported version
+        id: check-asset-inventory-supported-version
+        env:
+          STACK_VERSION: ${{ env.ELK_VERSION }}
+        run: |
+          MIN_VERSION="8.16.0"
+          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
+            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
+            echo "asset_inventory_supported=true" >> $GITHUB_OUTPUT
+          else
+            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
+            echo "asset_inventory_supported=false" >> $GITHUB_OUTPUT
+          fi
 
   ci-azure:
     needs: [ init-hermit ]
