@@ -47,7 +47,7 @@ require (
 	github.com/aws/smithy-go v1.22.3
 	github.com/dgraph-io/ristretto v0.2.0
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250214184128-61caa19a696f
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250221185808-b5bf95171d62
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.9.1
 	github.com/elastic/elastic-agent-client/v7 v7.17.1
