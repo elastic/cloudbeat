@@ -430,7 +430,7 @@ jobs:
 
       - name: Run UI Sanity checks (Kibana)
         uses: ./.github/actions/kibana-ftr
-        if: ${{ success() && inputs.run-ui-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
+        if: ${{ success() && inputs.run-ui-sanity-tests == true }}
         with:
           test_kibana_url: ${{ steps.elk-stack.outputs.test-kibana-url }}
           test_es_url: ${{ steps.elk-stack.outputs.test-es-url }}
