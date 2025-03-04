@@ -218,7 +218,15 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 }
 
 func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
-	awsConfig, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	var awsConfig *awssdk.Config
+	var err error
+
+	if cfg.CloudConfig.Aws.CloudConnectors {
+		awsConfig, err = awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
+	} else {
+		awsConfig, err = awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	}
+
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
