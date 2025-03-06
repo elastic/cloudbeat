@@ -26,6 +26,7 @@ BEATS_DIR = (
 # notice_overrides holds additional overrides entries for go-licence-detector.
 notice_overrides = [
     {"name": "github.com/elastic/beats/v7", "licenceType": "Elastic"},
+    {"name": "github.com/michel-laterman/beats/v7", "licenceType": "Elastic"},
     {"name": "github.com/build-security/beats/v7", "licenceType": "Elastic"},
     {"name": "github.com/golang/glog", "licenceType": "Apache-2.0"},
     {"name": "github.com/spdx/tools-golang", "licenceFile": "LICENSE.code", "licenceType": "Apache-2.0"},
