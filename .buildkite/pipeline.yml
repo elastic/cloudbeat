@@ -6,7 +6,7 @@ agents:
 
 steps:
   - label: ":package: Package Cloudbeat FIPS - Snapshot"
-    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+    # if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
     env:
       WORKFLOW: "snapshot"
       FIPS: "true"
