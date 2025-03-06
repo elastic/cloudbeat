@@ -30,6 +30,8 @@ COMPONENTS_TIMEOUT = 300
 COMPONENTS_BACKOFF = 10
 
 AGENT_VERSION = elasticsearch.agent_version
+if AGENT_VERSION.endswith("SNAPSHOT"):
+    AGENT_VERSION = AGENT_VERSION.split("-")[0]
 
 # Check if AGENT_VERSION is provided
 if not AGENT_VERSION:
