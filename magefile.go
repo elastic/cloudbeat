@@ -36,15 +36,6 @@ import (
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/integtest/notests"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/unittest"
-
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
 )
 
