@@ -41,7 +41,7 @@ elk_config.auth = (elk_config.user, elk_config.password)
 
 kspm_config = Munch()
 kspm_config.docker_image_override = os.getenv("DOCKER_IMAGE_OVERRIDE", "")
-if not kspm_config.docker_image_override and elk_config.stack_version.endswith("SNAPHSOT"):
+if not kspm_config.docker_image_override and elk_config.stack_version.endswith("SNAPSHOT"):
     kspm_config.docker_image_override = f"{DOCKER_ARTIFACTORY_AGENT}:{elk_config.stack_version}"
     if elk_config.agent_version:
         kspm_config.docker_image_override = f"{DOCKER_ARTIFACTORY_AGENT}:{elk_config.agent_version}"
