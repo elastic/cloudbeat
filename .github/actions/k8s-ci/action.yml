@@ -19,7 +19,7 @@ inputs:
   docker-images-folder:
     description: 'Docker build cache folder'
     required: false
-    default: '/tmp/.docker-images'
+    default: .docker-images
 runs:
   using: composite
   steps:
