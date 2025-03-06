@@ -26,7 +26,7 @@ jobs:
         run: |
           date_name=$(echo "prd-env-$(date +'%d%b%H%M')" | tr '[:upper:]' '[:lower:]')
           echo "date-name=$date_name" >> $GITHUB_OUTPUT
-          echo "stack-version=$STACK_VERSION" >> $GITHUB_OUTPUT          
+          echo "stack-version=$STACK_VERSION" >> $GITHUB_OUTPUT
 
   deploy:
     needs: naming
