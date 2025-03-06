@@ -5,38 +5,46 @@ agents:
   image: "family/platform-ingest-beats-ubuntu-2204"
 
 steps:
-  - label: ":package: Package Cloudbeat - Snapshot"
+  - label: ":package: Package Cloudbeat FIPS - Snapshot"
     if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
     env:
       WORKFLOW: "snapshot"
+      FIPS: "true"
     key: "package-snapshot"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
+  # - label: ":package: Package Cloudbeat - Snapshot"
+  #   if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   env:
+  #     WORKFLOW: "snapshot"
+  #   key: "package-snapshot"
+  #   command: "./.buildkite/scripts/package.sh"
+  #   artifact_paths: "build/distributions/*"
 
-  - label: ":rocket: Publishing Snapshot DRA artifacts"
-    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
-    depends_on: "package-snapshot"
-    command: "./.buildkite/scripts/publish.sh"
-    env:
-      WORKFLOW: "snapshot"
+  # - label: ":rocket: Publishing Snapshot DRA artifacts"
+  #   if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   depends_on: "package-snapshot"
+  #   command: "./.buildkite/scripts/publish.sh"
+  #   env:
+  #     WORKFLOW: "snapshot"
 
-  - label: ":package: Package Cloudbeat - Staging"
-    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
-    env:
-      WORKFLOW: "staging"
-    key: "package-staging"
-    command: "./.buildkite/scripts/package.sh"
-    artifact_paths: "build/distributions/*"
+  # - label: ":package: Package Cloudbeat - Staging"
+  #   if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   env:
+  #     WORKFLOW: "staging"
+  #   key: "package-staging"
+  #   command: "./.buildkite/scripts/package.sh"
+  #   artifact_paths: "build/distributions/*"
 
-  - label: ":rocket: Publishing Staging DRA artifacts"
-    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
-    depends_on: "package-staging"
-    command: "./.buildkite/scripts/publish.sh"
-    env:
-      WORKFLOW: "staging"
+  # - label: ":rocket: Publishing Staging DRA artifacts"
+  #   if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   depends_on: "package-staging"
+  #   command: "./.buildkite/scripts/publish.sh"
+  #   env:
+  #     WORKFLOW: "staging"
 
-  - wait: ~
-    continue_on_failure: true
+  # - wait: ~
+  #   continue_on_failure: true
 
-  - label: "Send Slack Notification"
-    command: ".buildkite/scripts/notify.sh | buildkite-agent pipeline upload"
+  # - label: "Send Slack Notification"
+  #   command: ".buildkite/scripts/notify.sh | buildkite-agent pipeline upload"
