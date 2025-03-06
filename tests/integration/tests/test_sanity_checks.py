@@ -181,7 +181,6 @@ def test_cspm_aws_findings(
         query_list = build_query_list(
             benchmark_id="cis_aws",
             match_type=match_type,
-            version=AGENT_VERSION,
             agent=agent,
         )
         query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
@@ -244,7 +243,6 @@ def test_cspm_gcp_findings(
         query_list = build_query_list(
             benchmark_id="cis_gcp",
             match_type=match_type,
-            version=AGENT_VERSION,
             agent=agent,
         )
         query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
@@ -279,7 +277,6 @@ def test_cspm_azure_findings(
     for agent in azure_agents:
         query_list = build_query_list(
             benchmark_id="cis_azure",
-            version=AGENT_VERSION,
             match_type=match_type,
             agent=agent,
         )
