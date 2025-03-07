@@ -107,5 +107,5 @@ func (p *Publisher) publish(events *[]beat.Event) {
 }
 
 func (p *Publisher) newEventSlice() []beat.Event {
-	return make([]beat.Event, 0, p.threshold + p.threshold/2) // init with capacity based on threshold
+	return make([]beat.Event, 0, p.threshold+(p.threshold/2)) // init with capacity based on threshold
 }
