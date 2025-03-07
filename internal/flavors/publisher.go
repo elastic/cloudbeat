@@ -53,7 +53,7 @@ func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, clien
 }
 
 func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
-	var eventsToSend []beat.Event
+	eventsToSend := p.newEventSlice()
 	flushTicker := time.NewTicker(p.interval)
 	for {
 		select {
@@ -98,5 +98,14 @@ func (p *Publisher) publish(events *[]beat.Event) {
 	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events)).
 		Infof("Publishing %d events to elasticsearch", len(*events))
 	p.client.PublishAll(*events)
-	*events = nil
+	*events = (*events)[:0] // reuse the capacity and set len to 0.
+
+	// if for some reason capacity exceeds 4*threshold, drop the slice and create a new one. (it will never get here, just a precaution)
+	if cap(*events) > (4 * p.threshold) {
+		*events = p.newEventSlice()
+	}
+}
+
+func (p *Publisher) newEventSlice() []beat.Event {
+	return make([]beat.Event, 0, int(float32(p.threshold)*1.5)) // init with capacity based on threshold
 }
