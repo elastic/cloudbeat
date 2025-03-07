@@ -100,7 +100,7 @@ func (p *Publisher) publish(events *[]beat.Event) {
 	p.client.PublishAll(*events)
 	*events = (*events)[:0] // reuse the capacity and set len to 0.
 
-	// if for some reason capacity exceeds 4*threshold, drop the slice and create a new one. (it will never get here, just a precaution)
+	// Reset the capacity if the slice has grown considerably
 	if cap(*events) > (4 * p.threshold) {
 		*events = p.newEventSlice()
 	}
