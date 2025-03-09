@@ -10,6 +10,7 @@ steps:
     env:
       WORKFLOW: "snapshot"
       FIPS: "true"
+      MAGEFILE_VERBOSE: "true"
     key: "package-snapshot"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
