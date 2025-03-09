@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 env:
   BRANCH: "${BUILDKITE_BRANCH}"
   # AWS_ARM_INSTANCE_TYPE: "m6g.xlarge"
@@ -6,9 +7,9 @@ env:
   IMAGE_UBUNTU_X86_64: "family/platform-ingest-beats-ubuntu-2204"
   MAGEFILE_VERBOSE: "true"
 
-agents:
-  provider: "gcp" # needed for running docker commands
-  image: "family/platform-ingest-beats-ubuntu-2204"
+# agents:
+#   provider: "gcp" # needed for running docker commands
+#   image: "family/platform-ingest-beats-ubuntu-2204"
 
 steps:
   - label: ":package: Package Cloudbeat FIPS - Snapshot (linux/amd64)"
@@ -32,7 +33,7 @@ steps:
     agents:
       provider: "aws"
       imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
-      # instanceType: "${AWS_ARM_INSTANCE_TYPE}"
+      instanceType: "${AWS_ARM_INSTANCE_TYPE}"
     key: "package-snapshot-linux-arm64"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
