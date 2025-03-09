@@ -1,16 +1,38 @@
 env:
   BRANCH: "${BUILDKITE_BRANCH}"
+  # AWS_ARM_INSTANCE_TYPE: "m6g.xlarge"
+  AWS_IMAGE_UBUNTU_ARM_64: "platform-ingest-beats-ubuntu-2204-aarch64"
+  # GCP_DEFAULT_MACHINE_TYPE: "c2d-standard-8"
+  IMAGE_UBUNTU_X86_64: "family/platform-ingest-beats-ubuntu-2204"
+  MAGEFILE_VERBOSE: "true"
+
 agents:
   provider: "gcp" # needed for running docker commands
   image: "family/platform-ingest-beats-ubuntu-2204"
 
 steps:
-  - label: ":package: Package Cloudbeat FIPS - Snapshot"
-    # if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+  - label: ":package: Package Cloudbeat FIPS - Snapshot (linux/amd64)"
     env:
       WORKFLOW: "snapshot"
       FIPS: "true"
-      MAGEFILE_VERBOSE: "true"
+      PLATFORMS: linux/amd64
+    agents:
+      provider: gcp
+      image: "${IMAGE_UBUNTU_X86_64}"
+      # machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
+    key: "package-snapshot"
+    command: "./.buildkite/scripts/package.sh"
+    artifact_paths: "build/distributions/*"
+
+  - label: ":package: Package Cloudbeat FIPS - Snapshot (linux/arm64)"
+    env:
+      WORKFLOW: "snapshot"
+      FIPS: "true"
+      PLATFORMS: linux/arm64
+    agents:
+      provider: "aws"
+      imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
+      # instanceType: "${AWS_ARM_INSTANCE_TYPE}"
     key: "package-snapshot"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
