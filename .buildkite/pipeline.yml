@@ -20,7 +20,7 @@ steps:
       provider: gcp
       image: "${IMAGE_UBUNTU_X86_64}"
       # machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
-    key: "package-snapshot-linux/amd64"
+    key: "package-snapshot-linux-amd64"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
 
@@ -33,7 +33,7 @@ steps:
       provider: "aws"
       imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
       # instanceType: "${AWS_ARM_INSTANCE_TYPE}"
-    key: "package-snapshot-linux/arm64"
+    key: "package-snapshot-linux-arm64"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
   # - label: ":package: Package Cloudbeat - Snapshot"
