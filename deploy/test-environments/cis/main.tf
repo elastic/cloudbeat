@@ -1,7 +1,6 @@
 provider "aws" {
   region      = var.region
-  retry_mode  = "standard"
-  max_retries = 15
+  max_retries = 30
 }
 
 locals {
