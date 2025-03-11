@@ -29,6 +29,7 @@ CNVM_TAGS = (
     "Key=project,Value=test-environments"
 )
 
+DOCKER_ARTIFACTORY_AGENT = "docker.elastic.co/elastic-agent/elastic-agent"
 
 elk_config = Munch()
 elk_config.user = os.getenv("ES_USER", "NA")
@@ -40,6 +41,10 @@ elk_config.auth = (elk_config.user, elk_config.password)
 
 kspm_config = Munch()
 kspm_config.docker_image_override = os.getenv("DOCKER_IMAGE_OVERRIDE", "")
+if not kspm_config.docker_image_override and elk_config.stack_version.endswith("SNAPSHOT"):
+    kspm_config.docker_image_override = f"{DOCKER_ARTIFACTORY_AGENT}:{elk_config.stack_version}"
+    if elk_config.agent_version:
+        kspm_config.docker_image_override = f"{DOCKER_ARTIFACTORY_AGENT}:{elk_config.agent_version}"
 
 aws_config = Munch()
 aws_config.access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "NA")
