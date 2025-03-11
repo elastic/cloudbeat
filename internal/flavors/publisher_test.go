@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -212,26 +213,57 @@ func sleepOnCycleEnd(t *testing.T, size int, eventCount int, interval time.Durat
 }
 
 func TestPublisher_HandleEvents_Buffer(t *testing.T) {
+	testhelper.SkipLong(t)
+
+	event := func(id int) beat.Event {
+		return beat.Event{
+			Fields: mapstr.M{"id": id},
+		}
+	}
+
+	events := func(ids []int) []beat.Event {
+		return lo.Map(ids, func(id int, _ int) beat.Event { return event(id) })
+	}
+
+	eventsBatches := func(batchesOfSize ...int) [][]beat.Event {
+		id := 1
+		return lo.Map(batchesOfSize, func(singleBatchSize int, _ int) []beat.Event {
+			b := events(lo.RangeFrom(id, singleBatchSize))
+			id += singleBatchSize
+			return b
+		})
+	}
+
 	tests := map[string]struct {
 		interval                            time.Duration
 		threshold                           int
-		incomeEventBatchesOf                []int
+		incomeEventBatchesSizes             []int
 		expectedPublishedBatchesIDs         [][]int
 		expectedBufferCapacityOnEachPublish []int
 		expectedBufferCapacityEnd           int
+		ctxTimeout                          time.Duration
 	}{
 		"single batch": {
 			interval:                            2 * time.Second,
 			threshold:                           10,
-			incomeEventBatchesOf:                []int{5},
+			incomeEventBatchesSizes:             []int{5},
 			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5}},
 			expectedBufferCapacityOnEachPublish: []int{15},
 			expectedBufferCapacityEnd:           15,
 		},
+		"single batch with ctx deadline": {
+			interval:                            500 * time.Millisecond,
+			threshold:                           10,
+			incomeEventBatchesSizes:             []int{5},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5}},
+			expectedBufferCapacityOnEachPublish: []int{15},
+			expectedBufferCapacityEnd:           15,
+			ctxTimeout:                          time.Second,
+		},
 		"single batch increase capacity": {
 			interval:                            2 * time.Second,
 			threshold:                           5,
-			incomeEventBatchesOf:                []int{10},
+			incomeEventBatchesSizes:             []int{10},
 			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
 			expectedBufferCapacityOnEachPublish: []int{15},
 			expectedBufferCapacityEnd:           15,
@@ -239,7 +271,7 @@ func TestPublisher_HandleEvents_Buffer(t *testing.T) {
 		"two batches under threshold": {
 			interval:                            2 * time.Second,
 			threshold:                           10,
-			incomeEventBatchesOf:                []int{5, 5},
+			incomeEventBatchesSizes:             []int{5, 5},
 			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
 			expectedBufferCapacityOnEachPublish: []int{15},
 			expectedBufferCapacityEnd:           15,
@@ -247,7 +279,7 @@ func TestPublisher_HandleEvents_Buffer(t *testing.T) {
 		"two batches at threshold": {
 			interval:                            2 * time.Second,
 			threshold:                           5,
-			incomeEventBatchesOf:                []int{3, 3, 6},
+			incomeEventBatchesSizes:             []int{3, 3, 6},
 			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6}, {7, 8, 9, 10, 11, 12}},
 			expectedBufferCapacityOnEachPublish: []int{7, 7},
 			expectedBufferCapacityEnd:           7,
@@ -255,7 +287,7 @@ func TestPublisher_HandleEvents_Buffer(t *testing.T) {
 		"single batch over threshold": {
 			interval:                            2 * time.Second,
 			threshold:                           3,
-			incomeEventBatchesOf:                []int{5},
+			incomeEventBatchesSizes:             []int{5},
 			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5}},
 			expectedBufferCapacityOnEachPublish: []int{8},
 			expectedBufferCapacityEnd:           8, // 4 * 2
@@ -263,7 +295,7 @@ func TestPublisher_HandleEvents_Buffer(t *testing.T) {
 		"single batch over threshold break capacity limit": {
 			interval:                            2 * time.Second,
 			threshold:                           3,
-			incomeEventBatchesOf:                []int{15},
+			incomeEventBatchesSizes:             []int{15},
 			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}},
 			expectedBufferCapacityOnEachPublish: []int{15},
 			expectedBufferCapacityEnd:           4,
@@ -271,7 +303,7 @@ func TestPublisher_HandleEvents_Buffer(t *testing.T) {
 		"multiple batches break capacity limit": {
 			interval:                            2 * time.Second,
 			threshold:                           5,
-			incomeEventBatchesOf:                []int{2, 2, 20},
+			incomeEventBatchesSizes:             []int{2, 2, 20},
 			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}},
 			expectedBufferCapacityOnEachPublish: []int{27},
 			expectedBufferCapacityEnd:           7,
@@ -285,6 +317,10 @@ func TestPublisher_HandleEvents_Buffer(t *testing.T) {
 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
+			if tc.ctxTimeout != 0 {
+				ctx, cancel = context.WithTimeout(ctx, tc.ctxTimeout)
+				defer cancel()
+			}
 
 			var publisher *Publisher
 
@@ -304,46 +340,17 @@ func TestPublisher_HandleEvents_Buffer(t *testing.T) {
 
 			// send events
 			go func() {
-				events := generateEventBatches(tc.incomeEventBatchesOf...)
+				events := eventsBatches(tc.incomeEventBatchesSizes...)
 				for _, batch := range events {
 					eventsChannel <- batch
 				}
-				close(eventsChannel)
+				if tc.ctxTimeout == 0 {
+					close(eventsChannel)
+				}
 			}()
 
 			publisher.HandleEvents(ctx, eventsChannel)
 			require.Equal(t, tc.expectedBufferCapacityEnd, cap(publisher.eventsBuffer))
 		})
 	}
-}
-
-func generateEventBatches(batchesOf ...int) [][]beat.Event {
-	batches := make([][]beat.Event, 0, len(batchesOf))
-
-	id := 0
-
-	for _, singleBatchCount := range batchesOf {
-		singleBatch := make([]beat.Event, 0, singleBatchCount)
-		for range singleBatchCount {
-			id++
-			singleBatch = append(singleBatch, event(id))
-		}
-		batches = append(batches, singleBatch)
-	}
-
-	return batches
-}
-
-func event(id int) beat.Event {
-	return beat.Event{
-		Fields: mapstr.M{"id": id},
-	}
-}
-
-func events(ids []int) []beat.Event {
-	s := make([]beat.Event, len(ids))
-	for i := range len(ids) {
-		s[i] = event(ids[i])
-	}
-	return s
 }
