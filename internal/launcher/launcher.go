@@ -26,12 +26,13 @@ import (
 	"sync"
 	"time"
 
+	cryptofips "crypto/fips140"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/management/status"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/go-ucfg"
-
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 const (
@@ -73,6 +74,7 @@ type Validator interface {
 }
 
 func New(log *clog.Logger, name string, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) beat.Beater {
+	fmt.Println("cryptofips.enabled?", cryptofips.Enabled())
 	return &launcher{
 		beaterErr: make(chan error, 1),
 		wg:        sync.WaitGroup{},
