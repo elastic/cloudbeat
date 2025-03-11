@@ -84,7 +84,7 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 		}
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			[]string{id},
+			id,
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
