@@ -78,9 +78,13 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 	}
 
 	for _, item := range awsResources {
+		var id string = item.GetResourceArn()
+		if id == "" { // e.g. LambdaEventSourceMappings
+			id = item.GetResourceName()
+		}
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-			item.GetResourceArn(),
+			id,
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
