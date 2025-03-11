@@ -398,7 +398,7 @@ func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *clog.Logger, f T
 
 func (p *Provider) getAllAssets(ctx context.Context, request *assetpb.ListAssetsRequest) []*assetpb.Asset {
 	p.log.Infof("Listing asset types: %v of type %v for %v", request.AssetTypes, request.ContentType, request.Parent)
-	results := make([]*assetpb.Asset, 0) // TODO: use PageInfo().Remaining() to initialize with capacity <issue link>
+	results := make([]*assetpb.Asset, 0)
 	it := p.inventory.ListAssets(ctx, request)
 	for {
 		response, err := it.Next()
