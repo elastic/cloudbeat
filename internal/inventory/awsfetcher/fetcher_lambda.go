@@ -84,11 +84,7 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 		}
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
-<<<<<<< HEAD
-			item.GetResourceArn(),
-=======
 			[]string{id},
->>>>>>> 01cf3fc6 ([Asset Inventory][AWS] Add integration test cases for implemented assets (#2487))
 			item.GetResourceName(),
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
