@@ -1,0 +1,46 @@
+name: Test Runner
+run-name: Test E2E Flow by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *' # every day at 02:00
+
+jobs:
+  matrix-setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set deployment matrix
+        id: set-matrix
+        env:
+          ECH_REGION: "gcp-us-west2"
+          AWS_REGION: "aws-us-east-1"
+        run: |
+          echo 'matrix={
+            "include": [
+              {"branch": "main", "type": "ech", "region": "$ECH_REGION", "serverless": false},
+              {"branch": "8.x", "type": "ech", "region": "$ECH_REGION", "serverless": false},
+              {"branch": "main", "type": "serverless", "region": "$AWS_REGION", "serverless": true},
+              {"branch": "8.x", "type": "serverless", "region": "$AWS_REGION", "serverless": true}
+            ]
+          }' >> $GITHUB_OUTPUT
+
+  run-version:
+    needs: matrix-setup
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{fromJson(needs.matrix_setup.outputs.matrix)}}
+    name: Run ${{ matrix.type }} on ${{ matrix.branch }}
+    uses: ./.github/workflows/test-e2e-flow.yml
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    with:
+      branch: ${{ matrix.branch }}
+      deployment-type: ${{ matrix.type }}
+      region: ${{ matrix.region }}
+      serverless: ${{ matrix.serverless }}
