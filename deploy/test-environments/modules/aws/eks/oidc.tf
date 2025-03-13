@@ -7,5 +7,15 @@ resource "aws_eks_identity_provider_config" "eks_oidc" {
 
   }
 
+  depends_on = [module.eks, null_resource.wait_for_cluster]
+}
+
+resource "null_resource" "wait_for_cluster" {
   depends_on = [module.eks]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      aws eks wait cluster-active --name ${local.cluster_name} --region ${var.region}
+    EOT
+  }
 }
