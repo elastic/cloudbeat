@@ -33,14 +33,16 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 )
 
-func awsConfigRetrier() aws.Retryer {
-	return retry.NewStandard(func(o *retry.StandardOptions) {
-		o.Retryables = append(o.Retryables, retry.RetryableHTTPStatusCode{
-			Codes: map[int]struct{}{
-				http.StatusTooManyRequests: {},
-			},
-		})
+func RetryableCodesOption(o *retry.StandardOptions) {
+	o.Retryables = append(o.Retryables, retry.RetryableHTTPStatusCode{
+		Codes: map[int]struct{}{
+			http.StatusTooManyRequests: {},
+		},
 	})
+}
+
+func awsConfigRetrier() aws.Retryer {
+	return retry.NewStandard(RetryableCodesOption)
 }
 
 func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
