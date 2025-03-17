@@ -59,6 +59,7 @@ var ResourcesToFetch = []ResourcesClassification{
 	{gcpinventory.CloudFunctionAssetType, inventory.AssetClassificationGcpCloudFunction},
 	{gcpinventory.CloudRunService, inventory.AssetClassificationGcpCloudRunService},
 	{gcpinventory.IamRoleAssetType, inventory.AssetClassificationGcpIamRole},
+	{gcpinventory.ComputeNetworkAssetType, inventory.AssetClassificationGcpNetwork},
 }
 
 func newAssetsInventoryFetcher(logger *clog.Logger, provider inventoryProvider) inventory.AssetFetcher {
@@ -261,6 +262,7 @@ var assetEnrichers = map[string]func(item *gcpinventory.ExtendedGcpAsset, fields
 	gcpinventory.GkeClusterAssetType:            enrichGkeCluster,
 	gcpinventory.ComputeForwardingRuleAssetType: enrichForwardingRule,
 	gcpinventory.CloudFunctionAssetType:         enrichCloudFunction,
+	gcpinventory.ComputeNetworkAssetType:        enrichNetwork,
 }
 
 func enrichOrganization(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
@@ -350,6 +352,14 @@ func enrichCloudFunction(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*st
 		inventory.WithFass(inventory.Fass{
 			Name:    getStringValue("name", fields),
 			Version: revision,
+		}),
+	}
+}
+
+func enrichNetwork(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+	return []inventory.AssetEnricher{
+		inventory.WithNetwork(inventory.Network{
+			Name: getStringValue("name", fields),
 		}),
 	}
 }
