@@ -177,7 +177,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      # v4
+      # Setup all required tools
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
