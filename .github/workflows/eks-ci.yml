@@ -60,7 +60,7 @@ jobs:
     steps:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
         with:
           tool-cache: false
           android: true
@@ -74,12 +74,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup GO (with caching)
-        uses: magnetikonline/action-golang-cache@v5
+        uses: magnetikonline/action-golang-cache@fcca93e25c7fe3943de4d40c22d255d17f63e63b  # v5
         with:
           go-version-file: .go-version
 
       - name: build cloudbeat binary
-        uses: magefile/mage-action@v3
+        uses: magefile/mage-action@6a5dcb5fe61f43d7c08a98bc3cf9bc63c308c08e  # v3.0.0
         with:
           version: latest
           args: build
@@ -243,7 +243,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v2.9.0
+        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1  # v2.9.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: eu-west-1
