@@ -63,11 +63,7 @@ jobs:
           poetry install
 
       - name: Configure AWS credentials
-<<<<<<< HEAD
-        uses: aws-actions/configure-aws-credentials@v4
-=======
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

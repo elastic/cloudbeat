@@ -131,11 +131,7 @@ jobs:
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Configure AWS credentials
-<<<<<<< HEAD
-        uses: aws-actions/configure-aws-credentials@v4
-=======
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -216,11 +212,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-<<<<<<< HEAD
-        uses: actions/upload-artifact@v3
-=======
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
         with:
           name: allure_results-${{ matrix.test-target}}
           path: ${{ env.REPORTS_DIR }}
@@ -238,11 +230,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Download Artifacts
-<<<<<<< HEAD
-        uses: actions/download-artifact@v3
-=======
         uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
         with:
           path: artifacts
 
@@ -253,11 +241,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-<<<<<<< HEAD
-        uses: andrcuns/allure-publish-action@v2.8.0
-=======
         uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1 # v2.9.0
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: eu-west-1
