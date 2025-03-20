@@ -1,42 +1,74 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 env:
   BRANCH: "${BUILDKITE_BRANCH}"
-agents:
-  provider: "gcp" # needed for running docker commands
-  image: "family/platform-ingest-beats-ubuntu-2204"
+  AWS_ARM_INSTANCE_TYPE: "m6g.xlarge"
+  AWS_IMAGE_UBUNTU_ARM_64: "platform-ingest-beats-ubuntu-2204-aarch64"
+  # GCP_DEFAULT_MACHINE_TYPE: "c2d-standard-8"
+  IMAGE_UBUNTU_X86_64: "family/platform-ingest-beats-ubuntu-2204"
+  MAGEFILE_VERBOSE: "true"
+
+# agents:
+#   provider: "gcp" # needed for running docker commands
+#   image: "family/platform-ingest-beats-ubuntu-2204"
 
 steps:
-  - label: ":package: Package Cloudbeat - Snapshot"
-    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+  - label: ":package: Package Cloudbeat FIPS - Snapshot (linux/amd64)"
     env:
       WORKFLOW: "snapshot"
-    key: "package-snapshot"
+      FIPS: "true"
+      PLATFORMS: linux/amd64
+    agents:
+      provider: gcp
+      image: "${IMAGE_UBUNTU_X86_64}"
+      # machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
+    key: "package-snapshot-linux-amd64"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
 
-  - label: ":rocket: Publishing Snapshot DRA artifacts"
-    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
-    depends_on: "package-snapshot"
-    command: "./.buildkite/scripts/publish.sh"
+  - label: ":package: Package Cloudbeat FIPS - Snapshot (linux/arm64)"
     env:
       WORKFLOW: "snapshot"
-
-  - label: ":package: Package Cloudbeat - Staging"
-    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
-    env:
-      WORKFLOW: "staging"
-    key: "package-staging"
+      FIPS: "true"
+      PLATFORMS: linux/arm64
+    agents:
+      provider: "aws"
+      imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
+      instanceType: "${AWS_ARM_INSTANCE_TYPE}"
+    key: "package-snapshot-linux-arm64"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
+  # - label: ":package: Package Cloudbeat - Snapshot"
+  #   if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   env:
+  #     WORKFLOW: "snapshot"
+  #   key: "package-snapshot"
+  #   command: "./.buildkite/scripts/package.sh"
+  #   artifact_paths: "build/distributions/*"
 
-  - label: ":rocket: Publishing Staging DRA artifacts"
-    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
-    depends_on: "package-staging"
-    command: "./.buildkite/scripts/publish.sh"
-    env:
-      WORKFLOW: "staging"
+  # - label: ":rocket: Publishing Snapshot DRA artifacts"
+  #   if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   depends_on: "package-snapshot"
+  #   command: "./.buildkite/scripts/publish.sh"
+  #   env:
+  #     WORKFLOW: "snapshot"
 
-  - wait: ~
-    continue_on_failure: true
+  # - label: ":package: Package Cloudbeat - Staging"
+  #   if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   env:
+  #     WORKFLOW: "staging"
+  #   key: "package-staging"
+  #   command: "./.buildkite/scripts/package.sh"
+  #   artifact_paths: "build/distributions/*"
 
-  - label: "Send Slack Notification"
-    command: ".buildkite/scripts/notify.sh | buildkite-agent pipeline upload"
+  # - label: ":rocket: Publishing Staging DRA artifacts"
+  #   if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+  #   depends_on: "package-staging"
+  #   command: "./.buildkite/scripts/publish.sh"
+  #   env:
+  #     WORKFLOW: "staging"
+
+  # - wait: ~
+  #   continue_on_failure: true
+
+  # - label: "Send Slack Notification"
+  #   command: ".buildkite/scripts/notify.sh | buildkite-agent pipeline upload"

@@ -22,7 +22,9 @@ import (
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	azlog "github.com/Azure/azure-sdk-for-go/sdk/azcore/log"
 
+	// print log output to stdout
 	"github.com/elastic/cloudbeat/internal/config"
 )
 
@@ -39,6 +41,10 @@ type ConfigProvider struct {
 }
 
 func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
+	azlog.SetListener(func(event azlog.Event, s string) {
+		fmt.Println(s)
+	})
+
 	switch cfg.Credentials.ClientCredentialsType {
 	case config.AzureClientCredentialsTypeSecret:
 		return p.getSecretCredentialsConfig(cfg)
