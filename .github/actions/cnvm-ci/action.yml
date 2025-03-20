@@ -27,7 +27,7 @@ runs:
         elk-version: ${{ inputs.elk-version }}
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
@@ -55,7 +55,7 @@ runs:
 
     - name: Upload test results
       if: ${{ always() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
       with:
         name: allure-results-ci-cnvm
         path: tests/allure/results/
@@ -63,7 +63,7 @@ runs:
 
     - if: ${{ failure() || cancelled() || inputs.debug == 'true' }}
       name: Upload cloudbeat logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
       with:
         name: cloubeat-logs-ci-cnvm
         path: logs/
