@@ -50,7 +50,7 @@ jobs:
       id-token: 'write'
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -64,7 +64,7 @@ jobs:
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -72,14 +72,14 @@ jobs:
 
       - id: google-auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - id: azure-auth
         name: Azure login
-        uses: azure/login@v2
+        uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 

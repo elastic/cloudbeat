@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
@@ -41,7 +41,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -64,7 +64,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -87,7 +87,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -131,7 +131,7 @@ jobs:
       id-token: 'write'
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -152,7 +152,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
         with:
           tool-cache: false
           android: true
@@ -163,7 +163,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -186,7 +186,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
         with:
           tool-cache: false
           android: true
@@ -197,7 +197,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -236,7 +236,7 @@ jobs:
             values-file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
         with:
           tool-cache: false
           android: true
@@ -247,7 +247,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -286,9 +286,9 @@ jobs:
       S3_BUCKET_ALLURE_REPORT_AP: "http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/ci"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         if: ${{ always() }}
         with:
           pattern: allure-results-ci-*
@@ -303,7 +303,7 @@ jobs:
 
       - name: Publish allure report
         if: ${{ always() }}
-        uses: andrcuns/allure-publish-action@v2.8.0
+        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1 # v2.9.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: ${{ env.AWS_REGION }}
@@ -341,7 +341,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Comment test success result
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@52423e01640425a022ef5fd42c6fb5f633a02728 # v2
         if: ${{ success() && github.event_name != 'push' }}
         with:
           header: CI Test Results
@@ -352,7 +352,7 @@ jobs:
 
       - if: ${{ success() }}
         name: Cleanup docker image artifacts
-        uses: geekyeggo/delete-artifact@v5
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
         with:
           name: docker-images
           failOnError: false

@@ -51,7 +51,7 @@ jobs:
         pipeline-name: [ beats, golang, hermit, mods ]
         git-branch: [ main, 8.x ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Install Updatecli in the runner
@@ -71,7 +71,7 @@ jobs:
       matrix:
         pipeline-name: [ golang, beats ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Set Branch
