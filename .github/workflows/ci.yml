@@ -25,12 +25,42 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
           init-tools: 'true'
 
+<<<<<<< HEAD
+=======
+  check-asset-inventory-supported-version:
+    needs: [ init-hermit ]
+    name: Check Asset Inventory supported version
+    runs-on: ubuntu-22.04
+    outputs:
+      asset_inventory_supported: ${{ steps.check-asset-inventory-supported-version.outputs.asset_inventory_supported }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Check Asset Inventory supported version
+        id: check-asset-inventory-supported-version
+        env:
+          STACK_VERSION: ${{ env.ELK_VERSION }}
+        run: |
+          MIN_VERSION="8.16.0"
+          if [[ "$(echo -e "$MIN_VERSION\n$STACK_VERSION" | sort -V | head -n 1)" == "$MIN_VERSION" ]]; then
+            echo "Stack version meets the requirement: $STACK_VERSION >= $MIN_VERSION."
+            echo "asset_inventory_supported=true" >> $GITHUB_OUTPUT
+          else
+            echo "Stack version is below the requirement: $STACK_VERSION < $MIN_VERSION."
+            echo "asset_inventory_supported=false" >> $GITHUB_OUTPUT
+          fi
+
+>>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
   ci-azure:
     needs: [ init-hermit ]
     name: CIS Azure CI
@@ -41,7 +71,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -54,6 +84,33 @@ jobs:
           azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
           azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
 
+<<<<<<< HEAD
+=======
+  ci-azure-asset-inventory:
+    needs: [ init-hermit, check-asset-inventory-supported-version ]
+    name: Azure Asset Inventory CI
+    runs-on: ubuntu-22.04
+    if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run Azure integration tests
+        uses: ./.github/actions/azure-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
+          azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
+          azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
+
+>>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
   ci-aws:
     needs: [ init-hermit ]
     name: CIS AWS CI
@@ -64,7 +121,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -87,7 +144,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -131,7 +188,7 @@ jobs:
       id-token: 'write'
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -145,6 +202,33 @@ jobs:
           gcp-project-id: 'elastic-security-test'
           gcp-account-type: 'single-account'
 
+<<<<<<< HEAD
+=======
+  ci-gcp-asset-inventory:
+    needs: [ init-hermit, check-asset-inventory-supported-version ]
+    name: GCP Asset Inventory CI
+    runs-on: ubuntu-22.04
+    if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
+    timeout-minutes: 60
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Run GCP Asset Inventory integration tests
+        uses: ./.github/actions/gcp-asset-inventory-ci
+        with:
+          elk-version: ${{ env.ELK_VERSION }}
+          credentials-json: ${{ secrets.GCP_ASSETS_INVENTORY_CREDENTIALS_JSON }}
+          project-id: "elastic-security-test"
+
+
+>>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
   ci-cnvm:
     needs: [ init-hermit ]
     name: CNVM CI
@@ -152,7 +236,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
         with:
           tool-cache: false
           android: true
@@ -163,7 +247,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -186,7 +270,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
         with:
           tool-cache: false
           android: true
@@ -197,7 +281,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -236,7 +320,7 @@ jobs:
             values-file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
         with:
           tool-cache: false
           android: true
@@ -247,7 +331,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -286,9 +370,9 @@ jobs:
       S3_BUCKET_ALLURE_REPORT_AP: "http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/ci"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         if: ${{ always() }}
         with:
           pattern: allure-results-ci-*
@@ -303,7 +387,11 @@ jobs:
 
       - name: Publish allure report
         if: ${{ always() }}
+<<<<<<< HEAD
         uses: andrcuns/allure-publish-action@v2.7.1
+=======
+        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1 # v2.9.0
+>>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: ${{ env.AWS_REGION }}
@@ -341,7 +429,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Comment test success result
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@52423e01640425a022ef5fd42c6fb5f633a02728 # v2
         if: ${{ success() && github.event_name != 'push' }}
         with:
           header: CI Test Results
@@ -352,7 +440,7 @@ jobs:
 
       - if: ${{ success() }}
         name: Cleanup docker image artifacts
-        uses: geekyeggo/delete-artifact@v5
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
         with:
           name: docker-images
           failOnError: false
