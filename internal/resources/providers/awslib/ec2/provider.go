@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -100,7 +101,17 @@ func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) err
 	if err != nil {
 		return err
 	}
-	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
+	_, err = client.DeleteSnapshot(ctx,
+		&ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)},
+		func(ec2Options *ec2.Options) {
+			ec2Options.Retryer = retry.NewStandard(
+				awslib.RetryableCodesOption,
+				func(retryOptions *retry.StandardOptions) {
+					retryOptions.MaxAttempts = 10
+				},
+			)
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("error deleting snapshot %s: %w", snapshot.SnapshotId, err)
 	}
