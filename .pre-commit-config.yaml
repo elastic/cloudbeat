@@ -42,11 +42,7 @@ repos:
         files: ^(.ci/scripts|.github/actions|tests)/
 
   - repo: https://github.com/pycqa/pylint
-<<<<<<< HEAD
-    rev: v3.3.1
-=======
     rev: v3.3.6
->>>>>>> 9a48286d (Update pylint version (#3117))
     hooks:
       - id: pylint
         args: [
