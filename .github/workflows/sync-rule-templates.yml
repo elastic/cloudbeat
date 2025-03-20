@@ -17,14 +17,14 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout Integrations repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
           repository: elastic/integrations
           path: integrations
 
       - name: Checkout Cloudbeat repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
           path: cloudbeat
@@ -34,7 +34,7 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5
         with:
           python-version: "3.9"
 

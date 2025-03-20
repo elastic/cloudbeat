@@ -51,11 +51,15 @@ jobs:
         pipeline-name: [ beats, golang, hermit, mods ]
         git-branch: [ main, 8.x ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Install Updatecli in the runner
+<<<<<<< HEAD
         uses: updatecli/updatecli-action@4aca518a70708e38063453d8de9c551af7f48ac3 # v0.76.1
+=======
+        uses: updatecli/updatecli-action@d2e5d2667ba67a8599e636531baef731f54858bc # v2.78.1
+>>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
@@ -71,7 +75,7 @@ jobs:
       matrix:
         pipeline-name: [ golang, beats ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Set Branch
@@ -85,7 +89,11 @@ jobs:
 
           echo "GIT_BRANCH=$branchName" >> $GITHUB_ENV
       - name: Install Updatecli in the runner
+<<<<<<< HEAD
         uses: updatecli/updatecli-action@4aca518a70708e38063453d8de9c551af7f48ac3 # v0.76.1
+=======
+        uses: updatecli/updatecli-action@d2e5d2667ba67a8599e636531baef731f54858bc # v2.78.1
+>>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:

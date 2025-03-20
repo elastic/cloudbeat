@@ -12,6 +12,15 @@ jobs:
     outputs:
       deployment_name: ${{ steps.set_deployment_name.outputs.date-name }}
     steps:
+<<<<<<< HEAD
+=======
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+>>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
       - name: Set deployment name
         id: set_deployment_name
         run: |
