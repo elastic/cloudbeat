@@ -52,7 +52,7 @@ runs:
 
     - name: Upload test results
       if: ${{ always() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
       with:
         name: allure-results-ci-aws-asset-inventory
         path: tests/allure/results/
@@ -60,7 +60,7 @@ runs:
 
     - if: ${{ failure() || cancelled() || inputs.debug == 'true' }}
       name: Upload cloudbeat logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
       with:
         name: cloubeat-logs-ci-aws-asset-inventory
         path: logs/

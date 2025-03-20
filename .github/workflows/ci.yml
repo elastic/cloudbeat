@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
@@ -39,7 +39,7 @@ jobs:
       asset_inventory_supported: ${{ steps.check-asset-inventory-supported-version.outputs.asset_inventory_supported }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -68,7 +68,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -92,7 +92,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -115,7 +115,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -139,7 +139,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -161,7 +161,7 @@ jobs:
       id-token: 'write'
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -186,7 +186,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -217,7 +217,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -251,7 +251,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -301,7 +301,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -342,9 +342,9 @@ jobs:
       S3_BUCKET_ALLURE_REPORT_AP: "http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/ci"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
         if: ${{ always() }}
         with:
           pattern: allure-results-ci-*
