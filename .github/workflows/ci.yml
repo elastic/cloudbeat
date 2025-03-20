@@ -81,33 +81,6 @@ jobs:
           azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
           azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
 
-<<<<<<< HEAD
-=======
-  ci-azure-asset-inventory:
-    needs: [ init-hermit, check-asset-inventory-supported-version ]
-    name: Azure Asset Inventory CI
-    runs-on: ubuntu-22.04
-    if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
-    timeout-minutes: 60
-    permissions:
-      contents: "read"
-      id-token: "write"
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
-
-      - name: Run Azure integration tests
-        uses: ./.github/actions/azure-asset-inventory-ci
-        with:
-          elk-version: ${{ env.ELK_VERSION }}
-          azure-client-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientId }}
-          azure-tenant-id: ${{ fromJSON(secrets.AZURE_CREDENTIALS).tenantId }}
-          azure-client-secret: ${{ fromJSON(secrets.AZURE_CREDENTIALS).clientSecret }}
-
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
   ci-aws:
     needs: [ init-hermit ]
     name: CIS AWS CI
@@ -163,7 +136,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -199,33 +172,6 @@ jobs:
           gcp-project-id: 'elastic-security-test'
           gcp-account-type: 'single-account'
 
-<<<<<<< HEAD
-=======
-  ci-gcp-asset-inventory:
-    needs: [ init-hermit, check-asset-inventory-supported-version ]
-    name: GCP Asset Inventory CI
-    runs-on: ubuntu-22.04
-    if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
-    timeout-minutes: 60
-    permissions:
-      contents: "read"
-      id-token: "write"
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
-
-      - name: Run GCP Asset Inventory integration tests
-        uses: ./.github/actions/gcp-asset-inventory-ci
-        with:
-          elk-version: ${{ env.ELK_VERSION }}
-          credentials-json: ${{ secrets.GCP_ASSETS_INVENTORY_CREDENTIALS_JSON }}
-          project-id: "elastic-security-test"
-
-
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
   ci-cnvm:
     needs: [ init-hermit ]
     name: CNVM CI

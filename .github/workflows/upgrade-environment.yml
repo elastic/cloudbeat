@@ -128,8 +128,6 @@ jobs:
           role-session-name: github-ci
           aws-region: ${{ env.AWS_REGION }}
 
-<<<<<<< HEAD
-=======
       - id: google-auth
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
@@ -143,7 +141,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
->>>>>>> 45a70b81 (ci: pin actions to specific commits (#3107))
       - name: Download tf state data
         env:
           S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
