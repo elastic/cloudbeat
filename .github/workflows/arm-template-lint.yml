@@ -20,7 +20,7 @@ jobs:
       matrix:
         template: [ "ARM-for-organization-account", "ARM-for-single-account" ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
         # Copy files to its own folder because it's what the official ARM-TTK action expects
         # Docs https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#test-parameters
@@ -30,7 +30,7 @@ jobs:
           mkdir ${{ matrix.template }}
           cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
 
-      - uses: microsoft/action-armttk@v1
+      - uses: microsoft/action-armttk@71252e1767b6e23ad905bf5c456ebdbc7d7ae1bf # v1
         name: lint ${{ matrix.template }}
         with:
           github_token: ${{ secrets.github_token }}
