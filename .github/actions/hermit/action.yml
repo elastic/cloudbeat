@@ -10,7 +10,7 @@ runs:
   steps:
     - id: free-disk
       name: Free Disk Space
-      uses: jlumbroso/free-disk-space@main
+      uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
       with:
         tool-cache: false
         android: true
@@ -32,7 +32,7 @@ runs:
         echo "hash=$hash" >> "$GITHUB_OUTPUT"
 
     - id: cache-tools
-      uses: actions/cache@v4
+      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
       with:
         path: |
           ~/.cache/hermit/pkg
@@ -42,7 +42,7 @@ runs:
         key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
 
     - id: cache-go-deps
-      uses: actions/cache@v4
+      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
       with:
         path: |
           ~/go/pkg/

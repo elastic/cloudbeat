@@ -17,7 +17,7 @@ runs:
       run: mage -v build
 
     - name: Run elasticsearch
-      uses: elastic/elastic-github-actions/elasticsearch@master
+      uses: elastic/elastic-github-actions/elasticsearch@dc110609b1cb3024477ead739ca23ab547b8b9ff # master
       with:
         stack-version: ${{ inputs.elk-version }}
         security-enabled: false
