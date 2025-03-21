@@ -25,21 +25,25 @@ import (
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 )
 
+func RetryableCodesOption(o *retry.StandardOptions) {
+	o.Retryables = append(o.Retryables, retry.RetryableHTTPStatusCode{
+		Codes: map[int]struct{}{
+			http.StatusTooManyRequests: {},
+		},
+	})
+}
+
+func awsConfigRetrier() aws.Retryer {
+	return retry.NewStandard(RetryableCodesOption)
+}
+
 func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
 	awsConfig, err := libbeataws.InitializeAWSConfig(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	awsConfig.Retryer = func() aws.Retryer {
-		return retry.NewStandard(func(o *retry.StandardOptions) {
-			o.Retryables = append(o.Retryables, retry.RetryableHTTPStatusCode{
-				Codes: map[int]struct{}{
-					http.StatusTooManyRequests: {},
-				},
-			})
-		})
-	}
+	awsConfig.Retryer = awsConfigRetrier
 
 	return &awsConfig, nil
 }
