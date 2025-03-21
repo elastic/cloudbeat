@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates an IAM Role with SecurityAudit policy that can be assumed by elastic's cloud connectors super role
+
+Parameters:
+  ElasticResourceId:
+    Description: Specify the Elastic resource ID that the new role will trust upon.
+    Type: String
+
+Resources:
+  ElasticCloudConnectorsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'ElasticCloudConnectorsRole-${AWS::StackName}'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+
+              # TODO: this is not a valid global super role, it will be replaced with the real one.
+              AWS: <TBD Elastic Global Super Role ARN>
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Join
+                  - '-'
+                  - - !Ref ElasticResourceId
+                    - !Select
+
+                      # Extract a UUID from the AWS::StackId by splitting on "/"
+                      - 2
+                      - !Split
+                        - /
+                        - !Ref "AWS::StackId"
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+
+Outputs:
+  RoleArn:
+    Description: The ARN of the IAM Role
+    Value: !GetAtt ElasticCloudConnectorsRole.Arn
+
+  ExternalId:
+    Description: The External ID part string used in the trust policy.
+    Value: !Select
+      - 2
+      - !Split
+        - /
+        - !Ref "AWS::StackId"
