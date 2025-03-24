@@ -24,8 +24,11 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
@@ -206,5 +209,148 @@ func sleepOnCycleEnd(t *testing.T, size int, eventCount int, interval time.Durat
 		waitPeriod := cycleInterval - time.Since(start) + gracePeriod
 		t.Logf("--- Waiting %s (cycle %d interval %s)", waitPeriod.String(), cycle, cycleInterval.String())
 		time.Sleep(waitPeriod)
+	}
+}
+
+func TestPublisher_HandleEvents_Buffer(t *testing.T) {
+	testhelper.SkipLong(t)
+
+	event := func(id int) beat.Event {
+		return beat.Event{
+			Fields: mapstr.M{"id": id},
+		}
+	}
+
+	events := func(ids []int) []beat.Event {
+		return lo.Map(ids, func(id int, _ int) beat.Event { return event(id) })
+	}
+
+	eventsBatches := func(batchesOfSize ...int) [][]beat.Event {
+		id := 1
+		return lo.Map(batchesOfSize, func(singleBatchSize int, _ int) []beat.Event {
+			b := events(lo.RangeFrom(id, singleBatchSize))
+			id += singleBatchSize
+			return b
+		})
+	}
+
+	tests := map[string]struct {
+		interval                            time.Duration
+		threshold                           int
+		incomeEventBatchesSizes             []int
+		expectedPublishedBatchesIDs         [][]int
+		expectedBufferCapacityOnEachPublish []int
+		expectedBufferCapacityEnd           int
+		ctxTimeout                          time.Duration
+	}{
+		"single batch": {
+			interval:                            2 * time.Second,
+			threshold:                           10,
+			incomeEventBatchesSizes:             []int{5},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5}},
+			expectedBufferCapacityOnEachPublish: []int{15},
+			expectedBufferCapacityEnd:           15,
+		},
+		"single batch with ctx deadline": {
+			interval:                            500 * time.Millisecond,
+			threshold:                           10,
+			incomeEventBatchesSizes:             []int{5},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5}},
+			expectedBufferCapacityOnEachPublish: []int{15},
+			expectedBufferCapacityEnd:           15,
+			ctxTimeout:                          time.Second,
+		},
+		"single batch increase capacity": {
+			interval:                            2 * time.Second,
+			threshold:                           5,
+			incomeEventBatchesSizes:             []int{10},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+			expectedBufferCapacityOnEachPublish: []int{15},
+			expectedBufferCapacityEnd:           15,
+		},
+		"two batches under threshold": {
+			interval:                            2 * time.Second,
+			threshold:                           10,
+			incomeEventBatchesSizes:             []int{5, 5},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+			expectedBufferCapacityOnEachPublish: []int{15},
+			expectedBufferCapacityEnd:           15,
+		},
+		"two batches at threshold": {
+			interval:                            2 * time.Second,
+			threshold:                           5,
+			incomeEventBatchesSizes:             []int{3, 3, 6},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6}, {7, 8, 9, 10, 11, 12}},
+			expectedBufferCapacityOnEachPublish: []int{7, 7},
+			expectedBufferCapacityEnd:           7,
+		},
+		"single batch over threshold": {
+			interval:                            2 * time.Second,
+			threshold:                           3,
+			incomeEventBatchesSizes:             []int{5},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5}},
+			expectedBufferCapacityOnEachPublish: []int{8},
+			expectedBufferCapacityEnd:           8, // 4 * 2
+		},
+		"single batch over threshold break capacity limit": {
+			interval:                            2 * time.Second,
+			threshold:                           3,
+			incomeEventBatchesSizes:             []int{15},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}},
+			expectedBufferCapacityOnEachPublish: []int{15},
+			expectedBufferCapacityEnd:           4,
+		},
+		"multiple batches break capacity limit": {
+			interval:                            2 * time.Second,
+			threshold:                           5,
+			incomeEventBatchesSizes:             []int{2, 2, 20},
+			expectedPublishedBatchesIDs:         [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24}},
+			expectedBufferCapacityOnEachPublish: []int{27},
+			expectedBufferCapacityEnd:           7,
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			log := testhelper.NewLogger(t)
+			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			if tc.ctxTimeout != 0 {
+				ctx, cancel = context.WithTimeout(ctx, tc.ctxTimeout)
+				defer cancel()
+			}
+
+			var publisher *Publisher
+
+			client := newMockClient(t)
+			calls := make([]*mock.Call, len(tc.expectedPublishedBatchesIDs))
+			for i, publishedSliceIDs := range tc.expectedPublishedBatchesIDs {
+				calls[i] = client.EXPECT().PublishAll(events(publishedSliceIDs)).Run(
+					func(_ []beat.Event) {
+						assert.Equalf(t, tc.expectedBufferCapacityOnEachPublish[i], cap(publisher.eventsBuffer), "buffer capacity miss-match on publish number %d", i)
+					},
+				).Call
+			}
+			mock.InOrder(calls...)
+
+			publisher = NewPublisher(log, tc.interval, tc.threshold, client)
+			eventsChannel := make(chan []beat.Event, 10)
+
+			// send events
+			go func() {
+				events := eventsBatches(tc.incomeEventBatchesSizes...)
+				for _, batch := range events {
+					eventsChannel <- batch
+				}
+				if tc.ctxTimeout == 0 {
+					close(eventsChannel)
+				}
+			}()
+
+			publisher.HandleEvents(ctx, eventsChannel)
+			require.Equal(t, tc.expectedBufferCapacityEnd, cap(publisher.eventsBuffer))
+		})
 	}
 }
