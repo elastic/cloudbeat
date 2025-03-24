@@ -12,10 +12,10 @@ body:
       required: true
 
   - type: input
-    id: link
+    id: links
     attributes:
-      label: "Link"
-      description: "Link to failing Github Action"
+      label: "Links"
+      description: "Links to failing Github Action and file line"
     validations:
       required: true
 
