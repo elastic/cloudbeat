@@ -15,15 +15,15 @@ body:
     id: link
     attributes:
       label: "Link"
-      description: "Link to file/line number in GitHub."
+      description: "Link to failing Github Action"
     validations:
       required: true
 
   - type: input
     id: branch
     attributes:
-      label: "Branch"
-      description: "Git branch the test was seen in. If a PR, the branch the PR was based off."
+      label: "Branch / PR"
+      description: "Git branch or PR the test was seen in."
     validations:
       required: true
 
