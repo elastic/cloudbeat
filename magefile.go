@@ -36,15 +36,6 @@ import (
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/integtest/notests"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/unittest"
-
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
 )
 
@@ -106,19 +97,19 @@ func GolangCrossBuild() error {
 }
 
 // BuildGoDaemon builds the go-daemon binary (use crossBuildGoDaemon).
-func BuildGoDaemon() error {
-	return devtools.BuildGoDaemon()
-}
+// func BuildGoDaemon() error {
+// 	return devtools.BuildGoDaemon()
+// }
 
 // CrossBuild cross-builds the beat for all target platforms.
 func CrossBuild() error {
 	return devtools.CrossBuild()
 }
 
-// CrossBuildGoDaemon cross-builds the go-daemon binary using Docker.
-func CrossBuildGoDaemon() error {
-	return devtools.CrossBuildGoDaemon()
-}
+// // CrossBuildGoDaemon cross-builds the go-daemon binary using Docker.
+// func CrossBuildGoDaemon() error {
+// 	return devtools.CrossBuildGoDaemon()
+// }
 
 // Run UnitTests
 func GoTestUnit(ctx context.Context) error {
@@ -141,7 +132,7 @@ func Package() {
 	}
 
 	mg.Deps(Update)
-	mg.Deps(CrossBuild, CrossBuildGoDaemon)
+	mg.Deps(CrossBuild)
 	mg.SerialDeps(devtools.Package)
 }
 

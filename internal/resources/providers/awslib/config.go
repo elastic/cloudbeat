@@ -46,6 +46,7 @@ func awsConfigRetrier() aws.Retryer {
 }
 
 func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
+	cfg.FIPSEnabled = true
 	awsConfig, err := libbeataws.InitializeAWSConfig(cfg)
 	if err != nil {
 		return nil, err
