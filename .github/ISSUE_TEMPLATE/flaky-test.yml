@@ -1,0 +1,45 @@
+name: "Flaky Test"
+description: "Report a flaky test (one that doesn't pass consistently)"
+labels: ["flaky-test"]
+projects: ["elastic/705"]
+body:
+  - type: input
+    id: test-name
+    attributes:
+      label: "Test Name"
+      description: "Name of the failing test."
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: "Link"
+      description: "Link to file/line number in GitHub."
+    validations:
+      required: true
+
+  - type: input
+    id: branch
+    attributes:
+      label: "Branch"
+      description: "Git branch the test was seen in. If a PR, the branch the PR was based off."
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: "Notes"
+      description: "Additional details about the test, e.g., theory as to failure cause."
+    validations:
+      required: false
+
+  - type: textarea
+    id: stack-trace
+    attributes:
+      label: "Stack Trace/Logs"
+      description: "Paste stack trace or logs here."
+      render: shell
+    validations:
+      required: false
