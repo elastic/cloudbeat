@@ -92,7 +92,7 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins *Ec2Instance) ([]EBS
 			{
 				ResourceType: "snapshot",
 				Tags: []types.Tag{
-					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("orestis-%s-%s", snapshotPrefix, *ins.InstanceId))},
+					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("%s-%s", snapshotPrefix, *ins.InstanceId))},
 					{Key: aws.String("Workload"), Value: aws.String("Cloudbeat Vulnerability Snapshot")},
 				},
 			},
