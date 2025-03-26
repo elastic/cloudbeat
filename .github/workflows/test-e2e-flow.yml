@@ -51,11 +51,14 @@ jobs:
   # TODO: Remove this deploy job
   deploy:
     needs: naming
-    run: |
-      echo "Deployment name: ${{ needs.naming.outputs.deployment_name }}"
-      echo "Stack version: ${{ needs.naming.outputs.stack_version }}"
-      echo "Region: ${{ inputs.region }}"
-      echo "Serverless: ${{ inputs.serverless }}"
+    steps:
+      - name: Debug step
+        id: deploy-debug-step
+        run: |
+          echo "Deployment name: ${{ needs.naming.outputs.deployment_name }}"
+          echo "Stack version: ${{ needs.naming.outputs.stack_version }}"
+          echo "Region: ${{ inputs.region }}"
+          echo "Serverless: ${{ inputs.serverless }}"
 
   # deploy:
   #   needs: naming
@@ -76,8 +79,11 @@ jobs:
   # TODO: Remove this destroy_environment job
   destroy_environment:
     needs: ["naming", "deploy"]
-    run: |
-      echo "Destroying environment with prefix: ${{ needs.naming.outputs.deployment_name }}"
+    steps:
+      - name: Debug step
+        id: destroy-debug-step
+        run: |
+          echo "Destroying environment with prefix: ${{ needs.naming.outputs.deployment_name }}"
 
   # destroy_environment:
   #   needs: ["naming", "deploy"]
