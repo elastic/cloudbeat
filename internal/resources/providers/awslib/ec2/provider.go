@@ -20,6 +20,7 @@ package ec2
 import (
 	"context"
 	"fmt"
+	"iter"
 	"strings"
 	"time"
 
@@ -325,10 +326,13 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 	return result, nil
 }
 
-func (p *Provider) ListOwnedSnapshots(ctx context.Context, before time.Time) chan EBSSnapshot {
-	ch := make(chan EBSSnapshot, 20)
-	go func() {
-		defer close(ch)
+// IterOwnedSnapshots will iterate over the snapshots owned by cloudbeat (snapshotPrefix) that are older than the
+// specified before time. A snapshot will be yielded if:
+// - It has a tag with key "Name" and value starting with snapshotPrefix
+// - It is older than the specified before time
+// - It is "owned" by the current account (owner ID is "self")
+func (p *Provider) IterOwnedSnapshots(ctx context.Context, before time.Time) iter.Seq[EBSSnapshot] {
+	return func(yield func(EBSSnapshot) bool) {
 		_, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
 			input := &ec2.DescribeSnapshotsInput{
 				Filters: []types.Filter{
@@ -348,7 +352,10 @@ func (p *Provider) ListOwnedSnapshots(ctx context.Context, before time.Time) cha
 				for _, snap := range output.Snapshots {
 					if filterSnap(snap, before) {
 						p.log.Infof("Found old snapshot %s", *snap.SnapshotId)
-						ch <- FromSnapshot(snap, region, p.awsAccountID, Ec2Instance{})
+						ebsSnap := FromSnapshot(snap, region, p.awsAccountID, Ec2Instance{})
+						if !yield(ebsSnap) {
+							return nil, nil
+						}
 					}
 				}
 			}
@@ -357,8 +364,7 @@ func (p *Provider) ListOwnedSnapshots(ctx context.Context, before time.Time) cha
 		if err != nil {
 			p.log.Errorf("Error listing owned snapshots: %v", err)
 		}
-	}()
-	return ch
+	}
 }
 
 func filterSnap(snap types.Snapshot, before time.Time) bool {
