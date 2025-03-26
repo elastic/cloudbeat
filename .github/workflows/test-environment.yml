@@ -113,6 +113,27 @@ on:
         type: boolean
         required: false
         default: true
+      ext-kibana-url:
+        description: "External Kibana URL for update existing environment"
+        type: string
+        required: false
+      ext-es-url:
+        description: "External Elasticsearch URL for update existing environment"
+        type: string
+        required: false
+      ext-es-user:
+        description: "External Elasticsearch user for update existing environment"
+        type: string
+        required: false
+      ext-es-password:
+        description: "External Elasticsearch password for update existing environment"
+        type: string
+        required: false
+      deploy-stack:
+        description: "Deploy stack"
+        type: boolean
+        required: false
+        default: true
     outputs:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
@@ -157,7 +178,7 @@ jobs:
       aws-cnvm-stack-name: ${{ steps.upload-state.outputs.aws-cnvm-stack }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -239,6 +260,17 @@ jobs:
             echo "INFRA_TYPE=$INPUT_INFRA_TYPE" >> $GITHUB_ENV
           fi
 
+      - name: Init Deploy Stack
+        id: init-deploy-stack
+        env:
+          INIT_DEPLOY_STACK: ${{ inputs.deploy-stack }}
+        run: |
+          if [[ "${INIT_DEPLOY_STACK}" == "true" || -z "${INIT_DEPLOY_STACK}" ]]; then
+            echo "DEPLOY_STACK=true" >> $GITHUB_ENV
+          else
+            echo "DEPLOY_STACK=false" >> $GITHUB_ENV
+          fi
+
       - name: Init Agent Based
         id: init-agent-based
         env:
@@ -262,7 +294,7 @@ jobs:
           echo "AGENTLESS=$agentless_flag" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5
         with:
           python-version: "3.9"
 
@@ -278,7 +310,7 @@ jobs:
           poetry install
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.1
+        uses: aws-actions/configure-aws-credentials@010d0da01d0b5a38af31e9c3470dbfdabdecca3a # v4.0.1
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -286,13 +318,13 @@ jobs:
 
       - id: azure-auth
         name: Azure login
-        uses: azure/login@v2
+        uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - id: google-auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -304,6 +336,7 @@ jobs:
 
       - name: Deploy ELK Cloud Stack
         id: elk-stack
+        if: ${{ env.DEPLOY_STACK == 'true' }}
         uses: ./.github/actions/elk-stack
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
@@ -328,7 +361,8 @@ jobs:
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
 
-      - name: Update Stack Vars
+      - name: Update Stack Vars - new Deployment
+        if: ${{ env.DEPLOY_STACK == 'true' }}
         env:
           STACK_ES_USER: ${{ steps.elk-stack.outputs.es-user }}
           STACK_ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
@@ -339,6 +373,23 @@ jobs:
           echo "ES_PASSWORD=$STACK_ES_PASSWORD" >> $GITHUB_ENV
           echo "KIBANA_URL=$STACK_KIBANA_URL" >> $GITHUB_ENV
           echo "ES_URL=$STACK_ES_URL" >> $GITHUB_ENV
+
+      - name: Update Stack Vars - existing Deployment
+        if: ${{ env.DEPLOY_STACK == 'false' }}
+        env:
+          USER_ES_USER: ${{ inputs.ext-es-user || '' }}
+          USER_ES_PASSWORD: ${{ inputs.ext-es-password }}
+          USER_KIBANA_URL: ${{ inputs.ext-kibana-url || '' }}
+          USER_ES_URL: ${{ inputs.ext-es-url || '' }}
+          SECRET: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          echo "Using user-provided environment values..."
+          echo "ES_USER=$USER_ES_USER" >> $GITHUB_ENV
+          user_password=$(gpg --decrypt --quiet --batch --passphrase "$SECRET" --output - <(echo "$USER_ES_PASSWORD" | base64 --decode))
+          echo "::add-mask::$user_password"
+          echo "ES_PASSWORD=$user_password" >> $GITHUB_ENV
+          echo "KIBANA_URL=$USER_KIBANA_URL" >> $GITHUB_ENV
+          echo "ES_URL=$USER_ES_URL" >> $GITHUB_ENV
 
       - name: Summary
         if: success()
@@ -357,7 +408,7 @@ jobs:
 
       - name: Deploy CDR Integrations
         id: cdr-integrations
-        if: ${{ !cancelled() && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cis' }}
+        if: ${{ !cancelled() && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cis' }}
         uses: ./.github/actions/cdr
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
@@ -372,9 +423,9 @@ jobs:
           wiz-endpoint-url: ${{ secrets.WIZ_ENDPOINT_URL }}
           wiz-token-url: ${{ secrets.WIZ_TOKEN_URL }}
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-          es-user: ${{ steps.elk-stack.outputs.es-user }}
-          es-password: ${{ steps.elk-stack.outputs.es-password }}
-          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          es-user: ${{ env.ES_USER }}
+          es-password: ${{ env.ES_PASSWORD }}
+          kibana-url: ${{ env.KIBANA_URL }}
           elk-stack-version: ${{ env.STACK_VERSION }}
           azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           tag-project: ${{ github.actor }}
@@ -382,7 +433,7 @@ jobs:
 
       - name: Deploy CIS Agent Based Integrations
         id: cis-integrations
-        if: ${{ !cancelled() && env.AGENT_BASED == 'true' && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
+        if: ${{ !cancelled() && env.AGENT_BASED == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
         uses: ./.github/actions/cis-agent-based
         with:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
@@ -392,9 +443,9 @@ jobs:
           cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-          es-user: ${{ steps.elk-stack.outputs.es-user }}
-          es-password: ${{ steps.elk-stack.outputs.es-password }}
-          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          es-user: ${{ env.ES_USER }}
+          es-password: ${{ env.ES_PASSWORD }}
+          kibana-url: ${{ env.KIBANA_URL }}
           docker-image-override: ${{ env.DOCKER_IMAGE_OVERRIDE }}
           serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
           tag-project: ${{ github.actor }}
@@ -402,13 +453,13 @@ jobs:
 
       - name: Deploy CIS Agentless Integrations
         id: cis-agentless-integrations
-        if: ${{ !cancelled() && env.AGENTLESS == 'true' && steps.elk-stack.outcome == 'success' && env.INFRA_TYPE != 'cdr' }}
+        if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
         uses: ./.github/actions/cis-agentless
         with:
           cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
-          es-user: ${{ steps.elk-stack.outputs.es-user }}
-          es-password: ${{ steps.elk-stack.outputs.es-password }}
-          kibana-url: ${{ steps.elk-stack.outputs.kibana-url }}
+          es-user: ${{ env.ES_USER }}
+          es-password: ${{ env.ES_PASSWORD }}
+          kibana-url: ${{ env.KIBANA_URL }}
 
       - name: Wait for agents to enroll
         id: wait-for-agents
