@@ -18,7 +18,7 @@ on:
         type: boolean
 
 jobs:
-  naming:
+  setup:
     runs-on: ubuntu-latest
     outputs:
       deployment_name: ${{ steps.set-variables.outputs.date-name }}
@@ -39,62 +39,38 @@ jobs:
           BRANCH: ${{ inputs.branch }}
           TYPE: ${{ inputs.deployment-type }}
         run: |
-          prefix="prd-${TYPE}"
+          prefix="${TYPE}"
           # Add branch identifier for non-main branches on ech deployments
           if [[ "$TYPE" == "ech" && "$BRANCH" != "main" ]]; then
-            prefix="${prefix}-$(echo $BRANCH | sed 's/\./-/g')"
+            prefix="${prefix}-$(echo $BRANCH | sed 's/\.//g')"
           fi
 
           date_name=$(echo "${prefix}-$(date +'%d%b%H%M')" | tr '[:upper:]' '[:lower:]')
           echo "date-name=$date_name" >> $GITHUB_OUTPUT
           echo "stack-version=$STACK_VERSION" >> $GITHUB_OUTPUT
-  # TODO: Remove this deploy job
+
   deploy:
-    runs-on: ubuntu-latest
-    needs: naming
-    steps:
-      - name: Debug step
-        id: deploy-debug-step
-        run: |
-          echo "Deployment name: ${{ needs.naming.outputs.deployment_name }}"
-          echo "Stack version: ${{ needs.naming.outputs.stack_version }}"
-          echo "Region: ${{ inputs.region }}"
-          echo "Serverless: ${{ inputs.serverless }}"
+    needs: setup
+    uses: ./.github/workflows/test-environment.yml
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    with:
+      deployment_name: ${{ needs.setup.outputs.deployment_name }}
+      elk-stack-version: ${{ needs.setup.outputs.stack_version }}
+      ess-region: ${{ inputs.region }}
+      serverless_mode: ${{ inputs.serverless }}
+      run-sanity-tests: true
+      expiration_days: 0
 
-  # deploy:
-  #   needs: naming
-  #   uses: ./.github/workflows/test-environment.yml
-  #   secrets: inherit
-  #   # Required for the 'Deploy' job in the 'test-environment.yml' to authenticate with Google Cloud (gcloud).
-  #   permissions:
-  #     contents: 'read'
-  #     id-token: 'write'
-  #   with:
-  #     deployment_name: ${{ needs.naming.outputs.deployment_name }}
-  #     elk-stack-version: ${{ needs.naming.outputs.stack_version }}
-  #     ess-region: ${{ inputs.region }}
-  #     serverless_mode: ${{ inputs.serverless }}
-  #     run-sanity-tests: true
-  #     expiration_days: 0
-
-  # TODO: Remove this destroy_environment job
-  destroy_environment:
-    runs-on: ubuntu-latest
-    needs: ["naming", "deploy"]
-    steps:
-      - name: Debug step
-        id: destroy-debug-step
-        run: |
-          echo "Destroying environment with prefix: ${{ needs.naming.outputs.deployment_name }}"
-
-  # destroy_environment:
-  #   needs: ["naming", "deploy"]
-  #   uses: ./.github/workflows/destroy-environment.yml
-  #   secrets: inherit
-  #   # Required for the 'Destroy' job in the 'destroy-environment.yml'
-  #   permissions:
-  #     contents: 'read'
-  #     id-token: 'write'
-  #   if: success()
-  #   with:
-  #     prefix: ${{ needs.naming.outputs.deployment_name }}
+  destroy:
+    needs: ["setup", "deploy"]
+    uses: ./.github/workflows/destroy-environment.yml
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    if: success()
+    with:
+      prefix: ${{ needs.setup.outputs.deployment_name }}
