@@ -219,7 +219,7 @@ Before running the script, ensure that:
 **Note**: The script will ask for confirmation before deleting each environment, unless you set the `interactive` flag
 to `false`.
 
-### Scheduled Workflow Runs 
+### Scheduled Workflow Runs
 
 #### Nightly Deployment and Testing
 
