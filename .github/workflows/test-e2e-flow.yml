@@ -37,7 +37,7 @@ jobs:
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           BRANCH: ${{ inputs.branch }}
-          TYPE: ${{ inputs.deployment_type }}
+          TYPE: ${{ inputs.deployment-type }}
         run: |
           prefix="prd-${TYPE}"
           # Add branch identifier for non-main branches on ech deployments
