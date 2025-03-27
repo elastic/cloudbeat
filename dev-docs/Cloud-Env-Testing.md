@@ -219,6 +219,12 @@ Before running the script, ensure that:
 **Note**: The script will ask for confirmation before deleting each environment, unless you set the `interactive` flag
 to `false`.
 
-### Scheduled Environment Deletion
+### Scheduled Workflow Runs 
+
+#### Nightly Deployment and Testing
+
+A scheduled `test-runner` workflow is triggered daily at 02:00. This workflow executes `test-e2e-flow`, which includes setup, deployment (along with integration test execution), and environment teardown for the main and 8.x versions (currently in development).
+
+#### Environment Deletion
 
 A scheduled workflow runs daily at midnight to clean up expired environments. This workflow examines all deployed environments for their expiration dates, and if the expiration date is reached, the `Destroy Environment` workflow is executed. The expiration date is set when creating a new environment, with the default being 14 days. Note that there is no specific notification to the user before the environment is deleted. The expiration date is saved in the `env_config.json` file, which is stored in the S3 state bucket. To extend the expiration date, the user should download the `env_config.json` file from the S3 bucket, update the expiration field to the desired date, and then upload the file back to the S3 bucket.
