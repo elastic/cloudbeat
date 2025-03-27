@@ -13,33 +13,43 @@ on:
     - cron: '0 2 * * *' # every day at 02:00
 
 jobs:
-  run-version:
-    strategy:
-      fail-fast: false
-      # TODO: To enable later
-      # max-parallel: 1
-      matrix:
-        include:
-          - type: ech
-            region: gcp-us-west2
-            serverless: false
-            branch: main
-          - type: ech
-            region: gcp-us-west2
-            serverless: false
-            branch: 8.x
-          - type: serverless
-            region: aws-us-east-1
-            serverless: true
-            branch: main
-    name: Run ${{ matrix.type }} on ${{ matrix.branch }} branch
+  run-ech-main:
+    name: Run ECH on main
     uses: ./.github/workflows/test-e2e-flow.yml
+    with:
+      branch: main
+      deployment-type: ech
+      region: gcp-us-west2
+      serverless: false
     secrets: inherit
     permissions:
       contents: 'read'
       id-token: 'write'
+
+  run-ech-8x:
+    name: Run ECH on 8.x
+    needs: run-ech-main  # Runs after 'run-ech-main'
+    uses: ./.github/workflows/test-e2e-flow.yml
     with:
-      branch: ${{ matrix.branch }}
-      deployment-type: ${{ matrix.type }}
-      region: ${{ matrix.region }}
-      serverless: ${{ matrix.serverless }}
+      branch: 8.x
+      deployment-type: ech
+      region: gcp-us-west2
+      serverless: false
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+  run-serverless-main:
+    name: Run Serverless on main
+    needs: run-ech-8x  # Runs after 'run-ech-8x'
+    uses: ./.github/workflows/test-e2e-flow.yml
+    with:
+      branch: main
+      deployment-type: serverless
+      region: aws-us-east-1
+      serverless: true
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
