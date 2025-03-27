@@ -28,7 +28,7 @@ jobs:
 
   run-ech-8x:
     name: Run ECH on 8.x
-    needs: run-ech-main  # Runs after 'run-ech-main'
+    # needs: run-ech-main  # Runs after 'run-ech-main'
     uses: ./.github/workflows/test-e2e-flow.yml
     with:
       branch: 8.x
@@ -42,7 +42,7 @@ jobs:
 
   run-serverless-main:
     name: Run Serverless on main
-    needs: run-ech-8x  # Runs after 'run-ech-8x'
+    # needs: run-ech-8x  # Runs after 'run-ech-8x'
     uses: ./.github/workflows/test-e2e-flow.yml
     with:
       branch: main
