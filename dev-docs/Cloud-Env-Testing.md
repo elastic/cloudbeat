@@ -224,6 +224,7 @@ to `false`.
 #### Nightly Deployment and Testing
 
 A scheduled `test-runner` workflow is triggered daily at 02:00. This workflow executes `test-e2e-flow`, which includes setup, deployment (along with integration test execution), and environment teardown for the main and 8.x versions (currently in development).
+This workflow can also be triggered manually.
 
 #### Environment Deletion
 
