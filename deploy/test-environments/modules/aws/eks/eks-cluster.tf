@@ -4,8 +4,8 @@ module "eks" {
 
   cluster_name    = local.cluster_name
   cluster_version = "1.32"
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  vpc_id          = module.vpc.vpc_id
+  subnet_ids      = module.vpc.private_subnets
 
   enable_irsa                 = true
   create_cloudwatch_log_group = false
