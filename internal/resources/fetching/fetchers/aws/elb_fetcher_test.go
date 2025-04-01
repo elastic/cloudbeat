@@ -142,7 +142,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		err = elbFetcher.Fetch(context.Background(), cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
-		s.Equal(len(test.expectedlbNames), len(results))
+		s.Len(results, len(test.expectedlbNames))
 		s.Require().NoError(err)
 
 		for i, expectedLbName := range test.expectedlbNames {
