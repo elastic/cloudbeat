@@ -254,7 +254,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		err = ecrFetcher.Fetch(ctx, cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
-		s.Equal(len(test.expectedRepositoriesNames), len(results))
+		s.Len(results, len(test.expectedRepositoriesNames))
 		s.Require().NoError(err)
 
 		// DO NOT REMOVE THIS METHOD
