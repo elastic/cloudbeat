@@ -32,10 +32,6 @@ import (
 	"github.com/elastic/beats/v7/dev-tools/mage"
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
-	"github.com/elastic/e2e-testing/pkg/downloads"
-	"github.com/magefile/mage/mg"
-	"github.com/magefile/mage/sh"
-
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/integtest/notests"
 	// mage:import
@@ -44,6 +40,9 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/unittest"
+	"github.com/elastic/e2e-testing/pkg/downloads"
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
 )
