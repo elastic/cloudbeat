@@ -2,6 +2,8 @@ module github.com/elastic/cloudbeat
 
 go 1.23.6
 
+toolchain go1.24.1
+
 require (
 	cloud.google.com/go/asset v1.20.4
 	cloud.google.com/go/iam v1.4.0
@@ -364,7 +366,7 @@ require (
 	github.com/goccy/go-yaml v1.15.23 // indirect
 	github.com/gofrs/flock v0.12.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
