@@ -97,10 +97,12 @@ func (r KmsResource) GetElasticCommonData() (map[string]any, error) {
 	if ok {
 		m["x509.not_after"] = key.KeyMetadata.ValidTo
 		m["x509.not_before"] = key.KeyMetadata.CreationDate
-		if key.KeyMetadata.KeyUsage == types.KeyUsageTypeSignVerify {
+		switch key.KeyMetadata.KeyUsage {
+		case types.KeyUsageTypeSignVerify:
 			m["x509.signature_algorithm"] = key.KeyMetadata.KeySpec
-		} else if key.KeyMetadata.KeyUsage == types.KeyUsageTypeEncryptDecrypt {
+		case types.KeyUsageTypeEncryptDecrypt:
 			m["x509.public_key_algorithm"] = key.KeyMetadata.KeySpec
+		default:
 		}
 	}
 

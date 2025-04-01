@@ -49,7 +49,7 @@ jobs:
 
       - name: golangci-lint
         shell: bash
-        run: golangci-lint run --out-format colored-line-number
+        run: golangci-lint run
 
       - name: Mage Check
         shell: bash
