@@ -2,6 +2,8 @@ module github.com/elastic/cloudbeat
 
 go 1.23.6
 
+toolchain go1.24.1
+
 require (
 	cloud.google.com/go/asset v1.20.4
 	cloud.google.com/go/iam v1.4.0
@@ -21,29 +23,29 @@ require (
 	github.com/aquasecurity/trivy v0.59.1
 	github.com/aquasecurity/trivy-db v0.0.0-20250227071930-8bd8a9b89e2d
 	github.com/aws/aws-sdk-go-v2 v1.36.3
-	github.com/aws/aws-sdk-go-v2/config v1.29.8
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.61
+	github.com/aws/aws-sdk-go-v2/config v1.29.12
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.65
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30
-	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.38.0
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.52.0
-	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.58.0
-	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.48.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.44.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.46.0
-	github.com/aws/aws-sdk-go-v2/service/configservice v1.52.0
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.206.0
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.42.0
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.29.0
-	github.com/aws/aws-sdk-go-v2/service/iam v1.40.0
-	github.com/aws/aws-sdk-go-v2/service/kms v1.38.0
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.70.0
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.38.0
-	github.com/aws/aws-sdk-go-v2/service/rds v1.94.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.0
-	github.com/aws/aws-sdk-go-v2/service/s3control v1.54.0
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.56.0
-	github.com/aws/aws-sdk-go-v2/service/sns v1.34.0
-	github.com/aws/aws-sdk-go-v2/service/sts v1.33.16
+	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.38.2
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.52.1
+	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.59.0
+	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.48.2
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.44.1
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.47.1
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.52.1
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.211.0
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.43.0
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.29.1
+	github.com/aws/aws-sdk-go-v2/service/iam v1.41.0
+	github.com/aws/aws-sdk-go-v2/service/kms v1.38.1
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.71.0
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.38.1
+	github.com/aws/aws-sdk-go-v2/service/rds v1.94.2
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.79.0
+	github.com/aws/aws-sdk-go-v2/service/s3control v1.56.0
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.57.0
+	github.com/aws/aws-sdk-go-v2/service/sns v1.34.2
+	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17
 	github.com/aws/smithy-go v1.22.3
 	github.com/dgraph-io/ristretto v0.2.0
 	github.com/djherbis/times v1.6.0
@@ -279,13 +281,13 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.34 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ebs v1.23.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.44.0
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.45.0
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.6.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.15 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.25.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.29.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.25.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
