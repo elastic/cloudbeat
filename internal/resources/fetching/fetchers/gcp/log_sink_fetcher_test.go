@@ -88,7 +88,7 @@ func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
 		asset, ok := res.Resource.(*GcpLoggingAsset)
 		s.True(ok)
 		s.Len(asset.Asset.LogSinks, 1)
-		s.Equal("logging.googleapis.com/LogSink", asset.Asset.LogSinks[0].Asset.AssetType)
+		s.Equal(expectedAsset.Assets, asset.Asset.LogSinks)
 		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
 		s.Equal(fetching.LoggingIdentity, asset.Type)
 		s.Equal(fetching.GcpLoggingType, asset.subType)
