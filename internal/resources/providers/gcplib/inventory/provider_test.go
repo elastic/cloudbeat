@@ -52,7 +52,7 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func NewMockInventoryContentIterators() (*AssetsInventoryWrapper, *MockIterator, *MockIterator) {
+func NewMockInventoryContentIterators() (inventory *AssetsInventoryWrapper, resourceIter *MockIterator, policiesIter *MockIterator) {
 	mockedResourceIterator := new(MockIterator)
 	mockedPoliciesIterator := new(MockIterator)
 	mockedInventory := &AssetsInventoryWrapper{
