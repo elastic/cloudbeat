@@ -51,28 +51,30 @@ func NewGcpPoliciesFetcher(_ context.Context, log *clog.Logger, ch chan fetching
 
 func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpPoliciesFetcher.Fetch")
+	defer f.log.Info("GcpPoliciesFetcher.Fetch done")
 
-	projectsAssets, err := f.provider.ListProjectsAncestorsPolicies(ctx)
-	if err != nil {
-		return err
-	}
+	resultsCh := make(chan *inventory.ProjectPoliciesAsset)
+	go f.provider.ListProjectsAncestorsPolicies(ctx, resultsCh)
 
-	for _, projectPolicies := range projectsAssets {
+	for {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("GcpPoliciesFetcher context err: %s", ctx.Err().Error())
 			return nil
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cycleMetadata,
-			Resource: &GcpPoliciesAsset{
-				Type:    fetching.ProjectManagement,
-				subType: fetching.GcpPolicies,
-				Asset:   projectPolicies,
-			},
-		}:
+		case asset, ok := <-resultsCh:
+			if !ok {
+				return nil
+			}
+
+			f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cycleMetadata,
+				Resource: &GcpPoliciesAsset{
+					Type:    fetching.ProjectManagement,
+					subType: fetching.GcpPolicies,
+					Asset:   asset,
+				},
+			}
 		}
 	}
-	return nil
 }
 
 func (f *GcpPoliciesFetcher) Stop() {
