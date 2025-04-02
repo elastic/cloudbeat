@@ -7,9 +7,6 @@ on:
       branch:
         required: true
         type: string
-      deployment-type:
-        required: true
-        type: string
       region:
         required: true
         type: string
@@ -37,15 +34,19 @@ jobs:
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           BRANCH: ${{ inputs.branch }}
-          TYPE: ${{ inputs.deployment-type }}
+          IS_SERVERLESS: ${{ inputs.serverless }}
         run: |
-          prefix="${TYPE}"
-          # Add branch identifier for non-main branches on ech deployments
-          if [[ "$TYPE" == "ech" && "$BRANCH" != "main" ]]; then
-            prefix="${prefix}-$(echo $BRANCH | sed 's/\.//g')"
+          prefix="ech"
+          if [[ "$IS_SERVERLESS" == "true" ]]; then
+            prefix="serverless"
           fi
 
-          date_name=$(echo "${prefix}-$(date +'%d%b%H%M')" | tr '[:upper:]' '[:lower:]')
+          branch="${BRANCH}"
+          if [[ "$BRANCH" != "main" ]]; then
+            branch="$(echo $BRANCH | sed 's/\.//g')"
+          fi
+
+          date_name=$(echo "${prefix}-${branch}-$(date +'%d%b%H%M')" | tr '[:upper:]' '[:lower:]')
           echo "date-name=$date_name" >> $GITHUB_OUTPUT
           echo "stack-version=$STACK_VERSION" >> $GITHUB_OUTPUT
 

@@ -12,7 +12,6 @@ jobs:
     uses: ./.github/workflows/test-e2e-flow.yml
     with:
       branch: main
-      deployment-type: ech
       region: gcp-us-west2
       serverless: false
     secrets: inherit
@@ -27,7 +26,6 @@ jobs:
     if: always()
     with:
       branch: 8.x
-      deployment-type: ech
       region: gcp-us-west2
       serverless: false
     secrets: inherit
@@ -42,7 +40,6 @@ jobs:
     if: always()
     with:
       branch: main
-      deployment-type: serverless
       region: aws-us-east-1
       serverless: true
     secrets: inherit
