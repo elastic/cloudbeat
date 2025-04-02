@@ -38,7 +38,12 @@ type GcpServiceUsageAsset struct {
 	Type    string
 	subType string
 
-	Asset *inventory.ServiceUsageAsset `json:"assets,omitempty"`
+	Asset *ServiceUsageAsset `json:"assets,omitempty"`
+}
+
+type ServiceUsageAsset struct {
+	CloudAccount *fetching.CloudAccountMetadata
+	Services     []*inventory.ExtendedGcpAsset `json:"services,omitempty"`
 }
 
 func NewGcpServiceUsageFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpServiceUsageFetcher {
@@ -51,29 +56,31 @@ func NewGcpServiceUsageFetcher(_ context.Context, log *clog.Logger, ch chan fetc
 
 func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpServiceUsageFetcher.Fetch")
+	defer f.log.Info("GcpServiceUsageFetcher.Fetch done")
 
-	serviceUsageAssets, err := f.provider.ListServiceUsageAssets(ctx)
-	if err != nil {
-		return err
-	}
+	resultsCh := make(chan *inventory.ProjectAssets)
+	// TODO?: use SearchAllResources to get just the resource we need, not all of them
+	go f.provider.ListProjectAssets(ctx, []string{inventory.ServiceUsageAssetType}, resultsCh)
 
-	for _, serviceUsageAsset := range serviceUsageAssets {
+	for {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("GcpServiceUsageFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
 			return nil
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cycleMetadata,
-			Resource: &GcpServiceUsageAsset{
-				Type:    fetching.MonitoringIdentity,
-				subType: fetching.GcpServiceUsage,
-				Asset:   serviceUsageAsset,
-			},
-		}:
+		case asset, ok := <-resultsCh:
+			if !ok {
+				return nil
+			}
+
+			f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cycleMetadata,
+				Resource: &GcpServiceUsageAsset{
+					Type:    fetching.MonitoringIdentity,
+					subType: fetching.GcpServiceUsage,
+					Asset:   &ServiceUsageAsset{asset.CloudAccount, asset.Assets},
+				},
+			}
 		}
 	}
-
-	return nil
 }
 
 func (f *GcpServiceUsageFetcher) Stop() {

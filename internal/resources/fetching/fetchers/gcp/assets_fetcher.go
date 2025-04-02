@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/huandu/xstrings"
+	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -48,41 +49,26 @@ type GcpAsset struct {
 // map of types to asset types.
 // sub-type is derived from asset type by using the first and last segments of the asset type name
 // example: gcp-cloudkms-crypto-key
-var GcpAssetTypes = map[string][]string{
-	fetching.ProjectManagement: {
-		inventory.CrmProjectAssetType,
-	},
-	fetching.KeyManagement: {
-		inventory.ApiKeysKeyAssetType,
-		inventory.CloudKmsCryptoKeyAssetType,
-	},
-	fetching.CloudIdentity: {
-		inventory.IamServiceAccountAssetType,
-		inventory.IamServiceAccountKeyAssetType,
-	},
-	fetching.CloudDatabase: {
-		inventory.BigqueryDatasetAssetType,
-		inventory.BigqueryTableAssetType,
-		inventory.SqlDatabaseInstanceAssetType,
-	},
-	fetching.CloudStorage: {
-		inventory.StorageBucketAssetType,
-		inventory.LogBucketAssetType,
-	},
-	fetching.CloudCompute: {
-		inventory.ComputeInstanceAssetType,
-		inventory.ComputeFirewallAssetType,
-		inventory.ComputeDiskAssetType,
-		inventory.ComputeNetworkAssetType,
-		inventory.ComputeBackendServiceAssetType,
-		inventory.ComputeSubnetworkAssetType,
-	},
-	fetching.CloudDns: {
-		inventory.DnsManagedZoneAssetType,
-	},
-	fetching.DataProcessing: {
-		inventory.DataprocClusterAssetType,
-	},
+
+var reversedGcpAssetTypes = map[string]string{
+	inventory.CrmProjectAssetType:            fetching.ProjectManagement,
+	inventory.ApiKeysKeyAssetType:            fetching.KeyManagement,
+	inventory.CloudKmsCryptoKeyAssetType:     fetching.KeyManagement,
+	inventory.IamServiceAccountAssetType:     fetching.CloudIdentity,
+	inventory.IamServiceAccountKeyAssetType:  fetching.CloudIdentity,
+	inventory.BigqueryDatasetAssetType:       fetching.CloudDatabase,
+	inventory.BigqueryTableAssetType:         fetching.CloudDatabase,
+	inventory.SqlDatabaseInstanceAssetType:   fetching.CloudDatabase,
+	inventory.StorageBucketAssetType:         fetching.CloudStorage,
+	inventory.LogBucketAssetType:             fetching.CloudStorage,
+	inventory.ComputeInstanceAssetType:       fetching.CloudCompute,
+	inventory.ComputeFirewallAssetType:       fetching.CloudCompute,
+	inventory.ComputeDiskAssetType:           fetching.CloudCompute,
+	inventory.ComputeNetworkAssetType:        fetching.CloudCompute,
+	inventory.ComputeBackendServiceAssetType: fetching.CloudCompute,
+	inventory.ComputeSubnetworkAssetType:     fetching.CloudCompute,
+	inventory.DnsManagedZoneAssetType:        fetching.CloudDns,
+	inventory.DataprocClusterAssetType:       fetching.DataProcessing,
 }
 
 func NewGcpAssetsFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpAssetsFetcher {
@@ -94,33 +80,31 @@ func NewGcpAssetsFetcher(_ context.Context, log *clog.Logger, ch chan fetching.R
 }
 
 func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
-	f.log.Info("Starting GcpAssetsFetcher.Fetch")
+	f.log.Info("GcpAssetsFetcher.Fetch start")
+	defer f.log.Info("GcpAssetsFetcher.Fetch done")
 
-	for typeName, assetTypes := range GcpAssetTypes {
-		assets, err := f.provider.ListAllAssetTypesByName(ctx, assetTypes)
-		if err != nil {
-			f.log.Errorf("Failed to list assets for type %s: %s", typeName, err.Error())
-			continue
-		}
+	resultsCh := make(chan *inventory.ExtendedGcpAsset)
+	go f.provider.ListAssetTypes(ctx, lo.Keys(reversedGcpAssetTypes), resultsCh)
 
-		for _, asset := range assets {
-			select {
-			case <-ctx.Done():
-				f.log.Infof("GcpAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
+	// defer f.provider.Clear() // TODO: maybe call this from registry?
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case asset, ok := <-resultsCh:
+			if !ok {
 				return nil
-			case f.resourceCh <- fetching.ResourceInfo{
+			}
+			f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cycleMetadata,
 				Resource: &GcpAsset{
-					Type:          typeName,
+					Type:          reversedGcpAssetTypes[asset.AssetType],
 					SubType:       getGcpSubType(asset.AssetType),
 					ExtendedAsset: asset,
 				},
-			}:
 			}
 		}
 	}
-
-	return nil
 }
 
 func (f *GcpAssetsFetcher) Stop() {

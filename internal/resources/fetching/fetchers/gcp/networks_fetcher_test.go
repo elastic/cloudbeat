@@ -36,42 +36,40 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
-type GcpServiceUsageFetcherTestSuite struct {
+type GcpNetworksFetcherTestSuite struct {
 	suite.Suite
+
 	resourceCh chan fetching.ResourceInfo
 }
 
-func TestGcpServiceUsageFetcherTestSuite(t *testing.T) {
-	s := new(GcpServiceUsageFetcherTestSuite)
+func TestGcpNetworksFetcherTestSuite(t *testing.T) {
+	s := new(GcpNetworksFetcherTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) SetupTest() {
+func (s *GcpNetworksFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) TearDownTest() {
+func (s *GcpNetworksFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) TestServiceUsageFetcher_Fetch_Success() {
+func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := NewGcpServiceUsageFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
-
-	expectedAsset := &inventory.ProjectAssets{
-		Assets: []*inventory.ExtendedGcpAsset{
-			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.ServiceUsageAssetType}},
-		},
+	fetcher := NewGcpNetworksFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
+	expectedAsset := &inventory.ExtendedGcpAsset{
+		Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.MonitoringAlertPolicyAssetType},
 		CloudAccount: &fetching.CloudAccountMetadata{
 			AccountId: "1",
 		},
 	}
 
-	mockInventoryService.On("ListProjectAssets", mock.Anything, []string{inventory.ServiceUsageAssetType}, mock.Anything).
+	mockInventoryService.On("ListNetworkAssets", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			ch := args.Get(2).(chan<- *inventory.ProjectAssets)
+			ch := args.Get(1).(chan<- *inventory.ExtendedGcpAsset)
 			ch <- expectedAsset
 			close(ch)
 		}).Once()
@@ -84,13 +82,9 @@ func (s *GcpServiceUsageFetcherTestSuite) TestServiceUsageFetcher_Fetch_Success(
 	select {
 	case res := <-s.resourceCh:
 		s.NotNil(res.Resource)
-		asset, ok := res.Resource.(*GcpServiceUsageAsset)
+		_, ok := res.Resource.(*GcpNetworksAsset)
 		s.True(ok)
-		s.Len(asset.Asset.Services, 1)
-		s.Equal(inventory.ServiceUsageAssetType, asset.Asset.Services[0].Asset.AssetType)
-		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
-		s.Equal(fetching.MonitoringIdentity, asset.Type)
-		s.Equal(fetching.GcpServiceUsage, asset.subType)
+
 	case <-time.After(time.Second):
 		s.Fail("Test timed out waiting for resource")
 	}
@@ -98,34 +92,32 @@ func (s *GcpServiceUsageFetcherTestSuite) TestServiceUsageFetcher_Fetch_Success(
 	mockInventoryService.AssertExpectations(s.T())
 }
 
-func TestServiceUsageResource_GetMetadata(t *testing.T) {
-	const projectId = "1"
+func TestNetworksResource_GetMetadata(t *testing.T) {
 	tests := []struct {
 		name     string
-		resource GcpServiceUsageAsset
+		resource GcpNetworksAsset
 		want     fetching.ResourceMetadata
 		wantErr  bool
 	}{
 		{
-			name: "retrieve successfully service usage assets",
-			resource: GcpServiceUsageAsset{
-				Type:    fetching.MonitoringIdentity,
-				subType: fetching.GcpServiceUsage,
-				Asset: &ServiceUsageAsset{
+			name: "happy path",
+			resource: GcpNetworksAsset{
+				Type:    fetching.ProjectManagement,
+				subType: fetching.GcpPolicies,
+				Asset: &inventory.ExtendedGcpAsset{
 					CloudAccount: &fetching.CloudAccountMetadata{
 						AccountId:        projectId,
 						AccountName:      "a",
 						OrganisationId:   "a",
 						OrganizationName: "a",
 					},
-					Services: []*inventory.ExtendedGcpAsset{},
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      fmt.Sprintf("%s-%s", fetching.GcpServiceUsage, projectId),
-				Name:    fmt.Sprintf("%s-%s", fetching.GcpServiceUsage, projectId),
-				Type:    fetching.MonitoringIdentity,
-				SubType: fetching.GcpServiceUsage,
+				ID:      fmt.Sprintf("%s-%s", fetching.GcpPolicies, projectId),
+				Name:    fmt.Sprintf("%s-%s", fetching.GcpPolicies, projectId),
+				Type:    fetching.ProjectManagement,
+				SubType: fetching.GcpPolicies,
 				Region:  gcplib.GlobalRegion,
 				CloudAccountMetadata: fetching.CloudAccountMetadata{
 					AccountId:        projectId,

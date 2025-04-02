@@ -19,9 +19,9 @@ package fetchers
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
@@ -56,54 +56,51 @@ func (s *GcpPoliciesFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
+func (s *GcpPoliciesFetcherTestSuite) TestPoliciesFetcher_Fetch_Success() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpPoliciesFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
+	fetcher := NewGcpPoliciesFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
+
+	expectedAsset := &inventory.ProjectPoliciesAsset{
+		Policies: []*inventory.ExtendedGcpAsset{
+			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.CrmProjectAssetType}},
+		},
+		CloudAccount: &fetching.CloudAccountMetadata{
+			AccountId: "1",
+		},
 	}
 
-	mockInventoryService.On("ListProjectsAncestorsPolicies", mock.Anything).Return(
-		[]*inventory.ProjectPoliciesAsset{
-			{
-				CloudAccount: &fetching.CloudAccountMetadata{
-					AccountId:        "a",
-					AccountName:      "a",
-					OrganisationId:   "a",
-					OrganizationName: "a",
-				},
-				Policies: []*inventory.ExtendedGcpAsset{
-					{Asset: &assetpb.Asset{}},
-				},
-			},
-		}, nil,
-	)
+	mockInventoryService.On("ListProjectsAncestorsPolicies", mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			ch := args.Get(1).(chan<- *inventory.ProjectPoliciesAsset)
+			ch <- expectedAsset
+			close(ch)
+		}).Once()
 
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().NoError(err)
-	results := testhelper.CollectResources(s.resourceCh)
+	go func() {
+		err := fetcher.Fetch(ctx, cycle.Metadata{})
+		s.NoError(err)
+	}()
 
-	s.Len(results, 1)
-}
-
-func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Error() {
-	ctx := context.Background()
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpPoliciesFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
+	select {
+	case res := <-s.resourceCh:
+		s.NotNil(res.Resource)
+		asset, ok := res.Resource.(*GcpPoliciesAsset)
+		s.True(ok)
+		s.Len(asset.Asset.Policies, 1)
+		s.Equal(inventory.CrmProjectAssetType, asset.Asset.Policies[0].Asset.AssetType)
+		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
+		s.Equal(fetching.ProjectManagement, asset.Type)
+		s.Equal(fetching.GcpPolicies, asset.subType)
+	case <-time.After(time.Second):
+		s.Fail("Test timed out waiting for resource")
 	}
 
-	mockInventoryService.On("ListProjectsAncestorsPolicies", mock.Anything).Return(nil, errors.New("api call error"))
-
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().Error(err)
+	mockInventoryService.AssertExpectations(s.T())
 }
 
 func TestGcpPoliciesAsset_GetMetadata(t *testing.T) {
+	const projectId = "1"
 	tests := []struct {
 		name     string
 		resource GcpPoliciesAsset
