@@ -88,7 +88,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestPoliciesFetcher_Fetch_Success() {
 		asset, ok := res.Resource.(*GcpPoliciesAsset)
 		s.True(ok)
 		s.Len(asset.Asset.Policies, 1)
-		s.Equal(inventory.CrmProjectAssetType, asset.Asset.Policies[0].Asset.AssetType)
+		s.Equal(expectedAsset.Policies[0], asset.Asset.Policies[0])
 		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
 		s.Equal(fetching.ProjectManagement, asset.Type)
 		s.Equal(fetching.GcpPolicies, asset.subType)

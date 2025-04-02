@@ -87,7 +87,7 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		s.NotNil(res.Resource)
 		asset, ok := res.Resource.(*GcpAsset)
 		s.True(ok)
-		s.Equal(expectedAsset.AssetType, asset.ExtendedAsset.AssetType)
+		s.Equal(expectedAsset, asset.ExtendedAsset)
 		s.Equal("cloud-compute", asset.Type)
 		s.Equal("gcp-compute-instance", asset.SubType)
 	case <-time.After(time.Second):
