@@ -64,7 +64,6 @@ var reversedGcpAssetTypes = map[string]string{
 	inventory.ComputeInstanceAssetType:       fetching.CloudCompute,
 	inventory.ComputeFirewallAssetType:       fetching.CloudCompute,
 	inventory.ComputeDiskAssetType:           fetching.CloudCompute,
-	inventory.ComputeNetworkAssetType:        fetching.CloudCompute,
 	inventory.ComputeBackendServiceAssetType: fetching.CloudCompute,
 	inventory.ComputeSubnetworkAssetType:     fetching.CloudCompute,
 	inventory.DnsManagedZoneAssetType:        fetching.CloudDns,

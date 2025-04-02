@@ -19,7 +19,6 @@ package fetchers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -67,8 +66,8 @@ func (f *GcpNetworksFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 			f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cycleMetadata,
 				Resource: &GcpNetworksAsset{
-					Type:    fetching.ProjectManagement,
-					subType: fetching.GcpPolicies,
+					Type:    fetching.CloudCompute,
+					subType: "gcp-compute-network",
 					Asset:   asset,
 				},
 			}
@@ -81,20 +80,14 @@ func (f *GcpNetworksFetcher) Stop() {
 }
 
 func (g *GcpNetworksAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := g.buildId()
 	return fetching.ResourceMetadata{
-		ID:                   id,
+		ID:                   g.Asset.Name,
 		Type:                 g.Type,
 		SubType:              g.subType,
-		Name:                 id,
+		Name:                 getAssetResourceName(g.Asset),
 		Region:               gcplib.GlobalRegion,
 		CloudAccountMetadata: *g.Asset.CloudAccount,
 	}, nil
-}
-
-func (g *GcpNetworksAsset) buildId() string {
-	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
-	return id
 }
 
 func (g *GcpNetworksAsset) GetData() any {
@@ -102,7 +95,7 @@ func (g *GcpNetworksAsset) GetData() any {
 }
 
 func (g *GcpNetworksAsset) GetIds() []string {
-	return []string{g.buildId()}
+	return []string{g.Asset.Name}
 }
 
 func (g *GcpNetworksAsset) GetElasticCommonData() (map[string]any, error) {
