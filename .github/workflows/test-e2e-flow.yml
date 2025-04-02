@@ -38,7 +38,8 @@ jobs:
         run: |
           prefix="ech"
           if [[ "$IS_SERVERLESS" == "true" ]]; then
-            prefix="serverless"
+            # Short name due to deployment name length limit
+            prefix="proj"
           fi
 
           branch="${BRANCH}"
