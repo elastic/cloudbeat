@@ -19,9 +19,9 @@ package fetchers
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
@@ -56,55 +56,52 @@ func (s *GcpLogSinkFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
+func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpLogSinkFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
+	fetcher := NewGcpLogSinkFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
+
+	expectedAsset := &inventory.ProjectAssets{
+		Assets: []*inventory.ExtendedGcpAsset{
+			{Asset: &assetpb.Asset{Name: "a1", AssetType: "logging.googleapis.com/LogSink"}},
+		},
+		CloudAccount: &fetching.CloudAccountMetadata{
+			AccountId: "1",
+		},
 	}
 
-	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(
-		[]*inventory.LoggingAsset{
-			{
-				CloudAccount: &fetching.CloudAccountMetadata{
-					AccountId:        "a",
-					AccountName:      "a",
-					OrganisationId:   "a",
-					OrganizationName: "a",
-				},
-				LogSinks: []*inventory.ExtendedGcpAsset{
-					{Asset: &assetpb.Asset{Name: "a", AssetType: inventory.LogSinkAssetType}},
-				},
-			},
-		}, nil,
-	)
+	mockInventoryService.On("ListProjectAssets", mock.Anything, []string{inventory.LogSinkAssetType}, mock.Anything).
+		Run(func(args mock.Arguments) {
+			ch := args.Get(2).(chan<- *inventory.ProjectAssets)
+			ch <- expectedAsset
+			close(ch)
+		}).Once()
 
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().NoError(err)
-	results := testhelper.CollectResources(s.resourceCh)
+	go func() {
+		err := fetcher.Fetch(ctx, cycle.Metadata{})
+		s.NoError(err)
+	}()
 
-	// ListMonitoringAssets mocked to return a single asset
-	s.Len(results, 1)
-}
+	select {
+	case res := <-s.resourceCh:
+		s.NotNil(res.Resource)
+		asset, ok := res.Resource.(*GcpLoggingAsset)
+		s.True(ok)
+		s.Len(asset.Asset.LogSinks, 1)
+		s.Equal("logging.googleapis.com/LogSink", asset.Asset.LogSinks[0].Asset.AssetType)
+		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
+		s.Equal(fetching.LoggingIdentity, asset.Type)
+		s.Equal(fetching.GcpLoggingType, asset.subType)
 
-func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Error() {
-	ctx := context.Background()
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpLogSinkFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
+	case <-time.After(time.Second):
+		s.Fail("Test timed out waiting for resource")
 	}
 
-	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(nil, errors.New("api call error"))
-
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().Error(err)
+	mockInventoryService.AssertExpectations(s.T())
 }
 
 func TestLoggingAsset_GetMetadata(t *testing.T) {
+	const projectId = "1"
 	tests := []struct {
 		name     string
 		resource GcpLoggingAsset
@@ -112,11 +109,11 @@ func TestLoggingAsset_GetMetadata(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name: "retrieve successfully service usage assets",
+			name: "retrieve successfully log sink assets",
 			resource: GcpLoggingAsset{
 				Type:    fetching.LoggingIdentity,
 				subType: fetching.GcpLoggingType,
-				Asset: &inventory.LoggingAsset{
+				Asset: &LoggingAsset{
 					CloudAccount: &fetching.CloudAccountMetadata{
 						AccountId:        projectId,
 						AccountName:      "a",

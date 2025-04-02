@@ -38,7 +38,12 @@ type GcpLoggingAsset struct {
 	Type    string
 	subType string
 
-	Asset *inventory.LoggingAsset `json:"asset,omitempty"`
+	Asset *LoggingAsset `json:"asset,omitempty"`
+}
+
+type LoggingAsset struct {
+	CloudAccount *fetching.CloudAccountMetadata
+	LogSinks     []*inventory.ExtendedGcpAsset `json:"log_sinks,omitempty"`
 }
 
 func NewGcpLogSinkFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpLogSinkFetcher {
@@ -51,29 +56,30 @@ func NewGcpLogSinkFetcher(_ context.Context, log *clog.Logger, ch chan fetching.
 
 func (f *GcpLogSinkFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpLogSinkFetcher.Fetch")
+	defer f.log.Info("GcpLogSinkFetcher.Fetch done")
 
-	loggingAssets, err := f.provider.ListLoggingAssets(ctx)
-	if err != nil {
-		return err
-	}
+	resultsCh := make(chan *inventory.ProjectAssets)
+	go f.provider.ListProjectAssets(ctx, []string{inventory.LogSinkAssetType}, resultsCh)
 
-	for _, asset := range loggingAssets {
+	for {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("GcpLogSinkFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
 			return nil
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cycleMetadata,
-			Resource: &GcpLoggingAsset{
-				Type:    fetching.LoggingIdentity,
-				subType: fetching.GcpLoggingType,
-				Asset:   asset,
-			},
-		}:
+		case asset, ok := <-resultsCh:
+			if !ok {
+				return nil
+			}
+
+			f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cycleMetadata,
+				Resource: &GcpLoggingAsset{
+					Type:    fetching.LoggingIdentity,
+					subType: fetching.GcpLoggingType,
+					Asset:   &LoggingAsset{asset.CloudAccount, asset.Assets},
+				},
+			}
 		}
 	}
-
-	return nil
 }
 
 func (f *GcpLogSinkFetcher) Stop() {
