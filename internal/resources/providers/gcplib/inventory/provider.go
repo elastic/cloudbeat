@@ -149,38 +149,47 @@ func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out 
 func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *MonitoringAsset) {
 	defer close(out)
 
-	logsResourceCh := make(chan *assetpb.Asset)
-	alertsResourceCh := make(chan *assetpb.Asset)
-	logsAssetCh := make(chan *ExtendedGcpAsset)
-	alertsAssetCh := make(chan *ExtendedGcpAsset)
+	projectsCh := make(chan *assetpb.Asset)
+	go p.getResources(ctx, []string{CrmProjectAssetType}, projectsCh)
 
-	go p.getResources(ctx, []string{MonitoringLogMetricAssetType}, logsResourceCh)
-	go p.getResources(ctx, []string{MonitoringAlertPolicyAssetType}, alertsResourceCh)
-	go p.enrichAssets(ctx, logsResourceCh, logsAssetCh)
-	go p.enrichAssets(ctx, alertsResourceCh, alertsAssetCh)
+	for project := range projectsCh {
+		logsResourceCh := make(chan *assetpb.Asset)
+		alertsResourceCh := make(chan *assetpb.Asset)
+		logsAssetCh := make(chan *ExtendedGcpAsset)
+		alertsAssetCh := make(chan *ExtendedGcpAsset)
 
-	var logAssets, alertAssets []*ExtendedGcpAsset
-	var wg sync.WaitGroup
+		go p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
+			Parent:      project.Ancestors[0],
+			AssetTypes:  []string{MonitoringLogMetricAssetType},
+			ContentType: assetpb.ContentType_RESOURCE,
+		}, logsResourceCh)
+		go p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
+			Parent:      project.Ancestors[0],
+			AssetTypes:  []string{MonitoringAlertPolicyAssetType},
+			ContentType: assetpb.ContentType_RESOURCE,
+		}, alertsResourceCh)
+		go p.enrichAssets(ctx, logsResourceCh, logsAssetCh)
+		go p.enrichAssets(ctx, alertsResourceCh, alertsAssetCh)
 
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		logAssets = collect(logsAssetCh)
-		p.log.Debugf("Listed %d log metrics\n", len(logAssets))
-	}()
-	go func() {
-		defer wg.Done()
-		alertAssets = collect(alertsAssetCh)
-		p.log.Debugf("Listed %d alert policies\n", len(alertAssets))
-	}()
-	wg.Wait()
+		var logAssets, alertAssets []*ExtendedGcpAsset
+		var wg sync.WaitGroup
 
-	assetsByProject := lo.GroupBy(append(logAssets, alertAssets...), func(asset *ExtendedGcpAsset) string { return asset.CloudAccount.AccountId })
-	for _, projectAssets := range assetsByProject {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			logAssets = collect(logsAssetCh)
+			p.log.Debugf("Listed %d log metrics for %v\n", len(logAssets), project.Name)
+		}()
+		go func() {
+			defer wg.Done()
+			alertAssets = collect(alertsAssetCh)
+			p.log.Debugf("Listed %d alert policies for %v\n", len(alertAssets), project.Name)
+		}()
+		wg.Wait()
 		out <- &MonitoringAsset{
-			LogMetrics:   getAssetsByType(projectAssets, MonitoringLogMetricAssetType),
-			Alerts:       getAssetsByType(projectAssets, MonitoringAlertPolicyAssetType),
-			CloudAccount: projectAssets[0].CloudAccount,
+			LogMetrics:   logAssets,
+			Alerts:       alertAssets,
+			CloudAccount: logAssets[0].CloudAccount,
 		}
 	}
 }
@@ -206,19 +215,24 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context, out chan<-
 func (p *Provider) ListProjectAssets(ctx context.Context, assetTypes []string, out chan<- *ProjectAssets) {
 	defer close(out)
 
-	resourcesCh := make(chan *assetpb.Asset)
-	assetsCh := make(chan *ExtendedGcpAsset)
-	go p.getResources(ctx, assetTypes, resourcesCh)
-	go p.enrichAssets(ctx, resourcesCh, assetsCh)
+	projectsCh := make(chan *assetpb.Asset)
+	go p.getResources(ctx, []string{CrmProjectAssetType}, projectsCh)
 
-	assets := collect(assetsCh)
-	p.log.Debugf("Listed %d resources for %v\n", len(assets), assetTypes)
+	for project := range projectsCh {
+		resourcesCh := make(chan *assetpb.Asset)
+		assetsCh := make(chan *ExtendedGcpAsset)
+		go p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
+			Parent:      project.Ancestors[0],
+			AssetTypes:  assetTypes,
+			ContentType: assetpb.ContentType_RESOURCE,
+		}, resourcesCh)
+		go p.enrichAssets(ctx, resourcesCh, assetsCh)
 
-	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.CloudAccount.AccountId })
-	for _, projectAssets := range assetsByProject {
+		assets := collect(assetsCh)
+		p.log.Debugf("Listed %d resources for %v\n", len(assets), assetTypes)
 		out <- &ProjectAssets{
-			Assets:       projectAssets,
-			CloudAccount: projectAssets[0].CloudAccount,
+			Assets:       assets,
+			CloudAccount: assets[0].CloudAccount,
 		}
 	}
 }
