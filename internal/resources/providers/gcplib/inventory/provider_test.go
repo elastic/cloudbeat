@@ -20,6 +20,7 @@ package inventory
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
@@ -140,7 +141,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 	go provider.ListAssetTypes(context.Background(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet("Error fetching GCP IAM_POLICY: test").TakeAll()
+	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "IAM_POLICY", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 
@@ -166,7 +167,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 	go provider.ListAssetTypes(context.Background(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet("Error fetching GCP RESOURCE: test").TakeAll()
+	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "RESOURCE", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 
