@@ -136,8 +136,8 @@ func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out 
 	mergeCh := make(chan *assetpb.Asset)    // *assetpb.Asset with Resource and IamPolicy
 	enrichCh := make(chan *ExtendedGcpAsset)
 
-	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_RESOURCE, assetTypes, resourceCh)
-	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_IAM_POLICY, assetTypes, policyCh)
+	go p.fetchAssets(ctx, assetpb.ContentType_RESOURCE, assetTypes, resourceCh)
+	go p.fetchAssets(ctx, assetpb.ContentType_IAM_POLICY, assetTypes, policyCh)
 	go p.mergeAssets(ctx, mergeCh, resourceCh, policyCh)
 	go p.enrichAssets(ctx, mergeCh, enrichCh)
 
@@ -178,10 +178,22 @@ func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *Monitor
 			p.log.Debugf("Listed %d alert policies for %v\n", len(alertAssets), project.Name)
 		}()
 		wg.Wait()
+
+		// We take the first cloud account we find, both are from the same project
+		var clountAccount *fetching.CloudAccountMetadata
+		if len(logAssets) > 0 {
+			clountAccount = logAssets[0].CloudAccount
+		} else if len(alertAssets) > 0 {
+			clountAccount = alertAssets[0].CloudAccount
+		} else {
+			p.log.Debugf("No log metrics or alert policies found for %v\n", project.Name)
+			continue
+		}
+
 		out <- &MonitoringAsset{
 			LogMetrics:   logAssets,
 			Alerts:       alertAssets,
-			CloudAccount: logAssets[0].CloudAccount,
+			CloudAccount: clountAccount,
 		}
 	}
 }
@@ -218,6 +230,9 @@ func (p *Provider) ListProjectAssets(ctx context.Context, assetTypes []string, o
 
 		assets := collect(assetsCh)
 		p.log.Debugf("Listed %d resources for %v\n", len(assets), assetTypes)
+		if len(assets) == 0 {
+			continue
+		}
 		out <- &ProjectAssets{
 			Assets:       assets,
 			CloudAccount: assets[0].CloudAccount,
@@ -246,7 +261,6 @@ func (p *Provider) Close() error {
 	return p.inventory.Close()
 }
 
-// TODO: when to call this method?
 func (p *Provider) Clear() {
 	p.crm.Clear()
 }
@@ -287,6 +301,25 @@ func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []st
 	return assets
 }
 
+func (p *Provider) fetchAssets(ctx context.Context, contentType assetpb.ContentType, assetTypes []string, out chan<- *assetpb.Asset) {
+	defer close(out)
+
+	wg := sync.WaitGroup{}
+	// Fetch each asset type separately to limit failures to a single type
+	for _, assetType := range assetTypes {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ch := make(chan *assetpb.Asset)
+			go p.getAllAssets(ctx, p.config.Parent, contentType, []string{assetType}, ch)
+			for asset := range ch {
+				out <- asset
+			}
+		}()
+	}
+	wg.Wait()
+}
+
 func (p *Provider) getAllAssets(ctx context.Context, parent string, contentType assetpb.ContentType, assetTypes []string, out chan<- *assetpb.Asset) {
 	defer close(out)
 
@@ -299,12 +332,12 @@ func (p *Provider) getAllAssets(ctx context.Context, parent string, contentType 
 	for {
 		response, err := it.Next()
 		if err == iterator.Done {
-			p.log.Infof("Finished fetching GCP %v for %v\n", contentType, assetTypes)
+			p.log.Infof("Finished fetching GCP %v of types: %v for %v\n", contentType, assetTypes, parent)
 			return
 		}
 
 		if err != nil {
-			p.log.Errorf("Error fetching GCP %v: %v\n", contentType, err)
+			p.log.Errorf("Error fetching GCP %v of types: %v for %v: %v\n", contentType, assetTypes, parent, err)
 			return
 		}
 
