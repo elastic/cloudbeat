@@ -84,7 +84,7 @@ func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 		s.NotNil(res.Resource)
 		asset, ok := res.Resource.(*GcpNetworksAsset)
 		s.True(ok)
-		s.Equal(expectedAsset, asset.Asset)
+		s.Equal(expectedAsset, asset.NetworkAsset)
 		s.Equal(fetching.CloudCompute, asset.Type)
 		s.Equal("gcp-compute-network", asset.subType)
 
@@ -105,9 +105,12 @@ func TestNetworksResource_GetMetadata(t *testing.T) {
 		{
 			name: "happy path",
 			resource: GcpNetworksAsset{
-				Type:    fetching.ProjectManagement,
-				subType: fetching.GcpPolicies,
-				Asset: &inventory.ExtendedGcpAsset{
+				Type:    fetching.CloudCompute,
+				subType: "gcp-compute-network",
+				NetworkAsset: &inventory.ExtendedGcpAsset{
+					Asset: &assetpb.Asset{
+						Name: fmt.Sprintf("%s/net1", projectId),
+					},
 					CloudAccount: &fetching.CloudAccountMetadata{
 						AccountId:        projectId,
 						AccountName:      "a",
@@ -117,10 +120,10 @@ func TestNetworksResource_GetMetadata(t *testing.T) {
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      fmt.Sprintf("%s-%s", fetching.GcpPolicies, projectId),
-				Name:    fmt.Sprintf("%s-%s", fetching.GcpPolicies, projectId),
-				Type:    fetching.ProjectManagement,
-				SubType: fetching.GcpPolicies,
+				ID:      fmt.Sprintf("%s/net1", projectId),
+				Name:    "net1",
+				Type:    fetching.CloudCompute,
+				SubType: "gcp-compute-network",
 				Region:  gcplib.GlobalRegion,
 				CloudAccountMetadata: fetching.CloudAccountMetadata{
 					AccountId:        projectId,

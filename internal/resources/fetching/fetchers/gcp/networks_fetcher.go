@@ -37,7 +37,7 @@ type GcpNetworksAsset struct {
 	Type    string
 	subType string
 
-	Asset *inventory.ExtendedGcpAsset `json:"assets,omitempty"`
+	NetworkAsset *inventory.ExtendedGcpAsset `json:"asset,omitempty"`
 }
 
 func NewGcpNetworksFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpNetworksFetcher {
@@ -66,9 +66,9 @@ func (f *GcpNetworksFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 			f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cycleMetadata,
 				Resource: &GcpNetworksAsset{
-					Type:    fetching.CloudCompute,
-					subType: "gcp-compute-network",
-					Asset:   asset,
+					Type:         fetching.CloudCompute,
+					subType:      "gcp-compute-network",
+					NetworkAsset: asset,
 				},
 			}
 		}
@@ -81,21 +81,21 @@ func (f *GcpNetworksFetcher) Stop() {
 
 func (g *GcpNetworksAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:                   g.Asset.Name,
+		ID:                   g.NetworkAsset.Name,
 		Type:                 g.Type,
 		SubType:              g.subType,
-		Name:                 getAssetResourceName(g.Asset),
+		Name:                 getAssetResourceName(g.NetworkAsset),
 		Region:               gcplib.GlobalRegion,
-		CloudAccountMetadata: *g.Asset.CloudAccount,
+		CloudAccountMetadata: *g.NetworkAsset.CloudAccount,
 	}, nil
 }
 
 func (g *GcpNetworksAsset) GetData() any {
-	return g.Asset
+	return g.NetworkAsset
 }
 
 func (g *GcpNetworksAsset) GetIds() []string {
-	return []string{g.Asset.Name}
+	return []string{g.NetworkAsset.Name}
 }
 
 func (g *GcpNetworksAsset) GetElasticCommonData() (map[string]any, error) {
