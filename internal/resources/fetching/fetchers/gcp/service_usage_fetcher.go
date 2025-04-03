@@ -57,9 +57,9 @@ func NewGcpServiceUsageFetcher(_ context.Context, log *clog.Logger, ch chan fetc
 func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpServiceUsageFetcher.Fetch")
 	defer f.log.Info("GcpServiceUsageFetcher.Fetch done")
+	defer f.provider.Clear()
 
 	resultsCh := make(chan *inventory.ProjectAssets)
-	// TODO?: use SearchAllResources to get just the resource we need, not all of them
 	go f.provider.ListProjectAssets(ctx, []string{inventory.ServiceUsageAssetType}, resultsCh)
 
 	for {
