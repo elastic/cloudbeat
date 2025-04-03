@@ -85,8 +85,8 @@ func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 		asset, ok := res.Resource.(*GcpNetworksAsset)
 		s.True(ok)
 		s.Equal(expectedAsset, asset.Asset)
-		s.Equal(fetching.ProjectManagement, asset.Type)
-		s.Equal(fetching.GcpPolicies, asset.subType)
+		s.Equal(fetching.CloudCompute, asset.Type)
+		s.Equal("gcp-compute-network", asset.subType)
 
 	case <-time.After(time.Second):
 		s.Fail("Test timed out waiting for resource")

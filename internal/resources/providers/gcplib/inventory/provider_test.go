@@ -55,6 +55,7 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 func NewMockInventoryContentIterators() (inventory *AssetsInventoryWrapper, resourceIter *MockIterator, policiesIter *MockIterator) {
 	mockedResourceIterator := new(MockIterator)
 	mockedPoliciesIterator := new(MockIterator)
+
 	mockedInventory := &AssetsInventoryWrapper{
 		Close: func() error { return nil },
 		ListAssets: func(_ context.Context, req *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
@@ -209,6 +210,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets_Success() {
 	provider := s.NewMockProvider()
 	logMetricsIterator := new(MockIterator)
 	alertPoliciesIterator := new(MockIterator)
+	projectIterator := new(MockIterator)
 
 	provider.inventory = &AssetsInventoryWrapper{
 		Close: func() error { return nil },
@@ -218,17 +220,25 @@ func (s *ProviderTestSuite) TestListMonitoringAssets_Success() {
 				return logMetricsIterator
 			case MonitoringAlertPolicyAssetType:
 				return alertPoliciesIterator
+			case CrmProjectAssetType:
+				return projectIterator
 			default:
 				return nil
 			}
 		},
 	}
+	projectIterator.On("Next").Return(&assetpb.Asset{Name: "projects/1", Ancestors: []string{"organizations/1/projects/1"}}, nil).Once()
+	projectIterator.On("Next").Return(&assetpb.Asset{Name: "projects/2", Ancestors: []string{"organizations/1/projects/2"}}, nil).Once()
+	projectIterator.On("Next").Return(nil, iterator.Done).Once()
 
 	logMetricsIterator.On("Next").Return(&assetpb.Asset{Name: "LogMetricName1", Ancestors: []string{"projects/1"}, AssetType: MonitoringLogMetricAssetType}, nil).Once()
-	logMetricsIterator.On("Next").Return(&assetpb.Asset{Name: "LogMetricName1", Ancestors: []string{"projects/2"}, AssetType: MonitoringLogMetricAssetType}, nil).Once()
 	logMetricsIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 	alertPoliciesIterator.On("Next").Return(&assetpb.Asset{Name: "AlertPolicyName1", Ancestors: []string{"projects/1"}, AssetType: MonitoringAlertPolicyAssetType}, nil).Once()
-	alertPoliciesIterator.On("Next").Return(&assetpb.Asset{Name: "AlertPolicyName1", Ancestors: []string{"projects/2"}, AssetType: MonitoringAlertPolicyAssetType}, nil).Once()
+	alertPoliciesIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+
+	logMetricsIterator.On("Next").Return(&assetpb.Asset{Name: "LogMetricName2", Ancestors: []string{"projects/2"}, AssetType: MonitoringLogMetricAssetType}, nil).Once()
+	logMetricsIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+	alertPoliciesIterator.On("Next").Return(&assetpb.Asset{Name: "AlertPolicyName2", Ancestors: []string{"projects/2"}, AssetType: MonitoringAlertPolicyAssetType}, nil).Once()
 	alertPoliciesIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	outCh := make(chan *MonitoringAsset)
@@ -242,22 +252,39 @@ func (s *ProviderTestSuite) TestListMonitoringAssets_Success() {
 	s.Len(results[0].Alerts, 1)
 	s.Len(results[1].LogMetrics, 1)
 	s.Len(results[1].Alerts, 1)
-	ids1 := []string{results[0].LogMetrics[0].CloudAccount.AccountId, results[0].Alerts[0].CloudAccount.AccountId}
-	ids2 := []string{results[1].LogMetrics[0].CloudAccount.AccountId, results[1].Alerts[0].CloudAccount.AccountId}
-	s.ElementsMatch(append(ids1, ids2...), []string{"1", "1", "2", "2"})
 
-	defer logMetricsIterator.AssertExpectations(s.T())
-	defer alertPoliciesIterator.AssertExpectations(s.T())
+	s.ElementsMatch([]string{"1", "1"}, []string{results[0].LogMetrics[0].CloudAccount.AccountId, results[0].Alerts[0].CloudAccount.AccountId})
+	s.ElementsMatch([]string{"2", "2"}, []string{results[1].LogMetrics[0].CloudAccount.AccountId, results[1].Alerts[0].CloudAccount.AccountId})
+
+	projectIterator.AssertExpectations(s.T())
+	logMetricsIterator.AssertExpectations(s.T())
+	alertPoliciesIterator.AssertExpectations(s.T())
 }
 
 func (s *ProviderTestSuite) TestListProjectAssets() {
 	outCh := make(chan *ProjectAssets)
 	provider := s.NewMockProvider()
-	inventory, mockedResourceIterator, _ := NewMockInventoryContentIterators()
-	provider.inventory = inventory
+	mockedProjectIterator := new(MockIterator)
+	mockedResourceIterator := new(MockIterator)
+	provider.inventory = &AssetsInventoryWrapper{
+		Close: func() error { return nil },
+		ListAssets: func(_ context.Context, req *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
+			switch req.AssetTypes[0] {
+			case CrmProjectAssetType:
+				return mockedProjectIterator
+			default:
+				return mockedResourceIterator
+			}
+		},
+	}
 
-	mockedResourceIterator.On("Next").Return(&assetpb.Asset{Name: "asset1", Ancestors: []string{"projects/1"}}, nil).Once()
-	mockedResourceIterator.On("Next").Return(&assetpb.Asset{Name: "asset2", Ancestors: []string{"projects/2"}}, nil).Once()
+	mockedProjectIterator.On("Next").Return(&assetpb.Asset{Name: "prj1", Ancestors: []string{"projects/1"}}, nil).Once()
+	mockedProjectIterator.On("Next").Return(&assetpb.Asset{Name: "prj2", Ancestors: []string{"projects/2"}}, nil).Once()
+	mockedProjectIterator.On("Next").Return(nil, iterator.Done).Once()
+
+	mockedResourceIterator.On("Next").Return(&assetpb.Asset{Name: "rsrc1", Ancestors: []string{"projects/1"}}, nil).Once()
+	mockedResourceIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+	mockedResourceIterator.On("Next").Return(&assetpb.Asset{Name: "rsrc2", Ancestors: []string{"projects/2"}}, nil).Once()
 	mockedResourceIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	go provider.ListProjectAssets(context.Background(), []string{"assettype"}, outCh)
@@ -268,6 +295,7 @@ func (s *ProviderTestSuite) TestListProjectAssets() {
 	s.Len(results[1].Assets, 1)
 	s.ElementsMatch([]string{"1", "2"}, []string{results[0].CloudAccount.AccountId, results[1].CloudAccount.AccountId})
 
+	mockedProjectIterator.AssertExpectations(s.T())
 	mockedResourceIterator.AssertExpectations(s.T())
 }
 func (s *ProviderTestSuite) TestListNetworkAssets() {
