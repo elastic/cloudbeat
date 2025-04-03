@@ -19,7 +19,6 @@ package fetchers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -28,34 +27,34 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
-type GcpMonitoringFetcher struct {
+type GcpNetworksFetcher struct {
 	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
 }
 
-type GcpMonitoringAsset struct {
+type GcpNetworksAsset struct {
 	Type    string
 	subType string
 
-	Asset *inventory.MonitoringAsset `json:"assets,omitempty"`
+	NetworkAsset *inventory.ExtendedGcpAsset `json:"asset,omitempty"`
 }
 
-func NewGcpMonitoringFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpMonitoringFetcher {
-	return &GcpMonitoringFetcher{
+func NewGcpNetworksFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpNetworksFetcher {
+	return &GcpNetworksFetcher{
 		log:        log,
 		resourceCh: ch,
 		provider:   provider,
 	}
 }
 
-func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
-	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
-	defer f.log.Info("GcpMonitoringFetcher.Fetch done")
+func (f *GcpNetworksFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
+	f.log.Info("Starting GcpNetworksFetcher.Fetch")
+	defer f.log.Info("GcpNetworksFetcher.Fetch done")
 	defer f.provider.Clear()
 
-	resultsCh := make(chan *inventory.MonitoringAsset)
-	go f.provider.ListMonitoringAssets(ctx, resultsCh)
+	resultsCh := make(chan *inventory.ExtendedGcpAsset)
+	go f.provider.ListNetworkAssets(ctx, resultsCh)
 
 	for {
 		select {
@@ -67,44 +66,39 @@ func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Me
 			}
 			f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cycleMetadata,
-				Resource: &GcpMonitoringAsset{
-					Type:    fetching.MonitoringIdentity,
-					subType: fetching.GcpMonitoringType,
-					Asset:   asset,
+				Resource: &GcpNetworksAsset{
+					Type:         fetching.CloudCompute,
+					subType:      "gcp-compute-network",
+					NetworkAsset: asset,
 				},
 			}
 		}
 	}
 }
 
-func (f *GcpMonitoringFetcher) Stop() {
+func (f *GcpNetworksFetcher) Stop() {
 	f.provider.Close()
 }
 
-func (g *GcpMonitoringAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := g.buildId()
+func (g *GcpNetworksAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:                   id,
+		ID:                   g.NetworkAsset.Name,
 		Type:                 g.Type,
 		SubType:              g.subType,
-		Name:                 id,
+		Name:                 getAssetResourceName(g.NetworkAsset),
 		Region:               gcplib.GlobalRegion,
-		CloudAccountMetadata: *g.Asset.CloudAccount,
+		CloudAccountMetadata: *g.NetworkAsset.CloudAccount,
 	}, nil
 }
 
-func (g *GcpMonitoringAsset) buildId() string {
-	return fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
+func (g *GcpNetworksAsset) GetData() any {
+	return g.NetworkAsset
 }
 
-func (g *GcpMonitoringAsset) GetData() any {
-	return g.Asset
+func (g *GcpNetworksAsset) GetIds() []string {
+	return []string{g.NetworkAsset.Name}
 }
 
-func (g *GcpMonitoringAsset) GetIds() []string {
-	return []string{g.buildId()}
-}
-
-func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]any, error) {
+func (g *GcpNetworksAsset) GetElasticCommonData() (map[string]any, error) {
 	return nil, nil
 }
