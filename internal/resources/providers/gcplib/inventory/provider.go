@@ -435,10 +435,6 @@ func decodeDnsPolicies(dnsPolicyAssets []*assetpb.Asset) []*dnsPolicyFields {
 	return dnsPolicies
 }
 
-func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*ExtendedGcpAsset {
-	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool { return asset.AssetType == assetType })
-}
-
 func isFolder(parent string) bool {
 	return strings.HasPrefix(parent, "folders")
 }
