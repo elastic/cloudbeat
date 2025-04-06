@@ -33,10 +33,11 @@ import (
 )
 
 type ResourceManagerWrapper struct {
+	log                        *clog.Logger
 	config                     auth.GcpFactoryConfig
-	accountNamesCache          sync.Map                                        // cache for CloudAccountMetadata
-	getProjectDisplayName      func(ctx context.Context, parent string) string // returns project display name or an empty string
-	getOrganizationDisplayName func(ctx context.Context, parent string) string // returns org display name or an empty string
+	accountMetadataCache       sync.Map
+	getProjectDisplayName      func(ctx context.Context, parent string) string
+	getOrganizationDisplayName func(ctx context.Context, parent string) string
 }
 
 func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (*ResourceManagerWrapper, error) {
@@ -48,10 +49,9 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 	}
 
 	return &ResourceManagerWrapper{
-		config:            gcpConfig,
-		accountNamesCache: sync.Map{},
-
-		// fetches GCP Project and Organization display names; errors are ignored as they're non-critical
+		log:                  log,
+		config:               gcpConfig,
+		accountMetadataCache: sync.Map{},
 		getProjectDisplayName: func(ctx context.Context, parent string) string {
 			prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
 			if err != nil {
@@ -75,15 +75,16 @@ func (c *ResourceManagerWrapper) GetCloudMetadata(ctx context.Context, asset *as
 	orgId := getOrganizationId(asset.Ancestors)
 	projectId := getProjectId(asset.Ancestors)
 	key := fmt.Sprintf("%s/%s", projectId, orgId)
-	cloudAccount, ok := c.accountNamesCache.Load(key)
+	cloudAccount, ok := c.accountMetadataCache.Load(key)
 	if ok {
 		cloudAccountMetadata, valid := cloudAccount.(*fetching.CloudAccountMetadata)
 		if valid {
 			return cloudAccountMetadata
 		}
+		c.log.Errorf("error casting cloud account metadata for key: %s", key)
 	}
 	cloudAccountMetadata := c.getMetadata(ctx, orgId, projectId)
-	c.accountNamesCache.Store(key, cloudAccountMetadata)
+	c.accountMetadataCache.Store(key, cloudAccountMetadata)
 	return cloudAccountMetadata
 }
 
@@ -116,7 +117,7 @@ func (c *ResourceManagerWrapper) getMetadata(ctx context.Context, orgId string, 
 }
 
 func (c *ResourceManagerWrapper) Clear() {
-	c.accountNamesCache.Clear()
+	c.accountMetadataCache.Clear()
 }
 
 func getOrganizationId(ancestors []string) string {

@@ -52,7 +52,7 @@ func (s *ResourceManagerTestSuite) NewMockResourceManagerWrapper() *ResourceMana
 			Parent:     "organizations/1",
 			ClientOpts: []option.ClientOption{},
 		},
-		accountNamesCache: sync.Map{},
+		accountMetadataCache: sync.Map{},
 		getProjectDisplayName: func(_ context.Context, _ string) string {
 			return "projectName"
 		},
@@ -68,10 +68,11 @@ func (s *ResourceManagerTestSuite) TestGetCloudMetadataOrg() {
 		Ancestors: ancestors,
 	})
 	s.Equal("5", result.AccountId)
-	s.Equal("projectName", result.AccountName)
 	s.Equal("1", result.OrganisationId)
+	s.Equal("projectName", result.AccountName)
 	s.Equal("orgName", result.OrganizationName)
 }
+
 func (s *ResourceManagerTestSuite) TestGetCloudMetadataProject() {
 	crm := s.NewMockResourceManagerWrapper()
 	crm.config.Parent = "projects/5"
