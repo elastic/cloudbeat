@@ -86,6 +86,79 @@ func (s *ResourceManagerTestSuite) TestGetCloudMetadataProject() {
 	s.Empty(result.OrganizationName) // no org name when Parent is a project
 }
 
+func (s *ResourceManagerTestSuite) TestGetCloudMetadataCacheMiss() {
+	crm := s.NewMockResourceManagerWrapper()
+	missPrj := 0
+	missOrg := 0
+	crm.getProjectDisplayName = func(_ context.Context, _ string) string {
+		missPrj++
+		return "projectName"
+	}
+	crm.getOrganizationDisplayName = func(_ context.Context, _ string) string {
+		missOrg++
+		return "orgName"
+	}
+
+	crm.config.Parent = "organizations/1"
+	_ = crm.GetCloudMetadata(context.Background(), &assetpb.Asset{
+		Name: "projects/1",
+		Ancestors: []string{
+			"projects/1",
+			"organizations/1",
+		},
+	})
+
+	s.Equal(1, missPrj)
+	s.Equal(1, missOrg)
+
+	_ = crm.GetCloudMetadata(context.Background(), &assetpb.Asset{
+		Name: "projects/2",
+		Ancestors: []string{
+			"projects/2",
+			"organizations/1",
+		},
+	})
+
+	s.Equal(2, missPrj)
+	s.Equal(2, missOrg)
+}
+func (s *ResourceManagerTestSuite) TestGetCloudMetadataCacheHit() {
+	crm := s.NewMockResourceManagerWrapper()
+	missPrj := 0
+	missOrg := 0
+	crm.getProjectDisplayName = func(_ context.Context, _ string) string {
+		missPrj++
+		return "projectName"
+	}
+	crm.getOrganizationDisplayName = func(_ context.Context, _ string) string {
+		missOrg++
+		return "orgName"
+	}
+
+	crm.config.Parent = "organizations/1"
+	_ = crm.GetCloudMetadata(context.Background(), &assetpb.Asset{
+		Name: "projects/1",
+		Ancestors: []string{
+			"projects/1",
+			"organizations/1",
+		},
+	})
+
+	s.Equal(1, missPrj)
+	s.Equal(1, missOrg)
+
+	_ = crm.GetCloudMetadata(context.Background(), &assetpb.Asset{
+		Name: "projects/1",
+		Ancestors: []string{
+			"projects/1",
+			"organizations/1",
+		},
+	})
+
+	s.Equal(1, missPrj)
+	s.Equal(1, missOrg)
+}
+
 func (s *ResourceManagerTestSuite) TestGetOrganizationId() {
 	s.Equal("1", getOrganizationId(ancestors))
 }
