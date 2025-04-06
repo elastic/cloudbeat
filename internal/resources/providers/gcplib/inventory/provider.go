@@ -100,7 +100,6 @@ func newAssetsInventoryWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 		return nil, err
 	}
 
-	// wrap the assets inventory client for mocking
 	return &AssetsInventoryWrapper{
 		Close: client.Close,
 		ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
@@ -131,17 +130,17 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpCon
 func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out chan<- *ExtendedGcpAsset) {
 	defer close(out)
 
-	resourceCh := make(chan *assetpb.Asset) // *assetpb.Asset with Resource
-	policyCh := make(chan *assetpb.Asset)   // *assetpb.Asset with IamPolicy
-	mergeCh := make(chan *assetpb.Asset)    // *assetpb.Asset with Resource and IamPolicy
-	enrichCh := make(chan *ExtendedGcpAsset)
+	resourceAssetsCh := make(chan *assetpb.Asset) // *assetpb.Asset with Resource
+	policiesAssetsCh := make(chan *assetpb.Asset) // *assetpb.Asset with IamPolicy
+	assetsCh := make(chan *assetpb.Asset)         // *assetpb.Asset with Resource and IamPolicy
+	extendedAssetsCh := make(chan *ExtendedGcpAsset)
 
-	go p.fetchAssets(ctx, assetpb.ContentType_RESOURCE, assetTypes, resourceCh)
-	go p.fetchAssets(ctx, assetpb.ContentType_IAM_POLICY, assetTypes, policyCh)
-	go p.mergeAssets(ctx, mergeCh, resourceCh, policyCh)
-	go p.enrichAssets(ctx, mergeCh, enrichCh)
+	go p.fetchAssets(ctx, assetpb.ContentType_RESOURCE, assetTypes, resourceAssetsCh)
+	go p.fetchAssets(ctx, assetpb.ContentType_IAM_POLICY, assetTypes, policiesAssetsCh)
+	go p.mergeAssets(ctx, resourceAssetsCh, policiesAssetsCh, assetsCh)
+	go p.extendAssets(ctx, assetsCh, extendedAssetsCh)
 
-	for asset := range enrichCh {
+	for asset := range extendedAssetsCh {
 		out <- asset
 	}
 }
@@ -150,9 +149,11 @@ func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *Monitor
 	defer close(out)
 
 	projectsCh := make(chan *assetpb.Asset)
+	extendedAssetCh := make(chan *ExtendedGcpAsset)
 	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_RESOURCE, []string{CrmProjectAssetType}, projectsCh)
+	go p.extendAssets(ctx, projectsCh, extendedAssetCh)
 
-	for project := range projectsCh {
+	for project := range extendedAssetCh {
 		logsResourceCh := make(chan *assetpb.Asset)
 		alertsResourceCh := make(chan *assetpb.Asset)
 		logsAssetCh := make(chan *ExtendedGcpAsset)
@@ -160,8 +161,8 @@ func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *Monitor
 
 		go p.getAllAssets(ctx, project.Ancestors[0], assetpb.ContentType_RESOURCE, []string{MonitoringLogMetricAssetType}, logsResourceCh)
 		go p.getAllAssets(ctx, project.Ancestors[0], assetpb.ContentType_RESOURCE, []string{MonitoringAlertPolicyAssetType}, alertsResourceCh)
-		go p.enrichAssets(ctx, logsResourceCh, logsAssetCh)
-		go p.enrichAssets(ctx, alertsResourceCh, alertsAssetCh)
+		go p.extendAssets(ctx, logsResourceCh, logsAssetCh)
+		go p.extendAssets(ctx, alertsResourceCh, alertsAssetCh)
 
 		var logAssets, alertAssets []*ExtendedGcpAsset
 		var wg sync.WaitGroup
@@ -179,21 +180,14 @@ func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *Monitor
 		}()
 		wg.Wait()
 
-		// We take the first cloud account we find, both are from the same project
-		var clountAccount *fetching.CloudAccountMetadata
-		if len(logAssets) > 0 {
-			clountAccount = logAssets[0].CloudAccount
-		} else if len(alertAssets) > 0 {
-			clountAccount = alertAssets[0].CloudAccount
-		} else {
-			p.log.Debugf("No log metrics or alert policies found for %v\n", project.Name)
+		if len(logAssets) == 0 && len(alertAssets) == 0 {
 			continue
 		}
 
 		out <- &MonitoringAsset{
 			LogMetrics:   logAssets,
 			Alerts:       alertAssets,
-			CloudAccount: clountAccount,
+			CloudAccount: project.CloudAccount,
 		}
 	}
 }
@@ -201,17 +195,19 @@ func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *Monitor
 func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context, out chan<- *ProjectPoliciesAsset) {
 	defer close(out)
 
-	prjCh := make(chan *assetpb.Asset)
-	prjMetadataCh := make(chan *ExtendedGcpAsset)
+	projectPoliciesCh := make(chan *assetpb.Asset)
+	extendedAssetsCh := make(chan *ExtendedGcpAsset)
 	policiesCache := &sync.Map{}
 
-	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_IAM_POLICY, []string{CrmProjectAssetType}, prjCh)
-	go p.enrichAssets(ctx, prjCh, prjMetadataCh)
+	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_IAM_POLICY, []string{CrmProjectAssetType}, projectPoliciesCh)
+	go p.extendAssets(ctx, projectPoliciesCh, extendedAssetsCh)
 
-	for asset := range prjMetadataCh {
+	for asset := range extendedAssetsCh {
+		ancestorPolicies := p.getAssetAncestorsPolicies(ctx, asset.Ancestors[1:], policiesCache)
+
 		out <- &ProjectPoliciesAsset{
 			CloudAccount: asset.CloudAccount,
-			Policies:     append([]*ExtendedGcpAsset{asset}, p.getAssetAncestorsPolicies(ctx, asset.Ancestors[1:], policiesCache)...),
+			Policies:     append([]*ExtendedGcpAsset{asset}, ancestorPolicies...),
 		}
 	}
 }
@@ -219,23 +215,25 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context, out chan<-
 func (p *Provider) ListProjectAssets(ctx context.Context, assetTypes []string, out chan<- *ProjectAssets) {
 	defer close(out)
 
-	projectsCh := make(chan *assetpb.Asset)
-	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_RESOURCE, []string{CrmProjectAssetType}, projectsCh)
+	projectResourcesCh := make(chan *assetpb.Asset)
+	extendedAssetCh := make(chan *ExtendedGcpAsset)
+	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_RESOURCE, []string{CrmProjectAssetType}, projectResourcesCh)
+	go p.extendAssets(ctx, projectResourcesCh, extendedAssetCh)
 
-	for project := range projectsCh {
+	for project := range extendedAssetCh {
 		resourcesCh := make(chan *assetpb.Asset)
 		assetsCh := make(chan *ExtendedGcpAsset)
 		go p.getAllAssets(ctx, project.Ancestors[0], assetpb.ContentType_RESOURCE, assetTypes, resourcesCh)
-		go p.enrichAssets(ctx, resourcesCh, assetsCh)
+		go p.extendAssets(ctx, resourcesCh, assetsCh)
 
 		assets := collect(assetsCh)
-		p.log.Debugf("Listed %d resources for %v\n", len(assets), assetTypes)
+		p.log.Debugf("Listed %d resources of type: %v in %v\n", len(assets), assetTypes, project.Name)
 		if len(assets) == 0 {
 			continue
 		}
 		out <- &ProjectAssets{
 			Assets:       assets,
-			CloudAccount: assets[0].CloudAccount,
+			CloudAccount: project.CloudAccount,
 		}
 	}
 }
@@ -249,7 +247,7 @@ func (p *Provider) ListNetworkAssets(ctx context.Context, out chan<- *ExtendedGc
 
 	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_RESOURCE, []string{DnsPolicyAssetType}, dnsResourceCh)
 	go p.getAllAssets(ctx, p.config.Parent, assetpb.ContentType_RESOURCE, []string{ComputeNetworkAssetType}, networkResourceCh)
-	go p.enrichAssets(ctx, networkResourceCh, extendedNetworkResourceCh)
+	go p.extendAssets(ctx, networkResourceCh, extendedNetworkResourceCh)
 
 	dnsPoliciesFields := decodeDnsPolicies(collect(dnsResourceCh))
 	for asset := range extendedNetworkResourceCh {
@@ -290,7 +288,7 @@ func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []st
 			defer wg.Done()
 			var ancestorPolicies []*ExtendedGcpAsset
 			for asset := range prjAncestorPolicyCh {
-				ancestorPolicies = append(ancestorPolicies, p.extendWithCloudMetadata(ctx, asset)) // TODO: we don't need to extend
+				ancestorPolicies = append(ancestorPolicies, p.newGcpExtendedAsset(ctx, asset))
 			}
 			cache.Store(ancestor, ancestorPolicies)
 			assets = append(assets, ancestorPolicies...)
@@ -350,7 +348,7 @@ func (p *Provider) getAllAssets(ctx context.Context, parent string, contentType 
 // if one channel closes, send remaining assets from the other. finally, flush remaining assets.
 //
 //revive:disable-next-line
-func (p *Provider) mergeAssets(ctx context.Context, out chan<- *assetpb.Asset, resourceCh, policyCh <-chan *assetpb.Asset) {
+func (p *Provider) mergeAssets(ctx context.Context, resourceCh, policyCh <-chan *assetpb.Asset, out chan<- *assetpb.Asset) {
 	defer close(out)
 
 	assetStore := make(map[string]*assetpb.Asset)
@@ -373,7 +371,6 @@ func (p *Provider) mergeAssets(ctx context.Context, out chan<- *assetpb.Asset, r
 				pch = nil
 			}
 		}
-
 		for id, a := range assetStore {
 			hasPolicy := a.IamPolicy != nil
 			hasResource := a.Resource != nil
@@ -386,20 +383,19 @@ func (p *Provider) mergeAssets(ctx context.Context, out chan<- *assetpb.Asset, r
 	}
 }
 
-func (p *Provider) enrichAssets(ctx context.Context, in <-chan *assetpb.Asset, out chan<- *ExtendedGcpAsset) {
+func (p *Provider) extendAssets(ctx context.Context, in <-chan *assetpb.Asset, out chan<- *ExtendedGcpAsset) {
 	defer close(out)
 
 	for asset := range in {
 		select {
 		case <-ctx.Done():
 			return
-		case out <- p.extendWithCloudMetadata(ctx, asset):
+		case out <- p.newGcpExtendedAsset(ctx, asset):
 		}
 	}
 }
 
-// extends the assets with the project and organization display name
-func (p *Provider) extendWithCloudMetadata(ctx context.Context, asset *assetpb.Asset) *ExtendedGcpAsset {
+func (p *Provider) newGcpExtendedAsset(ctx context.Context, asset *assetpb.Asset) *ExtendedGcpAsset {
 	return &ExtendedGcpAsset{
 		Asset:        asset,
 		CloudAccount: p.crm.GetCloudMetadata(ctx, asset),
@@ -425,7 +421,6 @@ func enrichNetworkAsset(asset *ExtendedGcpAsset, dnsPoliciesFields []*dnsPolicyF
 	dnsPolicy := findDnsPolicyByNetwork(dnsPoliciesFields, networkIdentifier)
 
 	if dnsPolicy != nil {
-		// TODO: avoid updating the raw asset
 		networkAssetFields["enabledDnsLogging"] = &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: dnsPolicy.enableLogging}}
 	}
 	return asset
