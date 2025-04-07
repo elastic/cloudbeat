@@ -42,7 +42,7 @@ env:
 
 jobs:
   Destroy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 120
     # Add "id-token" with the intended permissions.
     permissions:
