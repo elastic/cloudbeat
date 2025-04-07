@@ -217,12 +217,12 @@ type Group struct {
 }
 
 type Host struct {
-	ID           string `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Architecture string `json:"architecture,omitempty"`
-	Type         string `json:"type,omitempty"`
-	IP           string `json:"ip,omitempty"`
-	MacAddress   string `json:"mac,omitempty"`
+	ID           string   `json:"id,omitempty"`
+	Name         string   `json:"name,omitempty"`
+	Architecture string   `json:"architecture,omitempty"`
+	Type         string   `json:"type,omitempty"`
+	IP           string   `json:"ip,omitempty"`
+	MacAddress   []string `json:"mac,omitempty"`
 }
 
 type User struct {
