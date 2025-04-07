@@ -75,7 +75,6 @@ func TestAssetInventory_Run(t *testing.T) {
 				"orchestrator": &Orchestrator{
 					Type: "kubernetes",
 				},
-				"container": &Container{},
 				"organization": &Organization{
 					ID: "org-id",
 				},
@@ -122,7 +121,6 @@ func TestAssetInventory_Run(t *testing.T) {
 			WithNetwork(Network{
 				Name: "vpc-id",
 			}),
-			WithContainer(Container{}),
 			WithOrchestrator(Orchestrator{
 				Type: "kubernetes",
 			}),

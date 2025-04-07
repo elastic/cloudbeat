@@ -147,7 +147,6 @@ type AssetEvent struct {
 	Entity        Entity
 	Event         Event
 	Cloud         *Cloud
-	Container     *Container
 	Fass          *Fass
 	Group         *Group
 	Host          *Host
@@ -159,6 +158,11 @@ type AssetEvent struct {
 	Labels        map[string]string
 	Tags          []string
 	RawAttributes *any
+	Related       *Related
+}
+
+type Related struct {
+	Entity []string `json:"id,omitempty"`
 }
 
 type Organization struct {
@@ -180,9 +184,6 @@ type Entity struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 	AssetClassification
-
-	// non exported fields
-	relatedEntityId []string
 }
 
 type Event struct {
@@ -216,31 +217,25 @@ type Group struct {
 }
 
 type Host struct {
-	ID           string   `json:"id,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Architecture string   `json:"architecture,omitempty"`
-	Type         string   `json:"type,omitempty"`
-	IP           string   `json:"ip,omitempty"`
-	MacAddress   []string `json:"mac,omitempty"`
+	ID           string `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Architecture string `json:"architecture,omitempty"`
+	Type         string `json:"type,omitempty"`
+	IP           string `json:"ip,omitempty"`
+	MacAddress   string `json:"mac,omitempty"`
 }
 
 type User struct {
-	ID    string   `json:"id,omitempty"`
-	Name  string   `json:"name,omitempty"`
-	Email string   `json:"email,omitempty"`
-	Roles []string `json:"roles,omitempty"`
+	ID    string `json:"id,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email,omitempty"`
+	Roles string `json:"roles,omitempty"`
 }
 
 type Orchestrator struct {
 	ClusterID   string `json:"cluster.id,omitempty"`
 	ClusterName string `json:"cluster.name,omitempty"`
 	Type        string `json:"type,omitempty"`
-}
-
-type Container struct {
-	ID        string `json:"id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	ImageName string `json:"image.name,omitempty"`
 }
 
 // AssetEnricher functional builder function
@@ -273,16 +268,13 @@ func WithRawAsset(raw any) AssetEnricher {
 
 func WithRelatedAssetIds(ids []string) AssetEnricher {
 	return func(a *AssetEvent) {
-		ids = lo.Filter(ids, func(id string, _ int) bool {
-			return id != ""
-		})
-
+		ids = lo.Compact(ids)
 		if len(ids) == 0 {
-			a.Entity.relatedEntityId = nil
 			return
 		}
-
-		a.Entity.relatedEntityId = lo.Uniq(ids)
+		a.Related = &Related{
+			Entity: lo.Uniq(ids),
+		}
 	}
 }
 
@@ -373,11 +365,5 @@ func WithURL(url URL) AssetEnricher {
 func WithOrchestrator(orchestrator Orchestrator) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Orchestrator = &orchestrator
-	}
-}
-
-func WithContainer(container Container) AssetEnricher {
-	return func(a *AssetEvent) {
-		a.Container = &container
 	}
 }

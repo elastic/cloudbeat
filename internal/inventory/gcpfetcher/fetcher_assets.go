@@ -23,7 +23,6 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/samber/lo"
-	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -86,18 +85,18 @@ func (f *assetsInventory) fetch(ctx context.Context, assetChan chan<- inventory.
 	}
 
 	for _, item := range gcpAssets {
-		assetChan <- getAssetEvent(classification, item)
+		assetChan <- getAssetEvent(*f.logger, classification, item)
 	}
 }
 
-func getAssetEvent(classification inventory.AssetClassification, item *gcpinventory.ExtendedGcpAsset) inventory.AssetEvent {
+func getAssetEvent(log clog.Logger, classification inventory.AssetClassification, item *gcpinventory.ExtendedGcpAsset) inventory.AssetEvent {
 	// Common enrichers
 	enrichers := []inventory.AssetEnricher{
 		inventory.WithRawAsset(item),
 		inventory.WithLabels(getAssetLabels(item)),
 		inventory.WithTags(getAssetTags(item)),
 		inventory.WithRelatedAssetIds(
-			findRelatedAssetIds(classification.Type, item),
+			findRelatedAssetIds(item),
 		),
 		// Any asset type enrichers also setting Cloud fields will need to re-add these fields below
 		inventory.WithCloud(inventory.Cloud{
@@ -112,9 +111,8 @@ func getAssetEvent(classification inventory.AssetClassification, item *gcpinvent
 
 	// Asset type specific enrichers
 	if hasResourceData(item) {
-		fields := item.GetResource().GetData().GetFields()
 		if enricher, ok := assetEnrichers[item.AssetType]; ok {
-			enrichers = append(enrichers, enricher(item, fields)...)
+			enrichers = append(enrichers, enricher(log, item, item.GetResource().GetData().AsMap())...)
 		}
 	}
 
@@ -126,54 +124,55 @@ func getAssetEvent(classification inventory.AssetClassification, item *gcpinvent
 	)
 }
 
-func findRelatedAssetIds(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
+func findRelatedAssetIds(item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
 	ids = append(ids, item.Ancestors...)
 	if item.Resource != nil {
 		ids = append(ids, item.Resource.Parent)
 	}
-
-	ids = append(ids, findRelatedAssetIdsForType(t, item)...)
-
+	ids = append(ids, findRelatedAssetIdsForType(item)...)
 	ids = lo.Compact(ids)
 	ids = lo.Uniq(ids)
 	return ids
 }
 
-func findRelatedAssetIdsForType(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
+func findRelatedAssetIdsForType(item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
-
-	var fields map[string]*structpb.Value
-	if item.Resource != nil && item.Resource.Data != nil {
-		fields = item.GetResource().GetData().GetFields()
+	var pb map[string]any
+	if hasResourceData(item) {
+		pb = item.GetResource().GetData().AsMap()
 	}
 
-	switch t {
-	case inventory.AssetClassificationGcpInstance.Type:
-		if v, ok := fields["networkInterfaces"]; ok {
-			for _, networkInterface := range v.GetListValue().GetValues() {
-				networkInterfaceFields := networkInterface.GetStructValue().GetFields()
-				ids = appendIfExists(ids, networkInterfaceFields, "network")
-				ids = appendIfExists(ids, networkInterfaceFields, "subnetwork")
+	switch item.AssetType {
+	case gcpinventory.ComputeInstanceAssetType:
+		gcpComputeInstance := gcpComputeInstance{}
+		if err := mapstructure.Decode(pb, &gcpComputeInstance); err == nil {
+			for _, ni := range gcpComputeInstance.NetworkInterfaces {
+				ids = append(ids, ni.Network)
+				ids = append(ids, ni.Subnetwork)
 			}
-		}
-		if v, ok := fields["serviceAccounts"]; ok {
-			for _, serviceAccount := range v.GetListValue().GetValues() {
-				serviceAccountFields := serviceAccount.GetStructValue().GetFields()
-				ids = appendIfExists(ids, serviceAccountFields, "email")
+			for _, sa := range gcpComputeInstance.ServiceAccounts {
+				ids = append(ids, sa.Email)
 			}
-		}
-		if v, ok := fields["disks"]; ok {
-			for _, disk := range v.GetListValue().GetValues() {
-				diskFields := disk.GetStructValue().GetFields()
-				ids = appendIfExists(ids, diskFields, "source")
+			for _, disk := range gcpComputeInstance.Disks {
+				ids = append(ids, disk.Source)
 			}
+			ids = append(ids, gcpComputeInstance.MachineType)
+			ids = append(ids, gcpComputeInstance.Zone)
+
 		}
-		ids = appendIfExists(ids, fields, "machineType")
-		ids = appendIfExists(ids, fields, "zone")
-	case inventory.AssetClassificationGcpFirewall.Type, inventory.AssetClassificationGcpSubnet.Type:
-		ids = appendIfExists(ids, fields, "network")
-	case inventory.AssetClassificationGcpProject.Type, inventory.AssetClassificationGcpBucket.Type:
+	case gcpinventory.ComputeFirewallAssetType:
+		gcpFirewall := gcpFirewall{}
+		if err := mapstructure.Decode(pb, &gcpFirewall); err == nil {
+			ids = append(ids, gcpFirewall.Network)
+		}
+	case gcpinventory.ComputeSubnetworkAssetType:
+		gcpSubnetwork := gcpSubnetwork{}
+		if err := mapstructure.Decode(pb, &gcpSubnetwork); err == nil {
+			ids = append(ids, gcpSubnetwork.Network)
+		}
+
+	case gcpinventory.CrmProjectAssetType, gcpinventory.StorageBucketAssetType:
 		if item.IamPolicy == nil {
 			break
 		}
@@ -188,45 +187,25 @@ func findRelatedAssetIdsForType(t inventory.AssetType, item *gcpinventory.Extend
 	return ids
 }
 
-func appendIfExists(slice []string, fields map[string]*structpb.Value, key string) []string {
-	value, ok := fields[key]
-	if !ok {
-		return slice
-	}
-	return append(slice, value.GetStringValue())
-}
-
 func hasResourceData(item *gcpinventory.ExtendedGcpAsset) bool {
 	return item.Resource != nil && item.Resource.Data != nil
+}
+
+type gcpResource struct {
+	Tags struct {
+		Items []string `mapstructure:"items"`
+	}
 }
 
 func getAssetTags(item *gcpinventory.ExtendedGcpAsset) []string {
 	if !hasResourceData(item) {
 		return nil
 	}
-
-	tagsObj, ok := item.GetResource().GetData().GetFields()["tags"]
-	if !ok {
+	var resource gcpResource
+	if err := mapstructure.Decode(item.GetResource().GetData().AsMap(), &resource); err != nil {
 		return nil
 	}
-
-	structValue := tagsObj.GetStructValue()
-	if structValue == nil {
-		return nil
-	}
-
-	items, ok := structValue.GetFields()["items"]
-	if !ok {
-		return nil
-	}
-
-	tagValues := items.GetListValue().GetValues()
-	tags := make([]string, len(tagValues))
-	for i, tag := range tagValues {
-		tags[i] = tag.GetStringValue()
-	}
-
-	return tags
+	return resource.Tags.Items
 }
 
 func getAssetLabels(item *gcpinventory.ExtendedGcpAsset) map[string]string {
@@ -247,7 +226,7 @@ func getAssetLabels(item *gcpinventory.ExtendedGcpAsset) map[string]string {
 	return labelsMap
 }
 
-var assetEnrichers = map[string]func(item *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher{
+var assetEnrichers = map[string]func(log clog.Logger, item *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher{
 	gcpinventory.IamRoleAssetType:               noopEnricher,
 	gcpinventory.CrmFolderAssetType:             noopEnricher,
 	gcpinventory.CrmProjectAssetType:            noopEnricher,
@@ -265,112 +244,222 @@ var assetEnrichers = map[string]func(item *gcpinventory.ExtendedGcpAsset, fields
 	gcpinventory.ComputeNetworkAssetType:        enrichNetwork,
 }
 
-func enrichOrganization(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gcpOrganization struct {
+	Name string `mapstructure:"displayName"`
+}
+
+func enrichOrganization(log clog.Logger, _ *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gcpOrganization := gcpOrganization{}
+	if err := mapstructure.Decode(pb, &gcpOrganization); err != nil {
+		log.Errorf("Failed to decode GCP organization asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
+	}
 	return []inventory.AssetEnricher{
 		inventory.WithOrganization(inventory.Organization{
-			Name: getStringValue("displayName", fields),
+			Name: gcpOrganization.Name,
 		}),
 	}
 }
 
-func enrichComputeInstance(item *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gcpComputeInstance struct {
+	Name              string `mapstructure:"name"`
+	ID                string `mapstructure:"id"`
+	MachineType       string `mapstructure:"machineType"`
+	Zone              string `mapstructure:"zone"`
+	NetworkInterfaces []struct {
+		Network    string `mapstructure:"network"`
+		Subnetwork string `mapstructure:"subnetwork"`
+	} `mapstructure:"networkInterfaces"`
+	ServiceAccounts []struct {
+		Email string `mapstructure:"email"`
+	} `mapstructure:"serviceAccounts"`
+	Disks []struct {
+		Source string `mapstructure:"source"`
+	} `mapstructure:"disks"`
+}
+
+func enrichComputeInstance(log clog.Logger, item *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gcpComputeInstance := gcpComputeInstance{}
+	if err := mapstructure.Decode(pb, &gcpComputeInstance); err != nil {
+		log.Errorf("Failed to decode GCP compute instance asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
+	}
+
 	return []inventory.AssetEnricher{
 		inventory.WithCloud(inventory.Cloud{
-			// This will override the default Cloud fields, so we re-add the common ones
+			// This will override the default Cloud pb, so we re-add the common ones
 			Provider:         inventory.GcpCloudProvider,
 			AccountID:        item.CloudAccount.AccountId,
 			AccountName:      item.CloudAccount.AccountName,
 			ProjectID:        item.CloudAccount.OrganisationId,
 			ProjectName:      item.CloudAccount.OrganizationName,
 			ServiceName:      item.AssetType,
-			InstanceID:       getStringValue("id", fields),
-			InstanceName:     getStringValue("name", fields),
-			MachineType:      getStringValue("machineType", fields),
-			AvailabilityZone: getStringValue("zone", fields),
+			InstanceID:       gcpComputeInstance.ID,
+			InstanceName:     gcpComputeInstance.Name,
+			MachineType:      gcpComputeInstance.MachineType,
+			AvailabilityZone: gcpComputeInstance.Zone,
 		}),
 		inventory.WithHost(inventory.Host{
-			ID: getStringValue("id", fields),
+			ID: gcpComputeInstance.ID,
 		}),
 	}
 }
 
-func enrichFirewall(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gcpFirewall struct {
+	Name      string `mapstructure:"name"`
+	Direction string `mapstructure:"direction"`
+	Network   string `mapstructure:"network"`
+}
+
+func enrichFirewall(log clog.Logger, _ *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gcpFirewall := gcpFirewall{}
+	if err := mapstructure.Decode(pb, &gcpFirewall); err != nil {
+		log.Errorf("Failed to decode GCP firewall asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
+	}
+
 	return []inventory.AssetEnricher{
 		inventory.WithNetwork(inventory.Network{
-			Name:      getStringValue("name", fields),
-			Direction: getStringValue("direction", fields),
+			Name:      gcpFirewall.Name,
+			Direction: gcpFirewall.Direction,
 		}),
 	}
 }
 
-func enrichSubnetwork(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gcpSubnetwork struct {
+	Name      string `mapstructure:"name"`
+	StackType string `mapstructure:"stackType"`
+	Network   string `mapstructure:"network"`
+}
+
+func enrichSubnetwork(log clog.Logger, _ *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gcpSubnetwork := gcpSubnetwork{}
+	if err := mapstructure.Decode(pb, &gcpSubnetwork); err != nil {
+		log.Errorf("Failed to decode GCP subnetwork asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
+	}
+
 	return []inventory.AssetEnricher{
 		inventory.WithNetwork(inventory.Network{
-			Name: getStringValue("name", fields),
-			Type: strings.ToLower(getStringValue("stackType", fields)),
+			Name: gcpSubnetwork.Name,
+			Type: strings.ToLower(gcpSubnetwork.StackType),
 		}),
 	}
 }
 
-func enrichServiceAccount(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gcpServiceAccount struct {
+	Email       string `mapstructure:"email"`
+	DisplayName string `mapstructure:"displayName"`
+}
+
+func enrichServiceAccount(log clog.Logger, _ *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gcpServiceAccount := gcpServiceAccount{}
+	if err := mapstructure.Decode(pb, &gcpServiceAccount); err != nil {
+		log.Errorf("Failed to decode GCP service account asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
+	}
+
 	return []inventory.AssetEnricher{
 		inventory.WithUser(inventory.User{
-			Email: getStringValue("email", fields),
-			Name:  getStringValue("displayName", fields),
+			Email: gcpServiceAccount.Email,
+			Name:  gcpServiceAccount.DisplayName,
 		}),
 	}
 }
 
-func enrichGkeCluster(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gkeCluster struct {
+	Name string `mapstructure:"name"`
+	ID   string `mapstructure:"id"`
+}
+
+func enrichGkeCluster(log clog.Logger, _ *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gkeCluster := gkeCluster{}
+	if err := mapstructure.Decode(pb, &gkeCluster); err != nil {
+		log.Errorf("Failed to decode GKE cluster asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
+	}
 	return []inventory.AssetEnricher{
 		inventory.WithOrchestrator(inventory.Orchestrator{
 			Type:        "kubernetes",
-			ClusterName: getStringValue("name", fields),
-			ClusterID:   getStringValue("id", fields),
+			ClusterName: gkeCluster.Name,
+			ClusterID:   gkeCluster.ID,
 		}),
 	}
 }
 
-func enrichForwardingRule(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gcpForwardingRule struct {
+	Region string `mapstructure:"region"`
+}
+
+func enrichForwardingRule(log clog.Logger, item *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	cloud := inventory.Cloud{
+		Provider:    inventory.GcpCloudProvider,
+		AccountID:   item.CloudAccount.AccountId,
+		AccountName: item.CloudAccount.AccountName,
+		ProjectID:   item.CloudAccount.OrganisationId,
+		ProjectName: item.CloudAccount.OrganizationName,
+		ServiceName: item.AssetType,
+	}
+
+	gcpForwardingRule := gcpForwardingRule{}
+	if err := mapstructure.Decode(pb, &gcpForwardingRule); err != nil {
+		log.Errorf("Failed to decode GCP forwarding rule asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{
+			inventory.WithCloud(cloud),
+		}
+	}
+	cloud.Region = gcpForwardingRule.Region
 	return []inventory.AssetEnricher{
-		inventory.WithCloud(inventory.Cloud{
-			Region: getStringValue("region", fields),
-		}),
+		inventory.WithCloud(cloud),
 	}
 }
 
-func enrichCloudFunction(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
-	var revision string
-	if serviceConfig, ok := fields["serviceConfig"]; ok {
-		serviceConfigFields := serviceConfig.GetStructValue().GetFields()
-		revision = getStringValue("revision", serviceConfigFields)
+type gcpCloudFunction struct {
+	Name          string `mapstructure:"name"`
+	URL           string `mapstructure:"url"`
+	ServiceConfig struct {
+		Revision string `mapstructure:"revision"`
+	} `mapstructure:"serviceConfig"`
+}
+
+func enrichCloudFunction(log clog.Logger, _ *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gcpCloudFunction := gcpCloudFunction{}
+	if err := mapstructure.Decode(pb, &gcpCloudFunction); err != nil {
+		log.Errorf("Failed to decode GCP cloud function asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
 	}
 	return []inventory.AssetEnricher{
 		inventory.WithURL(inventory.URL{
-			Full: getStringValue("url", fields),
+			Full: gcpCloudFunction.URL,
 		}),
 		inventory.WithFass(inventory.Fass{
-			Name:    getStringValue("name", fields),
-			Version: revision,
+			Name:    gcpCloudFunction.Name,
+			Version: gcpCloudFunction.ServiceConfig.Revision,
 		}),
 	}
 }
 
-func enrichNetwork(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+type gcpNetwork struct {
+	Name string `mapstructure:"name"`
+}
+
+func enrichNetwork(log clog.Logger, _ *gcpinventory.ExtendedGcpAsset, pb map[string]any) []inventory.AssetEnricher {
+	gcpNetwork := gcpNetwork{}
+	if err := mapstructure.Decode(pb, &gcpNetwork); err != nil {
+		log.Errorf("Failed to decode GCP network asset: %+v, err: %v", pb, err)
+		return []inventory.AssetEnricher{}
+	}
+	if gcpNetwork.Name == "" {
+		return []inventory.AssetEnricher{}
+	}
+
 	return []inventory.AssetEnricher{
 		inventory.WithNetwork(inventory.Network{
-			Name: getStringValue("name", fields),
+			Name: gcpNetwork.Name,
 		}),
 	}
 }
 
-func noopEnricher(_ *gcpinventory.ExtendedGcpAsset, _ map[string]*structpb.Value) []inventory.AssetEnricher {
+func noopEnricher(_ clog.Logger, _ *gcpinventory.ExtendedGcpAsset, _ map[string]any) []inventory.AssetEnricher {
 	return []inventory.AssetEnricher{}
-}
-
-func getStringValue(key string, f map[string]*structpb.Value) string {
-	if value, ok := f[key]; ok {
-		return value.GetStringValue()
-	}
-	return ""
 }

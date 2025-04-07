@@ -124,10 +124,9 @@ func (a *AssetInventory) runAllFetchersOnce(ctx context.Context) {
 
 func (a *AssetInventory) publish(assets []AssetEvent) {
 	events := lo.Map(assets, func(e AssetEvent, _ int) beat.Event {
-		var relatedEntity []string
-		relatedEntity = append(relatedEntity, e.Entity.Id)
-		if len(e.Entity.relatedEntityId) > 0 {
-			relatedEntity = append(relatedEntity, e.Entity.relatedEntityId...)
+		relatedEntity := []string{e.Entity.Id}
+		if e.Related != nil {
+			relatedEntity = append(relatedEntity, e.Related.Entity...)
 		}
 		return beat.Event{
 			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Entity)},
@@ -146,7 +145,6 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 				"fass":           e.Fass,
 				"url":            e.URL,
 				"orchestrator":   e.Orchestrator,
-				"container":      e.Container,
 				"related.entity": relatedEntity,
 			},
 		}

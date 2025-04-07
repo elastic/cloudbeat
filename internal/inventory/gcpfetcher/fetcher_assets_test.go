@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -78,45 +79,103 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 }
 
 func TestAccountFetcher_EnrichAsset(t *testing.T) {
+	logger := clog.NewLogger("gcpfetcher_test")
+	defaultCloud := &inventory.Cloud{
+		Provider:    inventory.GcpCloudProvider,
+		AccountID:   "<project UUID>",
+		AccountName: "<project name>",
+		ProjectID:   "<org UUID>",
+		ProjectName: "<org name>",
+	}
+
 	var data = map[string]struct {
-		resource    *assetpb.Resource    // input of GCP asset resource data
-		enrichments inventory.AssetEvent // output of inventory asset ECS fields
+		resource  *assetpb.Resource    // input of GCP asset resource data
+		iamPolicy *iampb.Policy        // input of GCP asset iam policy data
+		event     inventory.AssetEvent // output of inventory asset ECS fields
 	}{
-		gcpinventory.IamRoleAssetType:   {},
-		gcpinventory.CrmFolderAssetType: {},
 		gcpinventory.ComputeNetworkAssetType: {
 			resource: &assetpb.Resource{
 				Data: NewStructMap(map[string]any{
 					"name": "network1",
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 				Network: &inventory.Network{
 					Name: "network1",
 				},
+			},
+		},
+		gcpinventory.IamRoleAssetType: {
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
+			},
+		},
+		gcpinventory.CrmFolderAssetType: {
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 			},
 		},
 		gcpinventory.CrmProjectAssetType: {
 			resource: &assetpb.Resource{
 				Data: NewStructMap(map[string]any{
 					"labels": map[string]any{"org": "security"},
+					"tags":   map[string]any{"items": []any{"tag1", "tag2"}},
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			iamPolicy: &iampb.Policy{
+				Bindings: []*iampb.Binding{
+					{
+						Role:    "roles/owner",
+						Members: []string{"user:a", "user:b"},
+					},
+				},
+			},
+			event: inventory.AssetEvent{
+				Cloud:  defaultCloud,
 				Labels: map[string]string{"org": "security"},
+				Tags:   []string{"tag1", "tag2"},
+				Related: &inventory.Related{
+					Entity: []string{"roles/owner", "user:a", "user:b"},
+				},
 			},
 		},
-		gcpinventory.StorageBucketAssetType:        {},
-		gcpinventory.IamServiceAccountKeyAssetType: {},
+		gcpinventory.StorageBucketAssetType: {
+			iamPolicy: &iampb.Policy{
+				Bindings: []*iampb.Binding{
+					{
+						Role:    "roles/owner",
+						Members: []string{"user:a", "user:b"},
+					},
+				},
+			},
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
+				Related: &inventory.Related{
+					Entity: []string{"roles/owner", "user:a", "user:b"},
+				},
+			},
+		},
+		gcpinventory.IamServiceAccountKeyAssetType: {
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
+			},
+		},
 		gcpinventory.CrmOrgAssetType: {
 			resource: &assetpb.Resource{
+				Parent: "organizations/<org UUID>",
 				Data: NewStructMap(map[string]any{
 					"displayName": "org",
+					"tags":        map[string]any{"items": []any{}},
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 				Organization: &inventory.Organization{
 					Name: "org",
+				},
+				Related: &inventory.Related{
+					Entity: []string{"organizations/<org UUID>"},
 				},
 			},
 		},
@@ -128,10 +187,27 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 					"machineType": "machineType",
 					"zone":        "zone",
 					"labels":      map[string]any{"key": "value"},
+					"networkInterfaces": []any{
+						map[string]any{"name": "nic0", "network": "n1", "subnetwork": "s1"},
+						map[string]any{"name": "nic1", "network": "n2", "subnetwork": "s2"},
+					},
+					"serviceAccounts": []any{
+						map[string]any{"email": "sa1@<project UUID>.iam.gserviceaccount.com"},
+						map[string]any{"email": "sa2@<project UUID>.iam.gserviceaccount.com"},
+					},
+					"disks": []any{
+						map[string]any{"source": "disk1"},
+						map[string]any{"source": "disk2"},
+					},
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
 				Cloud: &inventory.Cloud{
+					Provider:         defaultCloud.Provider,
+					AccountID:        defaultCloud.AccountID,
+					AccountName:      defaultCloud.AccountName,
+					ProjectID:        defaultCloud.ProjectID,
+					ProjectName:      defaultCloud.ProjectName,
 					InstanceID:       "id",
 					InstanceName:     "name",
 					MachineType:      "machineType",
@@ -141,6 +217,9 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 					ID: "id",
 				},
 				Labels: map[string]string{"key": "value"},
+				Related: &inventory.Related{
+					Entity: []string{"n1", "s1", "n2", "s2", "sa1@<project UUID>.iam.gserviceaccount.com", "sa2@<project UUID>.iam.gserviceaccount.com", "disk1", "disk2", "machineType", "zone"},
+				},
 			},
 		},
 		gcpinventory.ComputeFirewallAssetType: {
@@ -148,12 +227,17 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 				Data: NewStructMap(map[string]any{
 					"direction": "INGRESS",
 					"name":      "default-allow-ssh",
+					"network":   "default",
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 				Network: &inventory.Network{
 					Direction: "INGRESS",
 					Name:      "default-allow-ssh",
+				},
+				Related: &inventory.Related{
+					Entity: []string{"default"},
 				},
 			},
 		},
@@ -162,12 +246,17 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 				Data: NewStructMap(map[string]any{
 					"name":      "subnetwork",
 					"stackType": "IPV4_ONLY",
+					"network":   "network",
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 				Network: &inventory.Network{
 					Name: "subnetwork",
 					Type: "ipv4_only",
+				},
+				Related: &inventory.Related{
+					Entity: []string{"network"},
 				},
 			},
 		},
@@ -178,7 +267,8 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 					"email":       "service-account@<project UUID>.iam.gserviceaccount.com",
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 				User: &inventory.User{
 					Name:  "service-account",
 					Email: "service-account@<project UUID>.iam.gserviceaccount.com",
@@ -192,7 +282,8 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 					"id":   "cluster-id",
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 				Orchestrator: &inventory.Orchestrator{
 					Type:        "kubernetes",
 					ClusterName: "cluster",
@@ -206,9 +297,14 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 					"region": "region1",
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
 				Cloud: &inventory.Cloud{
-					Region: "region1",
+					Provider:    defaultCloud.Provider,
+					AccountID:   defaultCloud.AccountID,
+					AccountName: defaultCloud.AccountName,
+					ProjectID:   defaultCloud.ProjectID,
+					ProjectName: defaultCloud.ProjectName,
+					Region:      "region1",
 				},
 			},
 		},
@@ -222,7 +318,8 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 					},
 				}),
 			},
-			enrichments: inventory.AssetEvent{
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
 				Fass: &inventory.Fass{
 					Name:    "cloud-function",
 					Version: "1",
@@ -232,7 +329,14 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 				},
 			},
 		},
-		gcpinventory.CloudRunService: {},
+		gcpinventory.CloudRunService: {
+			resource: &assetpb.Resource{
+				Data: NewStructMap(map[string]any{}),
+			},
+			event: inventory.AssetEvent{
+				Cloud: defaultCloud,
+			},
+		},
 	}
 
 	for _, r := range ResourcesToFetch {
@@ -246,44 +350,37 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 				Name:      "/projects/<project UUID>/some_resource",
 				AssetType: r.assetType,
 				Resource:  item.resource,
+				IamPolicy: item.iamPolicy,
 			},
 			CloudAccount: &fetching.CloudAccountMetadata{
-				AccountId:        "<project UUID>",
-				AccountName:      "<project name>",
-				OrganisationId:   "<org UUID>",
-				OrganizationName: "<org name>",
+				AccountId:        defaultCloud.AccountID,
+				AccountName:      defaultCloud.AccountName,
+				OrganisationId:   defaultCloud.ProjectID,
+				OrganizationName: defaultCloud.ProjectName,
 			},
 		}
-		actual := getAssetEvent(r.classification, gcpAsset)
-		expected := item.enrichments
+		actual := getAssetEvent(*logger, r.classification, gcpAsset)
+		expected := item.event
+		expected.Cloud.ServiceName = r.assetType
+		inventory.WithRawAsset(gcpAsset)(&expected)
 
-		// Set the common fields that are not set in the enrichments
-		expected.Event = actual.Event
-		expected.Entity = actual.Entity
-		expected.RawAttributes = actual.RawAttributes
-
-		// Cloud is the only field where we have both common and enriched fields
-		if expected.Cloud == nil {
-			// Use the actual cloud fields when there are no cloud enrichments
-			expected.Cloud = actual.Cloud
-		} else {
-			// Use common cloud fields when there are cloud enrichments
-			expected.Cloud.Provider = actual.Cloud.Provider
-			expected.Cloud.AccountID = actual.Cloud.AccountID
-			expected.Cloud.AccountName = actual.Cloud.AccountName
-			expected.Cloud.ProjectID = actual.Cloud.ProjectID
-			expected.Cloud.ProjectName = actual.Cloud.ProjectName
-			expected.Cloud.ServiceName = actual.Cloud.ServiceName
-		}
-
-		assert.Equalf(t, expected, actual, "%v failed", "EnrichAsset")
+		assert.Equalf(t, expected.RawAttributes, actual.RawAttributes, "Asset %v failed %v fields", r.assetType, "RawAttributes")
+		assert.Equalf(t, expected.Related, actual.Related, "Asset %v failed %v fields", r.assetType, "Related")
+		assert.Equalf(t, expected.Cloud, actual.Cloud, "Asset %v failed %v fields", r.assetType, "Cloud")
+		assert.Equalf(t, expected.Network, actual.Network, "Asset %v failed %v fields", r.assetType, "Network")
+		assert.Equalf(t, expected.URL, actual.URL, "Asset %v failed %v fields", r.assetType, "URL")
+		assert.Equalf(t, expected.Host, actual.Host, "Asset %v failed %v fields", r.assetType, "Host")
+		assert.Equalf(t, expected.User, actual.User, "Asset %v failed %v fields", r.assetType, "User")
+		assert.Equalf(t, expected.Organization, actual.Organization, "Asset %v failed %v fields", r.assetType, "Organization")
+		assert.Equalf(t, expected.Labels, actual.Labels, "Asset %v failed %v fields", r.assetType, "Labels")
+		assert.ElementsMatch(t, expected.Tags, actual.Tags)
 	}
 }
 
 func NewStructMap(data map[string]any) *structpb.Struct {
-	dataStruct, err := structpb.NewStruct(data)
+	dataStruct, err := structpb.NewValue(data)
 	if err != nil {
 		panic(err)
 	}
-	return dataStruct
+	return dataStruct.GetStructValue()
 }
