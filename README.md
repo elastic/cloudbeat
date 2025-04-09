@@ -10,17 +10,17 @@ It is designed to be used as part of the [Cloud Security](https://www.elastic.co
 
 ### CSP Security Policies
 
-Cloudbeat uses security policies from the [Security Policies](./security-policies) directory to evaluate cloud resources.
+Cloudbeat uses [security policies](./security-policies) to evaluate cloud resources.
 
 ## Getting Started
 
 To get started with Cloud Security on your cluster, please refer to our documentation:
 
-- [Get started with Kubernetes Security Posture Management (KSPM)](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#get-started-with-kspm)
+- [Get started with Kubernetes Security Posture Management (KSPM)](https://www.elastic.co/guide/en/security/current/get-started-with-kspm.html)
 
-- [Get started with Cloud Security Posture Management (CSPM)](https://www.elastic.co/guide/en/security/master/cspm-get-started.html#cspm-get-started)
+- [Get started with Cloud Security Posture Management (CSPM)](https://www.elastic.co/guide/en/security/current/cspm.html)
 
-- [Get started with Cloud Native Vulnerability Management (CNVM)](https://www.elastic.co/guide/en/security/master/vuln-management-overview.html)
+- [Get started with Cloud Native Vulnerability Management (CNVM)](https://www.elastic.co/guide/en/security/current/vuln-management-get-started.html)
 
 ---
 
