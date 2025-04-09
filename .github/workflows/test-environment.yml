@@ -294,7 +294,7 @@ jobs:
           echo "AGENTLESS=$agentless_flag" >> $GITHUB_ENV
 
       - name: Set up Python
-        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5
         with:
           python-version: "3.9"
 
@@ -324,7 +324,7 @@ jobs:
 
       - id: google-auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
+        uses: google-github-actions/auth@71f986410dfbc7added4569d411d040a91dc6935 # v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
