@@ -1,0 +1,48 @@
+name: Test Runner
+run-name: Test E2E Flow by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *' # every day at 02:00
+
+jobs:
+  run-ech-main:
+    name: Run ECH on main
+    uses: ./.github/workflows/test-e2e-flow.yml
+    with:
+      branch: main
+      region: gcp-us-west2
+      serverless: false
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+  run-ech-8x:
+    name: Run ECH on 8.x
+    needs: run-ech-main
+    uses: ./.github/workflows/test-e2e-flow.yml
+    if: always()
+    with:
+      branch: 8.x
+      region: gcp-us-west2
+      serverless: false
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+  run-serverless-main:
+    name: Run Serverless on main
+    needs: run-ech-8x
+    uses: ./.github/workflows/test-e2e-flow.yml
+    if: always()
+    with:
+      branch: main
+      region: aws-us-east-1
+      serverless: true
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
