@@ -17,7 +17,7 @@ queue_rules:
 defaults:
   actions:
     backport:
-      title: "[{{ destination_branch }}] (backport #{{ number }}) {{ title }}"
+      title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
       assignees:
         - "{{ author }}"
       labels:
