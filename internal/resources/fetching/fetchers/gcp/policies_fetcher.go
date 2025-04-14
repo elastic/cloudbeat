@@ -60,7 +60,7 @@ func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	for {
 		select {
 		case <-ctx.Done():
-			return nil
+			return ctx.Err()
 		case asset, ok := <-resultsCh:
 			if !ok {
 				return nil
