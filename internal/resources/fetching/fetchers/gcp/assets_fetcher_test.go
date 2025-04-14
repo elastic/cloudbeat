@@ -84,7 +84,7 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Equal(len(GcpAssetTypes), len(results))
+	s.Len(results, len(GcpAssetTypes))
 
 	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
 		metadata, err := r.Resource.GetMetadata()

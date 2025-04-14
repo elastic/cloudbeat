@@ -146,6 +146,21 @@ The [`Create Environment with Cloud Logs`](https://github.com/elastic/cloudbeat/
 
 The workflow requires a subset of input parameters. All required inputs are described [here](#how-to-run-the-workflow).
 
+## Install Integrations Worfklow
+
+The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workflows/install-integrations.yml) GitHub workflow is used when the Elastic Stack is already installed, and the user wants to add `CIS` and/or `CDR` integrations.
+
+### Workflow Inputs
+
+- **`stack-version`** - The version of the stack to deploy.
+- **`kibana-url`** - The Kibana URL where the integrations will be installed.
+- **`kibana-username`** - The username for Kibana login.
+- **`kibana-password`** - The password for Kibana login.
+- **`infra-type`** - The type of integrations to install, with three allow options:
+  - **`all`** - Installs both `CIS` and `CDR` integrations.
+  - **`cis`** - Installs `CSPM`, `KSPM`, and `CNVM` integrations.
+  - **`cdr`** - Installs `Audit Logs`, `Asset Inventory`, and `Wiz` integrations.
+- **`docker-image-override`** - For build candidate versions, specifies a custom Docker image path for agent installations.
 
 ## Cleanup Procedure
 
@@ -204,6 +219,13 @@ Before running the script, ensure that:
 **Note**: The script will ask for confirmation before deleting each environment, unless you set the `interactive` flag
 to `false`.
 
-### Scheduled Environment Deletion
+### Scheduled Workflow Runs
+
+#### Nightly Deployment and Testing
+
+A scheduled `test-runner` workflow is triggered daily at 02:00. This workflow executes `test-e2e-flow`, which includes setup, deployment (along with integration test execution), and environment teardown for the main and 8.x versions (currently in development).
+This workflow can also be triggered manually.
+
+#### Environment Deletion
 
 A scheduled workflow runs daily at midnight to clean up expired environments. This workflow examines all deployed environments for their expiration dates, and if the expiration date is reached, the `Destroy Environment` workflow is executed. The expiration date is set when creating a new environment, with the default being 14 days. Note that there is no specific notification to the user before the environment is deleted. The expiration date is saved in the `env_config.json` file, which is stored in the S3 state bucket. To extend the expiration date, the user should download the `env_config.json` file from the S3 bucket, update the expiration field to the desired date, and then upload the file back to the S3 bucket.

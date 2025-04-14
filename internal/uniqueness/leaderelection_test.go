@@ -193,7 +193,7 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 
 		got, err := s.manager.buildConfig(context.TODO())
 		if (err != nil) != tt.wantErr {
-			s.FailNow("unexpected error: %v", err)
+			s.FailNow("unexpected error", "error: %v", err)
 		}
 
 		if !tt.shouldSetEnvar {
