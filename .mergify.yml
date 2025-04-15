@@ -1,3 +1,9 @@
+commands_restrictions:
+  backport:
+    conditions:
+      - or:
+        - sender-permission>=write
+        - sender=github-actions[bot]
 queue_rules:
   - name: default
     conditions:
@@ -7,6 +13,14 @@ queue_rules:
       - check-success=Test Rego Policies (pull_request)
       - check-success=Update rules status (pull_request)
       - check-success=Update rules metadata (pull_request)
+defaults:
+  actions:
+    backport:
+      title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+      assignees:
+        - "{{ author }}"
+      labels:
+        - "backport"
 pull_request_rules:
   - name: self-assign PRs
     conditions:
@@ -362,6 +376,19 @@ pull_request_rules:
           - "{{ author }}"
         branches:
           - "8.18"
+        labels:
+          - "backport"
+        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+  - name: backport patches to 9.0 branch
+    conditions:
+      - merged
+      - label=backport-v9.0.0
+    actions:
+      backport:
+        assignees:
+          - "{{ author }}"
+        branches:
+          - "9.0"
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
