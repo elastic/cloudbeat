@@ -379,8 +379,6 @@ pull_request_rules:
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
-<<<<<<< HEAD
-=======
   - name: backport patches to 9.0 branch
     conditions:
       - merged
@@ -394,4 +392,3 @@ pull_request_rules:
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
->>>>>>> 12841355 (New way of backporting active branches (#3183))
