@@ -20,8 +20,12 @@ package ec2
 import (
 	"context"
 	"fmt"
+	"iter"
+	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/samber/lo"
@@ -36,10 +40,22 @@ var (
 	subnetMainAssociationFilterName = "association.main"
 )
 
+const (
+	snapshotPrefix = "elastic-vulnerability"
+)
+
 type Provider struct {
 	log          *clog.Logger
 	clients      map[string]Client
 	awsAccountID string
+}
+
+func NewProviderFromClients(log *clog.Logger, awsAccountID string, clients map[string]Client) *Provider {
+	return &Provider{
+		log:          log,
+		clients:      clients,
+		awsAccountID: awsAccountID,
+	}
 }
 
 type Client interface {
@@ -77,7 +93,7 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins *Ec2Instance) ([]EBS
 			{
 				ResourceType: "snapshot",
 				Tags: []types.Tag{
-					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("elastic-vulnerability-%s", *ins.InstanceId))},
+					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("%s-%s", snapshotPrefix, *ins.InstanceId))},
 					{Key: aws.String("Workload"), Value: aws.String("Cloudbeat Vulnerability Snapshot")},
 				},
 			},
@@ -100,7 +116,17 @@ func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) err
 	if err != nil {
 		return err
 	}
-	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
+	_, err = client.DeleteSnapshot(ctx,
+		&ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)},
+		func(ec2Options *ec2.Options) {
+			ec2Options.Retryer = retry.NewStandard(
+				awslib.RetryableCodesOption,
+				func(retryOptions *retry.StandardOptions) {
+					retryOptions.MaxAttempts = 10
+				},
+			)
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("error deleting snapshot %s: %w", snapshot.SnapshotId, err)
 	}
@@ -298,6 +324,60 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID, snapshot.Instance))
 	}
 	return result, nil
+}
+
+// IterOwnedSnapshots will iterate over the snapshots owned by cloudbeat (snapshotPrefix) that are older than the
+// specified before time. A snapshot will be yielded if:
+// - It has a tag with key "Name" and value starting with snapshotPrefix
+// - It is older than the specified before time
+// - It is "owned" by the current account (owner ID is "self")
+func (p *Provider) IterOwnedSnapshots(ctx context.Context, before time.Time) iter.Seq[EBSSnapshot] {
+	return func(yield func(EBSSnapshot) bool) {
+		_, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+			input := &ec2.DescribeSnapshotsInput{
+				Filters: []types.Filter{
+					{
+						Name:   aws.String("tag:Name"),
+						Values: []string{fmt.Sprintf("%s-*", snapshotPrefix)},
+					},
+				},
+				OwnerIds: []string{"self"},
+			}
+			paginator := ec2.NewDescribeSnapshotsPaginator(c, input)
+			for paginator.HasMorePages() {
+				output, err := paginator.NextPage(ctx)
+				if err != nil {
+					return nil, err
+				}
+				for _, snap := range output.Snapshots {
+					if filterSnap(snap, before) {
+						p.log.Infof("Found old snapshot %s", *snap.SnapshotId)
+						ebsSnap := FromSnapshot(snap, region, p.awsAccountID, Ec2Instance{})
+						if !yield(ebsSnap) {
+							return nil, nil
+						}
+					}
+				}
+			}
+			return nil, nil
+		})
+		if err != nil {
+			p.log.Errorf("Error listing owned snapshots: %v", err)
+		}
+	}
+}
+
+func filterSnap(snap types.Snapshot, before time.Time) bool {
+	if aws.ToTime(snap.StartTime).After(before) {
+		return false
+	}
+
+	for _, tag := range snap.Tags {
+		if aws.ToString(tag.Key) == "Name" {
+			return strings.HasPrefix(aws.ToString(tag.Value), snapshotPrefix)
+		}
+	}
+	return false
 }
 
 func (p *Provider) DescribeSubnets(ctx context.Context) ([]awslib.AwsResource, error) {

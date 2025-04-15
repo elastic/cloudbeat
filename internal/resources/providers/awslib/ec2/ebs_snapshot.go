@@ -20,6 +20,7 @@ package ec2
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -56,8 +57,8 @@ func FromSnapshotInfo(snapshot types.SnapshotInfo, region string, awsAccount str
 		State:       snapshot.State,
 		Region:      region,
 		awsAccount:  awsAccount,
-		VolumeSize:  int(*snapshot.VolumeSize),
-		IsEncrypted: *snapshot.Encrypted,
+		VolumeSize:  int(aws.ToInt32(snapshot.VolumeSize)),
+		IsEncrypted: aws.ToBool(snapshot.Encrypted),
 	}
 }
 
@@ -67,8 +68,8 @@ func FromSnapshot(snapshot types.Snapshot, region string, awsAccount string, ins
 		State:       snapshot.State,
 		Region:      region,
 		awsAccount:  awsAccount,
-		VolumeSize:  int(*snapshot.VolumeSize),
+		VolumeSize:  int(aws.ToInt32(snapshot.VolumeSize)),
 		Instance:    ins,
-		IsEncrypted: *snapshot.Encrypted,
+		IsEncrypted: aws.ToBool(snapshot.Encrypted),
 	}
 }
