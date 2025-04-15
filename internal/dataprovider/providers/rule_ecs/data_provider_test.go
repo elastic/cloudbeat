@@ -34,7 +34,7 @@ func Test_DataProvider_EmptyRuleField(t *testing.T) {
 	event := &beat.Event{Fields: map[string]any{}} // DOES NOT have 'rule' key
 
 	err := provider.EnrichEvent(event, fetching.ResourceMetadata{})
-	assert.NoError(t, err, "should NOT fail when there is no 'rule' key")
+	require.NoError(t, err, "should NOT fail when there is no 'rule' key")
 
 	_, ok := event.Fields["rule"]
 	require.False(t, ok, "event should NOT have 'rule' key")
