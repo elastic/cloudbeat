@@ -62,25 +62,22 @@ func (f *GcpLogSinkFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metad
 	resultsCh := make(chan *inventory.ProjectAssets)
 	go f.provider.ListProjectAssets(ctx, []string{inventory.LogSinkAssetType}, resultsCh)
 
-	for {
+	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case asset, ok := <-resultsCh:
-			if !ok {
-				return nil
-			}
 
-			f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cycleMetadata,
-				Resource: &GcpLoggingAsset{
-					Type:    fetching.LoggingIdentity,
-					subType: fetching.GcpLoggingType,
-					Asset:   &LoggingAsset{asset.CloudAccount, asset.Assets},
-				},
-			}
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cycleMetadata,
+			Resource: &GcpLoggingAsset{
+				Type:    fetching.LoggingIdentity,
+				subType: fetching.GcpLoggingType,
+				Asset:   &LoggingAsset{asset.CloudAccount, asset.Assets},
+			},
+		}:
 		}
 	}
+	return nil
 }
 
 func (f *GcpLogSinkFetcher) Stop() {

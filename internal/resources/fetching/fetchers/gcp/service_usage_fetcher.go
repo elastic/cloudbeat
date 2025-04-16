@@ -62,25 +62,22 @@ func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cycleMetadata cycle.
 	resultsCh := make(chan *inventory.ProjectAssets)
 	go f.provider.ListProjectAssets(ctx, []string{inventory.ServiceUsageAssetType}, resultsCh)
 
-	for {
+	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case asset, ok := <-resultsCh:
-			if !ok {
-				return nil
-			}
 
-			f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cycleMetadata,
-				Resource: &GcpServiceUsageAsset{
-					Type:    fetching.MonitoringIdentity,
-					subType: fetching.GcpServiceUsage,
-					Asset:   &ServiceUsageAsset{asset.CloudAccount, asset.Assets},
-				},
-			}
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cycleMetadata,
+			Resource: &GcpServiceUsageAsset{
+				Type:    fetching.MonitoringIdentity,
+				subType: fetching.GcpServiceUsage,
+				Asset:   &ServiceUsageAsset{asset.CloudAccount, asset.Assets},
+			},
+		}:
 		}
 	}
+	return nil
 }
 
 func (f *GcpServiceUsageFetcher) Stop() {

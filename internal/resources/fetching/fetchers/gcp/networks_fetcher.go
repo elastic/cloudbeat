@@ -56,24 +56,22 @@ func (f *GcpNetworksFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	resultsCh := make(chan *inventory.ExtendedGcpAsset)
 	go f.provider.ListNetworkAssets(ctx, resultsCh)
 
-	for {
+	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case asset, ok := <-resultsCh:
-			if !ok {
-				return nil
-			}
-			f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cycleMetadata,
-				Resource: &GcpNetworksAsset{
-					Type:         fetching.CloudCompute,
-					subType:      "gcp-compute-network",
-					NetworkAsset: asset,
-				},
-			}
+
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cycleMetadata,
+			Resource: &GcpNetworksAsset{
+				Type:         fetching.CloudCompute,
+				subType:      "gcp-compute-network",
+				NetworkAsset: asset,
+			},
+		}:
 		}
 	}
+	return nil
 }
 
 func (f *GcpNetworksFetcher) Stop() {
