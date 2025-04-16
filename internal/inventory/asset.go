@@ -126,6 +126,7 @@ var (
 	AssetClassificationGcpIamRole           = AssetClassification{CategoryServiceUsageTechnology, "GCP IAM Role"}
 	AssetClassificationGcpCloudFunction     = AssetClassification{CategoryFaaS, "GCP Cloud Function"}
 	AssetClassificationGcpCloudRunService   = AssetClassification{CategoryContainerService, "GCP Cloud Run Service"}
+	AssetClassificationGcpNetwork           = AssetClassification{CategoryNetworking, "GCP VPC Network"}
 )
 
 // AssetEvent holds the whole asset
@@ -133,11 +134,31 @@ type AssetEvent struct {
 	Entity        Entity
 	Event         Event
 	Network       *Network
+	URL           *URL
+	Organization  *Organization
 	Cloud         *Cloud
+	Fass          *Fass
+	Orchestrator  *Orchestrator
+	Container     *Container
 	Host          *Host
 	User          *User
 	Labels        map[string]string
+	Tags          []string
 	RawAttributes *any
+}
+
+type Organization struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type Fass struct {
+	Name    string `json:"name,omitempty"`
+	Version string `json:"version,omitempty"`
+}
+
+type URL struct {
+	Full string `json:"full"`
 }
 
 // Entity contains the identifiers of the asset
@@ -155,7 +176,9 @@ type Event struct {
 }
 
 type Network struct {
-	Name string `json:"name,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Direction string `json:"direction,omitempty"`
+	Type      string `json:"type,omitempty"`
 }
 
 type Cloud struct {
@@ -182,8 +205,22 @@ type Host struct {
 }
 
 type User struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID    string   `json:"id,omitempty"`
+	Name  string   `json:"name,omitempty"`
+	Email string   `json:"email,omitempty"`
+	Roles []string `json:"roles,omitempty"`
+}
+
+type Orchestrator struct {
+	ClusterID   string `json:"cluster.id,omitempty"`
+	ClusterName string `json:"cluster.name,omitempty"`
+	Type        string `json:"type,omitempty"`
+}
+
+type Container struct {
+	ID        string `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	ImageName string `json:"image.name,omitempty"`
 }
 
 // AssetEnricher functional builder function
@@ -239,6 +276,16 @@ func WithLabels(labels map[string]string) AssetEnricher {
 	}
 }
 
+func WithTags(tags []string) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(tags) == 0 {
+			return
+		}
+
+		a.Tags = tags
+	}
+}
+
 func WithNetwork(network Network) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Network = &network
@@ -265,4 +312,34 @@ func WithUser(user User) AssetEnricher {
 
 func EmptyEnricher() AssetEnricher {
 	return func(_ *AssetEvent) {}
+}
+
+func WithOrganization(org Organization) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Organization = &org
+	}
+}
+
+func WithFass(fass Fass) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Fass = &fass
+	}
+}
+
+func WithURL(url URL) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.URL = &url
+	}
+}
+
+func WithOrchestrator(orchestrator Orchestrator) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Orchestrator = &orchestrator
+	}
+}
+
+func WithContainer(container Container) AssetEnricher {
+	return func(a *AssetEvent) {
+		a.Container = &container
+	}
 }
