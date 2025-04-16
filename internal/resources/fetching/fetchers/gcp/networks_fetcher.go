@@ -59,7 +59,8 @@ func (f *GcpNetworksFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			f.log.Debugf("GcpNetworksFetcher.Fetch context done: %v", ctx.Err())
+			return nil
 
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cycleMetadata,
