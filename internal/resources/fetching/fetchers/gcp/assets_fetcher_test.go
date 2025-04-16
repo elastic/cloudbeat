@@ -19,8 +19,8 @@ package fetchers
 
 import (
 	"context"
+	"sync"
 	"testing"
-	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/mock"
@@ -56,7 +56,7 @@ func (s *GcpAssetsFetcherTestSuite) TearDownTest() {
 func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
+	wg := sync.WaitGroup{}
 	mockInventoryService := new(inventory.MockServiceAPI)
 	fetcher := GcpAssetsFetcher{
 		log:        testhelper.NewLogger(s.T()),
@@ -77,23 +77,22 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			close(ch)
 		}).Once()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		err := fetcher.Fetch(ctx, cycle.Metadata{})
 		s.NoError(err)
 	}()
 
-	select {
-	case res := <-s.resourceCh:
-		s.NotNil(res.Resource)
-		asset, ok := res.Resource.(*GcpAsset)
-		s.True(ok)
-		s.Equal(expectedAsset, asset.ExtendedAsset)
-		s.Equal("cloud-compute", asset.Type)
-		s.Equal("gcp-compute-instance", asset.SubType)
-	case <-time.After(time.Second):
-		s.Fail("Test timed out waiting for resource")
-	}
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpAsset)
+	s.True(ok)
+	s.Equal(expectedAsset, asset.ExtendedAsset)
+	s.Equal("cloud-compute", asset.Type)
+	s.Equal("gcp-compute-instance", asset.SubType)
 
+	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
 }
 

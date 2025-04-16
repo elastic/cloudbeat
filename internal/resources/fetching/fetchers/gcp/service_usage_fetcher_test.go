@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
-	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
@@ -59,7 +59,7 @@ func (s *GcpServiceUsageFetcherTestSuite) TestServiceUsageFetcher_Fetch_Success(
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := NewGcpServiceUsageFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
-
+	wg := sync.WaitGroup{}
 	expectedAsset := &inventory.ProjectAssets{
 		Assets: []*inventory.ExtendedGcpAsset{
 			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.ServiceUsageAssetType}},
@@ -77,25 +77,24 @@ func (s *GcpServiceUsageFetcherTestSuite) TestServiceUsageFetcher_Fetch_Success(
 			close(ch)
 		}).Once()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		err := fetcher.Fetch(ctx, cycle.Metadata{})
 		s.NoError(err)
 	}()
 
-	select {
-	case res := <-s.resourceCh:
-		s.NotNil(res.Resource)
-		asset, ok := res.Resource.(*GcpServiceUsageAsset)
-		s.True(ok)
-		s.Len(asset.Asset.Services, 1)
-		s.Equal(inventory.ServiceUsageAssetType, asset.Asset.Services[0].Asset.AssetType)
-		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
-		s.Equal(fetching.MonitoringIdentity, asset.Type)
-		s.Equal(fetching.GcpServiceUsage, asset.subType)
-	case <-time.After(time.Second):
-		s.Fail("Test timed out waiting for resource")
-	}
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpServiceUsageAsset)
+	s.True(ok)
+	s.Len(asset.Asset.Services, 1)
+	s.Equal(inventory.ServiceUsageAssetType, asset.Asset.Services[0].Asset.AssetType)
+	s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
+	s.Equal(fetching.MonitoringIdentity, asset.Type)
+	s.Equal(fetching.GcpServiceUsage, asset.subType)
 
+	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
 }
 

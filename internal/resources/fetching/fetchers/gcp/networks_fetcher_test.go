@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
-	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
@@ -58,6 +58,7 @@ func (s *GcpNetworksFetcherTestSuite) TearDownTest() {
 
 func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 	ctx := context.Background()
+	wg := sync.WaitGroup{}
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := NewGcpNetworksFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
 	expectedAsset := &inventory.ExtendedGcpAsset{
@@ -74,24 +75,22 @@ func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 			close(ch)
 		}).Once()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		err := fetcher.Fetch(ctx, cycle.Metadata{})
 		s.NoError(err)
 	}()
 
-	select {
-	case res := <-s.resourceCh:
-		s.NotNil(res.Resource)
-		asset, ok := res.Resource.(*GcpNetworksAsset)
-		s.True(ok)
-		s.Equal(expectedAsset, asset.NetworkAsset)
-		s.Equal(fetching.CloudCompute, asset.Type)
-		s.Equal("gcp-compute-network", asset.subType)
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpNetworksAsset)
+	s.True(ok)
+	s.Equal(expectedAsset, asset.NetworkAsset)
+	s.Equal(fetching.CloudCompute, asset.Type)
+	s.Equal("gcp-compute-network", asset.subType)
 
-	case <-time.After(time.Second):
-		s.Fail("Test timed out waiting for resource")
-	}
-
+	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
 }
 
