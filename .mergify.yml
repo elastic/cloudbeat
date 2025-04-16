@@ -148,10 +148,7 @@ pull_request_rules:
           * `backport-active-all` is the label that automatically backports to all active branches.
           * `backport-active-8` is the label that automatically backports to all active minor branches for the 8 major.
           * `backport-active-9` is the label that automatically backports to all active minor branches for the 9 major.
-          **NOTE**: `backport-v8.x` has been added to help with the transition to the new branch 8.x.
-      label:
-        add:
-          - backport-v8.x
+
   - name: remove-backport label
     conditions:
       - label~=backport-v
@@ -343,19 +340,6 @@ pull_request_rules:
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
-  - name: backport patches to 8.x branch
-    conditions:
-      - merged
-      - label=backport-v8.x
-    actions:
-      backport:
-        assignees:
-          - "{{ author }}"
-        branches:
-          - "8.x"
-        labels:
-          - "backport"
-        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
   - name: backport patches to 8.17 branch
     conditions:
       - merged
@@ -382,6 +366,14 @@ pull_request_rules:
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+  - name: backport patches to 8.19 branch
+    conditions:
+      - merged
+      - label=backport-v8.19.0
+    actions:
+      backport:
+        branches:
+          - "8.19"
   - name: backport patches to 9.0 branch
     conditions:
       - merged
