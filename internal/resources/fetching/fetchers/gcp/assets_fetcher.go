@@ -89,7 +89,8 @@ func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			f.log.Debugf("GcpAssetsFetcher.Fetch context done: %v", ctx.Err())
+			return nil
 
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cycleMetadata,
