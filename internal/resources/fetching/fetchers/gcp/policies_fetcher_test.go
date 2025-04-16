@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
-	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
@@ -60,7 +60,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestPoliciesFetcher_Fetch_Success() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := NewGcpPoliciesFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
-
+	wg := sync.WaitGroup{}
 	expectedAsset := &inventory.ProjectPoliciesAsset{
 		Policies: []*inventory.ExtendedGcpAsset{
 			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.CrmProjectAssetType}},
@@ -78,25 +78,23 @@ func (s *GcpPoliciesFetcherTestSuite) TestPoliciesFetcher_Fetch_Success() {
 			close(ch)
 		}).Once()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		err := fetcher.Fetch(ctx, cycle.Metadata{})
 		s.NoError(err)
 	}()
 
-	select {
-	case res := <-s.resourceCh:
-		s.NotNil(res.Resource)
-		asset, ok := res.Resource.(*GcpPoliciesAsset)
-		s.True(ok)
-		s.Len(asset.Asset.Policies, 1)
-		s.Equal(expectedAsset.Policies[0], asset.Asset.Policies[0])
-		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
-		s.Equal(fetching.ProjectManagement, asset.Type)
-		s.Equal(fetching.GcpPolicies, asset.subType)
-	case <-time.After(time.Second):
-		s.Fail("Test timed out waiting for resource")
-	}
-
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpPoliciesAsset)
+	s.True(ok)
+	s.Len(asset.Asset.Policies, 1)
+	s.Equal(expectedAsset.Policies[0], asset.Asset.Policies[0])
+	s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
+	s.Equal(fetching.ProjectManagement, asset.Type)
+	s.Equal(fetching.GcpPolicies, asset.subType)
+	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
 }
 

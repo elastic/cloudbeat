@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
-	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
@@ -58,6 +58,7 @@ func (s *GcpLogSinkFetcherTestSuite) TearDownTest() {
 
 func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
 	ctx := context.Background()
+	wg := sync.WaitGroup{}
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := NewGcpLogSinkFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
 
@@ -77,26 +78,24 @@ func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
 			close(ch)
 		}).Once()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		err := fetcher.Fetch(ctx, cycle.Metadata{})
 		s.NoError(err)
 	}()
 
-	select {
-	case res := <-s.resourceCh:
-		s.NotNil(res.Resource)
-		asset, ok := res.Resource.(*GcpLoggingAsset)
-		s.True(ok)
-		s.Len(asset.Asset.LogSinks, 1)
-		s.Equal(expectedAsset.Assets, asset.Asset.LogSinks)
-		s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
-		s.Equal(fetching.LoggingIdentity, asset.Type)
-		s.Equal(fetching.GcpLoggingType, asset.subType)
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpLoggingAsset)
+	s.True(ok)
+	s.Len(asset.Asset.LogSinks, 1)
+	s.Equal(expectedAsset.Assets, asset.Asset.LogSinks)
+	s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
+	s.Equal(fetching.LoggingIdentity, asset.Type)
+	s.Equal(fetching.GcpLoggingType, asset.subType)
 
-	case <-time.After(time.Second):
-		s.Fail("Test timed out waiting for resource")
-	}
-
+	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
 }
 
