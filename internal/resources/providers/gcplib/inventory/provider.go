@@ -162,7 +162,6 @@ func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *Monitor
 		go func() {
 			defer wg.Done()
 			logAssets = collect(logsAssetCh)
-
 		}()
 		go func() {
 			defer wg.Done()

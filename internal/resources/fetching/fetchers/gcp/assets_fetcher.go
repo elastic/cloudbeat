@@ -86,24 +86,22 @@ func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	resultsCh := make(chan *inventory.ExtendedGcpAsset)
 	go f.provider.ListAssetTypes(ctx, lo.Keys(reversedGcpAssetTypes), resultsCh)
 
-	for {
+	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case asset, ok := <-resultsCh:
-			if !ok {
-				return nil
-			}
-			f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cycleMetadata,
-				Resource: &GcpAsset{
-					Type:          reversedGcpAssetTypes[asset.AssetType],
-					SubType:       getGcpSubType(asset.AssetType),
-					ExtendedAsset: asset,
-				},
-			}
+
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cycleMetadata,
+			Resource: &GcpAsset{
+				Type:          reversedGcpAssetTypes[asset.AssetType],
+				SubType:       getGcpSubType(asset.AssetType),
+				ExtendedAsset: asset,
+			},
+		}:
 		}
 	}
+	return nil
 }
 
 func (f *GcpAssetsFetcher) Stop() {

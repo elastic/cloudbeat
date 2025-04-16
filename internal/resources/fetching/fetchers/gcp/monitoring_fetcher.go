@@ -57,24 +57,22 @@ func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Me
 	resultsCh := make(chan *inventory.MonitoringAsset)
 	go f.provider.ListMonitoringAssets(ctx, resultsCh)
 
-	for {
+	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case asset, ok := <-resultsCh:
-			if !ok {
-				return nil
-			}
-			f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cycleMetadata,
-				Resource: &GcpMonitoringAsset{
-					Type:    fetching.MonitoringIdentity,
-					subType: fetching.GcpMonitoringType,
-					Asset:   asset,
-				},
-			}
+
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cycleMetadata,
+			Resource: &GcpMonitoringAsset{
+				Type:    fetching.MonitoringIdentity,
+				subType: fetching.GcpMonitoringType,
+				Asset:   asset,
+			},
+		}:
 		}
 	}
+	return nil
 }
 
 func (f *GcpMonitoringFetcher) Stop() {

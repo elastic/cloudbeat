@@ -57,25 +57,22 @@ func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	resultsCh := make(chan *inventory.ProjectPoliciesAsset)
 	go f.provider.ListProjectsAncestorsPolicies(ctx, resultsCh)
 
-	for {
+	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case asset, ok := <-resultsCh:
-			if !ok {
-				return nil
-			}
 
-			f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cycleMetadata,
-				Resource: &GcpPoliciesAsset{
-					Type:    fetching.ProjectManagement,
-					subType: fetching.GcpPolicies,
-					Asset:   asset,
-				},
-			}
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cycleMetadata,
+			Resource: &GcpPoliciesAsset{
+				Type:    fetching.ProjectManagement,
+				subType: fetching.GcpPolicies,
+				Asset:   asset,
+			},
+		}:
 		}
 	}
+	return nil
 }
 
 func (f *GcpPoliciesFetcher) Stop() {
