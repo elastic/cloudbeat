@@ -41,6 +41,17 @@ Resources:
             - !Split
               - /
               - !Ref AWS::StackId
+      Policies:
+        - PolicyName: ElasticCSPMUserPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                  - iam:GetRole
+                  - iam:ListAccountAliases
+                Resource: '*'
       Path: /
 
   CloudbeatRootRole:
