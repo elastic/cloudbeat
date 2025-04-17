@@ -44,6 +44,7 @@ type testAttr struct {
 	bdpp  func() dataprovider.CommonDataProvider
 	cdpp  func() dataprovider.ElasticCommonDataProvider
 	idpp  func() dataprovider.IdProvider
+	rdpp  func() dataprovider.CommonDataProvider
 }
 
 const (
@@ -135,6 +136,11 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				idProviderMock.EXPECT().GetId(mock.Anything, mock.Anything).Return(resourceId)
 				return idProviderMock
 			},
+			rdpp: func() dataprovider.CommonDataProvider {
+				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
+				dataProviderMock.EXPECT().EnrichEvent(mock.Anything, mock.Anything).Return(nil)
+				return dataProviderMock
+			},
 		},
 		{
 			name: "Events should not be created due zero findings",
@@ -161,6 +167,10 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				idProviderMock := dataprovider.NewMockIdProvider(s.T())
 				return idProviderMock
 			},
+			rdpp: func() dataprovider.CommonDataProvider {
+				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
+				return dataProviderMock
+			},
 		},
 	}
 
@@ -169,8 +179,9 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			cdp := tt.cdpp()
 			bdp := tt.bdpp()
 			idp := tt.idpp()
+			rdp := tt.rdpp()
 
-			transformer := NewTransformer(testhelper.NewLogger(s.T()), &config.Config{}, bdp, cdp, idp)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), &config.Config{}, bdp, cdp, idp, rdp)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
