@@ -19,8 +19,8 @@ package fetchers
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"sync"
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
@@ -38,7 +38,6 @@ import (
 
 type GcpServiceUsageFetcherTestSuite struct {
 	suite.Suite
-
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -56,55 +55,51 @@ func (s *GcpServiceUsageFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) TestFetcher_Fetch_Success() {
+func (s *GcpServiceUsageFetcherTestSuite) TestServiceUsageFetcher_Fetch_Success() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpServiceUsageFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
+	fetcher := NewGcpServiceUsageFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
+	wg := sync.WaitGroup{}
+	expectedAsset := &inventory.ProjectAssets{
+		Assets: []*inventory.ExtendedGcpAsset{
+			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.ServiceUsageAssetType}},
+		},
+		CloudAccount: &fetching.CloudAccountMetadata{
+			AccountId: "1",
+		},
 	}
 
-	mockInventoryService.On("ListServiceUsageAssets", mock.Anything).Return(
-		[]*inventory.ServiceUsageAsset{
-			{
-				CloudAccount: &fetching.CloudAccountMetadata{
-					AccountId:        "a",
-					AccountName:      "a",
-					OrganisationId:   "a",
-					OrganizationName: "a",
-				},
-				Services: []*inventory.ExtendedGcpAsset{
-					{Asset: &assetpb.Asset{Name: "a", AssetType: inventory.ServiceUsageAssetType}},
-				},
-			},
-		}, nil,
-	)
+	mockInventoryService.EXPECT().Clear()
+	mockInventoryService.On("ListProjectAssets", mock.Anything, []string{inventory.ServiceUsageAssetType}, mock.Anything).
+		Run(func(args mock.Arguments) {
+			ch := args.Get(2).(chan<- *inventory.ProjectAssets)
+			ch <- expectedAsset
+			close(ch)
+		}).Once()
 
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().NoError(err)
-	results := testhelper.CollectResources(s.resourceCh)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := fetcher.Fetch(ctx, cycle.Metadata{})
+		s.NoError(err)
+	}()
 
-	// ListMonitoringAssets mocked to return a single asset
-	s.Len(results, 1)
-}
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpServiceUsageAsset)
+	s.True(ok)
+	s.Len(asset.Asset.Services, 1)
+	s.Equal(inventory.ServiceUsageAssetType, asset.Asset.Services[0].Asset.AssetType)
+	s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
+	s.Equal(fetching.MonitoringIdentity, asset.Type)
+	s.Equal(fetching.GcpServiceUsage, asset.subType)
 
-func (s *GcpServiceUsageFetcherTestSuite) TestFetcher_Fetch_Error() {
-	ctx := context.Background()
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpServiceUsageFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
-
-	mockInventoryService.On("ListServiceUsageAssets", mock.Anything).Return(nil, errors.New("api call error"))
-
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().Error(err)
+	wg.Wait()
+	mockInventoryService.AssertExpectations(s.T())
 }
 
 func TestServiceUsageResource_GetMetadata(t *testing.T) {
+	const projectId = "1"
 	tests := []struct {
 		name     string
 		resource GcpServiceUsageAsset
@@ -116,7 +111,7 @@ func TestServiceUsageResource_GetMetadata(t *testing.T) {
 			resource: GcpServiceUsageAsset{
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpServiceUsage,
-				Asset: &inventory.ServiceUsageAsset{
+				Asset: &ServiceUsageAsset{
 					CloudAccount: &fetching.CloudAccountMetadata{
 						AccountId:        projectId,
 						AccountName:      "a",
