@@ -33,6 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	gcpfetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp"
 )
 
 const (
@@ -95,7 +96,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
-		Raw:              eventData.RuleResult.Resource,
+		Raw:              getPreferredRawValue(eventData),
 	}
 
 	related := Related{
@@ -161,5 +162,18 @@ func getEcsOutcome(evaluation string) string {
 		return EcsOutcomeSuccess
 	default:
 		return EcsOutcomeUnknown
+	}
+}
+
+func getPreferredRawValue(event evaluator.EventData) any {
+	switch event.ResourceInfo.Resource.(type) {
+	// Skip 'raw' for GCP custom resources grouping real GCP resources
+	case *gcpfetchers.GcpLoggingAsset,
+		*gcpfetchers.GcpMonitoringAsset,
+		*gcpfetchers.GcpPoliciesAsset,
+		*gcpfetchers.GcpServiceUsageAsset:
+		return nil
+	default:
+		return event.RuleResult.Resource
 	}
 }
