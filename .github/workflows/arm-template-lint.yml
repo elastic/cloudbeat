@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - main
-      - "8.x"
+      - "8.19"
     paths:
       - "deploy/azure/*.json"
 
