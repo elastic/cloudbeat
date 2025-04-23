@@ -206,64 +206,6 @@ func (_c *MockAzureAuthProviderAPI_FindDefaultCredentials_Call) RunAndReturn(run
 	return _c
 }
 
-// FindUsernamePasswordCredentials provides a mock function with given fields: tenantID, clientID, username, password, options
-func (_m *MockAzureAuthProviderAPI) FindUsernamePasswordCredentials(tenantID string, clientID string, username string, password string, options *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error) {
-	ret := _m.Called(tenantID, clientID, username, password, options)
-
-	var r0 *azidentity.UsernamePasswordCredential
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string, string, *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error)); ok {
-		return rf(tenantID, clientID, username, password, options)
-	}
-	if rf, ok := ret.Get(0).(func(string, string, string, string, *azidentity.UsernamePasswordCredentialOptions) *azidentity.UsernamePasswordCredential); ok {
-		r0 = rf(tenantID, clientID, username, password, options)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*azidentity.UsernamePasswordCredential)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(string, string, string, string, *azidentity.UsernamePasswordCredentialOptions) error); ok {
-		r1 = rf(tenantID, clientID, username, password, options)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindUsernamePasswordCredentials'
-type MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call struct {
-	*mock.Call
-}
-
-// FindUsernamePasswordCredentials is a helper method to define mock.On call
-//   - tenantID string
-//   - clientID string
-//   - username string
-//   - password string
-//   - options *azidentity.UsernamePasswordCredentialOptions
-func (_e *MockAzureAuthProviderAPI_Expecter) FindUsernamePasswordCredentials(tenantID interface{}, clientID interface{}, username interface{}, password interface{}, options interface{}) *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call {
-	return &MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call{Call: _e.mock.On("FindUsernamePasswordCredentials", tenantID, clientID, username, password, options)}
-}
-
-func (_c *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call) Run(run func(tenantID string, clientID string, username string, password string, options *azidentity.UsernamePasswordCredentialOptions)) *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(string), args[3].(string), args[4].(*azidentity.UsernamePasswordCredentialOptions))
-	})
-	return _c
-}
-
-func (_c *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call) Return(_a0 *azidentity.UsernamePasswordCredential, _a1 error) *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call) RunAndReturn(run func(string, string, string, string, *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error)) *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // NewMockAzureAuthProviderAPI creates a new instance of MockAzureAuthProviderAPI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockAzureAuthProviderAPI(t interface {
