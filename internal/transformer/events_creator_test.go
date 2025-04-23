@@ -202,28 +202,28 @@ func (s *EventsCreatorTestSuite) TestTransformer_GetPreferredRawValue() {
 	}{
 		{
 			name:     "returns nil for GcpLoggingAsset",
-			input:    &gcpfetchers.GcpLoggingAsset{},
+			input:    &gcpfetchers.GcpLoggingAsset{}, //nolint:exhaustruct
 			expected: nil,
 		},
 		{
 			name:     "returns nil for GcpMonitoringAsset",
-			input:    &gcpfetchers.GcpMonitoringAsset{},
+			input:    &gcpfetchers.GcpMonitoringAsset{}, //nolint:exhaustruct
 			expected: nil,
 		},
 		{
 			name:     "returns nil for GcpPoliciesAsset",
-			input:    &gcpfetchers.GcpPoliciesAsset{},
+			input:    &gcpfetchers.GcpPoliciesAsset{}, //nolint:exhaustruct
 			expected: nil,
 		},
 		{
 			name:     "returns nil for GcpServiceUsageAsset",
-			input:    &gcpfetchers.GcpServiceUsageAsset{},
+			input:    &gcpfetchers.GcpServiceUsageAsset{}, //nolint:exhaustruct
 			expected: nil,
 		},
 		{
 			name:     "returns the actual resource when the resource is not a gcp-wrapper-resource",
-			input:    &gcpfetchers.GcpAsset{},
-			expected: &gcpfetchers.GcpAsset{},
+			input:    &gcpfetchers.GcpAsset{}, //nolint:exhaustruct
+			expected: &gcpfetchers.GcpAsset{}, //nolint:exhaustruct
 		},
 	}
 
