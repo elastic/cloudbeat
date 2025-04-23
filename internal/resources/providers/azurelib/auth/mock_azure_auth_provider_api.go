@@ -206,6 +206,7 @@ func (_c *MockAzureAuthProviderAPI_FindDefaultCredentials_Call) RunAndReturn(run
 	return _c
 }
 
+<<<<<<< HEAD
 // FindUsernamePasswordCredentials provides a mock function with given fields: tenantID, clientID, username, password, options
 func (_m *MockAzureAuthProviderAPI) FindUsernamePasswordCredentials(tenantID string, clientID string, username string, password string, options *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error) {
 	ret := _m.Called(tenantID, clientID, username, password, options)
@@ -264,6 +265,8 @@ func (_c *MockAzureAuthProviderAPI_FindUsernamePasswordCredentials_Call) RunAndR
 	return _c
 }
 
+=======
+>>>>>>> b83fc8b2 (Remove Azure Username and Password authentication because it's deprecated on 1.9.0 (#3231))
 // NewMockAzureAuthProviderAPI creates a new instance of MockAzureAuthProviderAPI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockAzureAuthProviderAPI(t interface {
