@@ -109,12 +109,11 @@ type AzureClientOpt struct {
 }
 
 const (
-	AzureClientCredentialsTypeARMTemplate      = "arm_template"
-	AzureClientCredentialsTypeManagedIdentity  = "managed_identity"
-	AzureClientCredentialsTypeManual           = "manual"
-	AzureClientCredentialsTypeSecret           = "service_principal_with_client_secret"
-	AzureClientCredentialsTypeCertificate      = "service_principal_with_client_certificate"
-	AzureClientCredentialsTypeUsernamePassword = "service_principal_with_client_username_and_password"
+	AzureClientCredentialsTypeARMTemplate     = "arm_template"
+	AzureClientCredentialsTypeManagedIdentity = "managed_identity"
+	AzureClientCredentialsTypeManual          = "manual"
+	AzureClientCredentialsTypeSecret          = "service_principal_with_client_secret"
+	AzureClientCredentialsTypeCertificate     = "service_principal_with_client_certificate"
 )
 
 const (
