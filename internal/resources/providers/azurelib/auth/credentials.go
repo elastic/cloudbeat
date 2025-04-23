@@ -44,11 +44,6 @@ func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFac
 		return p.getSecretCredentialsConfig(cfg)
 	case config.AzureClientCredentialsTypeCertificate:
 		return p.getCertificateCredentialsConfig(cfg)
-	case config.AzureClientCredentialsTypeUsernamePassword:
-		if cfg.Credentials.ClientUsername == "" || cfg.Credentials.ClientPassword == "" {
-			return nil, ErrIncompleteUsernamePassword
-		}
-		return p.getUsernamePasswordCredentialsConfig(cfg)
 	case "", config.AzureClientCredentialsTypeManagedIdentity, config.AzureClientCredentialsTypeARMTemplate, config.AzureClientCredentialsTypeManual:
 		return p.getDefaultCredentialsConfig()
 	}
@@ -93,23 +88,6 @@ func (p *ConfigProvider) getCertificateCredentialsConfig(cfg config.AzureConfig)
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get secret credentials: %w", err)
-	}
-
-	return &AzureFactoryConfig{
-		Credentials: creds,
-	}, nil
-}
-
-func (p *ConfigProvider) getUsernamePasswordCredentialsConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
-	creds, err := p.AuthProvider.FindUsernamePasswordCredentials(
-		cfg.Credentials.TenantID,
-		cfg.Credentials.ClientID,
-		cfg.Credentials.ClientUsername,
-		cfg.Credentials.ClientPassword,
-		nil,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get username and password credentials: %w", err)
 	}
 
 	return &AzureFactoryConfig{
