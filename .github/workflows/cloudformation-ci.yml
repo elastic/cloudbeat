@@ -1,14 +1,15 @@
 name: CloudFormation-CI
 
 on:
-  # pull_request_target:
-  #   branches:
-  #     - main
-  #     - "[0-9]+.[0-9]+"
-  #   types: [opened, synchronize, reopened]
-  #   paths:
-  #     - deploy/cloudformation/*.yml
-  #     - .github/workflows/cloudformation-ci.yml
+  # TODO: comment pull_request_targer block after testing
+  pull_request_target:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [opened, synchronize, reopened]
+    paths:
+      - deploy/cloudformation/*.yml
+      - .github/workflows/cloudformation-ci.yml
   push:
     branches:
       - main
