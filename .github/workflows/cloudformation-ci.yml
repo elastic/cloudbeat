@@ -85,6 +85,7 @@ jobs:
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
+          AGENT_VERSION: ${{ env.ELK_VERSION }}
         run: |
           poetry run python ./install_cnvm_integration.py
 
