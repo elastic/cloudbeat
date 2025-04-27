@@ -40,9 +40,10 @@ collect_evidence(resource, key_paths) := {key: evidence |
 	some key, path in key_paths
 	evidence := object.get(resource, path, resource)
 }
+
 # get different evidence based on the evaluation
 get_evidence(ok, passed, failed) := result if {
-	ok
+	ok == true
 	result = passed
 } else := failed
 

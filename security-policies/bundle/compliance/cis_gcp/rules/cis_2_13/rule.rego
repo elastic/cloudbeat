@@ -15,10 +15,9 @@ finding := result if {
 
 	result := common.generate_result_without_expected(
 		common.calculate_result(ok),
-		{"services": {json.filter(c, ["resource/data"]) | c := common.get_evidence(ok, passed, failed)[_]}}
+		{"services": {json.filter(c, ["resource/data"]) | c := common.get_evidence(ok, passed, failed)[_]}},
 	)
 }
-
 
 is_enabled_inventory_service(service) if {
 	service.resource.data.name == "cloudasset.googleapis.com"
