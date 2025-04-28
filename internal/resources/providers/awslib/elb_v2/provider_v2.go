@@ -76,7 +76,7 @@ func (p *Provider) describeListeners(ctx context.Context, region, loadBalancerAr
 	p.log.Debugf("Fetching ELB Listeners for %s", loadBalancerArn)
 	c, ok := p.clients[region]
 	if !ok {
-		return nil, fmt.Errorf("Could not find client for %s region", region)
+		return nil, fmt.Errorf("could not find client for %s region", region)
 	}
 	input := &elbv2.DescribeListenersInput{
 		LoadBalancerArn: pointers.Ref(loadBalancerArn),

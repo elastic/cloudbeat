@@ -1,0 +1,78 @@
+name: Test E2E Flow
+run-name: Test E2E Flow by @${{ github.actor }}
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+      region:
+        required: true
+        type: string
+      serverless:
+        required: true
+        type: boolean
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_name: ${{ steps.set-variables.outputs.date-name }}
+      stack_version: ${{ steps.set-variables.outputs.stack-version }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+
+      - name: Set variables
+        id: set-variables
+        env:
+          STACK_VERSION: ${{ env.ELK_VERSION }}
+          BRANCH: ${{ inputs.branch }}
+          IS_SERVERLESS: ${{ inputs.serverless }}
+        run: |
+          prefix="ech"
+          if [[ "$IS_SERVERLESS" == "true" ]]; then
+            # Short name due to deployment name length limit
+            prefix="proj"
+          fi
+
+          branch="${BRANCH}"
+          if [[ "$BRANCH" != "main" ]]; then
+            branch="$(echo $BRANCH | sed 's/\.//g')"
+          fi
+
+          date_name=$(echo "${prefix}-${branch}-$(date +'%d%b%H%M')" | tr '[:upper:]' '[:lower:]')
+          echo "date-name=$date_name" >> $GITHUB_OUTPUT
+          echo "stack-version=$STACK_VERSION" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: setup
+    uses: ./.github/workflows/test-environment.yml
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    with:
+      deployment_name: ${{ needs.setup.outputs.deployment_name }}
+      elk-stack-version: ${{ needs.setup.outputs.stack_version }}
+      ess-region: ${{ inputs.region }}
+      serverless_mode: ${{ inputs.serverless }}
+      run-sanity-tests: true
+      expiration_days: 0
+
+  destroy:
+    needs: ["setup", "deploy"]
+    uses: ./.github/workflows/destroy-environment.yml
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    if: success()
+    with:
+      prefix: ${{ needs.setup.outputs.deployment_name }}

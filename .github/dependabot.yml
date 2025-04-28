@@ -40,13 +40,13 @@ updates:
     schedule:
       interval: "monthly"
 
-  # Maintain dependencies for go.mod 8.x branch
+  # Maintain dependencies for go.mod 8.19 branch
   - package-ecosystem: "gomod"
-    target-branch: "8.x"
+    target-branch: "8.19"
     directory: "/"
     commit-message:
       include: scope
-      prefix: "8.x"
+      prefix: "8.19"
     groups:
       azure:
         patterns:
@@ -102,7 +102,7 @@ updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: ".github/workflows"
-    target-branch: "8.x"
+    target-branch: "8.19"
     schedule:
       interval: "monthly"
     labels:

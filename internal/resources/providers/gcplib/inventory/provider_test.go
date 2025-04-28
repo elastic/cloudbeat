@@ -166,7 +166,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 			s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 			value, err := tc.provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
 			s.Require().NoError(err)
-			s.Equal(len(tc.expected), len(value))
+			s.Len(value, len(tc.expected))
 			for idx, expectedAsset := range tc.expected {
 				asset := value[idx]
 				s.Equal(expectedAsset, asset)
@@ -530,7 +530,7 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	s.Len(value, 1)             // single project
 	s.Len(value[0].Policies, 2) // multiple policies - project + org
 	s.Equal("ProjectName", value[0].CloudAccount.AccountName)
-	s.Equal("", value[0].CloudAccount.OrganizationName) // no org name for project
+	s.Empty(value[0].CloudAccount.OrganizationName) // no org name for project
 	s.Equal("AssetName1", value[0].Policies[0].Name)
 	s.Equal("AssetName2", value[0].Policies[1].Name)
 }
