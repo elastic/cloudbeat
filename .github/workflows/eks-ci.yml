@@ -59,7 +59,7 @@ jobs:
     steps:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
         with:
           tool-cache: false
           android: true
@@ -73,7 +73,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Setup GO (with caching)
-        uses: magnetikonline/action-golang-cache@fcca93e25c7fe3943de4d40c22d255d17f63e63b # v5
+        uses: magnetikonline/action-golang-cache@fcca93e25c7fe3943de4d40c22d255d17f63e63b  # v5
         with:
           go-version-file: .go-version
 
@@ -242,7 +242,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1 # v2.9.0
+        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1  # v2.9.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: eu-west-1
