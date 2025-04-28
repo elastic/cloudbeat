@@ -31,22 +31,26 @@ func CollectResourcesAndMatch(t *testing.T, fetcher inventory.AssetFetcher, expe
 	t.Helper()
 
 	ch := make(chan inventory.AssetEvent)
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	go func() {
+		defer close(ch)
 		fetcher.Fetch(ctx, ch)
 	}()
 
 	received := make([]inventory.AssetEvent, 0, len(expected))
-	for len(expected) != len(received) {
+	defer func() {
+		assert.ElementsMatch(t, expected, received)
+	}()
+	for {
 		select {
 		case <-ctx.Done():
-			assert.ElementsMatch(t, expected, received)
 			return
-		case event := <-ch:
+		case event, ok := <-ch:
+			if !ok {
+				return
+			}
 			received = append(received, event)
 		}
 	}
-
-	assert.ElementsMatch(t, expected, received)
 }

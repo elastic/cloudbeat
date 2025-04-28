@@ -14,7 +14,6 @@ on:
     branches:
       - main
       - "[0-9]+.[0-9]+"
-      - "8.x"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
@@ -79,7 +78,7 @@ jobs:
           go-version-file: .go-version
 
       - name: build cloudbeat binary
-        uses: magefile/mage-action@6a5dcb5fe61f43d7c08a98bc3cf9bc63c308c08e  # v3.0.0
+        uses: magefile/mage-action@6f50bbb8ea47d56e62dee92392788acbc8192d0b # v3
         with:
           version: latest
           args: build
@@ -88,7 +87,7 @@ jobs:
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
 
       - name: Cache Build dependencies
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.workflow }}
@@ -125,7 +124,7 @@ jobs:
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Cache docker images
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}

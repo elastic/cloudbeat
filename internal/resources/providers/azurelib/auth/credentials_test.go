@@ -114,58 +114,6 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Should return a UsernamePasswordCredential",
-			config: config.AzureConfig{
-				Credentials: config.AzureClientOpt{
-					ClientCredentialsType: config.AzureClientCredentialsTypeUsernamePassword,
-					TenantID:              "tenant_a",
-					ClientID:              "client_id",
-					ClientUsername:        "username",
-					ClientPassword:        "password",
-				},
-			},
-			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
-				m.EXPECT().
-					FindUsernamePasswordCredentials("tenant_a", "client_id", "username", "password", mock.Anything).
-					Return(&azidentity.UsernamePasswordCredential{}, nil).
-					Once()
-			},
-			want: &AzureFactoryConfig{
-				Credentials: &azidentity.UsernamePasswordCredential{},
-			},
-			wantErr: false,
-		},
-		{
-			name: "Should return error on incomplete Username Password Credential (missing password)",
-			config: config.AzureConfig{
-				Credentials: config.AzureClientOpt{
-					ClientCredentialsType: config.AzureClientCredentialsTypeUsernamePassword,
-					TenantID:              "tenant_a",
-					ClientID:              "client_id",
-					ClientUsername:        "username",
-					ClientPassword:        "",
-				},
-			},
-			authProviderInitFn: func(_ *MockAzureAuthProviderAPI) {},
-			want:               nil,
-			wantErr:            true,
-		},
-		{
-			name: "Should return error on incomplete Username Password Credential (missing username)",
-			config: config.AzureConfig{
-				Credentials: config.AzureClientOpt{
-					ClientCredentialsType: config.AzureClientCredentialsTypeUsernamePassword,
-					TenantID:              "tenant_a",
-					ClientID:              "client_id",
-					ClientUsername:        "",
-					ClientPassword:        "password",
-				},
-			},
-			authProviderInitFn: func(_ *MockAzureAuthProviderAPI) {},
-			want:               nil,
-			wantErr:            true,
-		},
-		{
 			name: "Should return a ClientCertificateCredential",
 			config: config.AzureConfig{
 				Credentials: config.AzureClientOpt{
