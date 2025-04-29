@@ -53,7 +53,7 @@ config:
     benchmark: cis_k8s
 `,
 			expectedType:        "cis_k8s",
-			expectedCloudConfig: CloudConfig{},
+			expectedCloudConfig: CloudConfig{Gcp: defaultGCPConfig()},
 		},
 		{
 			config: `
@@ -62,7 +62,7 @@ config:
     benchmark: cis_azure
 `,
 			expectedType:        "cis_azure",
-			expectedCloudConfig: CloudConfig{},
+			expectedCloudConfig: CloudConfig{Gcp: defaultGCPConfig()},
 		},
 		{
 			config: `
@@ -91,6 +91,37 @@ config:
 						RoleArn:              "role_arn",
 					},
 					AccountType: "organization-account",
+				},
+				Gcp: defaultGCPConfig(),
+			},
+		},
+		{
+			config: `
+config:
+  v1:
+    type: cspm
+    deployment: gcp
+    benchmark: cis_gcp
+    gcp:
+      project_id: abc123
+      organization_id: efg456
+      account_type: organization-account
+      credentials:
+        credentials_file_path: /tmp/creds.json
+`,
+			expectedType: "cis_gcp",
+			expectedCloudConfig: CloudConfig{
+				Gcp: GcpConfig{
+					ProjectId:      "abc123",
+					OrganizationId: "efg456",
+					AccountType:    "organization-account",
+					GcpClientOpt: GcpClientOpt{
+						CredentialsFilePath: "/tmp/creds.json",
+					},
+					GcpCallOpt: GcpCallOpt{
+						ListAssetsTimeout:  60 * time.Second,
+						ListAssetsPageSize: 200,
+					},
 				},
 			},
 		},
@@ -256,6 +287,7 @@ config:
 					},
 					CloudConnectorsConfig: CloudConnectorsConfig{},
 				},
+				Gcp: defaultGCPConfig(),
 			},
 		},
 		"happy path cloud connectors enabled - attempt overwrite roles": {
@@ -282,6 +314,7 @@ config:
 					},
 					CloudConnectorsConfig: CloudConnectorsConfig{},
 				},
+				Gcp: defaultGCPConfig(),
 			},
 		},
 		"happy path cloud connectors enabled - env vars set": {
@@ -315,6 +348,7 @@ config:
 						ResourceID:    "abc789",
 					},
 				},
+				Gcp: defaultGCPConfig(),
 			},
 		},
 	}
