@@ -17,9 +17,7 @@ finding := result if {
 
 	result := common.generate_result_without_expected(
 		common.calculate_result(ok),
-		{
-			"log_sinks": {json.filter(c, ["name", "resource/data/filter"]) | c := evidence[_]}
-		},
+		{"log_sinks": {json.filter(c, ["name", "resource/data/filter"]) | c := evidence[_]}},
 	)
 }
 
