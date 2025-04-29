@@ -19,6 +19,7 @@ package manager
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -69,7 +70,7 @@ func (s *ManagerTestSuite) TestManagerRun() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, NOOPPreflight{})
 	s.Require().NoError(err)
 
 	m.Run()
@@ -91,7 +92,10 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	pf := NewMockPreflight(s.T())
+	pf.EXPECT().Prepare(mock.Anything, mock.Anything).Once().Return(nil)
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, pf)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -113,7 +117,10 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	pf := NewMockPreflight(s.T())
+	pf.EXPECT().Prepare(mock.Anything, mock.Anything).Once().Return(nil)
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, pf)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -140,7 +147,10 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 		}
 	}).Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	pf := NewMockPreflight(s.T())
+	pf.EXPECT().Prepare(mock.Anything, mock.Anything).Once().Return(nil)
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, pf)
 	s.Require().NoError(err)
 
 	err = m.fetchSingle(t.Context(), fetcherName, cycle.Metadata{})
@@ -158,7 +168,7 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	d, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, NOOPPreflight{})
 	s.Require().NoError(err)
 
 	d.Run()
@@ -178,7 +188,10 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
+	pf := NewMockPreflight(s.T())
+	pf.EXPECT().Prepare(mock.Anything, mock.Anything).Once().Return(nil)
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry, pf)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -203,12 +216,35 @@ func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 	s.registry.EXPECT().Update().Once()
 
-	m, err := NewManager(ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
+	pf := NewMockPreflight(s.T())
+	pf.EXPECT().Prepare(mock.Anything, mock.Anything).Once().Return(nil)
+
+	m, err := NewManager(ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry, pf)
 	s.Require().NoError(err)
 
 	m.Run()
 	time.Sleep(3 * time.Second)
 	s.Require().EqualError(context.DeadlineExceeded, ctx.Err().Error())
+	s.registry.AssertExpectations(s.T())
+}
+
+func (s *ManagerTestSuite) TestManagerPreflightFail() {
+	interval := 5 * time.Second
+	fetcherName := "run_fetcher"
+
+	s.registry.EXPECT().Keys().Return([]string{fetcherName}).Twice()
+	s.registry.EXPECT().Update().Once()
+
+	pf := NewMockPreflight(s.T())
+	pf.EXPECT().Prepare(mock.Anything, mock.Anything).Once().Return(errors.New("error"))
+
+	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, pf)
+	s.Require().NoError(err)
+
+	m.Run()
+	waitForACycleToEnd(interval)
+	m.Stop()
+
 	s.registry.AssertExpectations(s.T())
 }
 

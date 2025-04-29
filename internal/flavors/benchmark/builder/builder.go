@@ -63,12 +63,12 @@ func New(options ...Option) *Builder {
 	return b
 }
 
-func (b *Builder) Build(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
-	return b.buildBase(ctx, log, cfg, resourceCh, reg)
+func (b *Builder) Build(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, preflight manager.Preflight) (Benchmark, error) {
+	return b.buildBase(ctx, log, cfg, resourceCh, reg, preflight)
 }
 
-func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
-	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg)
+func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, preflight manager.Preflight) (*basebenchmark, error) {
+	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg, preflight)
 	if err != nil {
 		return nil, err
 	}

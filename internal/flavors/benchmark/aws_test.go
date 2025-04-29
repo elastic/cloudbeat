@@ -19,16 +19,19 @@ package benchmark
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/elastic/beats/v7/libbeat/management/status"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
@@ -159,7 +162,100 @@ func TestAWS_Initialize(t *testing.T) {
 
 			testInitialize(t, &AWS{
 				IdentityProvider: tt.identityProvider,
+				errorPublisher:   nil,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
+}
+
+func TestAWSErrorProcessor(t *testing.T) {
+	type expectedCall struct {
+		status status.Status
+		msg    string
+	}
+
+	tests := map[string]struct {
+		inputErrors      []error
+		expectedMessages []string
+	}{
+		"no status update": {
+			inputErrors:      []error{errors.New("irrelevant")},
+			expectedMessages: []string{},
+		},
+		"status update": {
+			inputErrors: []error{&errorhandler.MissingCSPPermissionError{
+				Permission: "abc",
+			}},
+			expectedMessages: []string{
+				"missing permission on cloud provider side: abc",
+			},
+		},
+		"status update with inner error": {
+			inputErrors: []error{fmt.Errorf("error %w", &errorhandler.MissingCSPPermissionError{
+				Permission: "abc",
+			})},
+			expectedMessages: []string{
+				"missing permission on cloud provider side: abc",
+			},
+		},
+
+		"multiple with appended permissions": {
+			inputErrors: []error{
+				&errorhandler.MissingCSPPermissionError{Permission: "abc1"},
+				&errorhandler.MissingCSPPermissionError{Permission: "abc2"},
+				errors.New("irrelevant"),
+				&errorhandler.MissingCSPPermissionError{Permission: "abc3"},
+			},
+			expectedMessages: []string{
+				"missing permission on cloud provider side: abc1",
+				"missing permission on cloud provider side: abc1 , abc2",
+				"missing permission on cloud provider side: abc1 , abc2 , abc3",
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			m := &mockStatusReporter{}
+			for _, ec := range tc.expectedMessages {
+				m.On("UpdateStatus", status.Degraded, ec).Once()
+			}
+
+			defer m.AssertExpectations(t)
+
+			s := NewAWSErrorProcessor(testhelper.NewLogger(t))
+
+			for _, err := range tc.inputErrors {
+				s.Process(m, err)
+			}
+		})
+	}
+
+	t.Run("clean", func(t *testing.T) {
+		m := &mockStatusReporter{}
+		c := make([]*mock.Call, 0)
+		c = append(c, m.On("UpdateStatus", status.Degraded, "missing permission on cloud provider side: abc1").Once())
+		c = append(c, m.On("UpdateStatus", status.Degraded, "missing permission on cloud provider side: abc1 , abc2").Once())
+		c = append(c, m.On("UpdateStatus", status.Degraded, "missing permission on cloud provider side: abc1 , abc2 , abc3").Once())
+		c = append(c, m.On("UpdateStatus", status.Degraded, "missing permission on cloud provider side: abc4").Once())
+		mock.InOrder(c...)
+
+		defer m.AssertExpectations(t)
+
+		s := NewAWSErrorProcessor(testhelper.NewLogger(t))
+
+		s.Process(m, &errorhandler.MissingCSPPermissionError{Permission: "abc1"})
+		s.Process(m, &errorhandler.MissingCSPPermissionError{Permission: "abc2"})
+		s.Process(m, &errorhandler.MissingCSPPermissionError{Permission: "abc3"})
+		s.Clear()
+		s.Process(m, &errorhandler.MissingCSPPermissionError{Permission: "abc4"})
+	})
+}
+
+type mockStatusReporter struct {
+	mock.Mock
+}
+
+func (u *mockStatusReporter) UpdateStatus(s status.Status, msg string) {
+	u.Called(s, msg)
 }

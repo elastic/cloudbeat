@@ -25,6 +25,7 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -51,11 +52,16 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	strategy, err := benchmark.GetStrategy(cfg, log)
+	errLog := clog.NewLogger("error-handler")
+	errorHandler := errorhandler.NewErrorHandler(b.Manager, errorhandler.DefaultErrorHandlerBufferSize, errLog)
+
+	strategy, err := benchmark.GetStrategy(cfg, log, errorHandler)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
+
+	errorHandler.Register(strategy.ErrorProcessor().Process)
 
 	log.Infof("Creating benchmark %T", strategy)
 	bench, err := strategy.NewBenchmark(ctx, log, cfg)
@@ -81,12 +87,13 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 	return &posture{
 		flavorBase: flavorBase{
-			ctx:       ctx,
-			cancel:    cancel,
-			publisher: publisher,
-			config:    cfg,
-			log:       log,
-			client:    client,
+			ctx:          ctx,
+			cancel:       cancel,
+			publisher:    publisher,
+			config:       cfg,
+			log:          log,
+			client:       client,
+			errorHandler: errorHandler,
 		},
 		benchmark: bench,
 	}, nil
@@ -94,6 +101,8 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 // Run starts posture.
 func (bt *posture) Run(*beat.Beat) error {
+	bt.errorHandler.Start(bt.ctx)
+
 	bt.log.Info("posture is running! Hit CTRL-C to stop it")
 	eventsCh, err := bt.benchmark.Run(bt.ctx)
 	if err != nil {
@@ -114,6 +123,7 @@ func (bt *posture) Stop() {
 	}
 
 	bt.cancel()
+	bt.errorHandler.Stop()
 }
 
 // ensureAdditionalProcessors modifies cfg.Processors list to ensure 'host'

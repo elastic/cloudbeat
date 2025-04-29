@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -30,10 +31,11 @@ import (
 )
 
 type IAMFetcher struct {
-	log           *clog.Logger
-	iamProvider   iam.AccessManagement
-	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *cloud.Identity
+	log            *clog.Logger
+	iamProvider    iam.AccessManagement
+	resourceCh     chan fetching.ResourceInfo
+	cloudIdentity  *cloud.Identity
+	errorPublisher errorhandler.ErrorPublisher
 }
 
 type IAMFetcherConfig struct {
@@ -45,12 +47,13 @@ type IAMResource struct {
 	identity *cloud.Identity
 }
 
-func NewIAMFetcher(log *clog.Logger, provider iam.AccessManagement, ch chan fetching.ResourceInfo, identity *cloud.Identity) *IAMFetcher {
+func NewIAMFetcher(log *clog.Logger, provider iam.AccessManagement, ch chan fetching.ResourceInfo, identity *cloud.Identity, errorPublisher errorhandler.ErrorPublisher) *IAMFetcher {
 	return &IAMFetcher{
-		log:           log,
-		iamProvider:   provider,
-		resourceCh:    ch,
-		cloudIdentity: identity,
+		log:            log,
+		iamProvider:    provider,
+		resourceCh:     ch,
+		cloudIdentity:  identity,
+		errorPublisher: errorPublisher,
 	}
 }
 
@@ -63,6 +66,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 	pwdPolicy, err := f.iamProvider.GetPasswordPolicy(ctx)
 	if err != nil {
 		f.log.Errorf("Unable to fetch PasswordPolicy, error: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	} else {
 		iamResources = append(iamResources, pwdPolicy)
 	}
@@ -70,6 +74,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 	users, err := f.iamProvider.GetUsers(ctx)
 	if err != nil {
 		f.log.Errorf("Unable to fetch IAM users, error: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	} else {
 		iamResources = append(iamResources, users...)
 	}
@@ -77,6 +82,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 	policies, err := f.iamProvider.GetPolicies(ctx)
 	if err != nil {
 		f.log.Errorf("Unable to fetch IAM policies, error: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	} else {
 		iamResources = append(iamResources, policies...)
 	}
@@ -84,6 +90,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 	serverCertificates, err := f.iamProvider.ListServerCertificates(ctx)
 	if err != nil {
 		f.log.Errorf("Unable to fetch IAM server certificates, error: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	} else {
 		iamResources = append(iamResources, serverCertificates)
 	}
@@ -91,6 +98,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 	accessAnalyzers, err := f.iamProvider.GetAccessAnalyzers(ctx)
 	if err != nil {
 		f.log.Errorf("Unable to fetch access access analyzers, error: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	} else {
 		iamResources = append(iamResources, accessAnalyzers)
 	}

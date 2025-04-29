@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
@@ -35,7 +36,7 @@ type k8sbenchmark struct {
 }
 
 func (b *Builder) BuildK8s(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, k8sLeaderElector uniqueness.Manager) (Benchmark, error) {
-	base, err := b.buildBase(ctx, log, cfg, resourceCh, reg)
+	base, err := b.buildBase(ctx, log, cfg, resourceCh, reg, manager.NOOPPreflight{})
 	if err != nil {
 		return nil, err
 	}

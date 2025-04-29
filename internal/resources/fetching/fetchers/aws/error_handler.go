@@ -1,0 +1,59 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+package fetchers
+
+import (
+	"context"
+	"errors"
+
+	"github.com/aws/smithy-go"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
+)
+
+func HasAWSErrorCode(err error, codes map[string]struct{}) bool {
+	var apiErr smithy.APIError
+	if errors.As(err, &apiErr) {
+		_, found := codes[apiErr.ErrorCode()]
+		return found
+	}
+
+	return false
+}
+
+var permissionErrorCodes = map[string]struct{}{
+	"AccessDenied":          {},
+	"AccessDeniedException": {},
+	"UnauthorizedOperation": {},
+}
+
+// "UnrecognizedClientException",
+// "MissingAuthenticationToken",
+
+func IsPermissionError(err error) bool {
+	return HasAWSErrorCode(err, permissionErrorCodes)
+}
+
+func newMissingSecurityAuditError() error {
+	return &errorhandler.MissingCSPPermissionError{Permission: arnSecurityAudit}
+}
+
+func checkMissingPermissions(ctx context.Context, errorPublisher errorhandler.ErrorPublisher, err error) {
+	if IsPermissionError(err) {
+		errorPublisher.Publish(ctx, newMissingSecurityAuditError())
+	}
+}

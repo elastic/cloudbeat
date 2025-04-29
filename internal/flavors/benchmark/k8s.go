@@ -90,3 +90,7 @@ func (k *K8S) checkDependencies() error {
 	}
 	return nil
 }
+
+func (k *K8S) ErrorProcessor() ErrorProcessor {
+	return NOOPErrorProcessor{}
+}

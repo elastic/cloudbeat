@@ -70,7 +70,7 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 	ctx, cancel := context.WithCancel(t.Context())
 
 	factory := mockFactory(nAccounts,
-		func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
+		func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ ErrorPublisher) registry.FetchersMap {
 			if drain {
 				// create some resources if we are testing for that
 				go func() {
@@ -91,8 +91,10 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 		},
 	)
 
+	mep := NewMockErrorPublisher(t)
+
 	rootCh := make(chan fetching.ResourceInfo)
-	fetcherMap := newCisAwsOrganizationFetchers(ctx, testhelper.NewLogger(t), rootCh, accounts, nil, factory)
+	fetcherMap := newCisAwsOrganizationFetchers(ctx, testhelper.NewLogger(t), rootCh, mep, accounts, nil, factory)
 	assert.Lenf(t, fetcherMap, nAccounts, "Correct amount of maps")
 
 	if drain {
@@ -140,10 +142,13 @@ func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 	ctx, cancel := context.WithCancel(t.Context())
 
+	mep := NewMockErrorPublisher(t)
+
 	newCisAwsOrganizationFetchers(
 		ctx,
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
+		mep,
 		[]AwsAccount{{
 			Identity: cloud.Identity{
 				Account:      "1",
@@ -152,7 +157,7 @@ func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 		}},
 		nil,
 		mockFactory(1,
-			func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
+			func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ ErrorPublisher) registry.FetchersMap {
 				ch <- fetching.ResourceInfo{
 					Resource:      mockResource(),
 					CycleMetadata: cycle.Metadata{Sequence: 1},
@@ -169,10 +174,13 @@ func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 func TestNewCisAwsOrganizationFetchers_CloseChannel(t *testing.T) {
 	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 
+	mep := NewMockErrorPublisher(t)
+
 	newCisAwsOrganizationFetchers(
 		t.Context(),
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
+		mep,
 		[]AwsAccount{{
 			Identity: cloud.Identity{
 				Account:      "1",
@@ -181,7 +189,7 @@ func TestNewCisAwsOrganizationFetchers_CloseChannel(t *testing.T) {
 		}},
 		nil,
 		mockFactory(1,
-			func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
+			func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ ErrorPublisher) registry.FetchersMap {
 				defer close(ch)
 				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
 			},
@@ -194,10 +202,14 @@ func TestNewCisAwsOrganizationFetchers_Cache(t *testing.T) {
 		"1": {"fetcher": registry.RegisteredFetcher{}},
 		"3": {"fetcher": registry.RegisteredFetcher{}},
 	}
+
+	mep := NewMockErrorPublisher(t)
+
 	m := newCisAwsOrganizationFetchers(
 		t.Context(),
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
+		mep,
 		[]AwsAccount{
 			{
 				Identity: cloud.Identity{
@@ -214,7 +226,7 @@ func TestNewCisAwsOrganizationFetchers_Cache(t *testing.T) {
 		},
 		cache,
 		mockFactory(1,
-			func(_ context.Context, _ *clog.Logger, _ aws.Config, _ chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
+			func(_ context.Context, _ *clog.Logger, _ aws.Config, _ chan fetching.ResourceInfo, identity *cloud.Identity, ep ErrorPublisher) registry.FetchersMap {
 				assert.Equal(t, "2", identity.Account)
 				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
 			},
@@ -241,6 +253,6 @@ func mockResource() *fetching.MockResource {
 
 func mockFactory(times int, f awsFactory) awsFactory {
 	factory := mockAwsFactory{}
-	factory.EXPECT().Execute(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).RunAndReturn(f).Times(times)
+	factory.EXPECT().Execute(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).RunAndReturn(f).Times(times)
 	return factory.Execute
 }

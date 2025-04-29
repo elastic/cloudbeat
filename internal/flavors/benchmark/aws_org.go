@@ -33,6 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -51,6 +52,8 @@ type AWSOrg struct {
 	IAMProvider      iam.RoleGetter
 	IdentityProvider awslib.IdentityProviderGetter
 	AccountProvider  awslib.AccountProviderAPI
+	errorPublisher   ErrorPublisher
+	errorProcessor   *AWSErrorProcessor
 }
 
 func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -62,7 +65,7 @@ func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, a)
 }
 
 //revive:disable-next-line:function-result-limit
@@ -101,7 +104,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, ch, accounts, cache)
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, ch, accounts, cache, a.errorPublisher)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {
@@ -283,6 +286,15 @@ func (a *AWSOrg) checkDependencies() error {
 		return errors.New("aws account provider is uninitialized")
 	}
 	return nil
+}
+
+func (a *AWSOrg) Prepare(ctx context.Context, _ cycle.Metadata) error {
+	a.errorPublisher.Reset(ctx)
+	return nil
+}
+
+func (a *AWSOrg) ErrorProcessor() ErrorProcessor {
+	return a.errorProcessor
 }
 
 func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {

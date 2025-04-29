@@ -141,3 +141,7 @@ func (k *EKS) checkDependencies() error {
 	}
 	return nil
 }
+
+func (k *EKS) ErrorProcessor() ErrorProcessor {
+	return NOOPErrorProcessor{}
+}

@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
@@ -49,7 +50,7 @@ func (g *GCP) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Co
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
 		builder.WithManagerTimeout(cfg.Period),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, manager.NOOPPreflight{})
 }
 
 //revive:disable-next-line:function-result-limit
@@ -90,4 +91,8 @@ func (g *GCP) checkDependencies() error {
 		return errors.New("gcp asset inventory is uninitialized")
 	}
 	return nil
+}
+
+func (g *GCP) ErrorProcessor() ErrorProcessor {
+	return NOOPErrorProcessor{}
 }

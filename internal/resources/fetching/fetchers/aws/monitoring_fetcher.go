@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -31,11 +32,12 @@ import (
 )
 
 type MonitoringFetcher struct {
-	log           *clog.Logger
-	provider      monitoring.Client
-	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *cloud.Identity
-	securityhub   securityhub.Service
+	log            *clog.Logger
+	provider       monitoring.Client
+	resourceCh     chan fetching.ResourceInfo
+	cloudIdentity  *cloud.Identity
+	securityhub    securityhub.Service
+	errorPublisher errorhandler.ErrorPublisher
 }
 
 type MonitoringResource struct {
@@ -47,13 +49,14 @@ type SecurityHubResource struct {
 	securityhub.SecurityHub
 }
 
-func NewMonitoringFetcher(log *clog.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *cloud.Identity) *MonitoringFetcher {
+func NewMonitoringFetcher(log *clog.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *cloud.Identity, errorPublisher errorhandler.ErrorPublisher) *MonitoringFetcher {
 	return &MonitoringFetcher{
-		log:           log,
-		provider:      provider,
-		securityhub:   securityHubProvider,
-		resourceCh:    ch,
-		cloudIdentity: identity,
+		log:            log,
+		provider:       provider,
+		securityhub:    securityHubProvider,
+		resourceCh:     ch,
+		cloudIdentity:  identity,
+		errorPublisher: errorPublisher,
 	}
 }
 
@@ -62,6 +65,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
 		m.log.Errorf("failed to aggregate monitoring resources: %v", err)
+		checkMissingPermissions(ctx, m.errorPublisher, err)
 	}
 	if out != nil {
 		m.resourceCh <- fetching.ResourceInfo{
@@ -72,6 +76,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	hubs, err := m.securityhub.Describe(ctx)
 	if err != nil {
 		m.log.Errorf("failed to describe security hub: %v", err)
+		checkMissingPermissions(ctx, m.errorPublisher, err)
 		return nil
 	}
 

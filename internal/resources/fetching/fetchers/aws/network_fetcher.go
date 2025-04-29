@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -28,9 +29,10 @@ import (
 )
 
 type NetworkFetcher struct {
-	log        *clog.Logger
-	ec2Client  ec2.ElasticCompute
-	resourceCh chan fetching.ResourceInfo
+	log            *clog.Logger
+	ec2Client      ec2.ElasticCompute
+	resourceCh     chan fetching.ResourceInfo
+	errorPublisher errorhandler.ErrorPublisher
 }
 
 type ACLFetcherConfig struct {
@@ -41,11 +43,12 @@ type NetworkResource struct {
 	awslib.AwsResource
 }
 
-func NewNetworkFetcher(log *clog.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo) *NetworkFetcher {
+func NewNetworkFetcher(log *clog.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo, errorPublisher errorhandler.ErrorPublisher) *NetworkFetcher {
 	return &NetworkFetcher{
-		log:        log,
-		ec2Client:  ec2Client,
-		resourceCh: ch,
+		log:            log,
+		ec2Client:      ec2Client,
+		resourceCh:     ch,
+		errorPublisher: errorPublisher,
 	}
 }
 
@@ -98,22 +101,26 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 	nacl, err := client.DescribeNetworkAcl(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe network acl: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	}
 	resources = append(resources, nacl...)
 
 	securityGroups, err := client.DescribeSecurityGroups(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe security groups: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	}
 	resources = append(resources, securityGroups...)
 	vpcs, err := client.DescribeVpcs(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe vpcs: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	}
 	resources = append(resources, vpcs...)
 	ebsEncryption, err := client.GetEbsEncryptionByDefault(ctx)
 	if err != nil {
 		f.log.Errorf("failed to get ebs encryption by default: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	}
 
 	if ebsEncryption != nil {
