@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -36,6 +37,7 @@ type LoggingFetcher struct {
 	configserviceProvider configservice.ConfigService
 	resourceCh            chan fetching.ResourceInfo
 	cloudIdentity         *cloud.Identity
+	errorPublisher        errorhandler.ErrorPublisher
 }
 
 type LoggingResource struct {
@@ -53,6 +55,7 @@ func NewLoggingFetcher(
 	configserviceProvider configservice.ConfigService,
 	ch chan fetching.ResourceInfo,
 	identity *cloud.Identity,
+	errorPublisher errorhandler.ErrorPublisher,
 ) *LoggingFetcher {
 	return &LoggingFetcher{
 		log:                   log,
@@ -60,6 +63,7 @@ func NewLoggingFetcher(
 		configserviceProvider: configserviceProvider,
 		resourceCh:            ch,
 		cloudIdentity:         identity,
+		errorPublisher:        errorPublisher,
 	}
 }
 
@@ -68,6 +72,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata)
 	trails, err := f.loggingProvider.DescribeTrails(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe trails: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	}
 
 	for _, resource := range trails {
@@ -82,6 +87,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata)
 	configs, err := f.configserviceProvider.DescribeConfigRecorders(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe config recorders: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 		return nil
 	}
 

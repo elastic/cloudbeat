@@ -30,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/internal/uniqueness"
@@ -66,10 +67,12 @@ func TestBase_Build_Success(t *testing.T) {
 
 			resourceCh := make(chan fetching.ResourceInfo)
 			reg := registry.NewMockRegistry(t)
+			mpf := manager.NewMockPreflight(t)
+			mpf.EXPECT().Prepare(mock.Anything, mock.Anything).Return(nil)
 			benchmark, err := New(tt.opts...).Build(context.Background(), log, &config.Config{
 				BundlePath: path,
 				Period:     time.Minute,
-			}, resourceCh, reg)
+			}, resourceCh, reg, mpf)
 			require.NoError(t, err)
 			assert.IsType(t, tt.benchType, benchmark)
 

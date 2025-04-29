@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/beats/v7/libbeat/management/status"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -35,10 +36,25 @@ const (
 
 // flavorBase configuration.
 type flavorBase struct {
-	ctx       context.Context //nolint:containedctx
-	cancel    context.CancelFunc
-	config    *config.Config
-	client    beat.Client
-	log       *clog.Logger
-	publisher *Publisher
+	ctx          context.Context //nolint:containedctx
+	cancel       context.CancelFunc
+	config       *config.Config
+	client       beat.Client
+	log          *clog.Logger
+	publisher    *Publisher
+	errorHandler ErrorHandler
+}
+
+type ErrorHandler interface {
+	ErrorPublisher
+	Start(ctx context.Context)
+	Stop()
+}
+
+type ErrorProcessor interface {
+	Process(status.StatusReporter, error)
+}
+
+type ErrorPublisher interface {
+	Publish(ctx context.Context, err error)
 }
