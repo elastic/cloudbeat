@@ -83,12 +83,19 @@ type GcpConfig struct {
 	// SingleAccount or OrganizationAccount
 	AccountType string `config:"account_type"`
 
+	GcpCallOpt GcpCallOpt `config:"call_options"`
+
 	GcpClientOpt `config:"credentials"`
 }
 
 type GcpClientOpt struct {
 	CredentialsJSON     string `config:"credentials_json"`
 	CredentialsFilePath string `config:"credentials_file_path"`
+}
+
+type GcpCallOpt struct {
+	ListAssetsTimeout  time.Duration `config:"list_assets_timeout"`
+	ListAssetsPageSize int32         `config:"list_assets_page_size"`
 }
 
 type AzureConfig struct {
@@ -180,6 +187,9 @@ func New(cfg *config.C) (*Config, error) {
 func defaultConfig() (*Config, error) {
 	ret := &Config{
 		Period: 4 * time.Hour,
+		CloudConfig: CloudConfig{
+			Gcp: defaultGCPConfig(),
+		},
 	}
 
 	bundle, err := getBundlePath()
@@ -189,6 +199,20 @@ func defaultConfig() (*Config, error) {
 
 	ret.BundlePath = bundle
 	return ret, nil
+}
+
+func defaultGCPConfig() GcpConfig {
+	return GcpConfig{
+		GcpCallOpt: GcpCallOpt{
+			// default value on a par with gcp sdk
+			// https://github.com/googleapis/google-cloud-go/blob/952cd7fd419af9eb74f5d30a111ae936094b0645/asset/apiv1/asset_client.go#L96
+			ListAssetsTimeout: 60 * time.Second,
+
+			// default value from sdk is 100; we use 200
+			// https://github.com/googleapis/google-cloud-go/blob/a6c85f6387ee6aa291e786c882637fb03f3302f4/asset/apiv1/assetpb/asset_service.pb.go#L767-L769
+			ListAssetsPageSize: 200,
+		},
+	}
 }
 
 func getBundlePath() (string, error) {
