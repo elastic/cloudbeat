@@ -137,7 +137,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpCon
 			if req.PageSize == 0 {
 				req.PageSize = cfg.GcpCallOpt.ListAssetsPageSize
 			}
-			return client.ListAssets(ctx, req, append(opts, RetryOnResourceExhausted, gax.WithTimeout(cfg.GcpCallOpt.ListAssetsTimeout))...)
+			return client.ListAssets(ctx, req, append(opts, GAXCallOptionRetrier(log), gax.WithTimeout(cfg.GcpCallOpt.ListAssetsTimeout))...)
 		},
 	}
 
