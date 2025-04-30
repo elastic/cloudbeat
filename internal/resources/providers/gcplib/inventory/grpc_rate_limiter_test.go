@@ -21,10 +21,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/googleapis/gax-go/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/time/rate"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type RateLimiterTestSuite struct {
@@ -60,4 +67,26 @@ func (s *RateLimiterTestSuite) TestRateLimiterWait() {
 	actualDuration := endTime.Sub(startTime)
 	minDuration := duration * time.Duration((totalRequests - 1)) // 1st request is instant, 2nd and above wait 1duration each
 	s.GreaterOrEqual(actualDuration, minDuration)
+}
+
+func TestGAXCallOptionRetrier(t *testing.T) {
+	log := testhelper.NewObserverLogger(t)
+	r := GAXCallOptionRetrier(log)
+	settings := gax.CallSettings{}
+	r.Resolve(&settings)
+
+	c := []codes.Code{
+		codes.ResourceExhausted,
+		codes.DeadlineExceeded,
+		codes.Unavailable,
+	}
+
+	for _, code := range c {
+		pause, shouldRetry := settings.Retry().Retry(status.New(code, "error").Err())
+		require.True(t, shouldRetry)
+		require.True(t, pause < 1*time.Minute && pause > 0)
+	}
+
+	logs := logp.ObserverLogs().FilterMessageSnippet("gax Retryer retries based on error").All()
+	assert.Len(t, logs, len(c))
 }
