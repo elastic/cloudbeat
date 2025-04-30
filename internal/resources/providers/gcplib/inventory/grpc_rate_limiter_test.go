@@ -21,17 +21,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/time/rate"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type RateLimiterTestSuite struct {

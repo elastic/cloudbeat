@@ -543,14 +543,3 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	s.Equal("AssetName1", value[0].Policies[0].Name)
 	s.Equal("AssetName2", value[0].Policies[1].Name)
 }
-
-type fakeAssetServer struct {
-	assetpb.UnimplementedAssetServiceServer
-}
-
-func (*fakeAssetServer) ListAssets(ctx context.Context, req *assetpb.ListAssetsRequest) (*assetpb.ListAssetsResponse, error) {
-	return nil, nil
-}
-
-func TestAssetsInventoryWrapper(t *testing.T) {
-}
