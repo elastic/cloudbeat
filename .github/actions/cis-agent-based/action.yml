@@ -145,6 +145,7 @@ runs:
       working-directory: deploy/deployment-manager
       env:
         SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-acc"
       run: |
           # Deploys a GCP Service Account
           ./deploy_service_account.sh
