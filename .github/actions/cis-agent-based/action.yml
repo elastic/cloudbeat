@@ -138,6 +138,18 @@ runs:
         unset ENROLLMENT_TOKEN
         just deploy-cloudformation
 
+    - name: Create GCP Service Account
+      id: create-service-account
+      if: ${{ !cancelled() && steps.deploy-cis-infra.outcome == 'success' }}
+      shell: bash
+      working-directory: deploy/deployment-manager
+      env:
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
+      run: |
+          # Deploys a GCP Service Account
+          ./deploy_service_account.sh
+          mv KEY_FILE.json "../../tests/integrations_setup"
+
     - name: Install CSPM GCP integration
       id: cspm-gcp-integration
       if: ${{ !cancelled() && steps.deploy-cis-infra.outcome == 'success' }}
@@ -147,6 +159,7 @@ runs:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
+        SERVICE_ACCOUNT_JSON_PATH: "KEY_FILE.json"
       run: |
         poetry run python ./install_cspm_gcp_integration.py
 
@@ -159,6 +172,7 @@ runs:
         ACTOR: ${{ github.actor }}
         DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
         GCP_ZONE: "${{ inputs.cspm-gcp-zone }}"
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
       run: |
         # GCP labeling rules:
         # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
