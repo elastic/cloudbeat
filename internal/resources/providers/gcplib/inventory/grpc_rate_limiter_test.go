@@ -18,6 +18,7 @@
 package inventory
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -85,6 +86,14 @@ func TestGAXCallOptionRetrier(t *testing.T) {
 		pause, shouldRetry := settings.Retry().Retry(status.New(code, "error").Err())
 		require.True(t, shouldRetry)
 		require.True(t, pause < 1*time.Minute && pause > 0)
+	}
+
+	// should not retry
+	errs := []error{status.New(codes.Aborted, "error").Err(), status.New(codes.Canceled, "error").Err(), errors.New("error")}
+	for _, err := range errs {
+		pause, shouldRetry := settings.Retry().Retry(err)
+		require.False(t, shouldRetry)
+		require.Equal(t, time.Duration(0), pause)
 	}
 
 	logs := logp.ObserverLogs().FilterMessageSnippet("gax Retryer retries based on error").All()
