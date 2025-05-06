@@ -126,6 +126,39 @@ config:
 				},
 			},
 		},
+		{ // GCP config with call_options.
+			config: `
+config:
+  v1:
+    type: cspm
+    deployment: gcp
+    benchmark: cis_gcp
+    gcp:
+      project_id: abc123
+      organization_id: efg456
+      account_type: organization-account
+      credentials:
+        credentials_file_path: /tmp/creds.json
+      call_options:
+        list_assets_timeout: 6m
+        list_assets_page_size: 500
+`,
+			expectedType: "cis_gcp",
+			expectedCloudConfig: CloudConfig{
+				Gcp: GcpConfig{
+					ProjectId:      "abc123",
+					OrganizationId: "efg456",
+					AccountType:    "organization-account",
+					GcpClientOpt: GcpClientOpt{
+						CredentialsFilePath: "/tmp/creds.json",
+					},
+					GcpCallOpt: GcpCallOpt{
+						ListAssetsTimeout:  6 * time.Minute,
+						ListAssetsPageSize: 500,
+					},
+				},
+			},
+		},
 		{ // GCP with overwrite env vars
 			overwriteEnvs: func(t *testing.T) {
 				t.Helper()
