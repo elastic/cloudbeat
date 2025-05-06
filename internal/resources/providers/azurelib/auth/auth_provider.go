@@ -28,7 +28,6 @@ type AzureAuthProvider struct{}
 
 type AzureAuthProviderAPI interface {
 	FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error)
-	FindUsernamePasswordCredentials(tenantID string, clientID string, username string, password string, options *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error)
 	FindClientSecretCredentials(tenantID string, clientID string, clientSecret string, options *azidentity.ClientSecretCredentialOptions) (*azidentity.ClientSecretCredential, error)
 	FindCertificateCredential(tenantID string, clientID string, certPath string, password string, options *azidentity.ClientCertificateCredentialOptions) (*azidentity.ClientCertificateCredential, error)
 }
@@ -36,11 +35,6 @@ type AzureAuthProviderAPI interface {
 // FindDefaultCredentials is a wrapper around azidentity.NewDefaultAzureCredential to make it easier to mock
 func (a *AzureAuthProvider) FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error) {
 	return azidentity.NewDefaultAzureCredential(options)
-}
-
-// FindUsernamePasswordCredentials is a wrapper around azidentity.NewUsernamePasswordCredential to make it easier to mock
-func (a *AzureAuthProvider) FindUsernamePasswordCredentials(tenantID string, clientID string, username string, password string, options *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error) {
-	return azidentity.NewUsernamePasswordCredential(tenantID, clientID, username, password, options)
 }
 
 // FindClientSecretCredentials is a wrapper around azidentity.NewClientSecretCredential to make it easier to mock

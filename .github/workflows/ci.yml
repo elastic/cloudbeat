@@ -11,7 +11,6 @@ on:
     branches:
       - main
       - "[0-9]+.[0-9]+"
-      - "8.x"
   workflow_dispatch:
 
 concurrency:
@@ -206,7 +205,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
         with:
           tool-cache: false
           android: true
@@ -240,7 +239,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
         with:
           tool-cache: false
           android: true
@@ -290,7 +289,7 @@ jobs:
             values-file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
         with:
           tool-cache: false
           android: true
@@ -359,7 +358,7 @@ jobs:
 
       - name: Publish allure report
         if: ${{ always() }}
-        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1 # v2.9.0
+        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1  # v2.9.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: ${{ env.AWS_REGION }}
@@ -397,7 +396,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Comment test success result
-        uses: marocchino/sticky-pull-request-comment@52423e01640425a022ef5fd42c6fb5f633a02728 # v2
+        uses: marocchino/sticky-pull-request-comment@67d0dec7b07ed060a405f9b2a64b8ab319fdd7db # v2
         if: ${{ success() && github.event_name != 'push' }}
         with:
           header: CI Test Results
@@ -408,7 +407,7 @@ jobs:
 
       - if: ${{ success() }}
         name: Cleanup docker image artifacts
-        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b  # v5.1.0
         with:
           name: docker-images
           failOnError: false

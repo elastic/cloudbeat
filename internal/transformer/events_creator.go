@@ -38,8 +38,13 @@ import (
 const (
 	ecsCategoryConfiguration = "configuration"
 	ecsKindState             = "state"
-	ecsOutcomeSuccess        = "success"
 	ecsTypeInfo              = "info"
+)
+
+const (
+	EcsOutcomeSuccess = "success"
+	EcsOutcomeFailure = "failure"
+	EcsOutcomeUnknown = "unknown"
 )
 
 type Transformer struct {
@@ -107,7 +112,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			Timestamp: timestamp,
 
 			Fields: mapstr.M{
-				"event":    BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
+				"event":    BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}, getEcsOutcome(finding.Result.Evaluation)),
 				"resource": resource,
 				"result":   finding.Result,
 				"rule":     finding.Rule,
@@ -142,7 +147,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	return events, nil
 }
 
-func BuildECSEvent(seq int64, created time.Time, categories []string) ECSEvent {
+func BuildECSEvent(seq int64, created time.Time, categories []string, outcome string) ECSEvent {
 	id, _ := uuid.NewV4() // zero value in case of an error is uuid.Nil
 	return ECSEvent{
 		Category: categories,
@@ -150,7 +155,18 @@ func BuildECSEvent(seq int64, created time.Time, categories []string) ECSEvent {
 		ID:       id.String(),
 		Kind:     ecsKindState,
 		Sequence: seq,
-		Outcome:  ecsOutcomeSuccess,
+		Outcome:  outcome,
 		Type:     []string{ecsTypeInfo},
+	}
+}
+
+func getEcsOutcome(evaluation string) string {
+	switch evaluation {
+	case "failed":
+		return EcsOutcomeFailure
+	case "passed":
+		return EcsOutcomeSuccess
+	default:
+		return EcsOutcomeUnknown
 	}
 }

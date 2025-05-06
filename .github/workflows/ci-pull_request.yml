@@ -5,13 +5,11 @@ on:
     branches:
       - main
       - "[0-9]+.[0-9]+"
-      - "8.x"
     types: [opened, synchronize, reopened]
   push:
     branches:
       - main
       - "[0-9]+.[0-9]+"
-      - "8.x"
   workflow_dispatch:
 
 concurrency:
