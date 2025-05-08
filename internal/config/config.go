@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/launcher"
 )
 
@@ -266,15 +267,24 @@ const (
 )
 
 func overwritesFromEnvVars(c *Config) {
+	log := clog.NewLogger("config")
+	logErr := func(name string, value string, err error) {
+		log.Errorf("error trying to parse variable %s with value %s: %s", name, value, err.Error())
+	}
+
 	if v, exists := os.LookupEnv(CloudbeatGCPListAssetPageSizeEnvVar); exists {
 		if i, err := strconv.ParseInt(v, 10, 32); err == nil {
 			c.CloudConfig.Gcp.GcpCallOpt.ListAssetsPageSize = int32(i)
+		} else {
+			logErr(CloudbeatGCPListAssetPageSizeEnvVar, v, err)
 		}
 	}
 
 	if v, exists := os.LookupEnv(CloudbeatGCPListAssetTimeoutEnvVar); exists {
 		if d, err := time.ParseDuration(v); err == nil {
 			c.CloudConfig.Gcp.GcpCallOpt.ListAssetsTimeout = d
+		} else {
+			logErr(CloudbeatGCPListAssetPageSizeEnvVar, v, err)
 		}
 	}
 }
