@@ -78,7 +78,7 @@ if __name__ == "__main__":
         service_account_json = read_json(json_path)
         INTEGRATION_INPUT["vars"]["gcp.credentials.json"] = json.dumps(service_account_json)
 
-        if version.parse(package_version) >= version.parse("1.12"):
+        if version.parse(package_version) > version.parse("1.12"):
             INTEGRATION_INPUT["vars"].update(
                 {
                     "gcp.project_id": cnfg.gcp_dm_config.project_id,
