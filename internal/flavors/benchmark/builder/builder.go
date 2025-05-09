@@ -26,6 +26,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/common"
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/rule_ecs"
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -86,7 +87,9 @@ func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.C
 		return nil, err
 	}
 
-	transformer := transformer.NewTransformer(log, cfg, b.bdp, cdp, b.idp)
+	rep := rule_ecs.NewDataProvider()
+
+	transformer := transformer.NewTransformer(log, cfg, b.bdp, cdp, b.idp, rep)
 	return &basebenchmark{
 		log:         log,
 		manager:     manager,
