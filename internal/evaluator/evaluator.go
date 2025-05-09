@@ -53,6 +53,7 @@ type Result struct {
 
 type Rule struct {
 	Id                    string    `json:"id"`
+	UUID                  string    `json:"uuid"`
 	Name                  string    `json:"name"`
 	Profile_Applicability string    `json:"profile_applicability"`
 	Description           string    `json:"description"`
@@ -61,6 +62,7 @@ type Rule struct {
 	Remediation           string    `json:"remediation"`
 	Impact                string    `json:"impact"`
 	Default_Value         string    `json:"default_value"`
+	Reference             string    `json:"reference"`
 	References            string    `json:"references"`
 	Section               string    `json:"section"`
 	Version               string    `json:"version"`
