@@ -96,6 +96,6 @@ func TestGAXCallOptionRetrier(t *testing.T) {
 		require.Equal(t, time.Duration(0), pause)
 	}
 
-	logs := logp.ObserverLogs().FilterMessageSnippet("gax Retryer retries based on error").All()
+	logs := logp.ObserverLogs().FilterMessageSnippet("gax retryer attempt").All()
 	assert.Len(t, logs, len(c))
 }

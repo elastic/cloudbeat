@@ -272,7 +272,8 @@ func overwritesFromEnvVars(c *Config) {
 	logErr := func(name string, value string, err error) {
 		log.Errorw(
 			"error trying to parse config env variable",
-			logp.String(name, value),
+			logp.String("name", name),
+			logp.String("value", value),
 			logp.Error(err),
 		)
 	}
