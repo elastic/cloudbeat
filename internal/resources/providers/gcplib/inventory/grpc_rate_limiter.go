@@ -27,6 +27,7 @@ import (
 	"google.golang.org/grpc/codes"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 // retryer wraps another gax Retryer and logs each retry attempt.
@@ -44,7 +45,11 @@ func (r retryer) Retry(err error) (time.Duration, bool) {
 		if err != nil {
 			s = err.Error()
 		}
-		r.log.Debugf("gax Retryer retries based on error (%s) pause %s", s, pause.String())
+		r.log.Debugw(
+			"gax retryer attempt",
+			logp.String("error", s),
+			logp.Duration("pause", pause),
+		)
 	}
 
 	return pause, shouldRetry
