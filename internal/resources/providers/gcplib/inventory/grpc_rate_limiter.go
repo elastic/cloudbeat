@@ -21,13 +21,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 // retryer wraps another gax Retryer and logs each retry attempt.
