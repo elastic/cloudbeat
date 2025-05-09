@@ -194,11 +194,15 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(resource.Raw, "raw resource is missing")
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
 				s.Equal("test_resource_id", resource.ID)
-				s.NotEmpty(resource.Type, "resource  type is missing")
+				s.NotEmpty(resource.Type, "resource type is missing")
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
 				s.Equal(event.Fields["cloudbeat"], versionInfo)
 				s.Equal(enrichedValue, event.Fields[enrichedKey])
 				s.Regexp("^Rule \".*\": (passed|failed)$", event.Fields["message"], "event message is not correct")
+
+				rule := event.Fields["rule"].(evaluator.Rule)
+				s.Equal(rule.Id, rule.UUID)
+				s.Equal(rule.References, rule.Reference)
 			}
 		})
 	}
