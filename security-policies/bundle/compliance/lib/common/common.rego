@@ -41,6 +41,12 @@ collect_evidence(resource, key_paths) := {key: evidence |
 	evidence := object.get(resource, path, resource)
 }
 
+# get different evidence based on the evaluation
+get_evidence(ok, passed, failed) := result if {
+	ok == true
+	result = passed
+} else := failed
+
 # If value is not an array, enclose it in one
 ensure_array(value) := [value] if {
 	not is_array(value)
