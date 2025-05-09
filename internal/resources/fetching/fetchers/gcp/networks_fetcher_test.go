@@ -36,55 +36,46 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
-const projectId = "test-project"
-
-type GcpMonitoringFetcherTestSuite struct {
+type GcpNetworksFetcherTestSuite struct {
 	suite.Suite
 
 	resourceCh chan fetching.ResourceInfo
 }
 
-func TestGcpMonitoringFetcherTestSuite(t *testing.T) {
-	s := new(GcpMonitoringFetcherTestSuite)
+func TestGcpNetworksFetcherTestSuite(t *testing.T) {
+	s := new(GcpNetworksFetcherTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *GcpMonitoringFetcherTestSuite) SetupTest() {
+func (s *GcpNetworksFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
-func (s *GcpMonitoringFetcherTestSuite) TearDownTest() {
+func (s *GcpNetworksFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpMonitoringFetcherTestSuite) TestMonitoringFetcher_Fetch_Success() {
+func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 	ctx := context.Background()
 	wg := sync.WaitGroup{}
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := NewGcpMonitoringFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
-	expectedAsset := &inventory.MonitoringAsset{
-		Alerts: []*inventory.ExtendedGcpAsset{
-			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.MonitoringAlertPolicyAssetType}},
-		},
-		LogMetrics: []*inventory.ExtendedGcpAsset{
-			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.MonitoringLogMetricAssetType}},
-		},
+	fetcher := NewGcpNetworksFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
+	expectedAsset := &inventory.ExtendedGcpAsset{
+		Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.MonitoringAlertPolicyAssetType},
 		CloudAccount: &fetching.CloudAccountMetadata{
 			AccountId: "1",
 		},
 	}
-
 	mockInventoryService.EXPECT().Clear()
-	mockInventoryService.On("ListMonitoringAssets", mock.Anything, mock.Anything).
+	mockInventoryService.On("ListNetworkAssets", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			ch := args.Get(1).(chan<- *inventory.MonitoringAsset)
+			ch := args.Get(1).(chan<- *inventory.ExtendedGcpAsset)
 			ch <- expectedAsset
 			close(ch)
 		}).Once()
 
 	wg.Add(1)
-
 	go func() {
 		defer wg.Done()
 		err := fetcher.Fetch(ctx, cycle.Metadata{})
@@ -93,47 +84,45 @@ func (s *GcpMonitoringFetcherTestSuite) TestMonitoringFetcher_Fetch_Success() {
 
 	res := <-s.resourceCh
 	s.NotNil(res.Resource)
-	asset, ok := res.Resource.(*GcpMonitoringAsset)
+	asset, ok := res.Resource.(*GcpNetworksAsset)
 	s.True(ok)
-	s.Len(asset.Asset.Alerts, 1)
-	s.Len(asset.Asset.LogMetrics, 1)
-	s.Equal(expectedAsset.Alerts, asset.Asset.Alerts)
-	s.Equal(expectedAsset.LogMetrics, asset.Asset.LogMetrics)
-	s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
-	s.Equal(fetching.MonitoringIdentity, asset.Type)
-	s.Equal(fetching.GcpMonitoringType, asset.subType)
+	s.Equal(expectedAsset, asset.NetworkAsset)
+	s.Equal(fetching.CloudCompute, asset.Type)
+	s.Equal("gcp-compute-network", asset.subType)
+
 	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
 }
 
-func TestMonitoringResource_GetMetadata(t *testing.T) {
+func TestNetworksResource_GetMetadata(t *testing.T) {
 	tests := []struct {
 		name     string
-		resource GcpMonitoringAsset
+		resource GcpNetworksAsset
 		want     fetching.ResourceMetadata
 		wantErr  bool
 	}{
 		{
 			name: "happy path",
-			resource: GcpMonitoringAsset{
-				Type:    fetching.MonitoringIdentity,
-				subType: fetching.GcpMonitoringType,
-				Asset: &inventory.MonitoringAsset{
+			resource: GcpNetworksAsset{
+				Type:    fetching.CloudCompute,
+				subType: "gcp-compute-network",
+				NetworkAsset: &inventory.ExtendedGcpAsset{
+					Asset: &assetpb.Asset{
+						Name: fmt.Sprintf("%s/net1", projectId),
+					},
 					CloudAccount: &fetching.CloudAccountMetadata{
 						AccountId:        projectId,
 						AccountName:      "a",
 						OrganisationId:   "a",
 						OrganizationName: "a",
 					},
-					LogMetrics: []*inventory.ExtendedGcpAsset{},
-					Alerts:     []*inventory.ExtendedGcpAsset{},
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
-				Name:    fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
-				Type:    fetching.MonitoringIdentity,
-				SubType: fetching.GcpMonitoringType,
+				ID:      fmt.Sprintf("%s/net1", projectId),
+				Name:    "net1",
+				Type:    fetching.CloudCompute,
+				SubType: "gcp-compute-network",
 				Region:  gcplib.GlobalRegion,
 				CloudAccountMetadata: fetching.CloudAccountMetadata{
 					AccountId:        projectId,

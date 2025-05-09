@@ -19,7 +19,6 @@ package fetchers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -28,47 +27,47 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
-type GcpPoliciesFetcher struct {
+type GcpNetworksFetcher struct {
 	log        *clog.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
 }
 
-type GcpPoliciesAsset struct {
+type GcpNetworksAsset struct {
 	Type    string
 	subType string
 
-	Asset *inventory.ProjectPoliciesAsset `json:"assets,omitempty"`
+	NetworkAsset *inventory.ExtendedGcpAsset `json:"asset,omitempty"`
 }
 
-func NewGcpPoliciesFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpPoliciesFetcher {
-	return &GcpPoliciesFetcher{
+func NewGcpNetworksFetcher(_ context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpNetworksFetcher {
+	return &GcpNetworksFetcher{
 		log:        log,
 		resourceCh: ch,
 		provider:   provider,
 	}
 }
 
-func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
-	f.log.Info("Starting GcpPoliciesFetcher.Fetch")
-	defer f.log.Info("GcpPoliciesFetcher.Fetch done")
+func (f *GcpNetworksFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
+	f.log.Info("Starting GcpNetworksFetcher.Fetch")
+	defer f.log.Info("GcpNetworksFetcher.Fetch done")
 	defer f.provider.Clear()
 
-	resultsCh := make(chan *inventory.ProjectPoliciesAsset)
-	go f.provider.ListProjectsAncestorsPolicies(ctx, resultsCh)
+	resultsCh := make(chan *inventory.ExtendedGcpAsset)
+	go f.provider.ListNetworkAssets(ctx, resultsCh)
 
 	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
-			f.log.Debugf("GcpPoliciesFetcher.Fetch context done: %v", ctx.Err())
+			f.log.Debugf("GcpNetworksFetcher.Fetch context done: %v", ctx.Err())
 			return nil
 
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cycleMetadata,
-			Resource: &GcpPoliciesAsset{
-				Type:    fetching.ProjectManagement,
-				subType: fetching.GcpPolicies,
-				Asset:   asset,
+			Resource: &GcpNetworksAsset{
+				Type:         fetching.CloudCompute,
+				subType:      "gcp-compute-network",
+				NetworkAsset: asset,
 			},
 		}:
 		}
@@ -76,35 +75,29 @@ func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	return nil
 }
 
-func (f *GcpPoliciesFetcher) Stop() {
+func (f *GcpNetworksFetcher) Stop() {
 	f.provider.Close()
 }
 
-func (g *GcpPoliciesAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := g.buildId()
+func (g *GcpNetworksAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:                   id,
+		ID:                   g.NetworkAsset.Name,
 		Type:                 g.Type,
 		SubType:              g.subType,
-		Name:                 id,
+		Name:                 getAssetResourceName(g.NetworkAsset),
 		Region:               gcplib.GlobalRegion,
-		CloudAccountMetadata: *g.Asset.CloudAccount,
+		CloudAccountMetadata: *g.NetworkAsset.CloudAccount,
 	}, nil
 }
 
-func (g *GcpPoliciesAsset) buildId() string {
-	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.CloudAccount.AccountId)
-	return id
+func (g *GcpNetworksAsset) GetData() any {
+	return g.NetworkAsset
 }
 
-func (g *GcpPoliciesAsset) GetData() any {
-	return g.Asset.Policies
+func (g *GcpNetworksAsset) GetIds() []string {
+	return []string{g.NetworkAsset.Name}
 }
 
-func (g *GcpPoliciesAsset) GetIds() []string {
-	return []string{g.buildId()}
-}
-
-func (g *GcpPoliciesAsset) GetElasticCommonData() (map[string]any, error) {
+func (g *GcpNetworksAsset) GetElasticCommonData() (map[string]any, error) {
 	return nil, nil
 }

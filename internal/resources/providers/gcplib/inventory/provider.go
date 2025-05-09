@@ -19,7 +19,6 @@ package inventory
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -27,7 +26,6 @@ import (
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
-	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -38,24 +36,15 @@ import (
 )
 
 type Provider struct {
-	log                       *clog.Logger
-	config                    auth.GcpFactoryConfig
-	inventory                 *AssetsInventoryWrapper
-	crm                       *ResourceManagerWrapper
-	cloudAccountMetadataCache *MapCache[*fetching.CloudAccountMetadata]
+	log       *clog.Logger
+	config    auth.GcpFactoryConfig
+	inventory *AssetsInventoryWrapper
+	crm       *ResourceManagerWrapper
 }
 
 type AssetsInventoryWrapper struct {
 	Close      func() error
 	ListAssets func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator
-}
-
-type ResourceManagerWrapper struct {
-	// returns project display name or an empty string
-	getProjectDisplayName func(ctx context.Context, parent string) string
-
-	// returns org display name or an empty string
-	getOrganizationDisplayName func(ctx context.Context, parent string) string
 }
 
 type MonitoringAsset struct {
@@ -64,19 +53,14 @@ type MonitoringAsset struct {
 	Alerts       []*ExtendedGcpAsset `json:"alerts,omitempty"`
 }
 
-type LoggingAsset struct {
-	CloudAccount *fetching.CloudAccountMetadata
-	LogSinks     []*ExtendedGcpAsset `json:"log_sinks,omitempty"`
-}
-
 type ProjectPoliciesAsset struct {
 	CloudAccount *fetching.CloudAccountMetadata
 	Policies     []*ExtendedGcpAsset `json:"policies,omitempty"`
 }
 
-type ServiceUsageAsset struct {
+type ProjectAssets struct {
 	CloudAccount *fetching.CloudAccountMetadata
-	Services     []*ExtendedGcpAsset `json:"services,omitempty"`
+	Assets       []*ExtendedGcpAsset
 }
 
 type ExtendedGcpAsset struct {
@@ -91,242 +75,357 @@ type dnsPolicyFields struct {
 	enableLogging bool
 }
 
-type TypeGenerator[T any] func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *T
-
 type Iterator interface {
 	Next() (*assetpb.Asset, error)
 }
 
 type ServiceAPI interface {
-	// ListAllAssetTypesByName List all content types of the given assets types
-	ListAllAssetTypesByName(ctx context.Context, assets []string) ([]*ExtendedGcpAsset, error)
-
-	// ListMonitoringAssets List all monitoring assets by project id
-	ListMonitoringAssets(ctx context.Context, monitoringAssetTypes map[string][]string) ([]*MonitoringAsset, error)
-
-	// ListLoggingAssets returns a list of logging assets grouped by project id, extended with folder and org level log sinks
-	ListLoggingAssets(ctx context.Context) ([]*LoggingAsset, error)
-
-	// ListServiceUsageAssets returns a list of service usage assets grouped by project id
-	ListServiceUsageAssets(ctx context.Context) ([]*ServiceUsageAsset, error)
-
-	// returns a project policies for all its ancestors
-	ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error)
-
-	// Close the GCP asset client
+	ListAssetTypes(ctx context.Context, assetTypes []string, out chan<- *ExtendedGcpAsset)
+	ListMonitoringAssets(ctx context.Context, out chan<- *MonitoringAsset)
+	ListProjectsAncestorsPolicies(ctx context.Context, out chan<- *ProjectPoliciesAsset)
+	ListProjectAssets(ctx context.Context, assetTypes []string, out chan<- *ProjectAssets)
+	ListNetworkAssets(ctx context.Context, out chan<- *ExtendedGcpAsset)
+	Clear()
 	Close() error
 }
 
 type ProviderInitializerAPI interface {
-	// Init initializes the GCP asset client
 	Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error)
 }
 
-func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
+func newAssetsInventoryWrapper(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (*AssetsInventoryWrapper, error) {
 	limiter := NewAssetsInventoryRateLimiter(log)
-	// initialize GCP assets inventory client
 	client, err := asset.NewClient(ctx, append(gcpConfig.ClientOpts, option.WithGRPCDialOption(limiter.GetInterceptorDialOption()))...)
 	if err != nil {
 		return nil, err
 	}
-	// wrap the assets inventory client for mocking
-	assetsInventoryWrapper := &AssetsInventoryWrapper{
+
+	return &AssetsInventoryWrapper{
 		Close: client.Close,
 		ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
 			return client.ListAssets(ctx, req, append(opts, RetryOnResourceExhausted)...)
 		},
-	}
-
-	// initialize GCP resource manager client
-	var gcpClientOpt []option.ClientOption
-	gcpClientOpt = append(append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope)), gcpConfig.ClientOpts...)
-	crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
-	if err != nil {
-		return nil, err
-	}
-
-	displayNamesCache := NewMapCache[string]()
-	// wrap the resource manager client for mocking
-	crmServiceWrapper := &ResourceManagerWrapper{
-		getProjectDisplayName: func(ctx context.Context, parent string) string {
-			return displayNamesCache.Get(func() string {
-				prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
-				if err != nil {
-					log.Errorf("error fetching GCP Project: %s, error: %s", parent, err)
-					return ""
-				}
-				return prj.DisplayName
-			}, parent)
-		},
-		getOrganizationDisplayName: func(ctx context.Context, parent string) string {
-			return displayNamesCache.Get(func() string {
-				org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
-				if err != nil {
-					log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
-					return ""
-				}
-				return org.DisplayName
-			}, parent)
-		},
-	}
-
-	return &Provider{
-		config:                    gcpConfig,
-		log:                       log,
-		inventory:                 assetsInventoryWrapper,
-		crm:                       crmServiceWrapper,
-		cloudAccountMetadataCache: NewMapCache[*fetching.CloudAccountMetadata](),
 	}, nil
 }
 
-func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []string) ([]*ExtendedGcpAsset, error) {
-	wg := sync.WaitGroup{}
-	var resourceAssets []*assetpb.Asset
-	var policyAssets []*assetpb.Asset
+func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
+	assetsInventory, err := newAssetsInventoryWrapper(ctx, log, gcpConfig)
+	if err != nil {
+		return nil, err
+	}
 
-	wg.Add(1)
-	go func() {
-		resourceAssets = p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
-			Parent:      p.config.Parent,
-			AssetTypes:  assetTypes,
-			ContentType: assetpb.ContentType_RESOURCE,
-		})
-		wg.Done()
-	}()
-	wg.Add(1)
-	go func() {
-		policyAssets = p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
-			Parent:      p.config.Parent,
-			AssetTypes:  assetTypes,
-			ContentType: assetpb.ContentType_IAM_POLICY,
-		})
-		wg.Done()
-	}()
+	cloudResourceManager, err := NewResourceManagerWrapper(ctx, log, gcpConfig)
+	if err != nil {
+		return nil, err
+	}
 
-	wg.Wait()
-
-	var assets []*assetpb.Asset
-	assets = append(append(assets, resourceAssets...), policyAssets...)
-	mergedAssets := mergeAssetContentType(assets)
-	extendedAssets := p.extendWithCloudMetadata(ctx, mergedAssets)
-	// Enrich network assets with dns policy
-	p.enrichNetworkAssets(ctx, extendedAssets)
-
-	return extendedAssets, nil
+	return &Provider{
+		config:    gcpConfig,
+		log:       log,
+		inventory: assetsInventory,
+		crm:       cloudResourceManager,
+	}, nil
 }
 
-// ListMonitoringAssets returns a list of monitoring assets grouped by project id
-func (p *Provider) ListMonitoringAssets(ctx context.Context, monitoringAssetTypes map[string][]string) ([]*MonitoringAsset, error) {
-	logMetrics, err := p.ListAllAssetTypesByName(ctx, monitoringAssetTypes["LogMetric"])
-	if err != nil {
-		return nil, err
-	}
+func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out chan<- *ExtendedGcpAsset) {
+	defer close(out)
 
-	alertPolicies, err := p.ListAllAssetTypesByName(ctx, monitoringAssetTypes["AlertPolicy"])
-	if err != nil {
-		return nil, err
-	}
+	resourceAssetsCh := p.fetchAssets(ctx, assetpb.ContentType_RESOURCE, assetTypes)
+	policiesAssetsCh := p.fetchAssets(ctx, assetpb.ContentType_IAM_POLICY, assetTypes)
+	assetsCh := p.mergeAssets(ctx, resourceAssetsCh, policiesAssetsCh)
 
-	typeGenerator := func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *MonitoringAsset {
-		return &MonitoringAsset{
-			LogMetrics: getAssetsByType(assets, MonitoringLogMetricAssetType),
-			Alerts:     getAssetsByType(assets, MonitoringAlertPolicyAssetType),
-			CloudAccount: &fetching.CloudAccountMetadata{
-				AccountId:        projectId,
-				AccountName:      projectName,
-				OrganisationId:   orgId,
-				OrganizationName: orgName,
-			},
+	for asset := range assetsCh {
+		select {
+		case <-ctx.Done():
+			return
+		case out <- asset:
 		}
 	}
-
-	var assets []*ExtendedGcpAsset
-	assets = append(append(assets, logMetrics...), alertPolicies...)
-	monitoringAssets := getAssetsByProject[MonitoringAsset](assets, p.log, typeGenerator)
-
-	return monitoringAssets, nil
 }
 
-// ListLoggingAssets returns a list of logging assets grouped by project id, extended with folder and org level log sinks
-func (p *Provider) ListLoggingAssets(ctx context.Context) ([]*LoggingAsset, error) {
-	logSinks, err := p.ListAllAssetTypesByName(ctx, []string{LogSinkAssetType})
-	if err != nil {
-		return nil, err
-	}
+func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *MonitoringAsset) {
+	defer close(out)
 
-	typeGenerator := func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *LoggingAsset {
-		return &LoggingAsset{
-			LogSinks: assets,
-			CloudAccount: &fetching.CloudAccountMetadata{
-				AccountId:        projectId,
-				AccountName:      projectName,
-				OrganisationId:   orgId,
-				OrganizationName: orgName,
-			},
+	projectsCh := p.getParentResources(ctx, p.config.Parent, []string{CrmProjectAssetType})
+
+	for project := range projectsCh {
+		if ctx.Err() != nil {
+			return
+		}
+		logsAssetCh := p.getParentResources(ctx, project.Ancestors[0], []string{MonitoringLogMetricAssetType})
+		alertsAssetCh := p.getParentResources(ctx, project.Ancestors[0], []string{MonitoringAlertPolicyAssetType})
+
+		var logAssets, alertAssets []*ExtendedGcpAsset
+		var wg sync.WaitGroup
+
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			logAssets = collect(logsAssetCh)
+		}()
+		go func() {
+			defer wg.Done()
+			alertAssets = collect(alertsAssetCh)
+		}()
+		wg.Wait()
+
+		p.log.Debugf("Listed %d log metrics and %d alert policies for %v\n", len(logAssets), len(alertAssets), project.Name)
+		if len(logAssets) == 0 && len(alertAssets) == 0 {
+			continue
+		}
+		out <- &MonitoringAsset{
+			LogMetrics:   logAssets,
+			Alerts:       alertAssets,
+			CloudAccount: project.CloudAccount,
 		}
 	}
-
-	loggingAssets := getAssetsByProject[LoggingAsset](logSinks, p.log, typeGenerator)
-	return loggingAssets, nil
 }
 
-// ListServiceUsageAssets returns a list of service usage assets grouped by project id
-func (p *Provider) ListServiceUsageAssets(ctx context.Context) ([]*ServiceUsageAsset, error) {
-	services, err := p.ListAllAssetTypesByName(ctx, []string{ServiceUsageAssetType})
-	if err != nil {
-		return nil, err
-	}
+func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context, out chan<- *ProjectPoliciesAsset) {
+	defer close(out)
 
-	typeGenerator := func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *ServiceUsageAsset {
-		return &ServiceUsageAsset{
-			Services: assets,
-			CloudAccount: &fetching.CloudAccountMetadata{
-				AccountId:        projectId,
-				AccountName:      projectName,
-				OrganisationId:   orgId,
-				OrganizationName: orgName,
-			},
+	projectsCh := make(chan *ExtendedGcpAsset)
+	policiesCache := &sync.Map{}
+
+	go p.getAllAssets(ctx, projectsCh, &assetpb.ListAssetsRequest{
+		Parent:      p.config.Parent,
+		AssetTypes:  []string{CrmProjectAssetType},
+		ContentType: assetpb.ContentType_IAM_POLICY,
+	})
+
+	for asset := range projectsCh {
+		select {
+		case <-ctx.Done():
+			return
+		case out <- &ProjectPoliciesAsset{
+			CloudAccount: asset.CloudAccount,
+			Policies:     append([]*ExtendedGcpAsset{asset}, p.getAssetAncestorsPolicies(ctx, asset.Ancestors[1:], policiesCache)...),
+		}:
 		}
 	}
+}
 
-	assets := getAssetsByProject[ServiceUsageAsset](services, p.log, typeGenerator)
-	return assets, nil
+func (p *Provider) ListProjectAssets(ctx context.Context, assetTypes []string, out chan<- *ProjectAssets) {
+	defer close(out)
+
+	projectsCh := p.getParentResources(ctx, p.config.Parent, []string{CrmProjectAssetType})
+
+	for project := range projectsCh {
+		if ctx.Err() != nil {
+			return
+		}
+		assets := collect(p.getParentResources(ctx, project.Ancestors[0], assetTypes))
+		p.log.Debugf("Listed %d resources of type: %v in %v\n", len(assets), assetTypes, project.Name)
+		if len(assets) == 0 {
+			continue
+		}
+		out <- &ProjectAssets{
+			Assets:       assets,
+			CloudAccount: project.CloudAccount,
+		}
+	}
+}
+
+func (p *Provider) ListNetworkAssets(ctx context.Context, out chan<- *ExtendedGcpAsset) {
+	defer close(out)
+
+	dnsPolicyAssetCh := p.getParentResources(ctx, p.config.Parent, []string{DnsPolicyAssetType})
+	networkAssetCh := p.getParentResources(ctx, p.config.Parent, []string{ComputeNetworkAssetType})
+
+	dnsPoliciesFields := decodeDnsPolicies(lo.Map(collect(dnsPolicyAssetCh), func(asset *ExtendedGcpAsset, _ int) *assetpb.Asset { return asset.Asset }))
+	for asset := range networkAssetCh {
+		select {
+		case <-ctx.Done():
+			return
+		case out <- enrichNetworkAsset(asset, dnsPoliciesFields):
+		}
+	}
 }
 
 func (p *Provider) Close() error {
 	return p.inventory.Close()
 }
 
-// enrichNetworkAssets enriches the network assets with dns policy if exists
-func (p *Provider) enrichNetworkAssets(ctx context.Context, assets []*ExtendedGcpAsset) {
-	networkAssets := getAssetsByType(assets, ComputeNetworkAssetType)
-	if len(networkAssets) == 0 {
-		p.log.Infof("no %s assets were listed", ComputeNetworkAssetType)
-		return
+func (p *Provider) Clear() {
+	p.crm.Clear()
+}
+
+func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []string, cache *sync.Map) []*ExtendedGcpAsset {
+	wg := sync.WaitGroup{}
+	var assets []*ExtendedGcpAsset
+	mu := sync.Mutex{}
+	for _, ancestor := range ancestors {
+		if value, ok := cache.Load(ancestor); ok {
+			if v, ok := value.([]*ExtendedGcpAsset); ok {
+				mu.Lock()
+				assets = append(assets, v...)
+				mu.Unlock()
+			}
+			continue
+		}
+		prjAncestorPolicyCh := make(chan *ExtendedGcpAsset)
+		var assetType string
+		if isFolder(ancestor) {
+			assetType = CrmFolderAssetType
+		}
+		if isOrganization(ancestor) {
+			assetType = CrmOrgAssetType
+		}
+		go p.getAllAssets(ctx, prjAncestorPolicyCh, &assetpb.ListAssetsRequest{
+			Parent:      ancestor,
+			AssetTypes:  []string{assetType},
+			ContentType: assetpb.ContentType_IAM_POLICY,
+		})
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ancestorPolicies := collect(prjAncestorPolicyCh)
+			cache.Store(ancestor, ancestorPolicies)
+			mu.Lock()
+			assets = append(assets, ancestorPolicies...)
+			mu.Unlock()
+		}()
 	}
-	dnsPolicyAssets := p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
-		Parent:      p.config.Parent,
-		AssetTypes:  []string{DnsPolicyAssetType},
+	wg.Wait()
+	p.log.Debugf("Listed %d policies for ancestors: %v\n", len(assets), ancestors)
+	return assets
+}
+
+func (p *Provider) getParentResources(ctx context.Context, parent string, assetTypes []string) <-chan *ExtendedGcpAsset {
+	ch := make(chan *ExtendedGcpAsset)
+	go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
+		Parent:      parent,
+		AssetTypes:  assetTypes,
 		ContentType: assetpb.ContentType_RESOURCE,
 	})
+	return ch
+}
 
-	if len(dnsPolicyAssets) == 0 {
-		p.log.Infof("no %s assets were listed, return original assets", DnsPolicyAssetType)
-		return
+func (p *Provider) fetchAssets(ctx context.Context, contentType assetpb.ContentType, assetTypes []string) <-chan *ExtendedGcpAsset {
+	out := make(chan *ExtendedGcpAsset)
+	wg := sync.WaitGroup{}
+	// Fetch each asset type separately to limit failures to a single type
+	for _, assetType := range assetTypes {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ch := make(chan *ExtendedGcpAsset)
+			go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
+				Parent:      p.config.Parent,
+				AssetTypes:  []string{assetType},
+				ContentType: contentType,
+			})
+			for asset := range ch {
+				out <- asset
+			}
+		}()
 	}
-	dnsPolicies := decodeDnsPolicies(dnsPolicyAssets)
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
+}
 
-	p.log.Infof("attempting to enrich %d %s assets with dns policy", len(assets), ComputeNetworkAssetType)
-	for _, networkAsset := range networkAssets {
-		networkAssetFields := networkAsset.GetResource().GetData().GetFields()
-		networkIdentifier := strings.TrimPrefix(networkAsset.GetName(), "//compute.googleapis.com")
+func (p *Provider) getAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsset, req *assetpb.ListAssetsRequest) {
+	defer close(out)
 
-		dnsPolicy := findDnsPolicyByNetwork(dnsPolicies, networkIdentifier)
-		if dnsPolicy != nil {
-			p.log.Infof("enrich a %s asset with dns policy, name: %s", ComputeNetworkAssetType, networkIdentifier)
-			networkAssetFields["enabledDnsLogging"] = &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: dnsPolicy.enableLogging}}
+	p.log.Infof("Listing %v assets of types: %v for %v\n", req.ContentType, req.AssetTypes, req.Parent)
+	it := p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
+		Parent:      req.Parent,
+		AssetTypes:  req.AssetTypes,
+		ContentType: req.ContentType,
+	})
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			p.log.Infof("Finished fetching GCP %v of types: %v for %v\n", req.ContentType, req.AssetTypes, req.Parent)
+			return
 		}
+
+		if err != nil {
+			p.log.Errorf("Error fetching GCP %v of types: %v for %v: %v\n", req.ContentType, req.AssetTypes, req.Parent, err)
+			return
+		}
+
+		p.log.Debugf("Fetched GCP %v of type %v: %v\n", req.ContentType, response.AssetType, response.Name)
+		out <- p.newGcpExtendedAsset(ctx, response)
 	}
+}
+
+// merge by asset name. send assets with both resource & policy if both channels are open.
+// if one channel closes, send remaining assets from the other. finally, flush remaining assets.
+//
+//revive:disable-next-line
+func (p *Provider) mergeAssets(ctx context.Context, resourceCh, policyCh <-chan *ExtendedGcpAsset) <-chan *ExtendedGcpAsset {
+	out := make(chan *ExtendedGcpAsset)
+
+	go func() {
+		defer close(out)
+		assetStore := make(map[string]*ExtendedGcpAsset)
+		rch, pch := resourceCh, policyCh
+		for rch != nil || pch != nil || len(assetStore) > 0 {
+			select {
+			case <-ctx.Done():
+				return
+			case asset, ok := <-rch:
+				if ok {
+					mergeAssetContentType(assetStore, asset)
+				} else {
+					rch = nil
+				}
+			case asset, ok := <-pch:
+				if ok {
+					mergeAssetContentType(assetStore, asset)
+				} else {
+					pch = nil
+				}
+			}
+			for id, a := range assetStore {
+				hasPolicy := a.IamPolicy != nil
+				hasResource := a.Resource != nil
+				hasBoth := hasPolicy && hasResource
+				if hasBoth || (rch == nil && hasPolicy) || (pch == nil && hasResource) {
+					out <- a
+					delete(assetStore, id)
+				}
+			}
+		}
+	}()
+
+	return out
+}
+
+func (p *Provider) newGcpExtendedAsset(ctx context.Context, asset *assetpb.Asset) *ExtendedGcpAsset {
+	return &ExtendedGcpAsset{
+		Asset:        asset,
+		CloudAccount: p.crm.GetCloudMetadata(ctx, asset),
+	}
+}
+
+func mergeAssetContentType(store map[string]*ExtendedGcpAsset, asset *ExtendedGcpAsset) {
+	if existing, ok := store[asset.Name]; ok {
+		if asset.Resource != nil {
+			existing.Resource = asset.Resource
+		}
+		if asset.IamPolicy != nil {
+			existing.IamPolicy = asset.IamPolicy
+		}
+	} else {
+		store[asset.Name] = asset
+	}
+}
+
+func enrichNetworkAsset(asset *ExtendedGcpAsset, dnsPoliciesFields []*dnsPolicyFields) *ExtendedGcpAsset {
+	networkAssetFields := asset.GetResource().GetData().GetFields()
+	networkIdentifier := strings.TrimPrefix(asset.GetName(), "//compute.googleapis.com")
+	dnsPolicy := findDnsPolicyByNetwork(dnsPoliciesFields, networkIdentifier)
+
+	if dnsPolicy != nil {
+		networkAssetFields["enabledDnsLogging"] = &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: dnsPolicy.enableLogging}}
+	}
+	return asset
 }
 
 // findDnsPolicyByNetwork finds DNS policy by network identifier
@@ -341,7 +440,6 @@ func findDnsPolicyByNetwork(dnsPolicies []*dnsPolicyFields, networkIdentifier st
 	return nil
 }
 
-// decodeDnsPolicies gets the required fields from the dns policies assets
 func decodeDnsPolicies(dnsPolicyAssets []*assetpb.Asset) []*dnsPolicyFields {
 	dnsPolicies := make([]*dnsPolicyFields, 0)
 	for _, dnsPolicyAsset := range dnsPolicyAssets {
@@ -367,190 +465,18 @@ func decodeDnsPolicies(dnsPolicyAssets []*assetpb.Asset) []*dnsPolicyFields {
 	return dnsPolicies
 }
 
-// getAssetsByProject groups assets by project, extracts metadata for each project, and adds folder and organization-level resources for each group.
-func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *clog.Logger, f TypeGenerator[T]) []*T {
-	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.CloudAccount.AccountId })
-	enrichedAssets := make([]*T, 0, len(assetsByProject))
-	for projectId, projectAssets := range assetsByProject {
-		if projectId == "" {
-			continue
-		}
-
-		if len(projectAssets) == 0 {
-			log.Errorf("no assets were listed for project: %s", projectId)
-			continue
-		}
-
-		cloudAccount := projectAssets[0].CloudAccount
-
-		// add folder and org level log sinks for each project
-		projectAssets = append(projectAssets, assetsByProject[""]...)
-		enrichedAssets = append(enrichedAssets, f(
-			projectAssets,
-			projectId,
-			cloudAccount.AccountName,
-			cloudAccount.OrganisationId,
-			cloudAccount.OrganizationName,
-		))
-	}
-	return enrichedAssets
-}
-
-func (p *Provider) getAllAssets(ctx context.Context, request *assetpb.ListAssetsRequest) []*assetpb.Asset {
-	p.log.Infof("Listing asset types: %v of type %v for %v", request.AssetTypes, request.ContentType, request.Parent)
-	results := make([]*assetpb.Asset, 0)
-	it := p.inventory.ListAssets(ctx, request)
-	for {
-		response, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			p.log.Errorf("Error fetching GCP Asset: %s", err)
-			return results
-		}
-
-		p.log.Debugf("Fetched GCP Asset: %+v", response.Name)
-		results = append(results, response)
-	}
-	return results
-}
-
-func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
-	resultsMap := make(map[string]*assetpb.Asset)
-	for _, asset := range assets {
-		assetKey := asset.Name
-		if _, ok := resultsMap[assetKey]; !ok {
-			resultsMap[assetKey] = asset
-			continue
-		}
-		item := resultsMap[assetKey]
-		if asset.Resource != nil {
-			item.Resource = asset.Resource
-		}
-		if asset.IamPolicy != nil {
-			item.IamPolicy = asset.IamPolicy
-		}
-	}
-	results := make([]*assetpb.Asset, 0, len(resultsMap))
-	for _, asset := range resultsMap {
-		results = append(results, asset)
-	}
-	return results
-}
-
-// extends the assets with the project and organization display name
-func (p *Provider) extendWithCloudMetadata(ctx context.Context, assets []*assetpb.Asset) []*ExtendedGcpAsset {
-	extendedAssets := make([]*ExtendedGcpAsset, 0, len(assets))
-	for _, asset := range assets {
-		orgId := getOrganizationId(asset.Ancestors)
-		projectId := getProjectId(asset.Ancestors)
-		cacheKey := fmt.Sprintf("%s/%s", projectId, orgId)
-		cloudAccount := p.cloudAccountMetadataCache.Get(func() *fetching.CloudAccountMetadata {
-			return p.getCloudAccountMetadata(ctx, projectId, orgId)
-		}, cacheKey)
-		extendedAssets = append(extendedAssets, &ExtendedGcpAsset{
-			Asset:        asset,
-			CloudAccount: cloudAccount,
-		})
-	}
-	return extendedAssets
-}
-
-func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error) {
-	projects := p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
-		ContentType: assetpb.ContentType_IAM_POLICY,
-		Parent:      p.config.Parent,
-		AssetTypes:  []string{CrmProjectAssetType},
-	})
-	p.log.Infof("Listed %d GCP projects", len(projects))
-	ancestorsPoliciesCache := NewMapCache[[]*ExtendedGcpAsset]()
-	return lo.Map(projects, func(project *assetpb.Asset, _ int) *ProjectPoliciesAsset {
-		projectAsset := p.extendWithCloudMetadata(ctx, []*assetpb.Asset{project})[0]
-		// Skip first ancestor it as we already got it
-		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(ctx, ancestorsPoliciesCache, p, project.Ancestors[1:])...)
-		return &ProjectPoliciesAsset{CloudAccount: projectAsset.CloudAccount, Policies: policiesAssets}
-	}), nil
-}
-
-func getAncestorsAssets(ctx context.Context, ancestorsPoliciesCache *MapCache[[]*ExtendedGcpAsset], p *Provider, ancestors []string) []*ExtendedGcpAsset {
-	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
-		return ancestorsPoliciesCache.Get(func() []*ExtendedGcpAsset {
-			var assetType string
-			if isFolder(parent) {
-				assetType = CrmFolderAssetType
-			}
-			if isOrganization(parent) {
-				assetType = CrmOrgAssetType
-			}
-			return p.extendWithCloudMetadata(ctx, p.getAllAssets(ctx, &assetpb.ListAssetsRequest{
-				ContentType: assetpb.ContentType_IAM_POLICY,
-				Parent:      parent,
-				AssetTypes:  []string{assetType},
-			}))
-		}, parent)
-	}))
-}
-
-func (p *Provider) getCloudAccountMetadata(ctx context.Context, projectId string, orgId string) *fetching.CloudAccountMetadata {
-	var orgName string
-	var projectName string
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		if isOrganization(p.config.Parent) {
-			orgName = p.crm.getOrganizationDisplayName(ctx, fmt.Sprintf("organizations/%s", orgId))
-		}
-		wg.Done()
-	}()
-	wg.Add(1)
-	go func() {
-		// some assets are not associated with a project
-		if projectId != "" {
-			projectName = p.crm.getProjectDisplayName(ctx, fmt.Sprintf("projects/%s", projectId))
-		}
-		wg.Done()
-	}()
-	wg.Wait()
-	return &fetching.CloudAccountMetadata{
-		AccountId:        projectId,
-		AccountName:      projectName,
-		OrganisationId:   orgId,
-		OrganizationName: orgName,
-	}
-}
-
-func getOrganizationId(ancestors []string) string {
-	last := ancestors[len(ancestors)-1]
-	parts := strings.Split(last, "/") // organizations/1234567890
-
-	if parts[0] == "organizations" {
-		return parts[1]
-	}
-
-	return ""
-}
-
-func getProjectId(ancestors []string) string {
-	parts := strings.Split(ancestors[0], "/") // projects/1234567890
-
-	if parts[0] == "projects" {
-		return parts[1]
-	}
-
-	return ""
-}
-
-func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*ExtendedGcpAsset {
-	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {
-		return asset.AssetType == assetType
-	})
-}
-
 func isFolder(parent string) bool {
 	return strings.HasPrefix(parent, "folders")
 }
 
 func isOrganization(parent string) bool {
 	return strings.HasPrefix(parent, "organizations")
+}
+
+func collect[T any](ch <-chan T) []T {
+	res := make([]T, 0)
+	for item := range ch {
+		res = append(res, item)
+	}
+	return res
 }
