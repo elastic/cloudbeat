@@ -9,14 +9,17 @@ import future.keywords.in
 finding := result if {
 	data_adapter.is_services_usage
 
+	passed := [r | r := input.resource.services[_]; is_enabled_inventory_service(r)]
+	failed := [r | r := input.resource.services[_]; not is_enabled_inventory_service(r)]
+	ok := count(passed) > 0
+
 	result := common.generate_result_without_expected(
-		common.calculate_result(is_asset_inventory_enabled),
-		input.resource.services,
+		common.calculate_result(ok),
+		{"services": {json.filter(c, ["resource/data"]) | c := common.get_evidence(ok, passed, failed)[_]}},
 	)
 }
 
-is_asset_inventory_enabled if {
-	some service in input.resource.services
+is_enabled_inventory_service(service) if {
 	service.resource.data.name == "cloudasset.googleapis.com"
 	service.resource.data.state == "ENABLED"
 } else := false
