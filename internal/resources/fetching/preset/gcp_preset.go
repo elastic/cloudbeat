@@ -41,6 +41,9 @@ func NewCisGcpFetchers(ctx context.Context, log *clog.Logger, ch chan fetching.R
 	serviceUsageFetcher := fetchers.NewGcpServiceUsageFetcher(ctx, log, ch, inventory)
 	m["gcp_service_usage_fetcher"] = registry.RegisteredFetcher{Fetcher: serviceUsageFetcher}
 
+	networkAssetsFetcher := fetchers.NewGcpNetworksFetcher(ctx, log, ch, inventory)
+	m["gcp_network_fetcher"] = registry.RegisteredFetcher{Fetcher: networkAssetsFetcher}
+
 	// The logging fetcher is only available for the organization scope as it requires the Cloud Asset Inventory API
 	// to be enabled for the organization/folders level.
 	if cfg.AccountType == config.OrganizationAccount {

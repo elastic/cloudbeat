@@ -49,35 +49,30 @@ func NewGcpMonitoringFetcher(_ context.Context, log *clog.Logger, ch chan fetchi
 	}
 }
 
-var monitoringAssetTypes = map[string][]string{
-	"LogMetric":   {inventory.MonitoringLogMetricAssetType},
-	"AlertPolicy": {inventory.MonitoringAlertPolicyAssetType},
-}
-
 func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
+	defer f.log.Info("GcpMonitoringFetcher.Fetch done")
+	defer f.provider.Clear()
 
-	monitoringAssets, err := f.provider.ListMonitoringAssets(ctx, monitoringAssetTypes)
-	if err != nil {
-		return err
-	}
+	resultsCh := make(chan *inventory.MonitoringAsset)
+	go f.provider.ListMonitoringAssets(ctx, resultsCh)
 
-	for _, monitoringAsset := range monitoringAssets {
+	for asset := range resultsCh {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
+			f.log.Debugf("GcpMonitoringFetcher.Fetch context done: %v", ctx.Err())
 			return nil
+
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cycleMetadata,
 			Resource: &GcpMonitoringAsset{
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpMonitoringType,
-				Asset:   monitoringAsset,
+				Asset:   asset,
 			},
 		}:
 		}
 	}
-
 	return nil
 }
 
