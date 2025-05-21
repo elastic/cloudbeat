@@ -68,7 +68,8 @@ func (s *ProviderTestSuite) TestProviderInit() {
 	}
 
 	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
-	provider, err := initMock.Init(context.Background(), s.logger, gcpConfig)
+	t := s.T()
+	provider, err := initMock.Init(t.Context(), s.logger, gcpConfig)
 	s.Require().NoError(err)
 	s.NotNil(provider)
 }
@@ -164,7 +165,8 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 				s.mockedIterator.On("Next").Return(asset, nil).Once()
 			}
 			s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
-			value, err := tc.provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
+			t := s.T()
+			value, err := tc.provider.ListAllAssetTypesByName(t.Context(), []string{"test"})
 			s.Require().NoError(err)
 			s.Equal(len(tc.expected), len(value))
 			for idx, expectedAsset := range tc.expected {
@@ -252,7 +254,8 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 		"AlertPolicy": {MonitoringAlertPolicyAssetType},
 	}
 
-	values, err := provider.ListMonitoringAssets(context.Background(), monitoringAssetTypes)
+	t := s.T()
+	values, err := provider.ListMonitoringAssets(t.Context(), monitoringAssetTypes)
 
 	s.Require().NoError(err)
 	s.ElementsMatch(expected, values)
@@ -323,7 +326,8 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 	}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	provider.enrichNetworkAssets(context.Background(), assets)
+	t := s.T()
+	provider.enrichNetworkAssets(t.Context(), assets)
 
 	enrichedAssets := lo.Filter(assets, func(asset *ExtendedGcpAsset, _ int) bool {
 		return asset.GetResource().GetData().GetFields()["enabledDnsLogging"] != nil
@@ -401,7 +405,8 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	values, err := provider.ListServiceUsageAssets(context.Background())
+	t := s.T()
+	values, err := provider.ListServiceUsageAssets(t.Context())
 	s.Require().NoError(err)
 
 	// 2 assets, 1 for each project
@@ -492,7 +497,8 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink3", IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	values, err := provider.ListLoggingAssets(context.Background())
+	t := s.T()
+	values, err := provider.ListLoggingAssets(t.Context())
 	s.Require().NoError(err)
 
 	// 2 assets, 1 for each project
@@ -524,7 +530,8 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"organizations/1"}}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	value, err := provider.ListProjectsAncestorsPolicies(context.Background())
+	t := s.T()
+	value, err := provider.ListProjectsAncestorsPolicies(t.Context())
 	s.Require().NoError(err)
 
 	s.Len(value, 1)             // single project

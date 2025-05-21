@@ -116,7 +116,7 @@ func TestStrategyPicks(t *testing.T) {
 				logger: clog.NewLogger("strategy_test"),
 				cfg:    tc.cfg,
 			}
-			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+			ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 			defer cancel()
 			obj, err := s.NewAssetInventory(ctx, nil)
 			if tc.expectedErr != "" {

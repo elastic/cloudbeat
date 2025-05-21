@@ -185,7 +185,7 @@ func TestListKeyVaultDiagnosticSettings(t *testing.T) {
 				},
 			}
 
-			got, err := provider.ListKeyVaultDiagnosticSettings(context.Background(), tc.inputVault)
+			got, err := provider.ListKeyVaultDiagnosticSettings(t.Context(), tc.inputVault)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
@@ -298,7 +298,7 @@ func TestListKeyVaultKeys(t *testing.T) {
 				},
 			}
 
-			got, err := provider.ListKeyVaultKeys(context.Background(), tc.inputVault)
+			got, err := provider.ListKeyVaultKeys(t.Context(), tc.inputVault)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
@@ -417,7 +417,7 @@ func TestListKeyVaultSecrets(t *testing.T) {
 				},
 			}
 
-			got, err := provider.ListKeyVaultSecrets(context.Background(), tc.inputVault)
+			got, err := provider.ListKeyVaultSecrets(t.Context(), tc.inputVault)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
