@@ -48,18 +48,18 @@ func parseConfig() (*config, error) {
 	viper.AddConfigPath("./")
 	err := viper.ReadInConfig()
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to read configuration: %v", err))
+		return nil, fmt.Errorf("failed to read configuration: %v", err)
 	}
 
 	var cfg config
 	err = bindEnvs(cfg)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to bind environment variables: %v", err))
+		return nil, fmt.Errorf("failed to bind environment variables: %v", err)
 	}
 
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to unmarshal configuration file: %v", err))
+		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
 	}
 
 	err = validateConfig(&cfg)
