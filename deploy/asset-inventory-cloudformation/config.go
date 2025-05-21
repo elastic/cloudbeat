@@ -21,7 +21,7 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"reflect"
 	"strings"
 
@@ -47,18 +47,18 @@ func parseConfig() (*config, error) {
 	viper.AddConfigPath("./")
 	err := viper.ReadInConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to read configuration: %v", err)
+		return nil, errors.New("failed to read configuration: %v", err)
 	}
 
 	var cfg config
 	err = bindEnvs(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to bind environment variables: %v", err)
+		return nil, errors.New("failed to bind environment variables: %v", err)
 	}
 
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
+		return nil, errors.New("failed to unmarshal configuration file: %v", err)
 	}
 
 	err = validateConfig(&cfg)
@@ -95,19 +95,19 @@ func bindEnvs(iface any, parts ...string) error {
 
 func validateConfig(cfg *config) error {
 	if cfg.StackName == "" {
-		return fmt.Errorf("missing required flag: STACK_NAME")
+		return errors.New("missing required flag: STACK_NAME")
 	}
 
 	if cfg.FleetURL == "" {
-		return fmt.Errorf("missing required flag: FLEET_URL")
+		return errors.New("missing required flag: FLEET_URL")
 	}
 
 	if cfg.EnrollmentToken == "" {
-		return fmt.Errorf("missing required flag: ENROLLMENT_TOKEN")
+		return errors.New("missing required flag: ENROLLMENT_TOKEN")
 	}
 
 	if cfg.ElasticAgentVersion == "" {
-		return fmt.Errorf("missing required flag: ELASTIC_AGENT_VERSION")
+		return errors.New("missing required flag: ELASTIC_AGENT_VERSION")
 	}
 
 	if cfg.Dev != nil {
@@ -119,7 +119,7 @@ func validateConfig(cfg *config) error {
 
 func validateDevConfig(cfg *devConfig) error {
 	if cfg.AllowSSH && cfg.KeyName == "" {
-		return fmt.Errorf("missing required flag for SSH enablement mode: DEV.KEY_NAME")
+		return errors.New("missing required flag for SSH enablement mode: DEV.KEY_NAME")
 	}
 
 	return nil
