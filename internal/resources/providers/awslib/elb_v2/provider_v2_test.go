@@ -18,7 +18,6 @@
 package elb_v2
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -153,7 +152,7 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeLoadBalancers(context.Background())
+			got, err := p.DescribeLoadBalancers(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
