@@ -43,6 +43,7 @@ func (s *ConfigTestSuite) SetupTest() {
 func (s *ConfigTestSuite) TestNew() {
 	tests := []struct {
 		config              string
+		overwriteEnvs       func(*testing.T)
 		expectedType        string
 		expectedCloudConfig CloudConfig
 	}{
@@ -53,7 +54,7 @@ config:
     benchmark: cis_k8s
 `,
 			expectedType:        "cis_k8s",
-			expectedCloudConfig: CloudConfig{},
+			expectedCloudConfig: CloudConfig{Gcp: defaultGCPConfig()},
 		},
 		{
 			config: `
@@ -62,7 +63,7 @@ config:
     benchmark: cis_azure
 `,
 			expectedType:        "cis_azure",
-			expectedCloudConfig: CloudConfig{},
+			expectedCloudConfig: CloudConfig{Gcp: defaultGCPConfig()},
 		},
 		{
 			config: `
@@ -92,12 +93,114 @@ config:
 					},
 					AccountType: "organization-account",
 				},
+				Gcp: defaultGCPConfig(),
+			},
+		},
+		{ // GCP config only, default values for page size and timeout.
+			config: `
+config:
+  v1:
+    type: cspm
+    deployment: gcp
+    benchmark: cis_gcp
+    gcp:
+      project_id: abc123
+      organization_id: efg456
+      account_type: organization-account
+      credentials:
+        credentials_file_path: /tmp/creds.json
+`,
+			expectedType: "cis_gcp",
+			expectedCloudConfig: CloudConfig{
+				Gcp: GcpConfig{
+					ProjectId:      "abc123",
+					OrganizationId: "efg456",
+					AccountType:    "organization-account",
+					GcpClientOpt: GcpClientOpt{
+						CredentialsFilePath: "/tmp/creds.json",
+					},
+					GcpCallOpt: GcpCallOpt{
+						ListAssetsTimeout:  4 * time.Minute,
+						ListAssetsPageSize: 200,
+					},
+				},
+			},
+		},
+		{ // GCP config with call_options.
+			config: `
+config:
+  v1:
+    type: cspm
+    deployment: gcp
+    benchmark: cis_gcp
+    gcp:
+      project_id: abc123
+      organization_id: efg456
+      account_type: organization-account
+      credentials:
+        credentials_file_path: /tmp/creds.json
+      call_options:
+        list_assets_timeout: 6m
+        list_assets_page_size: 500
+`,
+			expectedType: "cis_gcp",
+			expectedCloudConfig: CloudConfig{
+				Gcp: GcpConfig{
+					ProjectId:      "abc123",
+					OrganizationId: "efg456",
+					AccountType:    "organization-account",
+					GcpClientOpt: GcpClientOpt{
+						CredentialsFilePath: "/tmp/creds.json",
+					},
+					GcpCallOpt: GcpCallOpt{
+						ListAssetsTimeout:  6 * time.Minute,
+						ListAssetsPageSize: 500,
+					},
+				},
+			},
+		},
+		{ // GCP with overwrite env vars
+			overwriteEnvs: func(t *testing.T) {
+				t.Helper()
+				t.Setenv(CloudbeatGCPListAssetPageSizeEnvVar, "400")
+				t.Setenv(CloudbeatGCPListAssetTimeoutEnvVar, "5m")
+			},
+			config: `
+config:
+  v1:
+    type: cspm
+    deployment: gcp
+    benchmark: cis_gcp
+    gcp:
+      project_id: abc123
+      organization_id: efg456
+      account_type: organization-account
+      credentials:
+        credentials_file_path: /tmp/creds.json
+`,
+			expectedType: "cis_gcp",
+			expectedCloudConfig: CloudConfig{
+				Gcp: GcpConfig{
+					ProjectId:      "abc123",
+					OrganizationId: "efg456",
+					AccountType:    "organization-account",
+					GcpClientOpt: GcpClientOpt{
+						CredentialsFilePath: "/tmp/creds.json",
+					},
+					GcpCallOpt: GcpCallOpt{
+						ListAssetsTimeout:  5 * time.Minute,
+						ListAssetsPageSize: 400,
+					},
+				},
 			},
 		},
 	}
 
 	for i, test := range tests {
 		s.Run(fmt.Sprint(i), func() {
+			if test.overwriteEnvs != nil {
+				test.overwriteEnvs(s.T())
+			}
 			cfg, err := config.NewConfigFrom(test.config)
 			s.Require().NoError(err)
 
@@ -256,6 +359,7 @@ config:
 					},
 					CloudConnectorsConfig: CloudConnectorsConfig{},
 				},
+				Gcp: defaultGCPConfig(),
 			},
 		},
 		"happy path cloud connectors enabled - attempt overwrite roles": {
@@ -282,6 +386,7 @@ config:
 					},
 					CloudConnectorsConfig: CloudConnectorsConfig{},
 				},
+				Gcp: defaultGCPConfig(),
 			},
 		},
 		"happy path cloud connectors enabled - env vars set": {
@@ -315,6 +420,7 @@ config:
 						ResourceID:    "abc789",
 					},
 				},
+				Gcp: defaultGCPConfig(),
 			},
 		},
 	}
