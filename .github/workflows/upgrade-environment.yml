@@ -212,6 +212,7 @@ jobs:
         env:
           AGENT_VERSION: ${{ needs.init.outputs.target-agent-version }}
           USE_K8S: false
+          AGENTLESS: true
         run: |
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
