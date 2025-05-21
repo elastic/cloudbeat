@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -78,6 +77,7 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 		},
 	}
 
+	t := s.T()
 	for _, test := range tests {
 		s.Run(test.name, func() {
 			ctx := t.Context()

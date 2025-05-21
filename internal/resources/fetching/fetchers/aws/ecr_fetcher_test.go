@@ -30,7 +30,7 @@ import (
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
@@ -65,6 +65,7 @@ func (s *EcrFetcherTestSuite) TearDownTest() {
 }
 
 func (s *EcrFetcherTestSuite) TestCreateFetcher() {
+	t := s.T()
 	firstRepositoryName := "cloudbeat"
 	secondRepositoryName := "cloudbeat1"
 	privateRepoWithSlash := "build/cloudbeat"
@@ -314,6 +315,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 				Containers: test.containers,
 			},
 		}
+		t := s.T()
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(t.Context(), pods, metav1.CreateOptions{})
 		s.Require().NoError(err)
 

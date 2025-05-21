@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
@@ -54,6 +53,7 @@ func (s *GcpAssetsFetcherTestSuite) TearDownTest() {
 }
 
 func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
+	t := s.T()
 	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpAssetsFetcher{

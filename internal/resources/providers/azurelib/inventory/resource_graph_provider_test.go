@@ -155,6 +155,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 		client: s.mockedClient,
 	}
 
+	t := s.T()
 	values, err := provider.ListAllAssetTypesByName(t.Context(), "test", []string{"test"})
 	s.Require().NoError(err)
 	s.Len(values, int(*nonTruncatedResponse.Count+*truncatedResponse.Count))

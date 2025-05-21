@@ -77,7 +77,7 @@ var fetcherResult = fetchers.FSResource{
 
 var (
 	opaResults evaluator.RuleResult
-	ctx        = t.Context()
+	ctx        = context.Background()
 )
 
 type EventsCreatorTestSuite struct {

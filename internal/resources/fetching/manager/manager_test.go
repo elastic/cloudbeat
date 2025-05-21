@@ -59,6 +59,7 @@ func (s *ManagerTestSuite) TearDownTest() {
 }
 
 func (s *ManagerTestSuite) TestManagerRun() {
+	t := s.T()
 	interval := 5 * time.Second
 	fetcherName := "test_fetcher"
 
@@ -79,6 +80,7 @@ func (s *ManagerTestSuite) TestManagerRun() {
 }
 
 func (s *ManagerTestSuite) TestManagerRunPanic() {
+	t := s.T()
 	interval := 3 * time.Second
 	fetcherMessage := "fetcher got panic"
 	fetcherName := "panic_fetcher"
@@ -100,6 +102,7 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 }
 
 func (s *ManagerTestSuite) TestManagerRunTimeout() {
+	t := s.T()
 	fetcherDelay := 4 * time.Second
 	interval := 5 * time.Second
 	fetcherName := "delay_fetcher"
@@ -122,6 +125,7 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 }
 
 func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
+	t := s.T()
 	fetcherDelay := 4 * time.Second
 	interval := 3 * time.Second
 	fetcherName := "timeout_fetcher"
@@ -145,6 +149,7 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 }
 
 func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
+	t := s.T()
 	interval := 5 * time.Second
 	fetcherName := "not_run_fetcher"
 
@@ -163,6 +168,7 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 }
 
 func (s *ManagerTestSuite) TestManagerStop() {
+	t := s.T()
 	interval := 30 * time.Second
 	fetcherName := "run_fetcher"
 
@@ -185,6 +191,7 @@ func (s *ManagerTestSuite) TestManagerStop() {
 }
 
 func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
+	t := s.T()
 	interval := 30 * time.Second
 	fetcherName := "run_fetcher"
 

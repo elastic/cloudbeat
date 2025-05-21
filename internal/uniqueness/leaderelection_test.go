@@ -30,7 +30,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
-	"k8s.io/api/coordination/v1"
+	v1 "k8s.io/api/coordination/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
@@ -103,6 +103,7 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 
 func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
 	sTime := time.Now()
+	t := s.T()
 	err := s.manager.Run(t.Context())
 	elapsed := time.Since(sTime)
 
@@ -120,6 +121,7 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
 	s.manager.kubeClient = k8sFake.NewSimpleClientset(lease)
+	t := s.T()
 	err := s.manager.Run(t.Context())
 	s.Require().NoError(err)
 
@@ -140,6 +142,7 @@ func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 	s.Require().NoError(os.Setenv(PodNameEnvar, podId))
 
 	s.manager.kubeClient = k8sFake.NewSimpleClientset()
+	t := s.T()
 	err := s.manager.Run(t.Context())
 	s.Require().NoError(err)
 

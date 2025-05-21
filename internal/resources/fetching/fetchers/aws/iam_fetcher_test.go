@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -212,6 +211,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
+			t := s.T()
 			ctx := t.Context()
 			iamProviderMock := &iam.MockAccessManagement{}
 			for funcName, returnVals := range test.mocksReturnVals {

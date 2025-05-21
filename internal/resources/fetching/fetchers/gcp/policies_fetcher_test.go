@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -57,6 +56,7 @@ func (s *GcpPoliciesFetcherTestSuite) TearDownTest() {
 }
 
 func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
+	t := s.T()
 	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpPoliciesFetcher{
@@ -89,6 +89,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
 }
 
 func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Error() {
+	t := s.T()
 	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpPoliciesFetcher{

@@ -18,7 +18,6 @@
 package awslib
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -58,6 +57,7 @@ func (s *AllRegionSelectorTestSuite) SetupTest() {
 }
 
 func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_SingleCall() {
+	t := s.T()
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(successfulDescribeCloudRegionOutput, nil)
 	result, err := s.selector.Regions(t.Context(), *awssdk.NewConfig())
 	s.Require().NoError(err)
@@ -65,6 +65,7 @@ func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_SingleCall() {
 }
 
 func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_FirstFail() {
+	t := s.T()
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(nil, errors.New("mock")).Once()
 	result, err := s.selector.Regions(t.Context(), *awssdk.NewConfig())
 	s.Require().Error(err)

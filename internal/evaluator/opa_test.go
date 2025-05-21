@@ -122,7 +122,7 @@ func (s *OpaTestSuite) TestOpaEvaluator_decode() {
 func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 	testhelper.SkipLong(s.T())
 
-	ctx := t.Context()
+	ctx := context.Background()
 	tests := []struct {
 		evals    int
 		expected int

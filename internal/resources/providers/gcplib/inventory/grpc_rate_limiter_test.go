@@ -18,7 +18,6 @@
 package inventory
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -44,6 +43,7 @@ func (s *RateLimiterTestSuite) SetupTest() {
 }
 
 func (s *RateLimiterTestSuite) TestRateLimiterWait() {
+	t := s.T()
 	ctx := t.Context()
 	duration := time.Millisecond
 	s.rateLimiter.methods = map[string]*rate.Limiter{

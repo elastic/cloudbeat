@@ -18,7 +18,6 @@
 package kms
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -173,6 +172,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 			clients: mockClients,
 		}
 
+		t := s.T()
 		ctx := t.Context()
 
 		results, err := kmsProvider.DescribeSymmetricKeys(ctx)
