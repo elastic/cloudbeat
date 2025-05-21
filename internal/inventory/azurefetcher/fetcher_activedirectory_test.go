@@ -108,7 +108,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	// collect
 	ch := make(chan inventory.AssetEvent)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 	defer cancel()
 	fetcher.Fetch(ctx, ch)
 	<-ctx.Done()

@@ -18,7 +18,11 @@
 package securityhub
 
 import (
+<<<<<<< HEAD
 	"context"
+=======
+	"errors"
+>>>>>>> bf5dbb6e ([go] Bump Golang to v1.24.0 (#3279))
 	"fmt"
 	"testing"
 
@@ -122,7 +126,7 @@ func TestProvider_Describe(t *testing.T) {
 				accountId: accountId,
 				clients:   clients,
 			}
-			got, err := p.Describe(context.Background())
+			got, err := p.Describe(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return

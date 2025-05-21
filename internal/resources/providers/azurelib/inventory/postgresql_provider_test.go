@@ -150,7 +150,7 @@ func TestListSinglePostgresConfigurations(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetSinglePSQLConfiguration(tc.apiMockCall)
-			got, err := p.ListSinglePostgresConfigurations(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
+			got, err := p.ListSinglePostgresConfigurations(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -222,7 +222,7 @@ func TestListFlexiblePostgresConfigurations(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetFlexPSQLConfiguration(tc.apiMockCall)
-			got, err := p.ListFlexiblePostgresConfigurations(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
+			got, err := p.ListFlexiblePostgresConfigurations(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -281,7 +281,7 @@ func TestListSinglePostgresFirewallRules(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetSinglePSQLFirewallRule(tc.apiMockCall)
-			got, err := p.ListSinglePostgresFirewallRules(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
+			got, err := p.ListSinglePostgresFirewallRules(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -340,7 +340,7 @@ func TestFlexibleSinglePostgresFirewallRules(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetFlexPSQLFirewallRule(tc.apiMockCall)
-			got, err := p.ListFlexiblePostgresFirewallRules(context.Background(), "subId", "resourceGroup", "psqlInstanceName")
+			got, err := p.ListFlexiblePostgresFirewallRules(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
