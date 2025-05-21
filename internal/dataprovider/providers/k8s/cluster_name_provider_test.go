@@ -67,6 +67,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 	client := fake.NewSimpleClientset(ns, cfgMap)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
+	t := s.T()
 	res, err := provider.GetClusterName(t.Context(), cfg)
 	s.Require().NoError(err)
 	s.Equal(clusterName, res)
@@ -84,6 +85,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoCluster
 	client := fake.NewSimpleClientset(ns)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
+	t := s.T()
 	res, err := provider.GetClusterName(t.Context(), cfg)
 	s.Empty(res)
 	s.Require().Error(err)
