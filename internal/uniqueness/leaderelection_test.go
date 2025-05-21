@@ -30,7 +30,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
-	v1 "k8s.io/api/coordination/v1"
+	"k8s.io/api/coordination/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
