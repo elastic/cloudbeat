@@ -38,12 +38,13 @@ type Manager struct {
 	interval time.Duration
 
 	fetcherRegistry registry.Registry
+	preflight       Preflight
 
 	ctx    context.Context //nolint:containedctx
 	cancel context.CancelFunc
 }
 
-func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
+func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry, preflight Preflight) (*Manager, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	return &Manager{
@@ -51,6 +52,7 @@ func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, t
 		timeout:         timeout,
 		interval:        interval,
 		fetcherRegistry: fetchers,
+		preflight:       preflight,
 		ctx:             ctx,
 		cancel:          cancel,
 	}, nil
@@ -92,16 +94,23 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 	m.fetcherRegistry.Update()
 	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
 
+	seq := time.Now().Unix()
+	cm := cycle.Metadata{Sequence: seq}
+
+	if err := m.preflight.Prepare(ctx, cm); err != nil {
+		m.log.Errorf("error on cycle %d preparing skipping: %s", seq, err.Error())
+		return
+	}
+
 	start := time.Now()
 
-	seq := time.Now().Unix()
 	m.log.Infof("Cycle %d has started", seq)
 	wg := &sync.WaitGroup{}
 	for _, key := range m.fetcherRegistry.Keys() {
 		wg.Add(1)
 		go func(k string) {
 			defer wg.Done()
-			err := m.fetchSingle(ctx, k, cycle.Metadata{Sequence: seq})
+			err := m.fetchSingle(ctx, k, cm)
 			if err != nil {
 				m.log.Errorf("Error running fetcher for key %s: %v", k, err)
 			}
@@ -155,3 +164,13 @@ func (m *Manager) fetchProtected(ctx context.Context, k string, metadata cycle.M
 
 	return m.fetcherRegistry.Run(ctx, k, metadata)
 }
+
+type Preflight interface {
+	Prepare(context.Context, cycle.Metadata) error
+}
+
+type NOOPPreflight struct{}
+
+func (NOOPPreflight) Prepare(context.Context, cycle.Metadata) error { return nil }
+
+var _ Preflight = NOOPPreflight{}

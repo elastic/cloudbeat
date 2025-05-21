@@ -21,24 +21,32 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
+	"sync"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-
+	"github.com/elastic/beats/v7/libbeat/management/status"
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/samber/lo"
 )
 
 const resourceChBufferSize = 10000
 
 type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
+	errorPublisher   ErrorPublisher
+	errorProcessor   *AWSErrorProcessor
 }
 
 func (a *AWS) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -50,7 +58,7 @@ func (a *AWS) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Co
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, a)
 }
 
 //revive:disable-next-line:function-result-limit
@@ -79,7 +87,7 @@ func (a *AWS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(preset.NewCisAwsFetchers(ctx, log, *awsConfig, ch, awsIdentity)),
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(ctx, log, *awsConfig, ch, awsIdentity, a.errorPublisher)),
 	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 
@@ -110,3 +118,53 @@ func (a *AWS) checkDependencies() error {
 	}
 	return nil
 }
+
+func (a *AWS) Prepare(ctx context.Context, _ cycle.Metadata) error {
+	a.errorPublisher.Reset(ctx)
+	a.errorProcessor.Clear()
+	return nil
+}
+
+func (a *AWS) ErrorProcessor() ErrorProcessor {
+	return a.errorProcessor
+}
+
+func NewAWSErrorProcessor(log *clog.Logger) *AWSErrorProcessor {
+	return &AWSErrorProcessor{
+		log: log,
+	}
+}
+
+type AWSErrorProcessor struct {
+	log                  *clog.Logger
+	missingPoliciesMutex sync.Mutex
+	missingPolicies      map[string]struct{}
+}
+
+func (a *AWSErrorProcessor) Process(sr status.StatusReporter, err error) {
+	var mp *errorhandler.MissingCSPPermissionError
+	if errors.As(err, &mp) {
+		a.log.Warn("missing permission error received, changing status to degraded")
+
+		a.missingPoliciesMutex.Lock()
+		defer a.missingPoliciesMutex.Unlock()
+		if a.missingPolicies == nil {
+			a.missingPolicies = map[string]struct{}{}
+		}
+		a.missingPolicies[mp.Permission] = struct{}{}
+		policies := lo.Keys(a.missingPolicies)
+		slices.Sort(policies)
+		sr.UpdateStatus(
+			status.Degraded,
+			fmt.Sprintf(awsErrorProcessorDegradedStatusMessageFMT, strings.Join(policies, " , ")),
+		)
+	}
+}
+
+func (a *AWSErrorProcessor) Clear() {
+	a.missingPoliciesMutex.Lock()
+	defer a.missingPoliciesMutex.Unlock()
+	a.missingPolicies = map[string]struct{}{}
+}
+
+const awsErrorProcessorDegradedStatusMessageFMT = "missing permission on cloud provider side: %s"

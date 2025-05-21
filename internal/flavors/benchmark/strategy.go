@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/elastic/beats/v7/libbeat/management/status"
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
@@ -33,12 +34,26 @@ import (
 	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
+type ErrorPublisher interface {
+	Publish(ctx context.Context, err error)
+	Reset(ctx context.Context)
+}
+
+type ErrorProcessor interface {
+	Process(status.StatusReporter, error)
+}
+
+type NOOPErrorProcessor struct{}
+
+func (NOOPErrorProcessor) Process(_ status.StatusReporter, _ error) {}
+
 type Strategy interface {
 	NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error)
 	checkDependencies() error
+	ErrorProcessor() ErrorProcessor
 }
 
-func GetStrategy(cfg *config.Config, log *clog.Logger) (Strategy, error) {
+func GetStrategy(cfg *config.Config, log *clog.Logger, errorPublisher ErrorPublisher) (Strategy, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
@@ -46,11 +61,15 @@ func GetStrategy(cfg *config.Config, log *clog.Logger) (Strategy, error) {
 				IAMProvider:      &iam.Provider{},
 				IdentityProvider: awslib.IdentityProvider{Logger: log},
 				AccountProvider:  awslib.AccountProvider{},
+				errorPublisher:   errorPublisher,
+				errorProcessor:   NewAWSErrorProcessor(log),
 			}, nil
 		}
 
 		return &AWS{
 			IdentityProvider: awslib.IdentityProvider{Logger: log},
+			errorPublisher:   errorPublisher,
+			errorProcessor:   NewAWSErrorProcessor(log),
 		}, nil
 	case config.CIS_EKS:
 		return &EKS{
