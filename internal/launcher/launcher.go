@@ -248,7 +248,7 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 
 	case update, ok := <-l.reloader.Channel():
 		if !ok {
-			return nil, fmt.Errorf("reloader channel unexpectedly closed")
+			return nil, errors.New("reloader channel unexpectedly closed")
 		}
 
 		l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
