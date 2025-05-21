@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -88,6 +87,7 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
+			t := s.T()
 			m := &rds.MockRds{}
 			for fn, rdsMocksReturnVals := range test.rdsMocksReturnVals {
 				m.On(fn, mock.Anything).Return(rdsMocksReturnVals...)
@@ -99,7 +99,7 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 				provider:   m,
 			}
 
-			ctx := context.Background()
+			ctx := t.Context()
 
 			err := rdsFetcher.Fetch(ctx, cycle.Metadata{})
 			s.Require().NoError(err)

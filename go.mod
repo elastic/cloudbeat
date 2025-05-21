@@ -1,8 +1,12 @@
 module github.com/elastic/cloudbeat
 
+<<<<<<< HEAD
 go 1.23.6
 
 toolchain go1.24.1
+=======
+go 1.24.0
+>>>>>>> bf5dbb6e ([go] Bump Golang to v1.24.0 (#3279))
 
 require (
 	cloud.google.com/go/asset v1.21.0
