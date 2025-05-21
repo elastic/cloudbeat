@@ -18,7 +18,6 @@
 package lambda
 
 import (
-	"context"
 	"errors"
 	"testing"
 

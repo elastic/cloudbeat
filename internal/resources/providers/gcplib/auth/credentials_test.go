@@ -18,7 +18,6 @@
 package auth
 
 import (
-	"context"
 	"errors"
 	"os"
 	"testing"

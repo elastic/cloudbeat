@@ -18,7 +18,6 @@
 package sns
 
 import (
-	"context"
 	"errors"
 	"testing"
 

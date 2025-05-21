@@ -18,7 +18,6 @@
 package builder
 
 import (
-	"context"
 	"path/filepath"
 	"testing"
 	"time"

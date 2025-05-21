@@ -18,7 +18,6 @@
 package logging
 
 import (
-	"context"
 	"errors"
 	"testing"
 

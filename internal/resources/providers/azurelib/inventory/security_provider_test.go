@@ -18,7 +18,6 @@
 package inventory
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"

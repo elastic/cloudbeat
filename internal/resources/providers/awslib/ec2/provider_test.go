@@ -18,7 +18,6 @@
 package ec2
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
