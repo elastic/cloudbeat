@@ -1,10 +1,6 @@
 module github.com/elastic/cloudbeat
 
-<<<<<<< HEAD
-go 1.23.8
-=======
 go 1.23.9
->>>>>>> 26b0f47c ([go] Bump golang to v1.23.9 (#3274))
 
 toolchain go1.24.3
 
