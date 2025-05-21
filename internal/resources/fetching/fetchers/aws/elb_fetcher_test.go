@@ -118,7 +118,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			},
 			Spec: v1.ServiceSpec{},
 		}
-		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
+		_, err := kubeclient.CoreV1().Services(test.ns).Create(t.Context(), services, metav1.CreateOptions{})
 		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
@@ -139,7 +139,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			cloudIdentity:   &identity,
 		}
 
-		err = elbFetcher.Fetch(context.Background(), cycle.Metadata{})
+		err = elbFetcher.Fetch(t.Context(), cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Len(results, len(test.expectedlbNames))
@@ -191,7 +191,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			},
 			Spec: v1.ServiceSpec{},
 		}
-		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
+		_, err := kubeclient.CoreV1().Services(test.ns).Create(t.Context(), services, metav1.CreateOptions{})
 		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
@@ -208,7 +208,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			cloudIdentity:   nil,
 		}
 
-		ctx := context.Background()
+		ctx := t.Context()
 
 		err = elbFetcher.Fetch(ctx, cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)

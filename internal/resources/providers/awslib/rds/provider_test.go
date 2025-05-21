@@ -159,7 +159,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 			ec2:     mockEc2,
 		}
 
-		ctx := context.Background()
+		ctx := t.Context()
 
 		results, err := rdsProvider.DescribeDBInstances(ctx)
 		s.Require().NoError(err)

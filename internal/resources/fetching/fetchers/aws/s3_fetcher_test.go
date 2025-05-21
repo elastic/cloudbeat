@@ -77,7 +77,7 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			ctx := context.Background()
+			ctx := t.Context()
 			s3ProviderMock := &s3.MockS3{}
 			for funcName, returnVals := range test.s3mocksReturnVals {
 				s3ProviderMock.On(funcName, ctx).Return(returnVals...)

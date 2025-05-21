@@ -44,7 +44,7 @@ func (s *RateLimiterTestSuite) SetupTest() {
 }
 
 func (s *RateLimiterTestSuite) TestRateLimiterWait() {
-	ctx := context.Background()
+	ctx := t.Context()
 	duration := time.Millisecond
 	s.rateLimiter.methods = map[string]*rate.Limiter{
 		"someMethod": rate.NewLimiter(rate.Every(duration/1), 1), // 1 request per duration

@@ -193,7 +193,7 @@ func TestPostgresqlEnricher_Enrich(t *testing.T) {
 
 			e := postgresqlEnricher{provider: provider}
 
-			err := e.Enrich(context.Background(), cmd, tc.input)
+			err := e.Enrich(t.Context(), cmd, tc.input)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {

@@ -57,7 +57,7 @@ func (s *GcpLogSinkFetcherTestSuite) TearDownTest() {
 }
 
 func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
-	ctx := context.Background()
+	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpLogSinkFetcher{
 		log:        testhelper.NewLogger(s.T()),
@@ -90,7 +90,7 @@ func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
 }
 
 func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Error() {
-	ctx := context.Background()
+	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpLogSinkFetcher{
 		log:        testhelper.NewLogger(s.T()),

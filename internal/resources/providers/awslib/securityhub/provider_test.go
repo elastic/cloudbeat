@@ -123,7 +123,7 @@ func TestProvider_Describe(t *testing.T) {
 				accountId: accountId,
 				clients:   clients,
 			}
-			got, err := p.Describe(context.Background())
+			got, err := p.Describe(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return

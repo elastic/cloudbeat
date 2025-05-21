@@ -143,7 +143,7 @@ func TestProvider_ListFunctions_and_ListAliases(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.ListFunctions(context.Background())
+			got, err := p.ListFunctions(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -210,7 +210,7 @@ func TestProvider_ListLayers(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.ListLayers(context.Background())
+			got, err := p.ListLayers(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -271,7 +271,7 @@ func TestProvider_ListEventSourceMappings(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.ListEventSourceMappings(context.Background())
+			got, err := p.ListEventSourceMappings(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return

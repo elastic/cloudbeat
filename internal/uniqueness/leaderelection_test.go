@@ -103,7 +103,7 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 
 func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
 	sTime := time.Now()
-	err := s.manager.Run(context.Background())
+	err := s.manager.Run(t.Context())
 	elapsed := time.Since(sTime)
 
 	s.Require().NoError(err)
@@ -120,11 +120,11 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
 	s.manager.kubeClient = k8sFake.NewSimpleClientset(lease)
-	err := s.manager.Run(context.Background())
+	err := s.manager.Run(t.Context())
 	s.Require().NoError(err)
 
 	updatedLease, err := s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Get(
-		context.Background(),
+		t.Context(),
 		LeaderLeaseName,
 		metav1.GetOptions{},
 	)
@@ -140,13 +140,13 @@ func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 	s.Require().NoError(os.Setenv(PodNameEnvar, podId))
 
 	s.manager.kubeClient = k8sFake.NewSimpleClientset()
-	err := s.manager.Run(context.Background())
+	err := s.manager.Run(t.Context())
 	s.Require().NoError(err)
 
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
 	_, err = s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Update(
-		context.Background(),
+		t.Context(),
 		lease,
 		metav1.UpdateOptions{},
 	)

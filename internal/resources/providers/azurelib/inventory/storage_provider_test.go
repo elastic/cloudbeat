@@ -280,7 +280,7 @@ func TestListStorageAccountQueues(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListStorageAccountQueues(context.Background(), []AzureAsset{
+			got, err := provider.ListStorageAccountQueues(t.Context(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",
@@ -351,7 +351,7 @@ func TestListStorageAccountQueueServices(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListStorageAccountQueueServices(context.Background(), []AzureAsset{
+			got, err := provider.ListStorageAccountQueueServices(t.Context(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",
@@ -426,7 +426,7 @@ func TestListStorageAccountBlobContainers(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListStorageAccountBlobContainers(context.Background(), []AzureAsset{
+			got, err := provider.ListStorageAccountBlobContainers(t.Context(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",
@@ -501,7 +501,7 @@ func TestListStorageAccountBlobServices(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListStorageAccountBlobServices(context.Background(), []AzureAsset{
+			got, err := provider.ListStorageAccountBlobServices(t.Context(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",
@@ -572,7 +572,7 @@ func TestListStorageAccountFileShares(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListStorageAccountFileShares(context.Background(), []AzureAsset{
+			got, err := provider.ListStorageAccountFileShares(t.Context(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",
@@ -641,7 +641,7 @@ func TestListStorageAccountTables(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListStorageAccountTables(context.Background(), []AzureAsset{
+			got, err := provider.ListStorageAccountTables(t.Context(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",
@@ -712,7 +712,7 @@ func TestListStorageAccountFileServices(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListStorageAccountFileServices(context.Background(), []AzureAsset{
+			got, err := provider.ListStorageAccountFileServices(t.Context(), []AzureAsset{
 				{
 					Type: "Storage Account",
 					Id:   "<storageid>",
@@ -1056,7 +1056,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
-			got, err := provider.ListDiagnosticSettingsAssetTypes(context.Background(), cycle.Metadata{}, lo.Keys[string](tc.subscriptions))
+			got, err := provider.ListDiagnosticSettingsAssetTypes(t.Context(), cycle.Metadata{}, lo.Keys[string](tc.subscriptions))
 			if tc.expectedError {
 				require.Error(t, err)
 			} else {

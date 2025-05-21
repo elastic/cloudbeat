@@ -57,7 +57,7 @@ func (s *GcpPoliciesFetcherTestSuite) TearDownTest() {
 }
 
 func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
-	ctx := context.Background()
+	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpPoliciesFetcher{
 		log:        testhelper.NewLogger(s.T()),
@@ -89,7 +89,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
 }
 
 func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Error() {
-	ctx := context.Background()
+	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpPoliciesFetcher{
 		log:        testhelper.NewLogger(s.T()),

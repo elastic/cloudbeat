@@ -54,7 +54,7 @@ func (s *GcpAssetsFetcherTestSuite) TearDownTest() {
 }
 
 func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
-	ctx := context.Background()
+	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := GcpAssetsFetcher{
 		log:        testhelper.NewLogger(s.T()),

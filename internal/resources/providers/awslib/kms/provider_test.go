@@ -173,7 +173,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 			clients: mockClients,
 		}
 
-		ctx := context.Background()
+		ctx := t.Context()
 
 		results, err := kmsProvider.DescribeSymmetricKeys(ctx)
 		if test.expectError {

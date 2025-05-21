@@ -424,7 +424,7 @@ func (s *AzureAssetsFetcherTestSuite) fetch(provider *azurelib.MockProviderAPI, 
 		provider:   provider,
 		enrichers:  initEnrichers(provider),
 	}
-	err := fetcher.Fetch(context.Background(), cycle.Metadata{})
+	err := fetcher.Fetch(t.Context(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 	s.Require().Len(results, expectedLength)
 	return results, err

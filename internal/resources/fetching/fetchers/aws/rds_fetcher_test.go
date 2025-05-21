@@ -99,7 +99,7 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 				provider:   m,
 			}
 
-			ctx := context.Background()
+			ctx := t.Context()
 
 			err := rdsFetcher.Fetch(ctx, cycle.Metadata{})
 			s.Require().NoError(err)

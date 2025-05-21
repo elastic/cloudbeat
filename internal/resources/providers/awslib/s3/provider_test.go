@@ -518,7 +518,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			accountId:     "asd",
 		}
 
-		ctx := context.Background()
+		ctx := t.Context()
 
 		results, err := s3Provider.DescribeBuckets(ctx)
 		if test.expectError {

@@ -418,7 +418,7 @@ func TestStorageAccountEnricher(t *testing.T) {
 			}
 
 			e := storageAccountEnricher{provider: provider}
-			err := e.Enrich(context.Background(), cmd, tc.inputAssets)
+			err := e.Enrich(t.Context(), cmd, tc.inputAssets)
 
 			if tc.expectError {
 				require.Error(t, err)
