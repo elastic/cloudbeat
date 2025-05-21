@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"sort"
@@ -282,7 +281,7 @@ func TestAzureLocationsNetworkWatcherAssetBatchFetcher_Fetch(t *testing.T) {
 			defer close(ch)
 			f := NewAzureLocationsNetworkWatcherAssetBatchFetcher(log, ch, m)
 
-			err := f.Fetch(context.Background(), tc.cycleMetadata)
+			err := f.Fetch(t.Context(), tc.cycleMetadata)
 			if tc.expectedErr {
 				require.Error(t, err)
 			} else {
