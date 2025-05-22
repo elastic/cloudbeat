@@ -20,7 +20,7 @@ package azurefetcher
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 	"time"
 
@@ -100,7 +100,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 
 	provider := newMockActivedirectoryProvider(t)
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
-		[]*models.ServicePrincipal{}, fmt.Errorf("! error listing service principals"),
+		[]*models.ServicePrincipal{}, errors.New("! error listing service principals"),
 	)
 
 	fetcher := newActiveDirectoryFetcher(log, provider)
@@ -108,7 +108,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	// collect
 	ch := make(chan inventory.AssetEvent)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 	defer cancel()
 	fetcher.Fetch(ctx, ch)
 	<-ctx.Done()

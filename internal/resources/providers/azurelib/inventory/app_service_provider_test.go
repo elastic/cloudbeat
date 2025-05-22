@@ -19,7 +19,7 @@ package inventory
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -100,7 +100,7 @@ func TestGetAppServiceAuthSettings(t *testing.T) {
 		"expected error: could not fetch AuthSettings from Azure": {
 			inputWebApp:              webAppAsset,
 			mockWrapperResponse:      armappservice.WebAppsClientGetAuthSettingsResponse{},
-			mockWrapperResponseError: fmt.Errorf("error fetching resource"),
+			mockWrapperResponseError: errors.New("error fetching resource"),
 			expected:                 []AzureAsset{},
 			expectError:              true,
 		},
@@ -155,7 +155,7 @@ func TestGetAppServiceAuthSettings(t *testing.T) {
 				},
 			}
 
-			got, err := provider.GetAppServiceAuthSettings(context.Background(), tc.inputWebApp)
+			got, err := provider.GetAppServiceAuthSettings(t.Context(), tc.inputWebApp)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
@@ -223,7 +223,7 @@ func TestGetAppServiceSiteConfig(t *testing.T) {
 		"expected error: could not fetch SiteConfig from Azure": {
 			inputWebApp:              webAppAsset,
 			mockWrapperResponse:      armappservice.WebAppsClientGetConfigurationResponse{},
-			mockWrapperResponseError: fmt.Errorf("error fetching resource"),
+			mockWrapperResponseError: errors.New("error fetching resource"),
 			expected:                 []AzureAsset{},
 			expectError:              true,
 		},
@@ -299,7 +299,7 @@ func TestGetAppServiceSiteConfig(t *testing.T) {
 				},
 			}
 
-			got, err := provider.GetAppServiceSiteConfig(context.Background(), tc.inputWebApp)
+			got, err := provider.GetAppServiceSiteConfig(t.Context(), tc.inputWebApp)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {

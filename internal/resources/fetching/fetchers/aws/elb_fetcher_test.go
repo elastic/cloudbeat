@@ -18,7 +18,7 @@
 package fetchers
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"regexp"
 	"testing"
@@ -117,7 +117,8 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			},
 			Spec: v1.ServiceSpec{},
 		}
-		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
+		t := s.T()
+		_, err := kubeclient.CoreV1().Services(test.ns).Create(t.Context(), services, metav1.CreateOptions{})
 		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
@@ -138,7 +139,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			cloudIdentity:   &identity,
 		}
 
-		err = elbFetcher.Fetch(context.Background(), cycle.Metadata{})
+		err = elbFetcher.Fetch(t.Context(), cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(len(test.expectedlbNames), len(results))
@@ -169,7 +170,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
 				},
 			},
-			fmt.Errorf("elb error")},
+			errors.New("elb error")},
 	}
 	for _, test := range tests {
 		kubeclient := k8sfake.NewSimpleClientset()
@@ -190,7 +191,8 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			},
 			Spec: v1.ServiceSpec{},
 		}
-		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
+		t := s.T()
+		_, err := kubeclient.CoreV1().Services(test.ns).Create(t.Context(), services, metav1.CreateOptions{})
 		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
@@ -207,7 +209,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			cloudIdentity:   nil,
 		}
 
-		ctx := context.Background()
+		ctx := t.Context()
 
 		err = elbFetcher.Fetch(ctx, cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)

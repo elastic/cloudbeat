@@ -112,7 +112,7 @@ func TestRepeater_Run(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
 			repeater := NewRepeater(log, tc.interval)
-			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
+			ctx, cancel := context.WithTimeout(t.Context(), tc.ctxTimeout)
 			defer cancel()
 
 			m := tc.fnMock(t)

@@ -19,7 +19,7 @@ package fetchers
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 	"time"
 
@@ -77,13 +77,13 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			monitoring: clientMocks{
 				"AggregateResources": [2]mocks{
 					{mock.Anything},
-					{nil, fmt.Errorf("failed to run provider")},
+					{nil, errors.New("failed to run provider")},
 				},
 			},
 			securityhub: clientMocks{
 				"Describe": [2]mocks{
 					{mock.Anything},
-					{[]securityhub.SecurityHub{{}}, fmt.Errorf("failed to run provider")},
+					{[]securityhub.SecurityHub{{}}, errors.New("failed to run provider")},
 				},
 			},
 		},
@@ -92,7 +92,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			monitoring: clientMocks{
 				"AggregateResources": [2]mocks{
 					{mock.Anything},
-					{nil, fmt.Errorf("failed to run provider")},
+					{nil, errors.New("failed to run provider")},
 				},
 			},
 			securityhub: clientMocks{
@@ -107,7 +107,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*5)
 			defer cancel()
 			mockClient := &monitoring.MockClient{}
 			for name, call := range tt.monitoring {
