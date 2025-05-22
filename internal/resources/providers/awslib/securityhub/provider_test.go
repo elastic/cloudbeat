@@ -18,6 +18,7 @@
 package securityhub
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -69,7 +70,7 @@ func TestProvider_Describe(t *testing.T) {
 			mocks: clientMocks{
 				"DescribeHub": [2]mocks{
 					{mock.Anything, mock.Anything},
-					{nil, fmt.Errorf("is not subscribed to AWS Security Hub")},
+					{nil, errors.New("is not subscribed to AWS Security Hub")},
 				},
 			},
 			regions: []string{awslib.DefaultRegion},
@@ -101,7 +102,7 @@ func TestProvider_Describe(t *testing.T) {
 			mocks: clientMocks{
 				"DescribeHub": [2]mocks{
 					{mock.Anything, mock.Anything},
-					{nil, fmt.Errorf("error")},
+					{nil, errors.New("error")},
 				},
 			},
 			regions: []string{awslib.DefaultRegion},
