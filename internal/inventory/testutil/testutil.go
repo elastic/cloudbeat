@@ -31,11 +31,7 @@ func CollectResourcesAndMatch(t *testing.T, fetcher inventory.AssetFetcher, expe
 	t.Helper()
 
 	ch := make(chan inventory.AssetEvent)
-<<<<<<< HEAD
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
-=======
 	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
->>>>>>> bf5dbb6e ([go] Bump Golang to v1.24.0 (#3279))
 	defer cancel()
 	go func() {
 		fetcher.Fetch(ctx, ch)
