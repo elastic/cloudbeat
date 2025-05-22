@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -33,6 +34,7 @@ const provider = "aws"
 
 type IdentityProviderGetter interface {
 	GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error)
+	GetCallerIdentity(ctx context.Context, cfg aws.Config) (sts.GetCallerIdentityOutput, error)
 }
 
 type IdentityProvider struct {
@@ -41,9 +43,9 @@ type IdentityProvider struct {
 
 // GetIdentity returns AWS identity information
 func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error) {
-	response, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	response, err := p.GetCallerIdentity(ctx, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get caller identity: %w", err)
+		return nil, err
 	}
 
 	alias, err := p.getAccountAlias(ctx, cfg)
@@ -70,4 +72,17 @@ func (IdentityProvider) getAccountAlias(ctx context.Context, cfg aws.Config) (st
 	}
 
 	return "", nil
+}
+
+func (p IdentityProvider) GetCallerIdentity(ctx context.Context, cfg aws.Config) (sts.GetCallerIdentityOutput, error) {
+	id, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		return sts.GetCallerIdentityOutput{}, fmt.Errorf("failed to get caller identity: %w", err)
+	}
+
+	if id == nil {
+		return sts.GetCallerIdentityOutput{}, errors.New("empty caller identity")
+	}
+
+	return *id, nil
 }
