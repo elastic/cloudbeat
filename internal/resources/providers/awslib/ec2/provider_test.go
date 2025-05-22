@@ -19,7 +19,6 @@ package ec2
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -614,7 +613,7 @@ func TestProvider_GetEbsEncryptionByDefault(t *testing.T) {
 			name: "with error",
 			client: func() Client {
 				m := &MockClient{}
-				m.On("GetEbsEncryptionByDefault", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed to get ebs"))
+				m.On("GetEbsEncryptionByDefault", mock.Anything, mock.Anything).Return(nil, errors.New("failed to get ebs"))
 				return m
 			},
 			regions: onlyDefaultRegion,
