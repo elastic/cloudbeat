@@ -306,6 +306,7 @@ runs:
         S3_BUCKET: ${{ inputs.env-s3-bucket }}
         EC2_CSPM_KEY: ${{ steps.generate-data.outputs.ec2-cspm-key }}
         EC2_KSPM_KEY: ${{ steps.generate-data.outputs.ec2-kspm-key }}
+        INTEGRATIONS_SETUP_DIR: "../../../tests/integrations_setup"
       shell: bash
       run: |
         ./manage_infrastructure.sh "cis" "upload-state"
