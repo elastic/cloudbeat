@@ -213,11 +213,6 @@ require (
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.70 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.70 // indirect
 	mvdan.cc/sh/v3 v3.10.0 // indirect
-<<<<<<< HEAD
-	tags.cncf.io/container-device-interface v0.8.0 // indirect
-	tags.cncf.io/container-device-interface/specs-go v0.8.0 // indirect
-=======
->>>>>>> e2317a60 (main(deps): Bump github.com/containerd/containerd/v2 from 2.0.2 to 2.0.4 (#3106))
 )
 
 require (
