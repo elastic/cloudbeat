@@ -33,6 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	gcpfetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
@@ -204,6 +205,58 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.Equal(rule.Id, rule.UUID)
 				s.Equal(rule.References, rule.Reference)
 			}
+		})
+	}
+}
+
+func (s *EventsCreatorTestSuite) TestTransformer_GetPreferredRawValue() {
+	tests := []struct {
+		name     string
+		expected any
+		input    fetching.Resource
+	}{
+		{
+			name:     "returns nil for GcpLoggingAsset",
+			input:    &gcpfetchers.GcpLoggingAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns nil for GcpMonitoringAsset",
+			input:    &gcpfetchers.GcpMonitoringAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns nil for GcpPoliciesAsset",
+			input:    &gcpfetchers.GcpPoliciesAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns nil for GcpServiceUsageAsset",
+			input:    &gcpfetchers.GcpServiceUsageAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns the actual resource when the resource is not a gcp-wrapper-resource",
+			input:    &gcpfetchers.GcpAsset{}, //nolint:exhaustruct
+			expected: &gcpfetchers.GcpAsset{}, //nolint:exhaustruct
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			eventData := evaluator.EventData{
+				RuleResult: evaluator.RuleResult{
+					Findings: []evaluator.Finding{},
+					Metadata: evaluator.Metadata{},
+					Resource: test.input,
+				},
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      test.input,
+					CycleMetadata: cycle.Metadata{},
+				},
+			}
+			result := getPreferredRawValue(eventData)
+			s.Equal(test.expected, result)
 		})
 	}
 }
