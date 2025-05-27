@@ -35,6 +35,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
@@ -102,10 +103,11 @@ func (s *ProviderTestSuite) TestProviderInit() {
 		Parent:     "projects/1",
 		ClientOpts: []option.ClientOption{},
 	}
+	gcpCnf := config.GcpConfig{}
 
-	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
+	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig, gcpCnf).Return(&Provider{}, nil).Once()
 	t := s.T()
-	provider, err := initMock.Init(t.Context(), s.logger, gcpConfig)
+	provider, err := initMock.Init(t.Context(), s.logger, gcpConfig, gcpCnf)
 	s.Require().NoError(err)
 	s.NotNil(provider)
 }
