@@ -39,8 +39,26 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
+
+var expectedAWSSubtypes = []string{
+	"123-" + fetching.IAMType,
+	"123-" + fetching.KmsType,
+	"123-" + fetching.TrailType,
+	"123-" + fetching.AwsMonitoringType,
+	"123-" + fetching.EC2NetworkingType,
+	"123-" + fetching.RdsType,
+	"123-" + fetching.S3Type,
+	"456-" + fetching.IAMType,
+	"456-" + fetching.KmsType,
+	"456-" + fetching.TrailType,
+	"456-" + fetching.AwsMonitoringType,
+	"456-" + fetching.EC2NetworkingType,
+	"456-" + fetching.RdsType,
+	"456-" + fetching.S3Type,
+}
 
 func TestAWSOrg_Initialize(t *testing.T) {
 	testhelper.SkipLong(t)
@@ -61,45 +79,37 @@ func TestAWSOrg_Initialize(t *testing.T) {
 		{
 			name:             "account provider uninitialized",
 			iamProvider:      getMockIAMRoleGetter(nil),
-			identityProvider: mockAwsIdentityProvider(nil),
+			identityProvider: mockAwsIdentityProviderWithCallerIdentityCall(nil),
 			accountProvider:  nil,
 			wantErr:          "account provider is uninitialized",
 		},
 		{
 			name:             "identity provider error",
 			iamProvider:      getMockIAMRoleGetter(nil),
-			identityProvider: mockAwsIdentityProvider(errors.New("some error")),
+			identityProvider: mockAwsIdentityProviderWithCallerIdentityCall(errors.New("some error")),
 			accountProvider:  mockAccountProvider(errors.New("not this error")),
 			wantErr:          "some error",
 		},
 		{
 			name:             "account provider error",
 			iamProvider:      getMockIAMRoleGetter(nil),
-			identityProvider: mockAwsIdentityProvider(nil),
+			identityProvider: mockAwsIdentityProviderWithCallerIdentityCall(nil),
 			accountProvider:  mockAccountProvider(errors.New("some error")),
 			want:             []string{},
 		},
 		{
 			name:             "no error",
 			iamProvider:      getMockIAMRoleGetter(nil),
-			identityProvider: mockAwsIdentityProvider(nil),
+			identityProvider: mockAwsIdentityProviderWithCallerIdentityCall(nil),
 			accountProvider:  mockAccountProvider(nil),
-			want: []string{
-				"123-" + fetching.IAMType,
-				"123-" + fetching.KmsType,
-				"123-" + fetching.TrailType,
-				"123-" + fetching.AwsMonitoringType,
-				"123-" + fetching.EC2NetworkingType,
-				"123-" + fetching.RdsType,
-				"123-" + fetching.S3Type,
-				"456-" + fetching.IAMType,
-				"456-" + fetching.KmsType,
-				"456-" + fetching.TrailType,
-				"456-" + fetching.AwsMonitoringType,
-				"456-" + fetching.EC2NetworkingType,
-				"456-" + fetching.RdsType,
-				"456-" + fetching.S3Type,
-			},
+			want:             expectedAWSSubtypes,
+		},
+		{
+			name:             "no error, already cloudbeat-root",
+			iamProvider:      getMockIAMRoleGetter(nil),
+			identityProvider: mockIdentityProviderAlreadyCloudbeatRoot(),
+			accountProvider:  mockAccountProvider(nil),
+			want:             expectedAWSSubtypes,
 		},
 	}
 	for _, tt := range tests {
@@ -174,7 +184,10 @@ func Test_getAwsAccounts(t *testing.T) {
 
 			for i, account := range got {
 				assert.Equal(t, tt.want[i], account.Identity)
-				assert.IsType(t, &aws.CredentialsCache{}, account.Credentials)
+				// if the account is other than the management, a credential cache has been created (assuming the member role)
+				if account.Account != tt.rootIdentity.Account {
+					assert.IsType(t, &aws.CredentialsCache{}, account.Credentials)
+				}
 			}
 		})
 	}
@@ -341,4 +354,73 @@ func makeRole(name string, tagKeyValues ...string) *iam.Role {
 			Tags:     tags,
 		},
 	}
+}
+
+func mockAwsIdentityProviderWithCallerIdentityCall(err error) *awslib.MockIdentityProviderGetter {
+	const account = "test-account"
+
+	identityProvider := &awslib.MockIdentityProviderGetter{}
+
+	callerIdentity := sts.GetCallerIdentityOutput{
+		Account: pointers.Ref(account),
+		Arn:     pointers.Ref(""),
+	}
+
+	onCallerIdentity := identityProvider.EXPECT().
+		GetCallerIdentity(mock.Anything, mock.Anything).
+		Return(callerIdentity, nil)
+
+	onCallerIdentity.Once()
+	if err != nil {
+		onCallerIdentity.Times(2)
+	}
+
+	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return(
+			&cloud.Identity{
+				Account: account,
+			},
+			nil,
+		)
+	} else {
+		on.Return(nil, err)
+	}
+
+	return identityProvider
+}
+
+func mockIdentityProviderAlreadyCloudbeatRoot() awslib.IdentityProviderGetter {
+	const account = "test-account"
+
+	identityProvider := &awslib.MockIdentityProviderGetter{}
+
+	callerIdentity := sts.GetCallerIdentityOutput{
+		Account: pointers.Ref(account),
+		Arn:     pointers.Ref("arn:aws:sts::test-account:assumed-role/cloudbeat-root/session-name"),
+	}
+
+	identityProvider.EXPECT().
+		GetCallerIdentity(mock.Anything, mock.Anything).
+		Return(callerIdentity, nil).
+		Once()
+
+	identityProvider.EXPECT().
+		GetIdentity(mock.Anything, mock.MatchedBy(func(cnf aws.Config) bool {
+			_ = cnf.Credentials
+			cache, is := cnf.Credentials.(*aws.CredentialsCache)
+			if !is {
+				return false
+			}
+
+			sl := cache.ProviderSources()
+			if len(sl) == 0 {
+				return false
+			}
+
+			return sl[0] != aws.CredentialSourceSTSAssumeRole // no assume was run.
+		})).
+		Return(&cloud.Identity{Account: account}, nil)
+
+	return identityProvider
 }
