@@ -22,40 +22,40 @@ import (
 	"github.com/samber/lo"
 )
 
-// AssetCategory is used to build the document index.
-type AssetCategory string
-
-const (
-	CategoryAccessManagement       AssetCategory = "Access Management"
-	CategoryAccount                AssetCategory = "Account"
-	CategoryContainerRegistry      AssetCategory = "Container Registry"
-	CategoryContainerService       AssetCategory = "Container Service"
-	CategoryDatabase               AssetCategory = "Database"
-	CategoryFaaS                   AssetCategory = "FaaS"
-	CategoryFileSystemService      AssetCategory = "File System Service"
-	CategoryFirewall               AssetCategory = "Firewall"
-	CategoryGateway                AssetCategory = "Gateway"
-	CategoryGroup                  AssetCategory = "Group"
-	CategoryHost                   AssetCategory = "Host"
-	CategoryIdentity               AssetCategory = "Identity"
-	CategoryInfrastructure         AssetCategory = "Infrastructure"
-	CategoryLoadBalancer           AssetCategory = "Load Balancer"
-	CategoryMessagingService       AssetCategory = "Messaging Service"
-	CategoryNetworking             AssetCategory = "Networking"
-	CategoryOrchestrator           AssetCategory = "Orchestrator"
-	CategoryOrganization           AssetCategory = "Organization"
-	CategoryPrivateEndpoint        AssetCategory = "Private Endpoint"
-	CategoryServiceAccount         AssetCategory = "Service Account"
-	CategoryServiceUsageTechnology AssetCategory = "Service Usage Technology"
-	CategorySnapshot               AssetCategory = "Snapshot"
-	CategoryStorageBucket          AssetCategory = "Storage Bucket"
-	CategorySubnet                 AssetCategory = "Subnet"
-	CategoryVolume                 AssetCategory = "Volume"
-	CategoryWebService             AssetCategory = "Web Service"
-)
-
 // AssetType is used to build the document index.
 type AssetType string
+
+const (
+	CategoryAccessManagement       AssetType = "Access Management"
+	CategoryAccount                AssetType = "Account"
+	CategoryContainerRegistry      AssetType = "Container Registry"
+	CategoryContainerService       AssetType = "Container Service"
+	CategoryDatabase               AssetType = "Database"
+	CategoryFaaS                   AssetType = "FaaS"
+	CategoryFileSystemService      AssetType = "File System Service"
+	CategoryFirewall               AssetType = "Firewall"
+	CategoryGateway                AssetType = "Gateway"
+	CategoryGroup                  AssetType = "Group"
+	CategoryHost                   AssetType = "Host"
+	CategoryIdentity               AssetType = "Identity"
+	CategoryInfrastructure         AssetType = "Infrastructure"
+	CategoryLoadBalancer           AssetType = "Load Balancer"
+	CategoryMessagingService       AssetType = "Messaging Service"
+	CategoryNetworking             AssetType = "Networking"
+	CategoryOrchestrator           AssetType = "Orchestrator"
+	CategoryOrganization           AssetType = "Organization"
+	CategoryPrivateEndpoint        AssetType = "Private Endpoint"
+	CategoryServiceAccount         AssetType = "Service Account"
+	CategoryServiceUsageTechnology AssetType = "Service Usage Technology"
+	CategorySnapshot               AssetType = "Snapshot"
+	CategoryStorageBucket          AssetType = "Storage Bucket"
+	CategorySubnet                 AssetType = "Subnet"
+	CategoryVolume                 AssetType = "Volume"
+	CategoryWebService             AssetType = "Web Service"
+)
+
+// AssetSubType is used to build the document index.
+type AssetSubType string
 
 const (
 	AwsCloudProvider   = "aws"
@@ -65,8 +65,8 @@ const (
 
 // AssetClassification holds the taxonomy of an asset
 type AssetClassification struct {
-	Category AssetCategory `json:"category"`
-	Type     AssetType     `json:"type"`
+	Category AssetType    `json:"type"`
+	Type     AssetSubType `json:"sub_type"`
 }
 
 // AssetClassifications below are used to generate
