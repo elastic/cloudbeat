@@ -22,7 +22,7 @@ jobs:
         id: set-matrix
         # This script will generate the matrix of agents and packages
         # starting from the version 8.17 and up to the latest version.
-        run: python ./.ci/scripts/get_versions.py --after 8.17
+        run: python ./.ci/scripts/get_versions.py --after 8.16
 
   test-agents:
     name: Agent Compatibility Test
