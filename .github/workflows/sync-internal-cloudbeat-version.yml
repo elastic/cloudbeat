@@ -1,10 +1,11 @@
 name: Sync Cloudbeat Versions on release
 # Makes sure all cloudbeat versions are updated with release branches
 on:
-  push:
-    branches:
-      # matches branches pushed by elasticmachine, e.g. "update-version-next-8.15.3"
-      - 'update-version-next-*'
+  # push:
+  #   branches:
+  #     # matches branches pushed by elasticmachine, e.g. "update-version-next-8.15.3"
+  #     - 'update-version-next-*'
+  workflow_dispatch: {}
 
 jobs:
   synchronize-versions:
