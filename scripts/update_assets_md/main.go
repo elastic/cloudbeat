@@ -43,20 +43,20 @@ const (
 )
 
 type Classification struct {
-	Category string
-	OldType  string
-	Type     string
+	Type    string
+	OldType string
+	SubType string
 }
 
 func (item Classification) ID() string {
-	if item.Type != "" {
+	if item.SubType != "" {
 		return fmt.Sprintf("%s_%s",
-			strcase.ToKebab(item.Category),
 			strcase.ToKebab(item.Type),
+			strcase.ToKebab(item.SubType),
 		)
 	}
 	return fmt.Sprintf("%s_%s",
-		strcase.ToKebab(item.Category),
+		strcase.ToKebab(item.Type),
 		strcase.ToKebab(item.OldType),
 	)
 }
@@ -176,9 +176,9 @@ func loadClassificationsFromExcel(filepath string) (*ByProvider, error) {
 		headers := rows[0]
 		for _, row := range rows[1:] {
 			cl := Classification{
-				Category: row[getColumnIndex(headers, "Category")],
-				OldType:  row[getColumnIndex(headers, "(current) Type")],
-				Type:     row[getColumnIndex(headers, "Updated Type")],
+				Type:    row[getColumnIndex(headers, "Category")],
+				OldType: row[getColumnIndex(headers, "(current) Type")],
+				SubType: row[getColumnIndex(headers, "Updated Type")],
 			}
 			output.Assign(provider, cl)
 		}
@@ -215,16 +215,16 @@ func writeSummary(plannedByProvider, implementedByProvider *ByProvider, filepath
 			item := planned[key]
 			status := "No ❌"
 
-			plannedByCategory[item.Category] += 1
+			plannedByCategory[item.Type] += 1
 			if _, ok := implemented[key]; ok {
 				status = "Yes ✅"
 				totalImplemented += 1
-				implementedByCategory[item.Category] += 1
+				implementedByCategory[item.Type] += 1
 			}
 			table = append(table,
 				fmt.Sprintf(
 					"| %s | %s | %s | %s |",
-					item.Category, item.OldType, item.Type, status,
+					item.Type, item.OldType, item.SubType, status,
 				),
 			)
 		}
@@ -305,8 +305,8 @@ func extractClassification(expr ast.Expr) (Classification, error) {
 		classification = append(classification, s)
 	}
 
-	output.Category = classification[0]
-	output.Type = classification[1]
+	output.Type = classification[0]
+	output.SubType = classification[1]
 	return output, nil
 }
 
