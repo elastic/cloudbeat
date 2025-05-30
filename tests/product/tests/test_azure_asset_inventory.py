@@ -6,6 +6,7 @@ This module verifies presence and correctness of retrieved entities
 from datetime import datetime, timedelta
 
 import pytest
+
 from commonlib.utils import get_ES_assets
 from product.tests.data.azure_asset_inventory import test_cases as azure_tc
 from product.tests.parameters import Parameters, register_params
@@ -16,8 +17,8 @@ from product.tests.parameters import Parameters, register_params
 @pytest.mark.asset_inventory_azure
 def test_azure_asset_inventory(
     asset_inventory_client,
-    category,
     type_,
+    sub_type,
 ):
     """
     This data driven test verifies entities published by cloudbeat agent.
@@ -25,8 +26,8 @@ def test_azure_asset_inventory(
     entities = get_ES_assets(
         asset_inventory_client,
         timeout=10,
-        category=category,
         type_=type_,
+        sub_type=sub_type,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
     )
 
@@ -43,7 +44,7 @@ def test_azure_asset_inventory(
 register_params(
     test_azure_asset_inventory,
     Parameters(
-        ("category", "type_"),
+        ("sub_type", "type"),
         [*azure_tc.test_cases.values()],
         ids=[*azure_tc.test_cases.keys()],
     ),

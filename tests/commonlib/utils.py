@@ -5,14 +5,15 @@ import time
 from functools import reduce
 from typing import List, Union
 
-import allure
 import munch
+from loguru import logger
+
+import allure
 from commonlib.io_utils import (
     get_assets_from_index,
     get_events_from_index,
     get_logs_from_stream,
 )
-from loguru import logger
 
 FINDINGS_BACKOFF_SECONDS = 5
 EVALUATION_BACKOFF_SECONDS = 2
@@ -83,8 +84,8 @@ def get_ES_evaluation(
 def get_ES_assets(
     elastic_client,
     timeout,
-    category,
     type_,
+    sub_type,
     exec_timestamp,
     resource_identifier=lambda r: True,
 ) -> Union[List[munch.Munch], None]:
@@ -96,8 +97,8 @@ def get_ES_assets(
             time.sleep(EVALUATION_BACKOFF_SECONDS)
             assets = get_assets_from_index(
                 elastic_client,
-                category,
                 type_,
+                sub_type,
                 latest_timestamp,
             )
         except Exception as e:
