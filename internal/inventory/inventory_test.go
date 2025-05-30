@@ -49,6 +49,7 @@ func TestAssetInventory_Run(t *testing.T) {
 						Category: CategoryInfrastructure,
 						Type:     "Virtual Machine",
 					},
+					Raw: emptyRef,
 				},
 				"event": Event{
 					Kind: "asset",
@@ -85,7 +86,6 @@ func TestAssetInventory_Run(t *testing.T) {
 				"url": &URL{
 					Full: "https://example.com",
 				},
-				"Attributes": emptyRef,
 			},
 		},
 	}
