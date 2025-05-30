@@ -144,21 +144,20 @@ var (
 
 // AssetEvent holds the whole asset
 type AssetEvent struct {
-	Entity        Entity
-	Event         Event
-	Cloud         *Cloud
-	Container     *Container
-	Fass          *Fass
-	Group         *Group
-	Host          *Host
-	Network       *Network
-	Orchestrator  *Orchestrator
-	Organization  *Organization
-	URL           *URL
-	User          *User
-	Labels        map[string]string
-	Tags          []string
-	RawAttributes *any
+	Entity       Entity
+	Event        Event
+	Cloud        *Cloud
+	Container    *Container
+	Fass         *Fass
+	Group        *Group
+	Host         *Host
+	Network      *Network
+	Orchestrator *Orchestrator
+	Organization *Organization
+	URL          *URL
+	User         *User
+	Labels       map[string]string
+	Tags         []string
 }
 
 type Organization struct {
@@ -179,6 +178,7 @@ type URL struct {
 type Entity struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
+	Raw  *any   `json:"raw"`
 	AssetClassification
 
 	// non exported fields
@@ -267,7 +267,7 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 
 func WithRawAsset(raw any) AssetEnricher {
 	return func(a *AssetEvent) {
-		a.RawAttributes = &raw
+		a.Entity.Raw = &raw
 	}
 }
 
