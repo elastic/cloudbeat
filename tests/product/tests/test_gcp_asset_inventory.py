@@ -6,7 +6,6 @@ This module verifies presence and correctness of retrieved entities
 from datetime import datetime, timedelta
 
 import pytest
-
 from commonlib.utils import get_ES_assets
 from product.tests.data.gcp_asset_inventory import test_cases as gcp_tc
 from product.tests.parameters import Parameters, register_params

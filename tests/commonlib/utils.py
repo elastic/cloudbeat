@@ -5,15 +5,14 @@ import time
 from functools import reduce
 from typing import List, Union
 
-import munch
-from loguru import logger
-
 import allure
+import munch
 from commonlib.io_utils import (
     get_assets_from_index,
     get_events_from_index,
     get_logs_from_stream,
 )
+from loguru import logger
 
 FINDINGS_BACKOFF_SECONDS = 5
 EVALUATION_BACKOFF_SECONDS = 2
