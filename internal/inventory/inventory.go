@@ -139,7 +139,6 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 				"host":           e.Host,
 				"network":        e.Network,
 				"user":           e.User,
-				"Attributes":     e.RawAttributes,
 				"labels":         e.Labels,
 				"tags":           e.Tags,
 				"organization":   e.Organization,
