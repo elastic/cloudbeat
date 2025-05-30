@@ -176,9 +176,10 @@ type URL struct {
 
 // Entity contains the identifiers of the asset
 type Entity struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-	Raw  *any   `json:"raw"`
+	Id     string  `json:"id"`
+	Name   string  `json:"name"`
+	Source *string `json:"source"`
+	Raw    *any    `json:"raw"`
 	AssetClassification
 
 	// non exported fields
@@ -318,6 +319,7 @@ func WithNetwork(network Network) AssetEnricher {
 func WithCloud(cloud Cloud) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Cloud = &cloud
+		a.Entity.Source = &cloud.Provider
 	}
 }
 

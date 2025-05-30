@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -43,8 +44,9 @@ func TestAssetInventory_Run(t *testing.T) {
 			Timestamp: now(),
 			Fields: mapstr.M{
 				"entity": Entity{
-					Id:   "arn:aws:ec2:us-east::ec2/234567890",
-					Name: "test-server",
+					Id:     "arn:aws:ec2:us-east::ec2/234567890",
+					Name:   "test-server",
+					Source: pointers.Ref(AwsCloudProvider),
 					AssetClassification: AssetClassification{
 						Category: CategoryInfrastructure,
 						Type:     "Virtual Machine",
