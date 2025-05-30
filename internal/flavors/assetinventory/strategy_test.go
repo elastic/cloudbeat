@@ -108,6 +108,28 @@ func TestStrategyPicks(t *testing.T) {
 			},
 			"STS: GetCallerIdentity",
 		},
+		{
+			"expected success: AWS with cloud connectors",
+			&config.Config{
+				AssetInventoryProvider: config.ProviderAWS,
+				CloudConfig: config.CloudConfig{
+					Aws: config.AwsConfig{
+						AccountType: config.SingleAccount,
+						Cred: aws.ConfigAWS{
+							AccessKeyID:     "key",
+							SecretAccessKey: "key",
+						},
+						CloudConnectors: true,
+						CloudConnectorsConfig: config.CloudConnectorsConfig{
+							LocalRoleARN:  "abc",
+							GlobalRoleARN: "xyz",
+							ResourceID:    "123",
+						},
+					},
+				},
+			},
+			"STS: GetCallerIdentity",
+		},
 	}
 
 	for _, tc := range testCases {
