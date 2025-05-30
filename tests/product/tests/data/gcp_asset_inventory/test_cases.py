@@ -6,59 +6,59 @@ from ..asset_inventory_test_case import AssetInventoryCase
 
 test_cases = {
     "[Asset Inventory][GCP][Service Account] assets found": AssetInventoryCase(
-        category="Access Management",
-        type_="GCP Service Account",
+        type_="Access Management",
+        sub_type="GCP Service Account",
     ),
     "[Asset Inventory][GCP][Service Account Key] assets found": AssetInventoryCase(
-        category="Access Management",
-        type_="GCP Service Account Key",
+        type_="Access Management",
+        sub_type="GCP Service Account Key",
     ),
     "[Asset Inventory][GCP][Instance] assets found": AssetInventoryCase(
-        category="Host",
-        type_="GCP Compute Instance",
+        type_="Host",
+        sub_type="GCP Compute Instance",
     ),
     "[Asset Inventory][GCP][Subnet] assets found": AssetInventoryCase(
-        category="Subnet",
-        type_="GCP Subnet",
+        type_="Subnet",
+        sub_type="GCP Subnet",
     ),
     "[Asset Inventory][GCP][Project] assets found": AssetInventoryCase(
-        category="Account",
-        type_="GCP Project",
+        type_="Account",
+        sub_type="GCP Project",
     ),
     # "[Asset Inventory][GCP][Organization] assets found": AssetInventoryCase(
-    #     category="Infrastructure",
-    #     type_="cloud-account",
+    #     type_="Infrastructure",
+    #     sub_type="cloud-account",
     # ),
     # "[Asset Inventory][GCP][Folder] assets found": AssetInventoryCase(
-    #     category="Infrastructure",
-    #     type_="resource-hierarchy",
+    #     type_="Infrastructure",
+    #     sub_type="resource-hierarchy",
     # ),
     "[Asset Inventory][GCP][Bucket] assets found": AssetInventoryCase(
-        category="Storage Bucket",
-        type_="GCP Bucket",
+        type_="Storage Bucket",
+        sub_type="GCP Bucket",
     ),
     "[Asset Inventory][GCP][Firewall] assets found": AssetInventoryCase(
-        category="Firewall",
-        type_="GCP Firewall",
+        type_="Firewall",
+        sub_type="GCP Firewall",
     ),
     # "[Asset Inventory][GCP][GKE Cluster] assets found": AssetInventoryCase(
-    #     category="Infrastructure",
-    #     type_="orchestration",
+    #     type_="Infrastructure",
+    #     sub_type="orchestration",
     # ),
     # "[Asset Inventory][GCP][Forwarding Rule] assets found": AssetInventoryCase(
-    #     category="Infrastructure",
-    #     type_="load-balancing",
+    #     type_="Infrastructure",
+    #     sub_type="load-balancing",
     # ),
     "[Asset Inventory][GCP][IAM Role] assets found": AssetInventoryCase(
-        category="Service Usage Technology",
-        type_="GCP IAM Role",
+        type_="Service Usage Technology",
+        sub_type="GCP IAM Role",
     ),
     # "[Asset Inventory][GCP][Cloud Function] assets found": AssetInventoryCase(
-    #     category="Infrastructure",
-    #     type_="function",
+    #     type_="Infrastructure",
+    #     sub_type="function",
     # ),
     "[Asset Inventory][GCP][Cloud Run Service] assets found": AssetInventoryCase(
-        category="Container Service",
-        type_="GCP Cloud Run Service",
+        type_="Container Service",
+        sub_type="GCP Cloud Run Service",
     ),
 }
