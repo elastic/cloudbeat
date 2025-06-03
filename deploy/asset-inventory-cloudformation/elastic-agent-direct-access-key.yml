@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates elastic-agent asset discovery user, role, and access key, and outputs the access key
+
+Parameters: {}
+
+Resources:
+  ElasticAssetDiscoveryUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Join
+        - '-'
+        - - elasticagent-user-ad # ad stands for asset discovery, we can't use the full name because of max 64 constraint
+          - !Select
+            - 2
+            - !Split
+              - /
+              - !Ref AWS::StackId
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
+      Path: /
+
+  ElasticAssetDiscoveryAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref ElasticAssetDiscoveryUser
+
+Outputs:
+  AccessKeyId:
+    Description: Access Key ID
+    Value: !Ref ElasticAssetDiscoveryAccessKey
+
+  SecretAccessKey:
+    Description: Secret Access Key
+    Value: !GetAtt ElasticAssetDiscoveryAccessKey.SecretAccessKey
