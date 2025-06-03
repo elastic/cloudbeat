@@ -43,7 +43,11 @@ def test_gcp_asset_inventory(
 register_params(
     test_gcp_asset_inventory,
     Parameters(
+<<<<<<< HEAD
         ("category", "type_"),
+=======
+        ("type_", "sub_type"),
+>>>>>>> 274aed95 (Fix `type_` test in asset inventory tests (#3332))
         [*gcp_tc.test_cases.values()],
         ids=[*gcp_tc.test_cases.keys()],
     ),
