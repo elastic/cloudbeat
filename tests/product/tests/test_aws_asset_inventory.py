@@ -42,7 +42,7 @@ def test_aws_asset_inventory(
 register_params(
     test_aws_asset_inventory,
     Parameters(
-        ("type", "sub_type"),
+        ("type_", "sub_type"),
         [*aws_tc.test_cases.values()],
         ids=[*aws_tc.test_cases.keys()],
     ),
