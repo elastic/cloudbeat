@@ -10,7 +10,7 @@ Resources:
     Properties:
       UserName: !Join
         - '-'
-        - - elasticagent-user-asset-discovery
+        - - elasticagent-user-ad # ad stands for asset discovery, we can't use the full name because of max 64 constraint
           - !Select
             - 2
             - !Split
