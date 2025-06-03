@@ -126,7 +126,7 @@ func getAssetEvent(classification inventory.AssetClassification, item *gcpinvent
 	)
 }
 
-func findRelatedAssetIds(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
+func findRelatedAssetIds(t inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
 	ids = append(ids, item.Ancestors...)
 	if item.Resource != nil {
@@ -140,7 +140,7 @@ func findRelatedAssetIds(t inventory.AssetType, item *gcpinventory.ExtendedGcpAs
 	return ids
 }
 
-func findRelatedAssetIdsForType(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
+func findRelatedAssetIdsForType(t inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
 
 	var fields map[string]*structpb.Value

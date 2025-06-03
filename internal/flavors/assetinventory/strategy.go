@@ -104,7 +104,7 @@ func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetche
 		return nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 	inventoryInitializer := &gcp_inventory.ProviderInitializer{}
-	provider, err := inventoryInitializer.Init(ctx, s.logger, *gcpConfig)
+	provider, err := inventoryInitializer.Init(ctx, s.logger, *gcpConfig, s.cfg.CloudConfig.Gcp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}

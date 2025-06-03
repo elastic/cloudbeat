@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -78,9 +77,10 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 		},
 	}
 
+	t := s.T()
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			ctx := context.Background()
+			ctx := t.Context()
 			kmsProviderMock := &kms.MockKMS{}
 			for funcName, returnVals := range test.kmsMocksReturnVals {
 				kmsProviderMock.On(funcName, ctx).Return(returnVals...)

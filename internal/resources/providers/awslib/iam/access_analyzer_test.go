@@ -18,7 +18,6 @@
 package iam
 
 import (
-	"context"
 	"errors"
 	"sort"
 	"testing"
@@ -111,7 +110,7 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 				accessAnalyzerClients: tt.clients,
 			}
 
-			allAnalyzers, err := p.GetAccessAnalyzers(context.Background())
+			allAnalyzers, err := p.GetAccessAnalyzers(t.Context())
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
 				return
