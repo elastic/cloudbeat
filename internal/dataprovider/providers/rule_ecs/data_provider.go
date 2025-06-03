@@ -15,29 +15,38 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package vulnerability
+package rule_ecs
 
 import (
-	"testing"
+	"errors"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/goleak"
+	"github.com/elastic/beats/v7/libbeat/beat"
 
-	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/evaluator"
+	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
-func TestNewVulnerabilityRunner(t *testing.T) {
-	testhelper.SkipLong(t)
-	defer goleak.VerifyNone(t, goleak.IgnoreCurrent(), goleak.IgnoreAnyFunction("net/http.(*http2clientConnReadLoop).run"))
+const (
+	ruleKey = "rule"
+)
 
-	log := testhelper.NewLogger(t)
-	runner, err := NewVulnerabilityRunner(t.Context(), log)
-	defer func() {
-		require.NoError(t, runner.Close(t.Context()))
-	}()
-	require.NoError(t, err)
-	assert.NotNil(t, runner)
-	assert.NotNil(t, runner.log)
-	assert.NotNil(t, runner)
+type DataProvider struct{}
+
+func NewDataProvider() DataProvider {
+	return DataProvider{}
+}
+
+func (dp DataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata) error {
+	ruleRaw, ok := event.Fields[ruleKey]
+	if !ok {
+		return nil
+	}
+	rule, ok := ruleRaw.(evaluator.Rule)
+	if !ok {
+		return errors.New("could not cast rule to 'evaluator.Rule")
+	}
+	rule.UUID = rule.Id
+	rule.Reference = rule.References
+	event.Fields[ruleKey] = rule
+	return nil
 }

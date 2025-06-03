@@ -18,7 +18,6 @@
 package awslib
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -58,20 +57,22 @@ func (s *AllRegionSelectorTestSuite) SetupTest() {
 }
 
 func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_SingleCall() {
+	t := s.T()
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(successfulDescribeCloudRegionOutput, nil)
-	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
+	result, err := s.selector.Regions(t.Context(), *awssdk.NewConfig())
 	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 }
 
 func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_FirstFail() {
+	t := s.T()
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(nil, errors.New("mock")).Once()
-	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
+	result, err := s.selector.Regions(t.Context(), *awssdk.NewConfig())
 	s.Require().Error(err)
 	s.Empty(result)
 
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(successfulDescribeCloudRegionOutput, nil).Once()
-	result, err = s.selector.Regions(context.Background(), *awssdk.NewConfig())
+	result, err = s.selector.Regions(t.Context(), *awssdk.NewConfig())
 	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	s.mock.AssertNumberOfCalls(s.T(), "DescribeRegions", 2)

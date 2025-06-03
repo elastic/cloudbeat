@@ -19,13 +19,13 @@ jobs:
       contents: 'read'
       id-token: 'write'
 
-  run-ech-8x:
-    name: Run ECH on 8.x
+  run-ech-819:
+    name: Run ECH on 8.19
     needs: run-ech-main
     uses: ./.github/workflows/test-e2e-flow.yml
     if: always()
     with:
-      branch: 8.x
+      branch: 8.19
       region: gcp-us-west2
       serverless: false
     secrets: inherit
@@ -35,7 +35,7 @@ jobs:
 
   run-serverless-main:
     name: Run Serverless on main
-    needs: run-ech-8x
+    needs: run-ech-819
     uses: ./.github/workflows/test-e2e-flow.yml
     if: always()
     with:

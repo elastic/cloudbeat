@@ -10,7 +10,7 @@ upload_cis() {
     aws s3 cp "./terraform.tfstate" "${S3_BUCKET}/cis-terraform.tfstate"
     aws s3 cp "${EC2_CSPM_KEY}" "${S3_BUCKET}/cspm.pem"
     aws s3 cp "${EC2_KSPM_KEY}" "${S3_BUCKET}/kspm.pem"
-    aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
+    aws s3 cp "${INTEGRATIONS_SETUP_DIR}/state_data.json" "$S3_BUCKET/state_data.json"
 }
 
 # Function to upload additional keys for CDR
@@ -21,7 +21,7 @@ upload_cdr() {
     aws s3 cp "${AUDIT_LOGS_KEY}" "${S3_BUCKET}/gcp_audit_logs.pem"
     aws s3 cp "${EC2_ASSET_INV_KEY}" "${S3_BUCKET}/asset_inv.pem"
     aws s3 cp "${EC2_WIZ_KEY}" "${S3_BUCKET}/wiz.pem"
-    aws s3 cp "./state_data.json" "$S3_BUCKET/state_data.json"
+    aws s3 cp "${INTEGRATIONS_SETUP_DIR}/state_data.json" "$S3_BUCKET/state_data.json"
 }
 
 # Check for valid input

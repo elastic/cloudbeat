@@ -33,13 +33,19 @@ import (
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	gcpfetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp"
 )
 
 const (
 	ecsCategoryConfiguration = "configuration"
 	ecsKindState             = "state"
-	ecsOutcomeSuccess        = "success"
 	ecsTypeInfo              = "info"
+)
+
+const (
+	EcsOutcomeSuccess = "success"
+	EcsOutcomeFailure = "failure"
+	EcsOutcomeUnknown = "unknown"
 )
 
 type Transformer struct {
@@ -48,6 +54,7 @@ type Transformer struct {
 	idProvider            dataprovider.IdProvider
 	benchmarkDataProvider dataprovider.CommonDataProvider
 	commonDataProvider    dataprovider.ElasticCommonDataProvider
+	ruleECSProvider       dataprovider.CommonDataProvider
 }
 
 type ECSEvent struct {
@@ -64,13 +71,14 @@ type Related struct {
 	Entity []string `json:"entity,omitempty"`
 }
 
-func NewTransformer(log *clog.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
+func NewTransformer(log *clog.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider, rep dataprovider.CommonDataProvider) *Transformer {
 	return &Transformer{
 		log:                   log,
 		index:                 cfg.Datastream(),
 		idProvider:            idp,
 		benchmarkDataProvider: bdp,
 		commonDataProvider:    cdp,
+		ruleECSProvider:       rep,
 	}
 }
 
@@ -90,7 +98,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
-		Raw:              eventData.RuleResult.Resource,
+		Raw:              getPreferredRawValue(eventData),
 	}
 
 	related := Related{
@@ -105,7 +113,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			Timestamp: timestamp,
 
 			Fields: mapstr.M{
-				"event":    BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
+				"event":    BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}, getEcsOutcome(finding.Result.Evaluation)),
 				"resource": resource,
 				"result":   finding.Result,
 				"rule":     finding.Rule,
@@ -117,6 +125,11 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		err := t.benchmarkDataProvider.EnrichEvent(&event, resMetadata)
 		if err != nil {
 			return nil, fmt.Errorf("failed to enrich event with benchmark context: %v", err)
+		}
+
+		err = t.ruleECSProvider.EnrichEvent(&event, resMetadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to enrich event with rule ECS context: %v", err)
 		}
 
 		err = globalEnricher.EnrichEvent(&event)
@@ -135,7 +148,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	return events, nil
 }
 
-func BuildECSEvent(seq int64, created time.Time, categories []string) ECSEvent {
+func BuildECSEvent(seq int64, created time.Time, categories []string, outcome string) ECSEvent {
 	id, _ := uuid.NewV4() // zero value in case of an error is uuid.Nil
 	return ECSEvent{
 		Category: categories,
@@ -143,7 +156,31 @@ func BuildECSEvent(seq int64, created time.Time, categories []string) ECSEvent {
 		ID:       id.String(),
 		Kind:     ecsKindState,
 		Sequence: seq,
-		Outcome:  ecsOutcomeSuccess,
+		Outcome:  outcome,
 		Type:     []string{ecsTypeInfo},
+	}
+}
+
+func getEcsOutcome(evaluation string) string {
+	switch evaluation {
+	case "failed":
+		return EcsOutcomeFailure
+	case "passed":
+		return EcsOutcomeSuccess
+	default:
+		return EcsOutcomeUnknown
+	}
+}
+
+func getPreferredRawValue(event evaluator.EventData) any {
+	switch event.ResourceInfo.Resource.(type) {
+	// Skip 'raw' for GCP custom resources grouping real GCP resources
+	case *gcpfetchers.GcpLoggingAsset,
+		*gcpfetchers.GcpMonitoringAsset,
+		*gcpfetchers.GcpPoliciesAsset,
+		*gcpfetchers.GcpServiceUsageAsset:
+		return nil
+	default:
+		return event.RuleResult.Resource
 	}
 }

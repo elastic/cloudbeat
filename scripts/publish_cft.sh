@@ -5,7 +5,8 @@ function upload_file() {
     local local_file=${1:?Missing local file name}
     local remote_file_prefix=${2:?Missing remote file name}
     local cft_version=${3:?Missing version}
-    local remote_file="${remote_file_prefix}-${cft_version}.yml"
+    local cft_version_zero_patch="${cft_version%.*}.0"
+    local remote_file="${remote_file_prefix}-${cft_version_zero_patch}.yml"
 
     sed --in-place'' "s/CFT_VERSION/$cft_version/g" "$local_file"
 
@@ -43,4 +44,10 @@ upload_file deploy/asset-inventory-cloudformation/elastic-agent-ec2.yml \
     "${version}"
 upload_file deploy/asset-inventory-cloudformation/elastic-agent-ec2-organization.yml \
     "cloudformation-asset-inventory-organization-account" \
+    "${version}"
+upload_file deploy/asset-inventory-cloudformation/elastic-agent-direct-access-key.yml \
+    "cloudformation-asset-inventory-direct-access-single-account" \
+    "${version}"
+upload_file deploy/asset-inventory-cloudformation/elastic-agent-direct-access-key-organization.yml \
+    "cloudformation-asset-inventory-direct-access-organization-account" \
     "${version}"

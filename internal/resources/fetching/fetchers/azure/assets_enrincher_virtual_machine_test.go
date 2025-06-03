@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -133,7 +132,7 @@ func TestEnrichVirtualMachinesWithNetworkSecurityGroup(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := enricher.Enrich(context.Background(), newCycle(1), tc.input)
+			err := enricher.Enrich(t.Context(), newCycle(1), tc.input)
 			if err != nil {
 				assert.Fail(t, err.Error())
 			}
