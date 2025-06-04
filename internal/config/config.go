@@ -24,12 +24,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/launcher"
 )
 
@@ -83,12 +86,19 @@ type GcpConfig struct {
 	// SingleAccount or OrganizationAccount
 	AccountType string `config:"account_type"`
 
+	GcpCallOpt GcpCallOpt `config:"call_options"`
+
 	GcpClientOpt `config:"credentials"`
 }
 
 type GcpClientOpt struct {
 	CredentialsJSON     string `config:"credentials_json"`
 	CredentialsFilePath string `config:"credentials_file_path"`
+}
+
+type GcpCallOpt struct {
+	ListAssetsTimeout  time.Duration `config:"list_assets_timeout"`
+	ListAssetsPageSize int32         `config:"list_assets_page_size"`
 }
 
 type AzureConfig struct {
@@ -148,6 +158,9 @@ func New(cfg *config.C) (*Config, error) {
 		}
 	}
 
+	// apply env var overwrites
+	overwritesFromEnvVars(c)
+
 	switch c.CloudConfig.Aws.AccountType {
 	case "":
 	case SingleAccount:
@@ -180,6 +193,9 @@ func New(cfg *config.C) (*Config, error) {
 func defaultConfig() (*Config, error) {
 	ret := &Config{
 		Period: 4 * time.Hour,
+		CloudConfig: CloudConfig{
+			Gcp: defaultGCPConfig(),
+		},
 	}
 
 	bundle, err := getBundlePath()
@@ -189,6 +205,20 @@ func defaultConfig() (*Config, error) {
 
 	ret.BundlePath = bundle
 	return ret, nil
+}
+
+func defaultGCPConfig() GcpConfig {
+	return GcpConfig{
+		GcpCallOpt: GcpCallOpt{
+			// default value from sdk is 1m; we use 4m to exceed quota window.
+			// https://github.com/googleapis/google-cloud-go/blob/952cd7fd419af9eb74f5d30a111ae936094b0645/asset/apiv1/asset_client.go#L96
+			ListAssetsTimeout: 4 * time.Minute,
+
+			// default value from sdk is 100; we use 200
+			// https://github.com/googleapis/google-cloud-go/blob/a6c85f6387ee6aa291e786c882637fb03f3302f4/asset/apiv1/assetpb/asset_service.pb.go#L767-L769
+			ListAssetsPageSize: 200,
+		},
+	}
 }
 
 func getBundlePath() (string, error) {
@@ -229,5 +259,38 @@ func newCloudConnectorsConfig() CloudConnectorsConfig {
 		LocalRoleARN:  os.Getenv(CloudConnectorsLocalRoleEnvVar),
 		GlobalRoleARN: os.Getenv(CloudConnectorsGlobalRoleEnvVar),
 		ResourceID:    os.Getenv(CloudResourceIDEnvVar),
+	}
+}
+
+const (
+	CloudbeatGCPListAssetPageSizeEnvVar = "CLOUDBEAT_GCP_LIST_ASSETS_PAGE_SIZE"
+	CloudbeatGCPListAssetTimeoutEnvVar  = "CLOUDBEAT_GCP_LIST_ASSETS_TIMEOUT"
+)
+
+func overwritesFromEnvVars(c *Config) {
+	log := clog.NewLogger("config")
+	logErr := func(name string, value string, err error) {
+		log.Errorw(
+			"error trying to parse config env variable",
+			logp.String("name", name),
+			logp.String("value", value),
+			logp.Error(err),
+		)
+	}
+
+	if v, exists := os.LookupEnv(CloudbeatGCPListAssetPageSizeEnvVar); exists {
+		if i, err := strconv.ParseInt(v, 10, 32); err == nil {
+			c.CloudConfig.Gcp.GcpCallOpt.ListAssetsPageSize = int32(i)
+		} else {
+			logErr(CloudbeatGCPListAssetPageSizeEnvVar, v, err)
+		}
+	}
+
+	if v, exists := os.LookupEnv(CloudbeatGCPListAssetTimeoutEnvVar); exists {
+		if d, err := time.ParseDuration(v); err == nil {
+			c.CloudConfig.Gcp.GcpCallOpt.ListAssetsTimeout = d
+		} else {
+			logErr(CloudbeatGCPListAssetPageSizeEnvVar, v, err)
+		}
 	}
 }

@@ -108,6 +108,28 @@ func TestStrategyPicks(t *testing.T) {
 			},
 			"STS: GetCallerIdentity",
 		},
+		{
+			"expected success: AWS with cloud connectors",
+			&config.Config{
+				AssetInventoryProvider: config.ProviderAWS,
+				CloudConfig: config.CloudConfig{
+					Aws: config.AwsConfig{
+						AccountType: config.SingleAccount,
+						Cred: aws.ConfigAWS{
+							AccessKeyID:     "key",
+							SecretAccessKey: "key",
+						},
+						CloudConnectors: true,
+						CloudConnectorsConfig: config.CloudConnectorsConfig{
+							LocalRoleARN:  "abc",
+							GlobalRoleARN: "xyz",
+							ResourceID:    "123",
+						},
+					},
+				},
+			},
+			"STS: GetCallerIdentity",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -116,7 +138,7 @@ func TestStrategyPicks(t *testing.T) {
 				logger: clog.NewLogger("strategy_test"),
 				cfg:    tc.cfg,
 			}
-			ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+			ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 			defer cancel()
 			obj, err := s.NewAssetInventory(ctx, nil)
 			if tc.expectedErr != "" {

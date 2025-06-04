@@ -40,8 +40,16 @@ const (
 	memberRole = "cloudbeat-asset-inventory-securityaudit"
 )
 
+func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) (*awssdk.Config, error) {
+	if cfg.CloudConfig.Aws.CloudConnectors {
+		return awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
+	}
+
+	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+}
+
 func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
-	awsConfig, err := awslib.InitializeAWSConfig(s.cfg.CloudConfig.Aws.Cred)
+	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
 	if err != nil {
 		return nil, err
 	}

@@ -33,6 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	gcpfetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
@@ -44,6 +45,7 @@ type testAttr struct {
 	bdpp  func() dataprovider.CommonDataProvider
 	cdpp  func() dataprovider.ElasticCommonDataProvider
 	idpp  func() dataprovider.IdProvider
+	rdpp  func() dataprovider.CommonDataProvider
 }
 
 const (
@@ -135,6 +137,11 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				idProviderMock.EXPECT().GetId(mock.Anything, mock.Anything).Return(resourceId)
 				return idProviderMock
 			},
+			rdpp: func() dataprovider.CommonDataProvider {
+				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
+				dataProviderMock.EXPECT().EnrichEvent(mock.Anything, mock.Anything).Return(nil)
+				return dataProviderMock
+			},
 		},
 		{
 			name: "Events should not be created due zero findings",
@@ -161,6 +168,10 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				idProviderMock := dataprovider.NewMockIdProvider(s.T())
 				return idProviderMock
 			},
+			rdpp: func() dataprovider.CommonDataProvider {
+				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
+				return dataProviderMock
+			},
 		},
 	}
 
@@ -169,8 +180,9 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			cdp := tt.cdpp()
 			bdp := tt.bdpp()
 			idp := tt.idpp()
+			rdp := tt.rdpp()
 
-			transformer := NewTransformer(testhelper.NewLogger(s.T()), &config.Config{}, bdp, cdp, idp)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), &config.Config{}, bdp, cdp, idp, rdp)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
@@ -183,12 +195,68 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(resource.Raw, "raw resource is missing")
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
 				s.Equal("test_resource_id", resource.ID)
-				s.NotEmpty(resource.Type, "resource  type is missing")
+				s.NotEmpty(resource.Type, "resource type is missing")
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
 				s.Equal(event.Fields["cloudbeat"], versionInfo)
 				s.Equal(enrichedValue, event.Fields[enrichedKey])
 				s.Regexp("^Rule \".*\": (passed|failed)$", event.Fields["message"], "event message is not correct")
+
+				rule := event.Fields["rule"].(evaluator.Rule)
+				s.Equal(rule.Id, rule.UUID)
+				s.Equal(rule.References, rule.Reference)
 			}
+		})
+	}
+}
+
+func (s *EventsCreatorTestSuite) TestTransformer_GetPreferredRawValue() {
+	tests := []struct {
+		name     string
+		expected any
+		input    fetching.Resource
+	}{
+		{
+			name:     "returns nil for GcpLoggingAsset",
+			input:    &gcpfetchers.GcpLoggingAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns nil for GcpMonitoringAsset",
+			input:    &gcpfetchers.GcpMonitoringAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns nil for GcpPoliciesAsset",
+			input:    &gcpfetchers.GcpPoliciesAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns nil for GcpServiceUsageAsset",
+			input:    &gcpfetchers.GcpServiceUsageAsset{}, //nolint:exhaustruct
+			expected: nil,
+		},
+		{
+			name:     "returns the actual resource when the resource is not a gcp-wrapper-resource",
+			input:    &gcpfetchers.GcpAsset{}, //nolint:exhaustruct
+			expected: &gcpfetchers.GcpAsset{}, //nolint:exhaustruct
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			eventData := evaluator.EventData{
+				RuleResult: evaluator.RuleResult{
+					Findings: []evaluator.Finding{},
+					Metadata: evaluator.Metadata{},
+					Resource: test.input,
+				},
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      test.input,
+					CycleMetadata: cycle.Metadata{},
+				},
+			}
+			result := getPreferredRawValue(eventData)
+			s.Equal(test.expected, result)
 		})
 	}
 }

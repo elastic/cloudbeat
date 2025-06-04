@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
@@ -71,16 +72,17 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	}
 
 	var (
-		awsConfig   *awssdk.Config
-		awsIdentity *cloud.Identity
-		err         error
+		awsConfigCloudbeatRoot *awssdk.Config
+		awsIdentity            *cloud.Identity
+		err                    error
 	)
 
-	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	// cloudbeat-root role credentials.
+	awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg)
 	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
 		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
 		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
-		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+		awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg)
 	}
 
 	if err != nil {
@@ -88,12 +90,13 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	}
 	log.Info("successfully retrieved AWS Identity")
 
-	a.IAMProvider = iam.NewIAMProvider(ctx, log, *awsConfig, nil)
+	// IAMProvider which is iam.RoleGetter should be created using cloudbeat-root role credentials (requires iam:GetRole).
+	a.IAMProvider = iam.NewIAMProvider(ctx, log, *awsConfigCloudbeatRoot, nil)
 
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
 		func() (registry.FetchersMap, error) {
-			accounts, err := a.getAwsAccounts(ctx, log, *awsConfig, awsIdentity)
+			accounts, err := a.getAwsAccounts(ctx, log, *awsConfigCloudbeatRoot, awsIdentity)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 			}
@@ -112,17 +115,15 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	return reg, cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 
-func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
-	rootCfg := assumeRole(
-		sts.NewFromConfig(initialCfg),
-		initialCfg,
-		fmtIAMRole(rootIdentity.Account, rootRole),
-	)
-	stsClient := sts.NewFromConfig(rootCfg)
+// getAwsAccounts returns all the aws accounts of the org.
+// For each account it bundles together the cloud.Identity and the credentials for the cloudbeat-securityaudit role of that account.
+// It requires cloudbeat-root credentials (requires iam:ListAccountAliases and iam:GetRole).
+func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudbeatRoot awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
+	stsClient := sts.NewFromConfig(cfgCloudbeatRoot)
 
 	// accountIdentities array contains all the Accounts and Organizational
-	// Units, even if they are nested.
-	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, rootCfg)
+	// Units, even if they are nested. (requires iam:ListAccountAliases)
+	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, cfgCloudbeatRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, initialCf
 		var awsConfig awssdk.Config
 
 		if identity.Account == rootIdentity.Account {
-			cfg, err := a.pickManagementAccountRole(ctx, log, stsClient, rootCfg, identity)
+			cfg, err := a.pickManagementAccountRole(ctx, log, stsClient, cfgCloudbeatRoot, identity)
 			if err != nil {
 				log.Errorf("error picking roles for account %s: %s", identity.Account, err)
 				continue
@@ -150,7 +151,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, initialCf
 			// not exist.
 			awsConfig = assumeRole(
 				stsClient,
-				rootCfg,
+				cfgCloudbeatRoot,
 				fmtIAMRole(identity.Account, memberRole),
 			)
 		}
@@ -217,26 +218,58 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	return config, nil
 }
 
+// getIdentity should assume the cloudbeat-root role and then perform the GetIdentity
+// and return the aws config (having credentials from cloudbeat-root role) and cloud.Identity data.
 func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
-	var awsConfig *awssdk.Config
-	var err error
-
-	if cfg.CloudConfig.Aws.CloudConnectors {
-		awsConfig, err = awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
-	} else {
-		awsConfig, err = awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
-	}
-
+	awsConfig, err := a.getInitialAWSConfig(ctx, cfg)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, *awsConfig)
+	// Ensure cloudbeat-root role credentials.
+	// Depending on case we might have or not have the GetRole policy, or we might already own the cloudbeat-root role,
+	// case A [EC2 Instance]: in this case we have already assumed cloudbeat-root role automatically because of InstanceProfile.
+	// case B [Direct Credentials]: in this case we have not assumed the cloudbeat-root role but we have the same policies with cloudbeat-root role, added to user.
+	// case C [Cloud Connectors]: in this case we have not assumed the cloudbeat-root role nor have the same policies with cloudbeat-root.
+	// So we will try to infer cloudbeat-root role ARN by using the same account id with our current identity.
+	identity, err := a.IdentityProvider.GetCallerIdentity(ctx, *awsConfig)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize AWS credentials, failed to call GetCallerIdentity: %w", err)
+	}
+
+	var cfgCloudbeatRoot awssdk.Config
+
+	if strings.Contains(pointers.Deref(identity.Arn), rootRole) {
+		// case A [EC2 Instance] already cloudbeat-root, no need to re-assume.
+		cfgCloudbeatRoot = *awsConfig
+	} else {
+		cfgCloudbeatRoot = assumeRole(
+			sts.NewFromConfig(*awsConfig),
+			*awsConfig,
+			fmtIAMRole(pointers.Deref(identity.Account), rootRole),
+		)
+	}
+
+	// the next operation requires cloudbeat-root role (requires iam:ListAccountAliases policy).
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, cfgCloudbeatRoot)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	return awsConfig, awsIdentity, nil
+	return &cfgCloudbeatRoot, awsIdentity, nil
+}
+
+// getInitialAWSConfig return the initial aws.Config based on the received configuration.
+func (a *AWSOrg) getInitialAWSConfig(ctx context.Context, cfg *config.Config) (*awssdk.Config, error) {
+	if cfg.CloudConfig.Aws.CloudConnectors {
+		// [Cloud Connectors] On cloud connectors this ends up assuming the customer remote role (using role chaining)
+		return awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
+	}
+
+	// [EC2 Instance] On EC2 created with our cloud formation, the identity is inferred by the EC2 instance InstanceProfile which has the cloudbeat-root role.
+	// [Direct Credentials] On Direct credentials this identity is the user created by the cloud formation.
+	// [Custom Setup] On custom setup like manual authentication for organization-level onboarding.
+	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 }
 
 func (a *AWSOrg) checkDependencies() error {

@@ -33,6 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/evaluator"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	gcpfetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp"
 )
 
 const (
@@ -53,6 +54,7 @@ type Transformer struct {
 	idProvider            dataprovider.IdProvider
 	benchmarkDataProvider dataprovider.CommonDataProvider
 	commonDataProvider    dataprovider.ElasticCommonDataProvider
+	ruleECSProvider       dataprovider.CommonDataProvider
 }
 
 type ECSEvent struct {
@@ -69,13 +71,14 @@ type Related struct {
 	Entity []string `json:"entity,omitempty"`
 }
 
-func NewTransformer(log *clog.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
+func NewTransformer(log *clog.Logger, cfg *config.Config, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider, rep dataprovider.CommonDataProvider) *Transformer {
 	return &Transformer{
 		log:                   log,
 		index:                 cfg.Datastream(),
 		idProvider:            idp,
 		benchmarkDataProvider: bdp,
 		commonDataProvider:    cdp,
+		ruleECSProvider:       rep,
 	}
 }
 
@@ -95,7 +98,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
-		Raw:              eventData.RuleResult.Resource,
+		Raw:              getPreferredRawValue(eventData),
 	}
 
 	related := Related{
@@ -122,6 +125,11 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		err := t.benchmarkDataProvider.EnrichEvent(&event, resMetadata)
 		if err != nil {
 			return nil, fmt.Errorf("failed to enrich event with benchmark context: %v", err)
+		}
+
+		err = t.ruleECSProvider.EnrichEvent(&event, resMetadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to enrich event with rule ECS context: %v", err)
 		}
 
 		err = globalEnricher.EnrichEvent(&event)
@@ -161,5 +169,18 @@ func getEcsOutcome(evaluation string) string {
 		return EcsOutcomeSuccess
 	default:
 		return EcsOutcomeUnknown
+	}
+}
+
+func getPreferredRawValue(event evaluator.EventData) any {
+	switch event.ResourceInfo.Resource.(type) {
+	// Skip 'raw' for GCP custom resources grouping real GCP resources
+	case *gcpfetchers.GcpLoggingAsset,
+		*gcpfetchers.GcpMonitoringAsset,
+		*gcpfetchers.GcpPoliciesAsset,
+		*gcpfetchers.GcpServiceUsageAsset:
+		return nil
+	default:
+		return event.RuleResult.Resource
 	}
 }

@@ -78,7 +78,7 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 }
 
 func TestAccountFetcher_EnrichAsset(t *testing.T) {
-	var data = map[string]struct {
+	data := map[string]struct {
 		resource    *assetpb.Resource    // input of GCP asset resource data
 		enrichments inventory.AssetEvent // output of inventory asset ECS fields
 	}{
@@ -260,7 +260,6 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 		// Set the common fields that are not set in the enrichments
 		expected.Event = actual.Event
 		expected.Entity = actual.Entity
-		expected.RawAttributes = actual.RawAttributes
 
 		// Cloud is the only field where we have both common and enriched fields
 		if expected.Cloud == nil {
