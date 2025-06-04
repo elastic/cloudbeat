@@ -35,6 +35,8 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
+var projectId = "test-project-id"
+
 type GcpMonitoringFetcherTestSuite struct {
 	suite.Suite
 
