@@ -143,7 +143,7 @@ func (c *Config) Datastream() string {
 	return defaultFindingsIndexPrefix + "-" + DefaultNamespace
 }
 
-// DatastreamNamespace returns the inferred default namespace setting from the Agent Policy
+// DatastreamNamespace returns the inferred namespace setting from the Agent Policy
 func (c *Config) DatastreamNamespace() string {
 	if c.Index == "" {
 		return DefaultNamespace
