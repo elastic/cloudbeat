@@ -68,5 +68,4 @@ targets:
       command: .ci/updatecli/scripts/update-beats.sh
       environments:
         - name: PATH
-        - name: GOPATH
         - name: HOME
