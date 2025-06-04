@@ -18,11 +18,7 @@
 package fetchers
 
 import (
-<<<<<<< HEAD
 	"context"
-	"errors"
-=======
->>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	"fmt"
 	"sync"
 	"testing"
@@ -40,50 +36,41 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
-type GcpLogSinkFetcherTestSuite struct {
+type GcpNetworksFetcherTestSuite struct {
 	suite.Suite
 
 	resourceCh chan fetching.ResourceInfo
 }
 
-func TestGcpLogSinkFetcherTestSuite(t *testing.T) {
-	s := new(GcpLogSinkFetcherTestSuite)
+func TestGcpNetworksFetcherTestSuite(t *testing.T) {
+	s := new(GcpNetworksFetcherTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *GcpLogSinkFetcherTestSuite) SetupTest() {
+func (s *GcpNetworksFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
-func (s *GcpLogSinkFetcherTestSuite) TearDownTest() {
+func (s *GcpNetworksFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-<<<<<<< HEAD
-func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
+func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 	ctx := context.Background()
-=======
-func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
-	t := s.T()
-	ctx := t.Context()
 	wg := sync.WaitGroup{}
->>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := NewGcpLogSinkFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
-
-	expectedAsset := &inventory.ProjectAssets{
-		Assets: []*inventory.ExtendedGcpAsset{
-			{Asset: &assetpb.Asset{Name: "a1", AssetType: "logging.googleapis.com/LogSink"}},
-		},
+	fetcher := NewGcpNetworksFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
+	expectedAsset := &inventory.ExtendedGcpAsset{
+		Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.MonitoringAlertPolicyAssetType},
 		CloudAccount: &fetching.CloudAccountMetadata{
 			AccountId: "1",
 		},
 	}
 	mockInventoryService.EXPECT().Clear()
-	mockInventoryService.On("ListProjectAssets", mock.Anything, []string{inventory.LogSinkAssetType}, mock.Anything).
+	mockInventoryService.On("ListNetworkAssets", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			ch := args.Get(2).(chan<- *inventory.ProjectAssets)
+			ch := args.Get(1).(chan<- *inventory.ExtendedGcpAsset)
 			ch <- expectedAsset
 			close(ch)
 		}).Once()
@@ -97,66 +84,45 @@ func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
 
 	res := <-s.resourceCh
 	s.NotNil(res.Resource)
-	asset, ok := res.Resource.(*GcpLoggingAsset)
+	asset, ok := res.Resource.(*GcpNetworksAsset)
 	s.True(ok)
-	s.Len(asset.Asset.LogSinks, 1)
-	s.Equal(expectedAsset.Assets, asset.Asset.LogSinks)
-	s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
-	s.Equal(fetching.LoggingIdentity, asset.Type)
-	s.Equal(fetching.GcpLoggingType, asset.subType)
+	s.Equal(expectedAsset, asset.NetworkAsset)
+	s.Equal(fetching.CloudCompute, asset.Type)
+	s.Equal("gcp-compute-network", asset.subType)
 
-<<<<<<< HEAD
-	// ListMonitoringAssets mocked to return a single asset
-	s.Len(results, 1)
-}
-
-func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Error() {
-	ctx := context.Background()
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpLogSinkFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
-
-	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(nil, errors.New("api call error"))
-
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().Error(err)
-=======
 	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
->>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 }
 
-func TestLoggingAsset_GetMetadata(t *testing.T) {
-	const projectId = "1"
+func TestNetworksResource_GetMetadata(t *testing.T) {
 	tests := []struct {
 		name     string
-		resource GcpLoggingAsset
+		resource GcpNetworksAsset
 		want     fetching.ResourceMetadata
 		wantErr  bool
 	}{
 		{
-			name: "retrieve successfully log sink assets",
-			resource: GcpLoggingAsset{
-				Type:    fetching.LoggingIdentity,
-				subType: fetching.GcpLoggingType,
-				Asset: &LoggingAsset{
+			name: "happy path",
+			resource: GcpNetworksAsset{
+				Type:    fetching.CloudCompute,
+				subType: "gcp-compute-network",
+				NetworkAsset: &inventory.ExtendedGcpAsset{
+					Asset: &assetpb.Asset{
+						Name: fmt.Sprintf("%s/net1", projectId),
+					},
 					CloudAccount: &fetching.CloudAccountMetadata{
 						AccountId:        projectId,
 						AccountName:      "a",
 						OrganisationId:   "a",
 						OrganizationName: "a",
 					},
-					LogSinks: []*inventory.ExtendedGcpAsset{},
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      fmt.Sprintf("%s-%s", fetching.GcpLoggingType, projectId),
-				Name:    fmt.Sprintf("%s-%s", fetching.GcpLoggingType, projectId),
-				Type:    fetching.LoggingIdentity,
-				SubType: fetching.GcpLoggingType,
+				ID:      fmt.Sprintf("%s/net1", projectId),
+				Name:    "net1",
+				Type:    fetching.CloudCompute,
+				SubType: "gcp-compute-network",
 				Region:  gcplib.GlobalRegion,
 				CloudAccountMetadata: fetching.CloudAccountMetadata{
 					AccountId:        projectId,
