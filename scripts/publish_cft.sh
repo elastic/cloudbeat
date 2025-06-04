@@ -46,8 +46,8 @@ upload_file deploy/asset-inventory-cloudformation/elastic-agent-ec2-organization
     "cloudformation-asset-inventory-organization-account" \
     "${version}"
 upload_file deploy/asset-inventory-cloudformation/elastic-agent-direct-access-key.yml \
-    "cloudformation-asset-inventory-direct-access-single-account" \
+    "cloudformation-asset-inventory-direct-access-key-single-account" \
     "${version}"
 upload_file deploy/asset-inventory-cloudformation/elastic-agent-direct-access-key-organization.yml \
-    "cloudformation-asset-inventory-direct-access-organization-account" \
+    "cloudformation-asset-inventory-direct-access-key-organization-account" \
     "${version}"
