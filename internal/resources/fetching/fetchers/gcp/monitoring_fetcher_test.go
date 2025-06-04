@@ -18,8 +18,8 @@
 package fetchers
 
 import (
-	"errors"
 	"fmt"
+	"sync"
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
@@ -35,7 +35,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
-const projectId = "test-project"
+var projectId = "test-project-id"
 
 type GcpMonitoringFetcherTestSuite struct {
 	suite.Suite
@@ -57,57 +57,53 @@ func (s *GcpMonitoringFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
+func (s *GcpMonitoringFetcherTestSuite) TestMonitoringFetcher_Fetch_Success() {
 	t := s.T()
 	ctx := t.Context()
+	wg := sync.WaitGroup{}
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpMonitoringFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
+	fetcher := NewGcpMonitoringFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
+	expectedAsset := &inventory.MonitoringAsset{
+		Alerts: []*inventory.ExtendedGcpAsset{
+			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.MonitoringAlertPolicyAssetType}},
+		},
+		LogMetrics: []*inventory.ExtendedGcpAsset{
+			{Asset: &assetpb.Asset{Name: "a1", AssetType: inventory.MonitoringLogMetricAssetType}},
+		},
+		CloudAccount: &fetching.CloudAccountMetadata{
+			AccountId: "1",
+		},
 	}
 
-	mockInventoryService.EXPECT().ListMonitoringAssets(mock.Anything, mock.Anything).Return(
-		[]*inventory.MonitoringAsset{
-			{
-				CloudAccount: &fetching.CloudAccountMetadata{
-					AccountId:        "a",
-					AccountName:      "a",
-					OrganisationId:   "a",
-					OrganizationName: "a",
-				},
-				LogMetrics: []*inventory.ExtendedGcpAsset{
-					{Asset: &assetpb.Asset{Name: "a", AssetType: "logging.googleapis.com/LogMetric"}},
-				},
-				Alerts: []*inventory.ExtendedGcpAsset{
-					{Asset: &assetpb.Asset{Name: "b", AssetType: "monitoring.googleapis.com/AlertPolicy"}},
-				},
-			},
-		}, nil,
-	)
+	mockInventoryService.EXPECT().Clear()
+	mockInventoryService.On("ListMonitoringAssets", mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			ch := args.Get(1).(chan<- *inventory.MonitoringAsset)
+			ch <- expectedAsset
+			close(ch)
+		}).Once()
 
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().NoError(err)
-	results := testhelper.CollectResources(s.resourceCh)
+	wg.Add(1)
 
-	// ListMonitoringAssets mocked to return a single asset
-	s.Len(results, 1)
-}
+	go func() {
+		defer wg.Done()
+		err := fetcher.Fetch(ctx, cycle.Metadata{})
+		s.NoError(err)
+	}()
 
-func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Error() {
-	t := s.T()
-	ctx := t.Context()
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpMonitoringFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
-
-	mockInventoryService.EXPECT().ListMonitoringAssets(mock.Anything, mock.Anything).Return(nil, errors.New("api call error"))
-
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().ErrorContains(err, "api call error")
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpMonitoringAsset)
+	s.True(ok)
+	s.Len(asset.Asset.Alerts, 1)
+	s.Len(asset.Asset.LogMetrics, 1)
+	s.Equal(expectedAsset.Alerts, asset.Asset.Alerts)
+	s.Equal(expectedAsset.LogMetrics, asset.Asset.LogMetrics)
+	s.Equal(expectedAsset.CloudAccount.AccountId, asset.Asset.CloudAccount.AccountId)
+	s.Equal(fetching.MonitoringIdentity, asset.Type)
+	s.Equal(fetching.GcpMonitoringType, asset.subType)
+	wg.Wait()
+	mockInventoryService.AssertExpectations(s.T())
 }
 
 func TestMonitoringResource_GetMetadata(t *testing.T) {

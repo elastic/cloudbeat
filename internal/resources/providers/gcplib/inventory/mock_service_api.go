@@ -38,6 +38,38 @@ func (_m *MockServiceAPI) EXPECT() *MockServiceAPI_Expecter {
 	return &MockServiceAPI_Expecter{mock: &_m.Mock}
 }
 
+// Clear provides a mock function with no fields
+func (_m *MockServiceAPI) Clear() {
+	_m.Called()
+}
+
+// MockServiceAPI_Clear_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Clear'
+type MockServiceAPI_Clear_Call struct {
+	*mock.Call
+}
+
+// Clear is a helper method to define mock.On call
+func (_e *MockServiceAPI_Expecter) Clear() *MockServiceAPI_Clear_Call {
+	return &MockServiceAPI_Clear_Call{Call: _e.mock.On("Clear")}
+}
+
+func (_c *MockServiceAPI_Clear_Call) Run(run func()) *MockServiceAPI_Clear_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockServiceAPI_Clear_Call) Return() *MockServiceAPI_Clear_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockServiceAPI_Clear_Call) RunAndReturn(run func()) *MockServiceAPI_Clear_Call {
+	_c.Run(run)
+	return _c
+}
+
 // Close provides a mock function with no fields
 func (_m *MockServiceAPI) Close() error {
 	ret := _m.Called()
@@ -83,151 +115,44 @@ func (_c *MockServiceAPI_Close_Call) RunAndReturn(run func() error) *MockService
 	return _c
 }
 
-// ListAllAssetTypesByName provides a mock function with given fields: ctx, assets
-func (_m *MockServiceAPI) ListAllAssetTypesByName(ctx context.Context, assets []string) ([]*ExtendedGcpAsset, error) {
-	ret := _m.Called(ctx, assets)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListAllAssetTypesByName")
-	}
-
-	var r0 []*ExtendedGcpAsset
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*ExtendedGcpAsset, error)); ok {
-		return rf(ctx, assets)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, []string) []*ExtendedGcpAsset); ok {
-		r0 = rf(ctx, assets)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*ExtendedGcpAsset)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
-		r1 = rf(ctx, assets)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+// ListAssetTypes provides a mock function with given fields: ctx, assetTypes, out
+func (_m *MockServiceAPI) ListAssetTypes(ctx context.Context, assetTypes []string, out chan<- *ExtendedGcpAsset) {
+	_m.Called(ctx, assetTypes, out)
 }
 
-// MockServiceAPI_ListAllAssetTypesByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAllAssetTypesByName'
-type MockServiceAPI_ListAllAssetTypesByName_Call struct {
+// MockServiceAPI_ListAssetTypes_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAssetTypes'
+type MockServiceAPI_ListAssetTypes_Call struct {
 	*mock.Call
 }
 
-// ListAllAssetTypesByName is a helper method to define mock.On call
+// ListAssetTypes is a helper method to define mock.On call
 //   - ctx context.Context
-//   - assets []string
-func (_e *MockServiceAPI_Expecter) ListAllAssetTypesByName(ctx interface{}, assets interface{}) *MockServiceAPI_ListAllAssetTypesByName_Call {
-	return &MockServiceAPI_ListAllAssetTypesByName_Call{Call: _e.mock.On("ListAllAssetTypesByName", ctx, assets)}
+//   - assetTypes []string
+//   - out chan<- *ExtendedGcpAsset
+func (_e *MockServiceAPI_Expecter) ListAssetTypes(ctx interface{}, assetTypes interface{}, out interface{}) *MockServiceAPI_ListAssetTypes_Call {
+	return &MockServiceAPI_ListAssetTypes_Call{Call: _e.mock.On("ListAssetTypes", ctx, assetTypes, out)}
 }
 
-func (_c *MockServiceAPI_ListAllAssetTypesByName_Call) Run(run func(ctx context.Context, assets []string)) *MockServiceAPI_ListAllAssetTypesByName_Call {
+func (_c *MockServiceAPI_ListAssetTypes_Call) Run(run func(ctx context.Context, assetTypes []string, out chan<- *ExtendedGcpAsset)) *MockServiceAPI_ListAssetTypes_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].([]string))
+		run(args[0].(context.Context), args[1].([]string), args[2].(chan<- *ExtendedGcpAsset))
 	})
 	return _c
 }
 
-func (_c *MockServiceAPI_ListAllAssetTypesByName_Call) Return(_a0 []*ExtendedGcpAsset, _a1 error) *MockServiceAPI_ListAllAssetTypesByName_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockServiceAPI_ListAssetTypes_Call) Return() *MockServiceAPI_ListAssetTypes_Call {
+	_c.Call.Return()
 	return _c
 }
 
-func (_c *MockServiceAPI_ListAllAssetTypesByName_Call) RunAndReturn(run func(context.Context, []string) ([]*ExtendedGcpAsset, error)) *MockServiceAPI_ListAllAssetTypesByName_Call {
-	_c.Call.Return(run)
+func (_c *MockServiceAPI_ListAssetTypes_Call) RunAndReturn(run func(context.Context, []string, chan<- *ExtendedGcpAsset)) *MockServiceAPI_ListAssetTypes_Call {
+	_c.Run(run)
 	return _c
 }
 
-// ListLoggingAssets provides a mock function with given fields: ctx
-func (_m *MockServiceAPI) ListLoggingAssets(ctx context.Context) ([]*LoggingAsset, error) {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListLoggingAssets")
-	}
-
-	var r0 []*LoggingAsset
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]*LoggingAsset, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context) []*LoggingAsset); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*LoggingAsset)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockServiceAPI_ListLoggingAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListLoggingAssets'
-type MockServiceAPI_ListLoggingAssets_Call struct {
-	*mock.Call
-}
-
-// ListLoggingAssets is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockServiceAPI_Expecter) ListLoggingAssets(ctx interface{}) *MockServiceAPI_ListLoggingAssets_Call {
-	return &MockServiceAPI_ListLoggingAssets_Call{Call: _e.mock.On("ListLoggingAssets", ctx)}
-}
-
-func (_c *MockServiceAPI_ListLoggingAssets_Call) Run(run func(ctx context.Context)) *MockServiceAPI_ListLoggingAssets_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
-	})
-	return _c
-}
-
-func (_c *MockServiceAPI_ListLoggingAssets_Call) Return(_a0 []*LoggingAsset, _a1 error) *MockServiceAPI_ListLoggingAssets_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockServiceAPI_ListLoggingAssets_Call) RunAndReturn(run func(context.Context) ([]*LoggingAsset, error)) *MockServiceAPI_ListLoggingAssets_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// ListMonitoringAssets provides a mock function with given fields: ctx, monitoringAssetTypes
-func (_m *MockServiceAPI) ListMonitoringAssets(ctx context.Context, monitoringAssetTypes map[string][]string) ([]*MonitoringAsset, error) {
-	ret := _m.Called(ctx, monitoringAssetTypes)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListMonitoringAssets")
-	}
-
-	var r0 []*MonitoringAsset
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, map[string][]string) ([]*MonitoringAsset, error)); ok {
-		return rf(ctx, monitoringAssetTypes)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, map[string][]string) []*MonitoringAsset); ok {
-		r0 = rf(ctx, monitoringAssetTypes)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*MonitoringAsset)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, map[string][]string) error); ok {
-		r1 = rf(ctx, monitoringAssetTypes)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+// ListMonitoringAssets provides a mock function with given fields: ctx, out
+func (_m *MockServiceAPI) ListMonitoringAssets(ctx context.Context, out chan<- *MonitoringAsset) {
+	_m.Called(ctx, out)
 }
 
 // MockServiceAPI_ListMonitoringAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListMonitoringAssets'
@@ -237,56 +162,100 @@ type MockServiceAPI_ListMonitoringAssets_Call struct {
 
 // ListMonitoringAssets is a helper method to define mock.On call
 //   - ctx context.Context
-//   - monitoringAssetTypes map[string][]string
-func (_e *MockServiceAPI_Expecter) ListMonitoringAssets(ctx interface{}, monitoringAssetTypes interface{}) *MockServiceAPI_ListMonitoringAssets_Call {
-	return &MockServiceAPI_ListMonitoringAssets_Call{Call: _e.mock.On("ListMonitoringAssets", ctx, monitoringAssetTypes)}
+//   - out chan<- *MonitoringAsset
+func (_e *MockServiceAPI_Expecter) ListMonitoringAssets(ctx interface{}, out interface{}) *MockServiceAPI_ListMonitoringAssets_Call {
+	return &MockServiceAPI_ListMonitoringAssets_Call{Call: _e.mock.On("ListMonitoringAssets", ctx, out)}
 }
 
-func (_c *MockServiceAPI_ListMonitoringAssets_Call) Run(run func(ctx context.Context, monitoringAssetTypes map[string][]string)) *MockServiceAPI_ListMonitoringAssets_Call {
+func (_c *MockServiceAPI_ListMonitoringAssets_Call) Run(run func(ctx context.Context, out chan<- *MonitoringAsset)) *MockServiceAPI_ListMonitoringAssets_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(map[string][]string))
+		run(args[0].(context.Context), args[1].(chan<- *MonitoringAsset))
 	})
 	return _c
 }
 
-func (_c *MockServiceAPI_ListMonitoringAssets_Call) Return(_a0 []*MonitoringAsset, _a1 error) *MockServiceAPI_ListMonitoringAssets_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockServiceAPI_ListMonitoringAssets_Call) Return() *MockServiceAPI_ListMonitoringAssets_Call {
+	_c.Call.Return()
 	return _c
 }
 
-func (_c *MockServiceAPI_ListMonitoringAssets_Call) RunAndReturn(run func(context.Context, map[string][]string) ([]*MonitoringAsset, error)) *MockServiceAPI_ListMonitoringAssets_Call {
-	_c.Call.Return(run)
+func (_c *MockServiceAPI_ListMonitoringAssets_Call) RunAndReturn(run func(context.Context, chan<- *MonitoringAsset)) *MockServiceAPI_ListMonitoringAssets_Call {
+	_c.Run(run)
 	return _c
 }
 
-// ListProjectsAncestorsPolicies provides a mock function with given fields: ctx
-func (_m *MockServiceAPI) ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error) {
-	ret := _m.Called(ctx)
+// ListNetworkAssets provides a mock function with given fields: ctx, out
+func (_m *MockServiceAPI) ListNetworkAssets(ctx context.Context, out chan<- *ExtendedGcpAsset) {
+	_m.Called(ctx, out)
+}
 
-	if len(ret) == 0 {
-		panic("no return value specified for ListProjectsAncestorsPolicies")
-	}
+// MockServiceAPI_ListNetworkAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListNetworkAssets'
+type MockServiceAPI_ListNetworkAssets_Call struct {
+	*mock.Call
+}
 
-	var r0 []*ProjectPoliciesAsset
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]*ProjectPoliciesAsset, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context) []*ProjectPoliciesAsset); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*ProjectPoliciesAsset)
-		}
-	}
+// ListNetworkAssets is a helper method to define mock.On call
+//   - ctx context.Context
+//   - out chan<- *ExtendedGcpAsset
+func (_e *MockServiceAPI_Expecter) ListNetworkAssets(ctx interface{}, out interface{}) *MockServiceAPI_ListNetworkAssets_Call {
+	return &MockServiceAPI_ListNetworkAssets_Call{Call: _e.mock.On("ListNetworkAssets", ctx, out)}
+}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
+func (_c *MockServiceAPI_ListNetworkAssets_Call) Run(run func(ctx context.Context, out chan<- *ExtendedGcpAsset)) *MockServiceAPI_ListNetworkAssets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(chan<- *ExtendedGcpAsset))
+	})
+	return _c
+}
 
-	return r0, r1
+func (_c *MockServiceAPI_ListNetworkAssets_Call) Return() *MockServiceAPI_ListNetworkAssets_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockServiceAPI_ListNetworkAssets_Call) RunAndReturn(run func(context.Context, chan<- *ExtendedGcpAsset)) *MockServiceAPI_ListNetworkAssets_Call {
+	_c.Run(run)
+	return _c
+}
+
+// ListProjectAssets provides a mock function with given fields: ctx, assetTypes, out
+func (_m *MockServiceAPI) ListProjectAssets(ctx context.Context, assetTypes []string, out chan<- *ProjectAssets) {
+	_m.Called(ctx, assetTypes, out)
+}
+
+// MockServiceAPI_ListProjectAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListProjectAssets'
+type MockServiceAPI_ListProjectAssets_Call struct {
+	*mock.Call
+}
+
+// ListProjectAssets is a helper method to define mock.On call
+//   - ctx context.Context
+//   - assetTypes []string
+//   - out chan<- *ProjectAssets
+func (_e *MockServiceAPI_Expecter) ListProjectAssets(ctx interface{}, assetTypes interface{}, out interface{}) *MockServiceAPI_ListProjectAssets_Call {
+	return &MockServiceAPI_ListProjectAssets_Call{Call: _e.mock.On("ListProjectAssets", ctx, assetTypes, out)}
+}
+
+func (_c *MockServiceAPI_ListProjectAssets_Call) Run(run func(ctx context.Context, assetTypes []string, out chan<- *ProjectAssets)) *MockServiceAPI_ListProjectAssets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]string), args[2].(chan<- *ProjectAssets))
+	})
+	return _c
+}
+
+func (_c *MockServiceAPI_ListProjectAssets_Call) Return() *MockServiceAPI_ListProjectAssets_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockServiceAPI_ListProjectAssets_Call) RunAndReturn(run func(context.Context, []string, chan<- *ProjectAssets)) *MockServiceAPI_ListProjectAssets_Call {
+	_c.Run(run)
+	return _c
+}
+
+// ListProjectsAncestorsPolicies provides a mock function with given fields: ctx, out
+func (_m *MockServiceAPI) ListProjectsAncestorsPolicies(ctx context.Context, out chan<- *ProjectPoliciesAsset) {
+	_m.Called(ctx, out)
 }
 
 // MockServiceAPI_ListProjectsAncestorsPolicies_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListProjectsAncestorsPolicies'
@@ -296,82 +265,25 @@ type MockServiceAPI_ListProjectsAncestorsPolicies_Call struct {
 
 // ListProjectsAncestorsPolicies is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockServiceAPI_Expecter) ListProjectsAncestorsPolicies(ctx interface{}) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
-	return &MockServiceAPI_ListProjectsAncestorsPolicies_Call{Call: _e.mock.On("ListProjectsAncestorsPolicies", ctx)}
+//   - out chan<- *ProjectPoliciesAsset
+func (_e *MockServiceAPI_Expecter) ListProjectsAncestorsPolicies(ctx interface{}, out interface{}) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+	return &MockServiceAPI_ListProjectsAncestorsPolicies_Call{Call: _e.mock.On("ListProjectsAncestorsPolicies", ctx, out)}
 }
 
-func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) Run(run func(ctx context.Context)) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) Run(run func(ctx context.Context, out chan<- *ProjectPoliciesAsset)) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(chan<- *ProjectPoliciesAsset))
 	})
 	return _c
 }
 
-func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) Return(_a0 []*ProjectPoliciesAsset, _a1 error) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) Return() *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+	_c.Call.Return()
 	return _c
 }
 
-func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) RunAndReturn(run func(context.Context) ([]*ProjectPoliciesAsset, error)) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// ListServiceUsageAssets provides a mock function with given fields: ctx
-func (_m *MockServiceAPI) ListServiceUsageAssets(ctx context.Context) ([]*ServiceUsageAsset, error) {
-	ret := _m.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListServiceUsageAssets")
-	}
-
-	var r0 []*ServiceUsageAsset
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]*ServiceUsageAsset, error)); ok {
-		return rf(ctx)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context) []*ServiceUsageAsset); ok {
-		r0 = rf(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*ServiceUsageAsset)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockServiceAPI_ListServiceUsageAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListServiceUsageAssets'
-type MockServiceAPI_ListServiceUsageAssets_Call struct {
-	*mock.Call
-}
-
-// ListServiceUsageAssets is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockServiceAPI_Expecter) ListServiceUsageAssets(ctx interface{}) *MockServiceAPI_ListServiceUsageAssets_Call {
-	return &MockServiceAPI_ListServiceUsageAssets_Call{Call: _e.mock.On("ListServiceUsageAssets", ctx)}
-}
-
-func (_c *MockServiceAPI_ListServiceUsageAssets_Call) Run(run func(ctx context.Context)) *MockServiceAPI_ListServiceUsageAssets_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
-	})
-	return _c
-}
-
-func (_c *MockServiceAPI_ListServiceUsageAssets_Call) Return(_a0 []*ServiceUsageAsset, _a1 error) *MockServiceAPI_ListServiceUsageAssets_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockServiceAPI_ListServiceUsageAssets_Call) RunAndReturn(run func(context.Context) ([]*ServiceUsageAsset, error)) *MockServiceAPI_ListServiceUsageAssets_Call {
-	_c.Call.Return(run)
+func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) RunAndReturn(run func(context.Context, chan<- *ProjectPoliciesAsset)) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+	_c.Run(run)
 	return _c
 }
 
