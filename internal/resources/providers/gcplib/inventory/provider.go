@@ -113,12 +113,20 @@ func newAssetsInventoryWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 }
 
 func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig, cfg config.GcpConfig) (ServiceAPI, error) {
+<<<<<<< HEAD
 	inv, err := newAssetsInventoryWrapper(ctx, log, gcpConfig, cfg)
+=======
+	assetsInventory, err := newAssetsInventoryWrapper(ctx, log, gcpConfig, cfg)
+>>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	if err != nil {
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	crm, err := NewResourceManagerWrapper(ctx, log, gcpConfig)
+=======
+	cloudResourceManager, err := NewResourceManagerWrapper(ctx, log, gcpConfig)
+>>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	if err != nil {
 		return nil, err
 	}
@@ -126,14 +134,20 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpCon
 	return &Provider{
 		config:    gcpConfig,
 		log:       log,
+<<<<<<< HEAD
 		inventory: inv,
 		crm:       crm,
+=======
+		inventory: assetsInventory,
+		crm:       cloudResourceManager,
+>>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	}, nil
 }
 
 func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out chan<- *ExtendedGcpAsset) {
 	defer close(out)
 
+<<<<<<< HEAD
 	for _, t := range assetTypes {
 		if ctx.Err() != nil {
 			return
@@ -144,6 +158,17 @@ func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out 
 
 		for a := range p.mergeAssets(ctx, resCh, polCh) {
 			out <- a
+=======
+	resourceAssetsCh := p.fetchAssets(ctx, assetpb.ContentType_RESOURCE, assetTypes)
+	policiesAssetsCh := p.fetchAssets(ctx, assetpb.ContentType_IAM_POLICY, assetTypes)
+	assetsCh := p.mergeAssets(ctx, resourceAssetsCh, policiesAssetsCh)
+
+	for asset := range assetsCh {
+		select {
+		case <-ctx.Done():
+			return
+		case out <- asset:
+>>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 		}
 	}
 }
@@ -298,19 +323,27 @@ func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []st
 }
 
 func (p *Provider) getParentResources(ctx context.Context, parent string, assetTypes []string) <-chan *ExtendedGcpAsset {
+<<<<<<< HEAD
 	return p.getAssets(ctx, parent, assetTypes, assetpb.ContentType_RESOURCE)
 }
 
 func (p *Provider) getAssets(ctx context.Context, parent string, assetTypes []string, contentType assetpb.ContentType) <-chan *ExtendedGcpAsset {
+=======
+>>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	ch := make(chan *ExtendedGcpAsset)
 	go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
 		Parent:      parent,
 		AssetTypes:  assetTypes,
+<<<<<<< HEAD
 		ContentType: contentType,
+=======
+		ContentType: assetpb.ContentType_RESOURCE,
+>>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	})
 	return ch
 }
 
+<<<<<<< HEAD
 func (p *Provider) mergeAssets(ctx context.Context, resCh, polCh <-chan *ExtendedGcpAsset) <-chan *ExtendedGcpAsset {
 	out := make(chan *ExtendedGcpAsset)
 	store := make(map[string]*ExtendedGcpAsset)
@@ -363,7 +396,57 @@ func mergeAsset(
 		}
 		if a.IamPolicy != nil {
 			asset.IamPolicy = a.IamPolicy
+=======
+func (p *Provider) fetchAssets(ctx context.Context, contentType assetpb.ContentType, assetTypes []string) <-chan *ExtendedGcpAsset {
+	out := make(chan *ExtendedGcpAsset)
+	wg := sync.WaitGroup{}
+	// Fetch each asset type separately to limit failures to a single type
+	for _, assetType := range assetTypes {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ch := make(chan *ExtendedGcpAsset)
+			go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
+				Parent:      p.config.Parent,
+				AssetTypes:  []string{assetType},
+				ContentType: contentType,
+			})
+			for asset := range ch {
+				out <- asset
+			}
+		}()
+	}
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
+}
+
+func (p *Provider) getAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsset, req *assetpb.ListAssetsRequest) {
+	defer close(out)
+
+	p.log.Infof("Listing %v assets of types: %v for %v\n", req.ContentType, req.AssetTypes, req.Parent)
+	it := p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
+		Parent:      req.Parent,
+		AssetTypes:  req.AssetTypes,
+		ContentType: req.ContentType,
+	})
+	for {
+		response, err := it.Next()
+		if err == iterator.Done {
+			p.log.Infof("Finished fetching GCP %v of types: %v for %v\n", req.ContentType, req.AssetTypes, req.Parent)
+			return
+>>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 		}
+
+		if err != nil {
+			p.log.Errorf("Error fetching GCP %v of types: %v for %v: %v\n", req.ContentType, req.AssetTypes, req.Parent, err)
+			return
+		}
+
+		p.log.Debugf("Fetched GCP %v of type %v: %v\n", req.ContentType, response.AssetType, response.Name)
+		out <- p.newGcpExtendedAsset(ctx, response)
 	}
 
 	if isAssetReady(asset, resCh, polCh) {
@@ -426,6 +509,80 @@ func (p *Provider) newGcpExtendedAsset(ctx context.Context, asset *assetpb.Asset
 	return &ExtendedGcpAsset{
 		Asset:        asset,
 		CloudAccount: p.crm.GetCloudMetadata(ctx, asset),
+	}
+}
+
+func enrichNetworkAsset(asset *ExtendedGcpAsset, dnsPoliciesFields []*dnsPolicyFields) *ExtendedGcpAsset {
+	networkAssetFields := asset.GetResource().GetData().GetFields()
+	networkIdentifier := strings.TrimPrefix(asset.GetName(), "//compute.googleapis.com")
+	dnsPolicy := findDnsPolicyByNetwork(dnsPoliciesFields, networkIdentifier)
+
+	if dnsPolicy != nil {
+		networkAssetFields["enabledDnsLogging"] = &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: dnsPolicy.enableLogging}}
+	}
+	return asset
+}
+
+// merge by asset name. send assets with both resource & policy if both channels are open.
+// if one channel closes, send remaining assets from the other. finally, flush remaining assets.
+//
+//revive:disable-next-line
+func (p *Provider) mergeAssets(ctx context.Context, resourceCh, policyCh <-chan *ExtendedGcpAsset) <-chan *ExtendedGcpAsset {
+	out := make(chan *ExtendedGcpAsset)
+
+	go func() {
+		defer close(out)
+		assetStore := make(map[string]*ExtendedGcpAsset)
+		rch, pch := resourceCh, policyCh
+		for rch != nil || pch != nil || len(assetStore) > 0 {
+			select {
+			case <-ctx.Done():
+				return
+			case asset, ok := <-rch:
+				if ok {
+					mergeAssetContentType(assetStore, asset)
+				} else {
+					rch = nil
+				}
+			case asset, ok := <-pch:
+				if ok {
+					mergeAssetContentType(assetStore, asset)
+				} else {
+					pch = nil
+				}
+			}
+			for id, a := range assetStore {
+				hasPolicy := a.IamPolicy != nil
+				hasResource := a.Resource != nil
+				hasBoth := hasPolicy && hasResource
+				if hasBoth || (rch == nil && hasPolicy) || (pch == nil && hasResource) {
+					out <- a
+					delete(assetStore, id)
+				}
+			}
+		}
+	}()
+
+	return out
+}
+
+func (p *Provider) newGcpExtendedAsset(ctx context.Context, asset *assetpb.Asset) *ExtendedGcpAsset {
+	return &ExtendedGcpAsset{
+		Asset:        asset,
+		CloudAccount: p.crm.GetCloudMetadata(ctx, asset),
+	}
+}
+
+func mergeAssetContentType(store map[string]*ExtendedGcpAsset, asset *ExtendedGcpAsset) {
+	if existing, ok := store[asset.Name]; ok {
+		if asset.Resource != nil {
+			existing.Resource = asset.Resource
+		}
+		if asset.IamPolicy != nil {
+			existing.IamPolicy = asset.IamPolicy
+		}
+	} else {
+		store[asset.Name] = asset
 	}
 }
 
