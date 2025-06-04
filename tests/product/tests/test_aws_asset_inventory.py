@@ -36,7 +36,7 @@ def test_aws_asset_inventory(
         assert entity.cloud.provider == "aws", f'Expected "aws" provider, got {entity.cloud.provider}'
         assert len(entity.entity.id) > 0, "Expected .entity.id list to contain an ID"
         assert len(entity.entity.id[0]) > 0, "Expected the ID to be non-empty"
-        assert entity.Attributes, "Expected the resource under .Attributes"
+        assert entity.entity.raw, "Expected the resource under .entity.raw"
 
 
 register_params(
