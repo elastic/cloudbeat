@@ -45,6 +45,7 @@ type AssetInventory struct {
 	logger              *clog.Logger
 	assetCh             chan AssetEvent
 	now                 func() time.Time
+	namespace           string
 }
 
 type AssetFetcher interface {
@@ -55,7 +56,7 @@ type AssetPublisher interface {
 	PublishAll([]beat.Event)
 }
 
-func NewAssetInventory(logger *clog.Logger, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time, period time.Duration) AssetInventory {
+func NewAssetInventory(logger *clog.Logger, namespace string, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time, period time.Duration) AssetInventory {
 	if period < minimalPeriod {
 		period = minimalPeriod
 	}
@@ -70,6 +71,7 @@ func NewAssetInventory(logger *clog.Logger, fetchers []AssetFetcher, publisher A
 		period:              period,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           namespace,
 	}
 }
 
