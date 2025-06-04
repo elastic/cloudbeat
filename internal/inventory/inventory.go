@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	indexTemplate = "logs-cloud_asset_inventory.asset_inventory-%s_%s-default"
+	indexTemplate = "logs-cloud_asset_inventory.asset_inventory-%s_%s-%s"
 	minimalPeriod = 30 * time.Second
 )
 
@@ -45,6 +45,7 @@ type AssetInventory struct {
 	logger              *clog.Logger
 	assetCh             chan AssetEvent
 	now                 func() time.Time
+	namespace           string
 }
 
 type AssetFetcher interface {
@@ -55,7 +56,7 @@ type AssetPublisher interface {
 	PublishAll([]beat.Event)
 }
 
-func NewAssetInventory(logger *clog.Logger, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time, period time.Duration) AssetInventory {
+func NewAssetInventory(logger *clog.Logger, namespace string, fetchers []AssetFetcher, publisher AssetPublisher, now func() time.Time, period time.Duration) AssetInventory {
 	if period < minimalPeriod {
 		period = minimalPeriod
 	}
@@ -70,6 +71,7 @@ func NewAssetInventory(logger *clog.Logger, fetchers []AssetFetcher, publisher A
 		period:              period,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           namespace,
 	}
 }
 
@@ -130,7 +132,7 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 			relatedEntity = append(relatedEntity, e.Entity.relatedEntityId...)
 		}
 		return beat.Event{
-			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(e.Entity)},
+			Meta:      mapstr.M{libevents.FieldMetaIndex: generateIndex(a.namespace, e.Entity)},
 			Timestamp: a.now(),
 			Fields: mapstr.M{
 				"entity":         e.Entity,
@@ -154,8 +156,8 @@ func (a *AssetInventory) publish(assets []AssetEvent) {
 	a.publisher.PublishAll(events)
 }
 
-func generateIndex(a Entity) string {
-	return fmt.Sprintf(indexTemplate, slugfy(string(a.Category)), slugfy(string(a.Type)))
+func generateIndex(namespace string, a Entity) string {
+	return fmt.Sprintf(indexTemplate, slugfy(string(a.Category)), slugfy(string(a.Type)), namespace)
 }
 
 func slugfy(s string) string {

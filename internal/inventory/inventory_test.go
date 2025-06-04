@@ -151,6 +151,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		period:              24 * time.Hour,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           "default",
 	}
 
 	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
@@ -193,6 +194,7 @@ func TestAssetInventory_Period(t *testing.T) {
 		period:              500 * time.Millisecond,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           "default",
 	}
 
 	// Run it enough for 2 cycles to finish; one starts immediately, the other after 500 milliseconds
@@ -235,6 +237,7 @@ func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
 		period:              24 * time.Hour,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           "default",
 	}
 
 	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
