@@ -65,6 +65,7 @@ func (s *EcrFetcherTestSuite) TearDownTest() {
 }
 
 func (s *EcrFetcherTestSuite) TestCreateFetcher() {
+	t := s.T()
 	firstRepositoryName := "cloudbeat"
 	secondRepositoryName := "cloudbeat1"
 	privateRepoWithSlash := "build/cloudbeat"
@@ -218,7 +219,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 				Containers: test.containers,
 			},
 		}
-		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
+		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(t.Context(), pods, metav1.CreateOptions{})
 		s.Require().NoError(err)
 
 		ecrProvider := &ecr.MockRepositoryDescriber{}
@@ -250,7 +251,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			resourceCh:   s.resourceCh,
 		}
 
-		ctx := context.Background()
+		ctx := t.Context()
 		err = ecrFetcher.Fetch(ctx, cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
@@ -314,7 +315,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 				Containers: test.containers,
 			},
 		}
-		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
+		t := s.T()
+		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(t.Context(), pods, metav1.CreateOptions{})
 		s.Require().NoError(err)
 
 		ecrProvider := &ecr.MockRepositoryDescriber{}
@@ -333,7 +335,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 			resourceCh:   s.resourceCh,
 		}
 
-		ctx := context.Background()
+		ctx := t.Context()
 		err = ecrFetcher.Fetch(ctx, cycle.Metadata{})
 		s.Require().NoError(err)
 		results := testhelper.CollectResources(s.resourceCh)

@@ -18,7 +18,6 @@
 package iam
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -83,7 +82,7 @@ func TestProvider_ListServerCertificates(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
-			got, err := p.ListServerCertificates(context.Background())
+			got, err := p.ListServerCertificates(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

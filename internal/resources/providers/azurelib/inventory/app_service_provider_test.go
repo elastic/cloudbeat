@@ -155,7 +155,7 @@ func TestGetAppServiceAuthSettings(t *testing.T) {
 				},
 			}
 
-			got, err := provider.GetAppServiceAuthSettings(context.Background(), tc.inputWebApp)
+			got, err := provider.GetAppServiceAuthSettings(t.Context(), tc.inputWebApp)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
@@ -299,7 +299,7 @@ func TestGetAppServiceSiteConfig(t *testing.T) {
 				},
 			}
 
-			got, err := provider.GetAppServiceSiteConfig(context.Background(), tc.inputWebApp)
+			got, err := provider.GetAppServiceSiteConfig(t.Context(), tc.inputWebApp)
 			if tc.expectError {
 				require.Error(t, err)
 			} else {
