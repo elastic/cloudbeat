@@ -18,11 +18,8 @@
 package fetchers
 
 import (
-<<<<<<< HEAD
 	"context"
-=======
 	"sync"
->>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"

@@ -18,11 +18,7 @@
 package fetchers
 
 import (
-<<<<<<< HEAD
 	"context"
-	"errors"
-=======
->>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	"fmt"
 	"sync"
 	"testing"
@@ -60,15 +56,9 @@ func (s *GcpLogSinkFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-<<<<<<< HEAD
-func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
-	ctx := context.Background()
-=======
 func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
-	t := s.T()
-	ctx := t.Context()
+	ctx := context.Background()
 	wg := sync.WaitGroup{}
->>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 	mockInventoryService := &inventory.MockServiceAPI{}
 	fetcher := NewGcpLogSinkFetcher(ctx, testhelper.NewLogger(s.T()), s.resourceCh, mockInventoryService)
 
@@ -105,28 +95,8 @@ func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
 	s.Equal(fetching.LoggingIdentity, asset.Type)
 	s.Equal(fetching.GcpLoggingType, asset.subType)
 
-<<<<<<< HEAD
-	// ListMonitoringAssets mocked to return a single asset
-	s.Len(results, 1)
-}
-
-func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Error() {
-	ctx := context.Background()
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpLogSinkFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
-
-	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(nil, errors.New("api call error"))
-
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().Error(err)
-=======
 	wg.Wait()
 	mockInventoryService.AssertExpectations(s.T())
->>>>>>> 7d719807 (make GCP provider work concurrently (#3152))
 }
 
 func TestLoggingAsset_GetMetadata(t *testing.T) {
