@@ -14,7 +14,6 @@ finding := result if {
 
 	# In order for an encryption key to be available,
 	# it needs to have a primary key version which is enabled
-	data_adapter.resource.data.primary
 	data_adapter.resource.data.primary.state == "ENABLED"
 
 	# set result
