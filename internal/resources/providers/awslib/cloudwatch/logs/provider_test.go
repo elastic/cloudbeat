@@ -77,7 +77,7 @@ func TestProvider_DescribeMetricFilters(t *testing.T) {
 			p := &Provider{
 				clients: createMockClients(c, regions),
 			}
-			got, err := p.DescribeMetricFilters(context.Background(), &regions[0], tt.logGroup)
+			got, err := p.DescribeMetricFilters(t.Context(), &regions[0], tt.logGroup)
 			if tt.wantErr {
 				require.Error(t, err)
 				return

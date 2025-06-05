@@ -261,7 +261,7 @@ func TestReadPager(t *testing.T) {
 				Fetcher: tc.fetchFn,
 			}
 			pager := runtime.NewPager[int](pagerHandlerMock)
-			intSlice, err := readPager[int](context.Background(), pager)
+			intSlice, err := readPager[int](t.Context(), pager)
 
 			if tc.expectErr {
 				require.Error(t, err)

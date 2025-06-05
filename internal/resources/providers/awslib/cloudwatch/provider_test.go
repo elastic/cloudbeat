@@ -75,7 +75,7 @@ func TestProvider_DescribeAlarms(t *testing.T) {
 			p := &Provider{
 				clients: createMockClients(c, regions),
 			}
-			got, err := p.DescribeAlarms(context.Background(), &regions[0], tt.filters)
+			got, err := p.DescribeAlarms(t.Context(), &regions[0], tt.filters)
 			if tt.wantErr {
 				require.Error(t, err)
 				return

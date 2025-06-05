@@ -66,7 +66,7 @@ func TestBase_Build_Success(t *testing.T) {
 
 			resourceCh := make(chan fetching.ResourceInfo)
 			reg := registry.NewMockRegistry(t)
-			benchmark, err := New(tt.opts...).Build(context.Background(), log, &config.Config{
+			benchmark, err := New(tt.opts...).Build(t.Context(), log, &config.Config{
 				BundlePath: path,
 				Period:     time.Minute,
 			}, resourceCh, reg)
@@ -75,7 +75,7 @@ func TestBase_Build_Success(t *testing.T) {
 
 			reg.EXPECT().Keys().Return([]string{}).Twice()
 			reg.EXPECT().Update().Return().Once()
-			_, err = benchmark.Run(context.Background())
+			_, err = benchmark.Run(t.Context())
 			time.Sleep(100 * time.Millisecond)
 			require.NoError(t, err)
 		})
@@ -114,7 +114,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 			resourceCh := make(chan fetching.ResourceInfo)
 			reg := registry.NewMockRegistry(t)
 			le := uniqueness.NewMockManager(t)
-			benchmark, err := New(tt.opts...).BuildK8s(context.Background(), log, &config.Config{
+			benchmark, err := New(tt.opts...).BuildK8s(t.Context(), log, &config.Config{
 				BundlePath: path,
 				Period:     time.Minute,
 			}, resourceCh, reg, le)
@@ -124,7 +124,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 			reg.EXPECT().Keys().Return([]string{}).Twice()
 			reg.EXPECT().Update().Return().Once()
 			le.EXPECT().Run(mock.Anything).Return(nil).Once()
-			_, err = benchmark.Run(context.Background())
+			_, err = benchmark.Run(t.Context())
 			time.Sleep(100 * time.Millisecond)
 			require.NoError(t, err)
 		})

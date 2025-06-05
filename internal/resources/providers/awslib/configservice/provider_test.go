@@ -111,7 +111,7 @@ func TestProvider_DescribeConfigRecorders(t *testing.T) {
 				clients:      testhelper.CreateMockClients[Client](tt.mockClient(), tt.regions),
 			}
 
-			got, err := p.DescribeConfigRecorders(context.TODO())
+			got, err := p.DescribeConfigRecorders(t.Context())
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DescribeConfigRecorders() error = %v, wantErr %v", err, tt.wantErr)
 				return

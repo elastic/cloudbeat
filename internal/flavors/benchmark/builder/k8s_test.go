@@ -90,7 +90,7 @@ func TestK8sRun_ReturnEvents(t *testing.T) {
 				leaderElector: tt.leaderelection(uniqueness.NewMockManager(t)),
 			}
 
-			eventsCh, err := sut.Run(context.Background())
+			eventsCh, err := sut.Run(t.Context())
 			require.NoError(t, err)
 			for i := 0; i < tt.resources; i++ {
 				sut.resourceCh <- fetching.ResourceInfo{} //nolint:exhaustruct

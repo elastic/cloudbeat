@@ -290,7 +290,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 		}
 		t.Run(tt.name, func(t *testing.T) {
 			for idx, cfg := range tt.cfg {
-				got, err := p.GetGcpClientConfig(context.Background(), cfg, clog.NewLogger("gcp credentials test"))
+				got, err := p.GetGcpClientConfig(t.Context(), cfg, clog.NewLogger("gcp credentials test"))
 				if tt.wantErr {
 					require.Error(t, err)
 				} else {

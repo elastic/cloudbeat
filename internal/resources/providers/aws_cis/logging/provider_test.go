@@ -36,7 +36,7 @@ import (
 )
 
 func TestProvider_DescribeTrails(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	tests := []struct {
 		name    string
 		clients map[string]func() any

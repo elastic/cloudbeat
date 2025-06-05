@@ -93,7 +93,7 @@ func TestProvider_ListTopics(t *testing.T) {
 				log:     logger,
 				clients: createMockClients(c, regions),
 			}
-			got, err := p.ListTopics(context.Background())
+			got, err := p.ListTopics(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -144,7 +144,7 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 				log:     logger,
 				clients: createMockClients(c, regions),
 			}
-			got, err := p.ListSubscriptionsByTopic(context.Background(), regions[0], tt.topic)
+			got, err := p.ListSubscriptionsByTopic(t.Context(), regions[0], tt.topic)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -253,7 +253,7 @@ func TestProvider_ListTopicsWithSubscriptions(t *testing.T) {
 				log:     logger,
 				clients: createMockClients(c, regions),
 			}
-			got, err := p.ListTopicsWithSubscriptions(context.Background())
+			got, err := p.ListTopicsWithSubscriptions(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return

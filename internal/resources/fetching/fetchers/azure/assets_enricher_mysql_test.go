@@ -90,7 +90,7 @@ func TestMysqlAssetEnricher_Enrich(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			cmd := cycle.Metadata{}
 			provider := azurelib.NewMockProviderAPI(t)
-			ctx := context.Background()
+			ctx := t.Context()
 
 			for serverName, mock := range tc.configRes {
 				provider.EXPECT().GetFlexibleTLSVersionConfiguration(ctx, "subId", "group", serverName).Return(mock.assets, mock.err)
