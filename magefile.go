@@ -130,6 +130,7 @@ func Package() {
 	}
 
 	mg.Deps(Update)
+	mg.Deps(CrossBuild)
 	mg.SerialDeps(devtools.Package)
 }
 
