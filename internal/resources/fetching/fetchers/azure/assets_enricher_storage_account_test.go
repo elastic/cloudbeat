@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"testing"
 

@@ -155,7 +155,8 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 		client: s.mockedClient,
 	}
 
-	values, err := provider.ListAllAssetTypesByName(context.Background(), "test", []string{"test"})
+	t := s.T()
+	values, err := provider.ListAllAssetTypesByName(t.Context(), "test", []string{"test"})
 	s.Require().NoError(err)
 	s.Len(values, int(*nonTruncatedResponse.Count+*truncatedResponse.Count))
 	lo.ForEach(values, func(r AzureAsset, index int) {

@@ -18,7 +18,6 @@
 package securityhub
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"testing"

@@ -18,7 +18,6 @@
 package configservice
 
 import (
-	"context"
 	"errors"
 	"testing"
 

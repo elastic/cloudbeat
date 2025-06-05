@@ -18,7 +18,6 @@
 package elb
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
