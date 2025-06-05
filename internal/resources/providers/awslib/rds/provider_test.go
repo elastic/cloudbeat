@@ -18,7 +18,6 @@
 package rds
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -159,7 +158,8 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 			ec2:     mockEc2,
 		}
 
-		ctx := context.Background()
+		t := s.T()
+		ctx := t.Context()
 
 		results, err := rdsProvider.DescribeDBInstances(ctx)
 		s.Require().NoError(err)

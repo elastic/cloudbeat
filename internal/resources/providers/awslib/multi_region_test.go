@@ -92,7 +92,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			multiRegionClients := wrapper.NewMultiRegionClients(context.Background(), tt.args.selector(), tt.args.cfg, factory, tt.args.log)
+			multiRegionClients := wrapper.NewMultiRegionClients(t.Context(), tt.args.selector(), tt.args.cfg, factory, tt.args.log)
 			clients := multiRegionClients.GetMultiRegionsClientMap()
 			if !reflect.DeepEqual(clients, tt.want) {
 				t.Errorf("GetRegions() got = %v, want %v", clients, tt.want)
@@ -140,7 +140,7 @@ func TestMultiRegionFetch(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := MultiRegionFetch(context.Background(), tt.clients, tt.fetcher)
+			got, err := MultiRegionFetch(t.Context(), tt.clients, tt.fetcher)
 			if tt.wantErr {
 				require.Error(t, err)
 				return

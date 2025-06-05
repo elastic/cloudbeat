@@ -18,7 +18,6 @@
 package monitoring
 
 import (
-	"context"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -222,7 +221,7 @@ func TestProvider_AggregateResources(t *testing.T) {
 				Sns:            mockSNS,
 				Log:            testhelper.NewLogger(t),
 			}
-			got, err := p.AggregateResources(context.Background())
+			got, err := p.AggregateResources(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return

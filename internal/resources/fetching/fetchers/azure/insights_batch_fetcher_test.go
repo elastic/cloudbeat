@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"reflect"
 	"sort"
@@ -207,7 +206,7 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 			defer close(ch)
 			f := NewAzureInsightsBatchAssetFetcher(log, ch, m)
 
-			err := f.Fetch(context.Background(), tc.cycleMetadata)
+			err := f.Fetch(t.Context(), tc.cycleMetadata)
 			if tc.expectedErr {
 				require.Error(t, err)
 			} else {

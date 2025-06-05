@@ -50,7 +50,7 @@ func TestStep(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inputChannel := make(chan int)
-			outCh := Step(context.Background(), testhelper.NewLogger(t), inputChannel, tt.fn)
+			outCh := Step(t.Context(), testhelper.NewLogger(t), inputChannel, tt.fn)
 			inputChannel <- tt.input
 			close(inputChannel)
 

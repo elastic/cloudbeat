@@ -18,7 +18,6 @@
 package cloudtrail
 
 import (
-	"context"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -143,7 +142,7 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			clientMock := &MockClient{}
 			for funcName, calls := range tt.cloudtrailClientMockReturnVals {
 				for _, returnVals := range calls {

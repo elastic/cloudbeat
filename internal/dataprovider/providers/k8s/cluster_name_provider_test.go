@@ -18,7 +18,6 @@
 package k8s
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -68,7 +67,8 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 	client := fake.NewSimpleClientset(ns, cfgMap)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
-	res, err := provider.GetClusterName(context.Background(), cfg)
+	t := s.T()
+	res, err := provider.GetClusterName(t.Context(), cfg)
 	s.Require().NoError(err)
 	s.Equal(clusterName, res)
 }
@@ -85,7 +85,8 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoCluster
 	client := fake.NewSimpleClientset(ns)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
-	res, err := provider.GetClusterName(context.Background(), cfg)
+	t := s.T()
+	res, err := provider.GetClusterName(t.Context(), cfg)
 	s.Empty(res)
 	s.Require().Error(err)
 	s.Require().ErrorContains(err, "fail to resolve the name of the cluster")

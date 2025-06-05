@@ -18,7 +18,6 @@
 package inventory
 
 import (
-	"context"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -147,7 +146,7 @@ func TestListSecurityContacts(t *testing.T) {
 				client: mockAzure,
 			}
 
-			got, gotErr := prov.ListSecurityContacts(context.Background(), tc.inputSubID)
+			got, gotErr := prov.ListSecurityContacts(t.Context(), tc.inputSubID)
 			if tc.expectError {
 				require.Error(t, gotErr)
 			} else {
@@ -268,7 +267,7 @@ func TestListAutoProvisioningSettings(t *testing.T) {
 				client: mockAzure,
 			}
 
-			got, gotErr := prov.ListAutoProvisioningSettings(context.Background(), tc.inputSubID)
+			got, gotErr := prov.ListAutoProvisioningSettings(t.Context(), tc.inputSubID)
 			if tc.expectError {
 				require.Error(t, gotErr)
 			} else {

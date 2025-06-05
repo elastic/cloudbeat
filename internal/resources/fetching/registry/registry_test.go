@@ -304,7 +304,7 @@ func Test_registry_Update(t *testing.T) {
 				emptyFn(t, r) // empty at beginning because of error
 				r.Update()
 				assert.Len(t, r.Keys(), 1)
-				require.NoError(t, r.Run(context.Background(), "fetcher", cycle.Metadata{}))
+				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
 				assert.Panics(t, r.Update)
 			},
 		},
@@ -324,11 +324,11 @@ func Test_registry_Update(t *testing.T) {
 			},
 			testFn: func(t *testing.T, r Registry) {
 				assert.Len(t, r.Keys(), 1)
-				require.NoError(t, r.Run(context.Background(), "fetcher", cycle.Metadata{}))
+				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
 
 				r.Update() // update fails, registry remains as is
 				assert.Len(t, r.Keys(), 1)
-				require.NoError(t, r.Run(context.Background(), "fetcher", cycle.Metadata{}))
+				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
 
 				assert.Panics(t, r.Update)
 			},

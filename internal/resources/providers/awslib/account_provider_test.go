@@ -229,7 +229,7 @@ func Test_listAccounts(t *testing.T) {
 			m := mockFromResultMap(tt.listAccountsResults, tt.listParentsResults, tt.describeOrganizationError)
 			defer m.AssertExpectations(t)
 
-			got, err := listAccounts(context.Background(), testhelper.NewLogger(t), m)
+			got, err := listAccounts(t.Context(), testhelper.NewLogger(t), m)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
 			} else {
@@ -305,7 +305,7 @@ func mockFromResultMap(
 }
 
 func Test_getOUInfoForAccount(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	accountId := "123"
 
 	t.Run("error in list", func(t *testing.T) {
@@ -397,7 +397,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 }
 
 func Test_describeOU(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	ouID := "123"
 	ou := types.OrganizationalUnit{
 		Arn:  aws.String("some-arn"),

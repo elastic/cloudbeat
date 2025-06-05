@@ -151,7 +151,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		now:                 now,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 	defer cancel()
 
 	go func() {
@@ -194,7 +194,7 @@ func TestAssetInventory_Period(t *testing.T) {
 	}
 
 	// Run it enough for 2 cycles to finish; one starts immediately, the other after 500 milliseconds
-	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Millisecond)
+	ctx, cancel := context.WithTimeout(t.Context(), 600*time.Millisecond)
 	defer cancel()
 
 	go func() {
@@ -235,7 +235,7 @@ func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
 		now:                 now,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
 	defer cancel()
 
 	inventory.runAllFetchersOnce(ctx)

@@ -37,7 +37,7 @@ import (
 )
 
 func Test_provider_GetSubscriptions(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	err1 := errors.New("some error 1")
 	err2 := errors.New("some error 2")
 	assets := []inventory.AzureAsset{

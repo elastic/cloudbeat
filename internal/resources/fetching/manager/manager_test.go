@@ -59,6 +59,7 @@ func (s *ManagerTestSuite) TearDownTest() {
 }
 
 func (s *ManagerTestSuite) TestManagerRun() {
+	t := s.T()
 	interval := 5 * time.Second
 	fetcherName := "test_fetcher"
 
@@ -68,7 +69,7 @@ func (s *ManagerTestSuite) TestManagerRun() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -79,6 +80,7 @@ func (s *ManagerTestSuite) TestManagerRun() {
 }
 
 func (s *ManagerTestSuite) TestManagerRunPanic() {
+	t := s.T()
 	interval := 3 * time.Second
 	fetcherMessage := "fetcher got panic"
 	fetcherName := "panic_fetcher"
@@ -89,7 +91,7 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -100,6 +102,7 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 }
 
 func (s *ManagerTestSuite) TestManagerRunTimeout() {
+	t := s.T()
 	fetcherDelay := 4 * time.Second
 	interval := 5 * time.Second
 	fetcherName := "delay_fetcher"
@@ -110,7 +113,7 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -122,6 +125,7 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 }
 
 func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
+	t := s.T()
 	fetcherDelay := 4 * time.Second
 	interval := 3 * time.Second
 	fetcherName := "timeout_fetcher"
@@ -136,15 +140,16 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 		}
 	}).Once()
 
-	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.Require().NoError(err)
 
-	err = m.fetchSingle(context.Background(), fetcherName, cycle.Metadata{})
+	err = m.fetchSingle(t.Context(), fetcherName, cycle.Metadata{})
 	s.Require().Error(err)
 	s.registry.AssertExpectations(s.T())
 }
 
 func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
+	t := s.T()
 	interval := 5 * time.Second
 	fetcherName := "not_run_fetcher"
 
@@ -153,7 +158,7 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	d, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.Require().NoError(err)
 
 	d.Run()
@@ -163,6 +168,7 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 }
 
 func (s *ManagerTestSuite) TestManagerStop() {
+	t := s.T()
 	interval := 30 * time.Second
 	fetcherName := "run_fetcher"
 
@@ -172,7 +178,7 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -185,10 +191,11 @@ func (s *ManagerTestSuite) TestManagerStop() {
 }
 
 func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
+	t := s.T()
 	interval := 30 * time.Second
 	fetcherName := "run_fetcher"
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second*2)
 	defer cancel()
 
 	s.registry.EXPECT().Keys().Return([]string{fetcherName}).Twice()

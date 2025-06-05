@@ -18,7 +18,6 @@
 package iam
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -107,7 +106,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
-			got, err := p.GetPolicies(context.Background())
+			got, err := p.GetPolicies(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -213,7 +212,7 @@ func TestProvider_getPolicies(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
-			got, err := p.getPolicies(context.Background())
+			got, err := p.getPolicies(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -324,7 +323,7 @@ func TestProvider_getSupportPolicy(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
-			got, err := p.getSupportPolicy(context.Background())
+			got, err := p.getSupportPolicy(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

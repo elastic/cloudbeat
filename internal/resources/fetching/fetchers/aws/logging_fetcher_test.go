@@ -114,7 +114,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			ctx, cancel := context.WithTimeout(t.Context(), time.Second*5)
 			defer cancel()
 			f := LoggingFetcher{
 				log:                   testhelper.NewLogger(t),

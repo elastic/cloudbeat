@@ -160,7 +160,7 @@ func TestKeyVaultEnricher(t *testing.T) {
 
 			enricher := keyVaultEnricher{provider: mockProvider}
 
-			err := enricher.Enrich(context.Background(), cycle.Metadata{}, tc.inputAssets)
+			err := enricher.Enrich(t.Context(), cycle.Metadata{}, tc.inputAssets)
 
 			if tc.expectError {
 				require.Error(t, err)

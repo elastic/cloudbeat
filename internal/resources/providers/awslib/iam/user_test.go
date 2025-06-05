@@ -18,7 +18,6 @@
 package iam
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -198,7 +197,7 @@ func Test_GetUsers(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			p := createProviderFromMockValues(t, test.mocksReturnVals)
 
-			users, err := p.GetUsers(context.TODO())
+			users, err := p.GetUsers(t.Context())
 
 			if !test.wantErr {
 				require.NoError(t, err)

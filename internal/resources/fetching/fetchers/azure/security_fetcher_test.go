@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -332,7 +331,7 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 			fetcherUnderTest := NewAzureSecurityAssetFetcher(log, ch, m)
 
 			// execute
-			err := fetcherUnderTest.Fetch(context.Background(), tc.cycleMetadata)
+			err := fetcherUnderTest.Fetch(t.Context(), tc.cycleMetadata)
 
 			// verify
 			if tc.expectedErr {

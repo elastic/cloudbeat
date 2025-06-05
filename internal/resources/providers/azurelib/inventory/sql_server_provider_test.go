@@ -144,7 +144,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetEncryptionProtector(tc.apiMockCall)
-			got, err := p.ListSQLEncryptionProtector(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+			got, err := p.ListSQLEncryptionProtector(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -228,7 +228,7 @@ func TestGetSQLBlobAuditingPolicies(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetBlobAuditingPolicies(tc.apiMockCall)
-			got, err := p.GetSQLBlobAuditingPolicies(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+			got, err := p.GetSQLBlobAuditingPolicies(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -307,7 +307,7 @@ func TestListSqlTransparentDataEncryptions(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetTransparentDataEncryption(tc.tdeFn, tc.dbFn)
-			got, err := p.ListSQLTransparentDataEncryptions(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+			got, err := p.ListSQLTransparentDataEncryptions(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -364,7 +364,7 @@ func TestListSQLAdvancedThreatProtectionSettings(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			p := mockAssetThreatProtection(tc.apiMockCall)
-			got, err := p.ListSQLAdvancedThreatProtectionSettings(context.Background(), "subId", "resourceGroup", "sqlServerInstanceName")
+			got, err := p.ListSQLAdvancedThreatProtectionSettings(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -657,7 +657,7 @@ func TestListSQLFirewallRules(t *testing.T) {
 			provider.clientOptions = &arm.ClientOptions{}
 			provider.clientOptions.Transport = fakeTransport
 
-			rules, err := provider.ListSQLFirewallRules(context.Background(), subID, resourceGroup, srv)
+			rules, err := provider.ListSQLFirewallRules(t.Context(), subID, resourceGroup, srv)
 			require.NoError(t, err)
 			assert.ElementsMatch(t, tc.expected, rules)
 		})

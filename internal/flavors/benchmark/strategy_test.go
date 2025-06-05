@@ -108,7 +108,7 @@ type benchInit interface {
 func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
-	reg, dp, _, err := s.initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
+	reg, dp, _, err := s.initialize(t.Context(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
 		require.ErrorContains(t, err, wantErr)
 		return
@@ -121,12 +121,12 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 
 	eks, ok := s.(*EKS)
 	if ok {
-		require.NoError(t, eks.leaderElector.Run(context.Background()))
+		require.NoError(t, eks.leaderElector.Run(t.Context()))
 		defer eks.leaderElector.Stop()
 	}
 	k8s, ok := s.(*K8S)
 	if ok {
-		require.NoError(t, k8s.leaderElector.Run(context.Background()))
+		require.NoError(t, k8s.leaderElector.Run(t.Context()))
 		defer k8s.leaderElector.Stop()
 	}
 

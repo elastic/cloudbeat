@@ -164,7 +164,7 @@ func Test_getAwsAccounts(t *testing.T) {
 				AccountProvider:  tt.accountProvider,
 			}
 			log := clog.NewLogger("test")
-			got, err := a.getAwsAccounts(context.Background(), log, aws.Config{}, &tt.rootIdentity)
+			got, err := a.getAwsAccounts(t.Context(), log, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
 				return
@@ -259,7 +259,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 				AccountAlias: "some-name",
 			}
 
-			_, err := a.pickManagementAccountRole(context.Background(), log, stsClient, rootCfg, identity)
+			_, err := a.pickManagementAccountRole(t.Context(), log, stsClient, rootCfg, identity)
 			if tt.expectedLog != "" {
 				require.NotEmpty(t, logCaptureBuf, "expected logs, but captured none")
 				require.Contains(t, logCaptureBuf.String(), tt.expectedLog, "expected message not found")

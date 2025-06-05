@@ -142,7 +142,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			log := testhelper.NewObserverLogger(t)
 			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
-			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
+			ctx, cancel := context.WithTimeout(t.Context(), tc.ctxTimeout)
 			defer cancel()
 
 			client := newMockClient(t)

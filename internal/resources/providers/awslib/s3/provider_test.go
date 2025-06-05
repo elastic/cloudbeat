@@ -18,7 +18,6 @@
 package s3
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -518,7 +517,8 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			accountId:     "asd",
 		}
 
-		ctx := context.Background()
+		t := s.T()
+		ctx := t.Context()
 
 		results, err := s3Provider.DescribeBuckets(ctx)
 		if test.expectError {

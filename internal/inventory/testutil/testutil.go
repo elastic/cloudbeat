@@ -31,7 +31,7 @@ func CollectResourcesAndMatch(t *testing.T, fetcher inventory.AssetFetcher, expe
 	t.Helper()
 
 	ch := make(chan inventory.AssetEvent)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
 	defer cancel()
 	go func() {
 		defer close(ch)

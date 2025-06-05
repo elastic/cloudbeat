@@ -134,7 +134,7 @@ func TestCache(t *testing.T) {
 				h.err = nil
 			}
 			h.called.Store(0)
-			got, err := cache.GetValue(context.Background(), Metadata{Sequence: tt.sequence}, h.cb)
+			got, err := cache.GetValue(t.Context(), Metadata{Sequence: tt.sequence}, h.cb)
 			if tt.wantErr {
 				require.ErrorContains(t, err, "some error")
 			} else {
@@ -153,7 +153,7 @@ func TestCache(t *testing.T) {
 func TestCache_Lock(t *testing.T) {
 	testhelper.SkipLong(t)
 
-	ctx := context.Background()
+	ctx := t.Context()
 	count := 0
 	ch := make(chan struct{})
 	fetch := func(_ context.Context) (int, error) {

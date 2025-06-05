@@ -18,7 +18,6 @@
 package ec2
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -88,7 +87,7 @@ func TestProvider_DescribeInternetGateways(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeInternetGateways(context.Background())
+			got, err := p.DescribeInternetGateways(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -159,7 +158,7 @@ func TestProvider_DescribeNatGateways(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeNatGateways(context.Background())
+			got, err := p.DescribeNatGateways(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -215,7 +214,7 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeNetworkAcl(context.Background())
+			got, err := p.DescribeNetworkAcl(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -277,7 +276,7 @@ func TestProvider_DescribeNetworkInterfaces(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeNetworkInterfaces(context.Background())
+			got, err := p.DescribeNetworkInterfaces(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -334,7 +333,7 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 				clients: clients,
 			}
 
-			got, err := p.DescribeSecurityGroups(context.Background())
+			got, err := p.DescribeSecurityGroups(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -405,7 +404,7 @@ func TestProvider_DescribeSubnets(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeSubnets(context.Background())
+			got, err := p.DescribeSubnets(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -468,7 +467,7 @@ func TestProvider_DescribeTransitGatewayAttachments(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeTransitGatewayAttachments(context.Background())
+			got, err := p.DescribeTransitGatewayAttachments(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -530,7 +529,7 @@ func TestProvider_DescribeTransitGateways(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeTransitGateways(context.Background())
+			got, err := p.DescribeTransitGateways(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -590,7 +589,7 @@ func TestProvider_DescribeVpcs(t *testing.T) {
 				clients: clients,
 			}
 
-			got, err := p.DescribeVpcs(context.Background())
+			got, err := p.DescribeVpcs(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -650,7 +649,7 @@ func TestProvider_GetEbsEncryptionByDefault(t *testing.T) {
 				clients:      clients,
 				awsAccountID: "aws-account",
 			}
-			got, err := p.GetEbsEncryptionByDefault(context.Background())
+			got, err := p.GetEbsEncryptionByDefault(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -741,7 +740,7 @@ func TestProvider_GetRouteTableForSubnet(t *testing.T) {
 				clients:      clients,
 				awsAccountID: "aws-account",
 			}
-			got, err := p.GetRouteTableForSubnet(context.Background(), tt.regions[0], "", "")
+			got, err := p.GetRouteTableForSubnet(t.Context(), tt.regions[0], "", "")
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -875,7 +874,7 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 				clients:      clients,
 				awsAccountID: "aws-account",
 			}
-			got, err := p.DescribeVolumes(context.Background(), tt.instances)
+			got, err := p.DescribeVolumes(t.Context(), tt.instances)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -937,7 +936,7 @@ func TestProvider_DescribeVpcPeeringConnections(t *testing.T) {
 				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
-			got, err := p.DescribeVpcPeeringConnections(context.Background())
+			got, err := p.DescribeVpcPeeringConnections(t.Context())
 			if tt.wantErr {
 				require.Error(t, err)
 				return

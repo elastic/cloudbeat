@@ -106,7 +106,8 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 		resourceCh: s.resourceCh,
 		provider:   mockProvider,
 	}
-	err := fetcher.Fetch(context.Background(), cycle.Metadata{})
+	t := s.T()
+	err := fetcher.Fetch(t.Context(), cycle.Metadata{})
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
@@ -202,7 +203,8 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 		resourceCh: s.resourceCh,
 		provider:   mockProvider,
 	}
-	err := fetcher.Fetch(context.Background(), cycle.Metadata{})
+	t := s.T()
+	err := fetcher.Fetch(t.Context(), cycle.Metadata{})
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 

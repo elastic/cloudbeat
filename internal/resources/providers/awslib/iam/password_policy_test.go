@@ -18,7 +18,6 @@
 package iam
 
 import (
-	"context"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -83,7 +82,7 @@ func Test_GetPasswordPolicy(t *testing.T) {
 
 	for _, tc := range tcs {
 		t.Run(tc.tcName, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			log := clog.NewLogger("test")
 			client := &MockClient{}
 			provider := Provider{

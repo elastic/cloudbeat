@@ -104,7 +104,7 @@ func TestMysqlProvider_GetFlexibleTLSVersionConfiguration(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			provider := mockAssetFlexibleConfigurationMysqlProvider(tc.configMock)
 
-			assets, err := provider.GetFlexibleTLSVersionConfiguration(context.Background(), "subscription", "resource", "server")
+			assets, err := provider.GetFlexibleTLSVersionConfiguration(t.Context(), "subscription", "resource", "server")
 
 			if tc.expectError {
 				require.Error(t, err)

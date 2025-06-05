@@ -67,7 +67,7 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 
 	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 
 	factory := mockFactory(nAccounts,
 		func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
@@ -138,7 +138,7 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 
 func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 
 	newCisAwsOrganizationFetchers(
 		ctx,
@@ -170,7 +170,7 @@ func TestNewCisAwsOrganizationFetchers_CloseChannel(t *testing.T) {
 	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 
 	newCisAwsOrganizationFetchers(
-		context.Background(),
+		t.Context(),
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
 		[]AwsAccount{{
@@ -195,7 +195,7 @@ func TestNewCisAwsOrganizationFetchers_Cache(t *testing.T) {
 		"3": {"fetcher": registry.RegisteredFetcher{}},
 	}
 	m := newCisAwsOrganizationFetchers(
-		context.Background(),
+		t.Context(),
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
 		[]AwsAccount{
