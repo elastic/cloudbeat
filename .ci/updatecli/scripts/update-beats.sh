@@ -14,5 +14,5 @@ go mod tidy
 # git diff is a safe choice because it will be non-empty when changes need to be committed and it's also good for
 # debugging.
 git diff
-# Re-generate config files
-mage config
+# Re-generate config files, ignore failure
+mage config || true
