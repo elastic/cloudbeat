@@ -29,6 +29,7 @@ echo "VERSION_QUALIFIER: ${VERSION_QUALIFIER}"
 echo "Downloading artifacts..."
 buildkite-agent artifact download "build/distributions/*" "." --step package-"${WORKFLOW}"
 chmod -R 777 build/distributions
+ls -lahR build/distributions/
 
 # Shared secret path containing the dra creds for project teams
 DRA_CREDS=$(vault kv get -field=data -format=json kv/ci-shared/release/dra-role)
