@@ -56,11 +56,10 @@ docker run --rm \
     --qualifier "${VERSION_QUALIFIER}" ${DRY_RUN} | tee rm-output.txt
 
 if [[ "$DRY_RUN" != "--dry-run" ]]; then
-  # extract the summary URL from a release manager output line like:
-  SUMMARY_URL=$(grep -E '^Report summary-.* can be found at ' rm-output.txt | grep -oP 'https://\S+' | awk '{print $1}')
-  # builkite annotation
-  printf "**${WORKFLOW} summary link:** [${SUMMARY_URL}](${SUMMARY_URL})\n" | buildkite-agent annotate --style=success --append
+    # extract the summary URL from a release manager output line like:
+    SUMMARY_URL=$(grep -E '^Report summary-.* can be found at ' rm-output.txt | grep -oP 'https://\S+' | awk '{print $1}')
+    # builkite annotation
+    printf "**${WORKFLOW} summary link:** [${SUMMARY_URL}](${SUMMARY_URL})\n" | buildkite-agent annotate --style=success --append
 fi
 
 rm rm-output.txt
-
