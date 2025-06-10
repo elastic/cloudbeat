@@ -62,4 +62,4 @@ if [[ "$DRY_RUN" != "--dry-run" ]]; then
     printf "**${WORKFLOW} summary link:** [${SUMMARY_URL}](${SUMMARY_URL})\n" | buildkite-agent annotate --style=success --append
 fi
 
-rm rm-output.txt
+rm -f rm-output.txt
