@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ "$DRY_RUN" == "true" ]]; then
+if [[ "${DRY_RUN}" == "true" ]]; then
     echo "~~~ Running in dry-run mode -- will NOT publish artifacts"
     DRY_RUN="--dry-run"
 else
@@ -27,8 +27,10 @@ echo "VERSION_QUALIFIER: ${VERSION_QUALIFIER}"
 
 # Download artifacts from other stages
 echo "Downloading artifacts..."
-buildkite-agent artifact download "build/distributions/*" "." --step package-"${WORKFLOW}"
+buildkite-agent artifact download "build/distributions/*" "."
 chmod -R 777 build/distributions
+
+echo "Downloaded artifacts:"
 ls -lahR build/distributions/
 
 # Shared secret path containing the dra creds for project teams
@@ -51,4 +53,14 @@ docker run --rm \
     --workflow "${WORKFLOW}" \
     --version "${VERSION}" \
     --artifact-set main \
-    --qualifier "${VERSION_QUALIFIER}" ${DRY_RUN}
+    --qualifier "${VERSION_QUALIFIER}" ${DRY_RUN} | tee rm-output.txt
+
+if [[ "$DRY_RUN" != "--dry-run" ]]; then
+  # extract the summary URL from a release manager output line like:
+  SUMMARY_URL=$(grep -E '^Report summary-.* can be found at ' rm-output.txt | grep -oP 'https://\S+' | awk '{print $1}')
+  # builkite annotation
+  printf "**${WORKFLOW} summary link:** [${SUMMARY_URL}](${SUMMARY_URL})\n" | buildkite-agent annotate --style=success --append
+fi
+
+rm rm-output.txt
+

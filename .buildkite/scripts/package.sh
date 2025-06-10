@@ -22,8 +22,6 @@ fi
 mage pythonEnv
 mage package
 
-ls -lahR build/distributions/
-
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"
 if [[ -n "${VERSION_QUALIFIER}" ]]; then
@@ -33,3 +31,6 @@ fi
 echo "Generating $CSV_FILE.csv"
 $PYTHON ./.buildkite/scripts/generate_notice.py --csv "$CSV_FILE.csv"
 cp build/dependencies-*.csv build/distributions/.
+
+echo "Produced artifacts:"
+ls -lahR build/distributions/
