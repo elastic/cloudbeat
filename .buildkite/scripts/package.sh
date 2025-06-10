@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -uox pipefail
 
-uname -a
-
-#export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
 source ./bin/activate-hermit
 
