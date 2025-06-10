@@ -49,11 +49,7 @@ docker run --rm \
     --commit "${BUILDKITE_COMMIT}" \
     --workflow "${WORKFLOW}" \
     --version "${VERSION}" \
-<<<<<<< HEAD
-    --artifact-set main
-=======
-    --artifact-set main \
-    --qualifier "${VERSION_QUALIFIER}" ${DRY_RUN} | tee rm-output.txt
+    --artifact-set main ${DRY_RUN} | tee rm-output.txt
 
 if [[ "$DRY_RUN" != "--dry-run" ]]; then
     # extract the summary URL from a release manager output line like:
@@ -63,4 +59,3 @@ if [[ "$DRY_RUN" != "--dry-run" ]]; then
 fi
 
 rm -f rm-output.txt
->>>>>>> db161e17 (DRA: separate arm64 (#3347))
