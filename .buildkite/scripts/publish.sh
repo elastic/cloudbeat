@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+if [[ "$DRY_RUN" == "true" ]]; then
+    echo "~~~ Running in dry-run mode -- will NOT publish artifacts"
+    DRY_RUN="--dry-run"
+else
+    echo "~~~ Running in publish mode"
+    DRY_RUN=""
+fi
+
 # Allow other users write access to create checksum files
 
 # The "branch" here selects which "$BRANCH.gradle" file of release manager is used
@@ -42,4 +50,4 @@ docker run --rm \
     --workflow "${WORKFLOW}" \
     --version "${VERSION}" \
     --artifact-set main \
-    --qualifier "${VERSION_QUALIFIER}"
+    --qualifier "${VERSION_QUALIFIER}" ${DRY_RUN}
