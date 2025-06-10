@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -uox pipefail
 
+uname -a
+
 #export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
 source ./bin/activate-hermit
@@ -17,11 +19,10 @@ if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
 fi
 
-# debug command to verify
-ls -lah /proc/sys/fs/binfmt_misc/ || true
-
 mage pythonEnv
 mage package
+
+ls -lahR build/distributions/
 
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"

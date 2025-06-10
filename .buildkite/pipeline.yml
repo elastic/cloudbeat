@@ -54,7 +54,7 @@ steps:
     if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
     key: "package-staging"
     steps:
-      - label: ":package: Package Cloudbeat linux/amd64 - Snapshot"
+      - label: ":package: Package Cloudbeat linux/amd64 - Staging"
         env:
           PLATFORMS: "${PLATFORMS_AMD64}"
           WORKFLOW: "staging"
@@ -65,7 +65,7 @@ steps:
           image: "${GCP_IMAGE_UBUNTU_X86_64}"
           machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
 
-      - label: ":package: Package Cloudbeat linux/arm64 - Snapshot"
+      - label: ":package: Package Cloudbeat linux/arm64 - Staging"
         env:
           PLATFORMS: "${PLATFORMS_ARM64}"
           WORKFLOW: "staging"
