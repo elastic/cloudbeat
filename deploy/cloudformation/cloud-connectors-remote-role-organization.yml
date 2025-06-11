@@ -43,9 +43,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-
-              # TODO: this is not a valid global super role, it will be replaced with the real one.
-              AWS: <TBD Elastic Global Super Role ARN>
+              AWS: arn:aws:iam::254766567737:role/cloud_connectors
             Action: sts:AssumeRole
             Condition:
               StringEquals:
