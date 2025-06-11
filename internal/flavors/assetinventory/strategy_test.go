@@ -29,9 +29,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestStrategyPicks(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	testCases := []struct {
 		name        string
 		cfg         *config.Config
