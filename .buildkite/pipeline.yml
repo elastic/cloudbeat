@@ -1,88 +1,36 @@
 env:
   BRANCH: "${BUILDKITE_BRANCH}"
-
-  GCP_DEFAULT_MACHINE_TYPE: "c2d-standard-8"
-  GCP_IMAGE_UBUNTU_X86_64: "family/platform-ingest-beats-ubuntu-2204"
-  AWS_ARM_INSTANCE_TYPE: "m6g.xlarge"
-  AWS_IMAGE_UBUNTU_ARM_64: "platform-ingest-beats-ubuntu-2204-aarch64"
-
-  PLATFORMS_AMD64: "linux/amd64"
-  PLATFORMS_ARM64: "linux/arm64"
-
-  DEV: false
+agents:
+  provider: "gcp" # needed for running docker commands
+  image: "family/platform-ingest-beats-ubuntu-2204"
 
 steps:
-
-  - group: "Package Snapshot"
+  - label: ":package: Package Cloudbeat - Snapshot"
     if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+    env:
+      WORKFLOW: "snapshot"
     key: "package-snapshot"
-    steps:
-      - label: ":package: Package Cloudbeat linux/amd64 - Snapshot"
-        env:
-          PLATFORMS: "${PLATFORMS_AMD64}"
-          WORKFLOW: "snapshot"
-        command: "./.buildkite/scripts/package.sh"
-        artifact_paths: "build/distributions/*"
-        agents:
-          provider: gcp
-          image: "${GCP_IMAGE_UBUNTU_X86_64}"
-          machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
-
-      - label: ":package: Package Cloudbeat linux/arm64 - Snapshot"
-        env:
-          PLATFORMS: "${PLATFORMS_ARM64}"
-          WORKFLOW: "snapshot"
-        command: "./.buildkite/scripts/package.sh"
-        artifact_paths: "build/distributions/*"
-        agents:
-          provider: "aws"
-          imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
-          instanceType: "${AWS_ARM_INSTANCE_TYPE}"
+    command: "./.buildkite/scripts/package.sh"
+    artifact_paths: "build/distributions/*"
 
   - label: ":rocket: Publishing Snapshot DRA artifacts"
     if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
     depends_on: "package-snapshot"
-    agents:
-      provider: gcp
-      image: "${GCP_IMAGE_UBUNTU_X86_64}"
-      machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
     command: "./.buildkite/scripts/publish.sh"
     env:
       WORKFLOW: "snapshot"
 
-  - group: "Package Staging"
+  - label: ":package: Package Cloudbeat - Staging"
     if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    env:
+      WORKFLOW: "staging"
     key: "package-staging"
-    steps:
-      - label: ":package: Package Cloudbeat linux/amd64 - Staging"
-        env:
-          PLATFORMS: "${PLATFORMS_AMD64}"
-          WORKFLOW: "staging"
-        command: "./.buildkite/scripts/package.sh"
-        artifact_paths: "build/distributions/*"
-        agents:
-          provider: gcp
-          image: "${GCP_IMAGE_UBUNTU_X86_64}"
-          machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
-
-      - label: ":package: Package Cloudbeat linux/arm64 - Staging"
-        env:
-          PLATFORMS: "${PLATFORMS_ARM64}"
-          WORKFLOW: "staging"
-        command: "./.buildkite/scripts/package.sh"
-        artifact_paths: "build/distributions/*"
-        agents:
-          provider: "aws"
-          imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
-          instanceType: "${AWS_ARM_INSTANCE_TYPE}"
+    command: "./.buildkite/scripts/package.sh"
+    artifact_paths: "build/distributions/*"
 
   - label: ":rocket: Publishing Staging DRA artifacts"
     if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
     depends_on: "package-staging"
-    agents:
-      provider: gcp
-      image: "${GCP_IMAGE_UBUNTU_X86_64}"
-      machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
     command: "./.buildkite/scripts/publish.sh"
     env:
       WORKFLOW: "staging"

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -uox pipefail
 
+export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
 source ./bin/activate-hermit
 
@@ -16,6 +17,9 @@ if [ "$WORKFLOW" = "snapshot" ]; then
     export SNAPSHOT="true"
 fi
 
+# debug command to verify
+ls -lah /proc/sys/fs/binfmt_misc/ || true
+
 mage pythonEnv
 mage package
 
@@ -28,6 +32,3 @@ fi
 echo "Generating $CSV_FILE.csv"
 $PYTHON ./.buildkite/scripts/generate_notice.py --csv "$CSV_FILE.csv"
 cp build/dependencies-*.csv build/distributions/.
-
-echo "Produced artifacts:"
-ls -lahR build/distributions/
