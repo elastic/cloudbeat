@@ -100,7 +100,7 @@ Resources:
                 Action:
                   - iam:GetRole
                   - iam:ListAccountAliases
-                  - iam:ListGroup
+                  - iam:ListGroups
                   - iam:ListRoles
                   - iam:ListUsers
                 Resource: '*'

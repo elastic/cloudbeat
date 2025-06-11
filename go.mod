@@ -1,6 +1,6 @@
 module github.com/elastic/cloudbeat
 
-go 1.24.2
+go 1.24.3
 
 require (
 	cloud.google.com/go/asset v1.21.1
@@ -47,7 +47,7 @@ require (
 	github.com/aws/smithy-go v1.22.3
 	github.com/dgraph-io/ristretto v0.2.0
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250509163612-21788fec0510
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250611004937-937eaefadde9
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.9.2
 	github.com/elastic/elastic-agent-client/v7 v7.17.2
@@ -128,7 +128,7 @@ require (
 	github.com/digitorus/pkcs7 v0.0.0-20230818184609-3a137a874352 // indirect
 	github.com/digitorus/timestamp v0.0.0-20231217203849-220c5c2851b7 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/ebitengine/purego v0.8.2 // indirect
+	github.com/ebitengine/purego v0.9.0-alpha.3.0.20250507171635-5047c08daa38 // indirect
 	github.com/elastic/pkcs8 v1.0.0 // indirect
 	github.com/elastic/sarama v1.19.1-0.20250304185506-df6449b5c996 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
@@ -176,7 +176,7 @@ require (
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
 	github.com/sassoftware/go-rpmutils v0.4.0 // indirect
 	github.com/sassoftware/relic v7.2.1+incompatible // indirect
-	github.com/shirou/gopsutil/v4 v4.25.1 // indirect
+	github.com/shirou/gopsutil/v4 v4.25.3 // indirect
 	github.com/sigstore/cosign/v2 v2.2.4 // indirect
 	github.com/sigstore/protobuf-specs v0.4.1 // indirect
 	github.com/sigstore/sigstore v1.9.1 // indirect
@@ -200,10 +200,10 @@ require (
 	github.com/yuin/gopher-lua v1.1.1 // indirect
 	github.com/zeebo/errs v1.4.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/collector/consumer v1.28.0 // indirect
-	go.opentelemetry.io/collector/consumer/consumererror v0.121.0 // indirect
-	go.opentelemetry.io/collector/pdata v1.28.0 // indirect
-	go.opentelemetry.io/collector/pdata/pprofile v0.122.0 // indirect
+	go.opentelemetry.io/collector/consumer v1.31.0 // indirect
+	go.opentelemetry.io/collector/consumer/consumererror v0.125.0 // indirect
+	go.opentelemetry.io/collector/pdata v1.31.0 // indirect
+	go.opentelemetry.io/collector/pdata/pprofile v0.125.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.35.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0 // indirect
@@ -327,12 +327,12 @@ require (
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.11.10 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.11.11 // indirect
 	github.com/elastic/go-concert v0.3.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.5.0 // indirect
 	github.com/elastic/go-structform v0.0.12 // indirect
-	github.com/elastic/go-sysinfo v1.15.0 // indirect
+	github.com/elastic/go-sysinfo v1.15.3 // indirect
 	github.com/elastic/go-windows v1.0.2 // indirect
 	github.com/elastic/gosigar v0.14.3 // indirect
 	github.com/elliotchance/orderedmap v1.8.0 // indirect
@@ -371,7 +371,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
+	github.com/golang/snappy v1.0.0 // indirect
 	github.com/gomodule/redigo v1.8.3 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
@@ -521,9 +521,9 @@ require (
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.elastic.co/apm/module/apmelasticsearch/v2 v2.6.3 // indirect
 	go.elastic.co/apm/module/apmhttp/v2 v2.6.3 // indirect
-	go.elastic.co/apm/v2 v2.6.3 // indirect
+	go.elastic.co/apm/v2 v2.7.0 // indirect
 	go.elastic.co/ecszap v1.0.2 // indirect
-	go.elastic.co/fastjson v1.4.0 // indirect
+	go.elastic.co/fastjson v1.5.0 // indirect
 	go.etcd.io/bbolt v1.4.0 // indirect
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
