@@ -4,11 +4,11 @@
 
 ### Prerequisites
 
-We use Poetry to manage our python dependencies. For more details, see [here](https://python-poetry.org/docs/).
+We use Poetry to manage our python dependencies. For more details, see [the poetry docs](https://python-poetry.org/docs/).
 
-1. Install poetry (follow the instructions [here](https://python-poetry.org/docs/#installation))
+1. Install poetry (follow [the instructions](https://python-poetry.org/docs/#installation))
 
-2. Install poetry env (follow installing pre-existing project instructions [here](https://python-poetry.org/docs/basic-usage/#initialising-a-pre-existing-project))
+2. Install poetry env (follow installing pre-existing project [instructions](https://python-poetry.org/docs/basic-usage/#initialising-a-pre-existing-project))
 
 ### Generate Rules Metadata
 
