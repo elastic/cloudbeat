@@ -25,6 +25,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -140,6 +141,15 @@ func (c *Config) Datastream() string {
 		return defaultVulnerabilityIndexPrefix + "-" + DefaultNamespace
 	}
 	return defaultFindingsIndexPrefix + "-" + DefaultNamespace
+}
+
+// DatastreamNamespace returns the inferred namespace setting from the Agent Policy
+func (c *Config) DatastreamNamespace() string {
+	if c.Index == "" {
+		return DefaultNamespace
+	}
+	elems := strings.Split(c.Index, "-")
+	return elems[len(elems)-1]
 }
 
 func New(cfg *config.C) (*Config, error) {
