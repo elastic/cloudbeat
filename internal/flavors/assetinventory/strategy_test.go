@@ -29,9 +29,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestStrategyPicks(t *testing.T) {
+	testhelper.SkipLong(t)
+
 	testCases := []struct {
 		name        string
 		cfg         *config.Config
@@ -102,6 +105,28 @@ func TestStrategyPicks(t *testing.T) {
 						Cred: aws.ConfigAWS{
 							AccessKeyID:     "key",
 							SecretAccessKey: "key",
+						},
+					},
+				},
+			},
+			"STS: GetCallerIdentity",
+		},
+		{
+			"expected success: AWS with cloud connectors",
+			&config.Config{
+				AssetInventoryProvider: config.ProviderAWS,
+				CloudConfig: config.CloudConfig{
+					Aws: config.AwsConfig{
+						AccountType: config.SingleAccount,
+						Cred: aws.ConfigAWS{
+							AccessKeyID:     "key",
+							SecretAccessKey: "key",
+						},
+						CloudConnectors: true,
+						CloudConnectorsConfig: config.CloudConnectorsConfig{
+							LocalRoleARN:  "abc",
+							GlobalRoleARN: "xyz",
+							ResourceID:    "123",
 						},
 					},
 				},

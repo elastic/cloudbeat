@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Creates elastic-agent cspm user, role, and access key, and outputs the access key
+Description: Creates elastic-agent Asset Discovery user, role, and access key, and outputs the access key
 
 Parameters:
   OrganizationalUnitIds:
@@ -30,19 +30,19 @@ Conditions:
     - "Yes"
 
 Resources:
-  ElasticCSPMUser:
+  ElasticAssetDiscoveryUser:
     Type: AWS::IAM::User
     Properties:
       UserName: !Join
         - '-'
-        - - elasticagent-user-cspm
+        - - elasticagent-user-ad # ad stands for asset discovery, we can't use the full name because of max 64 constraint
           - !Select
             - 2
             - !Split
               - /
               - !Ref AWS::StackId
       Policies:
-        - PolicyName: ElasticCSPMUserPolicy
+        - PolicyName: ElasticAssetDiscoveryUserPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -54,10 +54,10 @@ Resources:
                 Resource: '*'
       Path: /
 
-  CloudbeatRootRole:
+  CloudbeatAssetDiscoveryRootRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: cloudbeat-root
+      RoleName: cloudbeat-root-ad
       Description: Role that cloudbeat uses to assume roles in other accounts
       Tags:
         - Key: cloudbeat_scan_management_account
@@ -72,7 +72,7 @@ Resources:
               - sts:AssumeRole
           - Effect: Allow
             Principal:
-              AWS: !GetAtt ElasticCSPMUser.Arn
+              AWS: !GetAtt ElasticAssetDiscoveryUser.Arn
             Action:
               - sts:AssumeRole
           - Effect: Allow
@@ -83,7 +83,7 @@ Resources:
               - sts:AssumeRole
       Path: /
       Policies:
-        - PolicyName: cloudbeat-root-permissions
+        - PolicyName: cloudbeat-root-ad-permissions
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -108,8 +108,8 @@ Resources:
   CloudbeatRoleStackSet:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      StackSetName: cloudbeat-role-stackset
-      Description: StackSet for deploying the cloudbeat-securityaudit IAM role to member accounts in the specified organizational units.
+      StackSetName: cloudbeat-role-stackset-ad
+      Description: StackSet for deploying the cloudbeat-securityaudit-ad IAM role to member accounts in the specified organizational units.
       AutoDeployment:
         Enabled: true
         RetainStacksOnAccountRemoval: false
@@ -119,7 +119,7 @@ Resources:
         Active: true
       Parameters:
         - ParameterKey: RootRoleArn
-          ParameterValue: !GetAtt CloudbeatRootRole.Arn
+          ParameterValue: !GetAtt CloudbeatAssetDiscoveryRootRole.Arn
       PermissionModel: SERVICE_MANAGED
       StackInstancesGroup:
         - DeploymentTargets:
@@ -136,7 +136,7 @@ Resources:
           CloudbeatMemberRole:
             Type: 'AWS::IAM::Role'
             Properties:
-              RoleName: cloudbeat-securityaudit
+              RoleName: cloudbeat-securityaudit-ad
               AssumeRolePolicyDocument:
                 Version: '2012-10-17'
                 Statement:
@@ -152,13 +152,13 @@ Resources:
   CloudbeatManagementAccountAuditRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: cloudbeat-securityaudit
+      RoleName: cloudbeat-securityaudit-ad
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !GetAtt CloudbeatRootRole.Arn
+              AWS: !GetAtt CloudbeatAssetDiscoveryRootRole.Arn
             Action:
               - sts:AssumeRole
       Path: /
@@ -166,16 +166,16 @@ Resources:
         - arn:aws:iam::aws:policy/SecurityAudit
     Condition: ScanManagementAccountEnabled
 
-  ElasticCSPMAccessKey:
+  ElasticAssetDiscoveryAccessKey:
     Type: AWS::IAM::AccessKey
     Properties:
-      UserName: !Ref ElasticCSPMUser
+      UserName: !Ref ElasticAssetDiscoveryUser
 
 Outputs:
   AccessKeyId:
     Description: Access Key ID
-    Value: !Ref ElasticCSPMAccessKey
+    Value: !Ref ElasticAssetDiscoveryAccessKey
 
   SecretAccessKey:
     Description: Secret Access Key
-    Value: !GetAtt ElasticCSPMAccessKey.SecretAccessKey
+    Value: !GetAtt ElasticAssetDiscoveryAccessKey.SecretAccessKey

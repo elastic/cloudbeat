@@ -18,10 +18,10 @@
 package fetchers
 
 import (
+	"sync"
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -56,51 +56,44 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	t := s.T()
 	ctx := t.Context()
 	mockInventoryService := &inventory.MockServiceAPI{}
+	wg := sync.WaitGroup{}
+
 	fetcher := GcpAssetsFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.EXPECT().ListAllAssetTypesByName(mock.Anything, mock.MatchedBy(func(_ []string) bool {
-		return true
-	})).Return(
-		[]*inventory.ExtendedGcpAsset{
-			{
-				CloudAccount: &fetching.CloudAccountMetadata{
-					AccountId:        "prjId",
-					AccountName:      "prjName",
-					OrganisationId:   "orgId",
-					OrganizationName: "orgName",
-				},
-				Asset: &assetpb.Asset{
-					Name: "a", AssetType: "iam.googleapis.com/ServiceAccount",
-				},
-			},
-		}, nil,
-	)
+	expectedAsset := &inventory.ExtendedGcpAsset{
+		Asset: &assetpb.Asset{
+			AssetType: "compute.googleapis.com/Instance",
+		},
+	}
+	mockInventoryService.EXPECT().Clear()
+	mockInventoryService.On("ListAssetTypes", mock.Anything, mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			ch := args.Get(2).(chan<- *inventory.ExtendedGcpAsset)
+			ch <- expectedAsset
+			close(ch)
+		}).Once()
 
-	err := fetcher.Fetch(ctx, cycle.Metadata{})
-	s.Require().NoError(err)
-	results := testhelper.CollectResources(s.resourceCh)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := fetcher.Fetch(ctx, cycle.Metadata{})
+		s.NoError(err)
+	}()
 
-	s.Len(results, len(GcpAssetTypes))
+	res := <-s.resourceCh
+	s.NotNil(res.Resource)
+	asset, ok := res.Resource.(*GcpAsset)
+	s.True(ok)
+	s.Equal(expectedAsset, asset.ExtendedAsset)
+	s.Equal("cloud-compute", asset.Type)
+	s.Equal("gcp-compute-instance", asset.SubType)
 
-	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
-		metadata, err := r.Resource.GetMetadata()
-		s.Require().NoError(err)
-		cloudAccountMetadata := metadata.CloudAccountMetadata
-
-		s.Equal("prjName", cloudAccountMetadata.AccountName)
-		s.Equal("prjId", cloudAccountMetadata.AccountId)
-		s.Equal("orgId", cloudAccountMetadata.OrganisationId)
-		s.Equal("orgName", cloudAccountMetadata.OrganizationName)
-		if metadata.Type == fetching.CloudIdentity {
-			m, err := r.GetElasticCommonData()
-			s.Require().NoError(err, "error getting Elastic Common Data")
-			s.Len(m, 2)
-		}
-	})
+	wg.Wait()
+	mockInventoryService.AssertExpectations(s.T())
 }
 
 func (s *GcpAssetsFetcherTestSuite) TestFetcher_ElasticCommonData() {

@@ -15,8 +15,8 @@ from product.tests.parameters import Parameters, register_params
 @pytest.mark.asset_inventory_aws
 def test_aws_asset_inventory(
     asset_inventory_client,
-    category,
     type_,
+    sub_type,
 ):
     """
     This data driven test verifies entities published by cloudbeat agent.
@@ -24,8 +24,8 @@ def test_aws_asset_inventory(
     entities = get_ES_assets(
         asset_inventory_client,
         timeout=10,
-        category=category,
         type_=type_,
+        sub_type=sub_type,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
     )
 
@@ -36,13 +36,13 @@ def test_aws_asset_inventory(
         assert entity.cloud.provider == "aws", f'Expected "aws" provider, got {entity.cloud.provider}'
         assert len(entity.entity.id) > 0, "Expected .entity.id list to contain an ID"
         assert len(entity.entity.id[0]) > 0, "Expected the ID to be non-empty"
-        assert entity.Attributes, "Expected the resource under .Attributes"
+        assert entity.entity.raw, "Expected the resource under .entity.raw"
 
 
 register_params(
     test_aws_asset_inventory,
     Parameters(
-        ("category", "type_"),
+        ("type_", "sub_type"),
         [*aws_tc.test_cases.values()],
         ids=[*aws_tc.test_cases.keys()],
     ),

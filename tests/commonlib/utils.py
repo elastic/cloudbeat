@@ -83,8 +83,8 @@ def get_ES_evaluation(
 def get_ES_assets(
     elastic_client,
     timeout,
-    category,
     type_,
+    sub_type,
     exec_timestamp,
     resource_identifier=lambda r: True,
 ) -> Union[List[munch.Munch], None]:
@@ -96,8 +96,8 @@ def get_ES_assets(
             time.sleep(EVALUATION_BACKOFF_SECONDS)
             assets = get_assets_from_index(
                 elastic_client,
-                category,
                 type_,
+                sub_type,
                 latest_timestamp,
             )
         except Exception as e:
