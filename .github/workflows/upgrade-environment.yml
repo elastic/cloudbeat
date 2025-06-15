@@ -128,8 +128,6 @@ jobs:
           role-session-name: github-ci
           aws-region: ${{ env.AWS_REGION }}
 
-<<<<<<< HEAD
-=======
       - id: google-auth
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193 # v2
@@ -143,7 +141,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
->>>>>>> aeb00d56 (Bump google-github-actions/auth from 2.1.8 to 2.1.10 in /.github/workflows (#3257))
       - name: Download tf state data
         env:
           S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
