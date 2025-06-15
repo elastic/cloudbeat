@@ -72,7 +72,11 @@ jobs:
 
       - id: google-auth
         name: Authenticate to Google Cloud
+<<<<<<< HEAD
         uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
+=======
+        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193 # v2
+>>>>>>> aeb00d56 (Bump google-github-actions/auth from 2.1.8 to 2.1.10 in /.github/workflows (#3257))
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
