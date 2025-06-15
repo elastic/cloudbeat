@@ -64,7 +64,11 @@ jobs:
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
+<<<<<<< HEAD
         uses: aws-actions/configure-aws-credentials@010d0da01d0b5a38af31e9c3470dbfdabdecca3a # v4.0.1
+=======
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4
+>>>>>>> f9f668f9 (Bump aws-actions/configure-aws-credentials from 4.1.0 to 4.2.1 in /.github/workflows (#3324))
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
