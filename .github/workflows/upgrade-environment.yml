@@ -122,11 +122,7 @@ jobs:
           poetry install
 
       - name: Configure AWS credentials
-<<<<<<< HEAD
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
-=======
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4
->>>>>>> f9f668f9 (Bump aws-actions/configure-aws-credentials from 4.1.0 to 4.2.1 in /.github/workflows (#3324))
         with:
           role-to-assume: arn:aws:iam::704479110758:role/Developer_eks
           role-session-name: github-ci
