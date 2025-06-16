@@ -58,23 +58,23 @@ def get_events_from_index(
 
 def get_assets_from_index(
     elastic_client,
-    category: str,
     type_: str,
+    sub_type: str,
     time_after: datetime,
 ) -> list[Munch]:
     """
     Resturns assets from a given index matching given classification.
     @param elastic_client: Client to connect to Elasticsearch.
-    @param category: Entity category used as a filter
     @param type: Entity type used as a filter
+    @param sub_type: Entity sub_type used as a filter
     @param time_after: Filter events having timestamp > time_after
     @return: List of Munch objects
     """
     query = {
         "bool": {
             "must": [
-                {"match": {"entity.category": category}},
                 {"match": {"entity.type": type_}},
+                {"match": {"entity.sub_type": sub_type}},
             ],
             "filter": [
                 {
@@ -253,11 +253,14 @@ class FsClient:
         """
         Copy the contents of source into destination without overwriting the destination file.
         """
-        with open(source, "r", encoding="utf-8") as sfile, open(
-            destination,
-            "w",
-            encoding="utf-8",
-        ) as dfile:
+        with (
+            open(source, "r", encoding="utf-8") as sfile,
+            open(
+                destination,
+                "w",
+                encoding="utf-8",
+            ) as dfile,
+        ):
             for line in sfile:
                 dfile.write(line)
 

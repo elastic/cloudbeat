@@ -71,10 +71,10 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 	if err != nil {
 		return inventory.AssetInventory{}, err
 	}
-	s.logger.Infof("Creating %s AssetInventory", strings.ToUpper(s.cfg.AssetInventoryProvider))
+	s.logger.Infof("Creating %s AssetInventory for %q namespace", strings.ToUpper(s.cfg.AssetInventoryProvider), s.cfg.DatastreamNamespace())
 
 	now := func() time.Time { return time.Now() } //nolint:gocritic
-	return inventory.NewAssetInventory(s.logger, fetchers, client, now, s.cfg.Period), nil
+	return inventory.NewAssetInventory(s.logger, s.cfg.DatastreamNamespace(), fetchers, client, now, s.cfg.Period), nil
 }
 
 func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetcher, error) {

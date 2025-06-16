@@ -39,62 +39,38 @@ func (_m *mockInventoryProvider) EXPECT() *mockInventoryProvider_Expecter {
 	return &mockInventoryProvider_Expecter{mock: &_m.Mock}
 }
 
-// ListAllAssetTypesByName provides a mock function with given fields: ctx, assets
-func (_m *mockInventoryProvider) ListAllAssetTypesByName(ctx context.Context, assets []string) ([]*inventory.ExtendedGcpAsset, error) {
-	ret := _m.Called(ctx, assets)
-
-	if len(ret) == 0 {
-		panic("no return value specified for ListAllAssetTypesByName")
-	}
-
-	var r0 []*inventory.ExtendedGcpAsset
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, []string) ([]*inventory.ExtendedGcpAsset, error)); ok {
-		return rf(ctx, assets)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, []string) []*inventory.ExtendedGcpAsset); ok {
-		r0 = rf(ctx, assets)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*inventory.ExtendedGcpAsset)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
-		r1 = rf(ctx, assets)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+// ListAssetTypes provides a mock function with given fields: ctx, assets, assetsCh
+func (_m *mockInventoryProvider) ListAssetTypes(ctx context.Context, assets []string, assetsCh chan<- *inventory.ExtendedGcpAsset) {
+	_m.Called(ctx, assets, assetsCh)
 }
 
-// mockInventoryProvider_ListAllAssetTypesByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAllAssetTypesByName'
-type mockInventoryProvider_ListAllAssetTypesByName_Call struct {
+// mockInventoryProvider_ListAssetTypes_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAssetTypes'
+type mockInventoryProvider_ListAssetTypes_Call struct {
 	*mock.Call
 }
 
-// ListAllAssetTypesByName is a helper method to define mock.On call
+// ListAssetTypes is a helper method to define mock.On call
 //   - ctx context.Context
 //   - assets []string
-func (_e *mockInventoryProvider_Expecter) ListAllAssetTypesByName(ctx interface{}, assets interface{}) *mockInventoryProvider_ListAllAssetTypesByName_Call {
-	return &mockInventoryProvider_ListAllAssetTypesByName_Call{Call: _e.mock.On("ListAllAssetTypesByName", ctx, assets)}
+//   - assetsCh chan<- *inventory.ExtendedGcpAsset
+func (_e *mockInventoryProvider_Expecter) ListAssetTypes(ctx interface{}, assets interface{}, assetsCh interface{}) *mockInventoryProvider_ListAssetTypes_Call {
+	return &mockInventoryProvider_ListAssetTypes_Call{Call: _e.mock.On("ListAssetTypes", ctx, assets, assetsCh)}
 }
 
-func (_c *mockInventoryProvider_ListAllAssetTypesByName_Call) Run(run func(ctx context.Context, assets []string)) *mockInventoryProvider_ListAllAssetTypesByName_Call {
+func (_c *mockInventoryProvider_ListAssetTypes_Call) Run(run func(ctx context.Context, assets []string, assetsCh chan<- *inventory.ExtendedGcpAsset)) *mockInventoryProvider_ListAssetTypes_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].([]string))
+		run(args[0].(context.Context), args[1].([]string), args[2].(chan<- *inventory.ExtendedGcpAsset))
 	})
 	return _c
 }
 
-func (_c *mockInventoryProvider_ListAllAssetTypesByName_Call) Return(_a0 []*inventory.ExtendedGcpAsset, _a1 error) *mockInventoryProvider_ListAllAssetTypesByName_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *mockInventoryProvider_ListAssetTypes_Call) Return() *mockInventoryProvider_ListAssetTypes_Call {
+	_c.Call.Return()
 	return _c
 }
 
-func (_c *mockInventoryProvider_ListAllAssetTypesByName_Call) RunAndReturn(run func(context.Context, []string) ([]*inventory.ExtendedGcpAsset, error)) *mockInventoryProvider_ListAllAssetTypesByName_Call {
-	_c.Call.Return(run)
+func (_c *mockInventoryProvider_ListAssetTypes_Call) RunAndReturn(run func(context.Context, []string, chan<- *inventory.ExtendedGcpAsset)) *mockInventoryProvider_ListAssetTypes_Call {
+	_c.Run(run)
 	return _c
 }
 

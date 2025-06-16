@@ -71,14 +71,18 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 
 	provider := newMockInventoryProvider(t)
 	for _, resource := range ResourcesToFetch {
-		provider.EXPECT().mock.On("ListAllAssetTypesByName", mock.Anything, []string{resource.assetType}).Return([]*gcpinventory.ExtendedGcpAsset{createAsset(resource.assetType)}, nil)
+		provider.EXPECT().mock.On("ListAssetTypes", mock.Anything, []string{resource.assetType}, mock.Anything).Run(func(args mock.Arguments) {
+			ch := args.Get(2).(chan<- *gcpinventory.ExtendedGcpAsset)
+			ch <- createAsset(resource.assetType)
+			close(ch)
+		})
 	}
 	fetcher := newAssetsInventoryFetcher(logger, provider)
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
 
 func TestAccountFetcher_EnrichAsset(t *testing.T) {
-	var data = map[string]struct {
+	data := map[string]struct {
 		resource    *assetpb.Resource    // input of GCP asset resource data
 		enrichments inventory.AssetEvent // output of inventory asset ECS fields
 	}{
@@ -260,7 +264,6 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 		// Set the common fields that are not set in the enrichments
 		expected.Event = actual.Event
 		expected.Entity = actual.Entity
-		expected.RawAttributes = actual.RawAttributes
 
 		// Cloud is the only field where we have both common and enriched fields
 		if expected.Cloud == nil {

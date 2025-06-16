@@ -36,7 +36,7 @@ type (
 		provider inventoryProvider
 	}
 	inventoryProvider interface {
-		ListAllAssetTypesByName(ctx context.Context, assets []string) ([]*gcpinventory.ExtendedGcpAsset, error)
+		ListAssetTypes(ctx context.Context, assets []string, assetsCh chan<- *gcpinventory.ExtendedGcpAsset)
 	}
 	ResourcesClassification struct {
 		assetType      string
@@ -79,14 +79,11 @@ func (f *assetsInventory) fetch(ctx context.Context, assetChan chan<- inventory.
 	f.logger.Infof("Fetching %s", assetType)
 	defer f.logger.Infof("Fetching %s - Finished", assetType)
 
-	gcpAssets, err := f.provider.ListAllAssetTypesByName(ctx, []string{assetType})
-	if err != nil {
-		f.logger.Errorf("Could not fetch %s: %v", assetType, err)
-		return
-	}
+	resultsCh := make(chan *gcpinventory.ExtendedGcpAsset)
+	go f.provider.ListAssetTypes(ctx, []string{assetType}, resultsCh)
 
-	for _, item := range gcpAssets {
-		assetChan <- getAssetEvent(classification, item)
+	for asset := range resultsCh {
+		assetChan <- getAssetEvent(classification, asset)
 	}
 }
 
@@ -126,7 +123,7 @@ func getAssetEvent(classification inventory.AssetClassification, item *gcpinvent
 	)
 }
 
-func findRelatedAssetIds(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
+func findRelatedAssetIds(t inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
 	ids = append(ids, item.Ancestors...)
 	if item.Resource != nil {
@@ -140,7 +137,7 @@ func findRelatedAssetIds(t inventory.AssetType, item *gcpinventory.ExtendedGcpAs
 	return ids
 }
 
-func findRelatedAssetIdsForType(t inventory.AssetType, item *gcpinventory.ExtendedGcpAsset) []string {
+func findRelatedAssetIdsForType(t inventory.AssetSubType, item *gcpinventory.ExtendedGcpAsset) []string {
 	ids := []string{}
 
 	var fields map[string]*structpb.Value

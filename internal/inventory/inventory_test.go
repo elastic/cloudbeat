@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -43,12 +44,14 @@ func TestAssetInventory_Run(t *testing.T) {
 			Timestamp: now(),
 			Fields: mapstr.M{
 				"entity": Entity{
-					Id:   "arn:aws:ec2:us-east::ec2/234567890",
-					Name: "test-server",
+					Id:     "arn:aws:ec2:us-east::ec2/234567890",
+					Name:   "test-server",
+					Source: pointers.Ref(AwsCloudProvider),
 					AssetClassification: AssetClassification{
 						Category: CategoryInfrastructure,
 						Type:     "Virtual Machine",
 					},
+					Raw: emptyRef,
 				},
 				"event": Event{
 					Kind: "asset",
@@ -85,7 +88,6 @@ func TestAssetInventory_Run(t *testing.T) {
 				"url": &URL{
 					Full: "https://example.com",
 				},
-				"Attributes": emptyRef,
 			},
 		},
 	}
@@ -149,6 +151,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		period:              24 * time.Hour,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           "default",
 	}
 
 	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
@@ -191,6 +194,7 @@ func TestAssetInventory_Period(t *testing.T) {
 		period:              500 * time.Millisecond,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           "default",
 	}
 
 	// Run it enough for 2 cycles to finish; one starts immediately, the other after 500 milliseconds
@@ -233,6 +237,7 @@ func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
 		period:              24 * time.Hour,
 		assetCh:             make(chan AssetEvent),
 		now:                 now,
+		namespace:           "default",
 	}
 
 	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
