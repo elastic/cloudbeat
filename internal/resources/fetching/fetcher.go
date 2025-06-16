@@ -142,7 +142,7 @@ type Resource interface {
 
 type ResourceFields struct {
 	ResourceMetadata
-	Raw any `json:"raw"`
+	Raw any `json:"raw,omitempty"`
 }
 
 type ResourceMetadata struct {
