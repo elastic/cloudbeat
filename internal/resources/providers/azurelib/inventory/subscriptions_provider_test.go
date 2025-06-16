@@ -191,7 +191,7 @@ func TestSubscriptionProvider_ListLocations(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			provider := mockLocationsAsset(tc.configMock)
 
-			assets, err := provider.ListLocations(context.Background(), "subscription")
+			assets, err := provider.ListLocations(t.Context(), "subscription")
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -251,7 +251,7 @@ func TestSubscriptionProvider_ListTenants(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			provider := mockTenantAsset(tc.configMock)
 
-			assets, err := provider.ListTenants(context.Background())
+			assets, err := provider.ListTenants(t.Context())
 
 			if tc.expectError {
 				require.Error(t, err)
@@ -314,7 +314,7 @@ func TestSubscriptionProvider_ListSubscriptions(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			provider := mockSubscriptionAsset(tc.configMock)
 
-			assets, err := provider.ListSubscriptions(context.Background())
+			assets, err := provider.ListSubscriptions(t.Context())
 
 			if tc.expectError {
 				require.Error(t, err)

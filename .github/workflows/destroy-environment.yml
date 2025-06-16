@@ -64,7 +64,7 @@ jobs:
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -72,7 +72,7 @@ jobs:
 
       - id: google-auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@71f986410dfbc7added4569d411d040a91dc6935 # v2
+        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193 # v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
