@@ -43,7 +43,7 @@ def test_gcp_asset_inventory(
 register_params(
     test_gcp_asset_inventory,
     Parameters(
-        ("category", "type_"),
+        ("type_", "sub_type"),
         [*gcp_tc.test_cases.values()],
         ids=[*gcp_tc.test_cases.keys()],
     ),

@@ -43,7 +43,7 @@ def test_azure_asset_inventory(
 register_params(
     test_azure_asset_inventory,
     Parameters(
-        ("category", "type_"),
+        ("type_", "sub_type"),
         [*azure_tc.test_cases.values()],
         ids=[*azure_tc.test_cases.keys()],
     ),
