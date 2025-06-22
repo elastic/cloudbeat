@@ -270,9 +270,25 @@ class FsClient:
         @param beat_name: The name of beat the status should be retrieved
         @return: status message string
         """
-        response = json.loads(response)
-        beat_list = response["components"]
-        for beat in beat_list:
-            if beat_name in beat["name"]:
-                return beat["message"]
+        decoder = json.JSONDecoder()
+        idx = 0
+        response = response.strip()
+
+        while idx < len(response):
+            try:
+                obj, idx = decoder.raw_decode(response, idx)
+            except json.JSONDecodeError as exc:
+                logger.info(f"Failed to decode JSON response: {exc}. Response: {response}")
+                idx += 1
+                continue
+
+            beat_list = obj.get("components", [])
+            if not beat_list:
+                logger.info("No components found in the response.")
+                return ""
+            for beat in beat_list:
+                if beat_name in beat.get("name", ""):
+                    return beat.get("message", "")
+
+        logger.info("No matching beat found in the response.")
         return ""
