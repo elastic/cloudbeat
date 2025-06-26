@@ -8,14 +8,18 @@ import future.keywords.in
 finding := result if {
 	data_adapter.is_policies_resource
 
+	passed := [r | r := input.resource[_]; is_cloud_logging_configured(r)]
+	failed := [r | r := input.resource[_]; not is_cloud_logging_configured(r)]
+	ok := count(passed) > 0
+
 	result := common.generate_result_without_expected(
-		common.calculate_result(cloud_logging_is_configured),
-		input.resource,
+		common.calculate_result(ok),
+		{"policies": {json.filter(c, ["name", "iam_policy/audit_configs"]) | c := common.get_evidence(ok, passed, failed)[_]}},
 	)
 }
 
-cloud_logging_is_configured if {
-	policy := input.resource[_].iam_policy
+is_cloud_logging_configured(resource) if {
+	policy := resource.iam_policy
 	has_read_write_logs(policy)
 	not has_exempted_members(policy)
 } else := false
