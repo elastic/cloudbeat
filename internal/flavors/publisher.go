@@ -19,6 +19,9 @@ package flavors
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
+	"github.com/elastic/elastic-agent-libs/monitoring"
+	"go.elastic.co/apm/v2"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -41,14 +44,18 @@ type Publisher struct {
 	interval  time.Duration
 	threshold int
 	client    client
+	count     *monitoring.Uint
+	tracer    *apm.Tracer
 }
 
-func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client) *Publisher {
+func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client, monitoringRegistry *monitoring.Registry, tracer *apm.Tracer) *Publisher {
 	return &Publisher{
 		log:       log,
 		interval:  interval,
 		threshold: threshold,
 		client:    client,
+		count:     monitoring.NewUint(monitoringRegistry, "publisher.events.count"),
+		tracer:    tracer,
 	}
 }
 
@@ -91,12 +98,21 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
 }
 
 func (p *Publisher) publish(events *[]beat.Event) {
-	if len(*events) == 0 {
+	batchSize := len(*events)
+	if batchSize == 0 {
 		return
 	}
 
-	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events)).
-		Infof("Publishing %d events to elasticsearch", len(*events))
+	trans := p.tracer.StartTransaction("publish-events", "publisher")
+	trans.Context.SetLabel("batch.size", batchSize)
+	defer trans.End()
+
+	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, batchSize).
+		Infof("Publishing %d events to elasticsearch", batchSize)
+
 	p.client.PublishAll(*events)
+	p.count.Add(uint64(batchSize))
+	observability.EventsPublished.Add(float64(batchSize))
+
 	*events = nil
 }

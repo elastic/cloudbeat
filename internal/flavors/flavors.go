@@ -19,6 +19,7 @@ package flavors
 
 import (
 	"context"
+	"github.com/elastic/elastic-agent-libs/monitoring"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -35,10 +36,11 @@ const (
 
 // flavorBase configuration.
 type flavorBase struct {
-	ctx       context.Context //nolint:containedctx
-	cancel    context.CancelFunc
-	config    *config.Config
-	client    beat.Client
-	log       *clog.Logger
-	publisher *Publisher
+	ctx                context.Context //nolint:containedctx
+	cancel             context.CancelFunc
+	config             *config.Config
+	client             beat.Client
+	log                *clog.Logger
+	monitoringRegistry *monitoring.Registry
+	publisher          *Publisher
 }

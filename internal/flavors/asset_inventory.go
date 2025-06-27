@@ -60,7 +60,7 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 		return nil, err
 	}
 
-	publisher := NewPublisher(logger, flushInterval, eventsThreshold, beatClient)
+	publisher := NewPublisher(logger, flushInterval, eventsThreshold, beatClient, nil, nil)
 	return &assetInventory{
 		flavorBase: flavorBase{
 			ctx:       ctx,
