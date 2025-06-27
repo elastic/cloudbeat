@@ -20,8 +20,8 @@ package flavors
 import (
 	"context"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
-	"github.com/elastic/elastic-agent-libs/monitoring"
-	"go.elastic.co/apm/v2"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -44,17 +44,21 @@ type Publisher struct {
 	interval  time.Duration
 	threshold int
 	client    client
-	count     *monitoring.Uint
-	tracer    *apm.Tracer
+	count     metric.Int64Counter
+	tracer    trace.Tracer
 }
 
-func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client, monitoringRegistry *monitoring.Registry, tracer *apm.Tracer) *Publisher {
+func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client, tracer trace.Tracer, meter metric.Meter) *Publisher {
+	count, err := meter.Int64Counter("cloudbeat.events.published") // TODO: globals
+	if err != nil {
+		panic("failed to create events published counter: " + err.Error())
+	}
 	return &Publisher{
 		log:       log,
 		interval:  interval,
 		threshold: threshold,
 		client:    client,
-		count:     monitoring.NewUint(monitoringRegistry, "publisher.events.count"),
+		count:     count,
 		tracer:    tracer,
 	}
 }
@@ -102,16 +106,18 @@ func (p *Publisher) publish(events *[]beat.Event) {
 	if batchSize == 0 {
 		return
 	}
-
-	trans := p.tracer.StartTransaction("publish-events", "publisher")
-	trans.Context.SetLabel("batch.size", batchSize)
-	defer trans.End()
+	ctx, span := p.tracer.Start(
+		context.TODO(),
+		"orestis-publish-events",
+		trace.WithSpanKind(trace.SpanKindProducer),
+	)
+	defer span.End()
 
 	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, batchSize).
 		Infof("Publishing %d events to elasticsearch", batchSize)
 
 	p.client.PublishAll(*events)
-	p.count.Add(uint64(batchSize))
+	p.count.Add(ctx, int64(batchSize))
 	observability.EventsPublished.Add(float64(batchSize))
 
 	*events = nil

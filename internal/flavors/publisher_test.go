@@ -150,7 +150,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			for _, size := range tc.expectedEventSize {
 				client.EXPECT().PublishAll(mock.MatchedBy(lengthMatcher(size)))
 			}
-			publisher := NewPublisher(log, tc.interval, tc.threshold, client, monitoring.NewRegistry(), nil)
+			publisher := NewPublisher(log, tc.interval, tc.threshold, client, nil, nil)
 
 			eventsChannel := make(chan []beat.Event)
 

@@ -20,23 +20,29 @@ package flavors
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
+	"time"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/internal/infra/observability"
-	"github.com/elastic/cloudbeat/version"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/elastic/elastic-agent-libs/monitoring"
+	"github.com/go-logr/logr"
 	"github.com/goforj/godump"
-	"github.com/prometheus/client_golang/prometheus"
-	"go.elastic.co/apm/module/apmprometheus/v2"
-	"go.elastic.co/apm/v2"
-	"os"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/version"
 )
 
 func init() {
@@ -47,9 +53,8 @@ func init() {
 
 type posture struct {
 	flavorBase
-	benchmark  builder.Benchmark
-	tracerDone func()
-	tracer     *apm.Tracer
+	benchmark builder.Benchmark
+	tracer    *sdktrace.TracerProvider
 }
 
 // NewPosture creates an instance of posture.
@@ -93,83 +98,136 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	}
 	log.Infof("posture configured %d processors", len(cfg.Processors))
 
-	reg := newMonitoringRegistry(b, "cloudbeat")
-	tracer, err := newTracer("cloudbeat", version.CloudbeatSemanticVersion(), log.Logger)
+	tracerProvider, err := newTracerProvider(ctx, "cloudbeat", version.CloudbeatSemanticVersion(), log.Logger)
 	if err != nil {
 		cancel()
-		return nil, fmt.Errorf("failed to create tracer: %w", err)
+		return nil, fmt.Errorf("failed to create tracerProvider: %w", err)
 	}
-	log.Infof("posture configured with tracer %s", godump.DumpStr(tracer))
-	log.Infof("posture configured with registry %s", godump.DumpStr(reg))
 
-	publisher := NewPublisher(log, flushInterval, eventsThreshold, client, reg, tracer)
+	res, err := resource.New(ctx, resource.WithAttributes(semconv.ServiceNameKey.String("cloudbeat")))
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+	meterProvider, err := initMeterProvider(res)
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("failed to create meter provider: %w", err)
+	}
+
+	log.Infof("GREPME posture configured with tracerProvider %s", godump.DumpStr(tracerProvider))
+	log.Infof("GREPME posture configured with metricsProvider %s", godump.DumpStr(meterProvider))
+
+	publisher := NewPublisher(
+		log,
+		flushInterval,
+		eventsThreshold,
+		client,
+		tracerProvider.Tracer("orestis"),
+		meterProvider.Meter("orestis"),
+	)
 
 	return &posture{
 		flavorBase: flavorBase{
-			ctx:                ctx,
-			cancel:             cancel,
-			publisher:          publisher,
-			monitoringRegistry: reg,
-			config:             cfg,
-			log:                log,
-			client:             client,
+			ctx:       ctx,
+			cancel:    cancel,
+			publisher: publisher,
+			config:    cfg,
+			log:       log,
+			client:    client,
 		},
 		benchmark: bench,
-		tracer:    tracer,
+		tracer:    tracerProvider,
 	}, nil
 }
 
-func newMonitoringRegistry(b *beat.Beat, name string) *monitoring.Registry {
-	ns := b.Info.Monitoring.Namespace
-	if ns == nil {
-		return nil // No monitoring namespace, no registry
-	}
-	reg := ns.GetRegistry().GetRegistry(name)
-	if reg == nil {
-		reg = ns.GetRegistry().NewRegistry(name)
-	}
-	return reg
-}
-
-func newTracer(serviceName, serviceVersion string, logger *logp.Logger) (*apm.Tracer, error) {
-	//tr, err := transport.NewHTTPTransport(transport.HTTPTransportOptions{})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	tracer, err := apm.NewTracerOptions(apm.TracerOptions{
-		ServiceName:        serviceName,
-		ServiceVersion:     serviceVersion,
-		ServiceEnvironment: "",
-		//Transport:          tr,
-	})
+// initMeterProvider creates and registers a basic OpenTelemetry MeterProvider that prints to stdout.
+func initMeterProvider(res *resource.Resource) (*metric.MeterProvider, error) {
+	metricExporter, err := stdoutmetric.New()
 	if err != nil {
 		return nil, err
 	}
 
-	tracer.SetSpanStackTraceMinDuration(-1)              // always include stacktrace
-	tracer.SetLogger(warningLogger{logger.Named("apm")}) // Set logger for APM tracer
-	apm.SetDefaultTracer(tracer)
+	meterProvider := metric.NewMeterProvider(
+		metric.WithResource(res),
+		metric.WithReader(metric.NewPeriodicReader(
+			metricExporter,
+			metric.WithInterval(3*time.Second),
+		)),
+	)
 
-	return tracer, nil
+	otel.SetMeterProvider(meterProvider)
+	return meterProvider, nil
 }
 
-// warningLogger wraps logp.Logger to allow to be set in the apm.Tracer.
-type warningLogger struct {
+func newTracerProvider(ctx context.Context, name string, version string, log *logp.Logger) (*sdktrace.TracerProvider, error) {
+	log.Info("GREPME: Initializing OpenTelemetry TracerProvider")
+
+	// Create a new stdout exporter.
+	exporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint(), stdouttrace.WithWriter(newTmpWritter(log)))
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new resource with the service name.
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String(name),
+			semconv.ServiceVersion(version),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new TracerProvider with the exporter and resource.
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
+
+	// Set the global TracerProvider.
+	otel.SetTracerProvider(tp)
+	otel.SetLogger(logr.New(logWrapper{log.Named("GREPME")}))
+	return tp, nil
+}
+
+func newTmpWritter(log *logp.Logger) io.Writer {
+	return logWrapper{log.Named("GREPME")}
+}
+
+type logWrapper struct {
 	logp *logp.Logger
 }
 
-// Warningf logs a message at warning level.
-func (l warningLogger) Warningf(format string, args ...interface{}) {
-	l.logp.Warnf("GREPME: "+format, args...)
+func (l logWrapper) Write(p []byte) (n int, err error) {
+	//TODO delete this
+	l.logp.Info("GREPME: Write: " + string(p))
+	return len(p), nil
 }
 
-func (l warningLogger) Errorf(format string, args ...interface{}) {
-	l.logp.Errorf("GREPME: "+format, args...)
+func (l logWrapper) Init(info logr.RuntimeInfo) {
+	l.logp.Info("GREPME: Initializing logr wrapper", "info", info)
 }
 
-func (l warningLogger) Debugf(format string, args ...interface{}) {
-	l.logp.Infof("GREPME: "+format, args...)
+func (l logWrapper) Enabled(int) bool {
+	return true
+}
+
+func (l logWrapper) Info(_ int, msg string, keysAndValues ...any) {
+	l.logp.Info("GREPME: "+msg, "keysAndValues", keysAndValues)
+}
+
+func (l logWrapper) Error(err error, msg string, keysAndValues ...any) {
+	l.logp.Error("GREPME: "+msg, "err", err, "keysAndValues", keysAndValues)
+}
+
+func (l logWrapper) WithValues(keysAndValues ...any) logr.LogSink {
+	return logWrapper{l.logp.With(keysAndValues)}
+}
+
+func (l logWrapper) WithName(name string) logr.LogSink {
+	return logWrapper{l.logp.With(name)}
 }
 
 // Run starts posture.
@@ -183,11 +241,7 @@ func (bt *posture) Run(*beat.Beat) error {
 	bt.publisher.HandleEvents(bt.ctx, eventsCh)
 	bt.log.Warn("Posture has finished running")
 
-	//prometheusRegistry := prometheus.NewRegistry()
-	//prometheusRegistry.MustRegister(observability.All...)
-	//bt.tracerDone = bt.tracer.RegisterMetricsGatherer(apmprometheus.Wrap(prometheusRegistry))
-	prometheus.MustRegister(observability.EventsPublished)
-	bt.tracerDone = bt.tracer.RegisterMetricsGatherer(apmprometheus.Wrap(prometheus.DefaultGatherer))
+	//prometheus.MustRegister(observability.EventsPublished)
 
 	return nil
 }
@@ -202,11 +256,7 @@ func (bt *posture) Stop() {
 	}
 
 	if bt.tracer != nil {
-		bt.tracer.Flush(nil)
-	}
-	if bt.tracerDone != nil {
-		bt.tracerDone()
-		bt.tracerDone = nil
+		_ = bt.tracer.ForceFlush(bt.ctx)
 	}
 }
 
