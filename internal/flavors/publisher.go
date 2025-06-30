@@ -30,6 +30,8 @@ import (
 )
 
 const (
+	scopeName = "github.com/elastic/cloudbeat/internal/flavors"
+
 	ecsEventActionField = "event.action"
 	ecsEventActionValue = "publish-events"
 	ecsEventCountField  = "event.Count"
@@ -48,10 +50,12 @@ type Publisher struct {
 	tracer    trace.Tracer
 }
 
-func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client, tracer trace.Tracer, meter metric.Meter) *Publisher {
-	count, err := meter.Int64Counter("cloudbeat.events.published") // TODO: globals
+func NewPublisher(ctx context.Context, log *clog.Logger, interval time.Duration, threshold int, client client) *Publisher {
+	const publisherScope = scopeName + "/publisher"
+
+	count, err := observability.MeterFromContext(ctx, publisherScope).Int64Counter("cloudbeat.events.published")
 	if err != nil {
-		panic("failed to create events published counter: " + err.Error())
+		panic("failed to create events published counter: " + err.Error()) // TODO: log
 	}
 	return &Publisher{
 		log:       log,
@@ -59,7 +63,7 @@ func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, clien
 		threshold: threshold,
 		client:    client,
 		count:     count,
-		tracer:    tracer,
+		tracer:    observability.TracerFromContext(ctx, publisherScope),
 	}
 }
 
@@ -118,7 +122,6 @@ func (p *Publisher) publish(events *[]beat.Event) {
 
 	p.client.PublishAll(*events)
 	p.count.Add(ctx, int64(batchSize))
-	observability.EventsPublished.Add(float64(batchSize))
 
 	*events = nil
 }

@@ -94,19 +94,18 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	}
 	log.Infof("posture configured %d processors", len(cfg.Processors))
 
-	otel, err := observability.SetUpOtel(ctx, "orestis-cloudbeat", version.CloudbeatSemanticVersion(), log.Logger)
+	ctx, err = observability.SetUpOtel(ctx, "orestis-cloudbeat", version.CloudbeatSemanticVersion(), log.Logger)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to set up OpenTelemetry: %w", err)
 	}
 
 	publisher := NewPublisher(
+		ctx,
 		log,
 		flushInterval,
 		eventsThreshold,
 		client,
-		otel.TracerProvider.Tracer("orestis"),
-		otel.MeterProvider.Meter("orestis"),
 	)
 
 	return &posture{
@@ -125,6 +124,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 // Run starts posture.
 func (bt *posture) Run(*beat.Beat) error {
 	bt.log.Info("posture is running! Hit CTRL-C to stop it")
+
 	eventsCh, err := bt.benchmark.Run(bt.ctx)
 	if err != nil {
 		return err
@@ -132,8 +132,6 @@ func (bt *posture) Run(*beat.Beat) error {
 
 	bt.publisher.HandleEvents(bt.ctx, eventsCh)
 	bt.log.Warn("Posture has finished running")
-
-	//prometheus.MustRegister(observability.EventsPublished)
 
 	return nil
 }
@@ -146,6 +144,7 @@ func (bt *posture) Stop() {
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)
 	}
+
 }
 
 // ensureAdditionalProcessors modifies cfg.Processors list to ensure 'host'

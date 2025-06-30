@@ -20,6 +20,7 @@ package manager
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"sync"
 	"time"
 
@@ -27,6 +28,8 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 )
+
+const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 
 type Manager struct {
 	log *clog.Logger
@@ -67,6 +70,11 @@ func (m *Manager) Stop() {
 }
 
 func (m *Manager) fetchAndSleep(ctx context.Context) {
+	counter, err := observability.MeterFromContext(ctx, scopeName).Int64Counter("cloudbeat.fetcher.manager.cycles")
+	if err != nil {
+		m.log.Errorf("Failed to create fetcher manager cycles counter: %v", err)
+	}
+
 	// set immediate exec for first time run
 	timer := time.NewTimer(0)
 	defer timer.Stop()
@@ -79,6 +87,7 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 		case <-timer.C:
 			// update the interval
 			timer.Reset(m.interval)
+			counter.Add(ctx, 1)
 			// this is blocking so the stop will not be called until all the fetchers are finished
 			// in case there is a blocking fetcher it will halt (til the m.timeout)
 			go m.fetchIteration(ctx)
@@ -89,6 +98,9 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
+	ctx, span := observability.StartSpan(ctx, scopeName, "Fetch Iteration")
+	defer span.End()
+
 	m.fetcherRegistry.Update()
 	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
 
@@ -117,6 +129,9 @@ func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle
 	if !m.fetcherRegistry.ShouldRun(k) {
 		return nil
 	}
+
+	ctx, span := observability.StartSpan(ctx, scopeName, "Fetch "+k)
+	defer span.End()
 
 	ctx, cancel := context.WithTimeout(ctx, m.timeout)
 	defer cancel()

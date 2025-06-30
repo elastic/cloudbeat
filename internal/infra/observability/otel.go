@@ -8,50 +8,52 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/metric"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type OTel struct {
-	TracerProvider *sdktrace.TracerProvider
-	MeterProvider  *metric.MeterProvider
+	TracerProvider trace.TracerProvider
+	MeterProvider  metric.MeterProvider
 }
 
-func SetUpOtel(ctx context.Context, serviceName, serviceVersion string, logger *logp.Logger) (OTel, error) {
+func SetUpOtel(ctx context.Context, serviceName, serviceVersion string, logger *logp.Logger) (context.Context, error) {
 	otel.SetLogger(logr.New(logWrapper{logger.Named("otel").Named("GREPME")}))
 
 	res, err := newResource(ctx, serviceName, serviceVersion)
 	if err != nil {
-		return OTel{}, fmt.Errorf("failed to create resource: %w", err)
+		return ctx, fmt.Errorf("failed to create resource: %w", err)
 	}
 
 	mp, err := newMetricsProvider(ctx, res)
 	if err != nil {
-		return OTel{}, fmt.Errorf("failed to create metrics provider: %w", err)
+		return ctx, fmt.Errorf("failed to create metrics provider: %w", err)
 	}
 
 	tp, err := newTracerProvider(ctx, res)
 	if err != nil {
-		return OTel{}, fmt.Errorf("failed to create tracer provider: %w", err)
+		return ctx, fmt.Errorf("failed to create tracer provider: %w", err)
 	}
 
-	return OTel{
+	return contextWithOTel(ctx, OTel{
 		TracerProvider: tp,
 		MeterProvider:  mp,
-	}, nil
+	}), nil
 }
 
-func newMetricsProvider(ctx context.Context, res *resource.Resource) (*metric.MeterProvider, error) {
+func newMetricsProvider(ctx context.Context, res *resource.Resource) (*sdkmetric.MeterProvider, error) {
 	metricExporter, err := otlpmetricgrpc.New(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	meterProvider := metric.NewMeterProvider(
-		metric.WithResource(res),
-		metric.WithReader(metric.NewPeriodicReader(
+	meterProvider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithResource(res),
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(
 			metricExporter,
 		)),
 	)
@@ -96,6 +98,8 @@ func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.T
 	otel.SetTracerProvider(tp)
 	return tp, nil
 }
+
+// TODO: figure out
 
 type logWrapper struct {
 	logp *logp.Logger

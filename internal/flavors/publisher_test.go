@@ -19,7 +19,6 @@ package flavors
 
 import (
 	"context"
-	"github.com/elastic/elastic-agent-libs/monitoring"
 	"testing"
 	"time"
 
@@ -150,7 +149,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			for _, size := range tc.expectedEventSize {
 				client.EXPECT().PublishAll(mock.MatchedBy(lengthMatcher(size)))
 			}
-			publisher := NewPublisher(log, tc.interval, tc.threshold, client, nil, nil)
+			publisher := NewPublisher(ctx, log, tc.interval, tc.threshold, client)
 
 			eventsChannel := make(chan []beat.Event)
 
