@@ -431,15 +431,15 @@ jobs:
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
-      - name: Deploy CIS Agentless Integrations
-        id: cis-agentless-integrations
-        if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
-        uses: ./.github/actions/cis-agentless
-        with:
-          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
-          es-user: ${{ env.ES_USER }}
-          es-password: ${{ env.ES_PASSWORD }}
-          kibana-url: ${{ env.KIBANA_URL }}
+      # - name: Deploy CIS Agentless Integrations
+      #   id: cis-agentless-integrations
+      #   if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
+      #   uses: ./.github/actions/cis-agentless
+      #   with:
+      #     cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+      #     es-user: ${{ env.ES_USER }}
+      #     es-password: ${{ env.ES_PASSWORD }}
+      #     kibana-url: ${{ env.KIBANA_URL }}
 
       - name: Deploy CIS Agent Based Integrations
         id: cis-integrations
