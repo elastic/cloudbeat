@@ -30,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
@@ -51,7 +52,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
 		builder.WithManagerTimeout(calculateFetcherTimeout(cfg.Period)),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, manager.NOOPPreflight{})
 }
 
 //revive:disable-next-line:function-result-limit
@@ -94,6 +95,10 @@ func (a *Azure) checkDependencies() error {
 		return errors.New("azure asset inventory is uninitialized")
 	}
 	return nil
+}
+
+func (a *Azure) ErrorProcessor() ErrorProcessor {
+	return NOOPErrorProcessor{}
 }
 
 // calculateFetcherTimeout calculates the timeout for each fetcher based on period as ~70% of the period duration. If less than 3 hours, it returns 3 hours.

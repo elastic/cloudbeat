@@ -60,17 +60,18 @@ func (w *wrapResource) GetElasticCommonData() (map[string]any, error) {
 	return w.wrapped.GetElasticCommonData()
 }
 
-func NewCisAwsOrganizationFetchers(ctx context.Context, log *clog.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
-	return newCisAwsOrganizationFetchers(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers)
+func NewCisAwsOrganizationFetchers(ctx context.Context, log *clog.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap, errorPublisher ErrorPublisher) map[string]registry.FetchersMap {
+	return newCisAwsOrganizationFetchers(ctx, log, rootCh, errorPublisher, accounts, cache, NewCisAwsFetchers)
 }
 
 // awsFactory is the same function type as NewCisAwsFetchers, and it's used to mock the function in tests
-type awsFactory func(context.Context, *clog.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
+type awsFactory func(context.Context, *clog.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity, ErrorPublisher) registry.FetchersMap
 
 func newCisAwsOrganizationFetchers(
 	ctx context.Context,
 	log *clog.Logger,
 	rootCh chan fetching.ResourceInfo,
+	errorPublisher ErrorPublisher,
 	accounts []AwsAccount,
 	cache map[string]registry.FetchersMap,
 	factory awsFactory,
@@ -122,6 +123,7 @@ func newCisAwsOrganizationFetchers(
 			account.Config,
 			ch,
 			&account.Identity,
+			errorPublisher,
 		)
 		m[account.Account] = f
 		if cache != nil {

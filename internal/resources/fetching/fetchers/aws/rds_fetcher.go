@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
@@ -28,9 +29,10 @@ import (
 )
 
 type RdsFetcher struct {
-	log        *clog.Logger
-	resourceCh chan fetching.ResourceInfo
-	provider   rds.Rds
+	log            *clog.Logger
+	resourceCh     chan fetching.ResourceInfo
+	provider       rds.Rds
+	errorPublisher errorhandler.ErrorPublisher
 }
 
 type RdsFetcherConfig struct {
@@ -41,11 +43,12 @@ type RdsResource struct {
 	dbInstance awslib.AwsResource
 }
 
-func NewRdsFetcher(log *clog.Logger, provider rds.Rds, ch chan fetching.ResourceInfo) *RdsFetcher {
+func NewRdsFetcher(log *clog.Logger, provider rds.Rds, ch chan fetching.ResourceInfo, errorPublisher errorhandler.ErrorPublisher) *RdsFetcher {
 	return &RdsFetcher{
-		log:        log,
-		resourceCh: ch,
-		provider:   provider,
+		log:            log,
+		resourceCh:     ch,
+		provider:       provider,
+		errorPublisher: errorPublisher,
 	}
 }
 
@@ -54,6 +57,7 @@ func (f *RdsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 	dbInstances, err := f.provider.DescribeDBInstances(ctx)
 	if err != nil {
 		f.log.Errorf("failed to load some DB instances from rds: %v", err)
+		checkMissingPermissions(ctx, f.errorPublisher, err)
 	}
 
 	for _, dbInstance := range dbInstances {

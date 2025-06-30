@@ -5,6 +5,6 @@ COPY --chown=elastic-agent:elastic-agent --chmod=755 cloudbeat /tmp/components/c
 COPY --chown=elastic-agent:elastic-agent --chmod=666 bundle.tar.gz /tmp/components/bundle.tar.gz
 COPY --chown=elastic-agent:elastic-agent --chmod=644 cloudbeat.yml /tmp/components/cloudbeat.yml
 
-RUN mv /tmp/components/* "$(dirname "$(realpath "$(which elastic-agent)")")"/components/
+RUN mv /tmp/components/* "$(dirname "$(realpath "$(command -v elastic-agent)")")"/components/
 
 FROM elastic_agent_cloudbeat
