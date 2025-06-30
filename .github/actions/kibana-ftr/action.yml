@@ -55,6 +55,6 @@ runs:
         TEST_CLOUD: "1"
         ES_SECURITY_ENABLED: "1"
         TEST_BROWSER_HEADLESS: "1"
-        TEST_CONFIG: "x-pack/solutions/security/test/cloud_security_posture_functional/cloud_tests"
+        TEST_CONFIG: "x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts"
       run: |
         node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"
