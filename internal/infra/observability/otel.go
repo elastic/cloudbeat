@@ -1,0 +1,126 @@
+package observability
+
+import (
+	"context"
+	"fmt"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/go-logr/logr"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+)
+
+type OTel struct {
+	TracerProvider *sdktrace.TracerProvider
+	MeterProvider  *metric.MeterProvider
+}
+
+func SetUpOtel(ctx context.Context, serviceName, serviceVersion string, logger *logp.Logger) (OTel, error) {
+	otel.SetLogger(logr.New(logWrapper{logger.Named("otel").Named("GREPME")}))
+
+	res, err := newResource(ctx, serviceName, serviceVersion)
+	if err != nil {
+		return OTel{}, fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	mp, err := newMetricsProvider(ctx, res)
+	if err != nil {
+		return OTel{}, fmt.Errorf("failed to create metrics provider: %w", err)
+	}
+
+	tp, err := newTracerProvider(ctx, res)
+	if err != nil {
+		return OTel{}, fmt.Errorf("failed to create tracer provider: %w", err)
+	}
+
+	return OTel{
+		TracerProvider: tp,
+		MeterProvider:  mp,
+	}, nil
+}
+
+func newMetricsProvider(ctx context.Context, res *resource.Resource) (*metric.MeterProvider, error) {
+	metricExporter, err := otlpmetricgrpc.New(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	meterProvider := metric.NewMeterProvider(
+		metric.WithResource(res),
+		metric.WithReader(metric.NewPeriodicReader(
+			metricExporter,
+		)),
+	)
+
+	otel.SetMeterProvider(meterProvider)
+	return meterProvider, nil
+}
+
+func newResource(ctx context.Context, serviceName string, serviceVersion string) (*resource.Resource, error) {
+	res, err := resource.New(
+		ctx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String(serviceName),
+			semconv.ServiceVersion(serviceVersion),
+		),
+		resource.WithTelemetrySDK(),
+		resource.WithHost(),
+		resource.WithContainer(),
+		resource.WithProcess(),
+		resource.WithFromEnv(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+	return res, nil
+}
+
+func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.TracerProvider, error) {
+	// This uses environment variables like OTEL_EXPORTER_OTLP_ENDPOINT
+	exporter, err := otlptracegrpc.New(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OTLP trace exporter: %w", err)
+	}
+
+	// Create a new TracerProvider with the exporter and resource.
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithResource(res),
+		sdktrace.WithBatcher(exporter),
+	)
+
+	// Set the global TracerProvider.
+	otel.SetTracerProvider(tp)
+	return tp, nil
+}
+
+type logWrapper struct {
+	logp *logp.Logger
+}
+
+func (l logWrapper) Init(info logr.RuntimeInfo) {
+	l.logp.Info("GREPME: Initializing logr wrapper", "info", info)
+}
+
+func (l logWrapper) Enabled(int) bool {
+	return true
+}
+
+func (l logWrapper) Info(_ int, msg string, keysAndValues ...any) {
+	l.logp.Info("GREPME: "+msg, "keysAndValues", keysAndValues)
+}
+
+func (l logWrapper) Error(err error, msg string, keysAndValues ...any) {
+	l.logp.Error("GREPME: "+msg, "err", err, "keysAndValues", keysAndValues)
+}
+
+func (l logWrapper) WithValues(keysAndValues ...any) logr.LogSink {
+	return logWrapper{l.logp.With(keysAndValues)}
+}
+
+func (l logWrapper) WithName(name string) logr.LogSink {
+	return logWrapper{l.logp.With(name)}
+}

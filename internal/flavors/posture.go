@@ -20,41 +20,37 @@ package flavors
 import (
 	"context"
 	"fmt"
-	"io"
-	"os"
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/beat"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/go-logr/logr"
-	"github.com/goforj/godump"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
-	"go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
-
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/version"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"os"
 )
 
 func init() {
-	if err := os.Setenv("ELASTIC_APM_ACTIVE", "true"); err != nil {
-		panic(fmt.Sprintf("failed to set ELASTIC_APM_ACTIVE environment variable: %v", err))
+	envVars := map[string]string{
+		"ELASTIC_APM_ACTIVE":          "true",
+		"OTEL_EXPORTER_OTLP_ENDPOINT": "http://apm-server.elastic-agent:8200",
+		"OTEL_LOGS_EXPORTER":          "otlp",
+		"OTEL_METRICS_EXPORTER":       "otlp",
+		"OTEL_TRACES_EXPORTER":        "otlp",
+	}
+
+	for key, value := range envVars {
+		if err := os.Setenv(key, value); err != nil {
+			panic(fmt.Sprintf("failed to set %s environment variable: %v", key, err))
+		}
 	}
 }
 
 type posture struct {
 	flavorBase
 	benchmark builder.Benchmark
-	tracer    *sdktrace.TracerProvider
 }
 
 // NewPosture creates an instance of posture.
@@ -98,33 +94,19 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	}
 	log.Infof("posture configured %d processors", len(cfg.Processors))
 
-	tracerProvider, err := newTracerProvider(ctx, "cloudbeat", version.CloudbeatSemanticVersion(), log.Logger)
+	otel, err := observability.SetUpOtel(ctx, "orestis-cloudbeat", version.CloudbeatSemanticVersion(), log.Logger)
 	if err != nil {
 		cancel()
-		return nil, fmt.Errorf("failed to create tracerProvider: %w", err)
+		return nil, fmt.Errorf("failed to set up OpenTelemetry: %w", err)
 	}
-
-	res, err := resource.New(ctx, resource.WithAttributes(semconv.ServiceNameKey.String("cloudbeat")))
-	if err != nil {
-		cancel()
-		return nil, fmt.Errorf("failed to create resource: %w", err)
-	}
-	meterProvider, err := initMeterProvider(res)
-	if err != nil {
-		cancel()
-		return nil, fmt.Errorf("failed to create meter provider: %w", err)
-	}
-
-	log.Infof("GREPME posture configured with tracerProvider %s", godump.DumpStr(tracerProvider))
-	log.Infof("GREPME posture configured with metricsProvider %s", godump.DumpStr(meterProvider))
 
 	publisher := NewPublisher(
 		log,
 		flushInterval,
 		eventsThreshold,
 		client,
-		tracerProvider.Tracer("orestis"),
-		meterProvider.Meter("orestis"),
+		otel.TracerProvider.Tracer("orestis"),
+		otel.MeterProvider.Meter("orestis"),
 	)
 
 	return &posture{
@@ -137,97 +119,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 			client:    client,
 		},
 		benchmark: bench,
-		tracer:    tracerProvider,
 	}, nil
-}
-
-// initMeterProvider creates and registers a basic OpenTelemetry MeterProvider that prints to stdout.
-func initMeterProvider(res *resource.Resource) (*metric.MeterProvider, error) {
-	metricExporter, err := stdoutmetric.New()
-	if err != nil {
-		return nil, err
-	}
-
-	meterProvider := metric.NewMeterProvider(
-		metric.WithResource(res),
-		metric.WithReader(metric.NewPeriodicReader(
-			metricExporter,
-			metric.WithInterval(3*time.Second),
-		)),
-	)
-
-	otel.SetMeterProvider(meterProvider)
-	return meterProvider, nil
-}
-
-func newTracerProvider(ctx context.Context, name string, version string, log *logp.Logger) (*sdktrace.TracerProvider, error) {
-	log.Info("GREPME: Initializing OpenTelemetry TracerProvider")
-
-	// Create a new stdout exporter.
-	exporter, err := stdouttrace.New(stdouttrace.WithPrettyPrint(), stdouttrace.WithWriter(newTmpWritter(log)))
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a new resource with the service name.
-	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			semconv.ServiceNameKey.String(name),
-			semconv.ServiceVersion(version),
-		),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create a new TracerProvider with the exporter and resource.
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter),
-		sdktrace.WithResource(res),
-	)
-
-	// Set the global TracerProvider.
-	otel.SetTracerProvider(tp)
-	otel.SetLogger(logr.New(logWrapper{log.Named("GREPME")}))
-	return tp, nil
-}
-
-func newTmpWritter(log *logp.Logger) io.Writer {
-	return logWrapper{log.Named("GREPME")}
-}
-
-type logWrapper struct {
-	logp *logp.Logger
-}
-
-func (l logWrapper) Write(p []byte) (n int, err error) {
-	//TODO delete this
-	l.logp.Info("GREPME: Write: " + string(p))
-	return len(p), nil
-}
-
-func (l logWrapper) Init(info logr.RuntimeInfo) {
-	l.logp.Info("GREPME: Initializing logr wrapper", "info", info)
-}
-
-func (l logWrapper) Enabled(int) bool {
-	return true
-}
-
-func (l logWrapper) Info(_ int, msg string, keysAndValues ...any) {
-	l.logp.Info("GREPME: "+msg, "keysAndValues", keysAndValues)
-}
-
-func (l logWrapper) Error(err error, msg string, keysAndValues ...any) {
-	l.logp.Error("GREPME: "+msg, "err", err, "keysAndValues", keysAndValues)
-}
-
-func (l logWrapper) WithValues(keysAndValues ...any) logr.LogSink {
-	return logWrapper{l.logp.With(keysAndValues)}
-}
-
-func (l logWrapper) WithName(name string) logr.LogSink {
-	return logWrapper{l.logp.With(name)}
 }
 
 // Run starts posture.
@@ -253,10 +145,6 @@ func (bt *posture) Stop() {
 
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)
-	}
-
-	if bt.tracer != nil {
-		_ = bt.tracer.ForceFlush(bt.ctx)
 	}
 }
 
