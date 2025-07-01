@@ -104,6 +104,10 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
+	res, err = resource.Merge(resource.Default(), res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to merge resource: %w", err)
+	}
 	return res, nil
 }
 
