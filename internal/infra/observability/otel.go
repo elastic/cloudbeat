@@ -19,6 +19,7 @@ package observability
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -38,9 +39,9 @@ import (
 
 const serviceName = "cloudbeat"
 
-type OTel struct {
-	TracerProvider trace.TracerProvider
-	MeterProvider  metric.MeterProvider
+type otelProviders struct {
+	traceProvider tracerProvider
+	meterProvider meterProvider
 }
 
 func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error) {
@@ -61,14 +62,38 @@ func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error
 		return ctx, fmt.Errorf("failed to create tracer provider: %w", err)
 	}
 
-	return contextWithOTel(ctx, OTel{
-		TracerProvider: tp,
-		MeterProvider:  mp,
+	return contextWithOTel(ctx, otelProviders{
+		traceProvider: tp,
+		meterProvider: mp,
 	}), nil
 }
 
 func StartSpan(ctx context.Context, tracerName, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
 	return TracerFromContext(ctx, tracerName).Start(ctx, spanName, opts...)
+}
+
+// tracerProvider is an extension of the trace.tracerProvider interface with shutdown and force flush operations.
+type tracerProvider interface {
+	trace.TracerProvider
+	ForceFlush(ctx context.Context) error
+	Shutdown(ctx context.Context) error
+}
+
+// meterProvider is an extension of the trace.meterProvider interface with shutdown and force flush operations.
+type meterProvider interface {
+	metric.MeterProvider
+	ForceFlush(ctx context.Context) error
+	Shutdown(ctx context.Context) error
+}
+
+func ShutdownOtel(ctx context.Context) error {
+	otl := otelFromContext(ctx)
+	return errors.Join(
+		otl.meterProvider.ForceFlush(ctx),
+		otl.meterProvider.Shutdown(ctx),
+		otl.traceProvider.ForceFlush(ctx),
+		otl.traceProvider.Shutdown(ctx),
+	)
 }
 
 func newMetricsProvider(ctx context.Context, res *resource.Resource) (*sdkmetric.MeterProvider, error) {
@@ -77,15 +102,14 @@ func newMetricsProvider(ctx context.Context, res *resource.Resource) (*sdkmetric
 		return nil, err
 	}
 
-	meterProvider := sdkmetric.NewMeterProvider(
+	mp := sdkmetric.NewMeterProvider(
 		sdkmetric.WithResource(res),
 		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(
 			metricExporter,
 		)),
 	)
-
-	otel.SetMeterProvider(meterProvider)
-	return meterProvider, nil
+	otel.SetMeterProvider(mp)
+	return mp, nil
 }
 
 func newResource(ctx context.Context) (*resource.Resource, error) {
@@ -113,6 +137,7 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 
 func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.TracerProvider, error) {
 	// This uses environment variables like OTEL_EXPORTER_OTLP_ENDPOINT
+	// APM server supports OTLP over gRPC, so we use the gRPC exporter.
 	exporter, err := otlptracegrpc.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OTLP trace exporter: %w", err)
@@ -123,7 +148,6 @@ func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.T
 		sdktrace.WithResource(res),
 		sdktrace.WithBatcher(exporter),
 	)
-
 	// Set the global TracerProvider.
 	otel.SetTracerProvider(tp)
 	return tp, nil

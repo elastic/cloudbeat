@@ -29,32 +29,46 @@ type contextKeyType int
 
 const contextKey contextKeyType = iota
 
-func otelFromContext(ctx context.Context) OTel {
+func otelFromContext(ctx context.Context) otelProviders {
 	if ctx != nil {
-		if otl, ok := ctx.Value(contextKey).(OTel); ok {
+		if otl, ok := ctx.Value(contextKey).(otelProviders); ok {
 			return otl
 		}
 		if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
-			return OTel{
-				TracerProvider: span.TracerProvider(),
-				MeterProvider:  otel.GetMeterProvider(),
+			return otelProviders{
+				traceProvider: tracerNoShutdown{span.TracerProvider()},
+				meterProvider: meterNoShutdown{otel.GetMeterProvider()},
 			}
 		}
 	}
-	return OTel{
-		TracerProvider: otel.GetTracerProvider(),
-		MeterProvider:  otel.GetMeterProvider(),
+	return otelProviders{
+		traceProvider: tracerNoShutdown{otel.GetTracerProvider()},
+		meterProvider: meterNoShutdown{otel.GetMeterProvider()},
 	}
 }
 
-func contextWithOTel(ctx context.Context, otl OTel) context.Context {
+func contextWithOTel(ctx context.Context, otl otelProviders) context.Context {
 	return context.WithValue(ctx, contextKey, otl)
 }
 
 func TracerFromContext(ctx context.Context, name string, opts ...trace.TracerOption) trace.Tracer {
-	return otelFromContext(ctx).TracerProvider.Tracer(name, opts...)
+	return otelFromContext(ctx).traceProvider.Tracer(name, opts...)
 }
 
 func MeterFromContext(ctx context.Context, name string, opts ...metric.MeterOption) metric.Meter {
-	return otelFromContext(ctx).MeterProvider.Meter(name, opts...)
+	return otelFromContext(ctx).meterProvider.Meter(name, opts...)
 }
+
+type (
+	meterNoShutdown struct {
+		metric.MeterProvider
+	}
+	tracerNoShutdown struct {
+		trace.TracerProvider
+	}
+)
+
+func (m meterNoShutdown) ForceFlush(context.Context) error  { return nil }
+func (m meterNoShutdown) Shutdown(context.Context) error    { return nil }
+func (t tracerNoShutdown) ForceFlush(context.Context) error { return nil }
+func (t tracerNoShutdown) Shutdown(context.Context) error   { return nil }

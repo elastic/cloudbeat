@@ -69,6 +69,11 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
+	ctx, err := observability.SetUpOtel(ctx, log.Logger)
+	if err != nil {
+		log.Errorf("failed to set up otel: %v", err)
+	}
+
 	strategy, err := benchmark.GetStrategy(cfg, log)
 	if err != nil {
 		cancel()
@@ -94,13 +99,6 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 		return nil, fmt.Errorf("failed to init client: %w", err)
 	}
 	log.Infof("posture configured %d processors", len(cfg.Processors))
-
-	ctx, err = observability.SetUpOtel(ctx, log.Logger)
-	if err != nil {
-		cancel()
-		return nil, fmt.Errorf("failed to set up OpenTelemetry: %w", err)
-	}
-	// TODO: these need shutdown...
 
 	publisher := NewPublisher(log, flushInterval, eventsThreshold, client)
 
@@ -139,6 +137,10 @@ func (bt *posture) Stop() {
 
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)
+	}
+
+	if err := observability.ShutdownOtel(bt.ctx); err != nil {
+		bt.log.Warn("Failed to shutdown otel", err)
 	}
 }
 
