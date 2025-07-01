@@ -19,13 +19,14 @@ package flavors
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/internal/infra/observability"
-	"go.opentelemetry.io/otel/metric"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 )
 
 const (
@@ -108,7 +109,7 @@ func (p *Publisher) publish(ctx context.Context, events *[]beat.Event, count met
 		ctx,
 		scopeName,
 		"Publish Events",
-		//trace.WithSpanKind(trace.SpanKindProducer),
+		trace.WithSpanKind(trace.SpanKindProducer),
 	)
 	defer span.End()
 

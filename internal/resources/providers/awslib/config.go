@@ -29,8 +29,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/internal/config"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
+
+	"github.com/elastic/cloudbeat/internal/config"
 )
 
 func RetryableCodesOption(o *retry.StandardOptions) {

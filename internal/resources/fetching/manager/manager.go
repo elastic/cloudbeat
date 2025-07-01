@@ -20,12 +20,13 @@ package manager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/internal/infra/observability"
-	"go.opentelemetry.io/otel/codes"
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel/codes"
+
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 )

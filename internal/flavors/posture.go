@@ -20,16 +20,17 @@ package flavors
 import (
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/version"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
-	"os"
 )
 
 func init() {
@@ -94,7 +95,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	}
 	log.Infof("posture configured %d processors", len(cfg.Processors))
 
-	ctx, err = observability.SetUpOtel(ctx, "orestis-cloudbeat", version.CloudbeatSemanticVersion(), log.Logger)
+	ctx, err = observability.SetUpOtel(ctx, log.Logger)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to set up OpenTelemetry: %w", err)
@@ -139,7 +140,6 @@ func (bt *posture) Stop() {
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)
 	}
-
 }
 
 // ensureAdditionalProcessors modifies cfg.Processors list to ensure 'host'

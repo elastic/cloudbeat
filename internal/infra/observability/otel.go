@@ -1,8 +1,26 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 package observability
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
@@ -14,17 +32,21 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/elastic/cloudbeat/version"
 )
+
+const serviceName = "cloudbeat"
 
 type OTel struct {
 	TracerProvider trace.TracerProvider
 	MeterProvider  metric.MeterProvider
 }
 
-func SetUpOtel(ctx context.Context, serviceName, serviceVersion string, logger *logp.Logger) (context.Context, error) {
-	otel.SetLogger(logr.New(logWrapper{logger.Named("otel").Named("GREPME")}))
+func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error) {
+	otel.SetLogger(logr.New(logWrapper{logger.Named("otel")}))
 
-	res, err := newResource(ctx, serviceName, serviceVersion)
+	res, err := newResource(ctx)
 	if err != nil {
 		return ctx, fmt.Errorf("failed to create resource: %w", err)
 	}
@@ -45,6 +67,10 @@ func SetUpOtel(ctx context.Context, serviceName, serviceVersion string, logger *
 	}), nil
 }
 
+func StartSpan(ctx context.Context, tracerName, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
+	return TracerFromContext(ctx, tracerName).Start(ctx, spanName, opts...)
+}
+
 func newMetricsProvider(ctx context.Context, res *resource.Resource) (*sdkmetric.MeterProvider, error) {
 	metricExporter, err := otlpmetricgrpc.New(ctx)
 	if err != nil {
@@ -62,12 +88,12 @@ func newMetricsProvider(ctx context.Context, res *resource.Resource) (*sdkmetric
 	return meterProvider, nil
 }
 
-func newResource(ctx context.Context, serviceName string, serviceVersion string) (*resource.Resource, error) {
+func newResource(ctx context.Context) (*resource.Resource, error) {
 	res, err := resource.New(
 		ctx,
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(serviceName),
-			semconv.ServiceVersion(serviceVersion),
+			semconv.ServiceVersion(version.CloudbeatSemanticVersion()),
 		),
 		resource.WithTelemetrySDK(),
 		resource.WithHost(),
