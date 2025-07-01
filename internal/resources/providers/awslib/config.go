@@ -30,6 +30,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/internal/config"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
 )
 
 func RetryableCodesOption(o *retry.StandardOptions) {
@@ -51,6 +52,7 @@ func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
 	}
 
 	awsConfig.Retryer = awsConfigRetrier
+	otelaws.AppendMiddlewares(&awsConfig.APIOptions)
 
 	return &awsConfig, nil
 }
@@ -67,6 +69,7 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 	if err != nil {
 		return nil, err
 	}
+	otelaws.AppendMiddlewares(&awsConfig.APIOptions)
 
 	chain := []AWSRoleChainingStep{
 		// Chain Step 2 - Elastic Super Role Global

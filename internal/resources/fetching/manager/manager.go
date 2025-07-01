@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
+	"go.opentelemetry.io/otel/codes"
 	"sync"
 	"time"
 
@@ -156,6 +157,10 @@ func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle
 		}
 
 	case err := <-errCh:
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		}
 		return err
 	}
 }

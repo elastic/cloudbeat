@@ -21,7 +21,6 @@ import (
 	"context"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/trace"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -46,35 +45,30 @@ type Publisher struct {
 	interval  time.Duration
 	threshold int
 	client    client
-	count     metric.Int64Counter
-	tracer    trace.Tracer
 }
 
-func NewPublisher(ctx context.Context, log *clog.Logger, interval time.Duration, threshold int, client client) *Publisher {
-	const publisherScope = scopeName + "/publisher"
-
-	count, err := observability.MeterFromContext(ctx, publisherScope).Int64Counter("cloudbeat.events.published")
-	if err != nil {
-		panic("failed to create events published counter: " + err.Error()) // TODO: log
-	}
+func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client) *Publisher {
 	return &Publisher{
 		log:       log,
 		interval:  interval,
 		threshold: threshold,
 		client:    client,
-		count:     count,
-		tracer:    observability.TracerFromContext(ctx, publisherScope),
 	}
 }
 
 func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
+	count, err := observability.MeterFromContext(ctx, scopeName).Int64Counter("cloudbeat.events.published")
+	if err != nil {
+		panic("failed to create events published counter: " + err.Error()) // TODO: log
+	}
+
 	var eventsToSend []beat.Event
 	flushTicker := time.NewTicker(p.interval)
 	for {
 		select {
 		case <-ctx.Done():
 			p.log.Warnf("Publisher context is done: %v", ctx.Err())
-			p.publish(&eventsToSend)
+			p.publish(ctx, &eventsToSend, count)
 			return
 
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
@@ -84,13 +78,13 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
 			}
 
 			p.log.Infof("Publisher time interval reached")
-			p.publish(&eventsToSend)
+			p.publish(ctx, &eventsToSend, count)
 
 		// Flush events to ES when reaching a certain threshold
 		case event, ok := <-ch:
 			if !ok {
 				p.log.Warn("Publisher channel is closed")
-				p.publish(&eventsToSend)
+				p.publish(ctx, &eventsToSend, count)
 				return
 			}
 
@@ -100,20 +94,21 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
 			}
 
 			p.log.Infof("Publisher buffer threshold:%d reached", p.threshold)
-			p.publish(&eventsToSend)
+			p.publish(ctx, &eventsToSend, count)
 		}
 	}
 }
 
-func (p *Publisher) publish(events *[]beat.Event) {
+func (p *Publisher) publish(ctx context.Context, events *[]beat.Event, count metric.Int64Counter) {
 	batchSize := len(*events)
 	if batchSize == 0 {
 		return
 	}
-	ctx, span := p.tracer.Start(
-		context.TODO(),
-		"orestis-publish-events",
-		trace.WithSpanKind(trace.SpanKindProducer),
+	ctx, span := observability.StartSpan(
+		ctx,
+		scopeName,
+		"Publish Events",
+		//trace.WithSpanKind(trace.SpanKindProducer),
 	)
 	defer span.End()
 
@@ -121,7 +116,7 @@ func (p *Publisher) publish(events *[]beat.Event) {
 		Infof("Publishing %d events to elasticsearch", batchSize)
 
 	p.client.PublishAll(*events)
-	p.count.Add(ctx, int64(batchSize))
+	count.Add(ctx, int64(batchSize))
 
 	*events = nil
 }

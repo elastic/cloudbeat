@@ -99,14 +99,9 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 		cancel()
 		return nil, fmt.Errorf("failed to set up OpenTelemetry: %w", err)
 	}
+	// TODO: these need shutdown...
 
-	publisher := NewPublisher(
-		ctx,
-		log,
-		flushInterval,
-		eventsThreshold,
-		client,
-	)
+	publisher := NewPublisher(log, flushInterval, eventsThreshold, client)
 
 	return &posture{
 		flavorBase: flavorBase{
