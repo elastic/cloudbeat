@@ -20,6 +20,7 @@ package clog
 import (
 	"context"
 	"errors"
+	"go.opentelemetry.io/otel/trace"
 	"strings"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -58,6 +59,17 @@ func (l *Logger) WithOptions(options ...logp.LogOption) *Logger {
 
 func (l *Logger) With(args ...any) *Logger {
 	return &Logger{l.Logger.With(args...)}
+}
+
+func (l *Logger) WithSpanContext(spanCtx trace.SpanContext) *Logger {
+	newLogger := l
+	if spanCtx.HasSpanID() {
+		newLogger = newLogger.With("span.id", spanCtx.SpanID().String())
+	}
+	if spanCtx.HasTraceID() {
+		newLogger = newLogger.With("trace.id", spanCtx.TraceID().String())
+	}
+	return newLogger
 }
 
 func NewLogger(selector string, options ...logp.LogOption) *Logger {

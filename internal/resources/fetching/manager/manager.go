@@ -102,14 +102,15 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 func (m *Manager) fetchIteration(ctx context.Context) {
 	ctx, span := observability.StartSpan(ctx, scopeName, "Fetch Iteration")
 	defer span.End()
+	logger := m.log.WithSpanContext(span.SpanContext())
 
 	m.fetcherRegistry.Update()
-	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
+	logger.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
 
 	start := time.Now()
 
 	seq := time.Now().Unix()
-	m.log.Infof("Cycle %d has started", seq)
+	logger.Infof("Cycle %d has started", seq)
 	wg := &sync.WaitGroup{}
 	for _, key := range m.fetcherRegistry.Keys() {
 		wg.Add(1)
@@ -117,14 +118,14 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 			defer wg.Done()
 			err := m.fetchSingle(ctx, k, cycle.Metadata{Sequence: seq})
 			if err != nil {
-				m.log.Errorf("Error running fetcher for key %s: %v", k, err)
+				logger.Errorf("Error running fetcher for key %s: %v", k, err)
 			}
 		}(key)
 	}
 
 	wg.Wait()
-	m.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
-	m.log.Infof("Cycle %d resource fetching has ended", seq)
+	logger.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
+	logger.Infof("Cycle %d resource fetching has ended", seq)
 }
 
 func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle.Metadata) error {

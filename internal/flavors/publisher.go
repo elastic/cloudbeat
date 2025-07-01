@@ -113,7 +113,12 @@ func (p *Publisher) publish(ctx context.Context, events *[]beat.Event, count met
 	)
 	defer span.End()
 
-	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, batchSize).
+	p.log.
+		WithSpanContext(span.SpanContext()).
+		With(
+			ecsEventActionField, ecsEventActionValue,
+			ecsEventCountField, batchSize,
+		).
 		Infof("Publishing %d events to elasticsearch", batchSize)
 
 	p.client.PublishAll(*events)
