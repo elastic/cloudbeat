@@ -390,6 +390,7 @@ jobs:
           echo "ES_PASSWORD=$user_password" >> $GITHUB_ENV
           echo "KIBANA_URL=$USER_KIBANA_URL" >> $GITHUB_ENV
           echo "ES_URL=$USER_ES_URL" >> $GITHUB_ENV
+          echo "CLOUD_HOST_NAME=$(echo $USER_KIBANA_URL | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
       - name: Summary
         if: success()
@@ -431,15 +432,15 @@ jobs:
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
-      # - name: Deploy CIS Agentless Integrations
-      #   id: cis-agentless-integrations
-      #   if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
-      #   uses: ./.github/actions/cis-agentless
-      #   with:
-      #     cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
-      #     es-user: ${{ env.ES_USER }}
-      #     es-password: ${{ env.ES_PASSWORD }}
-      #     kibana-url: ${{ env.KIBANA_URL }}
+      - name: Deploy CIS Agentless Integrations
+        id: cis-agentless-integrations
+        if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
+        uses: ./.github/actions/cis-agentless
+        with:
+          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+          es-user: ${{ env.ES_USER }}
+          es-password: ${{ env.ES_PASSWORD }}
+          kibana-url: ${{ env.KIBANA_URL }}
 
       - name: Deploy CIS Agent Based Integrations
         id: cis-integrations
@@ -499,6 +500,7 @@ jobs:
           ESS_TYPE: ${{ inputs.serverless_mode }}
           JOB_STATUS: "${{ job.status }}"
           S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
+          TEST_CLOUD_HOST_NAME:
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 
