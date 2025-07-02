@@ -12,10 +12,7 @@ finding := result if {
 	data_adapter.is_postgres_sql
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_flag_configured_as_expected),
-		{"DB Instance": data_adapter.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_flag_configured_as_expected))
 }
 
 is_flag_configured_as_expected := audit.is_flag_configured_as_expected("log_disconnections", ["on"])

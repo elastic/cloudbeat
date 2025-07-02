@@ -8,10 +8,7 @@ import future.keywords.if
 finding := result if {
 	data_adapter.is_compute_network
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_dns_logging_enabled),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_dns_logging_enabled))
 }
 
 is_dns_logging_enabled if {
