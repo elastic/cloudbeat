@@ -31,8 +31,9 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.34.0"
 	"go.opentelemetry.io/otel/trace"
+	"go.uber.org/zap"
 
 	"github.com/elastic/cloudbeat/version"
 )
@@ -44,12 +45,17 @@ type otelProviders struct {
 	meterProvider meterProvider
 }
 
+// SetUpOtel initializes OpenTelemetry logging, tracing, and metrics providers.
+// It configures OTLP exporters that send data to an OTLP endpoint
+// (e.g., APM Server) configured via environment variables.
 func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error) {
-	otel.SetLogger(logr.New(logWrapper{logger.Named("otel")}))
+	wrap := wrapLogger{l: logger.Named("otel")}
+	otel.SetLogger(logr.New(&wrap))
+	otel.SetErrorHandler(&wrap)
 
 	res, err := newResource(ctx)
 	if err != nil {
-		return ctx, fmt.Errorf("failed to create resource: %w", err)
+		return ctx, fmt.Errorf("failed to create OTel resource: %w", err)
 	}
 
 	mp, err := newMetricsProvider(ctx, res)
@@ -68,24 +74,27 @@ func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error
 	}), nil
 }
 
+// StartSpan starts a new trace span.
+// It's a convenience wrapper around tracer.Start().
 func StartSpan(ctx context.Context, tracerName, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
 	return TracerFromContext(ctx, tracerName).Start(ctx, spanName, opts...)
 }
 
-// tracerProvider is an extension of the trace.tracerProvider interface with shutdown and force flush operations.
+// tracerProvider is an extension of the trace.TracerProvider interface with shutdown and force flush operations.
 type tracerProvider interface {
 	trace.TracerProvider
 	ForceFlush(ctx context.Context) error
 	Shutdown(ctx context.Context) error
 }
 
-// meterProvider is an extension of the trace.meterProvider interface with shutdown and force flush operations.
+// meterProvider is an extension of the metric.MeterProvider interface with shutdown and force flush operations.
 type meterProvider interface {
 	metric.MeterProvider
 	ForceFlush(ctx context.Context) error
 	Shutdown(ctx context.Context) error
 }
 
+// ShutdownOtel flushes and shuts down the registered OpenTelemetry providers.
 func ShutdownOtel(ctx context.Context) error {
 	otl := otelFromContext(ctx)
 	return errors.Join(
@@ -97,16 +106,15 @@ func ShutdownOtel(ctx context.Context) error {
 }
 
 func newMetricsProvider(ctx context.Context, res *resource.Resource) (*sdkmetric.MeterProvider, error) {
+	// The OTLP gRPC exporter will be configured using environment variables (e.g., OTEL_EXPORTER_OTLP_ENDPOINT).
 	metricExporter, err := otlpmetricgrpc.New(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create OTLP metric exporter: %w", err)
 	}
 
 	mp := sdkmetric.NewMeterProvider(
 		sdkmetric.WithResource(res),
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(
-			metricExporter,
-		)),
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter)),
 	)
 	otel.SetMeterProvider(mp)
 	return mp, nil
@@ -115,6 +123,7 @@ func newMetricsProvider(ctx context.Context, res *resource.Resource) (*sdkmetric
 func newResource(ctx context.Context) (*resource.Resource, error) {
 	res, err := resource.New(
 		ctx,
+		resource.WithSchemaURL(semconv.SchemaURL),
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(serviceName),
 			semconv.ServiceVersion(version.CloudbeatSemanticVersion()),
@@ -126,59 +135,69 @@ func newResource(ctx context.Context) (*resource.Resource, error) {
 		resource.WithFromEnv(),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create resource: %w", err)
+		return nil, fmt.Errorf("failed to create application resource: %w", err)
 	}
+
 	res, err = resource.Merge(resource.Default(), res)
 	if err != nil {
-		return nil, fmt.Errorf("failed to merge resource: %w", err)
+		return nil, fmt.Errorf("failed to merge OTel resources: %w", err)
 	}
 	return res, nil
 }
 
 func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.TracerProvider, error) {
-	// This uses environment variables like OTEL_EXPORTER_OTLP_ENDPOINT
-	// APM server supports OTLP over gRPC, so we use the gRPC exporter.
+	// The APM server supports OTLP over gRPC, so we use the gRPC exporter.
+	// The OTLP gRPC exporter uses environment variables for configuration (e.g., OTEL_EXPORTER_OTLP_ENDPOINT).
 	exporter, err := otlptracegrpc.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OTLP trace exporter: %w", err)
 	}
 
-	// Create a new TracerProvider with the exporter and resource.
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithResource(res),
-		sdktrace.WithBatcher(exporter),
+		sdktrace.WithBatcher(exporter), // Batches spans for better performance.
 	)
-	// Set the global TracerProvider.
+	// Set the global TracerProvider to allow instrumentation libraries to use it.
 	otel.SetTracerProvider(tp)
 	return tp, nil
 }
 
-// TODO: figure out
-
-type logWrapper struct {
-	logp *logp.Logger
+// wrapLogger is a wrapper around logp.Logger that implements the logr.LogSink and otel.ErrorHandler interfaces.
+type wrapLogger struct {
+	l *logp.Logger
 }
 
-func (l logWrapper) Init(info logr.RuntimeInfo) {
-	l.logp.Info("GREPME: Initializing logr wrapper", "info", info)
+func (w *wrapLogger) Handle(err error) {
+	w.Error(err, "otel error")
 }
 
-func (l logWrapper) Enabled(int) bool {
-	return true
+func (w *wrapLogger) Init(ri logr.RuntimeInfo) {
+	w.l = w.l.WithOptions(zap.AddCallerSkip(ri.CallDepth))
 }
 
-func (l logWrapper) Info(_ int, msg string, keysAndValues ...any) {
-	l.logp.Info("GREPME: "+msg, "keysAndValues", keysAndValues)
+func (w *wrapLogger) Enabled(level int) bool {
+	// From the OTel documentation:
+	// To see Warn messages use a logger with `l.V(1).Enabled() == true`
+	// To see Info messages use a logger with `l.V(4).Enabled() == true`
+	// To see Debug messages use a logger with `l.V(8).Enabled() == true`.
+	return level <= 4
 }
 
-func (l logWrapper) Error(err error, msg string, keysAndValues ...any) {
-	l.logp.Error("GREPME: "+msg, "err", err, "keysAndValues", keysAndValues)
+func (w *wrapLogger) Info(level int, msg string, keysAndValues ...any) {
+	if !w.Enabled(level) {
+		return
+	}
+	w.l.Infow(msg, keysAndValues...)
 }
 
-func (l logWrapper) WithValues(keysAndValues ...any) logr.LogSink {
-	return logWrapper{l.logp.With(keysAndValues)}
+func (w *wrapLogger) Error(err error, msg string, keysAndValues ...any) {
+	w.l.With(logp.Error(err)).Errorw(msg, keysAndValues...)
 }
 
-func (l logWrapper) WithName(name string) logr.LogSink {
-	return logWrapper{l.logp.With(name)}
+func (w *wrapLogger) WithValues(keysAndValues ...any) logr.LogSink {
+	return &wrapLogger{l: w.l.With(keysAndValues...)}
+}
+
+func (w *wrapLogger) WithName(name string) logr.LogSink {
+	return &wrapLogger{l: w.l.Named(name)}
 }

@@ -20,10 +20,10 @@ package clog
 import (
 	"context"
 	"errors"
-	"go.opentelemetry.io/otel/trace"
 	"strings"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 

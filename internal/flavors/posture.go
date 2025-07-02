@@ -24,6 +24,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark"
@@ -71,7 +72,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 	ctx, err := observability.SetUpOtel(ctx, log.Logger)
 	if err != nil {
-		log.Errorf("failed to set up otel: %v", err)
+		log.Errorw("failed to set up otel", logp.Error(err))
 	}
 
 	strategy, err := benchmark.GetStrategy(cfg, log)
@@ -140,7 +141,7 @@ func (bt *posture) Stop() {
 	}
 
 	if err := observability.ShutdownOtel(bt.ctx); err != nil {
-		bt.log.Warn("Failed to shutdown otel", err)
+		bt.log.Warnw("Failed to shutdown otel", logp.Error(err))
 	}
 }
 
