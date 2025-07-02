@@ -22,16 +22,11 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
-	"github.com/elastic/cloudbeat/internal/infra/observability"
 )
 
 const (
-	scopeName = "github.com/elastic/cloudbeat/internal/flavors"
-
 	ecsEventActionField = "event.action"
 	ecsEventActionValue = "publish-events"
 	ecsEventCountField  = "event.Count"
@@ -58,18 +53,13 @@ func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, clien
 }
 
 func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
-	count, err := observability.MeterFromContext(ctx, scopeName).Int64Counter("cloudbeat.events.published")
-	if err != nil {
-		panic("failed to create events published counter: " + err.Error()) // TODO: log
-	}
-
 	var eventsToSend []beat.Event
 	flushTicker := time.NewTicker(p.interval)
 	for {
 		select {
 		case <-ctx.Done():
 			p.log.Warnf("Publisher context is done: %v", ctx.Err())
-			p.publish(ctx, &eventsToSend, count)
+			p.publish(&eventsToSend)
 			return
 
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
@@ -79,13 +69,13 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
 			}
 
 			p.log.Infof("Publisher time interval reached")
-			p.publish(ctx, &eventsToSend, count)
+			p.publish(&eventsToSend)
 
 		// Flush events to ES when reaching a certain threshold
 		case event, ok := <-ch:
 			if !ok {
 				p.log.Warn("Publisher channel is closed")
-				p.publish(ctx, &eventsToSend, count)
+				p.publish(&eventsToSend)
 				return
 			}
 
@@ -95,34 +85,18 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
 			}
 
 			p.log.Infof("Publisher buffer threshold:%d reached", p.threshold)
-			p.publish(ctx, &eventsToSend, count)
+			p.publish(&eventsToSend)
 		}
 	}
 }
 
-func (p *Publisher) publish(ctx context.Context, events *[]beat.Event, count metric.Int64Counter) {
-	batchSize := len(*events)
-	if batchSize == 0 {
+func (p *Publisher) publish(events *[]beat.Event) {
+	if len(*events) == 0 {
 		return
 	}
-	ctx, span := observability.StartSpan(
-		ctx,
-		scopeName,
-		"Publish Events",
-		trace.WithSpanKind(trace.SpanKindProducer),
-	)
-	defer span.End()
 
-	p.log.
-		WithSpanContext(span.SpanContext()).
-		With(
-			ecsEventActionField, ecsEventActionValue,
-			ecsEventCountField, batchSize,
-		).
-		Infof("Publishing %d events to elasticsearch", batchSize)
-
+	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events)).
+		Infof("Publishing %d events to elasticsearch", len(*events))
 	p.client.PublishAll(*events)
-	count.Add(ctx, int64(batchSize))
-
 	*events = nil
 }

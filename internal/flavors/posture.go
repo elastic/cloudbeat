@@ -119,7 +119,6 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 // Run starts posture.
 func (bt *posture) Run(*beat.Beat) error {
 	bt.log.Info("posture is running! Hit CTRL-C to stop it")
-
 	eventsCh, err := bt.benchmark.Run(bt.ctx)
 	if err != nil {
 		return err
@@ -127,7 +126,6 @@ func (bt *posture) Run(*beat.Beat) error {
 
 	bt.publisher.HandleEvents(bt.ctx, eventsCh)
 	bt.log.Warn("Posture has finished running")
-
 	return nil
 }
 
