@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/go-logr/logr"
@@ -38,7 +39,10 @@ import (
 	"github.com/elastic/cloudbeat/version"
 )
 
-const serviceName = "cloudbeat"
+const (
+	serviceName    = "cloudbeat"
+	endpointEnvVar = "OTEL_EXPORTER_OTLP_ENDPOINT"
+)
 
 type otelProviders struct {
 	traceProvider tracerProvider
@@ -49,7 +53,13 @@ type otelProviders struct {
 // It configures OTLP exporters that send data to an OTLP endpoint
 // (e.g., APM Server) configured via environment variables.
 func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error) {
-	wrap := wrapLogger{l: logger.Named("otel")}
+	logger = logger.Named("otel")
+	if os.Getenv(endpointEnvVar) == "" {
+		logger.Infof("%s is not set, skipping OpenTelemetry setup", endpointEnvVar)
+		return ctx, nil
+	}
+
+	wrap := wrapLogger{l: logger}
 	otel.SetLogger(logr.New(&wrap))
 	otel.SetErrorHandler(&wrap)
 

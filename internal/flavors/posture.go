@@ -36,7 +36,6 @@ import (
 
 func init() {
 	envVars := map[string]string{
-		"ELASTIC_APM_ACTIVE":          "true",
 		"OTEL_EXPORTER_OTLP_ENDPOINT": "http://apm-server.elastic-agent:8200",
 		"OTEL_LOGS_EXPORTER":          "otlp",
 		"OTEL_METRICS_EXPORTER":       "otlp",

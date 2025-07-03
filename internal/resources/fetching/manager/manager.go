@@ -23,7 +23,9 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
@@ -100,7 +102,12 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
-	ctx, span := observability.StartSpan(ctx, scopeName, "Fetch Iteration")
+	ctx, span := observability.StartSpan(
+		ctx,
+		scopeName,
+		"Fetch Iteration",
+		trace.WithAttributes(attribute.String("transaction.type", "request")),
+	)
 	defer span.End()
 	logger := m.log.WithSpanContext(span.SpanContext())
 
