@@ -368,13 +368,11 @@ jobs:
           STACK_ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
           STACK_KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
           STACK_ES_URL: ${{ steps.elk-stack.outputs.es-url }}
-          TEST_CLOUD_HOST_NAME: ${{ steps.elk-stack.outputs.test-cloud-host-name }}
         run: |
           echo "ES_USER=$STACK_ES_USER" >> $GITHUB_ENV
           echo "ES_PASSWORD=$STACK_ES_PASSWORD" >> $GITHUB_ENV
           echo "KIBANA_URL=$STACK_KIBANA_URL" >> $GITHUB_ENV
           echo "ES_URL=$STACK_ES_URL" >> $GITHUB_ENV
-          echo "TEST_CLOUD_HOST_NAME=$(echo $USER_KIBANA_URL | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
       - name: Update Stack Vars - existing Deployment
         if: ${{ env.DEPLOY_STACK == 'false' }}
@@ -384,7 +382,6 @@ jobs:
           USER_KIBANA_URL: ${{ inputs.ext-kibana-url || '' }}
           USER_ES_URL: ${{ inputs.ext-es-url || '' }}
           SECRET: ${{ secrets.GPG_PASSPHRASE }}
-          TEST_CLOUD_HOST_NAME: ${{ steps.elk-stack.outputs.test-cloud-host-name }}
         run: |
           echo "Using user-provided environment values..."
           echo "ES_USER=$USER_ES_USER" >> $GITHUB_ENV
@@ -393,7 +390,6 @@ jobs:
           echo "ES_PASSWORD=$user_password" >> $GITHUB_ENV
           echo "KIBANA_URL=$USER_KIBANA_URL" >> $GITHUB_ENV
           echo "ES_URL=$USER_ES_URL" >> $GITHUB_ENV
-          echo "TEST_CLOUD_HOST_NAME=$(echo $USER_KIBANA_URL | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
       - name: Summary
         if: success()
@@ -503,7 +499,6 @@ jobs:
           ESS_TYPE: ${{ inputs.serverless_mode }}
           JOB_STATUS: "${{ job.status }}"
           S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
-          TEST_CLOUD_HOST_NAME:
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 
