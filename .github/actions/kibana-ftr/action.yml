@@ -44,6 +44,10 @@ runs:
       run: |
         yarn kbn bootstrap
 
+    - name: Set TEST_CLOUD_HOST_NAME
+      run: |
+        echo "TEST_CLOUD_HOST_NAME=$(echo '${{ inputs.test_kibana_url }}' | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
+
     - name: Run FTR
       if: success()
       shell: bash
@@ -53,7 +57,7 @@ runs:
         TEST_ES_URL: ${{ inputs.test_es_url }}
         ES_VERSION: ${{ inputs.es_version }}
         TEST_CLOUD: "1"
-        TEST_CLOUD_HOST_NAME: $(echo $TEST_KIBANA_URL | awk -F[/:] '{print $4}')
+        TEST_CLOUD_HOST_NAME: ${{ env.TEST_CLOUD_HOST_NAME }}
         ES_SECURITY_ENABLED: "1"
         TEST_BROWSER_HEADLESS: "1"
         TEST_CONFIG: "x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts"
