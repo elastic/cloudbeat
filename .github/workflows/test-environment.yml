@@ -282,16 +282,16 @@ jobs:
           fi
           echo "AGENT_BASED=$agent_base_flag" >> $GITHUB_ENV
 
-      - name: Init Agentless
-        id: init-agentless
-        env:
-          INPUT_AGENTLESS: ${{ inputs.agentless }}
-        run: |
-          agentless_flag=true
-          if [[ -n "${INPUT_AGENTLESS}" ]]; then
-            agentless_flag=$INPUT_AGENTLESS
-          fi
-          echo "AGENTLESS=$agentless_flag" >> $GITHUB_ENV
+      # - name: Init Agentless
+      #   id: init-agentless
+      #   env:
+      #     INPUT_AGENTLESS: ${{ inputs.agentless }}
+      #   run: |
+      #     agentless_flag=true
+      #     if [[ -n "${INPUT_AGENTLESS}" ]]; then
+      #       agentless_flag=$INPUT_AGENTLESS
+      #     fi
+      #     echo "AGENTLESS=$agentless_flag" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
@@ -368,11 +368,13 @@ jobs:
           STACK_ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
           STACK_KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
           STACK_ES_URL: ${{ steps.elk-stack.outputs.es-url }}
+          TEST_CLOUD_HOST_NAME: ${{ steps.elk-stack.outputs.test-cloud-host-name }}
         run: |
           echo "ES_USER=$STACK_ES_USER" >> $GITHUB_ENV
           echo "ES_PASSWORD=$STACK_ES_PASSWORD" >> $GITHUB_ENV
           echo "KIBANA_URL=$STACK_KIBANA_URL" >> $GITHUB_ENV
           echo "ES_URL=$STACK_ES_URL" >> $GITHUB_ENV
+          echo "TEST_CLOUD_HOST_NAME=$(echo $USER_KIBANA_URL | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
       - name: Update Stack Vars - existing Deployment
         if: ${{ env.DEPLOY_STACK == 'false' }}
@@ -382,6 +384,7 @@ jobs:
           USER_KIBANA_URL: ${{ inputs.ext-kibana-url || '' }}
           USER_ES_URL: ${{ inputs.ext-es-url || '' }}
           SECRET: ${{ secrets.GPG_PASSPHRASE }}
+          TEST_CLOUD_HOST_NAME: ${{ steps.elk-stack.outputs.test-cloud-host-name }}
         run: |
           echo "Using user-provided environment values..."
           echo "ES_USER=$USER_ES_USER" >> $GITHUB_ENV
@@ -390,7 +393,7 @@ jobs:
           echo "ES_PASSWORD=$user_password" >> $GITHUB_ENV
           echo "KIBANA_URL=$USER_KIBANA_URL" >> $GITHUB_ENV
           echo "ES_URL=$USER_ES_URL" >> $GITHUB_ENV
-          echo "CLOUD_HOST_NAME=$(echo $USER_KIBANA_URL | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
+          echo "TEST_CLOUD_HOST_NAME=$(echo $USER_KIBANA_URL | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
       - name: Summary
         if: success()
@@ -432,15 +435,15 @@ jobs:
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
-      - name: Deploy CIS Agentless Integrations
-        id: cis-agentless-integrations
-        if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
-        uses: ./.github/actions/cis-agentless
-        with:
-          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
-          es-user: ${{ env.ES_USER }}
-          es-password: ${{ env.ES_PASSWORD }}
-          kibana-url: ${{ env.KIBANA_URL }}
+      # - name: Deploy CIS Agentless Integrations
+      #   id: cis-agentless-integrations
+      #   if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
+      #   uses: ./.github/actions/cis-agentless
+      #   with:
+      #     cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+      #     es-user: ${{ env.ES_USER }}
+      #     es-password: ${{ env.ES_PASSWORD }}
+      #     kibana-url: ${{ env.KIBANA_URL }}
 
       - name: Deploy CIS Agent Based Integrations
         id: cis-integrations
