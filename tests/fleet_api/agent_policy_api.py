@@ -27,7 +27,8 @@ def create_agent_policy(cfg: Munch, json_policy: dict) -> str:
         APICallException: If the API call fails or returns a non-200 status code.
     """
     url = f"{cfg.kibana_url}/api/fleet/agent_policies"
-
+    logger.info(f"Creating agent policy at {url}")
+    logger.info(f"Agent policy data: {json_policy}")
     try:
         response = perform_api_call(
             method="POST",
