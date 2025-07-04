@@ -26,14 +26,18 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/v1/plugins"
 	"github.com/open-policy-agent/opa/v1/sdk"
+	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	dlogger "github.com/elastic/cloudbeat/internal/evaluator/debug_logger"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 )
 
 var now = func() time.Time { return time.Now().UTC() }
+
+const scopeName = "github.com/elastic/cloudbeat/internal/evaluator"
 
 type OpaEvaluator struct {
 	log       *clog.Logger
@@ -72,14 +76,11 @@ func NewOpaEvaluator(ctx context.Context, log *clog.Logger, cfg *config.Config) 
 	plugin := fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
 	opaCfg := fmt.Sprintf(opaConfig, cfg.BundlePath, plugin)
 
-	decisonLogger := newLogger()
-	stdLogger := newLogger()
-
 	// create an instance of the OPA object
 	opa, err := sdk.New(ctx, sdk.Options{
 		Config:        bytes.NewReader([]byte(opaCfg)),
-		Logger:        stdLogger,
-		ConsoleLogger: decisonLogger,
+		Logger:        newLogger(),
+		ConsoleLogger: newLogger(),
 		Plugins: map[string]plugins.Factory{
 			dlogger.PluginName: &dlogger.Factory{},
 		},
@@ -107,9 +108,12 @@ func NewOpaEvaluator(ctx context.Context, log *clog.Logger, cfg *config.Config) 
 }
 
 func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) (EventData, error) {
+	ctx, span := observability.StartSpan(ctx, scopeName, "OPA Eval")
+	defer span.End()
+
 	resMetadata, err := resourceInfo.GetMetadata()
 	if err != nil {
-		return EventData{}, fmt.Errorf("failed to get resource metadata: %v", err)
+		return EventData{}, observability.FailSpan(span, "failed to get resource metadata", err)
 	}
 
 	fetcherResult := fetching.Result{
@@ -123,14 +127,20 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 		Benchmark: o.benchmark,
 	})
 	if err != nil {
-		return EventData{}, fmt.Errorf("error running the policy: %v", err)
+		return EventData{}, observability.FailSpan(span, "error running the policy", err)
 	}
 
 	ruleResults, err := o.decode(result)
 	if err != nil {
-		return EventData{}, fmt.Errorf("error decoding findings: %v", err)
+		return EventData{}, observability.FailSpan(span, "error decoding findings", err)
 	}
 
+	span.SetAttributes(
+		attribute.Int("findings.count", len(ruleResults.Findings)),
+		attribute.String("resource.type", resMetadata.Type),
+		attribute.String("resource.sub_type", resMetadata.SubType),
+		attribute.String("resource.name", resMetadata.Name),
+	)
 	o.log.Debugf("Created %d findings for input: %v", len(ruleResults.Findings), fetcherResult)
 	return EventData{ruleResults, resourceInfo}, nil
 }

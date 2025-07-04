@@ -26,6 +26,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/go-logr/logr"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/metric"
@@ -88,6 +89,15 @@ func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error
 // It's a convenience wrapper around tracer.Start().
 func StartSpan(ctx context.Context, tracerName, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
 	return TracerFromContext(ctx, tracerName).Start(ctx, spanName, opts...)
+}
+
+// FailSpan records an error in the span and sets its status to Error.
+// It returns an error that includes the original error message.
+// Note: If you want to record an error in a span but not mark the span as failed, use `span.RecordError(err)` instead.
+func FailSpan(span trace.Span, msg string, err error) error {
+	span.RecordError(err)
+	span.SetStatus(codes.Error, err.Error())
+	return fmt.Errorf("%s: %w", msg, err)
 }
 
 // tracerProvider is an extension of the trace.TracerProvider interface with shutdown and force flush operations.

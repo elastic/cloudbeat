@@ -20,7 +20,6 @@ package flavors
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
