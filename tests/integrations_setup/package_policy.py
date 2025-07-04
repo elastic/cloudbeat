@@ -218,6 +218,7 @@ def load_data(
     agent_policy = SIMPLIFIED_AGENT_POLICY
     agent_policy["name"] = agent_input.get("name", "")
     agent_policy["supports_agentless"] = bool(agent_input.get("supports_agentless"))
+    agent_policy["fleet_server_host_id"] = bool(agent_input.get("fleet_server_host_id"))
 
     stream_prefix = stream_name.split(".")[0]
     if package_name:
