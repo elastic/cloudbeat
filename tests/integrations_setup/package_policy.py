@@ -215,7 +215,7 @@ def load_data(
         Tuple[Dict, Dict]: A tuple containing the loaded agent policy and package policy.
     """
     logger.info("Loading agent and package policies")
-    agent_policy = copy.deepcopy(SIMPLIFIED_AGENT_POLICY)
+    agent_policy = SIMPLIFIED_AGENT_POLICY
     agent_policy["name"] = agent_input.get("name", "")
     agent_policy["supports_agentless"] = bool(agent_input.get("supports_agentless"))
 
