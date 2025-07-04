@@ -34,21 +34,6 @@ import (
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
 )
 
-func init() {
-	envVars := map[string]string{
-		"OTEL_EXPORTER_OTLP_ENDPOINT": "http://apm-server.elastic-agent:8200",
-		"OTEL_LOGS_EXPORTER":          "otlp",
-		"OTEL_METRICS_EXPORTER":       "otlp",
-		"OTEL_TRACES_EXPORTER":        "otlp",
-	}
-
-	for key, value := range envVars {
-		if err := os.Setenv(key, value); err != nil {
-			panic(fmt.Sprintf("failed to set %s environment variable: %v", key, err))
-		}
-	}
-}
-
 type posture struct {
 	flavorBase
 	benchmark builder.Benchmark
