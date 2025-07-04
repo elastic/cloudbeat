@@ -80,7 +80,6 @@ def get_fleet_server_host(cfg: Munch) -> str:
         response_obj = munchify(response)
         for fleet_server in response_obj["items"]:
             if fleet_server.is_default:
-                logger.info(f"Default fleet server found: {fleet_server}")
                 return fleet_server.host_urls[0]
         raise KeyError("No default fleet server found")
     except APICallException as api_ex:
