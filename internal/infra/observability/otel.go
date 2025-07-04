@@ -45,6 +45,11 @@ const (
 	endpointEnvVar = "OTEL_EXPORTER_OTLP_ENDPOINT"
 )
 
+type gracefulCloser interface {
+	ForceFlush(ctx context.Context) error
+	Shutdown(ctx context.Context) error
+}
+
 type otelProviders struct {
 	traceProvider tracerProvider
 	meterProvider meterProvider
@@ -103,15 +108,13 @@ func FailSpan(span trace.Span, msg string, err error) error {
 // tracerProvider is an extension of the trace.TracerProvider interface with shutdown and force flush operations.
 type tracerProvider interface {
 	trace.TracerProvider
-	ForceFlush(ctx context.Context) error
-	Shutdown(ctx context.Context) error
+	gracefulCloser
 }
 
 // meterProvider is an extension of the metric.MeterProvider interface with shutdown and force flush operations.
 type meterProvider interface {
 	metric.MeterProvider
-	ForceFlush(ctx context.Context) error
-	Shutdown(ctx context.Context) error
+	gracefulCloser
 }
 
 // ShutdownOtel flushes and shuts down the registered OpenTelemetry providers.
