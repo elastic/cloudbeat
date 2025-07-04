@@ -1,5 +1,5 @@
-name: 'CIS Agentless Integrations Installation'
-description: 'Deploy CIS Agentless Integrations to Elastic Cloud'
+name: "CIS Agentless Integrations Installation"
+description: "Deploy CIS Agentless Integrations to Elastic Cloud"
 inputs:
   cspm-azure-creds:
     description: "Azure credentials for CSPM agent deployment"
@@ -20,6 +20,10 @@ inputs:
     default: "default"
     required: false
     type: string
+  serverless-mode:
+    required: false
+    description: "Set to true if the environment is serverless"
+    default: "false"
 
 runs:
   using: composite
@@ -33,5 +37,6 @@ runs:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
+        SERVERLESS_MODE: ${{ inputs.serverless-mode }}
       run: |
         poetry run python ./install_agentless_integrations.py
