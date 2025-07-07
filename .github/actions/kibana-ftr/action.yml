@@ -42,7 +42,7 @@ runs:
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       run: |
-        yarn kbn bootstrap
+        yarn kbn bootstrap --force-install
 
     - name: Set TEST_CLOUD_HOST_NAME
       shell: bash
