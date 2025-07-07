@@ -1,23 +1,23 @@
-name: 'Run Kibana FTR'
-description: 'Run Kibana tests using FTR'
+name: "Run Kibana FTR"
+description: "Run Kibana tests using FTR"
 
 inputs:
   test_kibana_url:
-    description: 'URL for the Kibana instance to test'
+    description: "URL for the Kibana instance to test"
     required: true
   test_es_url:
-    description: 'URL for the ES instance'
+    description: "URL for the ES instance"
     required: true
   es_version:
-    description: 'Version of Elasticsearch to test against'
+    description: "Version of Elasticsearch to test against"
     required: true
   kibana_ref:
-    description: 'Kibana PR commit sha'
+    description: "Kibana PR commit sha"
     required: false
-    default: 'main'
+    default: "main"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Set global variables
       id: globals
@@ -42,7 +42,7 @@ runs:
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       run: |
-        yarn kbn bootstrap
+        yarn install && yarn kbn bootstrap
 
     - name: Set TEST_CLOUD_HOST_NAME
       shell: bash
@@ -57,10 +57,10 @@ runs:
         TEST_KIBANA_URL: ${{ inputs.test_kibana_url }}
         TEST_ES_URL: ${{ inputs.test_es_url }}
         ES_VERSION: ${{ inputs.es_version }}
-        TEST_CLOUD: '1'
-        ES_SECURITY_ENABLED: '1'
-        TEST_BROWSER_HEADLESS: '1'
+        TEST_CLOUD: "1"
+        ES_SECURITY_ENABLED: "1"
+        TEST_BROWSER_HEADLESS: "1"
         TEST_CLOUD_HOST_NAME: ${{ env.TEST_CLOUD_HOST_NAME }}
-        TEST_CONFIG: 'x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts'
+        TEST_CONFIG: "x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts"
       run: |
         node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"
