@@ -35,7 +35,7 @@ repos:
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.2.0
+    rev: 7.3.0
     hooks:
       - id: flake8
         name: flake8 ./tests/ ./.ci/scripts ./github/actions
@@ -77,7 +77,7 @@ repos:
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/aws-cloudformation/cfn-lint
-    rev: v1.35.4
+    rev: v1.36.1
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
@@ -184,7 +184,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.34.1
+    rev: v0.35.1
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
