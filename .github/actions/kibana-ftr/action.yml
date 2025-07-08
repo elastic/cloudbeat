@@ -51,7 +51,6 @@ runs:
         echo "TEST_CLOUD_HOST_NAME=$(echo '${{ inputs.test_kibana_url }}' | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
     - name: Run FTR
-      if: success()
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       env:
