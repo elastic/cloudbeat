@@ -42,7 +42,21 @@ runs:
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       run: |
+        set +e  # Do not exit on error, run all commands
+
+        echo "Cleaning Bazel cache..."
         rm -rf ~/.bazel-cache/
+        rm -rf ~/.cache/bazel/
+        rm -rf /home/runner/.cache/bazel/
+
+        echo "Cleaning Yarn and node_modules..."
+        yarn cache clean || echo "yarn cache clean failed, continuing..."
+        rm -rf node_modules
+
+        echo "Resetting Kibana state..."
+        yarn kbn reset || echo "yarn kbn reset failed, continuing..."
+
+        echo "Bootstrapping Kibana..."
         yarn kbn bootstrap
 
     - name: Set TEST_CLOUD_HOST_NAME
