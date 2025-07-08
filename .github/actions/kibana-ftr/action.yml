@@ -45,6 +45,7 @@ runs:
         yarn kbn bootstrap
 
     - name: Bootstrap Kibana 2
+      if: failure() # This runs if any previous step failed
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       run: |
