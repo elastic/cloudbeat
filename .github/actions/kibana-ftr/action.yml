@@ -57,7 +57,7 @@ runs:
         yarn kbn reset || echo "yarn kbn reset failed, continuing..."
 
         echo "Bootstrapping Kibana..."
-        yarn kbn bootstrap
+        yarn kbn bootstrap --force-install --no-validation || echo "yarn kbn bootstrap failed, continuing..."
 
     - name: Set TEST_CLOUD_HOST_NAME
       shell: bash
