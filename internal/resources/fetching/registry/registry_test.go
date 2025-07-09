@@ -281,14 +281,14 @@ func Test_registry_Update(t *testing.T) {
 		},
 		{
 			name: "error",
-			updater: func() (FetchersMap, error) {
+			updater: func(context.Context) (FetchersMap, error) {
 				return nil, errors.New("some-error")
 			},
 			testFn: emptyFn,
 		},
 		{
 			name: "success after fail",
-			updater: func() (FetchersMap, error) {
+			updater: func(context.Context) (FetchersMap, error) {
 				switch count {
 				case 0:
 					count++
@@ -302,15 +302,15 @@ func Test_registry_Update(t *testing.T) {
 			},
 			testFn: func(t *testing.T, r Registry) {
 				emptyFn(t, r) // empty at beginning because of error
-				r.Update()
+				r.Update(t.Context())
 				assert.Len(t, r.Keys(), 1)
 				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
-				assert.Panics(t, r.Update)
+				assert.Panics(t, func() { r.Update(t.Context()) })
 			},
 		},
 		{
 			name: "fail after success",
-			updater: func() (FetchersMap, error) {
+			updater: func(context.Context) (FetchersMap, error) {
 				switch count {
 				case 0:
 					count++
@@ -326,11 +326,11 @@ func Test_registry_Update(t *testing.T) {
 				assert.Len(t, r.Keys(), 1)
 				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
 
-				r.Update() // update fails, registry remains as is
+				r.Update(t.Context()) // update fails, registry remains as is
 				assert.Len(t, r.Keys(), 1)
 				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
 
-				assert.Panics(t, r.Update)
+				assert.Panics(t, func() { r.Update(t.Context()) })
 			},
 		},
 	}
@@ -341,7 +341,7 @@ func Test_registry_Update(t *testing.T) {
 
 			r := NewRegistry(testhelper.NewLogger(t), WithUpdater(tt.updater))
 			defer r.Stop()
-			r.Update()
+			r.Update(t.Context())
 			require.NotNil(t, tt.testFn)
 			tt.testFn(t, r)
 		})

@@ -111,13 +111,13 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 	defer span.End()
 	logger := m.log.WithSpanContext(span.SpanContext())
 
-	m.fetcherRegistry.Update()
+	m.fetcherRegistry.Update(ctx)
 	logger.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
 
 	start := time.Now()
-
-	seq := time.Now().Unix()
+	seq := start.Unix()
 	logger.Infof("Cycle %d has started", seq)
+
 	wg := &sync.WaitGroup{}
 	for _, key := range m.fetcherRegistry.Keys() {
 		wg.Add(1)

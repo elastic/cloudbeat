@@ -213,7 +213,7 @@ func (_c *MockRegistry_Stop_Call) RunAndReturn(run func()) *MockRegistry_Stop_Ca
 }
 
 // Update provides a mock function with no fields
-func (_m *MockRegistry) Update() {
+func (_m *MockRegistry) Update(context.Context) {
 	_m.Called()
 }
 
