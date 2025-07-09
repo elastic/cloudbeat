@@ -17,10 +17,7 @@ finding := result if {
 	data_adapter.resource.data.primary.state == "ENABLED"
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(rule_evaluation),
-		{"KMS": data_adapter.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(rule_evaluation))
 }
 
 rule_evaluation if {

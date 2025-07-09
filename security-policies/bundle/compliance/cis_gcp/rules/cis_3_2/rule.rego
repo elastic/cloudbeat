@@ -9,10 +9,7 @@ import future.keywords.in
 finding := result if {
 	data_adapter.is_compute_network
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_not_legacy_network),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_not_legacy_network))
 }
 
 is_not_legacy_network if {
