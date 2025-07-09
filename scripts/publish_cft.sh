@@ -51,3 +51,9 @@ upload_file deploy/asset-inventory-cloudformation/elastic-agent-direct-access-ke
 upload_file deploy/asset-inventory-cloudformation/elastic-agent-direct-access-key-organization.yml \
     "cloudformation-asset-inventory-direct-access-key-organization-account" \
     "${version}"
+upload_file deploy/asset-inventory-cloudformation/cloud-connectors-remote-role.yml \
+    "cloudformation-asset-inventory-cloud-connectors-single-account" \
+    "${version}"
+upload_file deploy/asset-inventory-cloudformation/cloud-connectors-remote-role-organization.yml \
+    "cloudformation-asset-inventory-cloud-connectors-organization-account" \
+    "${version}"
