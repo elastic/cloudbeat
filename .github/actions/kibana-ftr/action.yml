@@ -49,7 +49,6 @@ runs:
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
       if: failure()
-      timeout-minutes: 45
 
     - name: Set TEST_CLOUD_HOST_NAME
       shell: bash
