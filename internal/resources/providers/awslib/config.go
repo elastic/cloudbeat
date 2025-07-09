@@ -24,18 +24,14 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	v2Middleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/aws/smithy-go/middleware"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 )
 
 func RetryableCodesOption(o *retry.StandardOptions) {
@@ -57,19 +53,10 @@ func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
 	}
 
 	awsConfig.Retryer = awsConfigRetrier
-	otelaws.AppendMiddlewares(&awsConfig.APIOptions, otelaws.WithAttributeBuilder(otelaws.DefaultAttributeBuilder, ensureSpanName))
+
+	observability.AppendAWSMiddlewares(&awsConfig)
 
 	return &awsConfig, nil
-}
-
-func ensureSpanName(ctx context.Context, _ middleware.InitializeInput, _ middleware.InitializeOutput) []attribute.KeyValue {
-	span := trace.SpanFromContext(ctx)
-	if span.SpanContext().IsValid() {
-		if v2Middleware.GetServiceID(ctx) == "" && v2Middleware.GetOperationName(ctx) == "" {
-			span.SetName("Unknown AWS API Call")
-		}
-	}
-	return []attribute.KeyValue{}
 }
 
 func CloudConnectorsExternalID(resourceID, externalIDPart string) string {
@@ -84,7 +71,7 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 	if err != nil {
 		return nil, err
 	}
-	otelaws.AppendMiddlewares(&awsConfig.APIOptions)
+	observability.AppendAWSMiddlewares(&awsConfig)
 
 	chain := []AWSRoleChainingStep{
 		// Chain Step 2 - Elastic Super Role Global
