@@ -190,6 +190,7 @@ type wrapLogger struct {
 	l *logp.Logger
 }
 
+// Handle handles any error deemed irremediable by an OpenTelemetry component.
 func (w *wrapLogger) Handle(err error) {
 	w.Error(err, "otel error")
 }

@@ -100,13 +100,14 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 		func(ctx context.Context) (registry.FetchersMap, error) {
 			ctx, span := observability.StartSpan(ctx, scopeName, "Update AWS accounts")
 			defer span.End()
+			spannedLog := log.WithSpanContext(span.SpanContext())
 
-			accounts, err := a.getAwsAccounts(ctx, log, *awsConfigCloudbeatRoot, awsIdentity)
+			accounts, err := a.getAwsAccounts(ctx, spannedLog, *awsConfigCloudbeatRoot, awsIdentity)
 			if err != nil {
 				return nil, observability.FailSpan(span, "failed to get AWS accounts", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, ch, accounts, cache)
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, accounts, cache)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {
