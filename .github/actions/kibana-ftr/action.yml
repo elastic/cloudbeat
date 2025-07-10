@@ -47,11 +47,6 @@ runs:
         yarn kbn clean && yarn kbn reset || echo "⚠️ yarn kbn reset failed, continuing..."
         yarn kbn bootstrap
 
-    # TODO: Remove after debugging
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   if: failure()
-
     - name: Set TEST_CLOUD_HOST_NAME
       shell: bash
       run: |
