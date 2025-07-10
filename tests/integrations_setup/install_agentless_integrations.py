@@ -90,6 +90,7 @@ if __name__ == "__main__":
         AGENTLESS_INPUT = {
             "name": f"Agentless policy for {INTEGRATION_NAME}",
             "supports_agentless": True,
+            "fleet_server_host_id": "fleet-default-fleet-server-host",
         }
 
         logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")
