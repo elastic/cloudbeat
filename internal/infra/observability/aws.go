@@ -19,31 +19,32 @@ package observability
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awsmiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
-	"github.com/aws/smithy-go/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-func AppendAWSMiddlewares(awsConfig *aws.Config) {
-	otelaws.AppendMiddlewares(
-		&awsConfig.APIOptions,
-		otelaws.WithAttributeBuilder(otelaws.DefaultAttributeBuilder, ensureSpanName),
-	)
+type ensureSpanNameProcessor struct{}
+
+func (a ensureSpanNameProcessor) OnStart(_ context.Context, s sdktrace.ReadWriteSpan) {
+	if s.Name() == "" { // Empty span names are not allowed in Elastic APM.
+		s.SetName(defaultSpanName(s))
+	}
 }
 
-func ensureSpanName(ctx context.Context, _ middleware.InitializeInput, _ middleware.InitializeOutput) []attribute.KeyValue {
-	span := trace.SpanFromContext(ctx)
-	if span.SpanContext().IsValid() {
-		if awsmiddleware.GetServiceID(ctx) == "" && awsmiddleware.GetOperationName(ctx) == "" {
-			// The OTel AWS instrumentation uses the service ID and operation name to set the span name.
-			// If those are not set for some reason, we must set a default name to avoid having an empty span name which
-			// causes Elastic APM to throw an error when showing the span in the UI.
-			span.SetName("Unknown AWS API Call")
-		}
+func defaultSpanName(s sdktrace.ReadWriteSpan) string {
+	if strings.Contains(s.InstrumentationScope().Name, "otelaws") {
+		return "Unknown AWS API Call"
 	}
-	return []attribute.KeyValue{}
+	return "Anonymous Span"
+}
+
+func (a ensureSpanNameProcessor) OnEnd(sdktrace.ReadOnlySpan)      {}
+func (a ensureSpanNameProcessor) Shutdown(context.Context) error   { return nil }
+func (a ensureSpanNameProcessor) ForceFlush(context.Context) error { return nil }
+
+func AppendAWSMiddlewares(awsConfig *aws.Config) {
+	otelaws.AppendMiddlewares(&awsConfig.APIOptions)
 }

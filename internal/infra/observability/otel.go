@@ -179,6 +179,7 @@ func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.T
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithResource(res),
 		sdktrace.WithBatcher(exporter), // Batches spans for better performance.
+		sdktrace.WithSpanProcessor(ensureSpanNameProcessor{}),
 	)
 	// Set the global TracerProvider to allow instrumentation libraries to use it.
 	otel.SetTracerProvider(tp)
