@@ -25,9 +25,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/aws/smithy-go"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/internal/errorhandler"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -70,12 +73,13 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	iamUser := iam.User{
-		AccessKeys: []iam.AccessKey{{
-			Active:       false,
-			HasUsed:      false,
-			LastAccess:   "",
-			RotationDate: "",
-		},
+		AccessKeys: []iam.AccessKey{
+			{
+				Active:       false,
+				HasUsed:      false,
+				LastAccess:   "",
+				RotationDate: "",
+			},
 		},
 		MFADevices:          nil,
 		Name:                "test",
@@ -129,11 +133,12 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		Regions: []string{"region-1", "region-2"},
 	}
 
-	var tests = []struct {
-		name               string
-		mocksReturnVals    mocksReturnVals
-		account            string
-		numExpectedResults int
+	tests := []struct {
+		name                             string
+		mocksReturnVals                  mocksReturnVals
+		errorPublisherMissingPermissions []string
+		account                          string
+		numExpectedResults               int
 	}{
 		{
 			name: "Should not get any IAM resources",
@@ -207,6 +212,19 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 			account:            testAccount,
 			numExpectedResults: 1,
 		},
+		{
+			name: "Missing policy error",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy":      {nil, &smithy.GenericAPIError{Code: "AccessDenied"}},
+				"GetUsers":               {nil, &smithy.GenericAPIError{Code: "AccessDeniedException"}},
+				"GetPolicies":            {nil, &smithy.GenericAPIError{Code: "UnauthorizedOperation"}},
+				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
+			},
+			errorPublisherMissingPermissions: []string{arnSecurityAudit, arnSecurityAudit, arnSecurityAudit},
+			account:                          testAccount,
+			numExpectedResults:               0,
+		},
 	}
 
 	for _, test := range tests {
@@ -218,6 +236,17 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				iamProviderMock.On(funcName, ctx).Return(returnVals...)
 			}
 
+			ep := errorhandler.NewMockErrorPublisher(s.T())
+			for _, p := range test.errorPublisherMissingPermissions {
+				ep.EXPECT().Publish(mock.Anything, mock.MatchedBy(func(err error) bool {
+					var ser *errorhandler.MissingCSPPermissionError
+					if errors.As(err, &ser) {
+						return ser.Permission == p
+					}
+					return false
+				})).Once()
+			}
+
 			iamFetcher := IAMFetcher{
 				log:         testhelper.NewLogger(s.T()),
 				iamProvider: iamProviderMock,
@@ -225,6 +254,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				cloudIdentity: &cloud.Identity{
 					Account: test.account,
 				},
+				errorPublisher: ep,
 			}
 
 			err := iamFetcher.Fetch(ctx, cycle.Metadata{})
@@ -264,12 +294,13 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 		{
 			name: "Should return correct metadata for iam user",
 			resource: iam.User{
-				AccessKeys: []iam.AccessKey{{
-					Active:       false,
-					HasUsed:      false,
-					LastAccess:   "",
-					RotationDate: "",
-				},
+				AccessKeys: []iam.AccessKey{
+					{
+						Active:       false,
+						HasUsed:      false,
+						LastAccess:   "",
+						RotationDate: "",
+					},
 				},
 				MFADevices:          nil,
 				Name:                "test",
@@ -336,7 +367,6 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 			resource: iam.AccessAnalyzers{
 				Analyzers: []iam.AccessAnalyzer{
 					{
-
 						AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-arn")},
 						Region:          "region-1",
 					},
