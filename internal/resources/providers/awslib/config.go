@@ -31,6 +31,7 @@ import (
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 )
 
 func RetryableCodesOption(o *retry.StandardOptions) {
@@ -53,6 +54,8 @@ func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
 
 	awsConfig.Retryer = awsConfigRetrier
 
+	observability.AppendAWSMiddlewares(&awsConfig)
+
 	return &awsConfig, nil
 }
 
@@ -68,6 +71,7 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 	if err != nil {
 		return nil, err
 	}
+	observability.AppendAWSMiddlewares(&awsConfig)
 
 	chain := []AWSRoleChainingStep{
 		// Chain Step 2 - Elastic Super Role Global

@@ -113,7 +113,7 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 		require.ErrorContains(t, err, wantErr)
 		return
 	}
-	reg.Update()
+	reg.Update(t.Context())
 	defer reg.Stop()
 
 	require.NoError(t, err)

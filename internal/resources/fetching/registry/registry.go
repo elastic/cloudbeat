@@ -29,7 +29,7 @@ type Registry interface {
 	Keys() []string
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string, metadata cycle.Metadata) error
-	Update()
+	Update(context.Context)
 	Stop()
 }
 
@@ -41,7 +41,7 @@ type registry struct {
 
 type Option func(r *registry)
 
-type UpdaterFunc func() (FetchersMap, error)
+type UpdaterFunc func(ctx context.Context) (FetchersMap, error)
 
 func WithUpdater(fn UpdaterFunc) Option {
 	return func(r *registry) {
@@ -99,11 +99,11 @@ func (r *registry) Run(ctx context.Context, key string, metadata cycle.Metadata)
 	return registered.Fetcher.Fetch(ctx, metadata)
 }
 
-func (r *registry) Update() {
+func (r *registry) Update(ctx context.Context) {
 	if r.updater == nil {
 		return
 	}
-	fm, err := r.updater()
+	fm, err := r.updater(ctx)
 	if err != nil {
 		r.log.Errorf("Failed to update registry: %v", err)
 		return

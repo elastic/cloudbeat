@@ -23,11 +23,13 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
 )
 
@@ -50,6 +52,11 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log := clog.NewLogger("posture")
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
+
+	ctx, err := observability.SetUpOtel(ctx, log.Logger)
+	if err != nil {
+		log.Errorw("failed to set up otel", logp.Error(err))
+	}
 
 	strategy, err := benchmark.GetStrategy(cfg, log)
 	if err != nil {
@@ -107,13 +114,16 @@ func (bt *posture) Run(*beat.Beat) error {
 
 // Stop stops posture.
 func (bt *posture) Stop() {
+	defer bt.cancel() // context cancellation should be the last action
 	bt.benchmark.Stop()
 
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)
 	}
 
-	bt.cancel()
+	if err := observability.ShutdownOtel(bt.ctx); err != nil {
+		bt.log.Warnw("Failed to shutdown otel", logp.Error(err))
+	}
 }
 
 // ensureAdditionalProcessors modifies cfg.Processors list to ensure 'host'
