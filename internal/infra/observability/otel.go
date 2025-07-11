@@ -100,9 +100,10 @@ func StartSpan(ctx context.Context, tracerName, spanName string, opts ...trace.S
 // It returns an error that includes the original error message.
 // Note: If you want to record an error in a span but not mark the span as failed, use `span.RecordError(err)` instead.
 func FailSpan(span trace.Span, msg string, err error) error {
+	err = fmt.Errorf("%s: %w", msg, err)
 	span.RecordError(err)
 	span.SetStatus(codes.Error, err.Error())
-	return fmt.Errorf("%s: %w", msg, err)
+	return err
 }
 
 // tracerProvider is an extension of the trace.TracerProvider interface with shutdown and force flush operations.
