@@ -193,6 +193,7 @@ type loggerWrapper struct {
 }
 
 // Handle handles any error deemed irremediable by an OpenTelemetry component.
+// Implements the otel.ErrorHandler interface.
 func (w *loggerWrapper) Handle(err error) {
 	w.Error(err, "otel error")
 }
@@ -202,6 +203,7 @@ func (w *loggerWrapper) Init(ri logr.RuntimeInfo) {
 }
 
 func (w *loggerWrapper) Enabled(level int) bool {
+	// The higher the level, the more verbose the logging. E.g. warn is 1, Info is 4, Debug is 8.
 	// From the OTel documentation:
 	// To see Warn messages use a logger with `l.V(1).Enabled() == true`
 	// To see Info messages use a logger with `l.V(4).Enabled() == true`
