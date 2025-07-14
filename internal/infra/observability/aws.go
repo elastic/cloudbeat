@@ -26,6 +26,14 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
+// ensureSpanNameProcessor is an OpenTelemetry span processor that ensures no span has an empty name.
+// On AWS multi-account onboarding, otelaws has an edge case where there's no span name when the ec2imds service cannot
+// be reached:
+// > Region 'us-east-1' selected after failure to retrieve aws regions: operation error ec2imds:
+// > GetInstanceIdentityDocument, canceled, context deadline exceeded
+// Which in turn fails with `Error while fetching resource` `Missing required fields span.name in event (500)` in
+// Elastic APM.
+// This processor works around this by setting a default span name when the span name is empty.
 type ensureSpanNameProcessor struct{}
 
 func (a ensureSpanNameProcessor) OnStart(_ context.Context, s sdktrace.ReadWriteSpan) {
