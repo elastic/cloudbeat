@@ -32,7 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 )
 
-const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/manager"
+//go:generate generate_scopename
 
 type Manager struct {
 	log *clog.Logger
