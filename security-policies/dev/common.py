@@ -176,26 +176,35 @@ def add_new_line_after_period(text):
     # Join the lines back into a single string and return the result
     return "\n".join(lines)
 
-
 def format_json_in_text(text):
-    try:
-        # Search for JSON-like content in the text
-        start_index = text.find("{")
-        end_index = text.rfind("}") + 1
-        json_str = text[start_index:end_index]
+    def fix_and_format_json(json_candidate):
+        try:
+            # Attempt to load directly
+            parsed = json.loads(json_candidate)
+        except json.JSONDecodeError:
+            try:
+                # Try to clean up invalid JSON-like text
+                fixed = json_candidate.replace("'", '"')
+                fixed = re.sub(r'(\w+):', r'"\1":', fixed)  # unquoted keys
+                fixed = re.sub(r',\s*}', '}', fixed)         # trailing comma
+                fixed = re.sub(r',\s*]', ']', fixed)         # trailing comma
+                parsed = json.loads(fixed)
+            except Exception:
+                return json_candidate  # Return original if we can't fix
+        return json.dumps(parsed, indent=4)
 
-        # Try to load and format the JSON
-        parsed_json = json.loads(json_str)
-        formatted_json = json.dumps(parsed_json, indent=4)
+    # Match code blocks that look like JSON
+    pattern = r"```(?:json)?\s*({.*?})\s*```"
+    matches = list(re.finditer(pattern, text, re.DOTALL))
 
-        # Replace the original JSON string in the text with the formatted one
-        formatted_text = text[:start_index] + formatted_json + text[end_index:]
+    for match in reversed(matches):  # Reverse to avoid messing up indices
+        original_block = match.group(0)
+        json_candidate = match.group(1)
+        formatted_json = fix_and_format_json(json_candidate)
+        formatted_block = f"```json\n{formatted_json}\n```"
+        text = text[:match.start()] + formatted_block + text[match.end():]
 
-        return formatted_text
-    except:
-        # If JSON extraction or formatting fails, return the original text
-        return text
-
+    return text
 
 def fix_code_blocks(text: str):
     text = add_new_line_after_period(text)
@@ -212,3 +221,4 @@ def apply_pss_recursively(data):
         return pss(data) if len(data) > CODE_BLOCK_SIZE else data
     else:
         return data
+
