@@ -65,7 +65,7 @@ func SetUpOtel(ctx context.Context, logger *logp.Logger) (context.Context, error
 		return ctx, nil
 	}
 
-	wrap := wrapLogger{l: logger}
+	wrap := loggerWrapper{l: logger}
 	otel.SetLogger(logr.New(&wrap))
 	otel.SetErrorHandler(&wrap)
 
@@ -187,21 +187,21 @@ func newTracerProvider(ctx context.Context, res *resource.Resource) (*sdktrace.T
 	return tp, nil
 }
 
-// wrapLogger is a wrapper around logp.Logger that implements the logr.LogSink and otel.ErrorHandler interfaces.
-type wrapLogger struct {
+// loggerWrapper is a wrapper around logp.Logger that implements the logr.LogSink and otel.ErrorHandler interfaces.
+type loggerWrapper struct {
 	l *logp.Logger
 }
 
 // Handle handles any error deemed irremediable by an OpenTelemetry component.
-func (w *wrapLogger) Handle(err error) {
+func (w *loggerWrapper) Handle(err error) {
 	w.Error(err, "otel error")
 }
 
-func (w *wrapLogger) Init(ri logr.RuntimeInfo) {
+func (w *loggerWrapper) Init(ri logr.RuntimeInfo) {
 	w.l = w.l.WithOptions(zap.AddCallerSkip(ri.CallDepth))
 }
 
-func (w *wrapLogger) Enabled(level int) bool {
+func (w *loggerWrapper) Enabled(level int) bool {
 	// From the OTel documentation:
 	// To see Warn messages use a logger with `l.V(1).Enabled() == true`
 	// To see Info messages use a logger with `l.V(4).Enabled() == true`
@@ -209,21 +209,21 @@ func (w *wrapLogger) Enabled(level int) bool {
 	return level <= 4
 }
 
-func (w *wrapLogger) Info(level int, msg string, keysAndValues ...any) {
+func (w *loggerWrapper) Info(level int, msg string, keysAndValues ...any) {
 	if !w.Enabled(level) {
 		return
 	}
 	w.l.Infow(msg, keysAndValues...)
 }
 
-func (w *wrapLogger) Error(err error, msg string, keysAndValues ...any) {
+func (w *loggerWrapper) Error(err error, msg string, keysAndValues ...any) {
 	w.l.With(logp.Error(err)).Errorw(msg, keysAndValues...)
 }
 
-func (w *wrapLogger) WithValues(keysAndValues ...any) logr.LogSink {
-	return &wrapLogger{l: w.l.With(keysAndValues...)}
+func (w *loggerWrapper) WithValues(keysAndValues ...any) logr.LogSink {
+	return &loggerWrapper{l: w.l.With(keysAndValues...)}
 }
 
-func (w *wrapLogger) WithName(name string) logr.LogSink {
-	return &wrapLogger{l: w.l.Named(name)}
+func (w *loggerWrapper) WithName(name string) logr.LogSink {
+	return &loggerWrapper{l: w.l.Named(name)}
 }
