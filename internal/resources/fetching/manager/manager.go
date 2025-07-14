@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -140,9 +139,6 @@ func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle
 		return nil
 	}
 
-	ctx, span := observability.StartSpan(ctx, scopeName, "Fetch "+k)
-	defer span.End()
-
 	ctx, cancel := context.WithTimeout(ctx, m.timeout)
 	defer cancel()
 
@@ -166,10 +162,6 @@ func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle
 		}
 
 	case err := <-errCh:
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
-		}
 		return err
 	}
 }

@@ -20,9 +20,11 @@ package registry
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -30,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -353,4 +356,33 @@ func newMockFetcher(t *testing.T, err error, times int) RegisteredFetcher {
 	m.EXPECT().Stop().Once()
 	m.EXPECT().Fetch(mock.Anything, mock.Anything).Return(err).Times(times)
 	return RegisteredFetcher{Fetcher: m}
+}
+
+func Test_cleanTypeOf(t *testing.T) {
+	tests := []struct {
+		val  any
+		want string
+	}{
+		{
+			val:  nil,
+			want: "<nil>",
+		},
+		{
+			val:  fetching.MockFetcher{},
+			want: "fetching.MockFetcher",
+		},
+		{
+			val:  new(fetching.MockFetcher),
+			want: "fetching.MockFetcher",
+		},
+		{
+			val:  to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(fetchers.NewLoggingFetcher(nil, nil, nil, nil, nil))))))),
+			want: "fetchers.LoggingFetcher",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%T", tt.val), func(t *testing.T) {
+			assert.Equalf(t, tt.want, cleanTypeOf(tt.val), "cleanTypeOf(%v)", tt.val)
+		})
+	}
 }

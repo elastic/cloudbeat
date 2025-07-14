@@ -20,10 +20,14 @@ package registry
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
+
+const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 
 type Registry interface {
 	Keys() []string
@@ -96,7 +100,17 @@ func (r *registry) Run(ctx context.Context, key string, metadata cycle.Metadata)
 		return fmt.Errorf("fetcher %v not found", key)
 	}
 
-	return registered.Fetcher.Fetch(ctx, metadata)
+	ctx, span := observability.StartSpan(ctx, scopeName, fmt.Sprintf("%s.Fetch", cleanTypeOf(registered.Fetcher)))
+	defer span.End()
+	err := registered.Fetcher.Fetch(ctx, metadata)
+	if err != nil {
+		return observability.FailSpan(span, "fetch failed", err)
+	}
+	return nil
+}
+
+func cleanTypeOf(val any) string {
+	return strings.TrimLeft(fmt.Sprintf("%T", val), "*")
 }
 
 func (r *registry) Update(ctx context.Context) {
