@@ -120,7 +120,7 @@ type meterProvider interface {
 
 // ShutdownOtel flushes and shuts down the registered OpenTelemetry providers.
 func ShutdownOtel(ctx context.Context) error {
-	otl := otelFromContext(ctx)
+	otl := otelProvidersFromContext(ctx)
 	return errors.Join(
 		otl.meterProvider.ForceFlush(ctx),
 		otl.meterProvider.Shutdown(ctx),

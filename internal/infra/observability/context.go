@@ -29,7 +29,7 @@ type contextKeyType int
 
 const contextKey contextKeyType = iota
 
-func otelFromContext(ctx context.Context) otelProviders {
+func otelProvidersFromContext(ctx context.Context) otelProviders {
 	if ctx != nil {
 		if otl, ok := ctx.Value(contextKey).(otelProviders); ok {
 			return otl
@@ -52,11 +52,11 @@ func contextWithOTel(ctx context.Context, otl otelProviders) context.Context {
 }
 
 func TracerFromContext(ctx context.Context, name string, opts ...trace.TracerOption) trace.Tracer {
-	return otelFromContext(ctx).traceProvider.Tracer(name, opts...)
+	return otelProvidersFromContext(ctx).traceProvider.Tracer(name, opts...)
 }
 
 func MeterFromContext(ctx context.Context, name string, opts ...metric.MeterOption) metric.Meter {
-	return otelFromContext(ctx).meterProvider.Meter(name, opts...)
+	return otelProvidersFromContext(ctx).meterProvider.Meter(name, opts...)
 }
 
 // meterNoShutdown and tracerNoShutdown patch the metric.MeterProvider and trace.TracerProvider interfaces with Shutdown
