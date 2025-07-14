@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
@@ -45,6 +46,7 @@ const (
 	memberRole          = "cloudbeat-securityaudit"
 	scanSettingTagKey   = "cloudbeat_scan_management_account"
 	scanSettingTagValue = "Yes"
+	scopeName           = "github.com/elastic/cloudbeat/internal/flavors/benchmark/aws_org"
 )
 
 type AWSOrg struct {
@@ -95,13 +97,17 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
-		func() (registry.FetchersMap, error) {
-			accounts, err := a.getAwsAccounts(ctx, log, *awsConfigCloudbeatRoot, awsIdentity)
+		func(ctx context.Context) (registry.FetchersMap, error) {
+			ctx, span := observability.StartSpan(ctx, scopeName, "Update AWS accounts")
+			defer span.End()
+			spannedLog := log.WithSpanContext(span.SpanContext())
+
+			accounts, err := a.getAwsAccounts(ctx, spannedLog, *awsConfigCloudbeatRoot, awsIdentity)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
+				return nil, observability.FailSpan(span, "failed to get AWS accounts", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, ch, accounts, cache)
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, accounts, cache)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {
