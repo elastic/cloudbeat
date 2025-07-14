@@ -59,6 +59,11 @@ func MeterFromContext(ctx context.Context, name string, opts ...metric.MeterOpti
 	return otelFromContext(ctx).meterProvider.Meter(name, opts...)
 }
 
+// meterNoShutdown and tracerNoShutdown patch the metric.MeterProvider and trace.TracerProvider interfaces with Shutdown
+// and Flush operations.
+// The trace.TracerProvider interface does not provide Shutdown or Flush but sdktrace.TracerProvider (returned by
+// newTracerProvider) does. otel.GetTracerProvider() returns the first instead of the second. In real life, this will be
+// the case when using a no-op tracer (e.g. on-prem with no APM server set up).
 type (
 	meterNoShutdown struct {
 		metric.MeterProvider
