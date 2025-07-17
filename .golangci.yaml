@@ -134,14 +134,24 @@ linters:
         # Keeping disabled to avoid forcing variable name changes across codebase
         - name: var-naming
           disabled: true
+        # add-constant: Suggests adding constants for repeated values
+        # Disabled as agreed - can be overly pedantic and force unnecessary constants
         - name: add-constant
           disabled: true
+        # bare-return: Warns about bare returns in functions with named return values
+        # Disabled as agreed - bare returns can be acceptable in short functions
         - name: bare-return
           disabled: true
+        # line-length-limit: Enforces maximum line length
+        # Disabled as agreed - handled by other formatters and can be too restrictive
         - name: line-length-limit
           disabled: true
+        # max-public-structs: Limits the number of public structs per file
+        # Disabled as agreed - can be too restrictive for legitimate use cases
         - name: max-public-structs
           disabled: true
+        # unused-receiver: Warns about unused receivers in methods
+        # Disabled as agreed - can flag legitimate interface implementations
         - name: unused-receiver
           disabled: true
         # enforce-map-style: Enforces consistent map initialization style
