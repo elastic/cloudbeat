@@ -93,22 +93,45 @@ linters:
         - name: unhandled-error
           arguments:
             - bytes.Buffer.WriteString # Always returns nil error
+        # blank-imports: Warns about blank imports that are not in the main package
+        # This is a useful rule for detecting unused imports and side-effect imports
+        # Note: This may require careful review of blank imports for side effects
         - name: blank-imports
-          disabled: true
+        # confusing-naming: Warns about methods with names that differ only by capitalization
+        # This is generally a good practice but can be too restrictive for existing APIs
+        # Keeping disabled to avoid breaking changes to public interfaces
         - name: confusing-naming
           disabled: true
+        # exported: Requires comments for exported functions/types
+        # This would require massive documentation changes across the codebase
+        # Keeping disabled to avoid forcing documentation of all exported identifiers
         - name: exported
           disabled: true
+        # function-length: Enforces maximum function length
+        # This would require refactoring many existing functions
+        # Keeping disabled to avoid forcing architectural changes
         - name: function-length
           disabled: true
+        # get-return: Warns about getters that return more than one value
+        # This is a good practice for getter methods to keep them simple
+        # Enabling as violations are usually easy to fix
         - name: get-return
-          disabled: true
+        # import-alias-naming: Enforces naming conventions for import aliases
+        # This can be helpful for consistency but may require many changes
+        # Keeping disabled to avoid forcing import alias changes across codebase
         - name: import-alias-naming
           disabled: true
+        # import-shadowing: Warns about imports that shadow package names
+        # This is a good practice and violations are usually easy to fix
+        # Enabling as it helps avoid confusing code
         - name: import-shadowing
-          disabled: true
+        # unchecked-type-assertion: Warns about type assertions without checking the second return value
+        # This is important for runtime safety and should be enabled
+        # May require some fixes but improves code safety
         - name: unchecked-type-assertion
-          disabled: true
+        # var-naming: Enforces variable naming conventions
+        # This can be quite pedantic and require many changes to existing code
+        # Keeping disabled to avoid forcing variable name changes across codebase
         - name: var-naming
           disabled: true
         - name: add-constant
@@ -120,6 +143,16 @@ linters:
         - name: max-public-structs
           disabled: true
         - name: unused-receiver
+          disabled: true
+        # enforce-map-style: Enforces consistent map initialization style
+        # This rule helps maintain consistency but can be quite pedantic
+        # Disabled to avoid forcing style changes across large codebase
+        - name: enforce-map-style
+          disabled: true
+        # enforce-slice-style: Enforces consistent slice initialization style  
+        # This rule helps maintain consistency but can be quite pedantic
+        # Disabled to avoid forcing style changes across large codebase
+        - name: enforce-slice-style
           disabled: true
     staticcheck:
       checks:
