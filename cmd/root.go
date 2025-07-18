@@ -25,7 +25,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/cmd/instance"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/beats/v7/libbeat/publisher/processing"
-	_ "github.com/elastic/beats/v7/x-pack/libbeat/include"
+	_ "github.com/elastic/beats/v7/x-pack/libbeat/include" // Initialize x-pack components
 	"github.com/elastic/beats/v7/x-pack/libbeat/management"
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
 	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
