@@ -138,11 +138,11 @@ func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out 
 	policiesAssetsCh := p.fetchAssets(ctx, assetpb.ContentType_IAM_POLICY, assetTypes)
 	assetsCh := p.mergeAssets(ctx, resourceAssetsCh, policiesAssetsCh)
 
-	for asset := range assetsCh {
+	for gcpAsset := range assetsCh {
 		select {
 		case <-ctx.Done():
 			return
-		case out <- asset:
+		case out <- gcpAsset:
 		}
 	}
 }
@@ -191,19 +191,19 @@ func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context, out chan<-
 	projectsCh := make(chan *ExtendedGcpAsset)
 	policiesCache := &sync.Map{}
 
-	go p.getAllAssets(ctx, projectsCh, &assetpb.ListAssetsRequest{
+	go p.fetchAllAssets(ctx, projectsCh, &assetpb.ListAssetsRequest{
 		Parent:      p.config.Parent,
 		AssetTypes:  []string{CrmProjectAssetType},
 		ContentType: assetpb.ContentType_IAM_POLICY,
 	})
 
-	for asset := range projectsCh {
+	for gcpAsset := range projectsCh {
 		select {
 		case <-ctx.Done():
 			return
 		case out <- &ProjectPoliciesAsset{
-			CloudAccount: asset.CloudAccount,
-			Policies:     append([]*ExtendedGcpAsset{asset}, p.getAssetAncestorsPolicies(ctx, asset.Ancestors[1:], policiesCache)...),
+			CloudAccount: gcpAsset.CloudAccount,
+			Policies:     append([]*ExtendedGcpAsset{gcpAsset}, p.getAssetAncestorsPolicies(ctx, gcpAsset.Ancestors[1:], policiesCache)...),
 		}:
 		}
 	}
@@ -236,12 +236,12 @@ func (p *Provider) ListNetworkAssets(ctx context.Context, out chan<- *ExtendedGc
 	dnsPolicyAssetCh := p.getParentResources(ctx, p.config.Parent, []string{DnsPolicyAssetType})
 	networkAssetCh := p.getParentResources(ctx, p.config.Parent, []string{ComputeNetworkAssetType})
 
-	dnsPoliciesFields := decodeDnsPolicies(lo.Map(collect(dnsPolicyAssetCh), func(asset *ExtendedGcpAsset, _ int) *assetpb.Asset { return asset.Asset }))
-	for asset := range networkAssetCh {
+	dnsPoliciesFields := decodeDnsPolicies(lo.Map(collect(dnsPolicyAssetCh), func(gcpAsset *ExtendedGcpAsset, _ int) *assetpb.Asset { return gcpAsset.Asset }))
+	for gcpAsset := range networkAssetCh {
 		select {
 		case <-ctx.Done():
 			return
-		case out <- enrichNetworkAsset(asset, dnsPoliciesFields):
+		case out <- enrichNetworkAsset(gcpAsset, dnsPoliciesFields):
 		}
 	}
 }
@@ -275,7 +275,7 @@ func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []st
 		if isOrganization(ancestor) {
 			assetType = CrmOrgAssetType
 		}
-		go p.getAllAssets(ctx, prjAncestorPolicyCh, &assetpb.ListAssetsRequest{
+		go p.fetchAllAssets(ctx, prjAncestorPolicyCh, &assetpb.ListAssetsRequest{
 			Parent:      ancestor,
 			AssetTypes:  []string{assetType},
 			ContentType: assetpb.ContentType_IAM_POLICY,
@@ -298,7 +298,7 @@ func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []st
 
 func (p *Provider) getParentResources(ctx context.Context, parent string, assetTypes []string) <-chan *ExtendedGcpAsset {
 	ch := make(chan *ExtendedGcpAsset)
-	go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
+	go p.fetchAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
 		Parent:      parent,
 		AssetTypes:  assetTypes,
 		ContentType: assetpb.ContentType_RESOURCE,
@@ -315,13 +315,13 @@ func (p *Provider) fetchAssets(ctx context.Context, contentType assetpb.ContentT
 		go func() {
 			defer wg.Done()
 			ch := make(chan *ExtendedGcpAsset)
-			go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
+			go p.fetchAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
 				Parent:      p.config.Parent,
 				AssetTypes:  []string{assetType},
 				ContentType: contentType,
 			})
-			for asset := range ch {
-				out <- asset
+			for gcpAsset := range ch {
+				out <- gcpAsset
 			}
 		}()
 	}
@@ -332,7 +332,7 @@ func (p *Provider) fetchAssets(ctx context.Context, contentType assetpb.ContentT
 	return out
 }
 
-func (p *Provider) getAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsset, req *assetpb.ListAssetsRequest) {
+func (p *Provider) fetchAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsset, req *assetpb.ListAssetsRequest) {
 	defer close(out)
 
 	p.log.Infof("Listing %v assets of types: %v for %v\n", req.ContentType, req.AssetTypes, req.Parent)
@@ -401,35 +401,35 @@ func (p *Provider) mergeAssets(ctx context.Context, resourceCh, policyCh <-chan 
 	return out
 }
 
-func (p *Provider) newGcpExtendedAsset(ctx context.Context, asset *assetpb.Asset) *ExtendedGcpAsset {
+func (p *Provider) newGcpExtendedAsset(ctx context.Context, gcpAsset *assetpb.Asset) *ExtendedGcpAsset {
 	return &ExtendedGcpAsset{
-		Asset:        asset,
-		CloudAccount: p.crm.GetCloudMetadata(ctx, asset),
+		Asset:        gcpAsset,
+		CloudAccount: p.crm.GetCloudMetadata(ctx, gcpAsset),
 	}
 }
 
-func mergeAssetContentType(store map[string]*ExtendedGcpAsset, asset *ExtendedGcpAsset) {
-	if existing, ok := store[asset.Name]; ok {
-		if asset.Resource != nil {
-			existing.Resource = asset.Resource
+func mergeAssetContentType(store map[string]*ExtendedGcpAsset, gcpAsset *ExtendedGcpAsset) {
+	if existing, ok := store[gcpAsset.Name]; ok {
+		if gcpAsset.Resource != nil {
+			existing.Resource = gcpAsset.Resource
 		}
-		if asset.IamPolicy != nil {
-			existing.IamPolicy = asset.IamPolicy
+		if gcpAsset.IamPolicy != nil {
+			existing.IamPolicy = gcpAsset.IamPolicy
 		}
 	} else {
-		store[asset.Name] = asset
+		store[gcpAsset.Name] = gcpAsset
 	}
 }
 
-func enrichNetworkAsset(asset *ExtendedGcpAsset, dnsPoliciesFields []*dnsPolicyFields) *ExtendedGcpAsset {
-	networkAssetFields := asset.GetResource().GetData().GetFields()
-	networkIdentifier := strings.TrimPrefix(asset.GetName(), "//compute.googleapis.com")
+func enrichNetworkAsset(gcpAsset *ExtendedGcpAsset, dnsPoliciesFields []*dnsPolicyFields) *ExtendedGcpAsset {
+	networkAssetFields := gcpAsset.GetResource().GetData().GetFields()
+	networkIdentifier := strings.TrimPrefix(gcpAsset.GetName(), "//compute.googleapis.com")
 	dnsPolicy := findDnsPolicyByNetwork(dnsPoliciesFields, networkIdentifier)
 
 	if dnsPolicy != nil {
 		networkAssetFields["enabledDnsLogging"] = &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: dnsPolicy.enableLogging}}
 	}
-	return asset
+	return gcpAsset
 }
 
 // findDnsPolicyByNetwork finds DNS policy by network identifier
