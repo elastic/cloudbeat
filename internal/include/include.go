@@ -18,6 +18,5 @@
 package include
 
 import (
-	// Import sqlite driver for database functionality
-	_ "modernc.org/sqlite"
+	_ "modernc.org/sqlite" // Import sqlite driver for trivy
 )
