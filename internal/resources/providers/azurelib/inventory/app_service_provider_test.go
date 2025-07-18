@@ -33,23 +33,20 @@ import (
 
 type mockAzureAppServiceWrapper struct {
 	mock.Mock
+	t *testing.T
 }
 
 func (m *mockAzureAppServiceWrapper) AssetAuthSettings(_ context.Context, subscriptionID string, resourceGroupName string, appName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, appName)
 	resp, ok := r.Get(0).(armappservice.WebAppsClientGetAuthSettingsResponse)
-	if !ok {
-		panic("expected armappservice.WebAppsClientGetAuthSettingsResponse")
-	}
+	require.True(m.t, ok, "expected armappservice.WebAppsClientGetAuthSettingsResponse")
 	return resp, r.Error(1)
 }
 
 func (m *mockAzureAppServiceWrapper) AssetSiteConfigs(_ context.Context, subscriptionID string, resourceGroupName string, appName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, appName)
 	resp, ok := r.Get(0).(armappservice.WebAppsClientGetConfigurationResponse)
-	if !ok {
-		panic("expected armappservice.WebAppsClientGetConfigurationResponse")
-	}
+	require.True(m.t, ok, "expected armappservice.WebAppsClientGetConfigurationResponse")
 	return resp, r.Error(1)
 }
 
@@ -148,7 +145,7 @@ func TestGetAppServiceAuthSettings(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mockWrapper := &mockAzureAppServiceWrapper{}
+			mockWrapper := &mockAzureAppServiceWrapper{t: t}
 			mockWrapper.Test(t)
 			mockWrapper.
 				On("AssetAuthSettings", tc.inputWebApp.SubscriptionId, tc.inputWebApp.ResourceGroup, tc.inputWebApp.Name).
@@ -292,7 +289,7 @@ func TestGetAppServiceSiteConfig(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mockWrapper := &mockAzureAppServiceWrapper{}
+			mockWrapper := &mockAzureAppServiceWrapper{t: t}
 			mockWrapper.Test(t)
 			mockWrapper.
 				On("AssetSiteConfigs", tc.inputWebApp.SubscriptionId, tc.inputWebApp.ResourceGroup, tc.inputWebApp.Name).

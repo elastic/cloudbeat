@@ -291,8 +291,8 @@ func TestAzureLocationsNetworkWatcherAssetBatchFetcher_Fetch(t *testing.T) {
 			got := testhelper.CollectResources(ch)
 
 			// sort to ensure assertion
-			sortResourceNetworkWatcherByLocationResource(tc.expected)
-			sortResourceNetworkWatcherByLocationResource(got)
+			sortResourceNetworkWatcherByLocationResource(t, tc.expected)
+			sortResourceNetworkWatcherByLocationResource(t, got)
 
 			assert.Equal(t, tc.expected, got)
 
@@ -312,12 +312,10 @@ func TestAzureLocationsNetworkWatcherAssetBatchFetcher_Fetch(t *testing.T) {
 	}
 }
 
-func sortResourceNetworkWatcherByLocationResource(r []fetching.ResourceInfo) {
+func sortResourceNetworkWatcherByLocationResource(t *testing.T, r []fetching.ResourceInfo) {
 	for idx := range r {
 		abr, ok := (&r[idx]).Resource.(*NetworkWatchersBatchedByLocationResource)
-		if !ok {
-			continue
-		}
+		require.True(t, ok, "expected *NetworkWatchersBatchedByLocationResource")
 		sort.Slice(abr.NetworkWatchers, func(i, j int) bool { return abr.NetworkWatchers[i].Id > abr.NetworkWatchers[j].Id })
 	}
 

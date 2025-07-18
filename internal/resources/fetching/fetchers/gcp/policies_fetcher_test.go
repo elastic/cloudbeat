@@ -74,9 +74,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestPoliciesFetcher_Fetch_Success() {
 	mockInventoryService.On("ListProjectsAncestorsPolicies", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
 			ch, ok := args.Get(1).(chan<- *inventory.ProjectPoliciesAsset)
-			if !ok {
-				panic("expected chan<- *inventory.ProjectPoliciesAsset")
-			}
+			require.True(t, ok, "expected chan<- *inventory.ProjectPoliciesAsset")
 			ch <- expectedAsset
 			close(ch)
 		}).Once()

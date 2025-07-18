@@ -254,7 +254,7 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 }
 
 func (f *ProcessesFetcher) readConfigurationFile(filePath string, data []byte) (any, error) {
-	ext := filepath.Ext(path)
+	ext := filepath.Ext(filePath)
 	var output any
 
 	switch ext {

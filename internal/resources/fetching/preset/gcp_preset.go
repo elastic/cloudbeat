@@ -28,29 +28,29 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
-func NewCisGcpFetchers(ctx context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, inventoryAPI inventoryAPI.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {
+func NewCisGcpFetchers(ctx context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, inventoryAPI inventory.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {
 	log.Infof("Initializing GCP fetchers")
 	m := make(registry.FetchersMap)
 
-	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventory)
+	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventoryAPI)
 	m["gcp_cloud_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: assetsFetcher}
 
-	monitoringFetcher := fetchers.NewGcpMonitoringFetcher(ctx, log, ch, inventory)
+	monitoringFetcher := fetchers.NewGcpMonitoringFetcher(ctx, log, ch, inventoryAPI)
 	m["gcp_monitoring_fetcher"] = registry.RegisteredFetcher{Fetcher: monitoringFetcher}
 
-	serviceUsageFetcher := fetchers.NewGcpServiceUsageFetcher(ctx, log, ch, inventory)
+	serviceUsageFetcher := fetchers.NewGcpServiceUsageFetcher(ctx, log, ch, inventoryAPI)
 	m["gcp_service_usage_fetcher"] = registry.RegisteredFetcher{Fetcher: serviceUsageFetcher}
 
-	networkAssetsFetcher := fetchers.NewGcpNetworksFetcher(ctx, log, ch, inventory)
+	networkAssetsFetcher := fetchers.NewGcpNetworksFetcher(ctx, log, ch, inventoryAPI)
 	m["gcp_network_fetcher"] = registry.RegisteredFetcher{Fetcher: networkAssetsFetcher}
 
 	// The logging fetcher is only available for the organization scope as it requires the Cloud Asset Inventory API
 	// to be enabled for the organization/folders level.
 	if cfg.AccountType == config.OrganizationAccount {
-		loggingFetcher := fetchers.NewGcpLogSinkFetcher(ctx, log, ch, inventory)
+		loggingFetcher := fetchers.NewGcpLogSinkFetcher(ctx, log, ch, inventoryAPI)
 		m["gcp_logging_fetcher"] = registry.RegisteredFetcher{Fetcher: loggingFetcher}
 
-		policiesFetcher := fetchers.NewGcpPoliciesFetcher(ctx, log, ch, inventory)
+		policiesFetcher := fetchers.NewGcpPoliciesFetcher(ctx, log, ch, inventoryAPI)
 		m["gcp_policies_fetcher"] = registry.RegisteredFetcher{Fetcher: policiesFetcher}
 	}
 

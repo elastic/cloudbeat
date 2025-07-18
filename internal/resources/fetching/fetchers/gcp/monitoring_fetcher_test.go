@@ -79,9 +79,7 @@ func (s *GcpMonitoringFetcherTestSuite) TestMonitoringFetcher_Fetch_Success() {
 	mockInventoryService.On("ListMonitoringAssets", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
 			ch, ok := args.Get(1).(chan<- *inventory.MonitoringAsset)
-			if !ok {
-				panic("expected chan<- *inventory.MonitoringAsset")
-			}
+			require.True(t, ok, "expected chan<- *inventory.MonitoringAsset")
 			ch <- expectedAsset
 			close(ch)
 		}).Once()

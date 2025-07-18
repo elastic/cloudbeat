@@ -57,6 +57,7 @@ func (s *GcpNetworksFetcherTestSuite) TearDownTest() {
 }
 
 func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
+	t := s.T()
 	ctx := context.Background()
 	wg := sync.WaitGroup{}
 	mockInventoryService := &inventory.MockServiceAPI{}
@@ -71,9 +72,7 @@ func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 	mockInventoryService.On("ListNetworkAssets", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
 			ch, ok := args.Get(1).(chan<- *inventory.ExtendedGcpAsset)
-			if !ok {
-				panic("expected chan<- *inventory.ExtendedGcpAsset")
-			}
+			require.True(t, ok, "expected chan<- *inventory.ExtendedGcpAsset")
 			ch <- expectedAsset
 			close(ch)
 		}).Once()

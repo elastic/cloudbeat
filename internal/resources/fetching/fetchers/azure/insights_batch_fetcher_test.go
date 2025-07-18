@@ -216,8 +216,8 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 			got := testhelper.CollectResources(ch)
 
 			// sort to ensure assertion
-			sortResourceInfoSlice(tc.expected)
-			sortResourceInfoSlice(got)
+			sortResourceInfoSlice(t, tc.expected)
+			sortResourceInfoSlice(t, got)
 
 			assert.Equal(t, tc.expected, got)
 
@@ -237,12 +237,10 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 	}
 }
 
-func sortResourceInfoSlice(r []fetching.ResourceInfo) {
+func sortResourceInfoSlice(t *testing.T, r []fetching.ResourceInfo) {
 	for idx := range r {
 		abr, ok := (&r[idx]).Resource.(*AzureBatchResource)
-		if !ok {
-			continue
-		}
+		require.True(t, ok, "expected *AzureBatchResource")
 		sort.Slice(abr.Assets, func(i, j int) bool { return abr.Assets[i].Id > abr.Assets[j].Id })
 	}
 
@@ -250,12 +248,14 @@ func sortResourceInfoSlice(r []fetching.ResourceInfo) {
 		var x, y string
 
 		ai, ok := (&r[i]).Resource.(*AzureBatchResource)
-		if ok && len(ai.Assets) > 0 {
+		require.True(t, ok, "expected *AzureBatchResource")
+		if len(ai.Assets) > 0 {
 			x = ai.Assets[0].SubscriptionId
 		}
 
 		aj, ok := (&r[j]).Resource.(*AzureBatchResource)
-		if ok && len(aj.Assets) > 0 {
+		require.True(t, ok, "expected *AzureBatchResource")
+		if len(aj.Assets) > 0 {
 			y = aj.Assets[0].SubscriptionId
 		}
 

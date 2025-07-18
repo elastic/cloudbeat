@@ -343,8 +343,8 @@ func TestAzureSecurityAssetFetcher(t *testing.T) {
 			got := testhelper.CollectResources(ch)
 
 			// sort to ensure assertion
-			sortResourceInfoSlice(tc.expected)
-			sortResourceInfoSlice(got)
+			sortResourceInfoSlice(t, tc.expected)
+			sortResourceInfoSlice(t, got)
 
 			assert.ElementsMatch(t, tc.expected, got, "ResourceInfo slice mismatch")
 
