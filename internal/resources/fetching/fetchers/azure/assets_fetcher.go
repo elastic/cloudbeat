@@ -202,8 +202,6 @@ func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
 			m["user.effective.id"] = r.Asset.Id
 			m["user.effective.name"] = r.Asset.Name
 		}
-	default:
-		// No specific common data mapping for other asset types
 	}
 
 	return m, nil

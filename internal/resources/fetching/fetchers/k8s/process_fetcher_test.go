@@ -208,7 +208,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 
 		processResource := results[0].Resource
 		evalRes, ok := processResource.GetData().(EvalProcResource)
-		s.Require().True(ok, "expected EvalProcResource")
+	s.Require().True(ok, "expected EvalProcResource")
 		procCD, err := processResource.GetElasticCommonData()
 		s.Require().NoError(err)
 
