@@ -106,7 +106,7 @@ repos:
         pass_filenames: false
       - id: go-test
         name: Run short unit tests
-        entry: bash -c 'go test -short -timeout 100ms ./...'
+        entry: bash -c 'go test -failfast -short -timeout 100ms ./...'
         language: system
         files: .*.go
         pass_filenames: false
