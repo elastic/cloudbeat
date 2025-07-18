@@ -24,6 +24,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -72,7 +73,8 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 	provider := newMockInventoryProvider(t)
 	for _, resource := range ResourcesToFetch {
 		provider.EXPECT().mock.On("ListAssetTypes", mock.Anything, []string{resource.assetType}, mock.Anything).Run(func(args mock.Arguments) {
-			ch := args.Get(2).(chan<- *gcpinventory.ExtendedGcpAsset)
+			ch, ok := args.Get(2).(chan<- *gcpinventory.ExtendedGcpAsset)
+			require.True(t, ok, "expected chan<- *gcpinventory.ExtendedGcpAsset")
 			ch <- createAsset(resource.assetType)
 			close(ch)
 		})

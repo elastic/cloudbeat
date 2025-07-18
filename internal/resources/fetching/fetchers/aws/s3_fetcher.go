@@ -37,10 +37,10 @@ type S3Resource struct {
 	bucket awslib.AwsResource
 }
 
-func NewS3Fetcher(log *clog.Logger, s3 s3.S3, ch chan fetching.ResourceInfo) *S3Fetcher {
+func NewS3Fetcher(log *clog.Logger, s3Client s3.S3, ch chan fetching.ResourceInfo) *S3Fetcher {
 	return &S3Fetcher{
 		log:        log,
-		s3:         s3,
+		s3:         s3Client,
 		resourceCh: ch,
 	}
 }

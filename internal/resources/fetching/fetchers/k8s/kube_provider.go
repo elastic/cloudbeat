@@ -43,8 +43,8 @@ const (
 	ecsResourceNameField = "orchestrator.resource.name"
 )
 
-func getKubeData(log *clog.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
-	log.Debug("Starting getKubeData")
+func collectKubeData(log *clog.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
+	log.Debug("Starting collectKubeData")
 
 	for _, watcher := range watchers {
 		rs := watcher.Store().List()

@@ -49,14 +49,14 @@ func (globs Globs) Expand() ([]string, error) {
 				return nil, err
 			}
 			for _, path := range paths {
-				err = filepath.Walk(path, func(path string, _ os.FileInfo, err error) error {
+				err = filepath.Walk(path, func(walkPath string, _ os.FileInfo, err error) error {
 					if err != nil {
 						return err
 					}
 					// save deduped match from current iteration
-					if _, ok := hitMap[path]; !ok {
-						hits = append(hits, path)
-						hitMap[path] = true
+					if _, ok := hitMap[walkPath]; !ok {
+						hits = append(hits, walkPath)
+						hitMap[walkPath] = true
 					}
 					return nil
 				})

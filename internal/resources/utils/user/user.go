@@ -217,6 +217,7 @@ func findGroupId(id string, r io.Reader) (*Group, error) {
 	if v, err := readColonFile(r, matchGroupIndexValue(id, 2), 3); err != nil {
 		return nil, err
 	} else if v != nil {
+		//revive:disable-next-line:unchecked-type-assertion
 		return v.(*Group), nil
 	}
 	return nil, errors.New("Unknown groupId Error, GID: " + id)
@@ -275,6 +276,7 @@ func findUserId(uid string, r io.Reader) (*User, error) {
 	if v, err := readColonFile(r, matchUserIndexValue(uid, 2), 6); err != nil {
 		return nil, err
 	} else if v != nil {
+		//revive:disable-next-line:unchecked-type-assertion
 		return v.(*User), nil
 	}
 	return nil, errors.New("Unknown UserId Error, UID: " + uid)

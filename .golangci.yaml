@@ -93,33 +93,49 @@ linters:
         - name: unhandled-error
           arguments:
             - bytes.Buffer.WriteString # Always returns nil error
+        # Warns about blank imports - useful for detecting unused imports
         - name: blank-imports
-          disabled: true
+        # Disabled: too restrictive for existing APIs, could break public interfaces
         - name: confusing-naming
           disabled: true
+        # Disabled: would require massive documentation effort for all exported identifiers
         - name: exported
           disabled: true
+        # Disabled: would require refactoring many existing functions
         - name: function-length
           disabled: true
+        # Enforces simple getter methods (single return value)
         - name: get-return
-          disabled: true
+        # Disabled: would require import alias changes across codebase
         - name: import-alias-naming
           disabled: true
+        # Prevents confusing import shadows
         - name: import-shadowing
-          disabled: true
+        # Improves runtime safety by requiring checked type assertions
         - name: unchecked-type-assertion
-          disabled: true
+        # Disabled: pedantic naming rule, would require variable name changes across codebase
         - name: var-naming
           disabled: true
+        # Disabled: can be overly pedantic and force unnecessary constants
         - name: add-constant
           disabled: true
+        # Disabled: bare returns can be acceptable in short functions
         - name: bare-return
           disabled: true
+        # Disabled: handled by other formatters and can be too restrictive
         - name: line-length-limit
           disabled: true
+        # Disabled: can be too restrictive for legitimate use cases
         - name: max-public-structs
           disabled: true
+        # Disabled: can flag legitimate interface implementations
         - name: unused-receiver
+          disabled: true
+        # Disabled: pedantic style rule, would require changes across large codebase
+        - name: enforce-map-style
+          disabled: true
+        # Disabled: pedantic style rule, would require changes across large codebase
+        - name: enforce-slice-style
           disabled: true
     staticcheck:
       checks:

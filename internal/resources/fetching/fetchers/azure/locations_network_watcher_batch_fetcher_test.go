@@ -291,8 +291,8 @@ func TestAzureLocationsNetworkWatcherAssetBatchFetcher_Fetch(t *testing.T) {
 			got := testhelper.CollectResources(ch)
 
 			// sort to ensure assertion
-			sortResourceNetworkWatcherByLocationResource(tc.expected)
-			sortResourceNetworkWatcherByLocationResource(got)
+			sortResourceNetworkWatcherByLocationResource(t, tc.expected)
+			sortResourceNetworkWatcherByLocationResource(t, got)
 
 			assert.Equal(t, tc.expected, got)
 
@@ -312,9 +312,10 @@ func TestAzureLocationsNetworkWatcherAssetBatchFetcher_Fetch(t *testing.T) {
 	}
 }
 
-func sortResourceNetworkWatcherByLocationResource(r []fetching.ResourceInfo) {
+func sortResourceNetworkWatcherByLocationResource(t *testing.T, r []fetching.ResourceInfo) {
 	for idx := range r {
-		abr, _ := (&r[idx]).Resource.(*NetworkWatchersBatchedByLocationResource)
+		abr, ok := (&r[idx]).Resource.(*NetworkWatchersBatchedByLocationResource)
+		require.True(t, ok, "expected *NetworkWatchersBatchedByLocationResource")
 		sort.Slice(abr.NetworkWatchers, func(i, j int) bool { return abr.NetworkWatchers[i].Id > abr.NetworkWatchers[j].Id })
 	}
 
@@ -325,9 +326,9 @@ func sortResourceNetworkWatcherByLocationResource(r []fetching.ResourceInfo) {
 	})
 }
 
-func batchedNetworkWatcherByLocationResourceInfo(cycle cycle.Metadata, subscription governance.Subscription, location string, networkWatchers ...inventory.AzureAsset) fetching.ResourceInfo {
+func batchedNetworkWatcherByLocationResourceInfo(cycleMetadata cycle.Metadata, subscription governance.Subscription, location string, networkWatchers ...inventory.AzureAsset) fetching.ResourceInfo {
 	return fetching.ResourceInfo{
-		CycleMetadata: cycle,
+		CycleMetadata: cycleMetadata,
 		Resource: &NetworkWatchersBatchedByLocationResource{
 			typePair: typePair{
 				SubType: fetching.AzureNetworkWatchersType,

@@ -34,21 +34,28 @@ import (
 
 type mockAzureKeyVaultWrapper struct {
 	mock.Mock
+	t *testing.T
 }
 
 func (m *mockAzureKeyVaultWrapper) AssetKeyVaultKeys(_ context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.KeysClientListResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, vaultName)
-	return r.Get(0).([]armkeyvault.KeysClientListResponse), r.Error(1)
+	resp, ok := r.Get(0).([]armkeyvault.KeysClientListResponse)
+	require.True(m.t, ok, "expected []armkeyvault.KeysClientListResponse")
+	return resp, r.Error(1)
 }
 
 func (m *mockAzureKeyVaultWrapper) AssetKeyVaultSecrets(_ context.Context, subscriptionID string, resourceGroupName string, vaultName string) ([]armkeyvault.SecretsClientListResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, vaultName)
-	return r.Get(0).([]armkeyvault.SecretsClientListResponse), r.Error(1)
+	resp, ok := r.Get(0).([]armkeyvault.SecretsClientListResponse)
+	require.True(m.t, ok, "expected []armkeyvault.SecretsClientListResponse")
+	return resp, r.Error(1)
 }
 
 func (m *mockAzureKeyVaultWrapper) AssetDiagnosticSettings(_ context.Context, vaultId string, options *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
 	r := m.Called(vaultId, options)
-	return r.Get(0).([]armmonitor.DiagnosticSettingsClientListResponse), r.Error(1)
+	resp, ok := r.Get(0).([]armmonitor.DiagnosticSettingsClientListResponse)
+	require.True(m.t, ok, "expected []armmonitor.DiagnosticSettingsClientListResponse")
+	return resp, r.Error(1)
 }
 
 func TestListKeyVaultDiagnosticSettings(t *testing.T) {
@@ -170,7 +177,7 @@ func TestListKeyVaultDiagnosticSettings(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mockWrapper := &mockAzureKeyVaultWrapper{}
+			mockWrapper := &mockAzureKeyVaultWrapper{t: t}
 			mockWrapper.Test(t)
 			mockWrapper.
 				On("AssetDiagnosticSettings", tc.inputVault.Id, mock.Anything).
@@ -283,7 +290,7 @@ func TestListKeyVaultKeys(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mockWrapper := &mockAzureKeyVaultWrapper{}
+			mockWrapper := &mockAzureKeyVaultWrapper{t: t}
 			mockWrapper.Test(t)
 			mockWrapper.
 				On("AssetKeyVaultKeys", tc.inputVault.SubscriptionId, tc.inputVault.ResourceGroup, tc.inputVault.Name).
@@ -402,7 +409,7 @@ func TestListKeyVaultSecrets(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			mockWrapper := &mockAzureKeyVaultWrapper{}
+			mockWrapper := &mockAzureKeyVaultWrapper{t: t}
 			mockWrapper.Test(t)
 			mockWrapper.
 				On("AssetKeyVaultSecrets", tc.inputVault.SubscriptionId, tc.inputVault.ResourceGroup, tc.inputVault.Name).

@@ -23,6 +23,7 @@ import (
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/protobuf/types/known/structpb"
 
@@ -72,7 +73,8 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockInventoryService.EXPECT().Clear()
 	mockInventoryService.On("ListAssetTypes", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			ch := args.Get(2).(chan<- *inventory.ExtendedGcpAsset)
+			ch, ok := args.Get(2).(chan<- *inventory.ExtendedGcpAsset)
+			require.True(t, ok, "expected chan<- *inventory.ExtendedGcpAsset")
 			ch <- expectedAsset
 			close(ch)
 		}).Once()

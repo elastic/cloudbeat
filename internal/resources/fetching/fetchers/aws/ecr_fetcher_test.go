@@ -262,11 +262,17 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		// The results provided by the channel can return the results in a different order
 		// This method order the results before asserting on them
 		sort.SliceStable(results, func(i, j int) bool {
-			return *results[i].Resource.(EcrResource).RepositoryName <= *results[j].Resource.(EcrResource).RepositoryName
+			iEcr, iOk := results[i].Resource.(EcrResource)
+			jEcr, jOk := results[j].Resource.(EcrResource)
+			if !iOk || !jOk {
+				return false
+			}
+			return *iEcr.RepositoryName <= *jEcr.RepositoryName
 		})
 
 		for i, name := range test.expectedRepositoriesNames {
-			ecrResource := results[i].Resource.(EcrResource)
+			ecrResource, ok := results[i].Resource.(EcrResource)
+			s.Require().True(ok, "expected EcrResource")
 			metadata, err := ecrResource.GetMetadata()
 			s.Require().NoError(err)
 			s.Equal(name, *ecrResource.RepositoryName)

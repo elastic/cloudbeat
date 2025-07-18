@@ -653,7 +653,8 @@ func TestListSQLFirewallRules(t *testing.T) {
 			}
 			fakeTransport := fake.NewFirewallRulesServerTransport(fakeSrv)
 
-			provider := NewSQLProvider(testhelper.NewLogger(t), nil).(*sqlProvider)
+			provider, ok := NewSQLProvider(testhelper.NewLogger(t), nil).(*sqlProvider)
+			require.True(t, ok, "expected *sqlProvider")
 			provider.clientOptions = &arm.ClientOptions{}
 			provider.clientOptions.Transport = fakeTransport
 
