@@ -8,6 +8,7 @@ linters:
     - copyloopvar
     - errcheck
     - errname
+    - exhaustive
     - exhaustruct
     - exptostd
     - fatcontext
@@ -36,6 +37,8 @@ linters:
     - wastedassign
     - whitespace
   settings:
+    exhaustive:
+      default-signifies-exhaustive: true
     exhaustruct:
       include:
         - .*cloudbeat.*fetching.ResourceInfo
