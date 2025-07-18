@@ -217,7 +217,11 @@ func findGroupId(id string, r io.Reader) (*Group, error) {
 	if v, err := readColonFile(r, matchGroupIndexValue(id, 2), 3); err != nil {
 		return nil, err
 	} else if v != nil {
-		return v.(*Group), nil
+		group, ok := v.(*Group)
+		if !ok {
+			return nil, errors.New("invalid group type returned")
+		}
+		return group, nil
 	}
 	return nil, errors.New("Unknown groupId Error, GID: " + id)
 }
@@ -275,7 +279,11 @@ func findUserId(uid string, r io.Reader) (*User, error) {
 	if v, err := readColonFile(r, matchUserIndexValue(uid, 2), 6); err != nil {
 		return nil, err
 	} else if v != nil {
-		return v.(*User), nil
+		user, ok := v.(*User)
+		if !ok {
+			return nil, errors.New("invalid user type returned")
+		}
+		return user, nil
 	}
 	return nil, errors.New("Unknown UserId Error, UID: " + uid)
 }

@@ -183,9 +183,9 @@ func (d dummyTester) DummyFunc() ([]AwsResource, error) {
 		return awsRes, nil
 	case afRegion:
 		return nil, errors.New("api error")
+	default:
+		return nil, nil
 	}
-
-	return nil, nil
 }
 
 func Test_shouldDrop(t *testing.T) {

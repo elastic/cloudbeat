@@ -186,7 +186,8 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
-				resource := event.Fields["resource"].(fetching.ResourceFields)
+				resource, ok := event.Fields["resource"].(fetching.ResourceFields)
+				s.Require().True(ok, "expected resource to be fetching.ResourceFields")
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
 				s.NotEmpty(event.Fields["rule"], "event rule is missing")
@@ -201,7 +202,8 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.Equal(enrichedValue, event.Fields[enrichedKey])
 				s.Regexp("^Rule \".*\": (passed|failed)$", event.Fields["message"], "event message is not correct")
 
-				rule := event.Fields["rule"].(evaluator.Rule)
+				rule, ok := event.Fields["rule"].(evaluator.Rule)
+				s.Require().True(ok, "expected rule to be evaluator.Rule")
 				s.Equal(rule.Id, rule.UUID)
 				s.Equal(rule.References, rule.Reference)
 			}
