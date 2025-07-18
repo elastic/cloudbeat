@@ -216,12 +216,12 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	// so we will fail silently and not get any data from the Management
 	// Account.
 	log.Debugf("assuming '%s' role for Account %s", memberRole, identity.Account)
-	config := assumeRole(
+	awsCfg := assumeRole(
 		stsClient,
 		rootCfg,
 		fmtIAMRole(identity.Account, memberRole),
 	)
-	return config, nil
+	return awsCfg, nil
 }
 
 // getIdentity should assume the cloudbeat-root role and then perform the GetIdentity
