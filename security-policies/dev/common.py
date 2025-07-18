@@ -263,9 +263,8 @@ def fix_and_format_json(json_candidate):
             return json_candidate  # Return original if we can't fix
     return json.dumps(parsed, indent=4)
 
-def format_json_in_text(text):
+def format_and_fix_json_in_text(text):
     # Match code blocks that look like JSON
-    # print(fix_broken_json_block(text))
     text = fix_broken_json_block(text)
     pattern = r"```(?:json)?\s*({.*?})\s*```"
     matches = list(re.finditer(pattern, text, re.DOTALL))
@@ -278,9 +277,50 @@ def format_json_in_text(text):
 
     return text
 
-def fix_code_blocks(text: str):
+def format_json_in_text(text):
+    try:
+        # Match code blocks using triple backticks
+        code_blocks = re.findall(r"```(?:json)?(.*?)```", text, re.DOTALL)
+        for block in code_blocks:
+            stripped_block = block.strip()
+            try:
+                parsed_json = json.loads(stripped_block)
+                formatted_json = json.dumps(parsed_json, indent=4)
+                # Replace original block with formatted block, tagged as JSON
+                text = text.replace(f"```{block}```", f"```json\n{formatted_json}\n```")
+            except json.JSONDecodeError:
+                continue  # Not valid JSON, skip formatting
+        return text
+    except Exception:
+        return text
+
+def format_json_in_string_command(text):
+    try:
+        # Search for JSON-like content in the text
+        start_index = text.find("{")
+        end_index = text.rfind("}") + 1
+        json_str = text[start_index:end_index]
+
+        # Try to load and format the JSON
+        parsed_json = json.loads(json_str)
+        formatted_json = json.dumps(parsed_json, indent=4)
+
+        # Replace the original JSON string in the text with the formatted one
+        formatted_text = text[:start_index] + formatted_json + text[end_index:]
+
+        return formatted_text
+    except:
+        # If JSON extraction or formatting fails, return the original text
+        return text
+
+def fix_code_blocks(text: str, rule_number: str, benchmark_id: str):
     text = add_new_line_after_period(text)
-    text = format_json_in_text(text)
+    if (rule_number in {"1.17", "3.5"} and benchmark_id == "cis_aws"):
+        text = format_json_in_text(text)
+    elif (rule_number in {"3.10", "3.11"} and benchmark_id == "cis_aws") or (rule_number in {"5.1.5"} and benchmark_id == "cis_azure"):
+        text = format_json_in_string_command(text)
+    else:
+        text = format_and_fix_json_in_text(text)
     return check_and_fix_numbered_list(text)
 
 def apply_pss_recursively(data):
