@@ -61,8 +61,12 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 		}
 	}
 
-	rdsInstances := lo.Map(awsResources, func(item awslib.AwsResource, _ int) rds.DBInstance {
-		return item.(rds.DBInstance)
+	rdsInstances := lo.FilterMap(awsResources, func(item awslib.AwsResource, _ int) (rds.DBInstance, bool) {
+		if instance, ok := item.(rds.DBInstance); ok {
+			return instance, true
+		}
+		s.logger.Errorf("Unexpected type in RDS resources: %T", item)
+		return rds.DBInstance{}, false
 	})
 
 	for _, item := range rdsInstances {

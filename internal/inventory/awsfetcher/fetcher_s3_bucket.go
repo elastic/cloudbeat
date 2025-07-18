@@ -61,8 +61,12 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 		}
 	}
 
-	buckets := lo.Map(awsBuckets, func(item awslib.AwsResource, _ int) s3.BucketDescription {
-		return item.(s3.BucketDescription)
+	buckets := lo.FilterMap(awsBuckets, func(item awslib.AwsResource, _ int) (s3.BucketDescription, bool) {
+		if bucket, ok := item.(s3.BucketDescription); ok {
+			return bucket, true
+		}
+		s.logger.Errorf("Unexpected type in S3 bucket resources: %T", item)
+		return s3.BucketDescription{}, false
 	})
 
 	for _, bucket := range buckets {
