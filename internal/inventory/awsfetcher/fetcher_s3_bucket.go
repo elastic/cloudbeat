@@ -62,12 +62,7 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 	}
 
 	buckets := lo.Map(awsBuckets, func(item awslib.AwsResource, _ int) s3.BucketDescription {
-		bucket, ok := item.(s3.BucketDescription)
-		if !ok {
-			s.logger.Errorf("Expected s3.BucketDescription, got %T", item)
-			return s3.BucketDescription{}
-		}
-		return bucket
+		return item.(s3.BucketDescription)
 	})
 
 	for _, bucket := range buckets {

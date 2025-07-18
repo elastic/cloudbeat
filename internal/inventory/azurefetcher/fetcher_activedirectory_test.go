@@ -45,37 +45,37 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 		"displayName":            pointers.Ref("dn"),
 		"appOwnerOrganizationId": &appOwnerOrganizationId,
 	}
-	backingStore := store.NewInMemoryBackingStore()
+	store := store.NewInMemoryBackingStore()
 	for k, v := range values {
-		_ = backingStore.Set(k, v)
+		_ = store.Set(k, v)
 	}
 	servicePrincipal := &models.ServicePrincipal{
 		DirectoryObject: models.DirectoryObject{
 			Entity: models.Entity{},
 		},
 	}
-	servicePrincipal.SetBackingStore(backingStore)
+	servicePrincipal.SetBackingStore(store)
 
 	role := &models.DirectoryRole{
 		DirectoryObject: models.DirectoryObject{
 			Entity: models.Entity{},
 		},
 	}
-	role.SetBackingStore(backingStore)
+	role.SetBackingStore(store)
 
 	group := &models.Group{
 		DirectoryObject: models.DirectoryObject{
 			Entity: models.Entity{},
 		},
 	}
-	group.SetBackingStore(backingStore)
+	group.SetBackingStore(store)
 
 	user := &models.User{
 		DirectoryObject: models.DirectoryObject{
 			Entity: models.Entity{},
 		},
 	}
-	user.SetBackingStore(backingStore)
+	user.SetBackingStore(store)
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(

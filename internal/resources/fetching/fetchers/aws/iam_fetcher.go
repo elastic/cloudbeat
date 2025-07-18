@@ -149,8 +149,6 @@ func (r IAMResource) GetElasticCommonData() (map[string]any, error) {
 			m["user.effective.id"] = r.GetResourceArn()
 			m["user.effective.name"] = r.GetResourceName()
 		}
-	default:
-		// No specific common data mapping for other IAM resource types
 	}
 
 	return m, nil

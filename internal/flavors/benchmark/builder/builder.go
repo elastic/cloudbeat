@@ -68,12 +68,12 @@ func (b *Builder) Build(ctx context.Context, log *clog.Logger, cfg *config.Confi
 }
 
 func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
-	fetchManager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg)
+	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg)
 	if err != nil {
 		return nil, err
 	}
 
-	opaEvaluator, err := evaluator.NewOpaEvaluator(ctx, log, cfg)
+	evaluator, err := evaluator.NewOpaEvaluator(ctx, log, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -89,12 +89,12 @@ func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.C
 
 	rep := rule_ecs.NewDataProvider()
 
-	eventTransformer := transformer.NewTransformer(log, cfg, b.bdp, cdp, b.idp, rep)
+	transformer := transformer.NewTransformer(log, cfg, b.bdp, cdp, b.idp, rep)
 	return &basebenchmark{
 		log:         log,
-		manager:     fetchManager,
-		evaluator:   opaEvaluator,
-		transformer: eventTransformer,
+		manager:     manager,
+		evaluator:   evaluator,
+		transformer: transformer,
 		resourceCh:  resourceCh,
 	}, nil
 }

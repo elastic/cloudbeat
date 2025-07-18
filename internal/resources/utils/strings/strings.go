@@ -27,9 +27,6 @@ func FirstNonEmpty(args ...string) string {
 }
 
 func FromMap(data map[string]any, key string) string {
-	value, ok := data[key].(string)
-	if !ok {
-		return ""
-	}
+	value, _ := data[key].(string)
 	return value
 }

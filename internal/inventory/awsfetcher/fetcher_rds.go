@@ -62,12 +62,7 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	}
 
 	rdsInstances := lo.Map(awsResources, func(item awslib.AwsResource, _ int) rds.DBInstance {
-		instance, ok := item.(rds.DBInstance)
-		if !ok {
-			s.logger.Errorf("Expected rds.DBInstance, got %T", item)
-			return rds.DBInstance{}
-		}
-		return instance
+		return item.(rds.DBInstance)
 	})
 
 	for _, item := range rdsInstances {

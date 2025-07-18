@@ -72,11 +72,7 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 	provider := newMockInventoryProvider(t)
 	for _, resource := range ResourcesToFetch {
 		provider.EXPECT().mock.On("ListAssetTypes", mock.Anything, []string{resource.assetType}, mock.Anything).Run(func(args mock.Arguments) {
-			ch, ok := args.Get(2).(chan<- *gcpinventory.ExtendedGcpAsset)
-			if !ok {
-				t.Errorf("Expected chan<- *gcpinventory.ExtendedGcpAsset, got %T", args.Get(2))
-				return
-			}
+			ch := args.Get(2).(chan<- *gcpinventory.ExtendedGcpAsset)
 			ch <- createAsset(resource.assetType)
 			close(ch)
 		})

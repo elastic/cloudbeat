@@ -124,10 +124,10 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 		require.NoError(t, eks.leaderElector.Run(t.Context()))
 		defer eks.leaderElector.Stop()
 	}
-	k8sStrategy, ok := s.(*K8S)
+	k8s, ok := s.(*K8S)
 	if ok {
-		require.NoError(t, k8sStrategy.leaderElector.Run(t.Context()))
-		defer k8sStrategy.leaderElector.Stop()
+		require.NoError(t, k8s.leaderElector.Run(t.Context()))
+		defer k8s.leaderElector.Stop()
 	}
 
 	for _, fetcher := range want {

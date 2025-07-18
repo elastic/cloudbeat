@@ -18,6 +18,5 @@
 package include
 
 import (
-	// Blank import to register SQLite driver
 	_ "modernc.org/sqlite"
 )
