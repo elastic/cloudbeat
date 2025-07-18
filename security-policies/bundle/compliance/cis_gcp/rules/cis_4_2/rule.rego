@@ -12,8 +12,5 @@ finding := result if {
 	data_adapter.is_compute_instance
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(assert.is_false(audit.sa_is_default_with_full_access)),
-		{"Compute instance": input.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(assert.is_false(audit.sa_is_default_with_full_access)))
 }

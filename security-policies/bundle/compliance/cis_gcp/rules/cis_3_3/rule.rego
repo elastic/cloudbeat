@@ -15,10 +15,7 @@ finding := result if {
 	data_adapter.resource.data.visibility == "PUBLIC"
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_dnssec_enabled),
-		{"Managed zone": input.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_dnssec_enabled))
 }
 
 is_dnssec_enabled if {

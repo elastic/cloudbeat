@@ -8,10 +8,7 @@ finding := result if {
 	data_adapter.is_subnetwork
 	not_internal_https_load_balancer
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_flow_log_configured),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_flow_log_configured))
 }
 
 is_flow_log_configured if {

@@ -9,10 +9,7 @@ finding := result if {
 	data_adapter.is_cloud_resource_manager_project
 	data_adapter.has_policy
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(audit.is_role_not_service_account_user),
-		roles,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(audit.is_role_not_service_account_user))
 }
 
 roles if {

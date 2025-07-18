@@ -25,8 +25,5 @@ finding := result if {
 
 	no_admin_with_user_role := count(members_with_both_roles) == 0
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(no_admin_with_user_role),
-		data_adapter.iam_policy,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(no_admin_with_user_role))
 }
