@@ -8,7 +8,7 @@ linters:
     - copyloopvar
     - errcheck
     - errname
-    # - exhaustive  # Disabled to avoid requiring default statements in switches
+    - exhaustive
     - exhaustruct
     - exptostd
     - fatcontext
@@ -37,8 +37,8 @@ linters:
     - wastedassign
     - whitespace
   settings:
-    # exhaustive:
-    #   default-signifies-exhaustive: true
+    exhaustive:
+      default-signifies-exhaustive: true
     exhaustruct:
       include:
         - .*cloudbeat.*fetching.ResourceInfo
