@@ -72,7 +72,10 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockInventoryService.EXPECT().Clear()
 	mockInventoryService.On("ListAssetTypes", mock.Anything, mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			ch := args.Get(2).(chan<- *inventory.ExtendedGcpAsset)
+			ch, ok := args.Get(2).(chan<- *inventory.ExtendedGcpAsset)
+			if !ok {
+				panic("expected chan<- *inventory.ExtendedGcpAsset")
+			}
 			ch <- expectedAsset
 			close(ch)
 		}).Once()

@@ -70,7 +70,10 @@ func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 	mockInventoryService.EXPECT().Clear()
 	mockInventoryService.On("ListNetworkAssets", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
-			ch := args.Get(1).(chan<- *inventory.ExtendedGcpAsset)
+			ch, ok := args.Get(1).(chan<- *inventory.ExtendedGcpAsset)
+			if !ok {
+				panic("expected chan<- *inventory.ExtendedGcpAsset")
+			}
 			ch <- expectedAsset
 			close(ch)
 		}).Once()

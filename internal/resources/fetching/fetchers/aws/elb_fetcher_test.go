@@ -146,7 +146,8 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		s.Require().NoError(err)
 
 		for i, expectedLbName := range test.expectedlbNames {
-			elbResource := results[i].Resource.(ElbResource)
+			elbResource, ok := results[i].Resource.(ElbResource)
+			s.Require().True(ok, "expected ElbResource")
 			metadata, err := elbResource.GetMetadata()
 
 			s.Require().NoError(err)
