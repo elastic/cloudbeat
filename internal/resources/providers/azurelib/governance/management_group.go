@@ -108,7 +108,10 @@ func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
 		if !ok || len(chain) == 0 {
 			continue
 		}
-		parent, _ := chain[0].(map[string]any)
+		parent, ok := chain[0].(map[string]any)
+		if !ok {
+			continue
+		}
 
 		mg := managementGroups[strings.FromMap(parent, "name")]
 		subscriptions[asset.SubscriptionId] = Subscription{

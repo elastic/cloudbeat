@@ -37,12 +37,20 @@ type mockAzureAppServiceWrapper struct {
 
 func (m *mockAzureAppServiceWrapper) AssetAuthSettings(_ context.Context, subscriptionID string, resourceGroupName string, appName string) (armappservice.WebAppsClientGetAuthSettingsResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, appName)
-	return r.Get(0).(armappservice.WebAppsClientGetAuthSettingsResponse), r.Error(1)
+	resp, ok := r.Get(0).(armappservice.WebAppsClientGetAuthSettingsResponse)
+	if !ok {
+		panic("expected armappservice.WebAppsClientGetAuthSettingsResponse")
+	}
+	return resp, r.Error(1)
 }
 
 func (m *mockAzureAppServiceWrapper) AssetSiteConfigs(_ context.Context, subscriptionID string, resourceGroupName string, appName string) (armappservice.WebAppsClientGetConfigurationResponse, error) {
 	r := m.Called(subscriptionID, resourceGroupName, appName)
-	return r.Get(0).(armappservice.WebAppsClientGetConfigurationResponse), r.Error(1)
+	resp, ok := r.Get(0).(armappservice.WebAppsClientGetConfigurationResponse)
+	if !ok {
+		panic("expected armappservice.WebAppsClientGetConfigurationResponse")
+	}
+	return resp, r.Error(1)
 }
 
 func TestGetAppServiceAuthSettings(t *testing.T) {

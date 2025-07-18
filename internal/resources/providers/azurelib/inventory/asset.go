@@ -119,7 +119,10 @@ func (a *AzureAsset) AddExtension(key string, value any) {
 
 func getAssetFromData(data map[string]any) AzureAsset {
 	subId := strings.FromMap(data, "subscriptionId")
-	properties, _ := data["properties"].(map[string]any)
+	properties, ok := data["properties"].(map[string]any)
+	if !ok {
+		properties = nil
+	}
 	identity, ok := data["identity"].(map[string]any)
 	if !ok {
 		identity = nil

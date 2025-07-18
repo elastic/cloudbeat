@@ -20,6 +20,7 @@ package inventory
 import (
 	"bytes"
 	"context"
+	"errors"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -94,8 +95,16 @@ func (p *ResourceGraphProvider) runPaginatedQuery(ctx context.Context, query arm
 			return nil, err
 		}
 
-		for _, asset := range response.Data.([]any) {
-			structuredAsset := getAssetFromData(asset.(map[string]any))
+		data, ok := response.Data.([]any)
+		if !ok {
+			return nil, errors.New("expected []any from response.Data")
+		}
+		for _, asset := range data {
+			assetMap, ok := asset.(map[string]any)
+			if !ok {
+				continue // Skip malformed assets
+			}
+			structuredAsset := getAssetFromData(assetMap)
 			resourceAssets = append(resourceAssets, structuredAsset)
 		}
 
