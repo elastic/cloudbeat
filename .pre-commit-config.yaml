@@ -74,13 +74,13 @@ repos:
           "fmt",
           "-w",
         ]
-        files: deploy/cloudformation/.*yml
+        files: ^(deploy/cloudformation|deploy/asset-inventory-cloudformation)/.*\.ya?ml$
 
   - repo: https://github.com/aws-cloudformation/cfn-lint
     rev: v1.36.1
     hooks:
       - id: cfn-python-lint
-        files: deploy/cloudformation/.*.yml
+        files: ^(deploy/cloudformation|deploy/asset-inventory-cloudformation)/.*\.ya?ml$
 
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0

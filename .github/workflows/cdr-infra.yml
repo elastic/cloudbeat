@@ -29,6 +29,10 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
+      expiration-days:
+        description: "Number of days until environment expiration"
+        required: false
+        default: "5"
 
 jobs:
   init:
@@ -61,3 +65,4 @@ jobs:
       elk-stack-version: ${{ inputs.elk-stack-version }}
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       infra-type: ${{ needs.init.outputs.infra-type }}
+      expiration_days: ${{ inputs.expiration-days }}

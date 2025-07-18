@@ -41,8 +41,20 @@ runs:
     - name: Bootstrap Kibana
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      env:
+        ES_VERSION: ${{ inputs.es_version }}
       run: |
+        if [[ $ES_VERSION == 8.19* ]]; then
+          echo "Bootstrapping Kibana..."
+          yarn kbn bootstrap --force-install --no-validation || echo "⚠️ yarn kbn bootstrap failed, continuing..."
+          yarn kbn clean && yarn kbn reset || echo "⚠️ yarn kbn reset failed, continuing..."
+        fi
         yarn kbn bootstrap
+
+    - name: Set TEST_CLOUD_HOST_NAME
+      shell: bash
+      run: |
+        echo "TEST_CLOUD_HOST_NAME=$(echo '${{ inputs.test_kibana_url }}' | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
     - name: Run FTR
       if: success()
@@ -55,6 +67,7 @@ runs:
         TEST_CLOUD: '1'
         ES_SECURITY_ENABLED: '1'
         TEST_BROWSER_HEADLESS: '1'
-        TEST_CONFIG: 'x-pack/test/cloud_security_posture_functional/config.cloud.ts'
+        TEST_CLOUD_HOST_NAME: ${{ env.TEST_CLOUD_HOST_NAME }}
+        TEST_CONFIG: 'x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts'
       run: |
         node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"
