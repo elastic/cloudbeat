@@ -23,10 +23,16 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 )
+
+const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 
 type Manager struct {
 	log *clog.Logger
@@ -67,6 +73,11 @@ func (m *Manager) Stop() {
 }
 
 func (m *Manager) fetchAndSleep(ctx context.Context) {
+	counter, err := observability.MeterFromContext(ctx, scopeName).Int64Counter("cloudbeat.fetcher.manager.cycles")
+	if err != nil {
+		m.log.Errorf("Failed to create fetcher manager cycles counter: %v", err)
+	}
+
 	// set immediate exec for first time run
 	timer := time.NewTimer(0)
 	defer timer.Stop()
@@ -79,6 +90,7 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 		case <-timer.C:
 			// update the interval
 			timer.Reset(m.interval)
+			counter.Add(ctx, 1)
 			// this is blocking so the stop will not be called until all the fetchers are finished
 			// in case there is a blocking fetcher it will halt (til the m.timeout)
 			go m.fetchIteration(ctx)
@@ -89,13 +101,22 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
-	m.fetcherRegistry.Update()
-	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
+	ctx, span := observability.StartSpan(
+		ctx,
+		scopeName,
+		"Fetch Iteration",
+		trace.WithAttributes(attribute.String("transaction.type", "request")),
+	)
+	defer span.End()
+	logger := m.log.WithSpanContext(span.SpanContext())
+
+	m.fetcherRegistry.Update(ctx)
+	logger.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
 
 	start := time.Now()
+	seq := start.Unix()
+	logger.Infof("Cycle %d has started", seq)
 
-	seq := time.Now().Unix()
-	m.log.Infof("Cycle %d has started", seq)
 	wg := &sync.WaitGroup{}
 	for _, key := range m.fetcherRegistry.Keys() {
 		wg.Add(1)
@@ -103,14 +124,14 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 			defer wg.Done()
 			err := m.fetchSingle(ctx, k, cycle.Metadata{Sequence: seq})
 			if err != nil {
-				m.log.Errorf("Error running fetcher for key %s: %v", k, err)
+				logger.Errorf("Error running fetcher for key %s: %v", k, err)
 			}
 		}(key)
 	}
 
 	wg.Wait()
-	m.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
-	m.log.Infof("Cycle %d resource fetching has ended", seq)
+	logger.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
+	logger.Infof("Cycle %d resource fetching has ended", seq)
 }
 
 func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle.Metadata) error {
