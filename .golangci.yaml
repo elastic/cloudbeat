@@ -109,9 +109,8 @@ linters:
         # Disabled: would require import alias changes across codebase
         - name: import-alias-naming
           disabled: true
-        # Disabled: too many results in existing codebase
+        # Prevents confusing import shadows
         - name: import-shadowing
-          disabled: true
         # Improves runtime safety by requiring checked type assertions
         - name: unchecked-type-assertion
         # Disabled: pedantic naming rule, would require variable name changes across codebase
