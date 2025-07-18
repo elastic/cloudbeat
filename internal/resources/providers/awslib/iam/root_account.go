@@ -36,7 +36,7 @@ func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User 
 
 	rootDate, err := time.Parse(time.RFC3339, rootAccount.UserCreation)
 	if err != nil {
-		p.log.With("aws.iam.user.name", rootAccount.User, logp.Error(err)).Error("fail to parse root account user creation")
+		p.log.With(logp.Error(err)).Error("fail to parse root account user creation")
 		return nil
 	}
 
@@ -46,7 +46,7 @@ func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User 
 	if rootAccount.PasswordLastUsed != "no_information" && rootAccount.PasswordLastUsed != "N/A" {
 		pwdLastUsed, err = time.Parse(time.RFC3339, rootAccount.PasswordLastUsed)
 		if err != nil {
-			p.log.With("aws.iam.user.name", rootAccount.User, logp.Error(err)).Error("fail to parse root account password last used")
+			p.log.With(logp.Error(err)).Error("fail to parse root account password last used")
 			return nil
 		}
 	}
