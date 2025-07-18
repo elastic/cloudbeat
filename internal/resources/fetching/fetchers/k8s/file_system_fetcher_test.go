@@ -85,7 +85,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	s.Len(results, 1)
 
 	fsResource := results[0].Resource
-	evalResource := fsResource.GetData().(EvalFSResource)
+	evalResource, ok := fsResource.GetData().(EvalFSResource)
+	s.Require().True(ok, "expected EvalFSResource")
 
 	s.Equal(files[0], evalResource.Name)
 	s.Equal("600", evalResource.Mode)
@@ -134,7 +135,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Len(results, 2)
 
 	firstFSResource := results[0].Resource
-	firstEvalResource := firstFSResource.GetData().(EvalFSResource)
+	firstEvalResource, ok := firstFSResource.GetData().(EvalFSResource)
+	s.Require().True(ok, "expected EvalFSResource")
 	s.Equal(outerFiles[0], firstEvalResource.Name)
 	s.Equal("600", firstEvalResource.Mode)
 	s.Equal("root", firstEvalResource.Owner)
@@ -148,7 +150,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal(FSResourceType, rMetadata.Type)
 
 	secFSResource := results[1].Resource
-	secEvalResource := secFSResource.GetData().(EvalFSResource)
+	secEvalResource, ok := secFSResource.GetData().(EvalFSResource)
+	s.Require().True(ok, "expected EvalFSResource")
 	s.Equal(outerFiles[1], secEvalResource.Name)
 	s.Equal("600", secEvalResource.Mode)
 	s.Equal("etcd", secEvalResource.Owner)
@@ -191,7 +194,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	s.Len(results, 1)
 
 	fsResource := results[0].Resource
-	evalResource := fsResource.GetData().(EvalFSResource)
+	evalResource, ok := fsResource.GetData().(EvalFSResource)
+	s.Require().True(ok, "expected EvalFSResource")
 	expectedResult := filepath.Base(dir)
 	rMetadata, err := fsResource.GetMetadata()
 
@@ -247,7 +251,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 		fsResource := results[i].Resource
 		rMetadata, err := fsResource.GetMetadata()
 		s.Require().NoError(err)
-		evalResource := fsResource.GetData().(EvalFSResource)
+		evalResource, ok := fsResource.GetData().(EvalFSResource)
+		s.Require().True(ok, "expected EvalFSResource")
 
 		s.Contains(expectedResult, evalResource.Name)
 		s.NotNil(rMetadata.SubType)
@@ -305,7 +310,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
 		rMetadata, err := fsResource.GetMetadata()
-		evalResource := fsResource.GetData().(EvalFSResource)
+		evalResource, ok := fsResource.GetData().(EvalFSResource)
+		s.Require().True(ok, "expected EvalFSResource")
 
 		s.Require().NoError(err)
 		s.NotNil(rMetadata.SubType)
@@ -352,7 +358,8 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	s.Len(results, 1)
 
 	fsResource := results[0].Resource
-	fileInfo := fsResource.GetData().(EvalFSResource)
+	fileInfo, ok := fsResource.GetData().(EvalFSResource)
+	s.Require().True(ok, "expected EvalFSResource")
 	fileCd, err := fsResource.GetElasticCommonData()
 	s.Require().NoError(err)
 

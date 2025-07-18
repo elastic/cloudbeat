@@ -239,20 +239,23 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 
 func sortResourceInfoSlice(r []fetching.ResourceInfo) {
 	for idx := range r {
-		abr, _ := (&r[idx]).Resource.(*AzureBatchResource)
+		abr, ok := (&r[idx]).Resource.(*AzureBatchResource)
+		if !ok {
+			continue
+		}
 		sort.Slice(abr.Assets, func(i, j int) bool { return abr.Assets[i].Id > abr.Assets[j].Id })
 	}
 
 	sort.Slice(r, func(i, j int) bool {
 		var x, y string
 
-		ai, _ := (&r[i]).Resource.(*AzureBatchResource)
-		if len(ai.Assets) > 0 {
+		ai, ok := (&r[i]).Resource.(*AzureBatchResource)
+		if ok && len(ai.Assets) > 0 {
 			x = ai.Assets[0].SubscriptionId
 		}
 
-		aj, _ := (&r[j]).Resource.(*AzureBatchResource)
-		if len(aj.Assets) > 0 {
+		aj, ok := (&r[j]).Resource.(*AzureBatchResource)
+		if ok && len(aj.Assets) > 0 {
 			y = aj.Assets[0].SubscriptionId
 		}
 

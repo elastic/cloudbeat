@@ -100,7 +100,8 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	s.Require().NoError(err)
 
 	processResource := results[0].Resource
-	evalRes := processResource.GetData().(EvalProcResource)
+	evalRes, ok := processResource.GetData().(EvalProcResource)
+	s.Require().True(ok, "expected EvalProcResource")
 
 	s.Equal(testProcess.Pid, evalRes.PID)
 	s.Equal("kubelet", evalRes.Stat.Name)
@@ -152,7 +153,8 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	s.Require().NoError(err)
 
 	processResource := results[0].Resource
-	evalRes := processResource.GetData().(EvalProcResource)
+	evalRes, ok := processResource.GetData().(EvalProcResource)
+	s.Require().True(ok, "expected EvalProcResource")
 
 	s.Equal(testProcess.Pid, evalRes.PID)
 	s.Equal("kubelet", evalRes.Stat.Name)
@@ -189,7 +191,8 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			ConfigFilePath:    test.configFileName,
 		}
 
-		sysfs := createProcess(testProcess, test.delimiter).(fstest.MapFS)
+		sysfs, ok := createProcess(testProcess, test.delimiter).(fstest.MapFS)
+		s.Require().True(ok, "expected fstest.MapFS")
 		sysfs[test.configFileName] = &fstest.MapFile{
 			Data: configData,
 		}
@@ -204,7 +207,8 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		s.Require().NoError(err)
 
 		processResource := results[0].Resource
-		evalRes := processResource.GetData().(EvalProcResource)
+		evalRes, ok := processResource.GetData().(EvalProcResource)
+	s.Require().True(ok, "expected EvalProcResource")
 		procCD, err := processResource.GetElasticCommonData()
 		s.Require().NoError(err)
 

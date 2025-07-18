@@ -253,7 +253,7 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 	return configMap
 }
 
-func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (any, error) {
+func (f *ProcessesFetcher) readConfigurationFile(filePath string, data []byte) (any, error) {
 	ext := filepath.Ext(path)
 	var output any
 

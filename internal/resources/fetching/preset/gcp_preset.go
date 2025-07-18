@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 )
 
-func NewCisGcpFetchers(ctx context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {
+func NewCisGcpFetchers(ctx context.Context, log *clog.Logger, ch chan fetching.ResourceInfo, inventoryAPI inventoryAPI.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {
 	log.Infof("Initializing GCP fetchers")
 	m := make(registry.FetchersMap)
 
