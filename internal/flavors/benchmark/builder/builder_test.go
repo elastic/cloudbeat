@@ -73,7 +73,7 @@ func TestBase_Build_Success(t *testing.T) {
 			assert.IsType(t, tt.benchType, benchmark)
 
 			reg.EXPECT().Keys().Return([]string{}).Twice()
-			reg.EXPECT().Update().Return().Once()
+			reg.EXPECT().Update(mock.Anything).Return().Once()
 			_, err = benchmark.Run(t.Context())
 			time.Sleep(100 * time.Millisecond)
 			require.NoError(t, err)
@@ -121,7 +121,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 			assert.IsType(t, tt.benchType, benchmark)
 
 			reg.EXPECT().Keys().Return([]string{}).Twice()
-			reg.EXPECT().Update().Return().Once()
+			reg.EXPECT().Update(mock.Anything).Return().Once()
 			le.EXPECT().Run(mock.Anything).Return(nil).Once()
 			_, err = benchmark.Run(t.Context())
 			time.Sleep(100 * time.Millisecond)
