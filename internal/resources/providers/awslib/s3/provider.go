@@ -66,7 +66,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	}
 	clientBuckets, err := defaultClient.ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
-		p.log.With(logp.Error(err)).Errorf("Could not list s3 buckets: %v", err)
+		p.log.With(logp.Error(err)).Error("Could not list s3 buckets")
 		return nil, err
 	}
 
@@ -78,7 +78,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 
 	accountPublicAccessBlockConfig, accountPublicAccessBlockErr := p.getAccountPublicAccessBlock(ctx)
 	if accountPublicAccessBlockErr != nil {
-		p.log.With(logp.Error(accountPublicAccessBlockErr)).Errorf("Could not get account public access block configuration. Err: %v", accountPublicAccessBlockErr)
+		p.log.With(logp.Error(accountPublicAccessBlockErr)).Error("Could not get account public access block configuration")
 	}
 
 	bucketsRegionsMapping := p.getBucketsRegionMapping(ctx, clientBuckets.Buckets)
@@ -91,22 +91,22 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 			//  of the flow, so we should keep describing the bucket even if getting these objects fails.
 			sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, bucket.Name, region)
 			if encryptionErr != nil {
-				bucketLogger.With(logp.Error(encryptionErr)).Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
+				bucketLogger.With(logp.Error(encryptionErr)).Error("Could not get encryption for bucket")
 			}
 
 			bucketPolicy, policyErr := p.GetBucketPolicy(ctx, bucket.Name, region)
 			if policyErr != nil {
-				bucketLogger.With(logp.Error(policyErr)).Errorf("Could not get bucket policy for bucket %s. Error: %v", *bucket.Name, policyErr)
+				bucketLogger.With(logp.Error(policyErr)).Error("Could not get bucket policy")
 			}
 
 			bucketVersioning, versioningErr := p.getBucketVersioning(ctx, bucket.Name, region)
 			if versioningErr != nil {
-				bucketLogger.With(logp.Error(versioningErr)).Errorf("Could not get bucket versioning for bucket %s. Err: %v", *bucket.Name, versioningErr)
+				bucketLogger.With(logp.Error(versioningErr)).Error("Could not get bucket versioning")
 			}
 
 			publicAccessBlockConfiguration, publicAccessBlockErr := p.getPublicAccessBlock(ctx, bucket.Name, region)
 			if publicAccessBlockErr != nil {
-				bucketLogger.With(logp.Error(publicAccessBlockErr)).Errorf("Could not get public access block configuration for bucket %s. Err: %v", *bucket.Name, publicAccessBlockErr)
+				bucketLogger.With(logp.Error(publicAccessBlockErr)).Error("Could not get public access block configuration")
 			}
 
 			result = append(result, BucketDescription{
@@ -195,7 +195,7 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 		// If we could not get the Region for a bucket, additional API calls for resources will probably fail, we should
 		//	not describe this bucket.
 		if regionErr != nil {
-			p.log.With("aws.s3.bucket.name", *clientBucket.Name, logp.Error(regionErr)).Errorf("Could not get bucket location for bucket %s. Not describing this bucket. Error: %v", *clientBucket.Name, regionErr)
+			p.log.With("aws.s3.bucket.name", *clientBucket.Name, logp.Error(regionErr)).Error("Could not get bucket location. Not describing this bucket")
 			continue
 		}
 
