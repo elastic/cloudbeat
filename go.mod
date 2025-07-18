@@ -151,7 +151,7 @@ require (
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250223041408-d3c622f1b874 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.6 // indirect
-	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
+	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
 	github.com/gocsaf/csaf/v3 v3.2.0 // indirect
 	github.com/gofrs/uuid/v5 v5.2.0 // indirect
 	github.com/google/certificate-transparency-go v1.1.8 // indirect
