@@ -19,17 +19,19 @@ metadata:
     2. Select the Check box next to the Bucket.
     3. Click on 'Permissions', then Click on `Bucket Policy`.
     4. Ensure that a policy is listed that matches:
-    ```
-    '{
-     "Sid": <optional>,
-     "Effect": "Deny",
-     "Principal": "*",
-     "Action": "s3:*",
-     "Resource": "arn:aws:s3:::<bucket_name>/*",
-     "Condition": {
-     "Bool": {
-     "aws:SecureTransport": "false"
-     }'
+    ```json
+    {
+        "Sid": "<optional>",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:*",
+        "Resource": "arn:aws:s3:::<bucket_name>/*",
+        "Condition": {
+            "Bool": {
+                "aws:SecureTransport": "false"
+            }
+        }
+    }
     ```
     `<optional>` and `<bucket_name>` will be specific to your account
 
@@ -55,19 +57,19 @@ metadata:
     3. Click on 'Permissions'.
     4. Click 'Bucket Policy'
     5. Add this to the existing policy filling in the required information
-    ```
+    ```json
     {
-     "Sid": <optional>",
-     "Effect": "Deny",
-     "Principal": "*",
-     "Action": "s3:*",
-     "Resource": "arn:aws:s3:::<bucket_name>/*",
-     "Condition": {
-     "Bool": {
-     "aws:SecureTransport": "false"
-     }
-     }
-     }
+        "Sid": "<optional>",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:*",
+        "Resource": "arn:aws:s3:::<bucket_name>/*",
+        "Condition": {
+            "Bool": {
+                "aws:SecureTransport": "false"
+            }
+        }
+    }
     ```
     6. Save
     7. Repeat for all the buckets in your AWS account that contain sensitive data.
@@ -97,19 +99,19 @@ metadata:
     ```
 
     15. Modify the policy.json file by adding in this statement:
-    ```
+    ```json
     {
-     "Sid": <optional>",
-     "Effect": "Deny",
-     "Principal": "*",
-     "Action": "s3:*",
-     "Resource": "arn:aws:s3:::<bucket_name>/*",
-     "Condition": {
-     "Bool": {
-     "aws:SecureTransport": "false"
-     }
-     }
-     }
+        "Sid": "<optional>",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:*",
+        "Resource": "arn:aws:s3:::<bucket_name>/*",
+        "Condition": {
+            "Bool": {
+                "aws:SecureTransport": "false"
+            }
+        }
+    }
     ```
     16. Apply this modified policy back to the S3 bucket:
     ```
