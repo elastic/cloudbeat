@@ -160,73 +160,6 @@ def check_and_fix_numbered_list(text):
     # Join the lines back into a single string and return the result
     return "\n".join(lines)
 
-def fix_broken_json_block(text: str) -> str:
-    """
-    Fixes a broken JSON block inside a Markdown triple backtick section.
-    Ensures:
-    - Balanced curly braces
-    - Each closing brace is on its own line
-    - Strips outer single quotes if needed
-
-    Args:
-        text (str): Markdown text containing the broken JSON block.
-
-    Returns:
-        str: Updated text with fixed JSON formatting.
-    """
-    pattern = re.compile(r"```(?:\s*)'?\{.*?```", re.DOTALL)
-    match = pattern.search(text)
-
-    if not match:
-        return text
-
-    broken_block = match.group(0)
-
-    # Remove backticks and optional surrounding quotes
-    json_content = broken_block.strip('`').strip()
-    if json_content.startswith("'"):
-        json_content = json_content[1:]
-    if json_content.endswith("'"):
-        json_content = json_content[:-1]
-
-    # Count braces
-    open_braces = json_content.count('{')
-    close_braces = json_content.count('}')
-    missing = open_braces - close_braces
-    if missing > 0:
-        json_content += '}' * missing
-
-    # Split into lines and process closing braces to be on their own lines
-    lines = json_content.splitlines()
-    processed_lines = []
-
-    for line in lines:
-        line = line.strip()
-        # If a line ends with multiple closing braces (like }}}), split them
-        if re.match(r'^}+$', line):
-            for char in line:
-                processed_lines.append(char)
-        else:
-            # If a line ends with a closing brace (e.g., ...false"}}), split those braces
-            brace_match = re.match(r'^(.*?)(}+)$', line)
-            if brace_match:
-                content, braces = brace_match.groups()
-                if content.strip():
-                    processed_lines.append(content.strip())
-                for b in braces:
-                    processed_lines.append('}')
-            else:
-                processed_lines.append(line)
-
-    # Reassemble
-    final_json = '\n'.join(processed_lines)
-    final_block = f"```\n{final_json}\n```"
-    return text[:match.start()] + final_block + text[match.end():]
-
-def replacer(match):
-    key = match.group(1)
-    value = match.group(2)
-    return f'{key}: "{value}"'
 
 def add_new_line_after_period(text):
     # Split the text into lines
@@ -243,45 +176,32 @@ def add_new_line_after_period(text):
     # Join the lines back into a single string and return the result
     return "\n".join(lines)
 
-def fix_and_format_json(json_candidate):
-    try:
-        if json_candidate.startswith("'") and json_candidate.endswith("'"):
-            json_candidate = json_candidate[1:-1]
-        json_like_str = re.sub(r'(<[^>]+>)"', r'\1', json_candidate)
-
-        json_like_str = re.sub(r'(".*?")\s*:\s*(<[^">]+>)', r'\1: "\2"', json_like_str)
-        parsed = json.loads(json_like_str)
-    except json.JSONDecodeError:
-        try:
-            # Try to clean up invalid JSON-like text
-            fixed = json_candidate.replace("'", '"')
-            fixed = re.sub(r'(\w+):', r'"\1":', fixed)  # unquoted keys
-            fixed = re.sub(r',\s*}', '}', fixed)         # trailing comma
-            fixed = re.sub(r',\s*]', ']', fixed)         # trailing comma
-            parsed = json.loads(fixed)
-        except Exception:
-            return json_candidate  # Return original if we can't fix
-    return json.dumps(parsed, indent=4)
 
 def format_json_in_text(text):
-    # Match code blocks that look like JSON
-    # print(fix_broken_json_block(text))
-    text = fix_broken_json_block(text)
-    pattern = r"```(?:json)?\s*({.*?})\s*```"
-    matches = list(re.finditer(pattern, text, re.DOTALL))
-    for match in reversed(matches):  # Reverse to avoid messing up indices
-        original_block = match.group(0)
-        json_candidate = match.group(1)
-        formatted_json = fix_and_format_json(json_candidate)
-        formatted_block = f"```json\n{formatted_json}\n```"
-        text = text[:match.start()] + formatted_block + text[match.end():]
+    try:
+        # Search for JSON-like content in the text
+        start_index = text.find("{")
+        end_index = text.rfind("}") + 1
+        json_str = text[start_index:end_index]
 
-    return text
+        # Try to load and format the JSON
+        parsed_json = json.loads(json_str)
+        formatted_json = json.dumps(parsed_json, indent=4)
+
+        # Replace the original JSON string in the text with the formatted one
+        formatted_text = text[:start_index] + formatted_json + text[end_index:]
+
+        return formatted_text
+    except:
+        # If JSON extraction or formatting fails, return the original text
+        return text
+
 
 def fix_code_blocks(text: str):
     text = add_new_line_after_period(text)
     text = format_json_in_text(text)
     return check_and_fix_numbered_list(text)
+
 
 def apply_pss_recursively(data):
     if isinstance(data, dict):
