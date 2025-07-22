@@ -9,12 +9,5 @@ finding := result if {
 	data_adapter.is_iam_service_account
 	data_adapter.has_policy
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(audit.is_policy_not_managed_by_user),
-		members,
-	)
-}
-
-members if {
-	input.resource.iam_policy.bindings[i].members
+	result := common.generate_evaluation_result(common.calculate_result(audit.is_policy_not_managed_by_user))
 }
