@@ -32,6 +32,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
@@ -119,10 +120,10 @@ type ServiceAPI interface {
 
 type ProviderInitializerAPI interface {
 	// Init initializes the GCP asset client
-	Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error)
+	Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig, cfg config.GcpConfig) (ServiceAPI, error)
 }
 
-func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
+func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig, cfg config.GcpConfig) (ServiceAPI, error) {
 	limiter := NewAssetsInventoryRateLimiter(log)
 	// initialize GCP assets inventory client
 	client, err := asset.NewClient(ctx, append(gcpConfig.ClientOpts, option.WithGRPCDialOption(limiter.GetInterceptorDialOption()))...)
@@ -133,7 +134,10 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpCon
 	assetsInventoryWrapper := &AssetsInventoryWrapper{
 		Close: client.Close,
 		ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
-			return client.ListAssets(ctx, req, append(opts, RetryOnResourceExhausted)...)
+			if req.PageSize == 0 {
+				req.PageSize = cfg.GcpCallOpt.ListAssetsPageSize
+			}
+			return client.ListAssets(ctx, req, append(opts, GAXCallOptionRetrier(log), gax.WithTimeout(cfg.GcpCallOpt.ListAssetsTimeout))...)
 		},
 	}
 
