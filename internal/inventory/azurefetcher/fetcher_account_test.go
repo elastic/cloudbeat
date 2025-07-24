@@ -46,7 +46,7 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant UUID>",
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithOrganization(inventory.Organization{
 				ID: "<tenant UUID>",
@@ -82,7 +82,7 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<sub UUID>",
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithOrganization(inventory.Organization{
 				ID: "<sub UUID>",
