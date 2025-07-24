@@ -81,7 +81,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   tenantId,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithTags(item.GetTags()),
 		)
@@ -108,7 +108,7 @@ func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetC
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   f.tenantID,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithUser(inventory.User{
 				ID:   pointers.Deref(item.GetId()),
@@ -143,7 +143,7 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   f.tenantID,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithGroup(inventory.Group{
 				ID:   pointers.Deref(item.GetId()),
@@ -174,7 +174,7 @@ func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   f.tenantID,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithUser(inventory.User{
 				ID:   pointers.Deref(item.GetId()),
