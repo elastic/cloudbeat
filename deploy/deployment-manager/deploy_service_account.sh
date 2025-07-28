@@ -33,7 +33,7 @@ if is_role_not_assigned; then
     ADD_ROLE=true
 fi
 
-result="$(gcloud deployment-manager deployments create --automatic-rollback-on-error "${DEPLOYMENT_NAME}" --project "${PROJECT_NAME}" \
+result="$(gcloud deployment-manager deployments create "${DEPLOYMENT_NAME}" --project "${PROJECT_NAME}" \
     --template service_account.py \
     --properties "scope:'${SCOPE}',parentId:'${PARENT_ID}',serviceAccountName:'${SERVICE_ACCOUNT_NAME}'")"
 
