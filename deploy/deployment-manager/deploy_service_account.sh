@@ -68,15 +68,26 @@ while true; do
     fi
 done
 
-# Fetch the output value from the deployment description
-key="$(gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" \
-  --project="${PROJECT_NAME}" \
-  --format="value(outputs[0].finalValue)")"
+# Wait for deployment to become available and return outputs
+describe_attempt=1
+while true; do
+    key="$(gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" \
+        --project="${PROJECT_NAME}" \
+        --format="value(outputs[0].finalValue)" 2>/dev/null)"
+    
+    if [ -n "$key" ]; then
+        break
+    fi
 
-if [ -z "$key" ]; then
-    echo -e "${RED}Error: Service account key not found in deployment outputs. Exiting...${RESET}"
-    exit 1
-fi
+    if [[ $describe_attempt -ge $MAX_RETRIES ]]; then
+        echo -e "${RED}Error: Service account key not found in deployment outputs after ${describe_attempt} attempts. Exiting...${RESET}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}Waiting for deployment outputs to be available... attempt ${describe_attempt}${RESET}"
+    sleep 5
+    describe_attempt=$((describe_attempt + 1))
+done
 
 # Remove temporary role if it was added
 if [ "$ADD_ROLE" = "true" ]; then
