@@ -8,6 +8,7 @@ The following steps are performed:
 """
 
 import json
+import os
 
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
@@ -81,6 +82,8 @@ if __name__ == "__main__":
         generate_azure_integration_data(),
         generate_gcp_integration_data(),
     ]
+    serverless_mode = os.getenv("SERVERLESS_MODE", "false").lower() == "true"
+
     cspm_template = generate_policy_template(
         cfg=cnfg.elk_config,
         stream_prefix="cloud_security_posture",
@@ -90,7 +93,7 @@ if __name__ == "__main__":
         AGENTLESS_INPUT = {
             "name": f"Agentless policy for {INTEGRATION_NAME}",
             "supports_agentless": True,
-            "fleet_server_host_id": "fleet-default-fleet-server-host",
+            "fleet_server_host_id": "default-fleet-server" if serverless_mode else "fleet-default-fleet-server-host",
         }
 
         logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")

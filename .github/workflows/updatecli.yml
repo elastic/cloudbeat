@@ -55,7 +55,7 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@307ce72e224b82157cc31c78828f168b8e55d47d # v2.84.0
+        uses: updatecli/updatecli-action@b1405b899ee27cdaf56637d3cc7b9bc6a689b37c # v2.88.0
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
@@ -85,7 +85,7 @@ jobs:
 
           echo "GIT_BRANCH=$branchName" >> $GITHUB_ENV
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@307ce72e224b82157cc31c78828f168b8e55d47d # v2.84.0
+        uses: updatecli/updatecli-action@b1405b899ee27cdaf56637d3cc7b9bc6a689b37c # v2.88.0
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
