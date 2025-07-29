@@ -74,7 +74,7 @@ while true; do
     key="$(gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" \
         --project="${PROJECT_NAME}" \
         --format="value(outputs[0].finalValue)" 2>/dev/null)"
-    
+
     if [ -n "$key" ]; then
         break
     fi
@@ -97,7 +97,7 @@ if [ "$ADD_ROLE" = "true" ]; then
 fi
 
 # Save decoded key to file
-echo "$key" | base64 -d > KEY_FILE.json
+echo "$key" | base64 -d >KEY_FILE.json
 
 echo -e "\n${GREEN}Deployment complete.${RESET}"
 gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" --format='table(resources)'
