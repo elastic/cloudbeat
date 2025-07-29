@@ -67,23 +67,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
 
-  # IAM Role to assume for Management Account
-  CloudbeatRootRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: cloudbeat-root
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !GetAtt ElasticAgentRole.Arn
-            Action:
-              - sts:AssumeRole
-      Path: /
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/SecurityAudit
-
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
