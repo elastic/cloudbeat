@@ -54,15 +54,58 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 
 	expected := []inventory.AssetEvent{
 		inventory.NewAssetEvent(
+<<<<<<< HEAD
+=======
+			inventory.AssetClassificationAzureStorageBlobContainer,
+			azureBlobContainer.Id,
+			azureBlobContainer.Name,
+			inventory.WithRawAsset(azureBlobContainer),
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+>>>>>>> 04b20493 ([Asset Inventory][Azure] Add missing `cloud.*` section information (#3470))
 			inventory.AssetClassificationAzureStorageBlobService,
 			[]string{azureBlobService.Id},
 			azureBlobService.Name,
 			inventory.WithRawAsset(azureBlobService),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageFileService,
+			azureFileService.Id,
+			azureFileService.Name,
+			inventory.WithRawAsset(azureFileService),
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageFileShare,
+			azureFileShare.Id,
+			azureFileShare.Name,
+			inventory.WithRawAsset(azureFileShare),
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+>>>>>>> 04b20493 ([Asset Inventory][Azure] Add missing `cloud.*` section information (#3470))
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -70,11 +113,18 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			[]string{azureQueueService.Id},
 			azureQueueService.Name,
 			inventory.WithRawAsset(azureQueueService),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+>>>>>>> 04b20493 ([Asset Inventory][Azure] Add missing `cloud.*` section information (#3470))
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -82,11 +132,40 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			[]string{azureQueue.Id},
 			azureQueue.Name,
 			inventory.WithRawAsset(azureQueue),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageTable,
+			azureTable.Id,
+			azureTable.Name,
+			inventory.WithRawAsset(azureTable),
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureStorageTableService,
+			azureTableService.Id,
+			azureTableService.Name,
+			inventory.WithRawAsset(azureTableService),
+			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
+				Provider:    inventory.AzureCloudProvider,
+				ServiceName: "Azure",
+>>>>>>> 04b20493 ([Asset Inventory][Azure] Add missing `cloud.*` section information (#3470))
 			}),
 		),
 	}
