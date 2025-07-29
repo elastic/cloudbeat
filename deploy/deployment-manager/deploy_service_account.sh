@@ -68,21 +68,25 @@ while true; do
     fi
 done
 
-# Extract key from output
-key="$(echo "$result" | awk '/serviceAccountKey/{getline; print}' | awk '{print $2}')"
+# Fetch the output value from the deployment description
+key="$(gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" \
+  --project="${PROJECT_NAME}" \
+  --format="value(outputs[0].finalValue)")"
 
 if [ -z "$key" ]; then
-    echo -e "${RED}Error: Service account key not found in deployment output. Exiting...${RESET}"
+    echo -e "${RED}Error: Service account key not found in deployment outputs. Exiting...${RESET}"
     exit 1
 fi
 
+# Remove temporary role if it was added
 if [ "$ADD_ROLE" = "true" ]; then
     gcloud "${SCOPE}" remove-iam-policy-binding "${PARENT_ID}" \
         --member="serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com" \
         --role="${ROLE}"
 fi
 
-echo "$key" | base64 -d >KEY_FILE.json
+# Save decoded key to file
+echo "$key" | base64 -d > KEY_FILE.json
 
 echo -e "\n${GREEN}Deployment complete.${RESET}"
 gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" --format='table(resources)'
