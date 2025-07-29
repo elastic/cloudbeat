@@ -28,7 +28,7 @@ import (
 
 type storageFetcher struct {
 	logger   *clog.Logger
-	tenantID string //nolint:unused
+	tenantID string
 	provider storageProvider
 }
 
