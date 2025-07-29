@@ -45,7 +45,7 @@ on:
       expiration_days:
         description: "Number of days until environment expiration"
         required: false
-        default: 5
+        default: "5"
         type: string
       ec-api-key:
         type: string
@@ -92,7 +92,7 @@ on:
       expiration_days:
         description: "Number of days until environment expiration"
         required: false
-        default: 5
+        default: "5"
         type: string
       ec-api-key:
         type: string
@@ -440,6 +440,7 @@ jobs:
           es-user: ${{ env.ES_USER }}
           es-password: ${{ env.ES_PASSWORD }}
           kibana-url: ${{ env.KIBANA_URL }}
+          serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
 
       - name: Deploy CIS Agent Based Integrations
         id: cis-integrations

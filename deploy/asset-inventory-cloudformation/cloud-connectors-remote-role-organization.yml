@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Creates elastic-agent Asset Discovery user, role, and access key, and outputs the access key
+Description: Creates an IAM Role with SecurityAudit policy that can be assumed by elastic's cloud connectors super role
 
 Parameters:
   OrganizationalUnitIds:
@@ -24,35 +24,42 @@ Parameters:
     Default: "Yes"
     ConstraintDescription: Must specify "Yes" or "No"
 
+  ElasticResourceId:
+    Description: Specify the Elastic resource ID that the new role will trust upon.
+    Type: String
+
 Conditions:
   ScanManagementAccountEnabled: !Equals
     - !Ref ScanManagementAccount
     - "Yes"
 
 Resources:
-  ElasticAssetDiscoveryUser:
-    Type: AWS::IAM::User
+  ElasticCloudConnectorsRole:
+    Type: AWS::IAM::Role
     Properties:
-      UserName: !Join
-        - '-'
-        - - elasticagent-user-ad # ad stands for asset discovery, we can't use the full name because of max 64 constraint
-          - !Select
-            - 2
-            - !Split
-              - /
-              - !Ref AWS::StackId
-      Policies:
-        - PolicyName: ElasticAssetDiscoveryUserPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sts:AssumeRole
-                  - iam:GetRole
-                  - iam:ListAccountAliases
-                Resource: '*'
+      RoleName: !Sub 'ElasticCloudConnectorsRole-${AWS::StackName}'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::254766567737:role/cloud_connectors
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Join
+                  - '-'
+                  - - !Ref ElasticResourceId
+                    - !Select
+
+                      # Extract a UUID from the AWS::StackId by splitting on "/"
+                      - 2
+                      - !Split
+                        - /
+                        - !Ref "AWS::StackId"
       Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/SecurityAudit
 
   CloudbeatRootRole:
     Type: AWS::IAM::Role
@@ -72,7 +79,7 @@ Resources:
               - sts:AssumeRole
           - Effect: Allow
             Principal:
-              AWS: !GetAtt ElasticAssetDiscoveryUser.Arn
+              AWS: !GetAtt ElasticCloudConnectorsRole.Arn
             Action:
               - sts:AssumeRole
           - Effect: Allow
@@ -166,16 +173,15 @@ Resources:
         - arn:aws:iam::aws:policy/SecurityAudit
     Condition: ScanManagementAccountEnabled
 
-  ElasticAssetDiscoveryAccessKey:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName: !Ref ElasticAssetDiscoveryUser
-
 Outputs:
-  AccessKeyId:
-    Description: Access Key ID
-    Value: !Ref ElasticAssetDiscoveryAccessKey
+  RoleArn:
+    Description: The ARN of the IAM Role
+    Value: !GetAtt ElasticCloudConnectorsRole.Arn
 
-  SecretAccessKey:
-    Description: Secret Access Key
-    Value: !GetAtt ElasticAssetDiscoveryAccessKey.SecretAccessKey
+  ExternalId:
+    Description: The External ID part string used in the trust policy.
+    Value: !Select
+      - 2
+      - !Split
+        - /
+        - !Ref "AWS::StackId"

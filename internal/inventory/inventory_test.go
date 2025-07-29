@@ -163,7 +163,7 @@ func TestAssetInventory_Run(t *testing.T) {
 
 	select {
 	case <-ctx.Done():
-		t.Errorf("Context done without receiving any events")
+		t.Error("Context done without receiving any events")
 	case received := <-publishedCh:
 		inventory.Stop()
 		assert.ElementsMatch(t, received, expected)

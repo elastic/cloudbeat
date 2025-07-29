@@ -20,9 +20,11 @@ package registry
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -30,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
+	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -281,14 +284,14 @@ func Test_registry_Update(t *testing.T) {
 		},
 		{
 			name: "error",
-			updater: func() (FetchersMap, error) {
+			updater: func(context.Context) (FetchersMap, error) {
 				return nil, errors.New("some-error")
 			},
 			testFn: emptyFn,
 		},
 		{
 			name: "success after fail",
-			updater: func() (FetchersMap, error) {
+			updater: func(context.Context) (FetchersMap, error) {
 				switch count {
 				case 0:
 					count++
@@ -302,15 +305,15 @@ func Test_registry_Update(t *testing.T) {
 			},
 			testFn: func(t *testing.T, r Registry) {
 				emptyFn(t, r) // empty at beginning because of error
-				r.Update()
+				r.Update(t.Context())
 				assert.Len(t, r.Keys(), 1)
 				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
-				assert.Panics(t, r.Update)
+				assert.Panics(t, func() { r.Update(t.Context()) })
 			},
 		},
 		{
 			name: "fail after success",
-			updater: func() (FetchersMap, error) {
+			updater: func(context.Context) (FetchersMap, error) {
 				switch count {
 				case 0:
 					count++
@@ -326,11 +329,11 @@ func Test_registry_Update(t *testing.T) {
 				assert.Len(t, r.Keys(), 1)
 				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
 
-				r.Update() // update fails, registry remains as is
+				r.Update(t.Context()) // update fails, registry remains as is
 				assert.Len(t, r.Keys(), 1)
 				require.NoError(t, r.Run(t.Context(), "fetcher", cycle.Metadata{}))
 
-				assert.Panics(t, r.Update)
+				assert.Panics(t, func() { r.Update(t.Context()) })
 			},
 		},
 	}
@@ -341,7 +344,7 @@ func Test_registry_Update(t *testing.T) {
 
 			r := NewRegistry(testhelper.NewLogger(t), WithUpdater(tt.updater))
 			defer r.Stop()
-			r.Update()
+			r.Update(t.Context())
 			require.NotNil(t, tt.testFn)
 			tt.testFn(t, r)
 		})
@@ -353,4 +356,33 @@ func newMockFetcher(t *testing.T, err error, times int) RegisteredFetcher {
 	m.EXPECT().Stop().Once()
 	m.EXPECT().Fetch(mock.Anything, mock.Anything).Return(err).Times(times)
 	return RegisteredFetcher{Fetcher: m}
+}
+
+func Test_cleanTypeOf(t *testing.T) {
+	tests := []struct {
+		val  any
+		want string
+	}{
+		{
+			val:  nil,
+			want: "<nil>",
+		},
+		{
+			val:  fetching.MockFetcher{},
+			want: "fetching.MockFetcher",
+		},
+		{
+			val:  new(fetching.MockFetcher),
+			want: "fetching.MockFetcher",
+		},
+		{
+			val:  to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(fetchers.NewLoggingFetcher(nil, nil, nil, nil, nil))))))),
+			want: "fetchers.LoggingFetcher",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%T", tt.val), func(t *testing.T) {
+			assert.Equalf(t, tt.want, cleanTypeOf(tt.val), "cleanTypeOf(%v)", tt.val)
+		})
+	}
 }

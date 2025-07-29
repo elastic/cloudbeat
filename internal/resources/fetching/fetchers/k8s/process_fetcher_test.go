@@ -26,7 +26,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v2"
