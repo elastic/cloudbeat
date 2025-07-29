@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
 # This script:
 # 1. Enables necessary APIs for CSPM GCP integration
