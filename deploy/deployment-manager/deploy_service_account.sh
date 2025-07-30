@@ -61,7 +61,7 @@ while true; do
             echo -e "${RED}Max retries reached. Deployment failed.${RESET}"
             exit 1
         fi
-        sleep_time=$((DELAY * attempt))
+        sleep_time=$((DELAY * 2 ** (attempt - 1)))
         echo -e "${GREEN}Retrying in ${sleep_time} seconds...${RESET}"
         sleep $sleep_time
         attempt=$((attempt + 1))
@@ -73,7 +73,7 @@ describe_attempt=1
 while true; do
     key="$(gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" \
         --project="${PROJECT_NAME}" \
-        --format="value(outputs[0].finalValue)" 2>/dev/null)"
+        --format="value(outputs[?name='serviceAccountKey'].finalValue)" 2>/dev/null)"
 
     if [ -n "$key" ]; then
         break
