@@ -56,7 +56,7 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 			input.Marker = output.NextMarker
 		}
 
-		var result []awslib.AwsResource
+		result := make([]awslib.AwsResource, 0, len(kmsKeys))
 		for _, keyEntry := range kmsKeys {
 			keyInfo, err := c.DescribeKey(ctx, &kmsClient.DescribeKeyInput{
 				KeyId: keyEntry.KeyId,

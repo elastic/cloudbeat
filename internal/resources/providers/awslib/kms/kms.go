@@ -43,7 +43,7 @@ func NewKMSProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, facto
 	f := func(cfg aws.Config) Client {
 		return kms.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(ctx, awslib.CurrentRegionSelector(), cfg, f, log)
+	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 
 	return &Provider{
 		log:     log,
