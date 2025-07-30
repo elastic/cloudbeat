@@ -63,6 +63,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			[]string{disk.Id},
 			disk.Name,
 			inventory.WithRawAsset(disk),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -71,6 +72,30 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureVirtualMachine,
+			vm.Id,
+			vm.DisplayName,
+			inventory.WithRawAsset(vm),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure",
+				MachineType: "xlarge",
+				InstanceID:  "/vm",
+			}),
+			inventory.WithHost(inventory.Host{
+				ID:   vm.Id,
+				Name: "localhost",
+				Type: "xlarge",
+>>>>>>> 04b20493 ([Asset Inventory][Azure] Add missing `cloud.*` section information (#3470))
 			}),
 		),
 	}
