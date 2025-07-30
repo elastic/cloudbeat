@@ -11,8 +11,5 @@ finding := result if {
 	data_adapter.is_bigquery_dataset
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(audit.is_cmek_used),
-		{"BigQuery Dataset": input.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(audit.is_cmek_used))
 }
