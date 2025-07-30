@@ -16,10 +16,7 @@ finding := result if {
 	startswith(gcp_common.get_machine_type_family(data_adapter.resource.data.machineType), "n2d-")
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_confidential_computing_enabled),
-		{"Compute instance": input.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_confidential_computing_enabled))
 }
 
 is_confidential_computing_enabled := data_adapter.resource.data.confidentialInstanceConfig.enableConfidentialCompute

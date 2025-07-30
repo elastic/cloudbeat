@@ -12,8 +12,5 @@ finding := result if {
 	data_adapter.is_storage_bucket
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(assert.is_false(audit.resource_is_public)),
-		{"GCS Bucket": input.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(assert.is_false(audit.resource_is_public)))
 }
