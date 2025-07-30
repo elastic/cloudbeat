@@ -8,10 +8,7 @@ finding := result if {
 	data_adapter.is_cloud_sql
 	data_adapter.is_cloud_my_sql
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(skip_show_database_enabled),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(skip_show_database_enabled))
 }
 
 skip_show_database_enabled if {
