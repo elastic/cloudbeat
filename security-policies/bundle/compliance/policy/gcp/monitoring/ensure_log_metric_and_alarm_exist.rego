@@ -10,10 +10,7 @@ finding(filter) := result if {
 	data_adapter.is_monitoring_asset
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_setup_exists(filter)),
-		{"Monitoring": input.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_setup_exists(filter)))
 }
 
 is_setup_exists(filter) if {
