@@ -9,10 +9,7 @@ import future.keywords.in
 finding := result if {
 	data_adapter.is_sql_instance
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(assert.is_false(is_publicly_accessible)),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(assert.is_false(is_publicly_accessible)))
 }
 
 is_publicly_accessible if {
