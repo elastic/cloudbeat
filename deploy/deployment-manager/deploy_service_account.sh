@@ -85,7 +85,7 @@ while true; do
     fi
 
     echo -e "${GREEN}Waiting for deployment outputs to be available... attempt ${describe_attempt}${RESET}"
-    sleep 5
+    sleep ${DELAY}
     describe_attempt=$((describe_attempt + 1))
 done
 
