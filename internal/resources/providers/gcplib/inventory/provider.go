@@ -108,13 +108,8 @@ func newAssetsInventoryWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 	}, nil
 }
 
-<<<<<<< HEAD
 func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
-	assetsInventory, err := newAssetsInventoryWrapper(ctx, log, gcpConfig)
-=======
-func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig, cfg config.GcpConfig) (ServiceAPI, error) {
-	inv, err := newAssetsInventoryWrapper(ctx, log, gcpConfig, cfg)
->>>>>>> 03f12086 (Improve assets resources and policies fetching (#3434))
+	inv, err := newAssetsInventoryWrapper(ctx, log, gcpConfig)
 	if err != nil {
 		return nil, err
 	}
