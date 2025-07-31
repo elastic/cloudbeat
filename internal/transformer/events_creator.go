@@ -87,7 +87,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		return nil, nil
 	}
 
-	events := make([]beat.Event, 0)
+	events := make([]beat.Event, 0, len(eventData.Findings))
 	resMetadata, err := eventData.GetMetadata()
 	if err != nil {
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
