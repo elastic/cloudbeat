@@ -31,9 +31,10 @@ gcloud services enable \
 
 ADD_ROLE=false
 if is_role_not_assigned; then
-    gcloud "${SCOPE}" add-iam-policy-binding "${PARENT_ID}" \
+    output=$(gcloud "${SCOPE}" add-iam-policy-binding "${PARENT_ID}" \
         --member="serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com" \
-        --role="${ROLE}"
+        --role="${ROLE}" 2>&1)
+    echo "$output" | head -n 1
     ADD_ROLE=true
 fi
 
@@ -49,23 +50,22 @@ while true; do
     result="$(gcloud deployment-manager deployments create --automatic-rollback-on-error "${DEPLOYMENT_NAME}" --project "${PROJECT_NAME}" \
         --template service_account.py \
         --properties "scope:'${SCOPE}',parentId:'${PARENT_ID}',serviceAccountName:'${SERVICE_ACCOUNT_NAME}'" 2>&1)"
-    status=$?
     set -e
 
-    if [ $status -eq 0 ]; then
+    if ! echo "$result" | grep -qE 'Error|code: RESOURCE_ERROR' >/dev/null; then
         echo -e "${GREEN}Deployment succeeded on attempt ${attempt}.${RESET}"
         break
-    else
-        echo -e "${RED}Attempt ${attempt} failed: ${result}${RESET}"
-        if [[ $attempt -ge $MAX_RETRIES ]]; then
-            echo -e "${RED}Max retries reached. Deployment failed.${RESET}"
-            exit 1
-        fi
-        sleep_time=$((DELAY * 2 ** (attempt - 1)))
-        echo -e "${GREEN}Retrying in ${sleep_time} seconds...${RESET}"
-        sleep $sleep_time
-        attempt=$((attempt + 1))
     fi
+
+    echo -e "${RED}Attempt ${attempt} failed: ${result}${RESET}"
+    if [[ $attempt -ge $MAX_RETRIES ]]; then
+        echo -e "${RED}Max retries reached. Deployment failed.${RESET}"
+        exit 1
+    fi
+    sleep_time=$((DELAY * 2 ** (attempt - 1)))
+    echo -e "${GREEN}Retrying in ${sleep_time} seconds...${RESET}"
+    sleep $sleep_time
+    attempt=$((attempt + 1))
 done
 
 # Wait for deployment to become available and return outputs
@@ -73,7 +73,7 @@ describe_attempt=1
 while true; do
     key="$(gcloud deployment-manager deployments describe "${DEPLOYMENT_NAME}" \
         --project="${PROJECT_NAME}" \
-        --format="value(outputs[?name='serviceAccountKey'].finalValue)" 2>/dev/null)"
+        --format=json | jq -r '.outputs[] | select(.name=="serviceAccountKey") | .finalValue' 2>/dev/null)"
 
     if [ -n "$key" ]; then
         break
@@ -91,9 +91,10 @@ done
 
 # Remove temporary role if it was added
 if [ "$ADD_ROLE" = "true" ]; then
-    gcloud "${SCOPE}" remove-iam-policy-binding "${PARENT_ID}" \
+    output=$(gcloud "${SCOPE}" remove-iam-policy-binding "${PARENT_ID}" \
         --member="serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com" \
-        --role="${ROLE}"
+        --role="${ROLE}" 2>&1)
+    echo "$output" | head -n 1
 fi
 
 # Save decoded key to file
