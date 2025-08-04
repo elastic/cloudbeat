@@ -9,10 +9,7 @@ default has_cusomter_encrypted_key := false
 finding := result if {
 	data_adapter.is_dataproc_cluster
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(has_cusomter_encrypted_key),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(has_cusomter_encrypted_key))
 }
 
 has_cusomter_encrypted_key if {

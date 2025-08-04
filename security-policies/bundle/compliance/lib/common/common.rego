@@ -124,3 +124,5 @@ generate_result_without_expected(evaluation, evidence) := {
 	"evaluation": evaluation,
 	"evidence": evidence,
 }
+
+generate_evaluation_result(evaluation) := {"evaluation": evaluation}
