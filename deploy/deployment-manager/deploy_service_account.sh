@@ -5,7 +5,7 @@ set -e
 # 1. Enables necessary APIs for CSPM GCP integration
 # 2. Applies a Deployment Manager template to create a service account with roles and key
 # 3. Saves generated key to KEY_FILE.json
-# 4. Handles retry for deployment and failure cleanup
+# 4. Handles retry for deployment and failure cleanup due to limitations with Deployment Manager's dependsOn
 
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm-user}
 SERVICE_ACCOUNT_NAME=${SERVICE_ACCOUNT_NAME:-elastic-agent-cspm-user-sa}
