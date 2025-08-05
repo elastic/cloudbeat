@@ -9,10 +9,7 @@ finding := result if {
 	data_adapter.is_sql_instance
 	is_clous_sql_instance_second_gen
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(audit.ip_is_private),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(audit.ip_is_private))
 }
 
 is_clous_sql_instance_second_gen if {

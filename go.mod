@@ -577,7 +577,7 @@ replace (
 	github.com/dop251/goja => github.com/andrewkroh/goja v0.0.0-20190128172624-dd2ac4456e20
 	github.com/dop251/goja_nodejs => github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6
 	github.com/elazarl/goproxy => github.com/elazarl/goproxy v0.0.0-20230731152917-f99041a5c027
-	github.com/golang/glog => github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4
+	github.com/golang/glog => github.com/golang/glog v1.2.4 // indirect
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
 	github.com/lestrrat-go/jwx => github.com/lestrrat-go/jwx v1.2.27
 	k8s.io/kubernetes => k8s.io/kubernetes v1.31.0
