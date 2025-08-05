@@ -12,10 +12,7 @@ finding := result if {
 	data_adapter.is_sql_server
 
 	# set result
-	result := common.generate_result_without_expected(
-		common.calculate_result(assert.is_false(is_flag_limited)),
-		{"DB Instance": data_adapter.resource},
-	)
+	result := common.generate_evaluation_result(common.calculate_result(assert.is_false(is_flag_limited)))
 }
 
 is_flag_limited := audit.is_flag_limited("user connections")

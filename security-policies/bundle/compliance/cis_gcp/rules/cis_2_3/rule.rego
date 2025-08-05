@@ -10,10 +10,7 @@ default is_retention_policy_valid := false
 finding := result if {
 	data_adapter.is_log_bucket
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_retention_policy_valid),
-		data_adapter.resource,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_retention_policy_valid))
 }
 
 is_retention_policy_valid if {
