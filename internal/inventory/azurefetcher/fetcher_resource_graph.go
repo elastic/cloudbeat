@@ -55,18 +55,18 @@ func (f *resourceGraphFetcher) Fetch(ctx context.Context, assetChan chan<- inven
 		azureType      string
 		classification inventory.AssetClassification
 	}{
-		{"App Services", "Azure Compute", azurelib.AssetGroupResources, azurelib.WebsitesAssetType, inventory.AssetClassificationAzureAppService},
-		{"Container Registries", "Azure Containers", azurelib.AssetGroupResources, azurelib.ContainerRegistryAssetType, inventory.AssetClassificationAzureContainerRegistry},
-		{"Cosmos DB Accounts", "Azure Databases", azurelib.AssetGroupResources, azurelib.DocumentDBDatabaseAccountAssetType, inventory.AssetClassificationAzureCosmosDBAccount},
-		{"Cosmos DB SQL Databases", "Azure Databases", azurelib.AssetGroupResources, azurelib.CosmosDBForSQLDatabaseAssetType, inventory.AssetClassificationAzureCosmosDBSQLDatabase},
+		{"App Services", "Azure App Services", azurelib.AssetGroupResources, azurelib.WebsitesAssetType, inventory.AssetClassificationAzureAppService},
+		{"Container Registries", "Azure Container Registries", azurelib.AssetGroupResources, azurelib.ContainerRegistryAssetType, inventory.AssetClassificationAzureContainerRegistry},
+		{"Cosmos DB Accounts", "Azure Cosmos DB", azurelib.AssetGroupResources, azurelib.DocumentDBDatabaseAccountAssetType, inventory.AssetClassificationAzureCosmosDBAccount},
+		{"Cosmos DB SQL Databases", "Azure Cosmos DB", azurelib.AssetGroupResources, azurelib.CosmosDBForSQLDatabaseAssetType, inventory.AssetClassificationAzureCosmosDBSQLDatabase},
 		{"Disks", "Azure Storage", azurelib.AssetGroupResources, azurelib.DiskAssetType, inventory.AssetClassificationAzureDisk},
-		{"Elastic Pools", "Azure Databases", azurelib.AssetGroupResources, azurelib.ElasticPoolAssetType, inventory.AssetClassificationAzureElasticPool},
-		{"MySQL Flexible Servers", "Azure Databases", azurelib.AssetGroupResources, azurelib.FlexibleMySQLDBAssetType, inventory.AssetClassificationAzureSQLServer},
+		{"Elastic Pools", "Azure SQL Elastic Pools", azurelib.AssetGroupResources, azurelib.ElasticPoolAssetType, inventory.AssetClassificationAzureElasticPool},
+		{"MySQL Flexible Servers", "Azure SQL Servers", azurelib.AssetGroupResources, azurelib.FlexibleMySQLDBAssetType, inventory.AssetClassificationAzureSQLServer},
 		{"Resource Groups", "Azure Management", azurelib.AssetGroupResourceContainers, azurelib.ResouceGroupAssetType, inventory.AssetClassificationAzureResourceGroup},
-		{"SQL Databases", "Azure Databases", azurelib.AssetGroupResources, azurelib.MySQLDatabaseAssetType, inventory.AssetClassificationAzureSQLDatabase},
+		{"SQL Databases", "Azure SQL Databases", azurelib.AssetGroupResources, azurelib.MySQLDatabaseAssetType, inventory.AssetClassificationAzureSQLDatabase},
 		{"Snapshots", "Azure Storage", azurelib.AssetGroupResources, azurelib.SnapshotAssetType, inventory.AssetClassificationAzureSnapshot},
 		{"Storage Accounts", "Azure Storage", azurelib.AssetGroupResources, azurelib.StorageAccountAssetType, inventory.AssetClassificationAzureStorageAccount},
-		{"Virtual Machines", "Azure Compute", azurelib.AssetGroupResources, azurelib.VirtualMachineAssetType, inventory.AssetClassificationAzureVirtualMachine},
+		{"Virtual Machines", "Azure Virtual Machines", azurelib.AssetGroupResources, azurelib.VirtualMachineAssetType, inventory.AssetClassificationAzureVirtualMachine},
 	}
 	for _, r := range resourcesToFetch {
 		f.fetch(ctx, r.name, r.serviceName, r.azureGroup, r.azureType, r.classification, assetChan)
