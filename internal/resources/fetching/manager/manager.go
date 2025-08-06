@@ -104,7 +104,7 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 	ctx, span := observability.StartSpan(
 		ctx,
 		scopeName,
-		"Fetch Iteration",
+		"manager.Manager.fetchIteration",
 		trace.WithAttributes(attribute.String("transaction.type", "request")),
 	)
 	defer span.End()
