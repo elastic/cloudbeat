@@ -1,0 +1,113 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "variables": {
+        "elasticCloudIssuer": "https://evgboidc-dpf8dmdjhnakhpgv.a02.azurefd.net/oidc/",
+        "userAssignedIdentityName": "[concat('ElasticCloudConnectorsRole-', parameters('elasticResourceId'))]",
+        "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
+        "customRoleDefinitionName": "[guid('ElasticCloudConnectorsRoleDefinition-', subscription().subscriptionId)]",
+        "customRoleAssignmentName": "[guid('ElasticCloudConnectorsRoleAssignment-', parameters('elasticResourceId'))]",
+        "securityauditRoleAssignmentName": "[guid('ElasticCloudConnectorsSecurityAuditRoleAssignment-', parameters('elasticResourceId'))]"
+    },
+    "parameters": {
+        "elasticResourceId": {
+            "type": "string",
+            "defaultValue": "Elastic-Cloud-Resource-ID",
+            "metadata": {
+                "description": "Federated Identity Credential token subject"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "apiVersion": "2018-11-30",
+            "name": "[variables('userAssignedIdentityName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "elastic-cloud-id": "[parameters('elasticResourceId')]"
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
+                    "apiVersion": "2023-01-31",
+                    "name": "[variables('federatedIdentityCredentialsName')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
+                    ],
+                    "properties": {
+                        "issuer": "[variables('elasticCloudIssuer')]",
+                        "subject": "[parameters('elasticResourceId')]",
+                        "audiences": [
+                            "api://AzureADTokenExchange"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Authorization/roleDefinitions",
+            "apiVersion": "2022-04-01",
+            "name": "[variables('customRoleDefinitionName')]",
+            "properties": {
+                "assignableScopes": [
+                    "[concat('/subscriptions/', subscription().subscriptionId)]",
+                    "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name)]"
+                ],
+                "roleName": "Elastic Web App Reader",
+                "description": "Provide Elastic Cloud Connector deployments with read permissions for web app configurations",
+                "permissions": [
+                    {
+                        "actions": [
+                            "Microsoft.Web/sites/*/read",
+                            "Microsoft.Web/sites/config/Read",
+                            "Microsoft.Web/sites/config/list/Action"
+                        ]
+                    }
+                ],
+                "type": "CustomRole"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[variables('customRoleAssignmentName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]",
+                "[variables('customRoleDefinitionName')]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('customRoleDefinitionName'))]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2018-11-30').principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[variables('securityauditRoleAssignmentName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2018-11-30').principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        }
+    ],
+    "outputs": {
+        "RoleId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
+        },
+        "PrincipalId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2018-11-30').principalId]"
+        },
+        "ClientId": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2018-11-30').clientId]"
+        }
+    }
+}
