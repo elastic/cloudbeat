@@ -52,7 +52,7 @@ func (f *KmsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 
 	keys, err := f.kms.DescribeSymmetricKeys(ctx)
 	if err != nil {
-		f.log.Errorf("failed to describe keys from KMS: %v", err)
+		f.log.Errorf(ctx, "failed to describe keys from KMS: %v", err)
 		return nil
 	}
 

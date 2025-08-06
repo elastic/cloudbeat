@@ -21,6 +21,7 @@
 package launcher
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -99,7 +100,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 		l.log.Infof("Waiting for initial reconfiguration from Fleet server...")
 		update, err := l.reconfigureWait(reconfigureWaitTimeout)
 		if err != nil {
-			l.log.Errorf("Failed while waiting for the initial reconfiguration from Fleet server: %v", err)
+			l.log.Errorf(context.TODO(), "Failed while waiting for the initial reconfiguration from Fleet server: %v", err)
 			return err
 		}
 
@@ -122,7 +123,7 @@ func (l *launcher) run() error {
 		l.log.Info("Launcher stopped after timeout")
 	case err == nil: // unexpected
 	default:
-		l.log.Errorf("Launcher stopped by error: %v", err)
+		l.log.Errorf(context.TODO(), "Launcher stopped by error: %v", err)
 	}
 
 	l.reloader.Stop()
@@ -298,7 +299,7 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 			if l.validator != nil {
 				err := l.validator.Validate(update)
 				if err != nil {
-					l.log.Errorf("Config update validation failed: %v", err)
+					l.log.Errorf(context.TODO(), "Config update validation failed: %v", err)
 					healthErr := &BeaterUnhealthyError{}
 					if errors.As(err, healthErr) {
 						l.beat.Manager.UpdateStatus(status.Degraded, healthErr.Error())

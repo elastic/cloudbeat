@@ -97,7 +97,7 @@ func (rl *AssetsInventoryRateLimiter) Wait(ctx context.Context, method string, r
 	if limiter != nil {
 		err := limiter.Wait(ctx)
 		if err != nil {
-			rl.log.Errorf("Failed to wait for project quota on method: %s, request: %v, error: %v", method, req, err)
+			rl.log.Errorf(ctx, "Failed to wait for project quota on method: %s, request: %v, error: %v", method, req, err)
 		}
 	}
 }

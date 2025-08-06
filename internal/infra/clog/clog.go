@@ -31,13 +31,14 @@ type Logger struct {
 	*logp.Logger
 }
 
-func (l *Logger) Errorf(template string, args ...any) {
+func (l *Logger) Errorf(ctx context.Context, template string, args ...any) {
+	spanCtx := trace.SpanContextFromContext(ctx)
 	// Downgrade context.Canceled errors to warning level
 	if hasErrorType(context.Canceled, args...) {
-		l.Warnf(template, args...)
+		l.WithSpanContext(spanCtx).Warnf(template, args...)
 		return
 	}
-	l.Logger.Errorf(template, args...)
+	l.WithSpanContext(spanCtx).Logger.Errorf(template, args...)
 }
 
 func (l *Logger) Error(args ...any) {

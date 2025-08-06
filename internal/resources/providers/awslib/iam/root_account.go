@@ -27,7 +27,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
-func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User {
+func (p Provider) getRootAccountUser(ctx context.Context, rootAccount *CredentialReport) *types.User {
 	if rootAccount == nil {
 		p.log.Error("no root account entry was provided")
 		return nil
@@ -35,7 +35,7 @@ func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User 
 
 	rootDate, err := time.Parse(time.RFC3339, rootAccount.UserCreation)
 	if err != nil {
-		p.log.Errorf("fail to parse root account user creation, error: %v", err)
+		p.log.Errorf(ctx, "fail to parse root account user creation, error: %v", err)
 		return nil
 	}
 
@@ -45,7 +45,7 @@ func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User 
 	if rootAccount.PasswordLastUsed != "no_information" && rootAccount.PasswordLastUsed != "N/A" {
 		pwdLastUsed, err = time.Parse(time.RFC3339, rootAccount.PasswordLastUsed)
 		if err != nil {
-			p.log.Errorf("fail to parse root account password last used, error: %v", err)
+			p.log.Errorf(ctx, "fail to parse root account password last used, error: %v", err)
 			return nil
 		}
 	}

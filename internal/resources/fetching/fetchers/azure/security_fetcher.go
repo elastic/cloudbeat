@@ -66,7 +66,7 @@ func (f *AzureSecurityAssetFetcher) Fetch(ctx context.Context, cycleMetadata cyc
 		for assetType, fn := range fetches {
 			securityContacts, err := fn(ctx, sub.ShortID)
 			if err != nil {
-				f.log.Errorf("AzureSecurityAssetFetcher.Fetch failed to fetch %s for subscription %s: %s", assetType, sub.ShortID, err.Error())
+				f.log.Errorf(ctx, "AzureSecurityAssetFetcher.Fetch failed to fetch %s for subscription %s: %s", assetType, sub.ShortID, err.Error())
 				errs = append(errs, err)
 				continue
 			}

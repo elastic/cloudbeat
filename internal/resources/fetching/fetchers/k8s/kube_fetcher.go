@@ -163,7 +163,7 @@ func (f *KubeFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) err
 		return fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
-	getKubeData(f.log, f.watchers, f.resourceCh, cycleMetadata)
+	getKubeData(f.log, f.watchers, f.resourceCh, cycleMetadata) //nolint:contextcheck
 	return nil
 }
 

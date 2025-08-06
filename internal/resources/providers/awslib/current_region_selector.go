@@ -39,7 +39,7 @@ func (s *currentRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]
 
 	metadata, err := s.client.GetMetadata(ctx, cfg)
 	if err != nil {
-		log.Errorf("Failed getting current region: %v", err)
+		log.Errorf(ctx, "Failed getting current region: %v", err)
 		return nil, err
 	}
 

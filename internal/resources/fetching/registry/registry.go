@@ -119,7 +119,7 @@ func (r *registry) Update(ctx context.Context) {
 	}
 	fm, err := r.updater(ctx)
 	if err != nil {
-		r.log.Errorf("Failed to update registry: %v", err)
+		r.log.Errorf(ctx, "Failed to update registry: %v", err)
 		return
 	}
 	r.reg = fm

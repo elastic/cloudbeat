@@ -129,7 +129,7 @@ func NewProcessFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, processe
 	}
 }
 
-func (f *ProcessesFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
+func (f *ProcessesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting ProcessesFetcher.Fetch")
 
 	pids, err := proc.ListFS(f.Fs)
@@ -142,7 +142,8 @@ func (f *ProcessesFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata
 	for _, p := range pids {
 		stat, err := proc.ReadStatFS(f.Fs, p)
 		if err != nil {
-			f.log.Errorf("error while reading /proc/<pid>/stat for process %s: %s", p, err.Error())
+			// FIXME: This should be a context from the function signature.
+			f.log.Errorf(ctx, "error while reading /proc/<pid>/stat for process %s: %s", p, err.Error())
 			continue
 		}
 
@@ -159,39 +160,43 @@ func (f *ProcessesFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata
 			continue
 		}
 
-		fetchedResource := f.fetchProcessData(stat, processConfig, p, cmd)
+		fetchedResource := f.fetchProcessData(ctx, stat, processConfig, p, cmd)
 		f.resourceCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cycleMetadata}
 	}
 
 	return nil
 }
 
-func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string, cmd string) fetching.Resource {
-	configMap := f.getProcessConfigurationFile(processConf, cmd, procStat.Name)
+func (f *ProcessesFetcher) fetchProcessData(ctx context.Context, procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string, cmd string) fetching.Resource {
+	configMap := f.getProcessConfigurationFile(ctx, processConf, cmd, procStat.Name)
 	evalRes := EvalProcResource{PID: processId, Cmd: cmd, Stat: procStat, ExternalData: configMap}
-	procCd := f.createProcCommonData(procStat, cmd, processId)
+	procCd := f.createProcCommonData(ctx, procStat, cmd, processId)
 	return ProcResource{EvalResource: evalRes, ElasticCommon: procCd}
 }
 
-func (f *ProcessesFetcher) createProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
+func (f *ProcessesFetcher) createProcCommonData(ctx context.Context, stat proc.ProcStat, cmd string, pid string) ProcCommonData {
 	processID, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
-		f.log.Errorf("Couldn't parse PID, pid: %s", pid)
+		// FIXME: This should be a context from the function signature.
+		f.log.Errorf(ctx, "Couldn't parse PID, pid: %s", pid)
 	}
 
 	startTime, err := strconv.ParseUint(stat.StartTime, 10, 64)
 	if err != nil {
-		f.log.Errorf("Couldn't parse stat.StartTime, startTime: %s", stat.StartTime)
+		// FIXME: This should be a context from the function signature.
+		f.log.Errorf(ctx, "Couldn't parse stat.StartTime, startTime: %s", stat.StartTime)
 	}
 
 	pgid, err := strconv.ParseInt(stat.Group, 10, 64)
 	if err != nil {
-		f.log.Errorf("Couldn't parse stat.Group, Group: %s, Error: %v", stat.Group, err)
+		// FIXME: This should be a context from the function signature.
+		f.log.Errorf(ctx, "Couldn't parse stat.Group, Group: %s, Error: %v", stat.Group, err)
 	}
 
 	ppid, err := strconv.ParseInt(stat.Parent, 10, 64)
 	if err != nil {
-		f.log.Errorf("Couldn't parse stat.Parent, Parent: %s, Error: %v", stat.Parent, err)
+		// FIXME: This should be a context from the function signature.
+		f.log.Errorf(ctx, "Couldn't parse stat.Parent, Parent: %s, Error: %v", stat.Parent, err)
 	}
 
 	sysUptime, err := proc.ReadUptimeFS(f.Fs)
@@ -219,7 +224,7 @@ func (f *ProcessesFetcher) createProcCommonData(stat proc.ProcStat, cmd string, 
 // getProcessConfigurationFile - reads the configuration file associated with a process.
 // As an input this function receives a ProcessInputConfiguration that contains ConfigFileArguments, a string array that represents some process flags
 // The function extracts the configuration file associated with each flag and returns it.
-func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]any {
+func (f *ProcessesFetcher) getProcessConfigurationFile(ctx context.Context, processConfig ProcessInputConfiguration, cmd string, processName string) map[string]any {
 	configMap := make(map[string]any)
 	for _, argument := range processConfig.ConfigFileArguments {
 		// The regex extracts the cmd line flag(argument) value
@@ -232,7 +237,8 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 
 		groupMatches := matcher.FindStringSubmatch(cmd)
 		if len(groupMatches) < 2 {
-			f.log.Errorf("Couldn't find a configuration file associated with flag %s for process %s", argument, processName)
+			// FIXME: This should be a context from the function signature.
+			f.log.Errorf(ctx, "Couldn't find a configuration file associated with flag %s for process %s", argument, processName)
 			continue
 		}
 		argValue := matcher.FindStringSubmatch(cmd)[1]
@@ -240,12 +246,14 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 
 		data, err := fs.ReadFile(f.Fs, argValue)
 		if err != nil {
-			f.log.Errorf("Failed to read file configuration for process %s, error - %+v", processName, err)
+			// FIXME: This should be a context from the function signature.
+			f.log.Errorf(ctx, "Failed to read file configuration for process %s, error - %+v", processName, err)
 			continue
 		}
 		configFile, err := f.readConfigurationFile(argValue, data)
 		if err != nil {
-			f.log.Errorf("Failed to parse file configuration for process %s, error - %+v", processName, err)
+			// FIXME: This should be a context from the function signature.
+			f.log.Errorf(ctx, "Failed to parse file configuration for process %s, error - %+v", processName, err)
 			continue
 		}
 		configMap[argument] = configFile

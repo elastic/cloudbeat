@@ -70,7 +70,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cycleMetadata cycle.
 	for _, assetGroup := range AzureBatchAssetGroups {
 		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, slices.Collect(maps.Keys(AzureBatchAssets)))
 		if err != nil {
-			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
+			f.log.Errorf(ctx, "AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
 			errAgg = errors.Join(errAgg, err)
 			continue
 		}

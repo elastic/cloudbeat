@@ -55,7 +55,7 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 
 	awsResources, err := s.provider.DescribeDBInstances(ctx)
 	if err != nil {
-		s.logger.Errorf("Could not list RDS Instances: %v", err)
+		s.logger.Errorf(ctx, "Could not list RDS Instances: %v", err)
 		if len(awsResources) == 0 {
 			return
 		}

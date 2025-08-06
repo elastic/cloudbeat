@@ -18,6 +18,8 @@
 package evaluator
 
 import (
+	"context"
+
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
 	"go.uber.org/zap"
@@ -54,7 +56,7 @@ func (l *logger) Info(fmt string, a ...any) {
 }
 
 func (l *logger) Error(fmt string, a ...any) {
-	l.log.Errorf(fmt, a...)
+	l.log.Errorf(context.TODO(), fmt, a...)
 }
 
 func (l *logger) Warn(fmt string, a ...any) {

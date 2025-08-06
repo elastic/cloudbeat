@@ -75,7 +75,7 @@ func (m *Manager) Stop() {
 func (m *Manager) fetchAndSleep(ctx context.Context) {
 	counter, err := observability.MeterFromContext(ctx, scopeName).Int64Counter("cloudbeat.fetcher.manager.cycles")
 	if err != nil {
-		m.log.Errorf("Failed to create fetcher manager cycles counter: %v", err)
+		m.log.Errorf(ctx, "Failed to create fetcher manager cycles counter: %v", err)
 	}
 
 	// set immediate exec for first time run
@@ -124,7 +124,7 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 			defer wg.Done()
 			err := m.fetchSingle(ctx, k, cycle.Metadata{Sequence: seq})
 			if err != nil {
-				logger.Errorf("Error running fetcher for key %s: %v", k, err)
+				logger.Errorf(ctx, "Error running fetcher for key %s: %v", k, err)
 			}
 		}(key)
 	}

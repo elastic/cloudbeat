@@ -92,7 +92,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 		// Fetching all types even if non-existent in asset group for simplicity
 		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, slices.Collect(maps.Keys(AzureAssetTypeToTypePair)))
 		if err != nil {
-			f.log.Errorf("AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
+			f.log.Errorf(ctx, "AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
 			errAgg = errors.Join(errAgg, err)
 			continue
 		}
@@ -101,7 +101,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 
 	subscriptions, err := f.provider.GetSubscriptions(ctx, cycleMetadata)
 	if err != nil {
-		f.log.Errorf("Error fetching subscription information: %v", err)
+		f.log.Errorf(ctx, "Error fetching subscription information: %v", err)
 	}
 
 	for _, e := range f.enrichers {

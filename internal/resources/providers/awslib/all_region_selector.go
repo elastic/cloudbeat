@@ -47,7 +47,7 @@ func (s *allRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]stri
 
 	output, err := s.client.DescribeRegions(ctx, nil)
 	if err != nil {
-		log.Errorf("Failed getting available regions: %v", err)
+		log.Errorf(ctx, "Failed getting available regions: %v", err)
 		return nil, err
 	}
 

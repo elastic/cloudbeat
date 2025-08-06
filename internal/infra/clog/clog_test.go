@@ -46,8 +46,8 @@ func (s *LoggerTestSuite) TestErrorfWithContextCanceled() {
 	logger := NewLogger("test")
 
 	err := context.Canceled
-	logger.Errorf("some error: %s", err)         // error with context.Canceled
-	logger.Errorf("some error: %s", err.Error()) // error string with context Canceled
+	logger.Errorf(context.TODO(), "some error: %s", err)         // error with context.Canceled
+	logger.Errorf(context.TODO(), "some error: %s", err.Error()) // error string with context Canceled
 
 	logs := logp.ObserverLogs().TakeAll()
 	if s.Len(logs, 2) {
@@ -62,7 +62,7 @@ func (s *LoggerTestSuite) TestLogErrorfWithoutContextCanceled() {
 	logger := NewLogger("test")
 
 	err := errors.New("oops")
-	logger.Errorf("some error: %s", err)
+	logger.Errorf(context.TODO(), "some error: %s", err)
 
 	logs := logp.ObserverLogs().TakeAll()
 	if s.Len(logs, 1) {

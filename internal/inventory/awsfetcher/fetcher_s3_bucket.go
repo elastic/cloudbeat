@@ -55,7 +55,7 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 
 	awsBuckets, err := s.provider.DescribeBuckets(ctx)
 	if err != nil {
-		s.logger.Errorf("Could not list s3 buckets: %v", err)
+		s.logger.Errorf(ctx, "Could not list s3 buckets: %v", err)
 		if len(awsBuckets) == 0 {
 			return
 		}

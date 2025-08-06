@@ -54,7 +54,7 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 
 	roles, err := i.provider.ListRoles(ctx)
 	if err != nil {
-		i.logger.Errorf("Could not list roles: %v", err)
+		i.logger.Errorf(ctx, "Could not list roles: %v", err)
 		if len(roles) == 0 {
 			return
 		}
