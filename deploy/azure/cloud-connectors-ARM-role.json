@@ -7,7 +7,7 @@
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
         "customRoleDefinitionName": "[guid('ElasticCloudConnectorsRoleDefinition-', subscription().subscriptionId)]",
         "customRoleAssignmentName": "[guid('ElasticCloudConnectorsRoleAssignment-', parameters('elasticResourceId'))]",
-        "securityauditRoleAssignmentName": "[guid('ElasticCloudConnectorsSecurityAuditRoleAssignment-', parameters('elasticResourceId'))]"
+        "securityReaderRoleAssignmentName": "[guid('ElasticCloudConnectorsSecurityReaderRoleAssignment-', parameters('elasticResourceId'))]"
     },
     "parameters": {
         "elasticResourceId": {
@@ -85,7 +85,7 @@
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[variables('securityauditRoleAssignmentName')]",
+            "name": "[variables('securityReaderRoleAssignmentName')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
             ],
