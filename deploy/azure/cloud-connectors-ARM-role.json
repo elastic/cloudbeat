@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "variables": {
-        "elasticCloudIssuer": "https://evgboidc-dpf8dmdjhnakhpgv.a02.azurefd.net/oidc/",
+        
         "userAssignedIdentityName": "[concat('ElasticCloudConnectorsRole-', parameters('elasticResourceId'))]",
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
         "customRoleDefinitionName": "[guid('ElasticCloudConnectorsRoleDefinition-', subscription().subscriptionId)]",
@@ -15,6 +15,13 @@
             "defaultValue": "Elastic-Cloud-Resource-ID",
             "metadata": {
                 "description": "Federated Identity Credential token subject"
+            }
+        },
+        "elasticCloudIssuer": {
+            "type": "string",
+            "defaultValue": "https://evgboidc-dpf8dmdjhnakhpgv.a02.azurefd.net/oidc/",
+            "metadata": {
+                "description": "Issuer for the Elastic Cloud Federated Identity Credential"
             }
         }
     },
@@ -85,7 +92,7 @@
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[variables('securityReaderRoleAssignmentName')]",
+            "name": "[variables('securityauditRoleAssignmentName')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
             ],
