@@ -42,6 +42,7 @@ INTEGRATION_INPUT = {
         "aws.access_key_id": cnfg.aws_config.access_key_id,
         "aws.secret_access_key": cnfg.aws_config.secret_access_key,
         "aws.credentials.type": "direct_access_keys",
+        "aws.account_type": "single-account",
     },
 }
 AGENT_INPUT = {
@@ -61,10 +62,6 @@ if __name__ == "__main__":
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
 
-    patch_vars(
-        var_dict=INTEGRATION_INPUT.get("vars", {}),
-        package_version=package_version,
-    )
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,

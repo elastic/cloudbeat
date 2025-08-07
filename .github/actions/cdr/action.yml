@@ -299,6 +299,8 @@ runs:
         STACK_VERSION: ${{ inputs.elk-stack-version }}
       run: |
         poetry run python ./enable_entity_store.py
+        # TODO: Remove after DEBUG
+        poetry run python ./enable_entity_store.py
 
     - name: Install Azure Asset Inventory integration
       id: azure-asset-inventory-integration

@@ -50,6 +50,7 @@ if __name__ == "__main__":
             time.sleep(1)
         else:
             logger.error(f"Entity store did not fully start within {ENTITY_STORE_INIT_TIMEOUT} seconds.")
+            # sys.exit(1)
 
     except requests.RequestException as e:
         logger.error(f"An HTTP error occurred while enabling entity store: {e}")
