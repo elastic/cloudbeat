@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "variables": {
-        "userAssignedIdentityName": "[concat('ElasticCloudConnectorsRole-', parameters('elasticCloudConnectorId'))]",
+        "userAssignedIdentityName": "[concat('ElasticCloudConnectorsIdentity-', parameters('elasticCloudConnectorId'))]",
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
         "customRoleDefinitionName": "[guid('ElasticCloudConnectorsRoleDefinition-', subscription().subscriptionId)]",
         "customRoleAssignmentName": "[guid('ElasticCloudConnectorsRoleAssignment-', parameters('elasticCloudConnectorId'))]",
@@ -11,14 +11,14 @@
     "parameters": {
         "elasticResourceId": {
             "type": "string",
-            "defaultValue": "Elastic-Cloud-Resource-ID",
+            "minLength": 1,
             "metadata": {
                 "description": "Subject of the Federated Identity Credential token"
             }
         },
         "elasticCloudConnectorId": {
             "type": "string",
-            "defaultValue": "Elastic-Cloud-ID",
+            "minLength": 1,
             "metadata": {
                 "description": "Elastic Cloud Connector unique ID"
             }
