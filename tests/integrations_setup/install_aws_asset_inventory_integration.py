@@ -27,8 +27,8 @@ from package_policy import (
     VERSION_MAP,
     generate_random_name,
     load_data,
-    version_compatible,
     patch_vars,
+    version_compatible,
 )
 from state_file_manager import HostType, PolicyState, state_manager
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
-    
+
     patch_vars(
         var_dict=INTEGRATION_INPUT.get("vars", {}),
         package_version=package_version,
