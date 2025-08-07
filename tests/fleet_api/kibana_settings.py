@@ -24,7 +24,7 @@ def update_kibana_settings(cfg: Munch, settings: dict) -> None:
         "x-elastic-internal-origin": "kibana",
     }
     payload = {
-        "changes": settings
+        "changes": settings,
     }
     try:
         response = perform_api_call(
@@ -32,7 +32,7 @@ def update_kibana_settings(cfg: Munch, settings: dict) -> None:
             url=url,
             headers=headers,
             auth=cfg.auth,
-            params= {"json": payload}
+            params={"json": payload},
         )
         logger.info("Kibana settings updated successfully.")
         return response
