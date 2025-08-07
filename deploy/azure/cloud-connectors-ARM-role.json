@@ -2,18 +2,25 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "variables": {
-        "userAssignedIdentityName": "[concat('ElasticCloudConnectorsRole-', parameters('elasticResourceId'))]",
+        "userAssignedIdentityName": "[concat('ElasticCloudConnectorsRole-', parameters('elasticCloudConnectorId'))]",
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
         "customRoleDefinitionName": "[guid('ElasticCloudConnectorsRoleDefinition-', subscription().subscriptionId)]",
-        "customRoleAssignmentName": "[guid('ElasticCloudConnectorsRoleAssignment-', parameters('elasticResourceId'))]",
-        "securityReaderRoleAssignmentName": "[guid('ElasticCloudConnectorsSecurityReaderRoleAssignment-', parameters('elasticResourceId'))]"
+        "customRoleAssignmentName": "[guid('ElasticCloudConnectorsRoleAssignment-', parameters('elasticCloudConnectorId'))]",
+        "securityReaderRoleAssignmentName": "[guid('ElasticCloudConnectorsSecurityReaderRoleAssignment-', parameters('elasticCloudConnectorId'))]"
     },
     "parameters": {
         "elasticResourceId": {
             "type": "string",
             "defaultValue": "Elastic-Cloud-Resource-ID",
             "metadata": {
-                "description": "Federated Identity Credential token subject"
+                "description": "Subject of the Federated Identity Credential token"
+            }
+        },
+        "elasticCloudConnectorId": {
+            "type": "string",
+            "defaultValue": "Elastic-Cloud-ID",
+            "metadata": {
+                "description": "Elastic Cloud Connector unique ID"
             }
         },
         "elasticCloudIssuer": {
@@ -31,7 +38,8 @@
             "name": "[variables('userAssignedIdentityName')]",
             "location": "[resourceGroup().location]",
             "tags": {
-                "elastic-cloud-id": "[parameters('elasticResourceId')]"
+                "elastic-resource-id": "[parameters('elasticResourceId')]",
+                "elastic-cloud-connector-id": "[parameters('elasticCloudConnectorId')]"
             },
             "resources": [
                 {
