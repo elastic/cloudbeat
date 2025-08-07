@@ -33,7 +33,7 @@ jobs:
           mkdir ${{ matrix.template }}
           cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
 
-      - uses: microsoft/action-armttk@71252e1767b6e23ad905bf5c456ebdbc7d7ae1bf # v1
+      - uses: microsoft/action-armttk@dec42b3c9dd0e5c1648aa76d01aac55b351624f2 # v1
         name: lint ${{ matrix.template }}
         with:
           github_token: ${{ secrets.github_token }}
