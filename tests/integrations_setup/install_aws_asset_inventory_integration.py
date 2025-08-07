@@ -28,6 +28,7 @@ from package_policy import (
     generate_random_name,
     load_data,
     version_compatible,
+    patch_vars,
 )
 from state_file_manager import HostType, PolicyState, state_manager
 
@@ -59,6 +60,11 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
+    
+    patch_vars(
+        var_dict=INTEGRATION_INPUT.get("vars", {}),
+        package_version=package_version,
+    )
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
