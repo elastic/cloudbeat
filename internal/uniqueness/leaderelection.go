@@ -39,6 +39,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
+type Manager interface {
+	IsLeader() bool
+	Run(ctx context.Context) error
+	Stop()
+}
+
 type LeaderelectionManager struct {
 	log        *clog.Logger
 	leader     *le.LeaderElector
@@ -47,17 +53,11 @@ type LeaderelectionManager struct {
 	kubeClient k8s.Interface
 }
 
-func NewLeaderElector(log *clog.Logger, client k8s.Interface) Manager {
-	if client == nil {
-		log.Errorf("NewLeaderElector returned default client")
-		return &DefaultUniqueManager{}
-	}
-
-	wg := &sync.WaitGroup{}
+func NewLeaderElector(log *clog.Logger, client k8s.Interface) *LeaderelectionManager {
 	return &LeaderelectionManager{
 		log:        log,
 		leader:     nil,
-		wg:         wg,
+		wg:         &sync.WaitGroup{},
 		cancelFunc: nil,
 		kubeClient: client,
 	}
