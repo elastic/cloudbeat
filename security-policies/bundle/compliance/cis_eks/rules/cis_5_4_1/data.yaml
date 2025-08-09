@@ -68,29 +68,30 @@ metadata:
 
     Output:
 
-    ```
+    ```json
     {
-     "update": {
-     "id": "e6f0905f-a5d4-4a2a-8c49-EXAMPLE00000",
-     "status": "InProgress",
-     "type": "EndpointAccessUpdate",
-     "params": [
-     {
-     "type": "EndpointPublicAccess",
-     "value": "true"
-     },
-     {
-     "type": "EndpointPrivateAccess",
-     "value": "true"
-     },
-     {
-     "type": "publicAccessCidrs",
-     "value": "[\203.0.113.5/32\"]"
-     }
-     ],
-     "createdAt": 1576874258.137,
-     "errors": []
-     }
+    "update": {
+    "id": "e6f0905f-a5d4-4a2a-8c49-EXAMPLE00000",
+    "status": "InProgress",
+    "type": "EndpointAccessUpdate",
+    "params": [
+    {
+    "type": "EndpointPublicAccess",
+    "value": "true"
+    },
+    {
+    "type": "EndpointPrivateAccess",
+    "value": "true"
+    },
+    {
+    "type": "publicAccessCidrs",
+    "value": "[\203.0.113.5/32\"]"
+    }
+    ],
+    "createdAt": 1576874258.137,
+    "errors": []
+    }
+    }
     ```
   impact: |-
     When implementing Endpoint Private Access, be careful to ensure all desired networks are on the allowlist (whitelist) to prevent inadvertently blocking external access to your cluster's control plane.
