@@ -38,14 +38,14 @@ metadata:
     ```
     Output if Block Public access is enabled:
 
-    ```
+    ```json
     {
-     "PublicAccessBlockConfiguration": {
-     "BlockPublicAcls": true,
-     "IgnorePublicAcls": true,
-     "BlockPublicPolicy": true,
-     "RestrictPublicBuckets": true
-     }
+        "PublicAccessBlockConfiguration": {
+            "BlockPublicAcls": true,
+            "IgnorePublicAcls": true,
+            "BlockPublicPolicy": true,
+            "RestrictPublicBuckets": true
+        }
     }
     ```
 
@@ -66,14 +66,14 @@ metadata:
 
     Output if Block Public access is enabled:
 
-    ```
+    ```json
     {
-     "PublicAccessBlockConfiguration": {
-     "IgnorePublicAcls": true, 
-     "BlockPublicPolicy": true, 
-     "BlockPublicAcls": true, 
-     "RestrictPublicBuckets": true
-     }
+        "PublicAccessBlockConfiguration": {
+            "IgnorePublicAcls": true,
+            "BlockPublicPolicy": true,
+            "BlockPublicAcls": true,
+            "RestrictPublicBuckets": true
+        }
     }
     ```
 
