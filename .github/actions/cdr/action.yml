@@ -25,6 +25,11 @@ inputs:
     default: "default"
     required: false
     type: string
+  gcp-zone:
+    description: "GCP zone for Asset Inventory agent deployment"
+    required: false
+    default: "us-central1-a"
+    type: string
   aws-cloudtrail-s3-bucket:
     description: "AWS Cloudtrail S3 bucket"
     default: "default"
@@ -385,7 +390,7 @@ runs:
       env:
         ACTOR: ${{ github.actor }}
         DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
-        GCP_ZONE: "${{ inputs.cspm-gcp-zone }}"
+        GCP_ZONE: "${{ inputs.gcp-zone }}"
         SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
       run: |
         # GCP labeling rules:
