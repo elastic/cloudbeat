@@ -27,7 +27,6 @@ from package_policy import (
     VERSION_MAP,
     generate_random_name,
     load_data,
-    patch_vars,
     version_compatible,
 )
 from state_file_manager import HostType, PolicyState, state_manager

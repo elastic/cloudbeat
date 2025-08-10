@@ -3,6 +3,7 @@ Module to enable and verify the status of the Entity Store feature in Kibana.
 
 This script:
     - Updates Kibana settings to enable Asset Inventory.
+    - Creates the required data view if it doesn't exist.
     - Enables the Entity Store via API.
     - Checks the status of the Entity Store and its engines (host, user, service, generic).
     - Logs progress and errors using loguru.
@@ -18,6 +19,7 @@ import time
 
 import configuration_fleet as config_fleet
 import requests
+from fleet_api.data_view_api import create_data_view
 from fleet_api.entity_store_api import (
     enable_entity_store,
     is_entity_store_fully_started,
@@ -38,6 +40,10 @@ if __name__ == "__main__":
             },
         )
 
+        # Create data view if it doesn't exist
+        logger.info("Creating data view for entity store...")
+        create_data_view(cfg=elk_config, name="security-solution")
+
         enable_entity_store(cfg=elk_config)
 
         # Check the status of the entity store for up to ENTITY_STORE_INIT_TIMEOUT seconds
@@ -50,7 +56,7 @@ if __name__ == "__main__":
             time.sleep(1)
         else:
             logger.error(f"Entity store did not fully start within {ENTITY_STORE_INIT_TIMEOUT} seconds.")
-            # sys.exit(1)
+            sys.exit(1)
 
     except requests.RequestException as e:
         logger.error(f"An HTTP error occurred while enabling entity store: {e}")
