@@ -64,6 +64,7 @@ jobs:
       ess-region: ${{ inputs.region }}
       serverless_mode: ${{ inputs.serverless }}
       run-sanity-tests: true
+      run-ui-sanity-tests: true
       expiration_days: 0
 
   destroy:
