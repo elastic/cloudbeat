@@ -31,6 +31,7 @@ import (
 	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type Strategy interface {
@@ -38,7 +39,7 @@ type Strategy interface {
 	checkDependencies() error
 }
 
-func GetStrategy(cfg *config.Config, log *clog.Logger) (Strategy, error) {
+func GetStrategy(cfg *config.Config, log *clog.Logger, statusHandler statushandler.StatusHandlerAPI) (Strategy, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
@@ -46,11 +47,13 @@ func GetStrategy(cfg *config.Config, log *clog.Logger) (Strategy, error) {
 				IAMProvider:      &iam.Provider{},
 				IdentityProvider: awslib.IdentityProvider{Logger: log},
 				AccountProvider:  awslib.AccountProvider{},
+				StatusHandler:    statusHandler,
 			}, nil
 		}
 
 		return &AWS{
 			IdentityProvider: awslib.IdentityProvider{Logger: log},
+			StatusHandler:    statusHandler,
 		}, nil
 	case config.CIS_EKS:
 		return &EKS{

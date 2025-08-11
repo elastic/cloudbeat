@@ -85,7 +85,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 			defer wg.Done()
 			results, fetchErr := fetcher(ctx, region, client)
 			if fetchErr != nil {
-				errCn <- fmt.Errorf("fail to retrieve aws resources for region: %s, error: %v, ", region, fetchErr)
+				errCn <- errors.Join(fmt.Errorf("fail to retrieve aws resources for region: %s, error: %v, ", region, fetchErr), fetchErr)
 			}
 
 			mux.Lock()

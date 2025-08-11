@@ -41,23 +41,24 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
-func NewCisAwsFetchers(ctx context.Context, log *clog.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
+func NewCisAwsFetchers(ctx context.Context, log *clog.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity, statusHandler statushandler.StatusHandlerAPI) registry.FetchersMap {
 	log.Infof("Initializing AWS fetchers for account: '%s'", identity.Account)
 
 	m := make(registry.FetchersMap)
 	iamProvider := iam.NewIAMProvider(ctx, log, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
-	iamFetcher := fetchers.NewIAMFetcher(log, iamProvider, ch, identity)
+	iamFetcher := fetchers.NewIAMFetcher(log, iamProvider, ch, identity, statusHandler)
 	m[fetching.IAMType] = registry.RegisteredFetcher{Fetcher: iamFetcher}
 
 	kmsProvider := kms.NewKMSProvider(ctx, log, cfg, &awslib.MultiRegionClientFactory[kms.Client]{})
-	kmsFetcher := fetchers.NewKMSFetcher(log, kmsProvider, ch)
+	kmsFetcher := fetchers.NewKMSFetcher(log, kmsProvider, ch, statusHandler)
 	m[fetching.KmsType] = registry.RegisteredFetcher{Fetcher: kmsFetcher}
 
 	loggingProvider := logging.NewProvider(ctx, log, cfg, &awslib.MultiRegionClientFactory[cloudtrail.Client]{}, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 	configserviceProvider := configservice.NewProvider(ctx, log, cfg, &awslib.MultiRegionClientFactory[configservice.Client]{}, identity.Account)
-	loggingFetcher := fetchers.NewLoggingFetcher(log, loggingProvider, configserviceProvider, ch, identity)
+	loggingFetcher := fetchers.NewLoggingFetcher(log, loggingProvider, configserviceProvider, ch, identity, statusHandler)
 	m[fetching.TrailType] = registry.RegisteredFetcher{Fetcher: loggingFetcher}
 
 	monitoringProvider := monitoring.NewProvider(
@@ -71,15 +72,15 @@ func NewCisAwsFetchers(ctx context.Context, log *clog.Logger, cfg aws.Config, ch
 	)
 
 	securityHubProvider := securityhub.NewProvider(ctx, log, cfg, &awslib.MultiRegionClientFactory[securityhub.Client]{}, identity.Account)
-	monitoringFetcher := fetchers.NewMonitoringFetcher(log, monitoringProvider, securityHubProvider, ch, identity)
+	monitoringFetcher := fetchers.NewMonitoringFetcher(log, monitoringProvider, securityHubProvider, ch, identity, statusHandler)
 	m[fetching.AwsMonitoringType] = registry.RegisteredFetcher{Fetcher: monitoringFetcher}
 
 	ec2Provider := ec2.NewEC2Provider(ctx, log, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
-	networkFetcher := fetchers.NewNetworkFetcher(log, ec2Provider, ch)
+	networkFetcher := fetchers.NewNetworkFetcher(log, ec2Provider, ch, statusHandler)
 	m[fetching.EC2NetworkingType] = registry.RegisteredFetcher{Fetcher: networkFetcher}
 
 	rdsProvider := rds.NewProvider(ctx, log, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
-	rdsFetcher := fetchers.NewRdsFetcher(log, rdsProvider, ch)
+	rdsFetcher := fetchers.NewRdsFetcher(log, rdsProvider, ch, statusHandler)
 	m[fetching.RdsType] = registry.RegisteredFetcher{Fetcher: rdsFetcher}
 
 	s3Provider := s3.NewProvider(ctx, log, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)

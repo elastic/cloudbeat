@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type AwsAccount struct {
@@ -60,12 +61,12 @@ func (w *wrapResource) GetElasticCommonData() (map[string]any, error) {
 	return w.wrapped.GetElasticCommonData()
 }
 
-func NewCisAwsOrganizationFetchers(ctx context.Context, log *clog.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
-	return newCisAwsOrganizationFetchers(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers)
+func NewCisAwsOrganizationFetchers(ctx context.Context, log *clog.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap, statusHandler statushandler.StatusHandlerAPI) map[string]registry.FetchersMap {
+	return newCisAwsOrganizationFetchers(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers, statusHandler)
 }
 
 // awsFactory is the same function type as NewCisAwsFetchers, and it's used to mock the function in tests
-type awsFactory func(context.Context, *clog.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
+type awsFactory func(context.Context, *clog.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity, statushandler.StatusHandlerAPI) registry.FetchersMap
 
 func newCisAwsOrganizationFetchers(
 	ctx context.Context,
@@ -74,6 +75,7 @@ func newCisAwsOrganizationFetchers(
 	accounts []AwsAccount,
 	cache map[string]registry.FetchersMap,
 	factory awsFactory,
+	statusHandler statushandler.StatusHandlerAPI,
 ) map[string]registry.FetchersMap {
 	seen := make(map[string]bool)
 	for key := range cache {
@@ -122,6 +124,7 @@ func newCisAwsOrganizationFetchers(
 			account.Config,
 			ch,
 			&account.Identity,
+			statusHandler,
 		)
 		m[account.Account] = f
 		if cache != nil {
