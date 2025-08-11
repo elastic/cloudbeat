@@ -40,7 +40,7 @@ func (p *Provider) DescribeConfigRecorders(ctx context.Context) ([]awslib.AwsRes
 			})
 
 			if err != nil {
-				p.log.Error("Error fetching recorder status, recorder: %v , Error: %v:", recorder, err)
+				p.log.Error(ctx, "Error fetching recorder status, recorder: %v , Error: %v:", recorder, err)
 				return nil, err
 			}
 			result = append(result, Recorder{

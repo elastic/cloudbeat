@@ -29,7 +29,7 @@ import (
 
 func (p Provider) getRootAccountUser(ctx context.Context, rootAccount *CredentialReport) *types.User {
 	if rootAccount == nil {
-		p.log.Error("no root account entry was provided")
+		p.log.Error(ctx, "no root account entry was provided")
 		return nil
 	}
 

@@ -150,7 +150,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 		// Get the full command line name and not the /proc/pid/status one which might be silently truncated.
 		cmd, err := proc.ReadCmdLineFS(f.Fs, p)
 		if err != nil {
-			f.log.Error("error while reading /proc/<pid>/cmdline for process %s: %s", p, err.Error())
+			f.log.Error(ctx, "error while reading /proc/<pid>/cmdline for process %s: %s", p, err.Error())
 			continue
 		}
 		name := extractCommandName(cmd)
@@ -201,7 +201,7 @@ func (f *ProcessesFetcher) createProcCommonData(ctx context.Context, stat proc.P
 
 	sysUptime, err := proc.ReadUptimeFS(f.Fs)
 	if err != nil {
-		f.log.Error("couldn't read system boot time", err)
+		f.log.Error(ctx, "couldn't read system boot time", err)
 	}
 	uptimeDate := time.Now().Add(-time.Duration(sysUptime) * time.Second)
 
