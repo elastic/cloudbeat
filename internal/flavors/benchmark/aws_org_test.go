@@ -40,6 +40,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 var expectedAWSSubtypes = []string{
@@ -119,6 +120,7 @@ func TestAWSOrg_Initialize(t *testing.T) {
 				IAMProvider:      tt.iamProvider,
 				IdentityProvider: tt.identityProvider,
 				AccountProvider:  tt.accountProvider,
+				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -171,6 +173,7 @@ func Test_getAwsAccounts(t *testing.T) {
 				IAMProvider:      getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
+				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
 			}
 			log := testhelper.NewLogger(t)
 			got, err := a.getAwsAccounts(t.Context(), log, aws.Config{}, &tt.rootIdentity)
@@ -248,6 +251,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 				IAMProvider:      getMockIAMRoleGetter(tt.roles),
 				IdentityProvider: mockAwsIdentityProvider(nil),
 				AccountProvider:  mockAccountProvider(nil),
+				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
 			}
 
 			// set up log capture

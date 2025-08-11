@@ -40,6 +40,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const (
@@ -56,6 +57,7 @@ type AWSOrg struct {
 	IAMProvider      iam.RoleGetter
 	IdentityProvider awslib.IdentityProviderGetter
 	AccountProvider  awslib.AccountProviderAPI
+	StatusHandler    statushandler.StatusHandlerAPI
 }
 
 func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -67,7 +69,7 @@ func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, a.StatusHandler)
 }
 
 //revive:disable-next-line:function-result-limit
@@ -110,7 +112,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 				return nil, observability.FailSpan(span, "failed to get AWS accounts", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, accounts, cache)
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, accounts, cache, a.StatusHandler)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {

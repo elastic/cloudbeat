@@ -39,6 +39,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestGetStrategy(t *testing.T) {
@@ -90,7 +91,8 @@ func TestGetStrategy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%T", tt.wantType), func(t *testing.T) {
-			got, err := GetStrategy(&tt.cfg, testhelper.NewLogger(t))
+			sh := statushandler.NewMockStatusHandlerAPI(t)
+			got, err := GetStrategy(&tt.cfg, testhelper.NewLogger(t), sh)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
