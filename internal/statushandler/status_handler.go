@@ -65,6 +65,7 @@ func (s *StatusHandler) Degraded(message string) {
 	if _, exists := s.messages[message]; exists {
 		return
 	}
+	s.messages[message] = struct{}{}
 
 	sl := lo.Keys(s.messages)
 	slices.Sort(sl)
