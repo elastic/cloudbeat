@@ -30,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/manager"
@@ -47,9 +48,11 @@ type Manager struct {
 
 	ctx    context.Context //nolint:containedctx
 	cancel context.CancelFunc
+
+	statusHandler statushandler.StatusHandlerAPI
 }
 
-func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
+func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry, statusHandler statushandler.StatusHandlerAPI) (*Manager, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	return &Manager{
@@ -59,6 +62,7 @@ func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, t
 		fetcherRegistry: fetchers,
 		ctx:             ctx,
 		cancel:          cancel,
+		statusHandler:   statusHandler,
 	}, nil
 }
 
@@ -101,6 +105,8 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
+	m.statusHandler.Reset()
+
 	ctx, span := observability.StartSpan(
 		ctx,
 		scopeName,

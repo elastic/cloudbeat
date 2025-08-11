@@ -34,6 +34,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type Azure struct {
@@ -51,7 +52,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
 		builder.WithManagerTimeout(calculateFetcherTimeout(cfg.Period)),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, statushandler.NOOP{})
 }
 
 //revive:disable-next-line:function-result-limit

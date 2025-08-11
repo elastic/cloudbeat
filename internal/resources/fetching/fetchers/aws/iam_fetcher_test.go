@@ -33,6 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type IamFetcherTestSuite struct {
@@ -70,12 +71,13 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	iamUser := iam.User{
-		AccessKeys: []iam.AccessKey{{
-			Active:       false,
-			HasUsed:      false,
-			LastAccess:   "",
-			RotationDate: "",
-		},
+		AccessKeys: []iam.AccessKey{
+			{
+				Active:       false,
+				HasUsed:      false,
+				LastAccess:   "",
+				RotationDate: "",
+			},
 		},
 		MFADevices:          nil,
 		Name:                "test",
@@ -129,7 +131,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		Regions: []string{"region-1", "region-2"},
 	}
 
-	var tests = []struct {
+	tests := []struct {
 		name               string
 		mocksReturnVals    mocksReturnVals
 		account            string
@@ -225,6 +227,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				cloudIdentity: &cloud.Identity{
 					Account: test.account,
 				},
+				statusHandler: statushandler.NewMockStatusHandlerAPI(t),
 			}
 
 			err := iamFetcher.Fetch(ctx, cycle.Metadata{})
@@ -264,12 +267,13 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 		{
 			name: "Should return correct metadata for iam user",
 			resource: iam.User{
-				AccessKeys: []iam.AccessKey{{
-					Active:       false,
-					HasUsed:      false,
-					LastAccess:   "",
-					RotationDate: "",
-				},
+				AccessKeys: []iam.AccessKey{
+					{
+						Active:       false,
+						HasUsed:      false,
+						LastAccess:   "",
+						RotationDate: "",
+					},
 				},
 				MFADevices:          nil,
 				Name:                "test",
@@ -336,7 +340,6 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 			resource: iam.AccessAnalyzers{
 				Analyzers: []iam.AccessAnalyzer{
 					{
-
 						AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-arn")},
 						Region:          "region-1",
 					},
