@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -77,14 +78,10 @@ const scopeName = "example.com/mymodule/mypackage"
 	// Run the main function
 	main()
 
-	// Check that the scope.go file was created
-	scopeGoFile := filepath.Join(pkgDir, "scope.go")
-	_, err = os.Stat(scopeGoFile)
-	require.NoError(t, err, "scope.go should be created")
-
-	// Check the content of the scope.go file
+	// Check the content of the scope_generated.go file
+	scopeGoFile := filepath.Join(pkgDir, "scope_generated.go")
 	content, err := os.ReadFile(scopeGoFile)
 	require.NoError(t, err)
 
-	require.Equal(t, expectedContent, string(content))
+	assert.Equal(t, expectedContent, string(content))
 }

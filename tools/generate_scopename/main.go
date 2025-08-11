@@ -19,6 +19,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -51,7 +52,18 @@ package %s
 const scopeName = "%s"
 `
 
+const usage = `This tool is intended to be used with 'go generate'.
+It creates a 'scope_generated.go' file in the package where it is executed.
+This file includes a 'scopeName' constant, which holds the Go package path as its value.
+The tool depends on the 'GOFILE' and 'GOPACKAGE' environment variables being set.
+`
+
 func main() {
+	if displayUsage() {
+		fmt.Print(usage)
+		os.Exit(0)
+	}
+
 	gofile := os.Getenv("GOFILE")
 	if gofile == "" {
 		log.Fatal("GOFILE environment variable not set")
@@ -70,9 +82,16 @@ func main() {
 	content := fmt.Sprintf(format, pkgName, pkgPath)
 	content = strings.TrimSpace(content) + "\n"
 
-	if err := os.WriteFile(filepath.Join(filepath.Dir(gofile), "scope.go"), []byte(content), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(filepath.Dir(gofile), "scope_generated.go"), []byte(content), 0644); err != nil {
 		log.Fatalf("Failed to write file: %v", err)
 	}
+}
+
+func displayUsage() bool {
+	help := flag.Bool("help", false, "show help message")
+	h := flag.Bool("h", false, "show help message")
+	flag.Parse()
+	return *help || *h
 }
 
 func getPackageImportPath(filename string) (string, error) {
