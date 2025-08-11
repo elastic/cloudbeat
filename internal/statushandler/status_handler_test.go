@@ -71,9 +71,9 @@ func TestStatusHandler(t *testing.T) {
 			sh.Degraded(strconv.Itoa(i))
 		}
 
-		require.Equal(t, 50, len(sh.messages))
+		require.Len(t, sh.messages, 50)
 		sh.Reset()
-		require.Equal(t, 0, len(sh.messages))
+		require.Equal(t, sh.messages, 0)
 	})
 }
 
