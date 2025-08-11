@@ -66,7 +66,7 @@ func (k *K8S) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 	}
 
 	benchmarkHelper := NewK8sBenchmarkHelper(log, cfg, kubeClient)
-	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient) //nolint:contextcheck
+	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
 	dp, err := benchmarkHelper.GetK8sDataProvider(ctx, k8s.KubernetesClusterNameProvider{KubeClient: kubeClient})
 	if err != nil {

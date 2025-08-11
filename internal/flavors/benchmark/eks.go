@@ -73,7 +73,7 @@ func (k *EKS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 	}
 
 	benchmarkHelper := NewK8sBenchmarkHelper(log, cfg, kubeClient)
-	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient) //nolint:contextcheck
+	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
 	awsConfig, awsIdentity, err := k.getEksAwsConfig(ctx, cfg)
 	if err != nil {
