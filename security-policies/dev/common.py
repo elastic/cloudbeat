@@ -1,5 +1,6 @@
 import json
 import os
+import textwrap
 
 import git
 import pandas as pd
@@ -178,23 +179,21 @@ def add_new_line_after_period(text):
 
 
 def format_json_in_text(text):
-    try:
-        # Search for JSON-like content in the text
-        start_index = text.find("{")
-        end_index = text.rfind("}") + 1
-        json_str = text[start_index:end_index]
+    def replace_json_block(match):
+        code_block = match.group(1)
+        try:
+            # Try parsing the code block as JSON
+            parsed = json.loads(code_block)
+            pretty = json.dumps(parsed, indent=4)
 
-        # Try to load and format the JSON
-        parsed_json = json.loads(json_str)
-        formatted_json = json.dumps(parsed_json, indent=4)
+            return f"```json\n{pretty}\n```"
+        except json.JSONDecodeError:
+            # Not valid JSON — return original block
+            return f"```\n{code_block}```"
 
-        # Replace the original JSON string in the text with the formatted one
-        formatted_text = text[:start_index] + formatted_json + text[end_index:]
-
-        return formatted_text
-    except:
-        # If JSON extraction or formatting fails, return the original text
-        return text
+    # Match all code blocks: ```json\n<something>\n```, or ```\n<something>\n```
+    pattern = r"```(?:json)?\n([\s\S]*?)```"
+    return re.sub(pattern, replace_json_block, text)
 
 
 def fix_code_blocks(text: str):
