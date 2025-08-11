@@ -18,11 +18,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/mod/modfile"
 )
 
 const format = `
@@ -89,9 +92,9 @@ func getPackageImportPath(filename string) (string, error) {
 		return "", fmt.Errorf("could not read go.mod file %s: %w", modFile, err)
 	}
 
-	modPath := getModulePath(modContent)
-	if modPath == "" {
-		return "", fmt.Errorf("could not find module path in %s", modFile)
+	modPath, err := getModulePath(modContent)
+	if err != nil {
+		return "", fmt.Errorf("could not find module path in %s: %w", modFile, err)
 	}
 
 	relPath, err := filepath.Rel(filepath.Dir(modFile), dir)
@@ -116,12 +119,13 @@ func findGoModFile(dir string) (string, error) {
 	}
 }
 
-func getModulePath(modContent []byte) string {
-	lines := strings.Split(string(modContent), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "module") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "module"))
-		}
+func getModulePath(modContent []byte) (string, error) {
+	f, err := modfile.Parse("go.mod", modContent, nil)
+	if err != nil {
+		return "", err
 	}
-	return ""
+	if f.Module == nil {
+		return "", errors.New("cannot find module path")
+	}
+	return f.Module.Mod.Path, nil
 }
