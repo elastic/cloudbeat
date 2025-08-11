@@ -17,9 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
-  lint:
-    name: Lint
+  pre-commit:
+    name: Pre-commit Hooks
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
@@ -45,21 +44,96 @@ jobs:
         run: |
           pre-commit run --all-files
 
+      - name: Show git diff on failure
+        shell: bash
+        if: ${{ failure() }}
+        run: git diff
+
+  golangci-lint:
+    name: golangci-lint
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
       - name: golangci-lint
         shell: bash
         run: golangci-lint run
+
+  mage-check:
+    name: Mage Check
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
 
       - name: Mage Check
         shell: bash
         run: mage check
 
+      - name: Show git diff on failure
+        shell: bash
+        if: ${{ failure() }}
+        run: git diff
+
+  mage-check-license-headers:
+    name: Mage checkLicenseHeaders
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
       - name: Mage checkLicenseHeaders
         shell: bash
         run: mage checkLicenseHeaders
 
+  validate-mocks:
+    name: Validate mocks
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
       - name: Validate mocks
         shell: bash
         run: just validate-mocks
+
+  terraform-fmt:
+    name: Terraform fmt
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
 
       - name: Terraform fmt
         shell: bash
