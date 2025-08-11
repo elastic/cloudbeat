@@ -22,12 +22,16 @@ import (
 	"fmt"
 	"strings"
 
+	"go.opentelemetry.io/otel"
+
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
 
 const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+
+var tracer = otel.Tracer(scopeName)
 
 type Registry interface {
 	Keys() []string
@@ -100,7 +104,7 @@ func (r *registry) Run(ctx context.Context, key string, metadata cycle.Metadata)
 		return fmt.Errorf("fetcher %v not found", key)
 	}
 
-	ctx, span := observability.StartSpan(ctx, scopeName, fmt.Sprintf("%s.Fetch", cleanTypeOf(registered.Fetcher)))
+	ctx, span := tracer.Start(ctx, fmt.Sprintf("%s.Fetch", cleanTypeOf(registered.Fetcher)))
 	defer span.End()
 	err := registered.Fetcher.Fetch(ctx, metadata)
 	if err != nil {

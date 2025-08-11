@@ -23,16 +23,19 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
-	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 )
 
 const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/manager"
+
+var tracer = otel.Tracer(scopeName)
+var meter = otel.Meter(scopeName)
 
 type Manager struct {
 	log *clog.Logger
@@ -73,7 +76,7 @@ func (m *Manager) Stop() {
 }
 
 func (m *Manager) fetchAndSleep(ctx context.Context) {
-	counter, err := observability.MeterFromContext(ctx, scopeName).Int64Counter("cloudbeat.fetcher.manager.cycles")
+	counter, err := meter.Int64Counter("cloudbeat.fetcher.manager.cycles")
 	if err != nil {
 		m.log.Errorf(ctx, "Failed to create fetcher manager cycles counter: %v", err)
 	}
@@ -101,9 +104,8 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
-	ctx, span := observability.StartSpan(
+	ctx, span := tracer.Start(
 		ctx,
-		scopeName,
 		"manager.Manager.fetchIteration",
 		trace.WithAttributes(attribute.String("transaction.type", "request")),
 	)
