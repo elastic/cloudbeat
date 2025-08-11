@@ -73,7 +73,7 @@ func TestStatusHandler(t *testing.T) {
 
 		require.Len(t, sh.messages, 50)
 		sh.Reset()
-		require.Len(t, sh.messages, 0)
+		require.Empty(t, sh.messages)
 	})
 }
 
