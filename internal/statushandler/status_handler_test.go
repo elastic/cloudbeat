@@ -18,10 +18,12 @@
 package statushandler
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/management/status"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStatusHandler(t *testing.T) {
@@ -46,7 +48,8 @@ func TestStatusHandler(t *testing.T) {
 	t.Run("unique messages", func(t *testing.T) {
 		m := newMockStatusReporter(t)
 		c1 := m.On("UpdateStatus", status.Degraded, "abc").Once()
-		m.On("UpdateStatus", status.Degraded, "abc\nzzz").Once().NotBefore(c1)
+		c2 := m.On("UpdateStatus", status.Degraded, "abc\nzzz").Once().NotBefore(c1)
+		m.On("UpdateStatus", status.Running, "").Once().NotBefore(c2)
 
 		sh := NewStatusHandler(m)
 		sh.Degraded("abc")
@@ -55,6 +58,22 @@ func TestStatusHandler(t *testing.T) {
 		sh.Degraded("zzz")
 		sh.Degraded("zzz")
 		sh.Degraded("zzz")
+		sh.Reset()
+	})
+
+	t.Run("reset map", func(t *testing.T) {
+		m := newMockStatusReporter(t)
+		m.On("UpdateStatus", mock.Anything, mock.Anything).Maybe()
+
+		sh := NewStatusHandler(m)
+
+		for i := range 50 {
+			sh.Degraded(strconv.Itoa(i))
+		}
+
+		require.Equal(t, 50, len(sh.messages))
+		sh.Reset()
+		require.Equal(t, 0, len(sh.messages))
 	})
 }
 
