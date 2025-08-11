@@ -72,14 +72,11 @@ func NewOpaEvaluator(ctx context.Context, log *clog.Logger, cfg *config.Config) 
 	plugin := fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
 	opaCfg := fmt.Sprintf(opaConfig, cfg.BundlePath, plugin)
 
-	decisionLogger := newLogger(ctx)
-	stdLogger := newLogger(ctx)
-
 	// create an instance of the OPA object
 	opa, err := sdk.New(ctx, sdk.Options{
 		Config:        bytes.NewReader([]byte(opaCfg)),
-		Logger:        stdLogger,
-		ConsoleLogger: decisionLogger,
+		Logger:        newLogger(ctx),
+		ConsoleLogger: newLogger(ctx),
 		Plugins: map[string]plugins.Factory{
 			dlogger.PluginName: &dlogger.Factory{},
 		},
