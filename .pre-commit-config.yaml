@@ -35,7 +35,7 @@ repos:
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.2.0
+    rev: 7.3.0
     hooks:
       - id: flake8
         name: flake8 ./tests/ ./.ci/scripts ./github/actions
@@ -77,7 +77,7 @@ repos:
         files: ^(deploy/cloudformation|deploy/asset-inventory-cloudformation)/.*\.ya?ml$
 
   - repo: https://github.com/aws-cloudformation/cfn-lint
-    rev: v1.35.4
+    rev: v1.36.1
     hooks:
       - id: cfn-python-lint
         files: ^(deploy/cloudformation|deploy/asset-inventory-cloudformation)/.*\.ya?ml$
@@ -106,7 +106,7 @@ repos:
         pass_filenames: false
       - id: go-test
         name: Run short unit tests
-        entry: bash -c 'go test -short -timeout 100ms ./...'
+        entry: bash -c 'go test -failfast -short -timeout 100ms ./...'
         language: system
         files: .*.go
         pass_filenames: false
@@ -184,7 +184,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.34.1
+    rev: v0.35.1
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
