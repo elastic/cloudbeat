@@ -22,6 +22,7 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -86,12 +87,12 @@ func mapToArray(m map[string]any) []any {
 	return ret
 }
 
-func newLogger() logging.Logger {
+func newLogger(ctx context.Context) logging.Logger {
 	lvl := zap.NewAtomicLevelAt(logp.GetLevel())
 	log := clog.NewLogger("opa").WithOptions(
 		zap.IncreaseLevel(lvl),
 		zap.AddCallerSkip(1),
-	)
+	).WithSpanContext(trace.SpanContextFromContext(ctx))
 
 	return &logger{
 		log: log,
