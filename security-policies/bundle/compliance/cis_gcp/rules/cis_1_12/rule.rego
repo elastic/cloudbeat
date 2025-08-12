@@ -9,8 +9,5 @@ finding := result if {
 
 	is_project_apikey := startswith(data_adapter.resource.data.name, "projects/")
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(is_project_apikey == false),
-		data_adapter.resource.data.name,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(is_project_apikey == false))
 }

@@ -20,7 +20,7 @@ package azurefetcher
 import (
 	"context"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
@@ -90,7 +90,9 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
+				Region:      item.Location,
 				AccountID:   item.TenantId,
+				ProjectID:   item.SubscriptionId,
 				ServiceName: "Azure",
 			}),
 			inventory.WithLabelsFromAny(item.Tags),
@@ -104,7 +106,10 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 					Name: vmProperties.Extended.InstanceView.ComputerName,
 					Type: vmProperties.HardwareProfile.VmSize,
 				}
+				asset.Cloud.MachineType = vmProperties.HardwareProfile.VmSize
 			}
+			asset.Cloud.InstanceID = item.Id
+			asset.Cloud.InstanceName = item.Name
 		}
 
 		assetChan <- asset

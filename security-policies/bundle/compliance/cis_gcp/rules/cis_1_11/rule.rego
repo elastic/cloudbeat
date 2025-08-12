@@ -11,12 +11,9 @@ finding := result if {
 	data_adapter.is_cloud_resource_manager_project
 	data_adapter.has_policy
 
-	result := common.generate_result_without_expected(
-		# admin_has_other_role is an aggregation of the three checks above
-		# if an admin user has any of those other roles, the rule fails
-		common.calculate_result(admin_has_other_role == false),
-		data_adapter.iam_policy,
-	)
+	result := common.generate_evaluation_result(common.calculate_result(admin_has_other_role == false))
+	# admin_has_other_role is an aggregation of the three checks above
+	# if an admin user has any of those other roles, the rule fails
 }
 
 # check admin is not also cryptoKeyEncrypter
