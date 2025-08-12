@@ -9,7 +9,7 @@
         "securityReaderRoleAssignmentName": "[guid('ElasticCloudConnectorsSecurityReaderRoleAssignment-', parameters('elasticCloudConnectorId'))]"
     },
     "parameters": {
-        "elasticResourceId": {
+        "elasticStackId": {
             "type": "string",
             "minLength": 1,
             "metadata": {
@@ -38,7 +38,7 @@
             "name": "[variables('userAssignedIdentityName')]",
             "location": "[resourceGroup().location]",
             "tags": {
-                "elastic-resource-id": "[parameters('elasticResourceId')]",
+                "elastic-resource-id": "[parameters('elasticStackId')]",
                 "elastic-cloud-connector-id": "[parameters('elasticCloudConnectorId')]"
             },
             "resources": [
@@ -51,7 +51,7 @@
                     ],
                     "properties": {
                         "issuer": "[variables('elasticCloudIssuer')]",
-                        "subject": "[parameters('elasticResourceId')]",
+                        "subject": "[parameters('elasticStackId')]",
                         "audiences": [
                             "api://AzureADTokenExchange"
                         ]
@@ -111,7 +111,7 @@
         }
     ],
     "outputs": {
-        "RoleId": {
+        "Identity": {
             "type": "string",
             "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
         },
@@ -122,6 +122,10 @@
         "ClientId": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2018-11-30').clientId]"
+        },
+        "TenantId": {
+            "type": "string",
+            "value": "[subscription().tenantId]"
         }
     }
 }
