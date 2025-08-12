@@ -29,7 +29,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type (
@@ -39,7 +39,7 @@ type (
 	assetFlexFirewallRuleFn   func() ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error)
 )
 
-func mockAssetSinglePSQLConfiguration(f assetSingleConfigFn) PostgresqlProviderAPI {
+func mockAssetSinglePSQLConfiguration(t *testing.T, f assetSingleConfigFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
 		AssetSingleServerConfigurations: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresql.ConfigurationsClientListByServerOptions) ([]armpostgresql.ConfigurationsClientListByServerResponse, error) {
 			return f()
@@ -47,12 +47,12 @@ func mockAssetSinglePSQLConfiguration(f assetSingleConfigFn) PostgresqlProviderA
 	}
 
 	return &psqlProvider{
-		log:    clog.NewLogger("mock_single_psql_config"),
+		log:    testhelper.NewLogger(t),
 		client: cl,
 	}
 }
 
-func mockAssetFlexPSQLConfiguration(f assetFlexConfigFn) PostgresqlProviderAPI {
+func mockAssetFlexPSQLConfiguration(t *testing.T, f assetFlexConfigFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
 		AssetFlexibleServerConfigurations: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresqlflexibleservers.ConfigurationsClientListByServerOptions) ([]armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse, error) {
 			return f()
@@ -60,12 +60,12 @@ func mockAssetFlexPSQLConfiguration(f assetFlexConfigFn) PostgresqlProviderAPI {
 	}
 
 	return &psqlProvider{
-		log:    clog.NewLogger("mock_flex_psql_config"),
+		log:    testhelper.NewLogger(t),
 		client: cl,
 	}
 }
 
-func mockAssetSinglePSQLFirewallRule(f assetSingleFirewallRuleFn) PostgresqlProviderAPI {
+func mockAssetSinglePSQLFirewallRule(t *testing.T, f assetSingleFirewallRuleFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
 		AssetSingleServerFirewallRules: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresql.FirewallRulesClientListByServerOptions) ([]armpostgresql.FirewallRulesClientListByServerResponse, error) {
 			return f()
@@ -73,12 +73,12 @@ func mockAssetSinglePSQLFirewallRule(f assetSingleFirewallRuleFn) PostgresqlProv
 	}
 
 	return &psqlProvider{
-		log:    clog.NewLogger("mock_single_psql_firewall_rules"),
+		log:    testhelper.NewLogger(t),
 		client: cl,
 	}
 }
 
-func mockAssetFlexPSQLFirewallRule(f assetFlexFirewallRuleFn) PostgresqlProviderAPI {
+func mockAssetFlexPSQLFirewallRule(t *testing.T, f assetFlexFirewallRuleFn) PostgresqlProviderAPI {
 	cl := &psqlAzureClientWrapper{
 		AssetFlexibleServerFirewallRules: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armpostgresqlflexibleservers.FirewallRulesClientListByServerOptions) ([]armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse, error) {
 			return f()
@@ -86,7 +86,7 @@ func mockAssetFlexPSQLFirewallRule(f assetFlexFirewallRuleFn) PostgresqlProvider
 	}
 
 	return &psqlProvider{
-		log:    clog.NewLogger("mock_flexs_psql_firewall_rules"),
+		log:    testhelper.NewLogger(t),
 		client: cl,
 	}
 }
@@ -149,7 +149,7 @@ func TestListSinglePostgresConfigurations(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetSinglePSQLConfiguration(tc.apiMockCall)
+			p := mockAssetSinglePSQLConfiguration(t, tc.apiMockCall)
 			got, err := p.ListSinglePostgresConfigurations(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
@@ -221,7 +221,7 @@ func TestListFlexiblePostgresConfigurations(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetFlexPSQLConfiguration(tc.apiMockCall)
+			p := mockAssetFlexPSQLConfiguration(t, tc.apiMockCall)
 			got, err := p.ListFlexiblePostgresConfigurations(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
@@ -280,7 +280,7 @@ func TestListSinglePostgresFirewallRules(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetSinglePSQLFirewallRule(tc.apiMockCall)
+			p := mockAssetSinglePSQLFirewallRule(t, tc.apiMockCall)
 			got, err := p.ListSinglePostgresFirewallRules(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {
@@ -339,7 +339,7 @@ func TestFlexibleSinglePostgresFirewallRules(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetFlexPSQLFirewallRule(tc.apiMockCall)
+			p := mockAssetFlexPSQLFirewallRule(t, tc.apiMockCall)
 			got, err := p.ListFlexiblePostgresFirewallRules(t.Context(), "subId", "resourceGroup", "psqlInstanceName")
 
 			if tc.expectError {

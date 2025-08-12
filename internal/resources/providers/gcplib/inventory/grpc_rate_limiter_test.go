@@ -46,7 +46,7 @@ func TestInventoryRateLimiterTestSuite(t *testing.T) {
 }
 
 func (s *RateLimiterTestSuite) SetupTest() {
-	s.logger = clog.NewLogger("test")
+	s.logger = testhelper.NewLogger(s.T())
 	s.rateLimiter = NewAssetsInventoryRateLimiter(s.logger)
 }
 
