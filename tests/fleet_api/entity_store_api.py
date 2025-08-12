@@ -10,11 +10,14 @@ from loguru import logger
 from munch import Munch
 
 
-def enable_entity_store(cfg: Munch) -> None:
+def enable_entity_store(cfg: Munch) -> dict:
     """Enables the entity store in Kibana.
 
     Args:
         cfg (Munch): Config object containing authentication data.
+
+    Returns:
+        dict: The response from the entity store enable API.
     """
     url = f"{cfg.kibana_url}/api/entity_store/enable"
     payload = {
@@ -34,11 +37,14 @@ def enable_entity_store(cfg: Munch) -> None:
         raise api_ex
 
 
-def entity_store_status(cfg: Munch) -> None:
+def entity_store_status(cfg: Munch) -> dict:
     """Checks the status of the entity store in Kibana.
 
     Args:
         cfg (Munch): Config object containing authentication data.
+
+    Returns:
+        dict: The status response from the entity store API.
     """
     url = f"{cfg.kibana_url}/api/entity_store/status"
     try:

@@ -36,7 +36,10 @@ def create_data_view(cfg: Munch, name: str, namespace: str = "default") -> dict:
     create_url = f"{cfg.kibana_url}/s/{namespace}/api/data_views/data_view"
     payload = {
         "data_view": {
-            "title": "logs-*",
+            "title": (
+                ".alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,"
+                "filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*"
+            ),
             "timeFieldName": "@timestamp",
             "name": data_view_id,
             "id": data_view_id,

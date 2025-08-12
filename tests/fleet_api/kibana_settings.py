@@ -10,17 +10,21 @@ from loguru import logger
 from munch import Munch
 
 
-def update_kibana_settings(cfg: Munch, settings: dict) -> None:
+def update_kibana_settings(cfg: Munch, settings: dict) -> dict:
     """Updates internal Kibana settings.
 
     Args:
         cfg (Munch): Config object containing authentication data.
         settings (dict): Dictionary of settings to update in Kibana.
+
+    Returns:
+        dict: The response from the Kibana settings API.
     """
     url = f"{cfg.kibana_url}/api/kibana/settings"
     headers = {
         "Content-Type": "application/json",
         "kbn-xsrf": "true",
+        # Needed for internal Kibana API compatibility
         "x-elastic-internal-origin": "kibana",
     }
     payload = {
