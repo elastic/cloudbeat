@@ -35,7 +35,6 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
@@ -252,18 +251,15 @@ func Test_pickManagementAccountRole(t *testing.T) {
 			}
 
 			// set up log capture
-			var log *clog.Logger
 			logCaptureBuf := &bytes.Buffer{}
-			{
-				replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
-					return zapcore.NewCore(
-						zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
-						zapcore.AddSync(logCaptureBuf),
-						zapcore.DebugLevel,
-					)
-				})
-				log = testhelper.NewLogger(t).WithOptions(replacement)
-			}
+			replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
+				return zapcore.NewCore(
+					zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+					zapcore.AddSync(logCaptureBuf),
+					zapcore.DebugLevel,
+				)
+			})
+			log := testhelper.NewLogger(t).WithOptions(replacement)
 
 			stsClient := &mockStsClient{}
 			rootCfg := assumeRole(stsClient, aws.Config{}, "cloudbeat-root")
