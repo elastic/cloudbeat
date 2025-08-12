@@ -24,7 +24,7 @@ def update_kibana_settings(cfg: Munch, settings: dict) -> dict:
     headers = {
         "Content-Type": "application/json",
         "kbn-xsrf": "true",
-        # Needed for internal Kibana API compatibility
+        # needed for internal Kibana API compatibility
         "x-elastic-internal-origin": "kibana",
     }
     payload = {
