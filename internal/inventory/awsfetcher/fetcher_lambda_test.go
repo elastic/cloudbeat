@@ -24,12 +24,12 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/lambda"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestLambdaFunction_Fetch(t *testing.T) {
@@ -67,7 +67,7 @@ func TestLambdaFunction_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := clog.NewLogger("test_fetcher_lambda")
+	logger := testhelper.NewLogger(t)
 	provider := newMockLambdaProvider(t)
 
 	provider.On("ListEventSourceMappings", mock.Anything, mock.Anything).Return([]awslib.AwsResource{}, nil)

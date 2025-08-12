@@ -22,10 +22,10 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
@@ -55,7 +55,7 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 	}
 
 	// setup
-	logger := clog.NewLogger("azurefetcher_test")
+	logger := testhelper.NewLogger(t)
 	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(azureAssets, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(nil, nil)
@@ -91,7 +91,7 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 	}
 
 	// setup
-	logger := clog.NewLogger("azurefetcher_test")
+	logger := testhelper.NewLogger(t)
 	provider := newMockAccountProvider(t)
 	provider.EXPECT().ListTenants(mock.Anything).Return(nil, nil)
 	provider.EXPECT().ListSubscriptions(mock.Anything).Return(azureAssets, nil)
