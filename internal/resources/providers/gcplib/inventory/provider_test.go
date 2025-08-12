@@ -36,14 +36,12 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type ProviderTestSuite struct {
 	suite.Suite
-	logger          *clog.Logger
 	mockedInventory *AssetsInventoryWrapper
 	mockedCrm       *ResourceManagerWrapper
 }
@@ -74,7 +72,6 @@ func NewMockInventoryContentIterators() (inventory *AssetsInventoryWrapper, reso
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.logger = testhelper.NewObserverLogger(s.T())
 	s.mockedCrm = &ResourceManagerWrapper{
 		getProjectDisplayName: func(_ context.Context, _ string) string {
 			return "ProjectName"
@@ -87,7 +84,7 @@ func (s *ProviderTestSuite) SetupTest() {
 
 func (s *ProviderTestSuite) NewMockProvider() *Provider {
 	return &Provider{
-		log:       s.logger,
+		log:       testhelper.NewObserverLogger(s.T()),
 		inventory: s.mockedInventory,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
@@ -105,9 +102,10 @@ func (s *ProviderTestSuite) TestProviderInit() {
 	}
 	gcpCnf := config.GcpConfig{}
 
-	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig, gcpCnf).Return(&Provider{}, nil).Once()
+	logger := testhelper.NewObserverLogger(s.T())
+	initMock.EXPECT().Init(mock.Anything, logger, gcpConfig, gcpCnf).Return(&Provider{}, nil).Once()
 	t := s.T()
-	provider, err := initMock.Init(t.Context(), s.logger, gcpConfig, gcpCnf)
+	provider, err := initMock.Init(t.Context(), logger, gcpConfig, gcpCnf)
 	s.Require().NoError(err)
 	s.NotNil(provider)
 }
