@@ -2,11 +2,11 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "variables": {
-        "userAssignedIdentityName": "[concat('ElasticCloudConnectorsIdentity-', parameters('elasticCloudConnectorId'))]",
+        "userAssignedIdentityName": "[concat('ElasticCloudIdentity-', parameters('elasticCloudConnectorId'))]",
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
-        "customRoleDefinitionName": "[guid('ElasticCloudConnectorsRoleDefinition-', subscription().subscriptionId)]",
-        "customRoleAssignmentName": "[guid('ElasticCloudConnectorsRoleAssignment-', parameters('elasticCloudConnectorId'))]",
-        "securityReaderRoleAssignmentName": "[guid('ElasticCloudConnectorsSecurityReaderRoleAssignment-', parameters('elasticCloudConnectorId'))]"
+        "customRoleDefinitionName": "[guid('ElasticCloudRoleDefinition-', subscription().subscriptionId)]",
+        "customRoleAssignmentName": "[guid('ElasticCloudRoleAssignment-', parameters('elasticCloudConnectorId'))]",
+        "securityReaderRoleAssignmentName": "[guid('ElasticCloudSecurityReaderRoleAssignment-', parameters('elasticCloudConnectorId'))]"
     },
     "parameters": {
         "elasticStackId": {
@@ -38,7 +38,7 @@
             "name": "[variables('userAssignedIdentityName')]",
             "location": "[resourceGroup().location]",
             "tags": {
-                "elastic-resource-id": "[parameters('elasticStackId')]",
+                "elastic-stack-id": "[parameters('elasticStackId')]",
                 "elastic-cloud-connector-id": "[parameters('elasticCloudConnectorId')]"
             },
             "resources": [
@@ -50,7 +50,7 @@
                         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
                     ],
                     "properties": {
-                        "issuer": "[variables('elasticCloudIssuer')]",
+                        "issuer": "[parameters('elasticCloudIssuer')]",
                         "subject": "[parameters('elasticStackId')]",
                         "audiences": [
                             "api://AzureADTokenExchange"
