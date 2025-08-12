@@ -28,7 +28,7 @@ from fleet_api.kibana_settings import update_kibana_settings
 from loguru import logger
 
 elk_config = config_fleet.elk_config
-ENTITY_STORE_INIT_TIMEOUT = 15  # seconds
+ENTITY_STORE_INIT_TIMEOUT = 60  # seconds
 
 if __name__ == "__main__":
     try:
