@@ -27,7 +27,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type (
@@ -36,34 +36,34 @@ type (
 	subscriptionsFn func() ([]armsubscriptions.ClientListResponse, error)
 )
 
-func mockLocationsAsset(fn locationsFn) SubscriptionProviderAPI {
+func mockLocationsAsset(t *testing.T, fn locationsFn) SubscriptionProviderAPI {
 	wrapper := locationAzureClientWrapper{
 		AssetLocations: func(_ context.Context, _ string, _ *arm.ClientOptions, _ *armsubscriptions.ClientListLocationsOptions) ([]armsubscriptions.ClientListLocationsResponse, error) {
 			return fn()
 		},
 	}
 
-	return &subscriptionProvider{locationClient: wrapper, log: clog.NewLogger("mock_subscriptions_locations_asset_provider")}
+	return &subscriptionProvider{locationClient: wrapper, log: testhelper.NewLogger(t)}
 }
 
-func mockTenantAsset(fn tenantsFn) SubscriptionProviderAPI {
+func mockTenantAsset(t *testing.T, fn tenantsFn) SubscriptionProviderAPI {
 	tenantClientWrapper := tenantAzureClientWrapper{
 		Tenants: func(_ context.Context, _ *arm.ClientOptions, _ *armsubscriptions.TenantsClientListOptions) ([]armsubscriptions.TenantsClientListResponse, error) {
 			return fn()
 		},
 	}
 
-	return &subscriptionProvider{tenantClient: tenantClientWrapper, log: clog.NewLogger("mock_subscriptions_tenants_asset_provider")}
+	return &subscriptionProvider{tenantClient: tenantClientWrapper, log: testhelper.NewLogger(t)}
 }
 
-func mockSubscriptionAsset(fn subscriptionsFn) SubscriptionProviderAPI {
+func mockSubscriptionAsset(t *testing.T, fn subscriptionsFn) SubscriptionProviderAPI {
 	subscriptionClientWrapper := subscriptionAzureClientWrapper{
 		Subscriptions: func(_ context.Context, _ *arm.ClientOptions, _ *armsubscriptions.ClientListOptions) ([]armsubscriptions.ClientListResponse, error) {
 			return fn()
 		},
 	}
 
-	return &subscriptionProvider{subscriptionClient: subscriptionClientWrapper, log: clog.NewLogger("mock_subscriptions_subscription_asset_provider")}
+	return &subscriptionProvider{subscriptionClient: subscriptionClientWrapper, log: testhelper.NewLogger(t)}
 }
 
 func TestSubscriptionProvider_ListLocations(t *testing.T) {
@@ -189,7 +189,7 @@ func TestSubscriptionProvider_ListLocations(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			provider := mockLocationsAsset(tc.configMock)
+			provider := mockLocationsAsset(t, tc.configMock)
 
 			assets, err := provider.ListLocations(t.Context(), "subscription")
 
@@ -249,7 +249,7 @@ func TestSubscriptionProvider_ListTenants(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			provider := mockTenantAsset(tc.configMock)
+			provider := mockTenantAsset(t, tc.configMock)
 
 			assets, err := provider.ListTenants(t.Context())
 
@@ -312,7 +312,7 @@ func TestSubscriptionProvider_ListSubscriptions(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			provider := mockSubscriptionAsset(tc.configMock)
+			provider := mockSubscriptionAsset(t, tc.configMock)
 
 			assets, err := provider.ListSubscriptions(t.Context())
 

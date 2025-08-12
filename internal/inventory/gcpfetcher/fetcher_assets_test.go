@@ -26,15 +26,15 @@ import (
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	gcpinventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestAccountFetcher_Fetch_Assets(t *testing.T) {
-	logger := clog.NewLogger("gcpfetcher_test")
+	logger := testhelper.NewLogger(t)
 	createAsset := func(assetType string) *gcpinventory.ExtendedGcpAsset {
 		return &gcpinventory.ExtendedGcpAsset{
 			Asset: &assetpb.Asset{

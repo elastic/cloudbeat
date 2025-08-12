@@ -173,7 +173,7 @@ func Test_getAwsAccounts(t *testing.T) {
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
 			}
-			log := clog.NewLogger("test")
+			log := testhelper.NewLogger(t)
 			got, err := a.getAwsAccounts(t.Context(), log, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
@@ -262,7 +262,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 						zapcore.DebugLevel,
 					)
 				})
-				log = clog.NewLogger("test").WithOptions(replacement)
+				log = testhelper.NewLogger(t).WithOptions(replacement)
 			}
 
 			stsClient := &mockStsClient{}

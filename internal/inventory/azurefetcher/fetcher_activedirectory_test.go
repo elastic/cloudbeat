@@ -36,6 +36,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
@@ -137,7 +138,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	}
 
 	// setup
-	logger := clog.NewLogger("azurefetcher_test")
+	logger := testhelper.NewLogger(t)
 	provider := newMockActivedirectoryProvider(t)
 
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Maybe().Return(
@@ -170,7 +171,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 				zapcore.DebugLevel,
 			)
 		})
-		log = clog.NewLogger("test").WithOptions(replacement)
+		log = testhelper.NewLogger(t).WithOptions(replacement)
 	}
 
 	provider := newMockActivedirectoryProvider(t)
