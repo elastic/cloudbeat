@@ -19,7 +19,7 @@ import time
 
 import configuration_fleet as config_fleet
 import requests
-from fleet_api.data_view_api import create_data_view
+from fleet_api.data_view_api import create_security_default_data_view
 from fleet_api.entity_store_api import (
     enable_entity_store,
     is_entity_store_fully_started,
@@ -41,8 +41,8 @@ if __name__ == "__main__":
         )
 
         # Create data view if it doesn't exist
-        logger.info("Creating data view for entity store...")
-        create_data_view(cfg=elk_config, name="security-solution")
+        logger.info("Creating security default data view for entity store...")
+        create_security_default_data_view(cfg=elk_config, name="security-solution")
 
         enable_entity_store(cfg=elk_config)
 
