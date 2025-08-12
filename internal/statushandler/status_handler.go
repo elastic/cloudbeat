@@ -40,7 +40,6 @@ func NewStatusHandler(statusReporter status.StatusReporter) *StatusHandler {
 		statusReporter: statusReporter,
 		messages:       make(map[string]struct{}, messagesBufferSize),
 	}
-	s.refreshBuffer()
 
 	return s
 }
