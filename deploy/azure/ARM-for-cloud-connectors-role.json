@@ -4,9 +4,10 @@
     "variables": {
         "userAssignedIdentityName": "[concat('ElasticCloudIdentity-', parameters('elasticCloudConnectorId'))]",
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
-        "customRoleDefinitionName": "[guid('ElasticCloudRoleDefinition-', subscription().subscriptionId)]",
-        "customRoleAssignmentName": "[guid('ElasticCloudRoleAssignment-', parameters('elasticCloudConnectorId'))]",
-        "securityReaderRoleAssignmentName": "[guid('ElasticCloudSecurityReaderRoleAssignment-', parameters('elasticCloudConnectorId'))]"
+        "customRoleDefinition": "[guid('ElasticCloudRoleDefinition-', parameters('elasticCloudConnectorId'))]",
+        "customRoleDefinitionName": "[concat('Elastic Cloud Connector Role - ', parameters('elasticCloudConnectorId'))]",
+        "customRoleAssignment": "[guid('ElasticCloudRoleAssignment-', parameters('elasticCloudConnectorId'))]",
+        "securityReaderRoleAssignment": "[guid('ElasticCloudSecurityReaderRoleAssignment-', parameters('elasticCloudConnectorId'))]"
     },
     "parameters": {
         "elasticStackId": {
@@ -62,13 +63,13 @@
         {
             "type": "Microsoft.Authorization/roleDefinitions",
             "apiVersion": "2022-04-01",
-            "name": "[variables('customRoleDefinitionName')]",
+            "name": "[variables('customRoleDefinition')]",
             "properties": {
                 "assignableScopes": [
                     "[concat('/subscriptions/', subscription().subscriptionId)]",
                     "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name)]"
                 ],
-                "roleName": "Elastic Web App Reader",
+                "roleName": "[variables('customRoleDefinitionName')]",
                 "description": "Provide Elastic Cloud Connector deployments with read permissions for web app configurations",
                 "permissions": [
                     {
@@ -85,13 +86,13 @@
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[variables('customRoleAssignmentName')]",
+            "name": "[variables('customRoleAssignment')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]",
-                "[variables('customRoleDefinitionName')]"
+                "[variables('customRoleDefinition')]"
             ],
             "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('customRoleDefinitionName'))]",
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('customRoleDefinition'))]",
                 "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2018-11-30').principalId]",
                 "principalType": "ServicePrincipal"
             }
@@ -99,7 +100,7 @@
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[variables('securityReaderRoleAssignmentName')]",
+            "name": "[variables('securityReaderRoleAssignment')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
             ],
