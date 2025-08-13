@@ -57,7 +57,7 @@ func (f *RdsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 	dbInstances, err := f.provider.DescribeDBInstances(ctx)
 	if err != nil {
 		f.log.Errorf("failed to load some DB instances from rds: %v", err)
-		reportMissingPermissions(f.statusHandler, err)
+		awslib.ReportMissingPermission(f.statusHandler, err)
 	}
 
 	for _, dbInstance := range dbInstances {

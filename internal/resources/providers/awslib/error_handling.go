@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package awslib
 
 import (
 	"errors"
@@ -53,7 +53,7 @@ func IsPermissionError(err error) bool {
 	return HasAWSErrorCode(err, permissionErrorCodes)
 }
 
-func reportMissingPermissions(statusHandler statushandler.StatusHandlerAPI, err error) {
+func ReportMissingPermission(statusHandler statushandler.StatusHandlerAPI, err error) {
 	if IsPermissionError(err) {
 		statusHandler.Degraded(fmt.Sprintf(missingPolicyFMT, arnSecurityAudit))
 	}
