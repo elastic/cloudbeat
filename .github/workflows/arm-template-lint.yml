@@ -45,6 +45,5 @@ jobs:
           Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
           $testParams = @{
             TemplatePath = "./deploy/azure/${{ matrix.template }}/azuredeploy.json"
-            Skip         = 'Resources Should have Location'
           }
           Test-AzTemplate @testParams
