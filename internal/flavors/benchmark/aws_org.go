@@ -26,6 +26,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"go.opentelemetry.io/otel"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
@@ -48,6 +49,8 @@ const (
 	scanSettingTagValue = "Yes"
 	scopeName           = "github.com/elastic/cloudbeat/internal/flavors/benchmark/aws_org"
 )
+
+var tracer = otel.Tracer(scopeName)
 
 type AWSOrg struct {
 	IAMProvider      iam.RoleGetter
@@ -98,7 +101,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
 		func(ctx context.Context) (registry.FetchersMap, error) {
-			ctx, span := observability.StartSpan(ctx, scopeName, "benchmark.AWSOrg.initialize")
+			ctx, span := tracer.Start(ctx, "benchmark.AWSOrg.initialize")
 			defer span.End()
 			spannedLog := log.WithSpanContext(span.SpanContext())
 
