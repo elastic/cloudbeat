@@ -36,6 +36,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type (
@@ -124,6 +125,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				securityhub:   hub,
 				resourceCh:    ch,
 				cloudIdentity: &cloud.Identity{Account: "account"},
+				statusHandler: statushandler.NewMockStatusHandlerAPI(t),
 			}
 
 			err := m.Fetch(ctx, cycle.Metadata{})

@@ -29,12 +29,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type ManagerTestSuite struct {
 	suite.Suite
-	registry *registry.MockRegistry
-	opts     goleak.Option
+	registry      *registry.MockRegistry
+	statusHandler *statushandler.MockStatusHandlerAPI
+	opts          goleak.Option
 }
 
 const timeout = 2 * time.Second
@@ -50,6 +52,7 @@ func TestManagerTestSuite(t *testing.T) {
 func (s *ManagerTestSuite) SetupTest() {
 	s.opts = goleak.IgnoreCurrent()
 	s.registry = &registry.MockRegistry{}
+	s.statusHandler = statushandler.NewMockStatusHandlerAPI(s.T())
 }
 
 func (s *ManagerTestSuite) TearDownTest() {
@@ -69,7 +72,9 @@ func (s *ManagerTestSuite) TestManagerRun() {
 	s.registry.EXPECT().Update(mock.Anything).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.statusHandler.EXPECT().Reset().Once()
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, s.statusHandler)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -91,7 +96,9 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 	s.registry.EXPECT().Update(mock.Anything).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.statusHandler.EXPECT().Reset().Once()
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, s.statusHandler)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -113,7 +120,9 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 	s.registry.EXPECT().Update(mock.Anything).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.statusHandler.EXPECT().Reset().Once()
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, s.statusHandler)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -140,7 +149,9 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 		}
 	}).Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	// call to status handler reset is not expected here
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, s.statusHandler)
 	s.Require().NoError(err)
 
 	err = m.fetchSingle(t.Context(), fetcherName, cycle.Metadata{})
@@ -158,7 +169,9 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 	s.registry.EXPECT().Update(mock.Anything).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.statusHandler.EXPECT().Reset().Once()
+
+	d, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, timeout, s.registry, s.statusHandler)
 	s.Require().NoError(err)
 
 	d.Run()
@@ -178,7 +191,9 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	s.registry.EXPECT().Update(mock.Anything).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
+	s.statusHandler.EXPECT().Reset().Once()
+
+	m, err := NewManager(t.Context(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry, s.statusHandler)
 	s.Require().NoError(err)
 
 	m.Run()
@@ -203,7 +218,9 @@ func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 	s.registry.EXPECT().Update(mock.Anything).Once()
 
-	m, err := NewManager(ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
+	s.statusHandler.EXPECT().Reset().Once()
+
+	m, err := NewManager(ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry, s.statusHandler)
 	s.Require().NoError(err)
 
 	m.Run()

@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
 	_ "github.com/elastic/cloudbeat/internal/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type posture struct {
@@ -58,7 +59,9 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 		log.Errorw("failed to set up otel", logp.Error(err))
 	}
 
-	strategy, err := benchmark.GetStrategy(cfg, log)
+	statusHandler := statushandler.NewStatusHandler(b.Manager)
+
+	strategy, err := benchmark.GetStrategy(cfg, log, statusHandler)
 	if err != nil {
 		cancel()
 		return nil, err

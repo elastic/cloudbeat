@@ -27,23 +27,26 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/kms"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type KmsFetcher struct {
-	log        *clog.Logger
-	kms        kms.KMS
-	resourceCh chan fetching.ResourceInfo
+	log           *clog.Logger
+	kms           kms.KMS
+	resourceCh    chan fetching.ResourceInfo
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type KmsResource struct {
 	key awslib.AwsResource
 }
 
-func NewKMSFetcher(log *clog.Logger, provider kms.KMS, ch chan fetching.ResourceInfo) *KmsFetcher {
+func NewKMSFetcher(log *clog.Logger, provider kms.KMS, ch chan fetching.ResourceInfo, statusHandler statushandler.StatusHandlerAPI) *KmsFetcher {
 	return &KmsFetcher{
-		log:        log,
-		kms:        provider,
-		resourceCh: ch,
+		log:           log,
+		kms:           provider,
+		resourceCh:    ch,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -53,6 +56,7 @@ func (f *KmsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 	keys, err := f.kms.DescribeSymmetricKeys(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe keys from KMS: %v", err)
+		awslib.ReportMissingPermission(f.statusHandler, err)
 		return nil
 	}
 

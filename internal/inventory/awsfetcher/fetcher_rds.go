@@ -27,25 +27,28 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type rdsFetcher struct {
-	logger      *clog.Logger
-	provider    rdsProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      rdsProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type rdsProvider interface {
 	DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newRDSFetcher(logger *clog.Logger, identity *cloud.Identity, provider rdsProvider) inventory.AssetFetcher {
+func newRDSFetcher(logger *clog.Logger, identity *cloud.Identity, provider rdsProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &rdsFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -59,6 +62,7 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 		if len(awsResources) == 0 {
 			return
 		}
+		awslib.ReportMissingPermission(s.statusHandler, err)
 	}
 
 	rdsInstances := lo.Map(awsResources, func(item awslib.AwsResource, _ int) rds.DBInstance {

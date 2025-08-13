@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestNetworkFetcher_Fetch(t *testing.T) {
@@ -132,9 +133,10 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			ctx, cancel := context.WithTimeout(t.Context(), time.Second*5)
 			defer cancel()
 			f := NetworkFetcher{
-				log:        testhelper.NewLogger(t),
-				ec2Client:  tt.networkProvider(),
-				resourceCh: ch,
+				log:           testhelper.NewLogger(t),
+				ec2Client:     tt.networkProvider(),
+				resourceCh:    ch,
+				statusHandler: statushandler.NewMockStatusHandlerAPI(t),
 			}
 
 			err := f.Fetch(ctx, cycle.Metadata{})
