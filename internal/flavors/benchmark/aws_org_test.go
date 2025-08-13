@@ -117,10 +117,11 @@ func TestAWSOrg_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &AWSOrg{
-				IAMProvider:      tt.iamProvider,
-				IdentityProvider: tt.identityProvider,
-				AccountProvider:  tt.accountProvider,
-				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
+				IAMProvider:       tt.iamProvider,
+				IdentityProvider:  tt.identityProvider,
+				AccountProvider:   tt.accountProvider,
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -170,10 +171,11 @@ func Test_getAwsAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				IAMProvider:      getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
-				IdentityProvider: nil,
-				AccountProvider:  tt.accountProvider,
-				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
+				IAMProvider:       getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
+				IdentityProvider:  nil,
+				AccountProvider:   tt.accountProvider,
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 			}
 			log := testhelper.NewLogger(t)
 			got, err := a.getAwsAccounts(t.Context(), log, aws.Config{}, &tt.rootIdentity)
@@ -248,10 +250,11 @@ func Test_pickManagementAccountRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				IAMProvider:      getMockIAMRoleGetter(tt.roles),
-				IdentityProvider: mockAwsIdentityProvider(nil),
-				AccountProvider:  mockAccountProvider(nil),
-				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
+				IAMProvider:       getMockIAMRoleGetter(tt.roles),
+				IdentityProvider:  mockAwsIdentityProvider(nil),
+				AccountProvider:   mockAccountProvider(nil),
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 			}
 
 			// set up log capture
