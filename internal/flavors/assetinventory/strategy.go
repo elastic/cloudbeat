@@ -36,6 +36,7 @@ import (
 	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type Strategy interface {
@@ -43,8 +44,9 @@ type Strategy interface {
 }
 
 type strategy struct {
-	logger *clog.Logger
-	cfg    *config.Config
+	logger        *clog.Logger
+	cfg           *config.Config
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (inventory.AssetInventory, error) {
@@ -55,7 +57,7 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 	case config.ProviderAWS:
 		switch s.cfg.CloudConfig.Aws.AccountType {
 		case config.SingleAccount, config.OrganizationAccount:
-			fetchers, err = s.initAwsFetchers(ctx)
+			fetchers, err = s.initAwsFetchers(ctx, s.statusHandler)
 		default:
 			err = fmt.Errorf("unsupported account_type: %q", s.cfg.CloudConfig.Aws.AccountType)
 		}
@@ -111,9 +113,10 @@ func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetche
 	return gcpfetcher.New(s.logger, provider), nil
 }
 
-func GetStrategy(logger *clog.Logger, cfg *config.Config) Strategy {
+func GetStrategy(logger *clog.Logger, cfg *config.Config, statusHandler statushandler.StatusHandlerAPI) Strategy {
 	return &strategy{
-		logger: logger,
-		cfg:    cfg,
+		logger:        logger,
+		cfg:           cfg,
+		statusHandler: statusHandler,
 	}
 }

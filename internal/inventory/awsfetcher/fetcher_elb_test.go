@@ -33,6 +33,7 @@ import (
 	elbv2 "github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb_v2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestELBv1Fetcher_Fetch(t *testing.T) {
@@ -87,8 +88,10 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 	providerv2 := newMockV2Provider(t)
 	providerv2.EXPECT().DescribeLoadBalancers(mock.Anything).Return(nil, nil)
 
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newElbFetcher(logger, identity, providerv1, providerv2)
+	fetcher := newElbFetcher(logger, identity, providerv1, providerv2, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
@@ -134,7 +137,10 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 	providerv2.EXPECT().DescribeLoadBalancers(mock.Anything).Return(in, nil)
 
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newElbFetcher(logger, identity, providerv1, providerv2)
+
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
+	fetcher := newElbFetcher(logger, identity, providerv1, providerv2, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }

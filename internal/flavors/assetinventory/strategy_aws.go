@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const (
@@ -44,7 +45,7 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 }
 
-func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
+func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
 	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
 	if err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 
 	// Early exit if we're scanning the entire account.
 	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
-		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig), nil
+		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig, statusHandler), nil
 	}
 
 	// Assume audit roles per selected account and generate fetchers for them
@@ -85,7 +86,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 			s.logger.Infof("Skipping identity on purpose %+v", identity)
 			continue
 		}
-		accountFetchers := awsfetcher.New(ctx, s.logger, &identity, assumedRoleConfig)
+		accountFetchers := awsfetcher.New(ctx, s.logger, &identity, assumedRoleConfig, statusHandler)
 		fetchers = append(fetchers, accountFetchers...)
 	}
 
