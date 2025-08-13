@@ -30,6 +30,7 @@ import (
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/smithy-go"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gocarina/gocsv"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -80,23 +81,23 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 
 		mfaDevices, err := p.getMFADevices(ctx, apiUser, userAccount)
 		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %s, error: %v", username, err)
+			p.log.With("aws.iam.user.name", username, logp.Error(err)).Error("fail to list mfa device for user")
 		}
 
 		pwdEnabled, err := isPasswordEnabled(userAccount)
 		if err != nil {
-			p.log.Errorf("fail to parse PasswordEnabled for user: %s, error: %v", username, err)
+			p.log.With("aws.iam.user.name", username, logp.Error(err)).Error("fail to parse PasswordEnabled for user")
 			pwdEnabled = false
 		}
 
 		inlinePolicies, err := p.listInlinePolicies(ctx, apiUser.UserName)
 		if err != nil && !isRootUser(username) {
-			p.log.Errorf("fail to list inline policies for user: %s, error: %v", username, err)
+			p.log.With("aws.iam.user.name", username, logp.Error(err)).Error("fail to list inline policies for user")
 		}
 
 		attachedPolicies, err := p.listAttachedPolicies(ctx, apiUser.UserName)
 		if err != nil && !isRootUser(username) {
-			p.log.Errorf("fail to list attached policies for user: %s, error: %v", username, err)
+			p.log.With("aws.iam.user.name", username, logp.Error(err)).Error("fail to list attached policies for user")
 		}
 
 		users = append(users, User{
