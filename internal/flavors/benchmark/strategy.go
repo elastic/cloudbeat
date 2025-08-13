@@ -44,10 +44,11 @@ func GetStrategy(cfg *config.Config, log *clog.Logger, statusHandler statushandl
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
 			return &AWSOrg{
-				IAMProvider:      &iam.Provider{},
-				IdentityProvider: awslib.IdentityProvider{Logger: log},
-				AccountProvider:  awslib.AccountProvider{},
-				StatusHandler:    statusHandler,
+				IAMProvider:       &iam.Provider{},
+				IdentityProvider:  awslib.IdentityProvider{Logger: log},
+				AccountProvider:   awslib.AccountProvider{},
+				StatusHandler:     statusHandler,
+				AWSCredsValidator: awslib.CredentialsValidatorFunc(awslib.CredentialsValid),
 			}, nil
 		}
 
