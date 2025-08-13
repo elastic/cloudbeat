@@ -25,6 +25,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/aws/smithy-go"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
@@ -132,10 +133,11 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	tests := []struct {
-		name               string
-		mocksReturnVals    mocksReturnVals
-		account            string
-		numExpectedResults int
+		name                  string
+		mocksReturnVals       mocksReturnVals
+		account               string
+		numExpectedResults    int
+		initStatusHandlerMock func(*statushandler.MockStatusHandlerAPI)
 	}{
 		{
 			name: "Should not get any IAM resources",
@@ -209,6 +211,21 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 			account:            testAccount,
 			numExpectedResults: 1,
 		},
+		{
+			name: "Should not get any IAM resources - permission error",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy":      {nil, &smithy.GenericAPIError{Code: "AccessDenied"}},
+				"GetUsers":               {nil, &smithy.GenericAPIError{Code: "AccessDenied"}},
+				"GetPolicies":            {nil, &smithy.GenericAPIError{Code: "AccessDenied"}},
+				"ListServerCertificates": {nil, &smithy.GenericAPIError{Code: "AccessDenied"}},
+				"GetAccessAnalyzers":     {nil, &smithy.GenericAPIError{Code: "AccessDenied"}},
+			},
+			account:            testAccount,
+			numExpectedResults: 0,
+			initStatusHandlerMock: func(mh *statushandler.MockStatusHandlerAPI) {
+				mh.EXPECT().Degraded("missing permission on cloud provider side: arn:aws:iam::aws:policy/SecurityAudit").Times(5)
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -220,6 +237,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				iamProviderMock.On(funcName, ctx).Return(returnVals...)
 			}
 
+			mh := statushandler.NewMockStatusHandlerAPI(t)
 			iamFetcher := IAMFetcher{
 				log:         testhelper.NewLogger(s.T()),
 				iamProvider: iamProviderMock,
@@ -227,7 +245,11 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				cloudIdentity: &cloud.Identity{
 					Account: test.account,
 				},
-				statusHandler: statushandler.NewMockStatusHandlerAPI(t),
+				statusHandler: mh,
+			}
+
+			if test.initStatusHandlerMock != nil {
+				test.initStatusHandlerMock(mh)
 			}
 
 			err := iamFetcher.Fetch(ctx, cycle.Metadata{})
