@@ -40,6 +40,6 @@ jobs:
           Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
           $testParams = @{
             TemplatePath = "./deploy/azure/${{ matrix.template }}"
-            Skip = ${{ matrix.skip }}
+            Skip = "${{ matrix.skip }}"
           }
           Test-AzTemplate @testParams
