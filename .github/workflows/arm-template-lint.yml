@@ -33,8 +33,7 @@ jobs:
           mkdir ${{ matrix.template }}
           cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
 
-      - uses: microsoft/action-armttk@dec42b3c9dd0e5c1648aa76d01aac55b351624f2 # v1
+      - uses: Azure/arm-ttk-action@v1
         name: lint ${{ matrix.template }}
         with:
-          github_token: ${{ secrets.github_token }}
-          workdir: "./deploy/azure/${{ matrix.template }} -SkipByFile @{ '*' = '*ResourceIds should not contain*' }"
+          path: "./deploy/azure/${{ matrix.template }}"
