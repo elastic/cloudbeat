@@ -33,8 +33,18 @@ jobs:
           mkdir ${{ matrix.template }}
           cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
 
-      - uses: venura9/arm-ttk@master
-        name: lint ${{ matrix.template }}
+      - name: Checkout arm-ttk
+        uses: actions/checkout@v4
         with:
-          path: "./deploy/azure/${{ matrix.template }}"
-          skip: Resources Should have Location
+          repository: Azure/arm-ttk
+          path: arm-ttk
+
+      - name: Run ARM TTK
+        shell: pwsh
+        run: |
+          Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
+          $testParams = @{
+            TemplatePath = "./deploy/azure/${{ matrix.template }}/azuredeploy.json"
+            Skip         = 'Resources Should have Location'
+          }
+          Test-AzTemplate @testParams
