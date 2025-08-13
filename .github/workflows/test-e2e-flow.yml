@@ -13,6 +13,9 @@ on:
       serverless:
         required: true
         type: boolean
+      run-ui-sanity-tests:
+        required: true
+        type: boolean
 
 jobs:
   setup:
@@ -64,6 +67,7 @@ jobs:
       ess-region: ${{ inputs.region }}
       serverless_mode: ${{ inputs.serverless }}
       run-sanity-tests: true
+      run-ui-sanity-tests: ${{ inputs.run-ui-sanity-tests }}
       expiration_days: 0
 
   destroy:
