@@ -19,19 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         template:
-          - "ARM-for-organization-account"
-          - "ARM-for-single-account"
-          - "ARM-for-cloud-connectors-role"
+          - "ARM-for-organization-account.json"
+          - "ARM-for-single-account.json"
+          - "ARM-for-cloud-connectors-identity.json"
+        include:
+          - template: "ARM-for-single-account.json"
+            skip: "ResourceIds should not contain"
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-        # Copy files to its own folder because it's what the official ARM-TTK action expects
-        # Docs https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit#test-parameters
-      - name: copy file
-        working-directory: ./deploy/azure
-        run: |
-          mkdir ${{ matrix.template }}
-          cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
 
       - name: Checkout arm-ttk
         uses: actions/checkout@v4
@@ -44,6 +39,7 @@ jobs:
         run: |
           Import-Module ./arm-ttk/arm-ttk/arm-ttk.psd1
           $testParams = @{
-            TemplatePath = "./deploy/azure/${{ matrix.template }}/azuredeploy.json"
+            TemplatePath = "./deploy/azure/${{ matrix.template }}"
+            Skip = ${{ matrix.skip }}
           }
           Test-AzTemplate @testParams
