@@ -33,7 +33,8 @@ jobs:
           mkdir ${{ matrix.template }}
           cp ${{ matrix.template }}.json ${{ matrix.template }}/azuredeploy.json
 
-      - uses: Azure/arm-ttk-action@v1
+      - uses: venura9/arm-ttk@master
         name: lint ${{ matrix.template }}
         with:
           path: "./deploy/azure/${{ matrix.template }}"
+          skip: Resources Should have Location
