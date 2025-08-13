@@ -27,7 +27,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
@@ -138,7 +137,7 @@ func TestStrategyPicks(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			s := strategy{
-				logger: clog.NewLogger("strategy_test"),
+				logger: testhelper.NewLogger(t),
 				cfg:    tc.cfg,
 			}
 			ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)

@@ -26,13 +26,13 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb"
 	elbv2 "github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb_v2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestELBv1Fetcher_Fetch(t *testing.T) {
@@ -81,7 +81,7 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := clog.NewLogger("test_fetcher_elb_v1")
+	logger := testhelper.NewLogger(t)
 	providerv1 := newMockV1Provider(t)
 	providerv1.EXPECT().DescribeAllLoadBalancers(mock.Anything).Return(in, nil)
 	providerv2 := newMockV2Provider(t)
@@ -127,7 +127,7 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := clog.NewLogger("test_fetcher_elb_v2")
+	logger := testhelper.NewLogger(t)
 	providerv1 := newMockV1Provider(t)
 	providerv1.EXPECT().DescribeAllLoadBalancers(mock.Anything).Return(nil, nil)
 	providerv2 := newMockV2Provider(t)
