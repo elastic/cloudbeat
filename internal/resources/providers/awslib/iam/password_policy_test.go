@@ -25,8 +25,8 @@ import (
 	"github.com/aws/smithy-go/ptr"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func Test_GetPasswordPolicy(t *testing.T) {
@@ -83,7 +83,7 @@ func Test_GetPasswordPolicy(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.tcName, func(t *testing.T) {
 			ctx := t.Context()
-			log := clog.NewLogger("test")
+			log := testhelper.NewLogger(t)
 			client := &MockClient{}
 			provider := Provider{
 				log:                   log,
