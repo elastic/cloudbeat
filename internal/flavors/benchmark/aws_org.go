@@ -41,12 +41,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
+//go:generate generate_scopename
 const (
 	rootRole            = "cloudbeat-root"
 	memberRole          = "cloudbeat-securityaudit"
 	scanSettingTagKey   = "cloudbeat_scan_management_account"
 	scanSettingTagValue = "Yes"
-	scopeName           = "github.com/elastic/cloudbeat/internal/flavors/benchmark/aws_org"
 )
 
 type AWSOrg struct {

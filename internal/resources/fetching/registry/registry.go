@@ -27,7 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 )
 
-const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+//go:generate generate_scopename
 
 type Registry interface {
 	Keys() []string
