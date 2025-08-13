@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package awslib
 
 import (
 	"errors"
@@ -74,7 +74,7 @@ func TestIsPermissionErrorAndReportMissingPermissions(t *testing.T) {
 			}
 			got := IsPermissionError(tc.input)
 			assert.Equal(t, tc.expectedIsPermissionError, got)
-			reportMissingPermissions(mh, tc.input)
+			ReportMissingPermission(mh, tc.input)
 		})
 	}
 }

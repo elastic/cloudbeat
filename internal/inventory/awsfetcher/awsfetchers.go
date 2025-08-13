@@ -34,9 +34,10 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
-func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg aws.Config) []inventory.AssetFetcher {
+func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg aws.Config, statusHandler statushandler.StatusHandlerAPI) []inventory.AssetFetcher {
 	ec2Provider := ec2.NewEC2Provider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
 	elbProvider := elb.NewElbProvider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[elb.Client]{})
 	elbv2Provider := elbv2.NewElbV2Provider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[elbv2.Client]{})
@@ -47,15 +48,15 @@ func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg
 	snsProvider := sns.NewSNSProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[sns.Client]{})
 
 	return []inventory.AssetFetcher{
-		newEc2InstancesFetcher(logger, identity, ec2Provider),
-		newElbFetcher(logger, identity, elbProvider, elbv2Provider),
-		newIamPolicyFetcher(logger, identity, iamProvider),
-		newIamRoleFetcher(logger, identity, iamProvider),
-		newIamUserFetcher(logger, identity, iamProvider),
-		newLambdaFetcher(logger, identity, lambdaProvider),
-		newNetworkingFetcher(logger, identity, ec2Provider),
-		newRDSFetcher(logger, identity, rdsProvider),
-		newS3BucketFetcher(logger, identity, s3Provider),
-		newSNSFetcher(logger, identity, snsProvider),
+		newEc2InstancesFetcher(logger, identity, ec2Provider, statusHandler),
+		newElbFetcher(logger, identity, elbProvider, elbv2Provider, statusHandler),
+		newIamPolicyFetcher(logger, identity, iamProvider, statusHandler),
+		newIamRoleFetcher(logger, identity, iamProvider, statusHandler),
+		newIamUserFetcher(logger, identity, iamProvider, statusHandler),
+		newLambdaFetcher(logger, identity, lambdaProvider, statusHandler),
+		newNetworkingFetcher(logger, identity, ec2Provider, statusHandler),
+		newRDSFetcher(logger, identity, rdsProvider, statusHandler),
+		newS3BucketFetcher(logger, identity, s3Provider, statusHandler),
+		newSNSFetcher(logger, identity, snsProvider, statusHandler),
 	}
 }
