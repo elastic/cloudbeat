@@ -57,7 +57,7 @@ func (c *Cache[T]) GetValue(ctx context.Context, cycle Metadata, fetch func(cont
 		if c.lastCycle.Sequence < 0 {
 			return result, err
 		}
-		c.log.Errorf("Failed to renew, using cached value: %v", err)
+		c.log.Errorf(ctx, "Failed to renew, using cached value: %v", err)
 	} else {
 		c.cachedValue = result
 		c.lastCycle = cycle

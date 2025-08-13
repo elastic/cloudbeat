@@ -74,7 +74,7 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		f.log.Errorf("failed to get pods - %v", err)
+		f.log.Errorf(ctx, "failed to get pods - %v", err)
 		return err
 	}
 
@@ -96,7 +96,7 @@ func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList
 		// Add configuration
 		describedRepo, err := describer.Provider.DescribeRepositories(ctx, repositories, region)
 		if err != nil {
-			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %v", region, err)
+			f.log.Errorf(ctx, "could not retrieve pod's aws repositories for region %s: %v", region, err)
 		} else {
 			awsRepositories = append(awsRepositories, describedRepo...)
 		}

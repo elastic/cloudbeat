@@ -48,7 +48,7 @@ func (p *Provider) ListTopics(ctx context.Context) ([]types.Topic, error) {
 		for {
 			output, err := c.ListTopics(ctx, input)
 			if err != nil {
-				p.log.Errorf("Could not list SNS Topics. Error: %s", err)
+				p.log.Errorf(ctx, "Could not list SNS Topics. Error: %s", err)
 				return nil, err
 			}
 			all = append(all, output.Topics...)
@@ -93,7 +93,7 @@ func (p *Provider) ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.Aw
 		for {
 			output, err := c.ListTopics(ctx, input)
 			if err != nil {
-				p.log.Errorf("Could not list SNS Topics. Error: %s", err)
+				p.log.Errorf(ctx, "Could not list SNS Topics. Error: %s", err)
 				return nil, err
 			}
 
@@ -104,7 +104,7 @@ func (p *Provider) ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.Aw
 				}
 				subscriptions, err := p.ListSubscriptionsByTopic(ctx, region, topicInfo.GetResourceArn())
 				if err != nil {
-					p.log.Errorf("Could not list SNS Subscriptions for Topic %q. Error: %s", topicInfo.GetResourceArn(), err)
+					p.log.Errorf(ctx, "Could not list SNS Subscriptions for Topic %q. Error: %s", topicInfo.GetResourceArn(), err)
 				} else {
 					topicInfo.Subscriptions = subscriptions
 				}

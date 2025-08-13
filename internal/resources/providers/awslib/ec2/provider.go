@@ -362,7 +362,7 @@ func (p *Provider) IterOwnedSnapshots(ctx context.Context, before time.Time) ite
 			return nil, nil
 		})
 		if err != nil {
-			p.log.Errorf("Error listing owned snapshots: %v", err)
+			p.log.Errorf(ctx, "Error listing owned snapshots: %v", err)
 		}
 	}
 }
@@ -492,7 +492,7 @@ func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance
 		var result []*Volume
 		for _, vol := range allVolumes {
 			if len(vol.Attachments) != 1 {
-				p.log.Errorf("Volume %s has %d attachments", *vol.VolumeId, len(vol.Attachments))
+				p.log.Errorf(ctx, "Volume %s has %d attachments", *vol.VolumeId, len(vol.Attachments))
 				continue
 			}
 
@@ -564,7 +564,7 @@ func (p *Provider) DescribeVpcs(ctx context.Context) ([]awslib.AwsResource, erro
 				},
 			}})
 			if err != nil {
-				p.log.Errorf("Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
+				p.log.Errorf(ctx, "Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
 				continue
 			}
 

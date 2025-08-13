@@ -41,7 +41,7 @@ func (p Provider) GetIAMRolePermissions(ctx context.Context, roleName string) ([
 
 		policy, err := p.client.GetRolePolicy(ctx, input)
 		if err != nil {
-			p.log.Errorf("Failed to get policy %s: %v", *policyId.PolicyName, err)
+			p.log.Errorf(ctx, "Failed to get policy %s: %v", *policyId.PolicyName, err)
 			continue
 		}
 

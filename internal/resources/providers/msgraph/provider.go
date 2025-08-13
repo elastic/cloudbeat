@@ -94,7 +94,7 @@ func (p *provider) ListServicePrincipals(ctx context.Context) ([]*models.Service
 		return true // to continue the iteration
 	})
 	if err != nil {
-		p.log.Errorf("error iterating over Service Principals: %v", err)
+		p.log.Errorf(ctx, "error iterating over Service Principals: %v", err)
 	}
 	return items, nil
 }
@@ -122,7 +122,7 @@ func (p *provider) ListDirectoryRoles(ctx context.Context) ([]*models.DirectoryR
 		return true // to continue the iteration
 	})
 	if err != nil {
-		p.log.Errorf("error iterating over Directory Roles: %v", err)
+		p.log.Errorf(ctx, "error iterating over Directory Roles: %v", err)
 	}
 	return items, nil
 }
@@ -150,7 +150,7 @@ func (p *provider) ListGroups(ctx context.Context) ([]*models.Group, error) {
 		return true // to continue the iteration
 	})
 	if err != nil {
-		p.log.Errorf("error iterating over Groups: %v", err)
+		p.log.Errorf(ctx, "error iterating over Groups: %v", err)
 	}
 	return items, nil
 }
@@ -178,7 +178,7 @@ func (p *provider) ListUsers(ctx context.Context) ([]*models.User, error) {
 		return true // to continue the iteration
 	})
 	if err != nil {
-		p.log.Errorf("error iterating over Users: %v", err)
+		p.log.Errorf(ctx, "error iterating over Users: %v", err)
 	}
 	return items, nil
 }

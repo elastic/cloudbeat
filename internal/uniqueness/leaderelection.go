@@ -74,13 +74,13 @@ func (m *LeaderelectionManager) Run(ctx context.Context) error {
 
 	leConfig, err := m.buildConfig(newCtx)
 	if err != nil {
-		m.log.Errorf("Fail building leader election config: %v", err)
+		m.log.Errorf(ctx, "Fail building leader election config: %v", err)
 		return err
 	}
 
 	m.leader, err = le.NewLeaderElector(leConfig)
 	if err != nil {
-		m.log.Errorf("Fail to create a new leader elector: %v", err)
+		m.log.Errorf(ctx, "Fail to create a new leader elector: %v", err)
 		return err
 	}
 

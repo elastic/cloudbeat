@@ -21,6 +21,7 @@
 package launcher
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -93,13 +94,16 @@ func (l *launcher) Run(b *beat.Beat) error {
 		return err
 	}
 
+	// Create a root context for the launcher's execution.
+	ctx := context.Background()
+
 	// Wait for Fleet-side reconfiguration only if beater is running in Agent-managed mode.
 	if b.Manager.Enabled() {
 		defer b.Manager.Stop()
 		l.log.Infof("Waiting for initial reconfiguration from Fleet server...")
-		update, err := l.reconfigureWait(reconfigureWaitTimeout)
+		update, err := l.reconfigureWait(ctx, reconfigureWaitTimeout)
 		if err != nil {
-			l.log.Errorf("Failed while waiting for the initial reconfiguration from Fleet server: %v", err)
+			l.log.Errorf(ctx, "Failed while waiting for the initial reconfiguration from Fleet server: %v", err)
 			return err
 		}
 
@@ -108,12 +112,12 @@ func (l *launcher) Run(b *beat.Beat) error {
 		}
 	}
 
-	err := l.run()
+	err := l.run(ctx)
 	return err
 }
 
-func (l *launcher) run() error {
-	err := l.runLoop()
+func (l *launcher) run(ctx context.Context) error {
+	err := l.runLoop(ctx)
 
 	switch {
 	case errors.Is(err, ErrGracefulExit):
@@ -122,7 +126,7 @@ func (l *launcher) run() error {
 		l.log.Info("Launcher stopped after timeout")
 	case err == nil: // unexpected
 	default:
-		l.log.Errorf("Launcher stopped by error: %v", err)
+		l.log.Errorf(ctx, "Launcher stopped by error: %v", err)
 	}
 
 	l.reloader.Stop()
@@ -130,7 +134,7 @@ func (l *launcher) run() error {
 }
 
 // runLoop is the loop that keeps the launcher alive
-func (l *launcher) runLoop() error {
+func (l *launcher) runLoop(ctx context.Context) error {
 	l.log.Info("Launcher is running")
 	for {
 		// Run a new beater
@@ -143,7 +147,7 @@ func (l *launcher) runLoop() error {
 		// config update		(val, nil)
 		// stop signal			(nil, ErrStopSignal)
 		// beater error			(nil, err)
-		cfg, err := l.waitForUpdates()
+		cfg, err := l.waitForUpdates(ctx)
 
 		if isConfigUpdate(cfg, err) {
 			l.stopBeater()
@@ -237,8 +241,10 @@ func (l *launcher) stopBeaterWithTimeout(duration time.Duration) error {
 //  1. The Stop function got called 	(nil, ErrStopSignal)
 //  2. The beater run has returned 		(nil, err)
 //  3. A config update received 		(val, nil)
-func (l *launcher) waitForUpdates() (*config.C, error) {
+func (l *launcher) waitForUpdates(ctx context.Context) (*config.C, error) {
 	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	case err, ok := <-l.beaterErr:
 		if !ok {
 			l.log.Infof("Launcher received a stop signal")
@@ -278,7 +284,7 @@ func (l *launcher) configUpdate(update *config.C) error {
 // reconfigureWait will wait for and consume incoming reconfiguration from the Fleet server, and keep
 // discarding them until the incoming config contains the necessary information to start beater
 // properly, thereafter returning the valid config.
-func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
+func (l *launcher) reconfigureWait(ctx context.Context, timeout time.Duration) (*config.C, error) {
 	start := time.Now()
 	timer := time.After(timeout)
 
@@ -298,7 +304,7 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 			if l.validator != nil {
 				err := l.validator.Validate(update)
 				if err != nil {
-					l.log.Errorf("Config update validation failed: %v", err)
+					l.log.Errorf(ctx, "Config update validation failed: %v", err)
 					healthErr := &BeaterUnhealthyError{}
 					if errors.As(err, healthErr) {
 						l.beat.Manager.UpdateStatus(status.Degraded, healthErr.Error())

@@ -46,7 +46,7 @@ func (s *LoggerTestSuite) SetupSuite() {
 }
 
 func (s *LoggerTestSuite) TestLogFormat() {
-	logger := newLogger()
+	logger := newLogger(s.T().Context())
 	logger.SetLevel(logging.Warn)
 	logger.Warn("warn %s", "warn")
 	logs := logp.ObserverLogs().TakeAll()
@@ -56,7 +56,7 @@ func (s *LoggerTestSuite) TestLogFormat() {
 }
 
 func (s *LoggerTestSuite) TestLogFields() {
-	logger := newLogger()
+	logger := newLogger(s.T().Context())
 	logger.SetLevel(logging.Debug)
 	logger = logger.WithFields(map[string]any{
 		"key": "val",
@@ -72,7 +72,7 @@ func (s *LoggerTestSuite) TestLogFields() {
 }
 
 func (s *LoggerTestSuite) TestLogMultipleFields() {
-	logger := newLogger()
+	logger := newLogger(s.T().Context())
 	logger.SetLevel(logging.Debug)
 	logger = logger.WithFields(map[string]any{
 		"key1": "val1",
@@ -93,7 +93,7 @@ func (s *LoggerTestSuite) TestLogMultipleFields() {
 }
 
 func (s *LoggerTestSuite) TestLoggerGetLevel() {
-	logger := newLogger()
+	logger := newLogger(s.T().Context())
 	tests := []logging.Level{
 		logging.Debug,
 		logging.Info,
@@ -108,7 +108,7 @@ func (s *LoggerTestSuite) TestLoggerGetLevel() {
 }
 
 func (s *LoggerTestSuite) TestLoggerSetLevel() {
-	logger := newLogger()
+	logger := newLogger(s.T().Context())
 	logger.SetLevel(logging.Debug)
 	logger.Debug("debug")
 	logs := logp.ObserverLogs().TakeAll()
