@@ -12,7 +12,7 @@ from munch import Munch
 
 def create_security_default_data_view(cfg: Munch, name: str, namespace: str = "default") -> dict:
     """Creates a security default data view in Kibana if it doesn't exist.
-    
+
     This function creates a data view with security-related indices including alerts,
     beats data, logs, and traces commonly used by security solutions.
 
