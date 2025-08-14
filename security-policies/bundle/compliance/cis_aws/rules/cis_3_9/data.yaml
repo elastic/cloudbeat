@@ -56,40 +56,40 @@ metadata:
     **From Command Line:**
 
     11. Create a policy document and name it as `role_policy_document.json` and paste the following content:
-    ```
+    ```json
     {
-     "Version": "2012-10-17",
-     "Statement": [
-     {
-     "Sid": "test",
-     "Effect": "Allow",
-     "Principal": {
-     "Service": "ec2.amazonaws.com"
-     },
-     "Action": "sts:AssumeRole"
-     }
-     ]
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "test",
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "ec2.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+            }
+        ]
     }
     ```
     12. Create another policy document and name it as `iam_policy.json` and paste the following content:
-    ```
+    ```json
     {
-     "Version": "2012-10-17",
-     "Statement": [
-     {
-     "Effect": "Allow",
-     "Action":[
-     "logs:CreateLogGroup",
-     "logs:CreateLogStream",
-     "logs:DescribeLogGroups",
-     "logs:DescribeLogStreams",
-     "logs:PutLogEvents",
-     "logs:GetLogEvents",
-     "logs:FilterLogEvents"
-     ],
-     "Resource": "*"
-     }
-     ]
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:DescribeLogGroups",
+                    "logs:DescribeLogStreams",
+                    "logs:PutLogEvents",
+                    "logs:GetLogEvents",
+                    "logs:FilterLogEvents"
+                ],
+                "Resource": "*"
+            }
+        ]
     }
     ```
     13. Run the below command to create an IAM role:
