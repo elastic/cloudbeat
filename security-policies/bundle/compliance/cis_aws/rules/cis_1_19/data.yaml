@@ -31,18 +31,18 @@ metadata:
 
     The command output should return an array that contains all the SSL/TLS certificates currently stored in IAM and their metadata (name, ID, expiration date, etc):
 
-    ```
+    ```json
     {
-     "ServerCertificateMetadataList": [
-     {
-     "ServerCertificateId": "EHDGFRW7EJFYTE88D",
-     "ServerCertificateName": "MyServerCertificate",
-     "Expiration": "2018-07-10T23:59:59Z",
-     "Path": "/",
-     "Arn": "arn:aws:iam::012345678910:server-certificate/MySSLCertificate",
-     "UploadDate": "2018-06-10T11:56:08Z"
-     }
-     ]
+        "ServerCertificateMetadataList": [
+            {
+                "ServerCertificateId": "EHDGFRW7EJFYTE88D",
+                "ServerCertificateName": "MyServerCertificate",
+                "Expiration": "2018-07-10T23:59:59Z",
+                "Path": "/",
+                "Arn": "arn:aws:iam::012345678910:server-certificate/MySSLCertificate",
+                "UploadDate": "2018-06-10T11:56:08Z"
+            }
+        ]
     }
     ```
 
