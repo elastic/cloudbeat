@@ -178,20 +178,35 @@ def add_new_line_after_period(text):
     return "\n".join(lines)
 
 
-def format_json_in_text(text):
-    def replace_json_block(match):
-        code_block = match.group(1)
+def replace_json_block(match):
+    code_block = match.group(1)
+    try:
+        # Try parsing the entire code block as JSON
+        parsed = json.loads(code_block)
+        pretty = json.dumps(parsed, indent=4)
+        return f"```json\n{pretty}\n```"
+    except json.JSONDecodeError:
+        # Fallback: Try to find JSON-like substring inside code block
         try:
-            # Try parsing the code block as JSON
-            parsed = json.loads(code_block)
+            start = code_block.find("{")
+            end = code_block.rfind("}") + 1
+            if start == -1 or end == -1:
+                raise ValueError("No JSON-like structure found")
+
+            json_str = code_block[start:end]
+            parsed = json.loads(json_str)
             pretty = json.dumps(parsed, indent=4)
 
-            return f"```json\n{pretty}\n```"
-        except json.JSONDecodeError:
-            # Not valid JSON — return original block
+            # Reconstruct the block with formatted JSON inserted
+            formatted_block = code_block[:start] + pretty + code_block[end:]
+            return f"```\n{formatted_block}\n```"
+        except:
+            # If fallback also fails, return original block
             return f"```\n{code_block}```"
 
-    # Match all code blocks: ```json\n<something>\n```, or ```\n<something>\n```
+
+def format_json_in_text(text):
+    # Match code blocks: ```json\n<something>\n``` or ```\n<something>\n```
     pattern = r"```(?:json)?\n([\s\S]*?)```"
     return re.sub(pattern, replace_json_block, text)
 
