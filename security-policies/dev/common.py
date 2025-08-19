@@ -187,21 +187,21 @@ def replace_json_block(match):
         return f"```json\n{pretty}\n```"
     except json.JSONDecodeError:
         # Fallback: Try to find JSON-like substring inside code block
-        try:
-            start = code_block.find("{")
-            end = code_block.rfind("}") + 1
-            if start == -1 or end == -1:
-                return f"```\n{code_block}```"
+        start = code_block.find("{")
+        brace_end = code_block.rfind("}")
+        if start == -1 or brace_end == -1:
+            return f"```\n{code_block}```"
 
-            json_str = code_block[start:end]
+        end = brace_end + 1
+        json_str = code_block[start:end]
+        try:
             parsed = json.loads(json_str)
             pretty = json.dumps(parsed, indent=4)
 
             # Reconstruct the block with formatted JSON inserted
             formatted_block = code_block[:start] + pretty + code_block[end:]
             return f"```\n{formatted_block}\n```"
-        except:
-            # If fallback also fails, return original block
+        except json.JSONDecodeError:
             return f"```\n{code_block}```"
 
 
