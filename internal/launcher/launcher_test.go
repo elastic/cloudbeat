@@ -32,7 +32,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -128,7 +127,6 @@ func (v *validatorMock) Validate(cfg *config.C) error {
 type LauncherTestSuite struct {
 	suite.Suite
 
-	log  *clog.Logger
 	opts goleak.Option
 }
 
@@ -141,7 +139,6 @@ func TestLauncherTestSuite(t *testing.T) {
 	testhelper.SkipLong(t)
 
 	s := new(LauncherTestSuite)
-	s.log = testhelper.NewLogger(t)
 
 	s.opts = goleak.IgnoreCurrent()
 	suite.Run(t, s)
@@ -510,7 +507,7 @@ func (s *LauncherTestSuite) initMocks() *launcherMocks {
 }
 
 func (s *LauncherTestSuite) newLauncher(mocks *launcherMocks, creator beat.Creator) *launcher {
-	sut, ok := New(s.log, "DummyBeat", mocks.reloader, mocks.validator, creator, config.NewConfig()).(*launcher)
+	sut, ok := New(testhelper.NewLogger(s.T()), "DummyBeat", mocks.reloader, mocks.validator, creator, config.NewConfig()).(*launcher)
 	s.Require().True(ok)
 	return sut
 }

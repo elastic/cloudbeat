@@ -98,7 +98,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
 		func(ctx context.Context) (registry.FetchersMap, error) {
-			ctx, span := observability.StartSpan(ctx, scopeName, "Update AWS accounts")
+			ctx, span := observability.StartSpan(ctx, scopeName, "benchmark.AWSOrg.initialize")
 			defer span.End()
 			spannedLog := log.WithSpanContext(span.SpanContext())
 

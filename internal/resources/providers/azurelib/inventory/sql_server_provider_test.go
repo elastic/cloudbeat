@@ -33,7 +33,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -45,7 +44,7 @@ type (
 	threatProtectionFn          func() ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error)
 )
 
-func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
+func mockAssetEncryptionProtector(t *testing.T, f encryptionProtectorFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
 		AssetEncryptionProtector: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.EncryptionProtectorsClientListByServerOptions) ([]armsql.EncryptionProtectorsClientListByServerResponse, error) {
 			return f()
@@ -53,12 +52,12 @@ func mockAssetEncryptionProtector(f encryptionProtectorFn) SQLProviderAPI {
 	}
 
 	return &sqlProvider{
-		log:    clog.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    testhelper.NewLogger(t),
 		client: wrapper,
 	}
 }
 
-func mockAssetBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
+func mockAssetBlobAuditingPolicies(t *testing.T, f auditingPoliciesFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
 		AssetBlobAuditingPolicies: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.ServerBlobAuditingPoliciesClientGetOptions) (armsql.ServerBlobAuditingPoliciesClientGetResponse, error) {
 			return f()
@@ -66,12 +65,12 @@ func mockAssetBlobAuditingPolicies(f auditingPoliciesFn) SQLProviderAPI {
 	}
 
 	return &sqlProvider{
-		log:    clog.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    testhelper.NewLogger(t),
 		client: wrapper,
 	}
 }
 
-func mockAssetTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsFn databaseFn) SQLProviderAPI {
+func mockAssetTransparentDataEncryption(t *testing.T, tdesFn transparentDataEncryptionFn, dbsFn databaseFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
 		AssetDatabases: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.DatabasesClientListByServerOptions) ([]armsql.DatabasesClientListByServerResponse, error) {
 			return dbsFn()
@@ -82,12 +81,12 @@ func mockAssetTransparentDataEncryption(tdesFn transparentDataEncryptionFn, dbsF
 	}
 
 	return &sqlProvider{
-		log:    clog.NewLogger("mock_asset_sql_encryption_protector"),
+		log:    testhelper.NewLogger(t),
 		client: wrapper,
 	}
 }
 
-func mockAssetThreatProtection(f threatProtectionFn) SQLProviderAPI {
+func mockAssetThreatProtection(t *testing.T, f threatProtectionFn) SQLProviderAPI {
 	wrapper := &sqlAzureClientWrapper{
 		AssetServerAdvancedThreatProtectionSettings: func(_ context.Context, _, _, _ string, _ *arm.ClientOptions, _ *armsql.ServerAdvancedThreatProtectionSettingsClientListByServerOptions) ([]armsql.ServerAdvancedThreatProtectionSettingsClientListByServerResponse, error) {
 			return f()
@@ -95,7 +94,7 @@ func mockAssetThreatProtection(f threatProtectionFn) SQLProviderAPI {
 	}
 
 	return &sqlProvider{
-		log:    clog.NewLogger("mock_asset_sql_advanced_threat_protection"),
+		log:    testhelper.NewLogger(t),
 		client: wrapper,
 	}
 }
@@ -143,7 +142,7 @@ func TestListSQLEncryptionProtector(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetEncryptionProtector(tc.apiMockCall)
+			p := mockAssetEncryptionProtector(t, tc.apiMockCall)
 			got, err := p.ListSQLEncryptionProtector(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
@@ -227,7 +226,7 @@ func TestGetSQLBlobAuditingPolicies(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetBlobAuditingPolicies(tc.apiMockCall)
+			p := mockAssetBlobAuditingPolicies(t, tc.apiMockCall)
 			got, err := p.GetSQLBlobAuditingPolicies(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
@@ -306,7 +305,7 @@ func TestListSqlTransparentDataEncryptions(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetTransparentDataEncryption(tc.tdeFn, tc.dbFn)
+			p := mockAssetTransparentDataEncryption(t, tc.tdeFn, tc.dbFn)
 			got, err := p.ListSQLTransparentDataEncryptions(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
@@ -363,7 +362,7 @@ func TestListSQLAdvancedThreatProtectionSettings(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			p := mockAssetThreatProtection(tc.apiMockCall)
+			p := mockAssetThreatProtection(t, tc.apiMockCall)
 			got, err := p.ListSQLAdvancedThreatProtectionSettings(t.Context(), "subId", "resourceGroup", "sqlServerInstanceName")
 
 			if tc.expectError {
