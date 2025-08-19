@@ -324,7 +324,7 @@ jobs:
 
       - id: google-auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193 # v2
+        uses: google-github-actions/auth@140bb5113ffb6b65a7e9b937a81fa96cf5064462 # v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -415,6 +415,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           gcp-project-id: ${{ env.GCP_PROJECT }}
           gcp-service-account-json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
+          gcp-zone: ${{ env.GCP_ZONE }}
           aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
           azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
           azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}

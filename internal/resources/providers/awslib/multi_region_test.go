@@ -29,7 +29,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -48,7 +47,6 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 	type args struct {
 		selector func() RegionsSelector
 		cfg      aws.Config
-		log      *clog.Logger
 	}
 	tests := []struct {
 		name string
@@ -66,7 +64,6 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 				cfg: aws.Config{
 					Region: afRegion,
 				},
-				log: testhelper.NewLogger(t),
 			},
 			want: map[string]string{afRegion: afRegion},
 		},
@@ -79,7 +76,6 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					return m
 				},
 				cfg: aws.Config{},
-				log: testhelper.NewLogger(t),
 			},
 			want: map[string]string{DefaultRegion: DefaultRegion, euRegion: euRegion},
 		},
@@ -92,7 +88,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			multiRegionClients := wrapper.NewMultiRegionClients(t.Context(), tt.args.selector(), tt.args.cfg, factory, tt.args.log)
+			multiRegionClients := wrapper.NewMultiRegionClients(t.Context(), tt.args.selector(), tt.args.cfg, factory, testhelper.NewLogger(t))
 			clients := multiRegionClients.GetMultiRegionsClientMap()
 			if !reflect.DeepEqual(clients, tt.want) {
 				t.Errorf("GetRegions() got = %v, want %v", clients, tt.want)

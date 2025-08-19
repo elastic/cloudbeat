@@ -22,10 +22,10 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestStorageFetcher_Fetch(t *testing.T) {
@@ -169,7 +169,7 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 	}
 
 	// setup
-	logger := clog.NewLogger("azurefetcher_test")
+	logger := testhelper.NewLogger(t)
 	provider := newMockStorageProvider(t)
 
 	provider.EXPECT().ListSubscriptions(

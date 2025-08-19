@@ -31,7 +31,6 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
@@ -57,14 +56,12 @@ func (d *DummyResource) GetElasticCommonData() (map[string]any, error) {
 
 type OpaTestSuite struct {
 	suite.Suite
-	log *clog.Logger
 }
 
 func TestOpaTestSuite(t *testing.T) {
 	testhelper.SkipLong(t)
 
 	s := new(OpaTestSuite)
-	s.log = testhelper.NewLogger(t)
 
 	suite.Run(t, s)
 }
@@ -134,7 +131,7 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 	for _, tt := range tests {
 		s.Run(fmt.Sprintf("TestEvaluationsDecisionLogs %+v", tt), func() {
 			cfg := s.getTestConfig()
-			e, err := NewOpaEvaluator(ctx, s.log, cfg)
+			e, err := NewOpaEvaluator(ctx, testhelper.NewLogger(s.T()), cfg)
 			s.Require().NoError(err)
 
 			for i := 0; i < tt.evals; i++ {

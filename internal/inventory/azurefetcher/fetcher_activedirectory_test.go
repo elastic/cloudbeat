@@ -32,10 +32,10 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
@@ -137,7 +137,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	}
 
 	// setup
-	logger := clog.NewLogger("azurefetcher_test")
+	logger := testhelper.NewLogger(t)
 	provider := newMockActivedirectoryProvider(t)
 
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Maybe().Return(
@@ -160,18 +160,15 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 
 func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	// set up log capture
-	var log *clog.Logger
 	logCaptureBuf := &bytes.Buffer{}
-	{
-		replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
-			return zapcore.NewCore(
-				zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
-				zapcore.AddSync(logCaptureBuf),
-				zapcore.DebugLevel,
-			)
-		})
-		log = clog.NewLogger("test").WithOptions(replacement)
-	}
+	replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
+		return zapcore.NewCore(
+			zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+			zapcore.AddSync(logCaptureBuf),
+			zapcore.DebugLevel,
+		)
+	})
+	log := testhelper.NewLogger(t).WithOptions(replacement)
 
 	provider := newMockActivedirectoryProvider(t)
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
