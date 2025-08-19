@@ -26,7 +26,6 @@
         },
         "elasticCloudIssuer": {
             "type": "string",
-            "defaultValue": "https://evgboidc-dpf8dmdjhnakhpgv.a02.azurefd.net/oidc/",
             "metadata": {
                 "description": "Issuer for the Elastic Cloud Federated Identity Credential"
             }
