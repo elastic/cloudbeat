@@ -191,7 +191,7 @@ def replace_json_block(match):
             start = code_block.find("{")
             end = code_block.rfind("}") + 1
             if start == -1 or end == -1:
-                raise ValueError("No JSON-like structure found")
+                return f"```\n{code_block}```"
 
             json_str = code_block[start:end]
             parsed = json.loads(json_str)
@@ -207,7 +207,7 @@ def replace_json_block(match):
 
 def format_json_in_text(text):
     # Match code blocks: ```json\n<something>\n``` or ```\n<something>\n```
-    pattern = r"```(?:json)?\n([\s\S]*?)```"
+    pattern = r"```\n([\s\S]*?)```"
     return re.sub(pattern, replace_json_block, text)
 
 
