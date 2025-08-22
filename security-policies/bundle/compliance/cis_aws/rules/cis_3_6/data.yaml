@@ -26,7 +26,7 @@ metadata:
     **From Command Line:**
 
     9. Get the name of the S3 bucket that CloudTrail is logging to:
-    ``` 
+    ```
     aws cloudtrail describe-trails --query 'trailList[*].S3BucketName' 
     ```
     10. Ensure Bucket Logging is enabled:
@@ -37,12 +37,12 @@ metadata:
 
     Sample Output for a bucket with logging enabled:
 
-    ```
+    ```json
     {
-     "LoggingEnabled": {
-     "TargetPrefix": "<Prefix_Test>",
-     "TargetBucket": "<Bucket_name_for_Storing_Logs>"
-     }
+        "LoggingEnabled": {
+            "TargetPrefix": "<Prefix_Test>",
+            "TargetBucket": "<Bucket_name_for_Storing_Logs>"
+        }
     }
     ```
   remediation: |-

@@ -57,7 +57,6 @@ metadata:
             }
         ]
     }'
-
     ```
      or 
     ```
@@ -71,7 +70,6 @@ metadata:
             }
         ]
     }'
-
     ```
 
     **Note:** the KMSMasterKeyID can be set to the master key of your choosing; aws/s3 is an AWS preconfigured default.

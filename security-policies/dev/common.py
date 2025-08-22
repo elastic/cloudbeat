@@ -181,33 +181,27 @@ def add_new_line_after_period(text):
 def replace_json_block(match):
     code_block = match.group(1)
     try:
-        # Try parsing the entire code block as JSON
         parsed = json.loads(code_block)
         pretty = json.dumps(parsed, indent=4)
         return f"```json\n{pretty}\n```"
     except json.JSONDecodeError:
-        # Fallback: Try to find JSON-like substring inside code block
         start = code_block.find("{")
         brace_end = code_block.rfind("}")
         if start == -1 or brace_end == -1:
-            return f"```\n{code_block}```"
-
+            return f"```\n{code_block}\n```"
         end = brace_end + 1
         json_str = code_block[start:end]
         try:
             parsed = json.loads(json_str)
             pretty = json.dumps(parsed, indent=4)
-
-            # Reconstruct the block with formatted JSON inserted
             formatted_block = code_block[:start] + pretty + code_block[end:]
             return f"```\n{formatted_block}\n```"
         except json.JSONDecodeError:
-            return f"```\n{code_block}```"
+            return f"```\n{code_block}\n```"
 
 
 def format_json_in_text(text):
-    # Match code blocks: ```json\n<something>\n``` or ```\n<something>\n```
-    pattern = r"```\n([\s\S]*?)```"
+    pattern = r"```[ \t]*\n([\s\S]*?)\n[ \t]*```"
     return re.sub(pattern, replace_json_block, text)
 
 

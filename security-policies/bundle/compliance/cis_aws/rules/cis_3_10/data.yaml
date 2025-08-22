@@ -76,7 +76,6 @@ metadata:
             }
         ]
     }]'
-
     ```
     8. The command output will be `object-level` event trail configuration.
     9. If you want to enable it for all buckets at once then change Values parameter to `["arn:aws:s3"]` in command given above.
