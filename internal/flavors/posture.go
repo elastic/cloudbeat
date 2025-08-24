@@ -53,7 +53,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	ctx, err := observability.SetUpOtel(ctx, log.Logger)
+	err := observability.SetUpOtel(ctx, log.Logger)
 	if err != nil {
 		log.Errorw("failed to set up otel", logp.Error(err))
 	}
