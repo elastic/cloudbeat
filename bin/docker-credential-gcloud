@@ -1,1 +1,1 @@
-.gcloud-528.0.0.pkg
+.gcloud-532.0.0.pkg
