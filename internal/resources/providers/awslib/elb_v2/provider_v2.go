@@ -54,7 +54,7 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 			}
 			listeners, err := p.describeListeners(ctx, region, loadBalancer.GetResourceArn())
 			if err != nil {
-				p.log.Errorf("Error fetching listeners for %s: %v", loadBalancer.GetResourceArn(), err)
+				p.log.Errorf(ctx, "Error fetching listeners for %s: %v", loadBalancer.GetResourceArn(), err)
 			} else {
 				loadBalancer.Listeners = listeners
 			}

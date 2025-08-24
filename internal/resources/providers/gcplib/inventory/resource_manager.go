@@ -55,7 +55,7 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 		getProjectDisplayName: func(ctx context.Context, parent string) string {
 			prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
 			if err != nil {
-				log.Errorf("error fetching GCP Project: %s, error: %s", parent, err)
+				log.Errorf(ctx, "error fetching GCP Project: %s, error: %s", parent, err)
 				return ""
 			}
 			return prj.DisplayName
@@ -63,7 +63,7 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 		getOrganizationDisplayName: func(ctx context.Context, parent string) string {
 			org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
 			if err != nil {
-				log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
+				log.Errorf(ctx, "error fetching GCP Org: %s, error: %s", parent, err)
 				return ""
 			}
 			return org.DisplayName
@@ -81,7 +81,7 @@ func (c *ResourceManagerWrapper) GetCloudMetadata(ctx context.Context, asset *as
 		if valid {
 			return cloudAccountMetadata
 		}
-		c.log.Errorf("error casting cloud account metadata for key: %s", key)
+		c.log.Errorf(ctx, "error casting cloud account metadata for key: %s", key)
 	}
 	cloudAccountMetadata := c.getMetadata(ctx, orgId, projectId)
 	c.accountMetadataCache.Store(key, cloudAccountMetadata)

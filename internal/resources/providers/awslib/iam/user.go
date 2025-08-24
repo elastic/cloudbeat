@@ -54,7 +54,7 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		return nil, err
 	}
 
-	rootUser := p.getRootAccountUser(credentialReport[rootAccount])
+	rootUser := p.getRootAccountUser(ctx, credentialReport[rootAccount])
 	if rootUser != nil {
 		apiUsers = append(apiUsers, *rootUser)
 	}
@@ -80,23 +80,23 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 
 		mfaDevices, err := p.getMFADevices(ctx, apiUser, userAccount)
 		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %s, error: %v", username, err)
+			p.log.Errorf(ctx, "fail to list mfa device for user: %s, error: %v", username, err)
 		}
 
 		pwdEnabled, err := isPasswordEnabled(userAccount)
 		if err != nil {
-			p.log.Errorf("fail to parse PasswordEnabled for user: %s, error: %v", username, err)
+			p.log.Errorf(ctx, "fail to parse PasswordEnabled for user: %s, error: %v", username, err)
 			pwdEnabled = false
 		}
 
 		inlinePolicies, err := p.listInlinePolicies(ctx, apiUser.UserName)
 		if err != nil && !isRootUser(username) {
-			p.log.Errorf("fail to list inline policies for user: %s, error: %v", username, err)
+			p.log.Errorf(ctx, "fail to list inline policies for user: %s, error: %v", username, err)
 		}
 
 		attachedPolicies, err := p.listAttachedPolicies(ctx, apiUser.UserName)
 		if err != nil && !isRootUser(username) {
-			p.log.Errorf("fail to list attached policies for user: %s, error: %v", username, err)
+			p.log.Errorf(ctx, "fail to list attached policies for user: %s, error: %v", username, err)
 		}
 
 		users = append(users, User{

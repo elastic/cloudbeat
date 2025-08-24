@@ -78,7 +78,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 
 	azureAssets, err := f.provider.ListAllAssetTypesByName(ctx, resourceGroup, []string{resourceType})
 	if err != nil {
-		f.logger.Errorf("Could not fetch %s: %v", resourceName, err)
+		f.logger.Errorf(ctx, "Could not fetch %s: %v", resourceName, err)
 		return
 	}
 

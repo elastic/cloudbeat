@@ -18,6 +18,7 @@
 package fetchers
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
@@ -43,7 +44,7 @@ const (
 	ecsResourceNameField = "orchestrator.resource.name"
 )
 
-func getKubeData(log *clog.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
+func getKubeData(ctx context.Context, log *clog.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
 	log.Debug("Starting getKubeData")
 
 	for _, watcher := range watchers {
@@ -54,13 +55,13 @@ func getKubeData(log *clog.Logger, watchers []kubernetes.Watcher, resCh chan fet
 			resource, ok := r.(kubernetes.Resource)
 
 			if !ok {
-				log.Errorf("Bad resource: %#v does not implement kubernetes.Resource", r)
+				log.Errorf(ctx, "Bad resource: %#v does not implement kubernetes.Resource", r)
 				continue
 			}
 
 			err := addTypeInformationToKubeResource(resource)
 			if err != nil {
-				log.Errorf("Bad resource: %v", err)
+				log.Errorf(ctx, "Bad resource: %v", err)
 				continue
 			} // See https://github.com/kubernetes/kubernetes/issues/3030
 			resCh <- fetching.ResourceInfo{Resource: K8sResource{log, resource}, CycleMetadata: cycleMetadata}
@@ -108,7 +109,9 @@ func (r K8sResource) GetElasticCommonData() (map[string]any, error) {
 func getK8sObjectMeta(log *clog.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
 	if !ok {
-		log.Errorf("Failed to retrieve object metadata, Resource: %#v", k8sObj)
+		// Bypassing clog's context-aware Errorf to avoid using context.TODO().
+		// This means these logs won't be enriched with tracing information.
+		log.Logger.Errorf("Failed to retrieve object metadata, Resource: %#v", k8sObj)
 		return metav1.ObjectMeta{}
 	}
 
@@ -118,7 +121,9 @@ func getK8sObjectMeta(log *clog.Logger, k8sObj reflect.Value) metav1.ObjectMeta 
 func getK8sSubType(log *clog.Logger, k8sObj reflect.Value) string {
 	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
 	if !ok {
-		log.Errorf("Failed to retrieve type metadata, Resource: %#v", k8sObj)
+		// Bypassing clog's context-aware Errorf to avoid using context.TODO().
+		// This means these logs won't be enriched with tracing information.
+		log.Logger.Errorf("Failed to retrieve type metadata, Resource: %#v", k8sObj)
 		return ""
 	}
 

@@ -18,7 +18,6 @@
 package uniqueness
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -169,7 +168,7 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 			s.Require().NoError(os.Setenv(PodNameEnvar, podId))
 		}
 
-		got, err := s.manager.buildConfig(context.TODO())
+		got, err := s.manager.buildConfig(s.T().Context())
 		if (err != nil) != tt.wantErr {
 			s.FailNow("unexpected error", "error: %v", err)
 		}

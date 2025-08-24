@@ -52,7 +52,7 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 		for {
 			output, err := c.DescribeDBInstances(ctx, dbInstancesInput)
 			if err != nil {
-				p.log.Errorf("Could not describe DB instances. Error: %v", err)
+				p.log.Errorf(ctx, "Could not describe DB instances. Error: %v", err)
 				return result, err
 			}
 
@@ -89,7 +89,7 @@ func (p Provider) getDBInstanceSubnets(ctx context.Context, region string, dbIns
 		resultSubnet := Subnet{ID: *subnet.SubnetIdentifier, RouteTable: nil}
 		routeTableForSubnet, err := p.ec2.GetRouteTableForSubnet(ctx, region, *subnet.SubnetIdentifier, *dbInstance.DBSubnetGroup.VpcId)
 		if err != nil {
-			p.log.Errorf("Could not get route table for subnet %s of DB %s. Error: %v", *subnet.SubnetIdentifier, *dbInstance.DBInstanceIdentifier, err)
+			p.log.Errorf(ctx, "Could not get route table for subnet %s of DB %s. Error: %v", *subnet.SubnetIdentifier, *dbInstance.DBInstanceIdentifier, err)
 		} else {
 			var routes []Route
 			for _, route := range routeTableForSubnet.Routes {

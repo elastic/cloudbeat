@@ -29,7 +29,7 @@ func (p *Provider) DescribeConfigRecorders(ctx context.Context) ([]awslib.AwsRes
 	configs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) (awslib.AwsResource, error) {
 		recorderList, err := c.DescribeConfigurationRecorders(ctx, nil)
 		if err != nil {
-			p.log.Errorf("Error fetching AWS Config recorders: %v", err)
+			p.log.Errorf(ctx, "Error fetching AWS Config recorders: %v", err)
 			return nil, err
 		}
 
@@ -40,7 +40,7 @@ func (p *Provider) DescribeConfigRecorders(ctx context.Context) ([]awslib.AwsRes
 			})
 
 			if err != nil {
-				p.log.Error("Error fetching recorder status, recorder: %v , Error: %v:", recorder, err)
+				p.log.Error(ctx, "Error fetching recorder status, recorder: %v , Error: %v:", recorder, err)
 				return nil, err
 			}
 			result = append(result, Recorder{

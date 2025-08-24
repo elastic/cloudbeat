@@ -54,7 +54,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 
 	policies, err := i.provider.GetPolicies(ctx)
 	if err != nil {
-		i.logger.Errorf("Could not list policies: %v", err)
+		i.logger.Errorf(ctx, "Could not list policies: %v", err)
 		if len(policies) == 0 {
 			return
 		}
@@ -67,7 +67,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 
 		policy, ok := resource.(iam.Policy)
 		if !ok {
-			i.logger.Errorf("Could not get info about policy: %s", resource.GetResourceArn())
+			i.logger.Errorf(ctx, "Could not get info about policy: %s", resource.GetResourceArn())
 			continue
 		}
 
