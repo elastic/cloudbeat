@@ -80,7 +80,7 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   item.TenantId,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithLabelsFromAny(item.Tags),
 			inventory.WithOrganization(inventory.Organization{
