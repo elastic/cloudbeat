@@ -33,7 +33,7 @@ type mysqlAssetEnricher struct {
 func (e mysqlAssetEnricher) Enrich(ctx context.Context, _ cycle.Metadata, assets []inventory.AzureAsset) error {
 	var errAgg error
 	for i, a := range assets {
-		if a.Type != inventory.FlexibleMySQLDBAssetType {
+		if a.Type != inventory.FlexibleMySQLDBServerAssetType {
 			continue
 		}
 
