@@ -29,7 +29,7 @@ metadata:
     Run the command by providing `<INSTANCE_NAME>`.
     Ensure the value of the flag is `on`.
 
-    ``` 
+    ```
     gcloud sql instances describe <INSTANCE_NAME> --format="json" | jq '.settings|.|.databaseFlags[]|select(.name=="cloudsql.enable_pgaudit")|.value' 
     ```
 
