@@ -24,11 +24,11 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	ec2beat "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestEC2InstanceFetcher_Fetch(t *testing.T) {
@@ -138,7 +138,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := clog.NewLogger("test_fetcher_ec2")
+	logger := testhelper.NewLogger(t)
 	provider := newMockEc2InstancesProvider(t)
 	provider.EXPECT().DescribeInstances(mock.Anything).Return(in, nil)
 

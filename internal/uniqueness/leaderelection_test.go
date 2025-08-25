@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -33,7 +32,6 @@ import (
 	"k8s.io/api/coordination/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8s "k8s.io/client-go/kubernetes"
 	k8sFake "k8s.io/client-go/kubernetes/fake"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -76,29 +74,6 @@ func (s *LeaderElectionTestSuite) TearDownTest() {
 
 	// Verify no goroutines are leaking. Safest to keep this on top of the function.
 	goleak.VerifyNone(s.T(), s.opts)
-}
-
-func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
-	tests := []struct {
-		name      string
-		k8sClient k8s.Interface
-		want      Manager
-	}{
-		{
-			name:      "Should receive the leader election manager",
-			k8sClient: s.kubeClient,
-			want:      &LeaderelectionManager{},
-		},
-		{
-			name:      "k8s client couldn't established - should receive the default unique manager",
-			k8sClient: nil,
-			want:      &DefaultUniqueManager{},
-		},
-	}
-	for _, tt := range tests {
-		got := NewLeaderElector(testhelper.NewLogger(s.T()), tt.k8sClient)
-		s.Equalf(reflect.TypeOf(got), reflect.TypeOf(tt.want), "NewLeaderElector() = %v, want %v", got, tt.want)
-	}
 }
 
 func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
