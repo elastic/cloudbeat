@@ -26,25 +26,28 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type iamRoleFetcher struct {
-	logger      *clog.Logger
-	provider    iamRoleProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      iamRoleProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type iamRoleProvider interface {
 	ListRoles(ctx context.Context) ([]*iam.Role, error)
 }
 
-func newIamRoleFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamRoleProvider) inventory.AssetFetcher {
+func newIamRoleFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamRoleProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &iamRoleFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -58,6 +61,7 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 		if len(roles) == 0 {
 			return
 		}
+		awslib.ReportMissingPermission(i.statusHandler, err)
 	}
 
 	for _, role := range roles {

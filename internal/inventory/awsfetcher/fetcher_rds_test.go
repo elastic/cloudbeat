@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestRDSInstanceFetcher_Fetch(t *testing.T) {
@@ -114,8 +115,10 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 	provider := newMockRdsProvider(t)
 	provider.EXPECT().DescribeDBInstances(mock.Anything).Return(in, nil)
 
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newRDSFetcher(logger, identity, provider)
+	fetcher := newRDSFetcher(logger, identity, provider, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }

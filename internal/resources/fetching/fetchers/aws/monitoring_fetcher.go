@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/securityhub"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type MonitoringFetcher struct {
@@ -36,6 +37,7 @@ type MonitoringFetcher struct {
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *cloud.Identity
 	securityhub   securityhub.Service
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type MonitoringResource struct {
@@ -47,13 +49,14 @@ type SecurityHubResource struct {
 	securityhub.SecurityHub
 }
 
-func NewMonitoringFetcher(log *clog.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *cloud.Identity) *MonitoringFetcher {
+func NewMonitoringFetcher(log *clog.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *cloud.Identity, statusHandler statushandler.StatusHandlerAPI) *MonitoringFetcher {
 	return &MonitoringFetcher{
 		log:           log,
 		provider:      provider,
 		securityhub:   securityHubProvider,
 		resourceCh:    ch,
 		cloudIdentity: identity,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -62,6 +65,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
 		m.log.Errorf("failed to aggregate monitoring resources: %v", err)
+		awslib.ReportMissingPermission(m.statusHandler, err)
 	}
 	if out != nil {
 		m.resourceCh <- fetching.ResourceInfo{
@@ -72,6 +76,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	hubs, err := m.securityhub.Describe(ctx)
 	if err != nil {
 		m.log.Errorf("failed to describe security hub: %v", err)
+		awslib.ReportMissingPermission(m.statusHandler, err)
 		return nil
 	}
 

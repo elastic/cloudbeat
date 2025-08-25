@@ -26,25 +26,28 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type iamPolicyFetcher struct {
-	logger      *clog.Logger
-	provider    iamPolicyProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      iamPolicyProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type iamPolicyProvider interface {
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newIamPolicyFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamPolicyProvider) inventory.AssetFetcher {
+func newIamPolicyFetcher(logger *clog.Logger, identity *cloud.Identity, provider iamPolicyProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &iamPolicyFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -58,6 +61,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 		if len(policies) == 0 {
 			return
 		}
+		awslib.ReportMissingPermission(i.statusHandler, err)
 	}
 
 	for _, resource := range policies {

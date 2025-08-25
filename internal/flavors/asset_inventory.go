@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/flavors/assetinventory"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type assetInventory struct {
@@ -53,7 +54,9 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 		return nil, fmt.Errorf("failed to init client: %w", err)
 	}
 
-	strategy := assetinventory.GetStrategy(logger, cfg)
+	statusHandler := statushandler.NewStatusHandler(b.Manager)
+
+	strategy := assetinventory.GetStrategy(logger, cfg, statusHandler)
 	newAssetInventory, err := strategy.NewAssetInventory(ctx, beatClient)
 	if err != nil {
 		cancel()
