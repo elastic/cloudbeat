@@ -61,7 +61,7 @@ func (f *resourceGraphFetcher) Fetch(ctx context.Context, assetChan chan<- inven
 		{"Cosmos DB SQL Databases", "Azure Cosmos DB", azurelib.AssetGroupResources, azurelib.CosmosDBForSQLDatabaseAssetType, inventory.AssetClassificationAzureCosmosDBSQLDatabase},
 		{"Disks", "Azure Storage", azurelib.AssetGroupResources, azurelib.DiskAssetType, inventory.AssetClassificationAzureDisk},
 		{"Elastic Pools", "Azure SQL Elastic Pools", azurelib.AssetGroupResources, azurelib.ElasticPoolAssetType, inventory.AssetClassificationAzureElasticPool},
-		{"MySQL Flexible Servers", "Azure SQL Servers", azurelib.AssetGroupResources, azurelib.FlexibleMySQLDBAssetType, inventory.AssetClassificationAzureSQLServer},
+		{"MySQL Flexible Servers", "Azure SQL Servers", azurelib.AssetGroupResources, azurelib.FlexibleMySQLDBServerAssetType, inventory.AssetClassificationAzureSQLServer},
 		{"Resource Groups", "Azure Management", azurelib.AssetGroupResourceContainers, azurelib.ResouceGroupAssetType, inventory.AssetClassificationAzureResourceGroup},
 		{"SQL Databases", "Azure SQL Databases", azurelib.AssetGroupResources, azurelib.MySQLDatabaseAssetType, inventory.AssetClassificationAzureSQLDatabase},
 		{"Snapshots", "Azure Storage", azurelib.AssetGroupResources, azurelib.SnapshotAssetType, inventory.AssetClassificationAzureSnapshot},
