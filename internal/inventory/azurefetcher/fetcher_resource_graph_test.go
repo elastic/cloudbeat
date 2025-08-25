@@ -48,6 +48,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			[]string{appService.Id},
 			appService.Name,
 			inventory.WithRawAsset(appService),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -56,6 +57,12 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure App Services",
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -63,6 +70,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			[]string{disk.Id},
 			disk.Name,
 			inventory.WithRawAsset(disk),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -71,6 +79,30 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureVirtualMachine,
+			vm.Id,
+			vm.DisplayName,
+			inventory.WithRawAsset(vm),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Virtual Machines",
+				MachineType: "xlarge",
+				InstanceID:  "/vm",
+			}),
+			inventory.WithHost(inventory.Host{
+				ID:   vm.Id,
+				Name: "localhost",
+				Type: "xlarge",
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 			}),
 		),
 	}
