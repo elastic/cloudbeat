@@ -37,7 +37,7 @@ const (
 	ElasticPoolAssetType                 = "microsoft.sql/servers/elasticpools"
 	FlexibleMySQLDBServerAssetType             = "microsoft.dbformysql/flexibleservers"
 	FlexiblePostgreSQLDBAssetType        = "microsoft.dbforpostgresql/flexibleservers"
-	MySQLDBAssetType                     = "microsoft.dbformysql/servers"
+	MySQLDBServerAssetType                     = "microsoft.dbformysql/servers"
 	MySQLDatabaseAssetType               = "microsoft.sql/servers/databases"
 	NetworkSecurityGroupAssetType        = "microsoft.network/networksecuritygroups"
 	NetworkWatchersAssetType             = "microsoft.network/networkwatchers"
