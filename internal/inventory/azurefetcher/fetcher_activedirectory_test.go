@@ -62,6 +62,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 			[]string{"id"},
 			"dn",
 			inventory.WithRawAsset(values),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -70,6 +71,57 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   appOwnerOrganizationId.String(),
+				ServiceName: "Azure Entra",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureRoleDefinition,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "id",
+				Name: "dn",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraGroup,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithGroup(inventory.Group{
+				ID:   "id",
+				Name: "dn",
+			}),
+		),
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraUser,
+			"id",
+			"dn",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "id",
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   "id",
+				Name: "dn",
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 			}),
 		),
 	}

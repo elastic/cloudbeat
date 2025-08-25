@@ -43,6 +43,7 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 			[]string{"/tenants/<tenant UUID>"},
 			"Mario",
 			inventory.WithRawAsset(azureAssets[0]),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -51,6 +52,15 @@ func TestAccountFetcher_Fetch_Tenants(t *testing.T) {
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<tenant UUID>",
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithOrganization(inventory.Organization{
+				ID: "<tenant UUID>",
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 			}),
 		),
 	}
@@ -80,6 +90,7 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 			[]string{"/subscriptions/<sub UUID>"},
 			"Luigi",
 			inventory.WithRawAsset(azureAssets[0]),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -88,6 +99,15 @@ func TestAccountFetcher_Fetch_Subscriptions(t *testing.T) {
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   "<sub UUID>",
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithOrganization(inventory.Organization{
+				ID: "<sub UUID>",
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 			}),
 		),
 	}

@@ -75,6 +75,7 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 			[]string{item.Id},
 			item.DisplayName,
 			inventory.WithRawAsset(item),
+<<<<<<< HEAD
 			inventory.WithCloud(inventory.AssetCloud{
 				Provider: inventory.AzureCloudProvider,
 				Account: inventory.AssetCloudAccount{
@@ -83,6 +84,16 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 				Service: &inventory.AssetCloudService{
 					Name: "Azure",
 				},
+=======
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   item.TenantId,
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithLabelsFromAny(item.Tags),
+			inventory.WithOrganization(inventory.Organization{
+				ID: item.TenantId,
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 			}),
 		)
 	}

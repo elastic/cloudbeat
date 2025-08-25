@@ -117,7 +117,7 @@ func mockFlexMysqlTLSVersionConfig(id, tlsVersion string) inventory.AzureAsset {
 		SubscriptionId: "subId",
 		ResourceGroup:  "group",
 		Name:           "tls_version",
-		Type:           inventory.FlexibleMySQLDBAssetType + "/configuration",
+		Type:           inventory.FlexibleMySQLDBServerAssetType + "/configuration",
 		Properties: map[string]any{
 			"name":         "tls_version",
 			"source":       "system-default",
@@ -133,6 +133,6 @@ func mockFlexibleMysqlAsset(id string, name string) inventory.AzureAsset {
 		SubscriptionId: "subId",
 		ResourceGroup:  "group",
 		Name:           name,
-		Type:           inventory.FlexibleMySQLDBAssetType,
+		Type:           inventory.FlexibleMySQLDBServerAssetType,
 	}
 }
