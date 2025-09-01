@@ -18,8 +18,11 @@
 package evaluator
 
 import (
+	"context"
+
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -54,7 +57,7 @@ func (l *logger) Info(fmt string, a ...any) {
 }
 
 func (l *logger) Error(fmt string, a ...any) {
-	l.log.Errorf(fmt, a...)
+	l.log.Errorf(context.TODO(), fmt, a...)
 }
 
 func (l *logger) Warn(fmt string, a ...any) {
@@ -84,12 +87,12 @@ func mapToArray(m map[string]any) []any {
 	return ret
 }
 
-func newLogger() logging.Logger {
+func newLogger(ctx context.Context) logging.Logger {
 	lvl := zap.NewAtomicLevelAt(logp.GetLevel())
 	log := clog.NewLogger("opa").WithOptions(
 		zap.IncreaseLevel(lvl),
 		zap.AddCallerSkip(1),
-	)
+	).WithSpanContext(trace.SpanContextFromContext(ctx))
 
 	return &logger{
 		log: log,

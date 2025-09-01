@@ -38,7 +38,7 @@ func Step[In any, Out any](ctx context.Context, log *clog.Logger, inputChannel c
 		for s := range inputChannel {
 			val, err := fn(ctx, s)
 			if err != nil {
-				log.Error(err)
+				log.Error(ctx, err)
 				continue
 			}
 			outputCh <- val

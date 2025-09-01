@@ -67,7 +67,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata)
 	f.log.Debug("Starting LoggingFetcher.Fetch")
 	trails, err := f.loggingProvider.DescribeTrails(ctx)
 	if err != nil {
-		f.log.Errorf("failed to describe trails: %v", err)
+		f.log.Errorf(ctx, "failed to describe trails: %v", err)
 	}
 
 	for _, resource := range trails {
@@ -81,7 +81,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata)
 
 	configs, err := f.configserviceProvider.DescribeConfigRecorders(ctx)
 	if err != nil {
-		f.log.Errorf("failed to describe config recorders: %v", err)
+		f.log.Errorf(ctx, "failed to describe config recorders: %v", err)
 		return nil
 	}
 

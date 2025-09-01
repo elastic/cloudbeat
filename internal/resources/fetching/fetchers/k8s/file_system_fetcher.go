@@ -99,20 +99,22 @@ func NewFsFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, patterns []st
 	}
 }
 
-func (f *FileSystemFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
+func (f *FileSystemFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting FileSystemFetcher.Fetch")
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.patterns {
 		matchedFiles, err := Glob(filePattern)
 		if err != nil {
-			f.log.Errorf("Failed to find matched glob for %s, error: %+v", filePattern, err)
+			// FIXME: This should be a context from the function signature.
+			f.log.Errorf(ctx, "Failed to find matched glob for %s, error: %+v", filePattern, err)
 		}
 
 		for _, file := range matchedFiles {
-			resource, err := f.fetchSystemResource(file)
+			resource, err := f.fetchSystemResource(ctx, file)
 			if err != nil {
-				f.log.Errorf("Unable to fetch fileSystemResource for file %v", file)
+				// FIXME: This should be a context from the function signature.
+				f.log.Errorf(ctx, "Unable to fetch fileSystemResource for file %v", file)
 				continue
 			}
 
@@ -123,17 +125,17 @@ func (f *FileSystemFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadat
 	return nil
 }
 
-func (f *FileSystemFetcher) fetchSystemResource(filePath string) (*FSResource, error) {
+func (f *FileSystemFetcher) fetchSystemResource(ctx context.Context, filePath string) (*FSResource, error) {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
 	}
-	resourceInfo, _ := f.fromFileInfo(info, filePath)
+	resourceInfo, _ := f.fromFileInfo(ctx, info, filePath)
 
 	return resourceInfo, nil
 }
 
-func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (*FSResource, error) {
+func (f *FileSystemFetcher) fromFileInfo(ctx context.Context, info os.FileInfo, path string) (*FSResource, error) {
 	if info == nil {
 		return nil, nil
 	}
@@ -172,7 +174,7 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (*FSReso
 
 	return &FSResource{
 		EvalResource:  data,
-		ElasticCommon: f.createFileCommonData(stat, data, path),
+		ElasticCommon: f.createFileCommonData(ctx, stat, data, path),
 	}, nil
 }
 
@@ -232,7 +234,7 @@ func getFSSubType(fileInfo os.FileInfo) string {
 	return FileSubType
 }
 
-func (f *FileSystemFetcher) createFileCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) FileCommonData {
+func (f *FileSystemFetcher) createFileCommonData(ctx context.Context, stat *syscall.Stat_t, data EvalFSResource, path string) FileCommonData {
 	cd := FileCommonData{
 		Name:      data.Name,
 		Mode:      data.Mode,
@@ -250,7 +252,8 @@ func (f *FileSystemFetcher) createFileCommonData(stat *syscall.Stat_t, data Eval
 
 	t, err := times.Stat(path)
 	if err != nil {
-		f.log.Errorf("failed to get file time data (file %s), error - %s", path, err.Error())
+		// FIXME: This should be a context from the function signature.
+		f.log.Errorf(ctx, "failed to get file time data (file %s), error - %s", path, err.Error())
 	} else {
 		cd.Accessed = t.AccessTime()
 		cd.Mtime = t.ModTime()

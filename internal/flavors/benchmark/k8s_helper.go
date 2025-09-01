@@ -48,7 +48,7 @@ func NewK8sBenchmarkHelper(log *clog.Logger, cfg *config.Config, client client_g
 func (h *K8SBenchmarkHelper) GetK8sDataProvider(ctx context.Context, clusterNameProvider k8s.ClusterNameProviderAPI) (dataprovider.CommonDataProvider, error) {
 	clusterName, err := clusterNameProvider.GetClusterName(ctx, h.cfg)
 	if err != nil {
-		h.log.Errorf("failed to get cluster name: %v", err)
+		h.log.Errorf(ctx, "failed to get cluster name: %v", err)
 	}
 
 	serverVersion, err := h.client.Discovery().ServerVersion()

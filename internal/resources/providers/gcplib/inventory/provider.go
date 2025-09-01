@@ -413,7 +413,7 @@ func (p *Provider) getAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsse
 		}
 
 		if err != nil {
-			p.log.Errorf("Error fetching GCP %v of types: %v for %v: %v\n", req.ContentType, req.AssetTypes, req.Parent, err)
+			p.log.Errorf(ctx, "Error fetching GCP %v of types: %v for %v: %v\n", req.ContentType, req.AssetTypes, req.Parent, err)
 			return
 		}
 

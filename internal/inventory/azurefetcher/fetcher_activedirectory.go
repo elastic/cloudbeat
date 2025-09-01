@@ -63,7 +63,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 
 	items, err := f.provider.ListServicePrincipals(ctx)
 	if err != nil {
-		f.logger.Errorf("Could not fetch Service Principals: %v", err)
+		f.logger.Errorf(ctx, "Could not fetch Service Principals: %v", err)
 	}
 
 	for _, item := range items {
@@ -94,7 +94,7 @@ func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetC
 
 	items, err := f.provider.ListDirectoryRoles(ctx)
 	if err != nil {
-		f.logger.Errorf("Could not fetch Directory Roles: %v", err)
+		f.logger.Errorf(ctx, "Could not fetch Directory Roles: %v", err)
 	}
 
 	for _, item := range items {
@@ -124,7 +124,7 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 
 	items, err := f.provider.ListGroups(ctx)
 	if err != nil {
-		f.logger.Errorf("Could not fetch Groups: %v", err)
+		f.logger.Errorf(ctx, "Could not fetch Groups: %v", err)
 	}
 
 	for _, item := range items {
@@ -154,7 +154,7 @@ func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<
 
 	items, err := f.provider.ListUsers(ctx)
 	if err != nil {
-		f.logger.Errorf("Could not fetch Users: %v", err)
+		f.logger.Errorf(ctx, "Could not fetch Users: %v", err)
 	}
 
 	for _, item := range items {
