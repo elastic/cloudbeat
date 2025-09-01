@@ -85,7 +85,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureBlobContainer),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -95,7 +96,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureBlobService),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -105,7 +107,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureFileService),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -115,7 +118,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureFileShare),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -125,7 +129,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureQueueService),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -135,7 +140,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureQueue),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -145,7 +151,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureTable),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -155,7 +162,8 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			inventory.WithRawAsset(azureTableService),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				AccountID:   "<tenant id>",
+				ServiceName: "Azure Storage",
 			}),
 		),
 	}
