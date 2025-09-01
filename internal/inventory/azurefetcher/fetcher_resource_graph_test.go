@@ -69,7 +69,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
-				ServiceName: "Azure",
+				ServiceName: "Azure App Services",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -80,7 +80,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -91,7 +91,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
-				ServiceName: "Azure",
+				ServiceName: "Azure Virtual Machines",
 			}),
 			inventory.WithHost(inventory.Host{
 				ID:   vm.Id,
