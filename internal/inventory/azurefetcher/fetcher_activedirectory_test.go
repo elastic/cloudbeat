@@ -86,7 +86,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   appOwnerOrganizationId.String(),
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -97,7 +97,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "id",
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithUser(inventory.User{
 				ID:   "id",
@@ -112,7 +112,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "id",
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithGroup(inventory.Group{
 				ID:   "id",
@@ -127,7 +127,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "id",
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithUser(inventory.User{
 				ID:   "id",
