@@ -92,12 +92,8 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, serviceN
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   item.TenantId,
-<<<<<<< HEAD
-				ServiceName: "Azure",
-=======
 				ProjectID:   item.SubscriptionId,
 				ServiceName: serviceName,
->>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 			}),
 			inventory.WithLabelsFromAny(item.Tags),
 		)
