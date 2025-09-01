@@ -25,10 +25,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestResourceGraphFetcher_Fetch(t *testing.T) {
@@ -69,7 +69,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
-				ServiceName: "Azure",
+				ServiceName: "Azure App Services",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -80,7 +80,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -91,7 +91,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
-				ServiceName: "Azure",
+				ServiceName: "Azure Virtual Machines",
 				MachineType: "xlarge",
 				InstanceID:  "/vm",
 			}),
@@ -104,7 +104,7 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 	}
 
 	// setup
-	logger := clog.NewLogger("azurefetcher_test")
+	logger := testhelper.NewLogger(t)
 	provider := newMockResourceGraphProvider(t)
 
 	provider.EXPECT().ListAllAssetTypesByName(

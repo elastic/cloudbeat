@@ -126,12 +126,12 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 
 // getAwsAccounts returns all the aws accounts of the org.
 // For each account it bundles together the cloud.Identity and the credentials for the cloudbeat-securityaudit role of that account.
-// It requires cloudbeat-root credentials (requires iam:ListAccountAliases and iam:GetRole).
+// It requires cloudbeat-root credentials (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit and iam:GetRole).
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudbeatRoot awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
 	stsClient := sts.NewFromConfig(cfgCloudbeatRoot)
 
 	// accountIdentities array contains all the Accounts and Organizational
-	// Units, even if they are nested. (requires iam:ListAccountAliases)
+	// Units, even if they are nested. (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit)
 	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, cfgCloudbeatRoot)
 	if err != nil {
 		return nil, err

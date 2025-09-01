@@ -27,19 +27,19 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type flexibleConfigFn func(configName string) (armmysqlflexibleservers.ConfigurationsClientGetResponse, error)
 
-func mockAssetFlexibleConfigurationMysqlProvider(f flexibleConfigFn) MysqlProviderAPI {
+func mockAssetFlexibleConfigurationMysqlProvider(t *testing.T, f flexibleConfigFn) MysqlProviderAPI {
 	wrapper := mysqlAzureClientWrapper{
 		AssetFlexibleConfiguration: func(_ context.Context, _, _, _, configName string, _ *arm.ClientOptions, _ *armmysqlflexibleservers.ConfigurationsClientGetOptions) (armmysqlflexibleservers.ConfigurationsClientGetResponse, error) {
 			return f(configName)
 		},
 	}
 
-	return &mysqlProvider{client: wrapper, log: clog.NewLogger("mock_asset_flexible_config")}
+	return &mysqlProvider{client: wrapper, log: testhelper.NewLogger(t)}
 }
 
 func TestMysqlProvider_GetFlexibleTLSVersionConfiguration(t *testing.T) {
@@ -102,7 +102,7 @@ func TestMysqlProvider_GetFlexibleTLSVersionConfiguration(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			provider := mockAssetFlexibleConfigurationMysqlProvider(tc.configMock)
+			provider := mockAssetFlexibleConfigurationMysqlProvider(t, tc.configMock)
 
 			assets, err := provider.GetFlexibleTLSVersionConfiguration(t.Context(), "subscription", "resource", "server")
 
