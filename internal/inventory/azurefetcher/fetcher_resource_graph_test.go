@@ -92,8 +92,6 @@ func TestResourceGraphFetcher_Fetch(t *testing.T) {
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   "<tenant id>",
 				ServiceName: "Azure Virtual Machines",
-				MachineType: "xlarge",
-				InstanceID:  "/vm",
 			}),
 			inventory.WithHost(inventory.Host{
 				ID:   vm.Id,
