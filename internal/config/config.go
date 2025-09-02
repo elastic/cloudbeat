@@ -117,6 +117,7 @@ type AzureClientOpt struct {
 	ClientPassword            string `config:"client_password"`
 	ClientCertificatePath     string `config:"client_certificate_path"`
 	ClientCertificatePassword string `config:"client_certificate_password"`
+	ClientAssertionPath       string `config:"client_assertion_path"`
 }
 
 const (
@@ -125,6 +126,7 @@ const (
 	AzureClientCredentialsTypeManual          = "manual"
 	AzureClientCredentialsTypeSecret          = "service_principal_with_client_secret"
 	AzureClientCredentialsTypeCertificate     = "service_principal_with_client_certificate"
+	AzureClientCredentialsTypeCloudConnectors = "cloud_connectors"
 )
 
 const (
