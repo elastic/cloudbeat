@@ -117,7 +117,6 @@ type AzureClientOpt struct {
 	ClientPassword            string `config:"client_password"`
 	ClientCertificatePath     string `config:"client_certificate_path"`
 	ClientCertificatePassword string `config:"client_certificate_password"`
-	ClientAssertionPath       string `config:"client_assertion_path"`
 }
 
 const (
@@ -258,6 +257,7 @@ const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
 	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
 	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
+	AzureClientAssertionPathEnvVar  = "AZURE_CLIENT_ASSERTION_PATH"
 )
 
 type CloudConnectorsConfig struct {

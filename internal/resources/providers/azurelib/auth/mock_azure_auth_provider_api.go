@@ -99,9 +99,9 @@ func (_c *MockAzureAuthProviderAPI_FindCertificateCredential_Call) RunAndReturn(
 	return _c
 }
 
-// FindClientAssertionCredentials provides a mock function with given fields: tenantID, clientID, jwtFilePath, options
-func (_m *MockAzureAuthProviderAPI) FindClientAssertionCredentials(tenantID string, clientID string, jwtFilePath string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error) {
-	ret := _m.Called(tenantID, clientID, jwtFilePath, options)
+// FindClientAssertionCredentials provides a mock function with given fields: tenantID, clientID, options
+func (_m *MockAzureAuthProviderAPI) FindClientAssertionCredentials(tenantID string, clientID string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error) {
+	ret := _m.Called(tenantID, clientID, options)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindClientAssertionCredentials")
@@ -109,19 +109,19 @@ func (_m *MockAzureAuthProviderAPI) FindClientAssertionCredentials(tenantID stri
 
 	var r0 *azidentity.ClientAssertionCredential
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, string, *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error)); ok {
-		return rf(tenantID, clientID, jwtFilePath, options)
+	if rf, ok := ret.Get(0).(func(string, string, *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error)); ok {
+		return rf(tenantID, clientID, options)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string, *azidentity.ClientAssertionCredentialOptions) *azidentity.ClientAssertionCredential); ok {
-		r0 = rf(tenantID, clientID, jwtFilePath, options)
+	if rf, ok := ret.Get(0).(func(string, string, *azidentity.ClientAssertionCredentialOptions) *azidentity.ClientAssertionCredential); ok {
+		r0 = rf(tenantID, clientID, options)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*azidentity.ClientAssertionCredential)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string, *azidentity.ClientAssertionCredentialOptions) error); ok {
-		r1 = rf(tenantID, clientID, jwtFilePath, options)
+	if rf, ok := ret.Get(1).(func(string, string, *azidentity.ClientAssertionCredentialOptions) error); ok {
+		r1 = rf(tenantID, clientID, options)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -137,15 +137,14 @@ type MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call struct {
 // FindClientAssertionCredentials is a helper method to define mock.On call
 //   - tenantID string
 //   - clientID string
-//   - jwtFilePath string
 //   - options *azidentity.ClientAssertionCredentialOptions
-func (_e *MockAzureAuthProviderAPI_Expecter) FindClientAssertionCredentials(tenantID interface{}, clientID interface{}, jwtFilePath interface{}, options interface{}) *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call {
-	return &MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call{Call: _e.mock.On("FindClientAssertionCredentials", tenantID, clientID, jwtFilePath, options)}
+func (_e *MockAzureAuthProviderAPI_Expecter) FindClientAssertionCredentials(tenantID interface{}, clientID interface{}, options interface{}) *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call {
+	return &MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call{Call: _e.mock.On("FindClientAssertionCredentials", tenantID, clientID, options)}
 }
 
-func (_c *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call) Run(run func(tenantID string, clientID string, jwtFilePath string, options *azidentity.ClientAssertionCredentialOptions)) *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call {
+func (_c *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call) Run(run func(tenantID string, clientID string, options *azidentity.ClientAssertionCredentialOptions)) *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(string), args[2].(string), args[3].(*azidentity.ClientAssertionCredentialOptions))
+		run(args[0].(string), args[1].(string), args[2].(*azidentity.ClientAssertionCredentialOptions))
 	})
 	return _c
 }
@@ -155,7 +154,7 @@ func (_c *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call) Return(_
 	return _c
 }
 
-func (_c *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call) RunAndReturn(run func(string, string, string, *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error)) *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call {
+func (_c *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call) RunAndReturn(run func(string, string, *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error)) *MockAzureAuthProviderAPI_FindClientAssertionCredentials_Call {
 	_c.Call.Return(run)
 	return _c
 }

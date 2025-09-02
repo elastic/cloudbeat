@@ -142,12 +142,11 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 					ClientCredentialsType: config.AzureClientCredentialsTypeCloudConnectors,
 					TenantID:              "tenant_a",
 					ClientID:              "client_id",
-					ClientAssertionPath:   "/path/to/jwt.token",
 				},
 			},
 			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
 				m.EXPECT().
-					FindClientAssertionCredentials("tenant_a", "client_id", "/path/to/jwt.token", mock.Anything).
+					FindClientAssertionCredentials("tenant_a", "client_id", mock.Anything).
 					Return(&azidentity.ClientAssertionCredential{}, nil).
 					Once()
 			},
@@ -163,12 +162,11 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 					ClientCredentialsType: config.AzureClientCredentialsTypeCloudConnectors,
 					TenantID:              "tenant_a",
 					ClientID:              "client_id",
-					ClientAssertionPath:   "/path/to/jwt.token",
 				},
 			},
 			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
 				m.EXPECT().
-					FindClientAssertionCredentials("tenant_a", "client_id", "/path/to/jwt.token", mock.Anything).
+					FindClientAssertionCredentials("tenant_a", "client_id", mock.Anything).
 					Return(nil, errMockAzure).
 					Once()
 			},

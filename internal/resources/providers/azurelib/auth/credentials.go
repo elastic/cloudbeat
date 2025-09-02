@@ -101,7 +101,6 @@ func (p *ConfigProvider) getCloudConnectorsCredentialsConfig(cfg config.AzureCon
 	creds, err := p.AuthProvider.FindClientAssertionCredentials(
 		cfg.Credentials.TenantID,
 		cfg.Credentials.ClientID,
-		cfg.Credentials.ClientAssertionPath,
 		nil,
 	)
 	if err != nil {

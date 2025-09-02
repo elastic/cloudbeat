@@ -24,6 +24,8 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	
+	"github.com/elastic/cloudbeat/internal/config"
 )
 
 type AzureAuthProvider struct{}
@@ -32,7 +34,7 @@ type AzureAuthProviderAPI interface {
 	FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error)
 	FindClientSecretCredentials(tenantID string, clientID string, clientSecret string, options *azidentity.ClientSecretCredentialOptions) (*azidentity.ClientSecretCredential, error)
 	FindCertificateCredential(tenantID string, clientID string, certPath string, password string, options *azidentity.ClientCertificateCredentialOptions) (*azidentity.ClientCertificateCredential, error)
-	FindClientAssertionCredentials(tenantID string, clientID string, jwtFilePath string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error)
+	FindClientAssertionCredentials(tenantID string, clientID string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error)
 }
 
 // FindDefaultCredentials is a wrapper around azidentity.NewDefaultAzureCredential to make it easier to mock
@@ -65,8 +67,13 @@ func (a *AzureAuthProvider) FindCertificateCredential(tenantID string, clientID 
 	return azidentity.NewClientCertificateCredential(tenantID, clientID, certs, key, options)
 }
 
-// FindClientAssertionCredentials is a wrapper around azidentity.NewClientAssertionCredential that loads JWT from file, similar to FindCertificateCredential
-func (a *AzureAuthProvider) FindClientAssertionCredentials(tenantID string, clientID string, jwtFilePath string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error) {
+// FindClientAssertionCredentials is a wrapper around azidentity.NewClientAssertionCredential that loads JWT from environment variable, similar to cloud connectors pattern
+func (a *AzureAuthProvider) FindClientAssertionCredentials(tenantID string, clientID string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error) {
+	jwtFilePath := os.Getenv(config.AzureClientAssertionPathEnvVar)
+	if jwtFilePath == "" {
+		return nil, fmt.Errorf("environment variable %s is required for client assertion credentials", config.AzureClientAssertionPathEnvVar)
+	}
+
 	getAssertion := func(ctx context.Context) (string, error) {
 		return readJWTFromFile(jwtFilePath)
 	}
