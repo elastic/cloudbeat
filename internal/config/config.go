@@ -257,7 +257,7 @@ const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
 	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
 	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
-	AzureClientAssertionPathEnvVar  = "AZURE_CLIENT_ASSERTION_PATH"
+	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_JWT_PATH"
 )
 
 type CloudConnectorsConfig struct {

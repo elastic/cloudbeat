@@ -69,9 +69,9 @@ func (a *AzureAuthProvider) FindCertificateCredential(tenantID string, clientID 
 
 // FindClientAssertionCredentials is a wrapper around azidentity.NewClientAssertionCredential that loads JWT from environment variable, similar to cloud connectors pattern
 func (a *AzureAuthProvider) FindClientAssertionCredentials(tenantID string, clientID string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error) {
-	jwtFilePath := os.Getenv(config.AzureClientAssertionPathEnvVar)
+	jwtFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
 	if jwtFilePath == "" {
-		return nil, fmt.Errorf("environment variable %s is required for client assertion credentials", config.AzureClientAssertionPathEnvVar)
+		return nil, fmt.Errorf("environment variable %s is required for client assertion credentials", config.CloudConnectorsJWTPathEnvVar)
 	}
 
 	getAssertion := func(ctx context.Context) (string, error) {
