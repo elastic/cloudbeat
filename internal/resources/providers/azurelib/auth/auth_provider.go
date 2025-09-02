@@ -74,7 +74,7 @@ func (a *AzureAuthProvider) FindClientAssertionCredentials(tenantID string, clie
 		return nil, fmt.Errorf("environment variable %s is required for client assertion credentials", config.CloudConnectorsJWTPathEnvVar)
 	}
 
-	getAssertion := func(ctx context.Context) (string, error) {
+	getAssertion := func(_ context.Context) (string, error) {
 		return readJWTFromFile(jwtFilePath)
 	}
 
