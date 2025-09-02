@@ -35,8 +35,7 @@ jobs:
       - name: Set variables
         id: set-variables
         env:
-          # TODO: discard changes after test
-          STACK_VERSION: 9.2.0-SNAPSHOT
+          STACK_VERSION: ${{ env.ELK_VERSION }}
           BRANCH: ${{ inputs.branch }}
           IS_SERVERLESS: ${{ inputs.serverless }}
         run: |
