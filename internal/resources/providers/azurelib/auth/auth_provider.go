@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	
+
 	"github.com/elastic/cloudbeat/internal/config"
 )
 
