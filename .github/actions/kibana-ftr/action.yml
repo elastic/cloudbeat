@@ -65,11 +65,6 @@ runs:
         fi
         yarn kbn bootstrap
 
-    - name: Set TEST_CLOUD_HOST_NAME
-      shell: bash
-      run: |
-        echo "TEST_CLOUD_HOST_NAME=$(echo '${{ inputs.test_kibana_url }}' | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
-
     - name: Set test configuration
       shell: bash
       env:
@@ -106,7 +101,7 @@ runs:
         TEST_CLOUD: "1"
         ES_SECURITY_ENABLED: "1"
         TEST_BROWSER_HEADLESS: "1"
-        TEST_CLOUD_HOST_NAME: ${{ env.TEST_CLOUD_HOST_NAME }}
+        TEST_CLOUD_HOST_NAME: "cloud.elastic.co"
         TEST_CONFIG: ${{ env.TEST_CONFIG }}
       run: |
         node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"
