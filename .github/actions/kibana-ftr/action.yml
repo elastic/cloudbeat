@@ -1,23 +1,37 @@
-name: 'Run Kibana FTR'
-description: 'Run Kibana tests using FTR'
+name: "Run Kibana FTR"
+description: "Run Kibana tests using FTR"
 
 inputs:
   test_kibana_url:
-    description: 'URL for the Kibana instance to test'
+    description: "URL for the Kibana instance to test"
     required: true
   test_es_url:
-    description: 'URL for the ES instance'
+    description: "URL for the ES instance"
     required: true
   es_version:
-    description: 'Version of Elasticsearch to test against'
+    description: "Version of Elasticsearch to test against"
     required: true
   kibana_ref:
-    description: 'Kibana PR commit sha'
+    description: "Kibana PR commit sha"
     required: false
-    default: 'main'
+    default: "main"
+  serverless_mode:
+    description: "Run tests in serverless mode"
+    required: false
+    default: "false"
+  ftr_user:
+    description: "User for FTR tests (required for serverless)"
+    required: false
+    default: "admin"
+  ftr_password:
+    description: "Password for FTR tests (required for serverless)"
+    required: false
+  ftr_email:
+    description: "Email for FTR tests (required for serverless)"
+    required: false
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Set global variables
       id: globals
@@ -56,6 +70,31 @@ runs:
       run: |
         echo "TEST_CLOUD_HOST_NAME=$(echo '${{ inputs.test_kibana_url }}' | awk -F[/:] '{print $4}')" >> $GITHUB_ENV
 
+    - name: Set test configuration
+      shell: bash
+      env:
+        SERVERLESS_MODE: ${{ inputs.serverless_mode }}
+      run: |
+        echo "TEST_CONFIG=x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts" >> $GITHUB_ENV
+        if [ "$SERVERLESS_MODE" = "true" ]; then
+          echo "TEST_CONFIG=x-pack/solutions/security/test/serverless/functional/configs/config.cloud_secuirty_posture.cloud.ts" >> $GITHUB_ENV
+        fi
+
+    - name: Create FTR role users
+      if: ${{ inputs.serverless_mode == 'true' }}
+      shell: bash
+      working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      env:
+        FTR_USER: ${{ inputs.ftr_user }}
+        FTR_PASSWORD: ${{ inputs.ftr_password }}
+        FTR_EMAIL: ${{ inputs.ftr_email }}
+      run: |
+        umask 077
+        mkdir -p .ftr
+        jq -n --arg user "$FTR_USER" --arg password "$FTR_PASSWORD" --arg email "$FTR_EMAIL" \
+          '{($user): {password: $password, email: $email}}' > .ftr/role_users.json
+        chmod 600 .ftr/role_users.json
+
     - name: Run FTR
       if: success()
       shell: bash
@@ -64,10 +103,25 @@ runs:
         TEST_KIBANA_URL: ${{ inputs.test_kibana_url }}
         TEST_ES_URL: ${{ inputs.test_es_url }}
         ES_VERSION: ${{ inputs.es_version }}
-        TEST_CLOUD: '1'
-        ES_SECURITY_ENABLED: '1'
-        TEST_BROWSER_HEADLESS: '1'
+        TEST_CLOUD: "1"
+        ES_SECURITY_ENABLED: "1"
+        TEST_BROWSER_HEADLESS: "1"
         TEST_CLOUD_HOST_NAME: ${{ env.TEST_CLOUD_HOST_NAME }}
-        TEST_CONFIG: 'x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts'
+        TEST_CONFIG: ${{ env.TEST_CONFIG }}
       run: |
         node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"
+
+    - name: Cleanup credentials
+      if: always() && inputs.serverless_mode == 'true'
+      shell: bash
+      working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      run: |
+        if [ -f .ftr/role_users.json ]; then
+          if command -v shred >/dev/null 2>&1; then
+            shred -vfz -n 3 .ftr/role_users.json 2>/dev/null || true
+          else
+            dd if=/dev/zero of=.ftr/role_users.json bs=1024 count=1 2>/dev/null || true
+            rm -f .ftr/role_users.json
+          fi
+        fi
+        rmdir .ftr 2>/dev/null || true
