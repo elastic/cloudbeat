@@ -37,7 +37,7 @@ metadata:
 
     Sample Output for a bucket with logging enabled:
 
-    ```
+    ```json
     {
         "LoggingEnabled": {
             "TargetPrefix": "<Prefix_Test>",
@@ -67,7 +67,7 @@ metadata:
     aws cloudtrail describe-trails --region <region-name> --query trailList[*].S3BucketName
     ```
     8. Copy and add target bucket name at `<Logging_BucketName>`, Prefix for logfile at `<LogFilePrefix>` and optionally add an email address in the following template and save it as `<FileName.Json>`:
-    ```
+    ```json
     {
         "LoggingEnabled": {
             "TargetBucket": "<Logging_BucketName>",
