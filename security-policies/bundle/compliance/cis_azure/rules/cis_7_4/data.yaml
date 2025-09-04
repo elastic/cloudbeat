@@ -27,16 +27,16 @@ metadata:
     az disk list --query '[? diskstate == `Unattached`].{encryptionSettings: encryptionSettings, name: name}' -o json
     ```
     Sample Output:
-    ```
+    ```json
     [
-     {
-     "encryptionSettings": null,
-     "name": "<Disk1>"
-     },
-     {
-     "encryptionSettings": null,
-     "name": "<Disk2>"
-     }
+        {
+            "encryptionSettings": null,
+            "name": "<Disk1>"
+        },
+        {
+            "encryptionSettings": null,
+            "name": "<Disk2>"
+        }
     ]
     ```
   remediation: |-

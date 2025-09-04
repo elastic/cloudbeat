@@ -28,8 +28,8 @@ metadata:
 
     1. Create an IAM role for managing incidents with AWS:
      - Create a trust relationship policy document that allows <iam_user> to manage AWS incidents, and save it locally as /tmp/TrustPolicy.json:
-    ```
-     {
+    ```json
+    {
         "Version": "2012-10-17",
         "Statement": [
             {

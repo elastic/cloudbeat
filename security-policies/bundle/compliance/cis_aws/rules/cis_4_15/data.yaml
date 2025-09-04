@@ -53,7 +53,7 @@ metadata:
     ```
     at least one subscription should have "SubscriptionArn" with valid aws ARN.
     Example of valid "SubscriptionArn": 
-    ```
+    ```json
     "arn:aws:sns:<region>:<aws_account_number>:<SnsTopicName>:<SubscriptionID>"
     ```
   remediation: |-
