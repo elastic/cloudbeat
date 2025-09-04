@@ -179,24 +179,38 @@ def add_new_line_after_period(text):
 
 
 def replace_json_block(match):
+    # Extract the content inside the code block
     code_block = match.group(1)
+
+    # First attempt: try to parse the entire code block as JSON
     try:
         parsed = json.loads(code_block)
         pretty = json.dumps(parsed, indent=4)
         return f"```json\n{pretty}\n```"
     except json.JSONDecodeError:
+        # If the entire block isn't valid JSON, try to find JSON within it
+        # Won't be adding json tag here since the whole block isn't JSON but we will add proper indentations.
+        # Find the first opening brace and last closing brace
         start = code_block.find("{")
         brace_end = code_block.rfind("}")
+
+        # If no braces found, return as plain code block
         if start == -1 or brace_end == -1:
             return f"```\n{code_block}\n```"
+
+        # Calculate the end position (include the closing brace)
         end = brace_end + 1
         json_str = code_block[start:end]
+
+        # Second attempt: try to parse the extracted JSON portion
         try:
             parsed = json.loads(json_str)
             pretty = json.dumps(parsed, indent=4)
+            # Replace the JSON portion with the formatted version
             formatted_block = code_block[:start] + pretty + code_block[end:]
             return f"```\n{formatted_block}\n```"
         except json.JSONDecodeError:
+            # If JSON parsing still fails, return the original block unchanged
             return f"```\n{code_block}\n```"
 
 
