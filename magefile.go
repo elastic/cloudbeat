@@ -40,7 +40,7 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/unittest"
-	"github.com/elastic/e2e-testing/pkg/downloads"
+	"github.com/elastic/cloudbeat/internal/downloads"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
