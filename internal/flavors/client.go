@@ -20,6 +20,7 @@ package flavors
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (beat.Client, error) {
@@ -37,5 +38,5 @@ func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (
 
 // configureProcessors configure processors to be used by the beat
 func configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
-	return processors.New(processorsList)
+	return processors.New(processorsList, logp.NewLogger("processors"))
 }
