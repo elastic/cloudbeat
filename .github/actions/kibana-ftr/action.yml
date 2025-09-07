@@ -72,7 +72,7 @@ runs:
       run: |
         echo "TEST_CONFIG=x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts" >> $GITHUB_ENV
         if [ "$SERVERLESS_MODE" = "true" ]; then
-          echo "TEST_CONFIG=x-pack/solutions/security/test/serverless/functional/configs/config.cloud_secuirty_posture.cloud.ts" >> $GITHUB_ENV
+          echo "TEST_CONFIG=x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.cloud.ts" >> $GITHUB_ENV
         fi
 
     - name: Create FTR role users
