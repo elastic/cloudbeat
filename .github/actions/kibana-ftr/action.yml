@@ -111,12 +111,5 @@ runs:
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       run: |
-        if [ -f .ftr/role_users.json ]; then
-          if command -v shred >/dev/null 2>&1; then
-            shred -vfz -n 3 .ftr/role_users.json 2>/dev/null || true
-          else
-            dd if=/dev/zero of=.ftr/role_users.json bs=1024 count=1 2>/dev/null || true
-            rm -f .ftr/role_users.json
-          fi
-        fi
+        rm -f .ftr/role_users.json
         rmdir .ftr 2>/dev/null || true
