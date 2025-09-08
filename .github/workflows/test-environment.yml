@@ -489,6 +489,10 @@ jobs:
           test_es_url: ${{ steps.elk-stack.outputs.test-es-url }}
           es_version: ${{ env.STACK_VERSION }}
           kibana_ref: ${{ inputs.kibana_ref }}
+          serverless_mode: ${{ inputs.serverless_mode }}
+          ftr_user: ${{ secrets.FTR_USER }}
+          ftr_password: ${{ secrets.FTR_PASSWORD }}
+          ftr_email: ${{ secrets.FTR_EMAIL }}
 
       - name: Create Slack Payload
         if: always()
