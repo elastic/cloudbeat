@@ -438,6 +438,8 @@ jobs:
         uses: ./.github/actions/cis-agentless
         with:
           cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+          cspm-aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+          cspm-aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
           es-user: ${{ env.ES_USER }}
           es-password: ${{ env.ES_PASSWORD }}
           kibana-url: ${{ env.KIBANA_URL }}
