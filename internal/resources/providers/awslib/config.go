@@ -138,7 +138,7 @@ func CredentialsValid(ctx context.Context, cnf aws.Config, log *clog.Logger) boo
 	}
 
 	if !strings.Contains(err.Error(), "not authorized to perform: sts:AssumeRole") {
-		log.Errorf("Expected a 403 autorization error, but got: %v", err)
+		log.Errorf("Expected a 403 authorization error, but got: %v", err)
 	}
 
 	return false

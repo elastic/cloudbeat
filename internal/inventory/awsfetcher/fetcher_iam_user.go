@@ -57,10 +57,10 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 	users, err := i.provider.GetUsers(ctx)
 	if err != nil {
 		awslib.ReportMissingPermission(i.statusHandler, err)
+		i.logger.Errorf("Could not list users: %v", err)
 		if len(users) == 0 {
 			return
 		}
-		i.logger.Errorf("Could not list users: %v", err)
 	}
 
 	for _, resource := range users {
