@@ -51,9 +51,7 @@ func (s *StatusHandler) refreshBuffer() {
 	}
 
 	// Just clear existing map — keeps allocated buckets
-	for k := range s.messages {
-		delete(s.messages, k)
-	}
+	clear(s.messages)
 }
 
 func (s *StatusHandler) Degraded(message string) {

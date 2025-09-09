@@ -72,7 +72,7 @@ func TestIsPermissionErrorAndReportMissingPermissions(t *testing.T) {
 			if tc.initMock != nil {
 				tc.initMock(mh)
 			}
-			got := IsPermissionError(tc.input)
+			got := isPermissionError(tc.input)
 			assert.Equal(t, tc.expectedIsPermissionError, got)
 			ReportMissingPermission(mh, tc.input)
 		})

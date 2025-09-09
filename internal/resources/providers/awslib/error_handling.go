@@ -26,11 +26,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
-const arnSecurityAudit = "arn:aws:iam::aws:policy/SecurityAudit"
+const (
+	arnSecurityAudit = "arn:aws:iam::aws:policy/SecurityAudit"
+	missingPolicyFMT = "missing permission on cloud provider side: %s"
+)
 
-const missingPolicyFMT = "missing permission on cloud provider side: %s"
-
-func HasAWSErrorCode(err error, codes map[string]struct{}) bool {
+func hasAWSErrorCode(err error, codes map[string]struct{}) bool {
 	var apiErr smithy.APIError
 	if errors.As(err, &apiErr) {
 		_, found := codes[apiErr.ErrorCode()]
@@ -46,15 +47,12 @@ var permissionErrorCodes = map[string]struct{}{
 	"UnauthorizedOperation": {},
 }
 
-// "UnrecognizedClientException",
-// "MissingAuthenticationToken",
-
-func IsPermissionError(err error) bool {
-	return HasAWSErrorCode(err, permissionErrorCodes)
+func isPermissionError(err error) bool {
+	return hasAWSErrorCode(err, permissionErrorCodes)
 }
 
 func ReportMissingPermission(statusHandler statushandler.StatusHandlerAPI, err error) {
-	if IsPermissionError(err) {
+	if isPermissionError(err) {
 		statusHandler.Degraded(fmt.Sprintf(missingPolicyFMT, arnSecurityAudit))
 	}
 }
