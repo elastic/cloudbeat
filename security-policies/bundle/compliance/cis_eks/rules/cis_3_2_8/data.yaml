@@ -34,7 +34,7 @@ metadata:
 
     If modifying the Kubelet config file, edit the kubelet-config.json file `/etc/kubernetes/kubelet/kubelet-config.json` and set the below parameter to null
 
-    ```
+    ```json
     "hostname-override"
     ```
 

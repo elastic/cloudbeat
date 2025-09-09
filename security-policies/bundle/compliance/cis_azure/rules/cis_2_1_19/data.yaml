@@ -46,17 +46,17 @@ metadata:
     ```
     Where `input.json` contains the data below, replacing `validEmailAddress` with a single email address or multiple comma-separated email addresses:
 
-    ```
-     {
-     "id": "/subscriptions/<Your_Subscription_Id>/providers/Microsoft.Security/securityContacts/default",
-     "name": "default",
-     "type": "Microsoft.Security/securityContacts",
-     "properties": {
-     "email": "<validEmailAddress>",
-     "alertNotifications": "On",
-     "alertsToAdmins": "On"
-     }
-     }
+    ```json
+    {
+        "id": "/subscriptions/<Your_Subscription_Id>/providers/Microsoft.Security/securityContacts/default",
+        "name": "default",
+        "type": "Microsoft.Security/securityContacts",
+        "properties": {
+            "email": "<validEmailAddress>",
+            "alertNotifications": "On",
+            "alertsToAdmins": "On"
+        }
+    }
     ```
   impact: ''
   default_value: ''
