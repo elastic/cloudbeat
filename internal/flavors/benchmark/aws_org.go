@@ -26,6 +26,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"go.opentelemetry.io/otel"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
@@ -48,6 +49,8 @@ const (
 	scanSettingTagValue = "Yes"
 	scopeName           = "github.com/elastic/cloudbeat/internal/flavors/benchmark/aws_org"
 )
+
+var tracer = otel.Tracer(scopeName)
 
 type AWSOrg struct {
 	IAMProvider      iam.RoleGetter
@@ -98,7 +101,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
 		func(ctx context.Context) (registry.FetchersMap, error) {
-			ctx, span := observability.StartSpan(ctx, scopeName, "Update AWS accounts")
+			ctx, span := tracer.Start(ctx, "benchmark.AWSOrg.initialize")
 			defer span.End()
 			spannedLog := log.WithSpanContext(span.SpanContext())
 
@@ -123,12 +126,12 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 
 // getAwsAccounts returns all the aws accounts of the org.
 // For each account it bundles together the cloud.Identity and the credentials for the cloudbeat-securityaudit role of that account.
-// It requires cloudbeat-root credentials (requires iam:ListAccountAliases and iam:GetRole).
+// It requires cloudbeat-root credentials (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit and iam:GetRole).
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudbeatRoot awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
 	stsClient := sts.NewFromConfig(cfgCloudbeatRoot)
 
 	// accountIdentities array contains all the Accounts and Organizational
-	// Units, even if they are nested. (requires iam:ListAccountAliases)
+	// Units, even if they are nested. (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit)
 	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, cfgCloudbeatRoot)
 	if err != nil {
 		return nil, err

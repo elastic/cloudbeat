@@ -63,6 +63,10 @@ linters:
               recommendations:
                 - errors
               reason: Package is deprecated
+          - github.com/mitchellh/mapstructure:
+              recommendations:
+                - github.com/go-viper/mapstructure/v2
+              reason: GitHub repo is archived
     govet:
       disable:
         - fieldalignment

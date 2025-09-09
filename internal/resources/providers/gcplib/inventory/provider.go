@@ -113,12 +113,12 @@ func newAssetsInventoryWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 }
 
 func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig, cfg config.GcpConfig) (ServiceAPI, error) {
-	assetsInventory, err := newAssetsInventoryWrapper(ctx, log, gcpConfig, cfg)
+	inv, err := newAssetsInventoryWrapper(ctx, log, gcpConfig, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	cloudResourceManager, err := NewResourceManagerWrapper(ctx, log, gcpConfig)
+	crm, err := NewResourceManagerWrapper(ctx, log, gcpConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -126,23 +126,24 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *clog.Logger, gcpCon
 	return &Provider{
 		config:    gcpConfig,
 		log:       log,
-		inventory: assetsInventory,
-		crm:       cloudResourceManager,
+		inventory: inv,
+		crm:       crm,
 	}, nil
 }
 
 func (p *Provider) ListAssetTypes(ctx context.Context, assetTypes []string, out chan<- *ExtendedGcpAsset) {
 	defer close(out)
 
-	resourceAssetsCh := p.fetchAssets(ctx, assetpb.ContentType_RESOURCE, assetTypes)
-	policiesAssetsCh := p.fetchAssets(ctx, assetpb.ContentType_IAM_POLICY, assetTypes)
-	assetsCh := p.mergeAssets(ctx, resourceAssetsCh, policiesAssetsCh)
-
-	for asset := range assetsCh {
-		select {
-		case <-ctx.Done():
+	for _, t := range assetTypes {
+		if ctx.Err() != nil {
 			return
-		case out <- asset:
+		}
+
+		resCh := p.getAssets(ctx, p.config.Parent, []string{t}, assetpb.ContentType_RESOURCE)
+		polCh := p.getAssets(ctx, p.config.Parent, []string{t}, assetpb.ContentType_IAM_POLICY)
+
+		for a := range p.mergeAssets(ctx, resCh, polCh) {
+			out <- a
 		}
 	}
 }
@@ -297,39 +298,99 @@ func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []st
 }
 
 func (p *Provider) getParentResources(ctx context.Context, parent string, assetTypes []string) <-chan *ExtendedGcpAsset {
+	return p.getAssets(ctx, parent, assetTypes, assetpb.ContentType_RESOURCE)
+}
+
+func (p *Provider) getAssets(ctx context.Context, parent string, assetTypes []string, contentType assetpb.ContentType) <-chan *ExtendedGcpAsset {
 	ch := make(chan *ExtendedGcpAsset)
 	go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
 		Parent:      parent,
 		AssetTypes:  assetTypes,
-		ContentType: assetpb.ContentType_RESOURCE,
+		ContentType: contentType,
 	})
 	return ch
 }
 
-func (p *Provider) fetchAssets(ctx context.Context, contentType assetpb.ContentType, assetTypes []string) <-chan *ExtendedGcpAsset {
+func (p *Provider) mergeAssets(ctx context.Context, resCh, polCh <-chan *ExtendedGcpAsset) <-chan *ExtendedGcpAsset {
 	out := make(chan *ExtendedGcpAsset)
-	wg := sync.WaitGroup{}
-	// Fetch each asset type separately to limit failures to a single type
-	for _, assetType := range assetTypes {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			ch := make(chan *ExtendedGcpAsset)
-			go p.getAllAssets(ctx, ch, &assetpb.ListAssetsRequest{
-				Parent:      p.config.Parent,
-				AssetTypes:  []string{assetType},
-				ContentType: contentType,
-			})
-			for asset := range ch {
-				out <- asset
-			}
-		}()
-	}
+	store := make(map[string]*ExtendedGcpAsset)
+
 	go func() {
-		wg.Wait()
-		close(out)
+		defer close(out)
+
+		for polCh != nil || resCh != nil {
+			select {
+			case <-ctx.Done():
+				return
+
+			case a, ok := <-polCh:
+				if !ok {
+					polCh = nil
+					flushAssets(out, store, resCh, polCh)
+					continue
+				}
+				mergeAsset(out, store, a, resCh, polCh)
+
+			case a, ok := <-resCh:
+				if !ok {
+					resCh = nil
+					flushAssets(out, store, resCh, polCh)
+					continue
+				}
+				mergeAsset(out, store, a, resCh, polCh)
+			}
+		}
+
+		flushAssets(out, store, resCh, polCh)
 	}()
+
 	return out
+}
+
+func mergeAsset(
+	out chan<- *ExtendedGcpAsset,
+	store map[string]*ExtendedGcpAsset,
+	a *ExtendedGcpAsset,
+	resCh, polCh <-chan *ExtendedGcpAsset,
+) {
+	asset, found := store[a.Name]
+	if !found {
+		asset = a
+		store[a.Name] = asset
+	} else {
+		if a.Resource != nil {
+			asset.Resource = a.Resource
+		}
+		if a.IamPolicy != nil {
+			asset.IamPolicy = a.IamPolicy
+		}
+	}
+
+	if isAssetReady(asset, resCh, polCh) {
+		out <- asset
+		delete(store, a.Name)
+	}
+}
+
+func isAssetReady(a *ExtendedGcpAsset, resCh, polCh <-chan *ExtendedGcpAsset) bool {
+	resChOpen := resCh != nil
+	polChOpen := polCh != nil
+	return (a.Resource != nil && a.IamPolicy != nil) ||
+		(!polChOpen && a.Resource != nil) ||
+		(!resChOpen && a.IamPolicy != nil)
+}
+
+func flushAssets(
+	out chan<- *ExtendedGcpAsset,
+	store map[string]*ExtendedGcpAsset,
+	resCh, polCh <-chan *ExtendedGcpAsset,
+) {
+	for name, a := range store {
+		if isAssetReady(a, resCh, polCh) {
+			out <- a
+			delete(store, name)
+		}
+	}
 }
 
 func (p *Provider) getAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsset, req *assetpb.ListAssetsRequest) {
@@ -342,6 +403,9 @@ func (p *Provider) getAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsse
 		ContentType: req.ContentType,
 	})
 	for {
+		if ctx.Err() != nil {
+			return
+		}
 		response, err := it.Next()
 		if err == iterator.Done {
 			p.log.Infof("Finished fetching GCP %v of types: %v for %v\n", req.ContentType, req.AssetTypes, req.Parent)
@@ -358,66 +422,10 @@ func (p *Provider) getAllAssets(ctx context.Context, out chan<- *ExtendedGcpAsse
 	}
 }
 
-// merge by asset name. send assets with both resource & policy if both channels are open.
-// if one channel closes, send remaining assets from the other. finally, flush remaining assets.
-//
-//revive:disable-next-line
-func (p *Provider) mergeAssets(ctx context.Context, resourceCh, policyCh <-chan *ExtendedGcpAsset) <-chan *ExtendedGcpAsset {
-	out := make(chan *ExtendedGcpAsset)
-
-	go func() {
-		defer close(out)
-		assetStore := make(map[string]*ExtendedGcpAsset)
-		rch, pch := resourceCh, policyCh
-		for rch != nil || pch != nil || len(assetStore) > 0 {
-			select {
-			case <-ctx.Done():
-				return
-			case asset, ok := <-rch:
-				if ok {
-					mergeAssetContentType(assetStore, asset)
-				} else {
-					rch = nil
-				}
-			case asset, ok := <-pch:
-				if ok {
-					mergeAssetContentType(assetStore, asset)
-				} else {
-					pch = nil
-				}
-			}
-			for id, a := range assetStore {
-				hasPolicy := a.IamPolicy != nil
-				hasResource := a.Resource != nil
-				hasBoth := hasPolicy && hasResource
-				if hasBoth || (rch == nil && hasPolicy) || (pch == nil && hasResource) {
-					out <- a
-					delete(assetStore, id)
-				}
-			}
-		}
-	}()
-
-	return out
-}
-
 func (p *Provider) newGcpExtendedAsset(ctx context.Context, asset *assetpb.Asset) *ExtendedGcpAsset {
 	return &ExtendedGcpAsset{
 		Asset:        asset,
 		CloudAccount: p.crm.GetCloudMetadata(ctx, asset),
-	}
-}
-
-func mergeAssetContentType(store map[string]*ExtendedGcpAsset, asset *ExtendedGcpAsset) {
-	if existing, ok := store[asset.Name]; ok {
-		if asset.Resource != nil {
-			existing.Resource = asset.Resource
-		}
-		if asset.IamPolicy != nil {
-			existing.IamPolicy = asset.IamPolicy
-		}
-	} else {
-		store[asset.Name] = asset
 	}
 }
 

@@ -33,6 +33,7 @@ SIMPLIFIED_AGENT_POLICY = {
 VERSION_MAP = {
     "asset_inventory_aws": "0.2.1",
     "asset_inventory_azure": "0.2.1",
+    "asset_inventory_gcp": "0.2.1",
     "cis_k8s": "1.1.0",
     "cis_eks": "1.2.0",
     "cis_aws": "1.2.0",

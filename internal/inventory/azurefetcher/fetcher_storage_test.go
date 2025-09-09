@@ -22,10 +22,10 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	azurelib_inventory "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestStorageFetcher_Fetch(t *testing.T) {
@@ -84,8 +84,9 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureBlobContainer.Name,
 			inventory.WithRawAsset(azureBlobContainer),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -94,8 +95,9 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureBlobService.Name,
 			inventory.WithRawAsset(azureBlobService),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -104,8 +106,9 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureFileService.Name,
 			inventory.WithRawAsset(azureFileService),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -114,8 +117,9 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureFileShare.Name,
 			inventory.WithRawAsset(azureFileShare),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -124,8 +128,9 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureQueueService.Name,
 			inventory.WithRawAsset(azureQueueService),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -134,8 +139,9 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureQueue.Name,
 			inventory.WithRawAsset(azureQueue),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -144,8 +150,9 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureTable.Name,
 			inventory.WithRawAsset(azureTable),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 		inventory.NewAssetEvent(
@@ -154,14 +161,15 @@ func TestStorageFetcher_Fetch(t *testing.T) {
 			azureTableService.Name,
 			inventory.WithRawAsset(azureTableService),
 			inventory.WithCloud(inventory.Cloud{
+				AccountID:   "<tenant id>",
 				Provider:    inventory.AzureCloudProvider,
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 			}),
 		),
 	}
 
 	// setup
-	logger := clog.NewLogger("azurefetcher_test")
+	logger := testhelper.NewLogger(t)
 	provider := newMockStorageProvider(t)
 
 	provider.EXPECT().ListSubscriptions(

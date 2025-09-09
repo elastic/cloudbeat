@@ -25,6 +25,11 @@ inputs:
     default: "default"
     required: false
     type: string
+  gcp-zone:
+    description: "GCP zone for Asset Inventory agent deployment"
+    required: false
+    default: "us-central1-a"
+    type: string
   aws-cloudtrail-s3-bucket:
     description: "AWS Cloudtrail S3 bucket"
     default: "default"
@@ -288,6 +293,18 @@ runs:
           echo "asset_inventory_supported=false" >> $GITHUB_OUTPUT
         fi
 
+    - name: Enable Entity Store
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
+      run: |
+        poetry run python ./enable_entity_store.py
+
     - name: Install Azure Asset Inventory integration
       id: azure-asset-inventory-integration
       working-directory: tests/integrations_setup
@@ -297,6 +314,7 @@ runs:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
       run: |
         poetry run python ./install_azure_asset_inventory_integration.py
 
@@ -319,6 +337,7 @@ runs:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
       run: |
         poetry run python ./install_aws_asset_inventory_integration.py
 
@@ -334,6 +353,52 @@ runs:
         src="../../../tests/integrations_setup/$scriptname"
         cmd="chmod +x $scriptname && ./$scriptname"
         ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+    - name: Create GCP Service Account
+      id: create-service-account-cdr
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      shell: bash
+      working-directory: deploy/deployment-manager
+      env:
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-acc"
+      run: |
+          # Deploys a GCP Service Account
+          ./deploy_service_account.sh
+          mv KEY_FILE.json "../../tests/integrations_setup"
+
+    - name: Install GCP Asset Inventory integration
+      id: gcp-asset-inventory
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      shell: bash
+      working-directory: tests/integrations_setup
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
+        AGENT_VERSION: ${{ inputs.elk-stack-version }}
+        SERVICE_ACCOUNT_JSON_PATH: "KEY_FILE.json"
+      run: |
+        poetry run python ./install_gcp_asset_inventory_integration.py
+
+    - name: Deploy GCP Asset Inventory agent
+      id: gcp-asset-inventory-agent
+      if: ${{ !cancelled() && steps.gcp-asset-inventory.outcome  == 'success' }}
+      shell: bash
+      working-directory: deploy/deployment-manager
+      env:
+        ACTOR: ${{ github.actor }}
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
+        GCP_ZONE: "${{ inputs.gcp-zone }}"
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
+      run: |
+        # GCP labeling rules:
+        # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
+        # Convert github.actor to lowercase, replace disallowed characters
+        gcp_label=$(echo "$ACTOR" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/_/g')
+        gcp_default_tag="division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=$gcp_label"
+        . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${gcp_default_tag}" --zone="${GCP_ZONE}"
 
     - name: Upload CDR state
       id: upload-state-cdr

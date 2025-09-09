@@ -26,24 +26,5 @@ finding := result if {
 	data_adapter.has_policy
 	count(service_accounts) > 0
 
-	result := common.generate_result_without_expected(
-		common.calculate_result(audit.is_not_admin_roles(service_accounts)),
-		evidence,
-	)
-}
-
-# maps the service accounts array to an object with keys as roles and values as members
-# this makes it easier to see which service accounts has which role
-evidence := admin_roles if {
-	admin_roles := {role: members |
-		entry := service_accounts[_]
-		role := entry.role
-		members := entry.members
-		regex.match(`(.*Admin|.*admin|roles/(editor|owner))`, role)
-	}
-	count(admin_roles) > 0
-} else := {role: members |
-	entry := service_accounts[_]
-	role := entry.role
-	members := entry.members
+	result := common.generate_evaluation_result(common.calculate_result(audit.is_not_admin_roles(service_accounts)))
 }
