@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/kms"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type KmsFetcherTestSuite struct {
@@ -56,7 +57,7 @@ func (s *KmsFetcherTestSuite) TearDownTest() {
 }
 
 func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
-	var tests = []struct {
+	tests := []struct {
 		name               string
 		kmsMocksReturnVals KmsMocksReturnVals
 		numExpectedResults int
@@ -87,9 +88,10 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 			}
 
 			kmsFetcher := KmsFetcher{
-				log:        testhelper.NewLogger(s.T()),
-				kms:        kmsProviderMock,
-				resourceCh: s.resourceCh,
+				log:           testhelper.NewLogger(s.T()),
+				kms:           kmsProviderMock,
+				resourceCh:    s.resourceCh,
+				statusHandler: statushandler.NewMockStatusHandlerAPI(t),
 			}
 
 			err := kmsFetcher.Fetch(ctx, cycle.Metadata{})

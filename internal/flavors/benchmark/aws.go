@@ -33,12 +33,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const resourceChBufferSize = 10000
 
 type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
+	StatusHandler    statushandler.StatusHandlerAPI
 }
 
 func (a *AWS) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -50,7 +52,7 @@ func (a *AWS) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Co
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, a.StatusHandler)
 }
 
 //revive:disable-next-line:function-result-limit
@@ -79,7 +81,7 @@ func (a *AWS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(preset.NewCisAwsFetchers(ctx, log, *awsConfig, ch, awsIdentity)),
+		registry.WithFetchersMap(preset.NewCisAwsFetchers(ctx, log, *awsConfig, ch, awsIdentity, a.StatusHandler)),
 	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 

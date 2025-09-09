@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 	"github.com/elastic/cloudbeat/internal/uniqueness"
 )
 
@@ -63,12 +64,15 @@ func TestBase_Build_Success(t *testing.T) {
 			path, err := filepath.Abs("../../../../bundle.tar.gz")
 			require.NoError(t, err)
 
+			sh := statushandler.NewMockStatusHandlerAPI(t)
+			sh.EXPECT().Reset().Once()
+
 			resourceCh := make(chan fetching.ResourceInfo)
 			reg := registry.NewMockRegistry(t)
 			benchmark, err := New(tt.opts...).Build(t.Context(), log, &config.Config{
 				BundlePath: path,
 				Period:     time.Minute,
-			}, resourceCh, reg)
+			}, resourceCh, reg, sh)
 			require.NoError(t, err)
 			assert.IsType(t, tt.benchType, benchmark)
 
