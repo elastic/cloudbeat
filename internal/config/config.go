@@ -125,7 +125,7 @@ const (
 	AzureClientCredentialsTypeManual          = "manual"
 	AzureClientCredentialsTypeSecret          = "service_principal_with_client_secret"
 	AzureClientCredentialsTypeCertificate     = "service_principal_with_client_certificate"
-	AzureClientCredentialsTypeCloudConnectors = "cloud_connectors_federated_identity"
+	AzureClientCredentialsTypeCloudConnectors = "cloud_connectors"
 )
 
 const (
