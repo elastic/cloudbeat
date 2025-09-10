@@ -50,7 +50,7 @@ func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFac
 		return p.getDefaultCredentialsConfig()
 	}
 
-	return nil, ErrWrongCredentialsType
+	return nil, fmt.Errorf("wrong credentials type: %s", cfg.Credentials.ClientCredentialsType)
 }
 
 func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, error) {
@@ -113,6 +113,5 @@ func (p *ConfigProvider) getCloudConnectorsCredentialsConfig(cfg config.AzureCon
 }
 
 var (
-	ErrWrongCredentialsType       = errors.New("wrong credentials type")
 	ErrIncompleteUsernamePassword = errors.New("incomplete username and password credentials")
 )
