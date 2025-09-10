@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestS3BucketFetcher_Fetch(t *testing.T) {
@@ -134,8 +135,10 @@ func TestS3BucketFetcher_Fetch(t *testing.T) {
 	provider := newMockS3BucketProvider(t)
 	provider.EXPECT().DescribeBuckets(mock.Anything).Return(in, nil)
 
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newS3BucketFetcher(logger, identity, provider)
+	fetcher := newS3BucketFetcher(logger, identity, provider, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
