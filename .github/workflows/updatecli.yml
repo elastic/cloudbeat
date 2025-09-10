@@ -51,6 +51,17 @@ jobs:
         pipeline-name: [ beats, golang, hermit, mods ]
         git-branch: [ main ]
     steps:
+      # Disk cleanup
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -71,6 +82,17 @@ jobs:
       matrix:
         pipeline-name: [ golang, beats ]
     steps:
+      # Disk cleanup
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
