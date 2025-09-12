@@ -157,6 +157,7 @@ func (r IAMResource) GetElasticCommonData() (map[string]any, error) {
 			m["user.effective.id"] = r.GetResourceArn()
 			m["user.effective.name"] = r.GetResourceName()
 		}
+	default:
 	}
 
 	return m, nil
