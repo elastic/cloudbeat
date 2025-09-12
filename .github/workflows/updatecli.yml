@@ -74,14 +74,27 @@ jobs:
           GIT_USER: "Cloud Security Machine"
           GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
+  active-branches:
+    name: Build active branches matrix JSON
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+    steps:
+      - name: Fetch active branches
+        id: mk
+        run: |
+          MATRIX_JSON="$(curl -s https://artifacts.elastic.co/releases/TfEVhiaBGqR64ie0g0r0uUwNAbEQMu1Z/future-releases/stack.json | jq '[ .releases[] | select(.active_release == true) | .branch | select(. != "main" and . != "7.17") ]')"
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+
   updatecli-backport:
     name: "[${{ matrix.git-branch }}] Update ${{ matrix.pipeline-name }} dependencies - backport"
     runs-on: ubuntu-latest
+    needs: active-branches
     strategy:
       fail-fast: false
       matrix:
         pipeline-name: [ golang, beats ]
-        git-branch: [ "9.1", "9.0", "8.19", "8.18" ]
+        git-branch: ${{ fromJSON(needs.active-branches.outputs.matrix) }}
     steps:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
