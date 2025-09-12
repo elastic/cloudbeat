@@ -84,7 +84,7 @@ jobs:
         id: mk
         run: |
           MATRIX_JSON="$(curl -s https://artifacts.elastic.co/releases/TfEVhiaBGqR64ie0g0r0uUwNAbEQMu1Z/future-releases/stack.json | jq '[ .releases[] | select(.active_release == true) | .branch | select(. != "main" and . != "7.17") ]')"
-          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+          echo "matrix='$MATRIX_JSON'" >> "$GITHUB_OUTPUT"
 
   updatecli-backport:
     name: "[${{ matrix.git-branch }}] Update ${{ matrix.pipeline-name }} dependencies - backport"
