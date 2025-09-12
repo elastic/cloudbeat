@@ -79,6 +79,7 @@ func GetStrategy(cfg *config.Config, log *clog.Logger, statusHandler statushandl
 			cfgProvider:         &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
 			providerInitializer: &azurelib.ProviderInitializer{},
 		}, nil
+	default:
+		return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
 	}
-	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
 }
