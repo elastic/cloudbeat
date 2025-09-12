@@ -83,7 +83,7 @@ jobs:
       - name: Fetch active branches
         id: mk
         run: |
-          MATRIX_JSON="$(curl -s https://artifacts.elastic.co/releases/TfEVhiaBGqR64ie0g0r0uUwNAbEQMu1Z/future-releases/stack.json | jq -c '[ .releases[] | select(.active_release == true) | .branch | select(. != "main" and . != "7.17") ]')"
+          MATRIX_JSON="$(curl -s https://artifacts.elastic.co/releases/TfEVhiaBGqR64ie0g0r0uUwNAbEQMu1Z/future-releases/stack.json | jq -Mc '[ .releases[] | select(.active_release == true) | .branch | select(. != "main" and . != "7.17") ]')"
           echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
 
   updatecli-backport:
