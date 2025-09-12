@@ -75,12 +75,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
   updatecli-backport:
-    name: Update ${{ matrix.pipeline-name }} dependencies - backport
+    name: "[${{ matrix.git-branch }}] Update ${{ matrix.pipeline-name }} dependencies - backport"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         pipeline-name: [ golang, beats ]
+        git-branch: [ "9.1", "9.0", "8.19", "8.18" ]
     steps:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
@@ -96,20 +97,11 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
-      - name: Set Branch
-        run: |
-          branchName=$(git ls-remote --heads \
-            | awk '{print $2}' \
-            | grep -E 'refs/heads/[0-9]+\.[0-9]+' \
-            | awk -F/ '{print $3}' \
-            | sort -Vr \
-            | head -n 1)
-
-          echo "GIT_BRANCH=$branchName" >> $GITHUB_ENV
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
+          GIT_BRANCH: ${{ matrix.git-branch }}
           GIT_USER: "Cloud Security Machine"
           GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
