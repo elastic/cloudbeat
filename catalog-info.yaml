@@ -28,6 +28,8 @@ spec:
         filter_enabled: true
         filter_condition: build.branch == "main" || build.branch =~ /^[0-9]+\.[0-9x]+$$/
       teams:
+        contextual-security:
+          access_level: MANAGE_BUILD_AND_READ
         cloud-security-posture:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
