@@ -26,6 +26,8 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/samber/lo"
+	"go.opentelemetry.io/otel"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
@@ -39,6 +41,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const (
@@ -49,10 +52,14 @@ const (
 	scopeName           = "github.com/elastic/cloudbeat/internal/flavors/benchmark/aws_org"
 )
 
+var tracer = otel.Tracer(scopeName)
+
 type AWSOrg struct {
-	IAMProvider      iam.RoleGetter
-	IdentityProvider awslib.IdentityProviderGetter
-	AccountProvider  awslib.AccountProviderAPI
+	IAMProvider       iam.RoleGetter
+	IdentityProvider  awslib.IdentityProviderGetter
+	AccountProvider   awslib.AccountProviderAPI
+	StatusHandler     statushandler.StatusHandlerAPI
+	AWSCredsValidator awslib.CredentialsValidator
 }
 
 func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -64,7 +71,7 @@ func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, a.StatusHandler)
 }
 
 //revive:disable-next-line:function-result-limit
@@ -98,7 +105,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
 		func(ctx context.Context) (registry.FetchersMap, error) {
-			ctx, span := observability.StartSpan(ctx, scopeName, "benchmark.AWSOrg.initialize")
+			ctx, span := tracer.Start(ctx, "benchmark.AWSOrg.initialize")
 			defer span.End()
 			spannedLog := log.WithSpanContext(span.SpanContext())
 
@@ -107,7 +114,13 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 				return nil, observability.FailSpan(span, "failed to get AWS accounts", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, accounts, cache)
+			// Filter the accounts to the ones having valid credentials on each aws account.
+			// Meaning only the accounts that have the security audit role created and thus were selected by customer on cloud formation.
+			filtered := lo.Filter(accounts, func(item preset.AwsAccount, _ int) bool {
+				return a.AWSCredsValidator.Validate(ctx, item.Config, log)
+			})
+
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, filtered, cache, a.StatusHandler)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {

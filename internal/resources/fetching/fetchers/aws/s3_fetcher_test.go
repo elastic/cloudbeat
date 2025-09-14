@@ -53,7 +53,7 @@ func (s *S3FetcherTestSuite) TearDownTest() {
 }
 
 func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
-	var tests = []struct {
+	tests := []struct {
 		name               string
 		s3mocksReturnVals  s3mocksReturnVals
 		numExpectedResults int

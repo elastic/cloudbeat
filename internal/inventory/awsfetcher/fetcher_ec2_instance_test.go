@@ -29,6 +29,7 @@ import (
 	ec2beat "github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestEC2InstanceFetcher_Fetch(t *testing.T) {
@@ -142,8 +143,10 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 	provider := newMockEc2InstancesProvider(t)
 	provider.EXPECT().DescribeInstances(mock.Anything).Return(in, nil)
 
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newEc2InstancesFetcher(logger, identity, provider)
+	fetcher := newEc2InstancesFetcher(logger, identity, provider, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }

@@ -26,13 +26,15 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type networkingFetcher struct {
-	logger      *clog.Logger
-	provider    networkingProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      networkingProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type (
@@ -51,12 +53,13 @@ type (
 	}
 )
 
-func newNetworkingFetcher(logger *clog.Logger, identity *cloud.Identity, provider networkingProvider) inventory.AssetFetcher {
+func newNetworkingFetcher(logger *clog.Logger, identity *cloud.Identity, provider networkingProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &networkingFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -88,6 +91,7 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 
 	awsResources, err := function(ctx)
 	if err != nil {
+		awslib.ReportMissingPermission(s.statusHandler, err)
 		s.logger.Errorf("Could not fetch %s: %v", resourceName, err)
 		return
 	}

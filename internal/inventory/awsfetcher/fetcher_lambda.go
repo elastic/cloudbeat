@@ -24,13 +24,15 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type lambdaFetcher struct {
-	logger      *clog.Logger
-	provider    lambdaProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      lambdaProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type (
@@ -43,12 +45,13 @@ type (
 	}
 )
 
-func newLambdaFetcher(logger *clog.Logger, identity *cloud.Identity, provider lambdaProvider) inventory.AssetFetcher {
+func newLambdaFetcher(logger *clog.Logger, identity *cloud.Identity, provider lambdaProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &lambdaFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -73,6 +76,7 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 
 	awsResources, err := function(ctx)
 	if err != nil {
+		awslib.ReportMissingPermission(s.statusHandler, err)
 		s.logger.Errorf("Could not fetch %s: %v", resourceName, err)
 		return
 	}
