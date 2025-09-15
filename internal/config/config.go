@@ -257,7 +257,7 @@ const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
 	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
 	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
-	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_JWT_PATH"
+	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
 )
 
 type CloudConnectorsConfig struct {
