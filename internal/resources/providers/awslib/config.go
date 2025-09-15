@@ -48,8 +48,8 @@ func awsConfigRetrier() aws.Retryer {
 	return retry.NewStandard(RetryableCodesOption)
 }
 
-func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
-	awsConfig, err := libbeataws.InitializeAWSConfig(cfg)
+func InitializeAWSConfig(cfg libbeataws.ConfigAWS, logger *clog.Logger) (*aws.Config, error) {
+	awsConfig, err := libbeataws.InitializeAWSConfig(cfg, logger.Logger)
 	if err != nil {
 		return nil, err
 	}
