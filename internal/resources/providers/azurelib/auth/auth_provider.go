@@ -93,9 +93,9 @@ func readJWTFromFile(filePath string) (string, error) {
 	}
 
 	// Basic validation - JWT should have 3 parts separated by dots
-	parts := strings.Split(jwt, ".")
-	if len(parts) != 3 {
-		return "", fmt.Errorf("invalid JWT format in file %s: expected 3 parts separated by dots, got %d", filePath, len(parts))
+	parts := strings.Count(jwt, ".")
+	if parts != 2 {
+		return "", fmt.Errorf("invalid JWT format in file %s: expected 3 parts separated by dots, got %d", filePath, parts+1)
 	}
 
 	return jwt, nil
