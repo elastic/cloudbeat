@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestAWS_Initialize(t *testing.T) {
@@ -159,6 +160,7 @@ func TestAWS_Initialize(t *testing.T) {
 
 			testInitialize(t, &AWS{
 				IdentityProvider: tt.identityProvider,
+				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}

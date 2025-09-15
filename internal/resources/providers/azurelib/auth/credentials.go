@@ -48,9 +48,9 @@ func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFac
 		return p.getCloudConnectorsCredentialsConfig(cfg)
 	case "", config.AzureClientCredentialsTypeManagedIdentity, config.AzureClientCredentialsTypeARMTemplate, config.AzureClientCredentialsTypeManual:
 		return p.getDefaultCredentialsConfig()
+	default:
+		return nil, fmt.Errorf("wrong credentials type: %s", cfg.Credentials.ClientCredentialsType)
 	}
-
-	return nil, fmt.Errorf("wrong credentials type: %s", cfg.Credentials.ClientCredentialsType)
 }
 
 func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, error) {

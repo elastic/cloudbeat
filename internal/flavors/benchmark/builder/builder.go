@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 	"github.com/elastic/cloudbeat/internal/transformer"
 	"github.com/elastic/cloudbeat/version"
 )
@@ -63,12 +64,12 @@ func New(options ...Option) *Builder {
 	return b
 }
 
-func (b *Builder) Build(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
-	return b.buildBase(ctx, log, cfg, resourceCh, reg)
+func (b *Builder) Build(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, statusHandler statushandler.StatusHandlerAPI) (Benchmark, error) {
+	return b.buildBase(ctx, log, cfg, resourceCh, reg, statusHandler)
 }
 
-func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
-	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg)
+func (b *Builder) buildBase(ctx context.Context, log *clog.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, statusHandler statushandler.StatusHandlerAPI) (*basebenchmark, error) {
+	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg, statusHandler)
 	if err != nil {
 		return nil, err
 	}

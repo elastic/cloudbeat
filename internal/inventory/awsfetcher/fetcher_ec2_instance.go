@@ -23,27 +23,31 @@ import (
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type ec2InstanceFetcher struct {
-	logger      *clog.Logger
-	provider    ec2InstancesProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      ec2InstancesProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type ec2InstancesProvider interface {
 	DescribeInstances(ctx context.Context) ([]*ec2.Ec2Instance, error)
 }
 
-func newEc2InstancesFetcher(logger *clog.Logger, identity *cloud.Identity, provider ec2InstancesProvider) inventory.AssetFetcher {
+func newEc2InstancesFetcher(logger *clog.Logger, identity *cloud.Identity, provider ec2InstancesProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &ec2InstanceFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -54,6 +58,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 	instances, err := e.provider.DescribeInstances(ctx)
 	if err != nil {
 		e.logger.Errorf("Could not list ec2 instances: %v", err)
+		awslib.ReportMissingPermission(e.statusHandler, err)
 		return
 	}
 
