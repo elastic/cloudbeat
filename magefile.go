@@ -80,6 +80,7 @@ func Build() error {
 
 	args := devtools.DefaultBuildArgs()
 	args.CGO = false
+	args.ExtraFlags = append(args.ExtraFlags, "-tags=grpcnotrace")
 	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
 		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
 	}
