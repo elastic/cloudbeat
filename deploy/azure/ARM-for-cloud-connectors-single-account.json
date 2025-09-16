@@ -2,7 +2,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "variables": {
-        "elasticCloudConnectorId": "[newGuid()]",
+        "elasticCloudConnectorId": "[guid(subscription().subscriptionId, resourceGroup().id, deployment().name)]",
         "userAssignedIdentityName": "[concat('ElasticCloudIdentity-', variables('elasticCloudConnectorId'))]",
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
         "customRoleDefinition": "[guid('ElasticCloudRoleDefinition-', variables('elasticCloudConnectorId'))]",
