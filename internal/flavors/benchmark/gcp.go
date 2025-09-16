@@ -63,7 +63,7 @@ func (g *GCP) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 		return nil, nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 
-	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
+	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig, cfg.CloudConfig.Gcp)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}
