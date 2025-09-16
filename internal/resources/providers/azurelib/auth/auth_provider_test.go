@@ -18,7 +18,6 @@
 package auth
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -32,22 +31,18 @@ import (
 func TestAzureAuthProvider_FindClientAssertionCredentials(t *testing.T) {
 	tests := []struct {
 		name        string
-		setupEnv    func() string
-		cleanupEnv  func()
+		setupEnv    func(t *testing.T) string
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name: "Should successfully create credential when env var and file exist",
-			setupEnv: func() string {
+			setupEnv: func(t *testing.T) string {
 				tempDir := t.TempDir()
 				jwtFile := filepath.Join(tempDir, "jwt.token")
 				require.NoError(t, os.WriteFile(jwtFile, []byte("eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.signature"), 0644))
-				os.Setenv(config.CloudConnectorsJWTPathEnvVar, jwtFile)
+				t.Setenv(config.CloudConnectorsJWTPathEnvVar, jwtFile)
 				return jwtFile
-			},
-			cleanupEnv: func() {
-				os.Unsetenv(config.CloudConnectorsJWTPathEnvVar)
 			},
 			expectError: false,
 		},
@@ -55,8 +50,7 @@ func TestAzureAuthProvider_FindClientAssertionCredentials(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setupEnv()
-			defer tt.cleanupEnv()
+			tt.setupEnv(t)
 
 			provider := &AzureAuthProvider{}
 			cred, err := provider.FindClientAssertionCredentials("tenant-id", "client-id", nil)
@@ -110,7 +104,7 @@ func TestReadJWTFromFile(t *testing.T) {
 				return jwtFile
 			},
 			expectError: true,
-			errorMsg:    fmt.Sprintf("is empty"),
+			errorMsg:    "is empty",
 		},
 		{
 			name: "Should fail when JWT format is invalid",
