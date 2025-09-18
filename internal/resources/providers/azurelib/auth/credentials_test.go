@@ -136,6 +136,44 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Should return a ClientAssertionCredential for cloud_connectors",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					ClientCredentialsType: config.AzureClientCredentialsTypeCloudConnectors,
+					TenantID:              "tenant_a",
+					ClientID:              "client_id",
+				},
+			},
+			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
+				m.EXPECT().
+					FindClientAssertionCredentials("tenant_a", "client_id", mock.Anything).
+					Return(&azidentity.ClientAssertionCredential{}, nil).
+					Once()
+			},
+			want: &AzureFactoryConfig{
+				Credentials: &azidentity.ClientAssertionCredential{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Should return an error on cloud_connectors credentials error",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					ClientCredentialsType: config.AzureClientCredentialsTypeCloudConnectors,
+					TenantID:              "tenant_a",
+					ClientID:              "client_id",
+				},
+			},
+			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
+				m.EXPECT().
+					FindClientAssertionCredentials("tenant_a", "client_id", mock.Anything).
+					Return(nil, errMockAzure).
+					Once()
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
 			name: "Should return an error on credentials error",
 			config: config.AzureConfig{
 				Credentials: config.AzureClientOpt{

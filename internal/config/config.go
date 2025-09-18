@@ -125,6 +125,7 @@ const (
 	AzureClientCredentialsTypeManual          = "manual"
 	AzureClientCredentialsTypeSecret          = "service_principal_with_client_secret"
 	AzureClientCredentialsTypeCertificate     = "service_principal_with_client_certificate"
+	AzureClientCredentialsTypeCloudConnectors = "cloud_connectors"
 )
 
 const (
@@ -256,6 +257,7 @@ const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
 	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
 	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
+	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
 )
 
 type CloudConnectorsConfig struct {
