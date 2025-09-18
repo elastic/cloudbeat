@@ -172,7 +172,6 @@ delete-cloud-env prefix ignore-prefix="" interactive="true":
 # and update the license header
 generate-mocks:
   mockery --config=.mockery.yaml
-  mage AddLicenseHeaders
 
 # run to validate no mocks are missing
 validate-mocks:

@@ -1,6 +1,7 @@
+# https://vektra.github.io/mockery/latest/configuration/
 template: testify
 template-data:
-  unroll-variadic: true
+  boilerplate-file: tools/mockery.boilerplate
 packages:
   github.com/elastic/cloudbeat:
     config:
