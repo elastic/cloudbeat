@@ -20,12 +20,12 @@ package preset
 import (
 	"context"
 	"fmt"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 
@@ -70,7 +70,8 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 
 	ctx, cancel := context.WithCancel(t.Context())
 
-	factory := mockFactory(nAccounts,
+	factory := mockFactory(t,
+		nAccounts,
 		func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ statushandler.StatusHandlerAPI) registry.FetchersMap {
 			if drain {
 				// create some resources if we are testing for that
@@ -156,16 +157,14 @@ func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 			},
 		}},
 		nil,
-		mockFactory(1,
-			func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ statushandler.StatusHandlerAPI) registry.FetchersMap {
-				ch <- fetching.ResourceInfo{
-					Resource:      mockResource(),
-					CycleMetadata: cycle.Metadata{Sequence: 1},
-				}
+		mockFactory(t, 1, func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ statushandler.StatusHandlerAPI) registry.FetchersMap {
+			ch <- fetching.ResourceInfo{
+				Resource:      mockResource(),
+				CycleMetadata: cycle.Metadata{Sequence: 1},
+			}
 
-				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
-			},
-		),
+			return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
+		}),
 		sh,
 	)
 
@@ -188,12 +187,10 @@ func TestNewCisAwsOrganizationFetchers_CloseChannel(t *testing.T) {
 			},
 		}},
 		nil,
-		mockFactory(1,
-			func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ statushandler.StatusHandlerAPI) registry.FetchersMap {
-				defer close(ch)
-				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
-			},
-		),
+		mockFactory(t, 1, func(_ context.Context, _ *clog.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity, _ statushandler.StatusHandlerAPI) registry.FetchersMap {
+			defer close(ch)
+			return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
+		}),
 		sh,
 	)
 }
@@ -225,12 +222,10 @@ func TestNewCisAwsOrganizationFetchers_Cache(t *testing.T) {
 			},
 		},
 		cache,
-		mockFactory(1,
-			func(_ context.Context, _ *clog.Logger, _ aws.Config, _ chan fetching.ResourceInfo, identity *cloud.Identity, _ statushandler.StatusHandlerAPI) registry.FetchersMap {
-				assert.Equal(t, "2", identity.Account)
-				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
-			},
-		),
+		mockFactory(t, 1, func(_ context.Context, _ *clog.Logger, _ aws.Config, _ chan fetching.ResourceInfo, identity *cloud.Identity, _ statushandler.StatusHandlerAPI) registry.FetchersMap {
+			assert.Equal(t, "2", identity.Account)
+			return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
+		}),
 		sh,
 	)
 	assert.Len(t, cache, 2)
@@ -252,8 +247,13 @@ func mockResource() *fetching.MockResource {
 	return &m
 }
 
-func mockFactory(times int, f awsFactory) awsFactory {
-	factory := mockAwsFactory{}
-	factory.EXPECT().Execute(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).RunAndReturn(f).Times(times)
-	return factory.Execute
+func mockFactory(t *testing.T, times int64, f awsFactory) awsFactory {
+	called := atomic.Int64{}
+	t.Cleanup(func() {
+		assert.Equalf(t, times, called.Load(), "factory called unexpected number of times")
+	})
+	return func(ctx context.Context, logger *clog.Logger, config aws.Config, infos chan fetching.ResourceInfo, identity *cloud.Identity, api statushandler.StatusHandlerAPI) registry.FetchersMap {
+		called.Add(1)
+		return f(ctx, logger, config, infos, identity, api)
+	}
 }

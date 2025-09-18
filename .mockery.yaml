@@ -1,18 +1,16 @@
-# https://vektra.github.io/mockery/latest/configuration/
-
+template: testify
+template-data:
+  unroll-variadic: true
 packages:
   github.com/elastic/cloudbeat:
     config:
-      inpackage: true
       all: true
-      with-expecter: true
-      recursive: true
-      filename: "mock_{{ .InterfaceName | snakecase }}.go"
-      mockname: "{{ .Mock }}{{ .InterfaceName | firstUpper }}"
-      dir: "{{ .InterfaceDir }}"
-      outpkg: "{{ .PackageName }}"
-      exclude:
+      filename: '{{ .InterfaceFile | base | clean | trimSuffix ".go" }}_mock.go'
+      dir: '{{ .InterfaceDir }}'
+      exclude-subpkg-regex:
         - vendor
         - deploy/test-environments/.terraform
         - tools
         - scripts
+      structname: '{{ .Mock }}{{ .InterfaceName | firstUpper }}'
+      recursive: true
