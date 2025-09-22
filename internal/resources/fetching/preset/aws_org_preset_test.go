@@ -57,7 +57,7 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 	)
 
 	var accounts []AwsAccount
-	for i := 0; i < nAccounts; i++ {
+	for i := range nAccounts {
 		accounts = append(accounts, AwsAccount{
 			Identity: cloud.Identity{
 				Account:      fmt.Sprintf("account-%d", i),
@@ -76,7 +76,7 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 			if drain {
 				// create some resources if we are testing for that
 				go func() {
-					for i := 0; i < resourcesPerAccount; i++ {
+					for i := range resourcesPerAccount {
 						ch <- fetching.ResourceInfo{
 							Resource:      mockResource(),
 							CycleMetadata: cycle.Metadata{Sequence: int64(i)},
@@ -86,7 +86,7 @@ func subtest(t *testing.T, drain bool) { //revive:disable-line:flag-parameter
 			}
 
 			fm := registry.FetchersMap{}
-			for i := 0; i < nFetchers; i++ {
+			for i := range nFetchers {
 				fm[fmt.Sprintf("fetcher-%d", i)] = registry.RegisteredFetcher{}
 			}
 			return fm

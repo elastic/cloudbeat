@@ -235,10 +235,10 @@ func createProcess(process TextProcessContext, cmdDelimiter string) fs.FS {
 			Data: []byte(statContent),
 		},
 		fmt.Sprintf("proc/%s/status", process.Pid): {
-			Data: []byte(fmt.Sprintf(Status, process.Name)),
+			Data: fmt.Appendf(nil, Status, process.Name),
 		},
 		fmt.Sprintf("proc/%s/cmdline", process.Pid): {
-			Data: []byte(fmt.Sprintf(CmdLine, process.Name, process.ConfigFileFlagKey, cmdDelimiter, process.ConfigFilePath)),
+			Data: fmt.Appendf(nil, CmdLine, process.Name, process.ConfigFileFlagKey, cmdDelimiter, process.ConfigFilePath),
 		},
 	}
 }

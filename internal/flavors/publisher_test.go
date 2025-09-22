@@ -189,7 +189,7 @@ func generateEvents(t *testing.T, size int, expectedEventsInCycle int, interval 
 	sleepOnCycleEnd(t, size, expectedEventsInCycle, interval, start)
 	t.Logf(" %d events at %dms", size, time.Since(start).Milliseconds())
 	results := make([]beat.Event, size)
-	for i := 0; i < size; i++ {
+	for i := range size {
 		results[i] = beat.Event{}
 	}
 	return results
