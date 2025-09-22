@@ -198,7 +198,7 @@ Simple replaces    	   36765	     31604 ns/op	   37096 B/op	      99 allocs/op
 Regex replaces    	   16062	     78596 ns/op	   45002 B/op	     147 allocs/op
 */
 func BenchmarkParseFilterPattern(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, err := parseFilterPattern("{ ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"AcceptHandshake\") ||  ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }")
 		if err != nil {
 			b.Fail()
