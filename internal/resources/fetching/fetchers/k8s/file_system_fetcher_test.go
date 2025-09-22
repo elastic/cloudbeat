@@ -243,7 +243,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 
 	// All inner files should exist in the final result
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
-	for i := 0; i < len(results); i++ {
+	for i := range results {
 		fsResource := results[i].Resource
 		rMetadata, err := fsResource.GetMetadata()
 		s.Require().NoError(err)
@@ -302,7 +302,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	allFilesName := append(append(append(innerFiles, directories...), outerFiles...), innerInnerFiles...)
 
 	// All inner files should exist in the final result
-	for i := 0; i < len(results); i++ {
+	for i := range results {
 		fsResource := results[i].Resource
 		rMetadata, err := fsResource.GetMetadata()
 		evalResource := fsResource.GetData().(EvalFSResource)
