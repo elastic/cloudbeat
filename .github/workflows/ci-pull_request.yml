@@ -92,7 +92,7 @@ jobs:
         run: |
           go install gotest.tools/gotestsum
           GOOS=linux TEST_DIRECTORY=./... gotestsum --format pkgname -- -race -coverpkg=./... -coverprofile=cover.out.tmp
-          cat cover.out.tmp | grep -v "mock_.*.go" | grep -v "elastic/cloudbeat/deploy" | grep -v "internal/inventory/asset.go" > cover.out # remove mock files and deploy dir
+          grep -v "mock.go" cover.out.tmp | grep -v mock_old.go | grep -v "elastic/cloudbeat/deploy" | grep -v "internal/inventory/asset.go" > cover.out # remove mock files and deploy dir
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
