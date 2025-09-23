@@ -146,7 +146,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCalls()
 	selector, mocked := s.initTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	wg := sync.WaitGroup{}
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
@@ -168,7 +168,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCallsFa
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(nil, errors.New("mock"))
 	wg := sync.WaitGroup{}
 	t := s.T()
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()

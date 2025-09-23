@@ -216,7 +216,7 @@ func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
 
 	fetchers := []AssetFetcher{}
 	fetcherCounters := [](*int64){}
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		fetcher := NewMockAssetFetcher(t)
 		counter := int64(0)
 		fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, _ chan<- AssetEvent) {
