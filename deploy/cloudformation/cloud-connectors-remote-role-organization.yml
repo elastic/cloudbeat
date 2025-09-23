@@ -29,7 +29,7 @@ Parameters:
     Type: String
 
   ElasticRoleARN:
-    Description: Elastic Role ARN
+    Description: Elastic's Role ARN that the cloud connector will trust upon (change it only if you need to perform test with Elastic's test environments).
     Type: String
     Default: arn:aws:iam::254766567737:role/cloud_connectors
 
