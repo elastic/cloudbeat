@@ -27,6 +27,10 @@ Parameters:
   ElasticResourceId:
     Description: Specify the Elastic resource ID that the new role will trust upon.
     Type: String
+  ElasticRoleARN:
+    Type: String
+    Default: arn:aws:iam::254766567737:role/cloud_connectors
+    Description: Elastic Role ARN
 
 Conditions:
   ScanManagementAccountEnabled: !Equals
@@ -43,7 +47,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::254766567737:role/cloud_connectors
+              AWS: !Ref ElasticRoleARN
             Action: sts:AssumeRole
             Condition:
               StringEquals:
