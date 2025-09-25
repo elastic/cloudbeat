@@ -2,12 +2,13 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "variables": {
-        "userAssignedIdentityName": "[concat('ElasticCloudIdentity-', parameters('elasticCloudConnectorId'))]",
+        "elasticCloudConnectorId": "[guid(subscription().subscriptionId, resourceGroup().id, deployment().name)]",
+        "userAssignedIdentityName": "[concat('ElasticCloudIdentity-', variables('elasticCloudConnectorId'))]",
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
-        "customRoleDefinition": "[guid('ElasticCloudRoleDefinition-', parameters('elasticCloudConnectorId'))]",
-        "customRoleDefinitionName": "[concat('Elastic Cloud Connector Role - ', parameters('elasticCloudConnectorId'))]",
-        "customRoleAssignment": "[guid('ElasticCloudRoleAssignment-', parameters('elasticCloudConnectorId'))]",
-        "securityReaderRoleAssignment": "[guid('ElasticCloudSecurityReaderRoleAssignment-', parameters('elasticCloudConnectorId'))]"
+        "customRoleDefinition": "[guid('ElasticCloudRoleDefinition-', variables('elasticCloudConnectorId'))]",
+        "customRoleDefinitionName": "[concat('Elastic Cloud Connector Role - ', variables('elasticCloudConnectorId'))]",
+        "customRoleAssignment": "[guid('ElasticCloudRoleAssignment-', variables('elasticCloudConnectorId'))]",
+        "securityReaderRoleAssignment": "[guid('ElasticCloudSecurityReaderRoleAssignment-', variables('elasticCloudConnectorId'))]"
     },
     "parameters": {
         "elasticStackId": {
@@ -17,15 +18,9 @@
                 "description": "Subject of the Federated Identity Credential token"
             }
         },
-        "elasticCloudConnectorId": {
-            "type": "string",
-            "minLength": 1,
-            "metadata": {
-                "description": "Elastic Cloud Connector unique ID"
-            }
-        },
         "elasticCloudIssuer": {
             "type": "string",
+            "defaultValue": "https://elastic-cloud-connector.s3.us-east-1.amazonaws.com",
             "metadata": {
                 "description": "Issuer for the Elastic Cloud Federated Identity Credential"
             }
@@ -46,7 +41,7 @@
             "location": "[parameters('location')]",
             "tags": {
                 "elastic-stack-id": "[parameters('elasticStackId')]",
-                "elastic-cloud-connector-id": "[parameters('elasticCloudConnectorId')]"
+                "elastic-cloud-connector-id": "[variables('elasticCloudConnectorId')]"
             },
             "resources": [
                 {
@@ -125,6 +120,10 @@
         "PrincipalId": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]"
+        },
+        "ElasticCloudConnectorId": {
+            "type": "string",
+            "value": "[variables('elasticCloudConnectorId')]"
         },
         "ClientId": {
             "type": "string",
