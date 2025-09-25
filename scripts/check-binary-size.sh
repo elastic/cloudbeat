@@ -23,25 +23,15 @@ trap cleanup EXIT
 
 # Build current branch binary
 echo "📦 Building current branch binary..."
-if command -v mage &> /dev/null && mage build; then
-    cp cloudbeat "$TEMP_DIR/cloudbeat-current"
-else
-    echo "Using direct go build..."
-    go mod vendor
-    GOOS=linux CGO_ENABLED=0 go build -tags=grpcnotrace,release -o "$TEMP_DIR/cloudbeat-current" .
-fi
+just build-binary-for-size-check
+cp cloudbeat "$TEMP_DIR/cloudbeat-current"
 
 # Build main branch binary
 echo "📦 Building main branch binary..."
 git stash push -m "temp stash for size check" || true
 git checkout main
-if command -v mage &> /dev/null && mage build; then
-    cp cloudbeat "$TEMP_DIR/cloudbeat-main"
-else
-    echo "Using direct go build..."
-    go mod vendor
-    GOOS=linux CGO_ENABLED=0 go build -tags=grpcnotrace,release -o "$TEMP_DIR/cloudbeat-main" .
-fi
+just build-binary-for-size-check
+cp cloudbeat "$TEMP_DIR/cloudbeat-main"
 
 # Return to original branch
 git checkout "$CURRENT_BRANCH"

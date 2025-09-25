@@ -41,12 +41,7 @@ jobs:
       - name: Build PR branch binary
         run: |
           echo "Building PR branch binary..."
-          # Try mage build first, fallback to direct go build
-          if ! mage build; then
-            echo "Mage build failed, trying direct go build..."
-            go mod vendor
-            GOOS=linux CGO_ENABLED=0 go build -tags=grpcnotrace,release -o cloudbeat .
-          fi
+          just build-binary-for-size-check
           cp cloudbeat cloudbeat-pr
           
       - name: Stash PR binary
@@ -67,12 +62,7 @@ jobs:
       - name: Build main branch binary
         run: |
           echo "Building main branch binary..."
-          # Try mage build first, fallback to direct go build
-          if ! mage build; then
-            echo "Mage build failed, trying direct go build..."
-            go mod vendor
-            GOOS=linux CGO_ENABLED=0 go build -tags=grpcnotrace,release -o cloudbeat .
-          fi
+          just build-binary-for-size-check
           cp cloudbeat cloudbeat-main
           
       - name: Restore PR binary
