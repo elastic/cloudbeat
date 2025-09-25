@@ -172,12 +172,11 @@ delete-cloud-env prefix ignore-prefix="" interactive="true":
 # and update the license header
 generate-mocks:
   mockery --config=.mockery.yaml
-  mage AddLicenseHeaders
 
 # run to validate no mocks are missing
 validate-mocks:
   # delete and re-generate files to check nothing is different / missing
-  find . -name 'mock_*.go' -exec rm -f {} \;
+  find . -name '*mock.go' -exec rm -f {} \;
   just generate-mocks
   git diff --exit-code
   git ls-files --exclude-standard --others | grep -qE 'mock_.*go' && exit 1 || exit 0

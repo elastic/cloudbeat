@@ -58,7 +58,7 @@ func (s *RateLimiterTestSuite) TestRateLimiterWait() {
 
 	totalRequests := 5
 	startTime := time.Now()
-	for i := 0; i < totalRequests; i++ {
+	for range totalRequests {
 		s.rateLimiter.Wait(ctx, "someMethod", nil)
 	}
 	endTime := time.Now()

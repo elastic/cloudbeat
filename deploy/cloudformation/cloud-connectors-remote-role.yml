@@ -7,6 +7,11 @@ Parameters:
     Description: Specify the Elastic resource ID that the new role will trust upon.
     Type: String
 
+  ElasticRoleARN:
+    Description: Elastic's Role ARN that the cloud connector will trust upon (change it only if you need to perform test with Elastic's test environments).
+    Type: String
+    Default: arn:aws:iam::254766567737:role/cloud_connectors
+
 Resources:
   ElasticCloudConnectorsRole:
     Type: AWS::IAM::Role
@@ -17,7 +22,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::254766567737:role/cloud_connectors
+              AWS: !Ref ElasticRoleARN
             Action: sts:AssumeRole
             Condition:
               StringEquals:

@@ -80,6 +80,7 @@ func Build() error {
 
 	args := devtools.DefaultBuildArgs()
 	args.CGO = false
+	args.ExtraFlags = append(args.ExtraFlags, "-tags=grpcnotrace,release")
 	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
 		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
 	}
@@ -98,6 +99,7 @@ func Clean() error {
 func GolangCrossBuild() error {
 	args := devtools.DefaultGolangCrossBuildArgs()
 	args.CGO = false
+	args.ExtraFlags = append(args.ExtraFlags, "-tags=grpcnotrace,release")
 	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
 		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
 	}

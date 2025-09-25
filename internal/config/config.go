@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -242,12 +243,7 @@ func getBundlePath() (string, error) {
 }
 
 func isSupportedBenchmark(benchmark string) bool {
-	for _, s := range SupportedCIS {
-		if benchmark == s {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(SupportedCIS, benchmark)
 }
 
 // Cloud Connectors roles and resource id must be provided by the system (controller)
