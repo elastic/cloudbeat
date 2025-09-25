@@ -228,3 +228,7 @@ cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/test_environments/values/ci.yml {{range}}
+
+# Check binary size changes against main branch
+check-binary-size:
+  ./scripts/check-binary-size.sh
