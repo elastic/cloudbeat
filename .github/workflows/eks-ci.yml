@@ -71,17 +71,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
 
-<<<<<<< HEAD
-      - name: Cache Build dependencies
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.workflow }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-=======
->>>>>>> e3b4d4cf (GH actions: Improve caching (#3613))
       - name: Build cloudbeat-docker
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
         with:
@@ -107,15 +96,6 @@ jobs:
           tags: cloudbeat-test:latest
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
-<<<<<<< HEAD
-      - name: Cache docker images
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
-        with:
-          path: /tmp/*.tar
-          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
-
-=======
->>>>>>> e3b4d4cf (GH actions: Improve caching (#3613))
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
         with:
