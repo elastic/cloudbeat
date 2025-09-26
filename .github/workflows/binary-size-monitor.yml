@@ -41,7 +41,7 @@ jobs:
         run: |
           echo "Building target branch binary..."
           mage build
-          mv cloudbeat /tmp/cloudbeat-main
+          mv cloudbeat /tmp/cloudbeat-target
 
       - name: Check out PR
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -60,36 +60,36 @@ jobs:
 
           # Get file sizes
           PR_SIZE=$(stat -c%s /tmp/cloudbeat-pr)
-          MAIN_SIZE=$(stat -c%s /tmp/cloudbeat-main)
+          TARGET_SIZE=$(stat -c%s /tmp/cloudbeat-target)
 
           echo "PR binary size: $PR_SIZE bytes"
-          echo "Target binary size: $MAIN_SIZE bytes"
+          echo "Target binary size: $TARGET_SIZE bytes"
 
           # Calculate human-readable sizes in MiB (1024^2)
           PR_SIZE_MIB=$(echo "scale=2; $PR_SIZE/1024/1024" | bc)
-          MAIN_SIZE_MIB=$(echo "scale=2; $MAIN_SIZE/1024/1024" | bc)
+          TARGET_SIZE_MIB=$(echo "scale=2; $TARGET_SIZE/1024/1024" | bc)
 
           echo "PR binary size: ${PR_SIZE_MIB} MiB"
-          echo "Target binary size: ${MAIN_SIZE_MIB} MiB"
+          echo "Target binary size: ${TARGET_SIZE_MIB} MiB"
 
           # Calculate size difference and percentage
-          if [ $MAIN_SIZE -eq 0 ]; then
+          if [ $TARGET_SIZE -eq 0 ]; then
             echo "Error: Target branch binary size is 0"
             exit 1
           fi
 
-          SIZE_DIFF=$((PR_SIZE - MAIN_SIZE))
+          SIZE_DIFF=$((PR_SIZE - TARGET_SIZE))
           SIZE_DIFF_MIB=$(echo "scale=2; $SIZE_DIFF/1024/1024" | bc)
-          PERCENTAGE=$(echo "scale=2; $SIZE_DIFF * 100 / $MAIN_SIZE" | bc)
+          PERCENTAGE=$(echo "scale=2; $SIZE_DIFF * 100 / $TARGET_SIZE" | bc)
 
           echo "Size difference: $SIZE_DIFF bytes (${SIZE_DIFF_MIB} MiB)"
           echo "Percentage change: ${PERCENTAGE}%"
 
           # Store values for later steps
           echo "pr_size=$PR_SIZE" >> $GITHUB_OUTPUT
-          echo "main_size=$MAIN_SIZE" >> $GITHUB_OUTPUT
+          echo "target_size=$TARGET_SIZE" >> $GITHUB_OUTPUT
           echo "pr_size_mib=$PR_SIZE_MIB" >> $GITHUB_OUTPUT
-          echo "main_size_mib=$MAIN_SIZE_MIB" >> $GITHUB_OUTPUT
+          echo "target_size_mib=$TARGET_SIZE_MIB" >> $GITHUB_OUTPUT
           echo "size_diff=$SIZE_DIFF" >> $GITHUB_OUTPUT
           echo "size_diff_mib=$SIZE_DIFF_MIB" >> $GITHUB_OUTPUT
           echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
@@ -118,7 +118,7 @@ jobs:
             | Branch | Size (MiB) | Size (bytes) |
             |--------|-------------|-------------|
             | **PR Branch** | ${{ steps.size-check.outputs.pr_size_mib }} MiB | ${{ steps.size-check.outputs.pr_size }} bytes |
-            | **Target Branch** | ${{ steps.size-check.outputs.main_size_mib }} MiB | ${{ steps.size-check.outputs.main_size }} bytes |
+            | **Target Branch** | ${{ steps.size-check.outputs.target_size_mib }} MiB | ${{ steps.size-check.outputs.target_size }} bytes |
             | **Difference** | ${{ steps.size-check.outputs.size_diff_mib }} MiB | ${{ steps.size-check.outputs.size_diff }} bytes |
 
             **Size Change:** ${{ steps.size-check.outputs.percentage }}% | **Absolute Change:** ${{ steps.size-check.outputs.size_diff_mib }} MiB
