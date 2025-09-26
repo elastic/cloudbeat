@@ -51,6 +51,10 @@ jobs:
           mage build
           mv cloudbeat /tmp/cloudbeat-target
 
+      # Checkout PR branch to get latest script
+      - name: Check out PR (again)
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
       - name: Get binary sizes and compare
         id: size-check
         run: |
