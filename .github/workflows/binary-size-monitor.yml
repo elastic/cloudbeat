@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  # Binary size threshold in MiB (5 MiB = ~5.24 MB)
+  # Binary size threshold in MiB
   SIZE_THRESHOLD_MIB: 5
 
 concurrency:
