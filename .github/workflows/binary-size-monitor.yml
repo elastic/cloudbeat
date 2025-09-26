@@ -35,6 +35,7 @@ jobs:
         uses: ./.github/actions/hermit
         with:
           init-tools: 'false'
+          free-disk: 'false'
 
       - name: Build target branch binary
         run: |
