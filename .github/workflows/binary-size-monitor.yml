@@ -55,6 +55,8 @@ jobs:
       - name: Get binary sizes and compare
         id: size-check
         run: |
+          set -euo pipefail
+
           # Get file sizes
           PR_SIZE=$(stat -c%s /tmp/cloudbeat-pr)
           MAIN_SIZE=$(stat -c%s /tmp/cloudbeat-main)
