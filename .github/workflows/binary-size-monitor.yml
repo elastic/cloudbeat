@@ -36,10 +36,10 @@ jobs:
           ref: main
           clean: true
 
-      - name: Initialize hermit
-        shell: bash
-        run: |
-          ./bin/hermit env --raw >> "$GITHUB_ENV"
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: 'false'
 
       - name: Build main branch binary
         run: |
