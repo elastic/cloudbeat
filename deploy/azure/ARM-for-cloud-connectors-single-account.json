@@ -7,8 +7,6 @@
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
         "customRoleDefinition": "[guid('ElasticCloudRoleDefinition-', variables('elasticCloudConnectorId'))]",
         "customRoleDefinitionName": "[concat('Elastic Cloud Connector Role - ', variables('elasticCloudConnectorId'))]",
-        "customRoleAssignment": "[guid('ElasticCloudRoleAssignment-', variables('elasticCloudConnectorId'))]",
-        "securityReaderRoleAssignment": "[guid('ElasticCloudSecurityReaderRoleAssignment-', variables('elasticCloudConnectorId'))]",
         "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().name)]"
     },
     "parameters": {
