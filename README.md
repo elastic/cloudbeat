@@ -7,10 +7,6 @@
 Cloudbeat is a tool that analyzes cloud assets for security compliance and sends findings to Elasticsearch.
 It is designed to be used as part of the [Cloud Security](https://www.elastic.co/blog/secure-your-cloud-with-elastic-security) plugin in Kibana.
 
-## Binary Size Monitoring
-
-This repository includes automated binary size monitoring for pull requests. The system tracks changes to the cloudbeat binary size and alerts when increases exceed configurable thresholds. See [Binary Size Monitoring Documentation](docs/binary-size-monitoring.md) for details.
-
 
 ### CSP Security Policies
 
