@@ -25,11 +25,8 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Check out target branch
+      - name: Check out PR
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          ref: ${{ github.base_ref }}
-          clean: true
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -37,21 +34,22 @@ jobs:
           init-tools: 'false'
           free-disk: 'false'
 
+      - name: Build PR branch binary
+        run: |
+          mage build
+          mv cloudbeat /tmp/cloudbeat-pr
+
+      - name: Check out target branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          ref: ${{ github.base_ref }}
+          clean: true
+
       - name: Build target branch binary
         run: |
           echo "Building target branch binary..."
           mage build
           mv cloudbeat /tmp/cloudbeat-target
-
-      - name: Check out PR
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          clean: true
-
-      - name: Build PR branch binary
-        run: |
-          mage build
-          mv cloudbeat /tmp/cloudbeat-pr
 
       - name: Get binary sizes and compare
         id: size-check
