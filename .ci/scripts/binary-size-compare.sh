@@ -98,4 +98,5 @@ fi
 abs_percentage=${percentage/-/}
 echo "abs_percentage=$abs_percentage" >>"$output_file"
 
+echo ""
 cat "$output_file"
