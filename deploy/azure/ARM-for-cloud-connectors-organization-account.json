@@ -18,7 +18,7 @@
         },
         "ResourceGroupName": {
             "type": "string",
-            "defaultValue": "[concat('cloudbeat-connector-rg-', dateTimeToEpoch(utcNow('u')))]",
+            "defaultValue": "[concat('cloud-connector-rg-', dateTimeToEpoch(utcNow('u')))]",
             "metadata": {
                 "description": "The resource group name where the cloud connector managed identity will be created"
             }
