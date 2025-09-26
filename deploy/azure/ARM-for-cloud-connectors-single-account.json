@@ -7,8 +7,7 @@
         "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(resourceGroup().id))]",
         "customRoleDefinition": "[guid('ElasticCloudRoleDefinition-', variables('elasticCloudConnectorId'))]",
         "customRoleDefinitionName": "[concat('Elastic Cloud Connector Role - ', variables('elasticCloudConnectorId'))]",
-        "customRoleAssignment": "[guid('ElasticCloudRoleAssignment-', variables('elasticCloudConnectorId'))]",
-        "securityReaderRoleAssignment": "[guid('ElasticCloudSecurityReaderRoleAssignment-', variables('elasticCloudConnectorId'))]"
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().name)]"
     },
     "parameters": {
         "elasticStackId": {
@@ -71,7 +70,7 @@
                     "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name)]"
                 ],
                 "roleName": "[variables('customRoleDefinitionName')]",
-                "description": "Provide Elastic Cloud Connector deployments with read permissions for web app configurations",
+                "description": "Provide Elastic Cloud Connector deployments with read permissions for web app configurations and additional Azure resources",
                 "permissions": [
                     {
                         "actions": [
@@ -85,30 +84,68 @@
             }
         },
         {
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "2022-04-01",
-            "name": "[variables('customRoleAssignment')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2023-07-01",
+            "name": "[variables('roleAssignmentDeployment')]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]",
                 "[variables('customRoleDefinition')]"
             ],
             "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('customRoleDefinition'))]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]",
-                "principalType": "ServicePrincipal"
-            }
-        },
-        {
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "2022-04-01",
-            "name": "[variables('securityReaderRoleAssignment')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
-            ],
-            "properties": {
-                "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]",
-                "principalType": "ServicePrincipal"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "CustomRoleDefinitionId": {
+                        "value": "[variables('customRoleDefinition')]"
+                    },
+                    "UserAssignedIdentityPrincipalId": {
+                        "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "CustomRoleDefinitionId": {
+                            "type": "string"
+                        },
+                        "UserAssignedIdentityPrincipalId": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
+                            "properties": {
+                                "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                                "principalId": "[parameters('UserAssignedIdentityPrincipalId')]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('CustomRoleDefinitionId'))]",
+                                "principalId": "[parameters('UserAssignedIdentityPrincipalId')]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        }
+                    ]
+                }
             }
         }
     ],
