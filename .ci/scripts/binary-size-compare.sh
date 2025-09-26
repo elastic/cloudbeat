@@ -88,10 +88,8 @@ echo "Percentage change: ${percentage}%"
 # Check if size increase exceeds threshold
 if (($(echo "$size_diff_mib > $size_threshold_mib" | bc -l))); then
     echo "threshold_exceeded=1" >>"$output_file"
-    echo "significant_increase=1" >>"$output_file"
 else
     echo "threshold_exceeded=0" >>"$output_file"
-    echo "significant_increase=0" >>"$output_file"
 fi
 
 # Also store absolute percentage for display
