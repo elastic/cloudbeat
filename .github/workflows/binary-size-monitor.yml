@@ -25,23 +25,10 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y bc
-
-      - name: Initialize hermit
-        shell: bash
-        run: |
-          ./bin/hermit env --raw >> "$GITHUB_ENV"
-
-      - name: Build PR branch binary
-        run: |
-          mage build
-          mv cloudbeat /tmp/cloudbeat-pr
 
       - name: Check out main branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -49,17 +36,30 @@ jobs:
           ref: main
           clean: true
 
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
       - name: Build main branch binary
         run: |
           echo "Building main branch binary..."
           mage build
-          mv cloudbeat cloudbeat-main
-          mv /tmp/cloudbeat-pr cloudbeat-pr
+          mv cloudbeat /tmp/cloudbeat-main
+
+      - name: Check out PR
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Build PR branch binary
+        run: |
+          mage build
+          mv cloudbeat /tmp/cloudbeat-pr
 
       - name: Get binary sizes and compare
         id: size-check
         run: |
-          [[ -f cloudbeat-pr ]] && [[ -f cloudbeat-main ]] || exit 1
+          mv /tmp/cloudbeat-pr cloudbeat-pr
+          mv /tmp/cloudbeat-main cloudbeat-main
 
           # Get file sizes
           PR_SIZE=$(stat -f%z cloudbeat-pr 2>/dev/null || stat -c%s cloudbeat-pr)
