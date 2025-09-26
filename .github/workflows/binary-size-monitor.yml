@@ -8,8 +8,8 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  # Size increase threshold percentage (e.g., 10 = 10% increase)
-  SIZE_THRESHOLD: 10
+  # Binary size threshold in MiB (5 MiB = ~5.24 MB)
+  SIZE_THRESHOLD_MIB: 5
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -65,12 +65,12 @@ jobs:
           echo "PR binary size: $PR_SIZE bytes"
           echo "Main binary size: $MAIN_SIZE bytes"
 
-          # Calculate human-readable sizes
-          PR_SIZE_MB=$(echo "scale=2; $PR_SIZE/1024/1024" | bc)
-          MAIN_SIZE_MB=$(echo "scale=2; $MAIN_SIZE/1024/1024" | bc)
+          # Calculate human-readable sizes in MiB (1024^2)
+          PR_SIZE_MIB=$(echo "scale=2; $PR_SIZE/1024/1024" | bc)
+          MAIN_SIZE_MIB=$(echo "scale=2; $MAIN_SIZE/1024/1024" | bc)
 
-          echo "PR binary size: ${PR_SIZE_MB} MB"
-          echo "Main binary size: ${MAIN_SIZE_MB} MB"
+          echo "PR binary size: ${PR_SIZE_MIB} MiB"
+          echo "Main binary size: ${MAIN_SIZE_MIB} MiB"
 
           # Calculate size difference and percentage
           if [ $MAIN_SIZE -eq 0 ]; then
@@ -79,32 +79,27 @@ jobs:
           fi
 
           SIZE_DIFF=$((PR_SIZE - MAIN_SIZE))
-          SIZE_DIFF_MB=$(echo "scale=2; $SIZE_DIFF/1024/1024" | bc)
+          SIZE_DIFF_MIB=$(echo "scale=2; $SIZE_DIFF/1024/1024" | bc)
           PERCENTAGE=$(echo "scale=2; $SIZE_DIFF * 100 / $MAIN_SIZE" | bc)
 
-          echo "Size difference: $SIZE_DIFF bytes (${SIZE_DIFF_MB} MB)"
+          echo "Size difference: $SIZE_DIFF bytes (${SIZE_DIFF_MIB} MiB)"
           echo "Percentage change: ${PERCENTAGE}%"
 
           # Store values for later steps
           echo "pr_size=$PR_SIZE" >> $GITHUB_OUTPUT
           echo "main_size=$MAIN_SIZE" >> $GITHUB_OUTPUT
-          echo "pr_size_mb=$PR_SIZE_MB" >> $GITHUB_OUTPUT
-          echo "main_size_mb=$MAIN_SIZE_MB" >> $GITHUB_OUTPUT
+          echo "pr_size_mib=$PR_SIZE_MIB" >> $GITHUB_OUTPUT
+          echo "main_size_mib=$MAIN_SIZE_MIB" >> $GITHUB_OUTPUT
           echo "size_diff=$SIZE_DIFF" >> $GITHUB_OUTPUT
-          echo "size_diff_mb=$SIZE_DIFF_MB" >> $GITHUB_OUTPUT
+          echo "size_diff_mib=$SIZE_DIFF_MIB" >> $GITHUB_OUTPUT
           echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
 
-          # Check if size increase exceeds threshold (only for increases)
-          if (( $(echo "$PERCENTAGE > $SIZE_THRESHOLD" | bc -l) )); then
+          # Check if size increase exceeds 5MiB threshold
+          if (( $(echo "$SIZE_DIFF_MIB > $SIZE_THRESHOLD_MIB" | bc -l) )); then
             echo "threshold_exceeded=1" >> $GITHUB_OUTPUT
-          else
-            echo "threshold_exceeded=0" >> $GITHUB_OUTPUT
-          fi
-
-          # Check if size increase is >1MB (only report if significant increase)
-          if (( $(echo "$SIZE_DIFF_MB > 1" | bc -l) )); then
             echo "significant_increase=1" >> $GITHUB_OUTPUT
           else
+            echo "threshold_exceeded=0" >> $GITHUB_OUTPUT
             echo "significant_increase=0" >> $GITHUB_OUTPUT
           fi
 
@@ -120,20 +115,20 @@ jobs:
           message: |
             ## 📊 Binary Size Monitor Report
 
-            | Branch | Size (MB) | Size (bytes) |
-            |--------|-----------|-------------|
-            | **PR Branch** | ${{ steps.size-check.outputs.pr_size_mb }} MB | ${{ steps.size-check.outputs.pr_size }} bytes |
-            | **Main Branch** | ${{ steps.size-check.outputs.main_size_mb }} MB | ${{ steps.size-check.outputs.main_size }} bytes |
-            | **Difference** | ${{ steps.size-check.outputs.size_diff_mb }} MB | ${{ steps.size-check.outputs.size_diff }} bytes |
+            | Branch | Size (MiB) | Size (bytes) |
+            |--------|-------------|-------------|
+            | **PR Branch** | ${{ steps.size-check.outputs.pr_size_mib }} MiB | ${{ steps.size-check.outputs.pr_size }} bytes |
+            | **Main Branch** | ${{ steps.size-check.outputs.main_size_mib }} MiB | ${{ steps.size-check.outputs.main_size }} bytes |
+            | **Difference** | ${{ steps.size-check.outputs.size_diff_mib }} MiB | ${{ steps.size-check.outputs.size_diff }} bytes |
 
-            **Size Change:** ${{ steps.size-check.outputs.percentage }}%
+            **Size Change:** ${{ steps.size-check.outputs.percentage }}% | **Absolute Change:** ${{ steps.size-check.outputs.size_diff_mib }} MiB
 
-            ${{ steps.size-check.outputs.threshold_exceeded == '1' && format('⚠️ **WARNING:** Binary size increased by {0}%, which exceeds the {1}% threshold!', steps.size-check.outputs.percentage, env.SIZE_THRESHOLD) || '✅ Binary size change is within acceptable limits.' }}
+            ${{ steps.size-check.outputs.threshold_exceeded == '1' && format('⚠️ **WARNING:** Binary size increased by {0} MiB, which exceeds the {1} MiB threshold!', steps.size-check.outputs.size_diff_mib, env.SIZE_THRESHOLD_MIB) || '✅ Binary size change is within acceptable limits.' }}
 
       - name: Fail job if size threshold exceeded
         if: steps.size-check.outputs.threshold_exceeded == '1'
         run: |
-          echo "❌ Binary size increased by ${{ steps.size-check.outputs.percentage }}%, exceeding the ${{ env.SIZE_THRESHOLD }}% threshold"
+          echo "❌ Binary size increased by ${{ steps.size-check.outputs.size_diff_mib }} MiB (${{ steps.size-check.outputs.percentage }}%), exceeding the ${{ env.SIZE_THRESHOLD_MIB }} MiB threshold"
           echo "This indicates a significant increase in the cloudbeat binary size."
           echo "Please review your changes to understand the size impact."
           exit 1
