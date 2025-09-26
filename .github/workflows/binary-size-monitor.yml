@@ -56,56 +56,7 @@ jobs:
       - name: Get binary sizes and compare
         id: size-check
         run: |
-          set -euo pipefail
-
-          # Get file sizes
-          PR_SIZE=$(stat -c%s /tmp/cloudbeat-pr)
-          TARGET_SIZE=$(stat -c%s /tmp/cloudbeat-target)
-
-          echo "PR binary size: $PR_SIZE bytes"
-          echo "Target binary size: $TARGET_SIZE bytes"
-
-          # Calculate human-readable sizes in MiB (1024^2)
-          PR_SIZE_MIB=$(echo "scale=2; $PR_SIZE/1024/1024" | bc)
-          TARGET_SIZE_MIB=$(echo "scale=2; $TARGET_SIZE/1024/1024" | bc)
-
-          echo "PR binary size: ${PR_SIZE_MIB} MiB"
-          echo "Target binary size: ${TARGET_SIZE_MIB} MiB"
-
-          # Calculate size difference and percentage
-          if [ $TARGET_SIZE -eq 0 ]; then
-            echo "Error: Target branch binary size is 0"
-            exit 1
-          fi
-
-          SIZE_DIFF=$((PR_SIZE - TARGET_SIZE))
-          SIZE_DIFF_MIB=$(echo "scale=2; $SIZE_DIFF/1024/1024" | bc)
-          PERCENTAGE=$(echo "scale=2; $SIZE_DIFF * 100 / $TARGET_SIZE" | bc)
-
-          echo "Size difference: $SIZE_DIFF bytes (${SIZE_DIFF_MIB} MiB)"
-          echo "Percentage change: ${PERCENTAGE}%"
-
-          # Store values for later steps
-          echo "pr_size=$PR_SIZE" >> $GITHUB_OUTPUT
-          echo "target_size=$TARGET_SIZE" >> $GITHUB_OUTPUT
-          echo "pr_size_mib=$PR_SIZE_MIB" >> $GITHUB_OUTPUT
-          echo "target_size_mib=$TARGET_SIZE_MIB" >> $GITHUB_OUTPUT
-          echo "size_diff=$SIZE_DIFF" >> $GITHUB_OUTPUT
-          echo "size_diff_mib=$SIZE_DIFF_MIB" >> $GITHUB_OUTPUT
-          echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
-
-          # Check if size increase exceeds 5MiB threshold
-          if (( $(echo "$SIZE_DIFF_MIB > $SIZE_THRESHOLD_MIB" | bc -l) )); then
-            echo "threshold_exceeded=1" >> $GITHUB_OUTPUT
-            echo "significant_increase=1" >> $GITHUB_OUTPUT
-          else
-            echo "threshold_exceeded=0" >> $GITHUB_OUTPUT
-            echo "significant_increase=0" >> $GITHUB_OUTPUT
-          fi
-
-          # Also store absolute percentage for display
-          ABS_PERCENTAGE=$(echo "$PERCENTAGE" | sed 's/-//')
-          echo "abs_percentage=$ABS_PERCENTAGE" >> $GITHUB_OUTPUT
+          ./.ci/scripts/binary-size-compare.sh /tmp/cloudbeat-pr /tmp/cloudbeat-target ${{ env.SIZE_THRESHOLD_MIB }}
 
       - name: Comment on PR with size information
         if: steps.size-check.outputs.significant_increase == '1'
