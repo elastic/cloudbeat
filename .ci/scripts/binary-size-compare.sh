@@ -45,7 +45,6 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
     output_file="$GITHUB_OUTPUT"
 else
     output_file=$(mktemp)
-    echo "Running in local mode - results will be displayed at the end"
 fi
 
 # Get file sizes
