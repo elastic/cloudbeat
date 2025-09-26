@@ -107,8 +107,8 @@
                     "CustomRoleDefinitionId": {
                         "value": "[variables('customRoleDefinition')]"
                     },
-                    "UserAssignedIdentityName": {
-                        "value": "[variables('userAssignedIdentityName')]"
+                    "UserAssignedIdentityPrincipalId": {
+                        "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]"
                     }
                 },
                 "template": {
@@ -121,7 +121,7 @@
                         "CustomRoleDefinitionId": {
                             "type": "string"
                         },
-                        "UserAssignedIdentityName": {
+                        "UserAssignedIdentityPrincipalId": {
                             "type": "string"
                         }
                     },
@@ -132,7 +132,7 @@
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
                             "properties": {
                                 "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
-                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.ManagedIdentity/userAssignedIdentities', parameters('UserAssignedIdentityName')), '2023-01-31').principalId]",
+                                "principalId": "[parameters('UserAssignedIdentityPrincipalId')]",
                                 "principalType": "ServicePrincipal"
                             }
                         },
@@ -142,7 +142,7 @@
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
                             "properties": {
                                 "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('CustomRoleDefinitionId'))]",
-                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.ManagedIdentity/userAssignedIdentities', parameters('UserAssignedIdentityName')), '2023-01-31').principalId]",
+                                "principalId": "[parameters('UserAssignedIdentityPrincipalId')]",
                                 "principalType": "ServicePrincipal"
                             }
                         }
