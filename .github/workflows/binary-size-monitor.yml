@@ -58,12 +58,9 @@ jobs:
       - name: Get binary sizes and compare
         id: size-check
         run: |
-          mv /tmp/cloudbeat-pr cloudbeat-pr
-          mv /tmp/cloudbeat-main cloudbeat-main
-
           # Get file sizes
-          PR_SIZE=$(stat -f%z cloudbeat-pr 2>/dev/null || stat -c%s cloudbeat-pr)
-          MAIN_SIZE=$(stat -f%z cloudbeat-main 2>/dev/null || stat -c%s cloudbeat-main)
+          PR_SIZE=$(stat -c%s /tmp/cloudbeat-pr)
+          MAIN_SIZE=$(stat -c%s /tmp/cloudbeat-main)
 
           echo "PR binary size: $PR_SIZE bytes"
           echo "Main binary size: $MAIN_SIZE bytes"
