@@ -225,7 +225,17 @@
                                 "type": "CustomRole"
                             }
                         }
-                    ]
+                    ],
+                    "outputs": {
+                        "PrincipalId": {
+                            "type": "string",
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').principalId]"
+                        },
+                        "ClientId": {
+                            "type": "string",
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').clientId]"
+                        }
+                    }
                 }
             },
             "dependsOn": [
@@ -256,7 +266,7 @@
                         "value": "[parameters('SubscriptionId')]"
                     },
                     "UserAssignedIdentityPrincipalId": {
-                        "value": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]"
+                        "value": "[reference(variables('cloudConnectorDeployment')).outputs.PrincipalId.value]"
                     }
                 },
                 "template": {
@@ -316,7 +326,7 @@
         },
         "PrincipalId": {
             "type": "string",
-            "value": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]"
+            "value": "[reference(variables('cloudConnectorDeployment')).outputs.PrincipalId.value]"
         },
         "ElasticCloudConnectorId": {
             "type": "string",
@@ -324,7 +334,7 @@
         },
         "ClientId": {
             "type": "string",
-            "value": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').clientId]"
+            "value": "[reference(variables('cloudConnectorDeployment')).outputs.ClientId.value]"
         },
         "TenantId": {
             "type": "string",
