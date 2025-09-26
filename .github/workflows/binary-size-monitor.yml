@@ -23,92 +23,71 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      
-      - name: Initialize hermit for PR branch
-        uses: ./.github/actions/hermit
-        with:
-          init-tools: 'true'
-          
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y bc
-          
+
+      - name: Initialize hermit
+        shell: bash
+        run: |
+          ./bin/hermit env --raw >> "$GITHUB_ENV"
+
       - name: Build PR branch binary
         run: |
-          echo "Building PR branch binary..."
-          just build-binary-for-size-check
-          cp cloudbeat cloudbeat-pr
-          
-      - name: Stash PR binary
-        run: |
-          cp cloudbeat-pr /tmp/cloudbeat-pr
-          
+          mage build
+          mv cloudbeat /tmp/cloudbeat-pr
+
       - name: Check out main branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: main
           clean: true
-          
-      - name: Initialize hermit for main branch
-        uses: ./.github/actions/hermit
-        with:
-          init-tools: 'true'
-          
+
       - name: Build main branch binary
         run: |
           echo "Building main branch binary..."
-          just build-binary-for-size-check
-          cp cloudbeat cloudbeat-main
-          
-      - name: Restore PR binary
-        run: |
-          cp /tmp/cloudbeat-pr cloudbeat-pr
-          
+          mage build
+          mv cloudbeat cloudbeat-main
+          mv /tmp/cloudbeat-pr cloudbeat-pr
+
       - name: Get binary sizes and compare
         id: size-check
         run: |
-          # Verify binaries exist
-          if [ ! -f cloudbeat-pr ]; then
-            echo "Error: PR binary not found"
-            exit 1
-          fi
-          if [ ! -f cloudbeat-main ]; then
-            echo "Error: Main binary not found"
-            exit 1
-          fi
-          
+          [[ -f cloudbeat-pr ]] && [[ -f cloudbeat-main ]] || exit 1
+
           # Get file sizes
           PR_SIZE=$(stat -f%z cloudbeat-pr 2>/dev/null || stat -c%s cloudbeat-pr)
           MAIN_SIZE=$(stat -f%z cloudbeat-main 2>/dev/null || stat -c%s cloudbeat-main)
-          
+
           echo "PR binary size: $PR_SIZE bytes"
           echo "Main binary size: $MAIN_SIZE bytes"
-          
+
           # Calculate human-readable sizes
           PR_SIZE_MB=$(echo "scale=2; $PR_SIZE/1024/1024" | bc)
           MAIN_SIZE_MB=$(echo "scale=2; $MAIN_SIZE/1024/1024" | bc)
-          
+
           echo "PR binary size: ${PR_SIZE_MB} MB"
           echo "Main binary size: ${MAIN_SIZE_MB} MB"
-          
+
           # Calculate size difference and percentage
           if [ $MAIN_SIZE -eq 0 ]; then
             echo "Error: Main branch binary size is 0"
             exit 1
           fi
-          
+
           SIZE_DIFF=$((PR_SIZE - MAIN_SIZE))
           SIZE_DIFF_MB=$(echo "scale=2; $SIZE_DIFF/1024/1024" | bc)
           PERCENTAGE=$(echo "scale=2; $SIZE_DIFF * 100 / $MAIN_SIZE" | bc)
-          
+
           echo "Size difference: $SIZE_DIFF bytes (${SIZE_DIFF_MB} MB)"
           echo "Percentage change: ${PERCENTAGE}%"
-          
+
           # Store values for later steps
           echo "pr_size=$PR_SIZE" >> $GITHUB_OUTPUT
           echo "main_size=$MAIN_SIZE" >> $GITHUB_OUTPUT
@@ -117,25 +96,25 @@ jobs:
           echo "size_diff=$SIZE_DIFF" >> $GITHUB_OUTPUT
           echo "size_diff_mb=$SIZE_DIFF_MB" >> $GITHUB_OUTPUT
           echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
-          
+
           # Check if size increase exceeds threshold (only for increases)
           if (( $(echo "$PERCENTAGE > $SIZE_THRESHOLD" | bc -l) )); then
             echo "threshold_exceeded=1" >> $GITHUB_OUTPUT
           else
             echo "threshold_exceeded=0" >> $GITHUB_OUTPUT
           fi
-          
+
           # Check if size increase is >1MB (only report if significant increase)
           if (( $(echo "$SIZE_DIFF_MB > 1" | bc -l) )); then
             echo "significant_increase=1" >> $GITHUB_OUTPUT
           else
             echo "significant_increase=0" >> $GITHUB_OUTPUT
           fi
-          
+
           # Also store absolute percentage for display
           ABS_PERCENTAGE=$(echo "$PERCENTAGE" | sed 's/-//')
           echo "abs_percentage=$ABS_PERCENTAGE" >> $GITHUB_OUTPUT
-          
+
       - name: Comment on PR with size information
         if: steps.size-check.outputs.significant_increase == '1'
         uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2
@@ -143,17 +122,17 @@ jobs:
           header: Binary Size Monitor
           message: |
             ## 📊 Binary Size Monitor Report
-            
+
             | Branch | Size (MB) | Size (bytes) |
             |--------|-----------|-------------|
             | **PR Branch** | ${{ steps.size-check.outputs.pr_size_mb }} MB | ${{ steps.size-check.outputs.pr_size }} bytes |
             | **Main Branch** | ${{ steps.size-check.outputs.main_size_mb }} MB | ${{ steps.size-check.outputs.main_size }} bytes |
             | **Difference** | ${{ steps.size-check.outputs.size_diff_mb }} MB | ${{ steps.size-check.outputs.size_diff }} bytes |
-            
+
             **Size Change:** ${{ steps.size-check.outputs.percentage }}%
-            
+
             ${{ steps.size-check.outputs.threshold_exceeded == '1' && format('⚠️ **WARNING:** Binary size increased by {0}%, which exceeds the {1}% threshold!', steps.size-check.outputs.percentage, env.SIZE_THRESHOLD) || '✅ Binary size change is within acceptable limits.' }}
-            
+
       - name: Fail job if size threshold exceeded
         if: steps.size-check.outputs.threshold_exceeded == '1'
         run: |

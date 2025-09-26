@@ -228,13 +228,3 @@ cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/test_environments/values/ci.yml {{range}}
-
-# Build binary for size monitoring with proper release tags
-build-binary-for-size-check $GOARCH=LOCAL_GOARCH:
-  @echo "Building cloudbeat binary with release tags for linux/$GOARCH"
-  go mod vendor
-  GOOS=linux CGO_ENABLED=0 GOARCH=$GOARCH go build -tags=grpcnotrace,release -o cloudbeat .
-
-# Check binary size changes against main branch
-check-binary-size:
-  ./scripts/check-binary-size.sh
