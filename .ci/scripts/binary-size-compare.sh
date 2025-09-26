@@ -20,7 +20,7 @@ set -euo pipefail
 # Check arguments
 if [[ $# -lt 2 || $# -gt 3 ]]; then
     echo "Usage: $0 <pr_binary_path> <target_binary_path> <threshold_mib>" >&2
-    echo "" >&2
+    echo >&2
     echo "Example: $0 /tmp/cloudbeat-pr /tmp/cloudbeat-target 5" >&2
     exit 1
 fi
@@ -96,5 +96,5 @@ fi
 abs_percentage=${percentage/-/}
 echo "abs_percentage=$abs_percentage" >>"$output_file"
 
-echo ""
+echo
 cat "$output_file"
