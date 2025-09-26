@@ -30,10 +30,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc
 
-      - name: Check out main branch
+      - name: Check out target branch
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
-          ref: main
+          ref: ${{ github.base_ref }}
           clean: true
 
       - name: Hermit Environment
@@ -41,9 +41,9 @@ jobs:
         with:
           init-tools: 'false'
 
-      - name: Build main branch binary
+      - name: Build target branch binary
         run: |
-          echo "Building main branch binary..."
+          echo "Building target branch binary..."
           mage build
           mv cloudbeat /tmp/cloudbeat-main
 
@@ -65,18 +65,18 @@ jobs:
           MAIN_SIZE=$(stat -c%s /tmp/cloudbeat-main)
 
           echo "PR binary size: $PR_SIZE bytes"
-          echo "Main binary size: $MAIN_SIZE bytes"
+          echo "Target binary size: $MAIN_SIZE bytes"
 
           # Calculate human-readable sizes in MiB (1024^2)
           PR_SIZE_MIB=$(echo "scale=2; $PR_SIZE/1024/1024" | bc)
           MAIN_SIZE_MIB=$(echo "scale=2; $MAIN_SIZE/1024/1024" | bc)
 
           echo "PR binary size: ${PR_SIZE_MIB} MiB"
-          echo "Main binary size: ${MAIN_SIZE_MIB} MiB"
+          echo "Target binary size: ${MAIN_SIZE_MIB} MiB"
 
           # Calculate size difference and percentage
           if [ $MAIN_SIZE -eq 0 ]; then
-            echo "Error: Main branch binary size is 0"
+            echo "Error: Target branch binary size is 0"
             exit 1
           fi
 
@@ -120,7 +120,7 @@ jobs:
             | Branch | Size (MiB) | Size (bytes) |
             |--------|-------------|-------------|
             | **PR Branch** | ${{ steps.size-check.outputs.pr_size_mib }} MiB | ${{ steps.size-check.outputs.pr_size }} bytes |
-            | **Main Branch** | ${{ steps.size-check.outputs.main_size_mib }} MiB | ${{ steps.size-check.outputs.main_size }} bytes |
+            | **Target Branch** | ${{ steps.size-check.outputs.main_size_mib }} MiB | ${{ steps.size-check.outputs.main_size }} bytes |
             | **Difference** | ${{ steps.size-check.outputs.size_diff_mib }} MiB | ${{ steps.size-check.outputs.size_diff }} bytes |
 
             **Size Change:** ${{ steps.size-check.outputs.percentage }}% | **Absolute Change:** ${{ steps.size-check.outputs.size_diff_mib }} MiB
