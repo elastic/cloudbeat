@@ -338,7 +338,7 @@
         },
         "TenantId": {
             "type": "string",
-            "value": "[subscription().tenantId]"
+            "value": "[tenant().tenantId]"
         }
     }
 }
