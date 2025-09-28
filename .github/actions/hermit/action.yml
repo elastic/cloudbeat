@@ -40,12 +40,15 @@ runs:
           ~/.cache/pypoetry
           ~/.cache/pre-commit
         key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
+        restore-keys: |
+          ci-hermit-env-${{ runner.os }}
 
     - id: cache-go-deps
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
       with:
         path: |
           ~/go/pkg/
+          ~/.cache/go-build
         key: ci-go-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
 
     - name: Initialize hermit
