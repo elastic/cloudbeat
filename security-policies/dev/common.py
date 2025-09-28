@@ -163,19 +163,34 @@ def check_and_fix_numbered_list(text):
 
 
 def add_new_line_after_period(text):
-    # Split the text into lines
-    lines = text.split("\n")
+    # Regex to split on JSON code blocks (including the backticks and the "json" tag)
+    parts = re.split(r"(```json[\s\S]*?```)", text)
 
-    # Find the lines that start with a number and a period
-    numbered_lines = [line for line in lines if re.match(r"^\d+\.", line)]
+    def process_text_segment(segment):
+        # Split the text into lines
+        lines = segment.split("\n")
 
-    # Iterate through the lines and add a new line after a period, unless the line is a numbered line
-    for i, line in enumerate(lines):
-        if line not in numbered_lines:
-            lines[i] = line.replace(". ", ".\n")
+        # Find the lines that start with a number and a period
+        numbered_lines = [line for line in lines if re.match(r"^\d+\.", line)]
 
-    # Join the lines back into a single string and return the result
-    return "\n".join(lines)
+        # Iterate through the lines and add a new line after a period, unless the line is a numbered line
+        for i, line in enumerate(lines):
+            if line not in numbered_lines:
+                lines[i] = line.replace(". ", ".\n")
+
+        # Join the lines back into a single string and return the result
+        return "\n".join(lines)
+
+    result_parts = []
+    for part in parts:
+        if part.startswith("```json"):
+            # It's a JSON code block, leave as is
+            result_parts.append(part)
+        else:
+            # Normal text, process it
+            result_parts.append(process_text_segment(part))
+
+    return "".join(result_parts)
 
 
 def replace_json_block(match):
@@ -220,8 +235,8 @@ def format_json_in_text(text):
 
 
 def fix_code_blocks(text: str):
-    text = add_new_line_after_period(text)
     text = format_json_in_text(text)
+    text = add_new_line_after_period(text)
     return check_and_fix_numbered_list(text)
 
 
