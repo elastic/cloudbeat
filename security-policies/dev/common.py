@@ -183,7 +183,7 @@ def add_new_line_after_period(text):
 
     result_parts = []
     for part in parts:
-        if part.startswith("```json"):
+        if re.match(r"^```json[ \t]*", part):
             # It's a JSON code block, leave as is
             result_parts.append(part)
         else:
