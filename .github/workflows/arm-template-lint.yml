@@ -22,6 +22,7 @@ jobs:
           - "ARM-for-organization-account.json"
           - "ARM-for-single-account.json"
           - "ARM-for-cloud-connectors-single-account.json"
+          - "ARM-for-cloud-connectors-organization-account.json"
         include:
           - template: "ARM-for-single-account.json"
             skip: "ResourceIds should not contain"
