@@ -24,10 +24,12 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 const provider = "aws"
@@ -54,6 +56,15 @@ func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*clo
 		alias = ""
 	}
 
+	// if alias is not configured, try account name.
+	if alias == "" {
+		name, err := p.getAccountName(ctx, cfg, response.Account)
+		if err != nil {
+			p.Logger.Warnf("failed to get account name: %v", err)
+		}
+		alias = name
+	}
+
 	return &cloud.Identity{
 		Account:      *response.Account,
 		AccountAlias: alias,
@@ -72,6 +83,22 @@ func (IdentityProvider) getAccountAlias(ctx context.Context, cfg aws.Config) (st
 	}
 
 	return "", nil
+}
+
+func (p IdentityProvider) getAccountName(ctx context.Context, cfg aws.Config, accountID *string) (string, error) {
+	// "organizations:Describe*" is part of AWS SecurityAudit managed policy, cloudbeat-asset-inventory-root and cloudbeat-root role.
+	acctResp, err := organizations.NewFromConfig(cfg).DescribeAccount(ctx, &organizations.DescribeAccountInput{
+		AccountId: accountID,
+	})
+	if err != nil || acctResp == nil {
+		return "", err
+	}
+
+	if acctResp.Account == nil {
+		return "", nil
+	}
+
+	return pointers.Deref(acctResp.Account.Name), nil
 }
 
 func (p IdentityProvider) GetCallerIdentity(ctx context.Context, cfg aws.Config) (sts.GetCallerIdentityOutput, error) {
