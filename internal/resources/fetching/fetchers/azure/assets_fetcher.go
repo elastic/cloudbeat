@@ -59,6 +59,7 @@ func newPair(subType string, tpe string) typePair {
 }
 
 var AzureAssetTypeToTypePair = map[string]typePair{
+<<<<<<< HEAD
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
 	inventory.DocumentDBDatabaseAccountAssetType: newPair(fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase),
@@ -74,6 +75,22 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
 	inventory.RoleDefinitionsType:                newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 
+=======
+	inventory.ClassicStorageAccountAssetType:     {fetching.AzureClassicStorageAccountType, fetching.CloudStorage},
+	inventory.DiskAssetType:                      {fetching.AzureDiskType, fetching.CloudCompute},
+	inventory.DocumentDBDatabaseAccountAssetType: {fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase},
+	inventory.MySQLDBServerAssetType:             {fetching.AzureMySQLDBType, fetching.CloudDatabase},
+	inventory.FlexibleMySQLDBServerAssetType:     {fetching.AzureFlexibleMySQLDBType, fetching.CloudDatabase},
+	inventory.NetworkWatchersFlowLogAssetType:    {fetching.AzureNetworkWatchersFlowLogType, fetching.MonitoringIdentity},
+	inventory.FlexiblePostgreSQLDBAssetType:      {fetching.AzureFlexiblePostgreSQLDBType, fetching.CloudDatabase},
+	inventory.PostgreSQLDBAssetType:              {fetching.AzurePostgreSQLDBType, fetching.CloudDatabase},
+	inventory.SQLServersAssetType:                {fetching.AzureSQLServerType, fetching.CloudDatabase},
+	inventory.StorageAccountAssetType:            {fetching.AzureStorageAccountType, fetching.CloudStorage},
+	inventory.VirtualMachineAssetType:            {fetching.AzureVMType, fetching.CloudCompute},
+	inventory.WebsitesAssetType:                  {fetching.AzureWebSiteType, fetching.CloudCompute},
+	inventory.VaultAssetType:                     {fetching.AzureVaultType, fetching.KeyManagement},
+	inventory.RoleDefinitionsType:                {fetching.AzureRoleDefinitionType, fetching.CloudIdentity},
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 	// This asset type is used only for enrichment purposes, but is sent to OPA layer, producing no findings.
 	inventory.NetworkSecurityGroupAssetType: newPair(fetching.AzureNetworkSecurityGroupType, fetching.MonitoringIdentity),
 }
