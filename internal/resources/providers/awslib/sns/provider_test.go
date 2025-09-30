@@ -28,9 +28,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type (
@@ -40,7 +40,6 @@ type (
 
 var errMock = errors.New("mock error")
 var regions = []string{"us-east-1"}
-var logger = clog.NewLogger("TestSNSProvider")
 
 func TestProvider_ListTopics(t *testing.T) {
 	tests := []struct {
@@ -89,7 +88,7 @@ func TestProvider_ListTopics(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
-				log:     logger,
+				log:     testhelper.NewLogger(t),
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.ListTopics(t.Context())
@@ -140,7 +139,7 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
-				log:     logger,
+				log:     testhelper.NewLogger(t),
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.ListSubscriptionsByTopic(t.Context(), regions[0], tt.topic)
@@ -249,7 +248,7 @@ func TestProvider_ListTopicsWithSubscriptions(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
-				log:     logger,
+				log:     testhelper.NewLogger(t),
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.ListTopicsWithSubscriptions(t.Context())

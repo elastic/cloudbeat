@@ -19,6 +19,7 @@ package iam
 
 import (
 	"errors"
+	"slices"
 	"sort"
 	"testing"
 
@@ -127,9 +128,7 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 				}
 				return *a.Arn < *b.Arn
 			})
-			sort.Slice(allAnalyzersTyped.Regions, func(i, j int) bool {
-				return allAnalyzersTyped.Regions[i] < allAnalyzersTyped.Regions[j]
-			})
+			slices.Sort(allAnalyzersTyped.Regions)
 
 			assert.Equal(t, tt.want, allAnalyzers)
 		})

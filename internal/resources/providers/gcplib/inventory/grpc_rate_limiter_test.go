@@ -31,13 +31,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 type RateLimiterTestSuite struct {
 	suite.Suite
-	logger      *clog.Logger
 	rateLimiter *AssetsInventoryRateLimiter
 }
 
@@ -46,8 +44,8 @@ func TestInventoryRateLimiterTestSuite(t *testing.T) {
 }
 
 func (s *RateLimiterTestSuite) SetupTest() {
-	s.logger = clog.NewLogger("test")
-	s.rateLimiter = NewAssetsInventoryRateLimiter(s.logger)
+	logger := testhelper.NewLogger(s.T())
+	s.rateLimiter = NewAssetsInventoryRateLimiter(logger)
 }
 
 func (s *RateLimiterTestSuite) TestRateLimiterWait() {
@@ -60,7 +58,7 @@ func (s *RateLimiterTestSuite) TestRateLimiterWait() {
 
 	totalRequests := 5
 	startTime := time.Now()
-	for i := 0; i < totalRequests; i++ {
+	for range totalRequests {
 		s.rateLimiter.Wait(ctx, "someMethod", nil)
 	}
 	endTime := time.Now()

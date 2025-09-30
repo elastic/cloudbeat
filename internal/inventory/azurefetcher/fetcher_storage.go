@@ -121,7 +121,7 @@ func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.A
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   pickName(item.TenantId, f.tenantID),
-				ServiceName: "Azure",
+				ServiceName: "Azure Storage",
 				ProjectID:   item.SubscriptionId,
 			}),
 			inventory.WithLabelsFromAny(item.Tags),

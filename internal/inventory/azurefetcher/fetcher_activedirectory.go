@@ -81,7 +81,7 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   tenantId,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithTags(item.GetTags()),
 		)
@@ -108,7 +108,7 @@ func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetC
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   f.tenantID,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithUser(inventory.User{
 				ID:   pointers.Deref(item.GetId()),
@@ -128,11 +128,6 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 	}
 
 	for _, item := range items {
-		// TODO(kuba): How to test this without being able to test Groups?
-		// var labels map[string]string
-		// for _, l := range item.GetAssignedLabels() {
-		// 	fmt.Println(l)
-		// }
 		assetChan <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAzureEntraGroup,
 			pointers.Deref(item.GetId()),
@@ -143,13 +138,12 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   f.tenantID,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithGroup(inventory.Group{
 				ID:   pointers.Deref(item.GetId()),
 				Name: pointers.Deref(item.GetDisplayName()),
 			}),
-			// inventory.WithLabels(labels),
 		)
 	}
 }
@@ -174,7 +168,7 @@ func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   f.tenantID,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
 			inventory.WithUser(inventory.User{
 				ID:   pointers.Deref(item.GetId()),

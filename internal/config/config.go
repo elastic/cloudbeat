@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -125,6 +126,7 @@ const (
 	AzureClientCredentialsTypeManual          = "manual"
 	AzureClientCredentialsTypeSecret          = "service_principal_with_client_secret"
 	AzureClientCredentialsTypeCertificate     = "service_principal_with_client_certificate"
+	AzureClientCredentialsTypeCloudConnectors = "cloud_connectors"
 )
 
 const (
@@ -241,12 +243,7 @@ func getBundlePath() (string, error) {
 }
 
 func isSupportedBenchmark(benchmark string) bool {
-	for _, s := range SupportedCIS {
-		if benchmark == s {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(SupportedCIS, benchmark)
 }
 
 // Cloud Connectors roles and resource id must be provided by the system (controller)
@@ -256,6 +253,7 @@ const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
 	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
 	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
+	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
 )
 
 type CloudConnectorsConfig struct {

@@ -24,25 +24,28 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type snsFetcher struct {
-	logger      *clog.Logger
-	provider    snsProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      snsProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type snsProvider interface {
 	ListTopicsWithSubscriptions(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newSNSFetcher(logger *clog.Logger, identity *cloud.Identity, provider snsProvider) inventory.AssetFetcher {
+func newSNSFetcher(logger *clog.Logger, identity *cloud.Identity, provider snsProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &snsFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -53,6 +56,7 @@ func (s *snsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	awsResources, err := s.provider.ListTopicsWithSubscriptions(ctx)
 	if err != nil {
 		s.logger.Errorf(ctx, "Could not fetch SNS Topics: %v", err)
+		awslib.ReportMissingPermission(s.statusHandler, err)
 		return
 	}
 

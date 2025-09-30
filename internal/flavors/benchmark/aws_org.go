@@ -26,6 +26,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/samber/lo"
 	"go.opentelemetry.io/otel"
 
 	"github.com/elastic/cloudbeat/internal/config"
@@ -40,6 +41,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const (
@@ -53,9 +55,11 @@ const (
 var tracer = otel.Tracer(scopeName)
 
 type AWSOrg struct {
-	IAMProvider      iam.RoleGetter
-	IdentityProvider awslib.IdentityProviderGetter
-	AccountProvider  awslib.AccountProviderAPI
+	IAMProvider       iam.RoleGetter
+	IdentityProvider  awslib.IdentityProviderGetter
+	AccountProvider   awslib.AccountProviderAPI
+	StatusHandler     statushandler.StatusHandlerAPI
+	AWSCredsValidator awslib.CredentialsValidator
 }
 
 func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -67,7 +71,7 @@ func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, a.StatusHandler)
 }
 
 //revive:disable-next-line:function-result-limit
@@ -110,7 +114,13 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 				return nil, observability.FailSpan(span, "failed to get AWS accounts", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, accounts, cache)
+			// Filter the accounts to the ones having valid credentials on each aws account.
+			// Meaning only the accounts that have the security audit role created and thus were selected by customer on cloud formation.
+			filtered := lo.Filter(accounts, func(item preset.AwsAccount, _ int) bool {
+				return a.AWSCredsValidator.Validate(ctx, item.Config, log)
+			})
+
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, filtered, cache, a.StatusHandler)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {
@@ -126,12 +136,12 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 
 // getAwsAccounts returns all the aws accounts of the org.
 // For each account it bundles together the cloud.Identity and the credentials for the cloudbeat-securityaudit role of that account.
-// It requires cloudbeat-root credentials (requires iam:ListAccountAliases and iam:GetRole).
+// It requires cloudbeat-root credentials (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit and iam:GetRole).
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudbeatRoot awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
 	stsClient := sts.NewFromConfig(cfgCloudbeatRoot)
 
 	// accountIdentities array contains all the Accounts and Organizational
-	// Units, even if they are nested. (requires iam:ListAccountAliases)
+	// Units, even if they are nested. (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit)
 	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, cfgCloudbeatRoot)
 	if err != nil {
 		return nil, err

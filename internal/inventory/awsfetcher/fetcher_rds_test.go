@@ -23,12 +23,13 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestRDSInstanceFetcher_Fetch(t *testing.T) {
@@ -110,12 +111,14 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := clog.NewLogger("test_fetcher_rds_instance")
+	logger := testhelper.NewLogger(t)
 	provider := newMockRdsProvider(t)
 	provider.EXPECT().DescribeDBInstances(mock.Anything).Return(in, nil)
 
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newRDSFetcher(logger, identity, provider)
+	fetcher := newRDSFetcher(logger, identity, provider, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }

@@ -30,7 +30,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
@@ -141,7 +140,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		)
 	})
 
-	logger := clog.NewLogger("test_run")
+	logger := testhelper.NewLogger(t)
 	inventory := AssetInventory{
 		logger:              logger,
 		fetchers:            []AssetFetcher{fetcher},
@@ -184,7 +183,7 @@ func TestAssetInventory_Period(t *testing.T) {
 		atomic.AddInt64(&cycleCounter, 1)
 	})
 
-	logger := clog.NewLogger("test_run")
+	logger := testhelper.NewLogger(t)
 	inventory := AssetInventory{
 		logger:              logger,
 		fetchers:            []AssetFetcher{fetcher},
@@ -217,7 +216,7 @@ func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
 
 	fetchers := []AssetFetcher{}
 	fetcherCounters := [](*int64){}
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		fetcher := NewMockAssetFetcher(t)
 		counter := int64(0)
 		fetcher.EXPECT().Fetch(mock.Anything, mock.Anything).Run(func(_ context.Context, _ chan<- AssetEvent) {
@@ -227,7 +226,7 @@ func TestAssetInventory_RunAllFetchersOnce(t *testing.T) {
 		fetcherCounters = append(fetcherCounters, &counter)
 	}
 
-	logger := clog.NewLogger("test_run")
+	logger := testhelper.NewLogger(t)
 	inventory := AssetInventory{
 		logger:              logger,
 		fetchers:            fetchers,

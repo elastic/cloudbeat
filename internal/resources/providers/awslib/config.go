@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -31,6 +32,7 @@ import (
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/infra/observability"
 )
 
@@ -127,3 +129,31 @@ type AWSRoleChainingStep struct {
 	RoleARN string
 	Options func(aro *stscreds.AssumeRoleOptions)
 }
+
+func CredentialsValid(ctx context.Context, cnf aws.Config, log *clog.Logger) bool {
+	_, err := cnf.Credentials.Retrieve(ctx)
+
+	if err == nil {
+		return true
+	}
+
+	if !strings.Contains(err.Error(), "not authorized to perform: sts:AssumeRole") {
+		log.Errorf(ctx, "Expected a 403 authorization error, but got: %v", err)
+	}
+
+	return false
+}
+
+type CredentialsValidator interface {
+	Validate(ctx context.Context, cnf aws.Config, log *clog.Logger) bool
+}
+
+type CredentialsValidatorFunc func(ctx context.Context, cnf aws.Config, log *clog.Logger) bool
+
+func (c CredentialsValidatorFunc) Validate(ctx context.Context, cnf aws.Config, log *clog.Logger) bool {
+	return c(ctx, cnf, log)
+}
+
+var _ CredentialsValidator = (CredentialsValidatorFunc)(nil)
+
+var CredentialsValidatorNOOP CredentialsValidatorFunc = func(_ context.Context, _ aws.Config, _ *clog.Logger) bool { return true }

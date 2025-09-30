@@ -25,11 +25,12 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/testutil"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestIAMRoleFetcher_Fetch(t *testing.T) {
@@ -109,12 +110,14 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 		),
 	}
 
-	logger := clog.NewLogger("test_fetcher_iam_role")
+	logger := testhelper.NewLogger(t)
 	provider := newMockIamRoleProvider(t)
 	provider.EXPECT().ListRoles(mock.Anything).Return(in, nil)
 
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newIamRoleFetcher(logger, identity, provider)
+	fetcher := newIamRoleFetcher(logger, identity, provider, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }

@@ -35,12 +35,12 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 var expectedAWSSubtypes = []string{
@@ -117,9 +117,11 @@ func TestAWSOrg_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &AWSOrg{
-				IAMProvider:      tt.iamProvider,
-				IdentityProvider: tt.identityProvider,
-				AccountProvider:  tt.accountProvider,
+				IAMProvider:       tt.iamProvider,
+				IdentityProvider:  tt.identityProvider,
+				AccountProvider:   tt.accountProvider,
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -169,11 +171,13 @@ func Test_getAwsAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				IAMProvider:      getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
-				IdentityProvider: nil,
-				AccountProvider:  tt.accountProvider,
+				IAMProvider:       getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
+				IdentityProvider:  nil,
+				AccountProvider:   tt.accountProvider,
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 			}
-			log := clog.NewLogger("test")
+			log := testhelper.NewLogger(t)
 			got, err := a.getAwsAccounts(t.Context(), log, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				require.ErrorContains(t, err, tt.wantErr)
@@ -246,24 +250,23 @@ func Test_pickManagementAccountRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				IAMProvider:      getMockIAMRoleGetter(tt.roles),
-				IdentityProvider: mockAwsIdentityProvider(nil),
-				AccountProvider:  mockAccountProvider(nil),
+				IAMProvider:       getMockIAMRoleGetter(tt.roles),
+				IdentityProvider:  mockAwsIdentityProvider(nil),
+				AccountProvider:   mockAccountProvider(nil),
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 			}
 
 			// set up log capture
-			var log *clog.Logger
 			logCaptureBuf := &bytes.Buffer{}
-			{
-				replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
-					return zapcore.NewCore(
-						zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
-						zapcore.AddSync(logCaptureBuf),
-						zapcore.DebugLevel,
-					)
-				})
-				log = clog.NewLogger("test").WithOptions(replacement)
-			}
+			replacement := zap.WrapCore(func(zapcore.Core) zapcore.Core {
+				return zapcore.NewCore(
+					zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
+					zapcore.AddSync(logCaptureBuf),
+					zapcore.DebugLevel,
+				)
+			})
+			log := testhelper.NewLogger(t).WithOptions(replacement)
 
 			stsClient := &mockStsClient{}
 			rootCfg := assumeRole(stsClient, aws.Config{}, "cloudbeat-root")

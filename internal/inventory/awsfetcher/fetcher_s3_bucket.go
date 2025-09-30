@@ -27,25 +27,28 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type s3BucketFetcher struct {
-	logger      *clog.Logger
-	provider    s3BucketProvider
-	AccountId   string
-	AccountName string
+	logger        *clog.Logger
+	provider      s3BucketProvider
+	AccountId     string
+	AccountName   string
+	statusHandler statushandler.StatusHandlerAPI
 }
 
 type s3BucketProvider interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func newS3BucketFetcher(logger *clog.Logger, identity *cloud.Identity, provider s3BucketProvider) inventory.AssetFetcher {
+func newS3BucketFetcher(logger *clog.Logger, identity *cloud.Identity, provider s3BucketProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &s3BucketFetcher{
-		logger:      logger,
-		provider:    provider,
-		AccountId:   identity.Account,
-		AccountName: identity.AccountAlias,
+		logger:        logger,
+		provider:      provider,
+		AccountId:     identity.Account,
+		AccountName:   identity.AccountAlias,
+		statusHandler: statusHandler,
 	}
 }
 
@@ -59,6 +62,7 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 		if len(awsBuckets) == 0 {
 			return
 		}
+		awslib.ReportMissingPermission(s.statusHandler, err)
 	}
 
 	buckets := lo.Map(awsBuckets, func(item awslib.AwsResource, _ int) s3.BucketDescription {
