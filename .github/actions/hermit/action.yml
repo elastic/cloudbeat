@@ -5,11 +5,16 @@ inputs:
     description: 'Init tools'
     required: false
     default: 'false'
+  free-disk:
+    description: 'Free disk space'
+    required: false
+    default: 'true'
 runs:
   using: composite
   steps:
     - id: free-disk
       name: Free Disk Space
+      if: ${{ inputs.free-disk == 'true' }}
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
       with:
         tool-cache: false
