@@ -5,11 +5,16 @@ inputs:
     description: 'Init tools'
     required: false
     default: 'false'
+  free-disk:
+    description: 'Free disk space'
+    required: false
+    default: 'true'
 runs:
   using: composite
   steps:
     - id: free-disk
       name: Free Disk Space
+      if: ${{ inputs.free-disk == 'true' }}
       uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
       with:
         tool-cache: false
@@ -40,12 +45,15 @@ runs:
           ~/.cache/pypoetry
           ~/.cache/pre-commit
         key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
+        restore-keys: |
+          ci-hermit-env-${{ runner.os }}
 
     - id: cache-go-deps
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
       with:
         path: |
           ~/go/pkg/
+          ~/.cache/go-build
         key: ci-go-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
 
     - name: Initialize hermit
