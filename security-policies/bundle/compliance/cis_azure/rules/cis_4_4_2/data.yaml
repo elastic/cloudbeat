@@ -24,23 +24,22 @@ metadata:
     ```
 
     Example output:
-    ```
+    ```json
     {
-     "allowedValues": "TLSv1,TLSv1.1,TLSv1.2",
-     "dataType": "Set",
-     "defaultValue": "TLSv1.2",
-     "description": "Which protocols the server permits for encrypted connections.
-    By default, TLS 1.2 is enforced",
-     "id": "/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.DBforMySQL/flexibleServers/<serverName>/configurations/tls_version",
-     "isConfigPendingRestart": "False",
-     "isDynamicConfig": "False",
-     "isReadOnly": "False",
-     "name": "tls_version",
-     "resourceGroup": "<resourceGroupName>",
-     "source": "system-default",
-     "systemData": null,
-     "type": "Microsoft.DBforMySQL/flexibleServers/configurations",
-     "value": "TLSv1.2"
+        "allowedValues": "TLSv1,TLSv1.1,TLSv1.2",
+        "dataType": "Set",
+        "defaultValue": "TLSv1.2",
+        "description": "Which protocols the server permits for encrypted connections. By default, TLS 1.2 is enforced",
+        "id": "/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.DBforMySQL/flexibleServers/<serverName>/configurations/tls_version",
+        "isConfigPendingRestart": "False",
+        "isDynamicConfig": "False",
+        "isReadOnly": "False",
+        "name": "tls_version",
+        "resourceGroup": "<resourceGroupName>",
+        "source": "system-default",
+        "systemData": null,
+        "type": "Microsoft.DBforMySQL/flexibleServers/configurations",
+        "value": "TLSv1.2"
     }
     ```
   remediation: |-
