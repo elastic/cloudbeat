@@ -149,7 +149,7 @@ def modify_resource(resource):
     elif resource["name"] == "cloudbeatVM/customScriptExtension":
         # Modify agent installation to *not* disable SSH
         resource["properties"]["settings"] = {
-            "fileUris": ["https://raw.githubusercontent.com/elastic/cloudbeat/main/deploy/azure/install-agent-dev.sh"],
+            "fileUris": ["https://raw.githubusercontent.com/elastic/cloudbeat/9.2/deploy/azure/install-agent-dev.sh"],
             "commandToExecute": (
                 "[concat('"
                 "bash install-agent-dev.sh ', "
