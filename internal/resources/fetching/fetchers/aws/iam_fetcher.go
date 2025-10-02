@@ -65,7 +65,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 
 	pwdPolicy, err := f.iamProvider.GetPasswordPolicy(ctx)
 	if err != nil {
-		f.log.Errorf("Unable to fetch PasswordPolicy, error: %v", err)
+		f.log.Errorf(ctx, "Unable to fetch PasswordPolicy, error: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	} else {
 		iamResources = append(iamResources, pwdPolicy)
@@ -73,7 +73,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 
 	users, err := f.iamProvider.GetUsers(ctx)
 	if err != nil {
-		f.log.Errorf("Unable to fetch IAM users, error: %v", err)
+		f.log.Errorf(ctx, "Unable to fetch IAM users, error: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	} else {
 		iamResources = append(iamResources, users...)
@@ -81,7 +81,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 
 	policies, err := f.iamProvider.GetPolicies(ctx)
 	if err != nil {
-		f.log.Errorf("Unable to fetch IAM policies, error: %v", err)
+		f.log.Errorf(ctx, "Unable to fetch IAM policies, error: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	} else {
 		iamResources = append(iamResources, policies...)
@@ -89,7 +89,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 
 	serverCertificates, err := f.iamProvider.ListServerCertificates(ctx)
 	if err != nil {
-		f.log.Errorf("Unable to fetch IAM server certificates, error: %v", err)
+		f.log.Errorf(ctx, "Unable to fetch IAM server certificates, error: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	} else {
 		iamResources = append(iamResources, serverCertificates)
@@ -97,7 +97,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 
 	accessAnalyzers, err := f.iamProvider.GetAccessAnalyzers(ctx)
 	if err != nil {
-		f.log.Errorf("Unable to fetch access access analyzers, error: %v", err)
+		f.log.Errorf(ctx, "Unable to fetch access access analyzers, error: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	} else {
 		iamResources = append(iamResources, accessAnalyzers)

@@ -67,7 +67,7 @@ func (f *accountFetcher) fetch(ctx context.Context, resourceName string, functio
 
 	azureAssets, err := function(ctx)
 	if err != nil {
-		f.logger.Errorf("Could not fetch %s: %v", resourceName, err)
+		f.logger.Errorf(ctx, "Could not fetch %s: %v", resourceName, err)
 		return
 	}
 

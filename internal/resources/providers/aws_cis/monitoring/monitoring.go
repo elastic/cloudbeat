@@ -98,11 +98,11 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 		}
 		metrics, err := p.Cloudwatchlogs.DescribeMetricFilters(ctx, info.Trail.HomeRegion, logGroup)
 		if err != nil {
-			p.Log.Errorf("failed to describe metric filters for cloudwatchlog log group arn %s: %v", *info.Trail.CloudWatchLogsLogGroupArn, err)
+			p.Log.Errorf(ctx, "failed to describe metric filters for cloudwatchlog log group arn %s: %v", *info.Trail.CloudWatchLogsLogGroupArn, err)
 			continue
 		}
 
-		parsedMetrics := p.parserMetrics(metrics)
+		parsedMetrics := p.parserMetrics(ctx, metrics)
 		names := filterNamesFromMetrics(metrics)
 
 		if len(names) == 0 {
@@ -117,7 +117,7 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 		for _, name := range names {
 			alarms, err := p.Cloudwatch.DescribeAlarms(ctx, info.Trail.HomeRegion, []string{name})
 			if err != nil {
-				p.Log.Errorf("failed to describe alarms for cloudwatch filter %v: %v", names, err)
+				p.Log.Errorf(ctx, "failed to describe alarms for cloudwatch filter %v: %v", names, err)
 				continue
 			}
 			topics := p.getSubscriptionForAlarms(ctx, info.Trail.HomeRegion, alarms)
@@ -133,7 +133,7 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 	return &Resource{Items: items}, nil
 }
 
-func (p *Provider) parserMetrics(metrics []cloudwatchlogs_types.MetricFilter) []MetricFilter {
+func (p *Provider) parserMetrics(ctx context.Context, metrics []cloudwatchlogs_types.MetricFilter) []MetricFilter {
 	parsedMetrics := make([]MetricFilter, 0, len(metrics))
 	for _, m := range metrics {
 		if m.FilterPattern == nil {
@@ -145,7 +145,8 @@ func (p *Provider) parserMetrics(metrics []cloudwatchlogs_types.MetricFilter) []
 
 		exp, err := parseFilterPattern(*m.FilterPattern)
 		if err != nil {
-			p.Log.Errorf("failed to parse metric filter pattern: %v (pattern: %s)", err, *m.FilterPattern)
+			// FIXME: This should be a context from the function signature.
+			p.Log.Errorf(ctx, "failed to parse metric filter pattern: %v (pattern: %s)", err, *m.FilterPattern)
 			parsedMetrics = append(parsedMetrics, MetricFilter{
 				MetricFilter: m,
 			})
@@ -166,7 +167,7 @@ func (p *Provider) getSubscriptionForAlarms(ctx context.Context, region *string,
 		for _, action := range alarm.AlarmActions {
 			subscriptions, err := p.Sns.ListSubscriptionsByTopic(ctx, pointers.Deref(region), action)
 			if err != nil {
-				p.Log.Errorf("failed to list subscriptions for topic %s: %v", action, err)
+				p.Log.Errorf(ctx, "failed to list subscriptions for topic %s: %v", action, err)
 				continue
 			}
 			for _, topic := range subscriptions {

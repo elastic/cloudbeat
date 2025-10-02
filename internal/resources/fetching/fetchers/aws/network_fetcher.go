@@ -100,26 +100,26 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 	var resources []awslib.AwsResource
 	nacl, err := client.DescribeNetworkAcl(ctx)
 	if err != nil {
-		f.log.Errorf("failed to describe network acl: %v", err)
+		f.log.Errorf(ctx, "failed to describe network acl: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	}
 	resources = append(resources, nacl...)
 
 	securityGroups, err := client.DescribeSecurityGroups(ctx)
 	if err != nil {
-		f.log.Errorf("failed to describe security groups: %v", err)
+		f.log.Errorf(ctx, "failed to describe security groups: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	}
 	resources = append(resources, securityGroups...)
 	vpcs, err := client.DescribeVpcs(ctx)
 	if err != nil {
-		f.log.Errorf("failed to describe vpcs: %v", err)
+		f.log.Errorf(ctx, "failed to describe vpcs: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	}
 	resources = append(resources, vpcs...)
 	ebsEncryption, err := client.GetEbsEncryptionByDefault(ctx)
 	if err != nil {
-		f.log.Errorf("failed to get ebs encryption by default: %v", err)
+		f.log.Errorf(ctx, "failed to get ebs encryption by default: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	}
 

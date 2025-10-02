@@ -94,12 +94,12 @@ func (s *cachedRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]s
 	var output []string
 	output, err := s.client.Regions(ctx, cfg)
 	if err != nil {
-		log.Errorf("Failed getting regions: %v", err)
+		log.Errorf(ctx, "Failed getting regions: %v", err)
 		return nil, err
 	}
 
 	if !s.setCache(output) {
-		log.Errorf("Failed setting regions cache")
+		log.Errorf(ctx, "Failed setting regions cache")
 	}
 	return output, nil
 }

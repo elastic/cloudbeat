@@ -64,7 +64,7 @@ func listAccounts(ctx context.Context, log *clog.Logger, client organizationsAPI
 
 			organization, err := getOUInfoForAccount(ctx, client, organizationIdToName, account.Id)
 			if err != nil {
-				log.Errorf("failed to get organizational unit info for account %s: %v", *account.Id, err)
+				log.Errorf(ctx, "failed to get organizational unit info for account %s: %v", *account.Id, err)
 			}
 			accounts = append(accounts, cloud.Identity{
 				Provider:         "aws",

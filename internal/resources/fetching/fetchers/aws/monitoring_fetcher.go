@@ -64,7 +64,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
-		m.log.Errorf("failed to aggregate monitoring resources: %v", err)
+		m.log.Errorf(ctx, "failed to aggregate monitoring resources: %v", err)
 		awslib.ReportMissingPermission(m.statusHandler, err)
 	}
 	if out != nil {
@@ -75,7 +75,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metada
 	}
 	hubs, err := m.securityhub.Describe(ctx)
 	if err != nil {
-		m.log.Errorf("failed to describe security hub: %v", err)
+		m.log.Errorf(ctx, "failed to describe security hub: %v", err)
 		awslib.ReportMissingPermission(m.statusHandler, err)
 		return nil
 	}

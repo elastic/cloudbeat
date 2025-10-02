@@ -91,8 +91,8 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 
 	awsResources, err := function(ctx)
 	if err != nil {
+		s.logger.Errorf(ctx, "Could not fetch %s: %v", resourceName, err)
 		awslib.ReportMissingPermission(s.statusHandler, err)
-		s.logger.Errorf("Could not fetch %s: %v", resourceName, err)
 		return
 	}
 

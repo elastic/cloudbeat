@@ -223,7 +223,7 @@ func (p Provider) listInlinePolicies(ctx context.Context, identity *string) ([]P
 			UserName:   identity,
 		})
 		if err != nil {
-			p.log.Errorf("fail to get inline policy for user: %s, policy name: %s", *identity, policyNames[i])
+			p.log.Errorf(ctx, "fail to get inline policy for user: %s, policy name: %s", *identity, policyNames[i])
 			policies = append(policies, PolicyDocument{PolicyName: policyNames[i]})
 			continue
 		}

@@ -56,7 +56,7 @@ func (f *RdsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) er
 	f.log.Info("Starting RdsFetcher.Fetch")
 	dbInstances, err := f.provider.DescribeDBInstances(ctx)
 	if err != nil {
-		f.log.Errorf("failed to load some DB instances from rds: %v", err)
+		f.log.Errorf(ctx, "failed to load some DB instances from rds: %v", err)
 		awslib.ReportMissingPermission(f.statusHandler, err)
 	}
 

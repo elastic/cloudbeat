@@ -161,7 +161,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudb
 		if identity.Account == rootIdentity.Account {
 			cfg, err := a.pickManagementAccountRole(ctx, log, stsClient, cfgCloudbeatRoot, identity)
 			if err != nil {
-				log.Errorf("error picking roles for account %s: %s", identity.Account, err)
+				log.Errorf(ctx, "error picking roles for account %s: %s", identity.Account, err)
 				continue
 			}
 			awsConfig = cfg
@@ -218,7 +218,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	if foundTagValue == scanSettingTagValue {
 		_, err := a.IAMProvider.GetRole(ctx, memberRole)
 		if err != nil {
-			log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, memberRole, err)
+			log.Errorf(ctx, "Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, memberRole, err)
 		}
 	}
 

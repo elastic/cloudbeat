@@ -74,7 +74,7 @@ func (f *storageFetcher) Fetch(ctx context.Context, assetChan chan<- inventory.A
 
 	storageAccounts, err := f.listStorageAccounts(ctx)
 	if err != nil {
-		f.logger.Errorf("Could not fetch anything: %v", err)
+		f.logger.Errorf(ctx, "Could not fetch anything: %v", err)
 		return
 	}
 
@@ -108,7 +108,7 @@ func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.A
 
 	azureAssets, err := function(ctx, storageAccounts)
 	if err != nil {
-		f.logger.Errorf("Could not fetch %s: %v", resourceName, err)
+		f.logger.Errorf(ctx, "Could not fetch %s: %v", resourceName, err)
 		return
 	}
 

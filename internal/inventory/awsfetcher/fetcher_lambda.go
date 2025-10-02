@@ -76,8 +76,8 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 
 	awsResources, err := function(ctx)
 	if err != nil {
+		s.logger.Errorf(ctx, "Could not fetch %s: %v", resourceName, err)
 		awslib.ReportMissingPermission(s.statusHandler, err)
-		s.logger.Errorf("Could not fetch %s: %v", resourceName, err)
 		return
 	}
 

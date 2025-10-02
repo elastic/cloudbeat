@@ -155,12 +155,12 @@ func (p *storageAccountProvider) ListStorageAccounts(ctx context.Context, storag
 	for _, saID := range storageAccountsSubscriptionsIds {
 		res, err := p.client.AssetAccountStorage(ctx, saID, nil)
 		if err != nil {
-			p.log.Errorf("error while fetching storage accounts for subscriptionId: %s, error: %v", saID, err)
+			p.log.Errorf(ctx, "error while fetching storage accounts for subscriptionId: %s, error: %v", saID, err)
 			continue
 		}
 		storageAccountsAssets, err := transformStorageAccounts(res, saID)
 		if err != nil {
-			p.log.Errorf("error while transforming storage for subscriptionId: %s, error: %v", saID, err)
+			p.log.Errorf(ctx, "error while transforming storage for subscriptionId: %s, error: %v", saID, err)
 			continue
 		}
 		assets = append(assets, storageAccountsAssets...)
@@ -256,7 +256,7 @@ func (p *storageAccountProvider) ListStorageAccountFileServices(ctx context.Cont
 		for _, item := range response.Value {
 			properties, err := maps.AsMapStringAny(item.FileServiceProperties)
 			if err != nil {
-				p.log.Errorf("error while transforming azure queue services for storage accounts %s: %v", sa.Id, err)
+				p.log.Errorf(ctx, "error while transforming azure queue services for storage accounts %s: %v", sa.Id, err)
 			}
 
 			assets = append(assets, AzureAsset{
@@ -288,7 +288,7 @@ func (p *storageAccountProvider) ListStorageAccountFileShares(ctx context.Contex
 
 		fileShares, err := transformFileShares(responses, sa)
 		if err != nil {
-			p.log.Errorf("error while transforming azure file share for storage accounts %s: %v", sa.Id, err)
+			p.log.Errorf(ctx, "error while transforming azure file share for storage accounts %s: %v", sa.Id, err)
 		}
 
 		assets = append(assets, fileShares...)
@@ -307,7 +307,7 @@ func (p *storageAccountProvider) ListStorageAccountQueues(ctx context.Context, s
 
 		queues, err := transformQueues(responses, sa)
 		if err != nil {
-			p.log.Errorf("error while transforming azure queues for storage accounts %s: %v", sa.Id, err)
+			p.log.Errorf(ctx, "error while transforming azure queues for storage accounts %s: %v", sa.Id, err)
 		}
 
 		assets = append(assets, queues...)
@@ -327,7 +327,7 @@ func (p *storageAccountProvider) ListStorageAccountQueueServices(ctx context.Con
 		for _, item := range response.Value {
 			properties, err := maps.AsMapStringAny(item.QueueServiceProperties)
 			if err != nil {
-				p.log.Errorf("error while transforming azure queue services for storage accounts %s: %v", sa.Id, err)
+				p.log.Errorf(ctx, "error while transforming azure queue services for storage accounts %s: %v", sa.Id, err)
 			}
 
 			assets = append(assets, AzureAsset{
@@ -358,7 +358,7 @@ func (p *storageAccountProvider) ListStorageAccountTables(ctx context.Context, s
 
 		tables, err := transformTables(responses, sa)
 		if err != nil {
-			p.log.Errorf("error while transforming azure tables for storage accounts %s: %v", sa.Id, err)
+			p.log.Errorf(ctx, "error while transforming azure tables for storage accounts %s: %v", sa.Id, err)
 		}
 
 		assets = append(assets, tables...)
@@ -377,7 +377,7 @@ func (p *storageAccountProvider) ListStorageAccountTableServices(ctx context.Con
 		for _, item := range response.Value {
 			properties, err := maps.AsMapStringAny(item.TableServiceProperties)
 			if err != nil {
-				p.log.Errorf("error while transforming azure table services for storage accounts %s: %v", sa.Id, err)
+				p.log.Errorf(ctx, "error while transforming azure table services for storage accounts %s: %v", sa.Id, err)
 			}
 
 			assets = append(assets, AzureAsset{

@@ -49,7 +49,7 @@ func (f *S3Fetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) err
 	f.log.Info("Starting S3Fetcher.Fetch")
 	buckets, err := f.s3.DescribeBuckets(ctx)
 	if err != nil {
-		f.log.Errorf("failed to load buckets from S3: %v", err)
+		f.log.Errorf(ctx, "failed to load buckets from S3: %v", err)
 		return nil
 	}
 
