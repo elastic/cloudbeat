@@ -28,11 +28,9 @@ jobs:
       - name: Check out PR
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
-        with:
-          init-tools: 'false'
-          free-disk: 'false'
+      - name: Initialize hermit
+        shell: bash
+        run: ./bin/hermit env --raw >> "$GITHUB_ENV"
 
       - name: Build PR branch binary
         run: |
