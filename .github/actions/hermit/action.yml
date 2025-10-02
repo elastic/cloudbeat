@@ -47,6 +47,13 @@ runs:
         key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
         restore-keys: |
           ci-hermit-env-${{ runner.os }}
+    - name: Log cached paths 1
+      shell: bash
+      run: |
+        ls -lah ~/.cache/hermit/pkg
+        ls -lah ./.hermit
+        ls -lah ~/.cache/pypoetry
+        ls -lah ~/.cache/pre-commit
 
     - id: cache-go-deps
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
