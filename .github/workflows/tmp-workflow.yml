@@ -19,6 +19,7 @@ jobs:
         uses: ./.github/actions/hermit
         with:
           init-tools: 'true'
+          free-disk: 'false'
       - name: local hermit folder
         run: |
           ls -lahR ./.hermit/
@@ -28,3 +29,4 @@ jobs:
       - name: python
         run: |
           /home/runner/.cache/hermit/pkg/python3-3.11.4/install/bin/python3.11 --version
+          poetry --version
