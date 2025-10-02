@@ -22,17 +22,11 @@ jobs:
           free-disk: 'false'
       - name: local hermit folder
         run: |
-          ls -lahR ./.hermit/
+          ls -lah ./.hermit/
       - name: pkg hermit folder
         run: |
           ls -lah ~/.cache/hermit/pkg/
-      - name: build
-        run: |
-          mage -v build
       - name: python
         run: |
+          hermit install
           ls -lah /home/runner/.cache/hermit/pkg/
-          which poetry
-          head -n 3 $(which poetry)
-          poetry --version
-          /home/runner/.cache/hermit/pkg/python3-3.11.4/install/bin/python3.11 --version
