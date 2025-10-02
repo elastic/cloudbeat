@@ -62,6 +62,14 @@ runs:
           ~/go/pkg/
         key: ci-go-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
 
+    - name: Log cached paths 2
+      shell: bash
+      run: |
+        ls -lah ~/.cache/hermit/pkg
+        ls -lah ./.hermit
+        ls -lah ~/.cache/pypoetry
+        ls -lah ~/.cache/pre-commit
+
     - name: Initialize hermit
       shell: bash
       run: ./bin/hermit env --raw >> "$GITHUB_ENV"
@@ -72,6 +80,14 @@ runs:
       if: steps.cache-tools.outputs.cache-hit != 'true'
       shell: bash
       run: hermit clean --transient
+
+    - name: Log cached paths 3
+      shell: bash
+      run: |
+        ls -lah ~/.cache/hermit/pkg
+        ls -lah ./.hermit
+        ls -lah ~/.cache/pypoetry
+        ls -lah ~/.cache/pre-commit
 
     - if: ${{ inputs.init-tools == 'true' }}
       name: Install hermit packages
