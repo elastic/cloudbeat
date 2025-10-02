@@ -25,15 +25,14 @@ jobs:
           ls -lahR ./.hermit/
       - name: pkg hermit folder
         run: |
-          ls -lahR ~/.cache/hermit/pkg/
+          ls -lah ~/.cache/hermit/pkg/
       - name: build
         run: |
-          ls -lahR ~/.cache/hermit/pkg/
           mage -v build
       - name: python
         run: |
-          ls -lahR /home/runner/.cache/hermit/pkg/
-          /home/runner/.cache/hermit/pkg/python3-3.11.4/install/bin/python3.11 --version
-          poetry --version
+          ls -lah /home/runner/.cache/hermit/pkg/
           which poetry
           head -n 3 $(which poetry)
+          poetry --version
+          /home/runner/.cache/hermit/pkg/python3-3.11.4/install/bin/python3.11 --version
