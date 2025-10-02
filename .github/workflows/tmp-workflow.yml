@@ -30,3 +30,5 @@ jobs:
         run: |
           /home/runner/.cache/hermit/pkg/python3-3.11.4/install/bin/python3.11 --version
           poetry --version
+          which poetry
+          head -n 3 $(which poetry)
