@@ -32,6 +32,7 @@ jobs:
           mage -v build
       - name: python
         run: |
+          ls -lahR /home/runner/.cache/hermit/pkg/
           /home/runner/.cache/hermit/pkg/python3-3.11.4/install/bin/python3.11 --version
           poetry --version
           which poetry
