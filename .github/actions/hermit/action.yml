@@ -1,6 +1,11 @@
 name: 'Hermit Environment'
 description: 'Activate hermit environment'
 inputs:
+  # This action should not be called with `init-tools: 'false` from standalone workflows.
+  # The purpose is for the ci.yml to first init the tools and cache them, while the rest of jobs wait for that
+  # and then the rest of the jobs fetch them from cache by including this action with `init-tools: 'false`.
+  # If you want to use this action from a standalone workflow, use `init-tools: 'true`, or use the step that
+  # activates the hermit, directly.
   init-tools:
     description: 'Init tools'
     required: false
