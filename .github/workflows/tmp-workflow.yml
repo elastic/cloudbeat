@@ -26,7 +26,3 @@ jobs:
       - name: pkg hermit folder
         run: |
           ls -lah ~/.cache/hermit/pkg/
-      - name: python
-        run: |
-          hermit install
-          ls -lah /home/runner/.cache/hermit/pkg/
