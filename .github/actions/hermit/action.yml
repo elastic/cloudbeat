@@ -59,14 +59,6 @@ runs:
       shell: bash
       run: ./bin/hermit env --raw >> "$GITHUB_ENV"
 
-    - name: Log cached paths 3
-      shell: bash
-      run: |
-        ls -lah ~/.cache/hermit/pkg
-        ls -lah ./.hermit
-        ls -lah ~/.cache/pypoetry
-        ls -lah ~/.cache/pre-commit
-
     - if: ${{ inputs.init-tools == 'true' }}
       name: Install hermit packages
       shell: bash
@@ -94,3 +86,11 @@ runs:
     - name: Download go dependencies
       shell: bash
       run: go mod download && go mod tidy
+
+    - name: Log cached paths
+      shell: bash
+      run: |
+        ls -lah ~/.cache/hermit/pkg
+        ls -lah ./.hermit
+        ls -lah ~/.cache/pypoetry
+        ls -lah ~/.cache/pre-commit
