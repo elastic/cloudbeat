@@ -90,9 +90,30 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, resource
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
+				Region:      item.Location,
 				AccountID:   item.TenantId,
+				ProjectID:   item.SubscriptionId,
 				ServiceName: "Azure",
 			}),
 		)
+<<<<<<< HEAD
+=======
+
+		if resourceType == azurelib.VirtualMachineAssetType {
+			vmProperties := tryUnpackingVMProperties(item.Properties)
+			if vmProperties != nil {
+				asset.Host = &inventory.Host{
+					ID:   item.Id,
+					Name: vmProperties.Extended.InstanceView.ComputerName,
+					Type: vmProperties.HardwareProfile.VmSize,
+				}
+				asset.Cloud.MachineType = vmProperties.HardwareProfile.VmSize
+			}
+			asset.Cloud.InstanceID = item.Id
+			asset.Cloud.InstanceName = item.Name
+		}
+
+		assetChan <- asset
+>>>>>>> 04b20493 ([Asset Inventory][Azure] Add missing `cloud.*` section information (#3470))
 	}
 }
