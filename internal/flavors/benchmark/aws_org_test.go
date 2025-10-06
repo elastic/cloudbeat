@@ -122,6 +122,7 @@ func TestAWSOrg_Initialize(t *testing.T) {
 				AccountProvider:   tt.accountProvider,
 				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
 				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -176,6 +177,7 @@ func Test_getAwsAccounts(t *testing.T) {
 				AccountProvider:   tt.accountProvider,
 				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
 				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}
 			log := testhelper.NewLogger(t)
 			got, err := a.getAwsAccounts(t.Context(), log, aws.Config{}, &tt.rootIdentity)
@@ -242,7 +244,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 			},
 			expectedLog: fmt.Sprintf(
 				"should be scanned (%s: %s), but %q role is missing",
-				scanSettingTagKey, scanSettingTagValue, memberRole,
+				scanSettingTagKey, scanSettingTagValue, awslib.BenchmarkOrgIAMRoleNamesProvider{}.MemberRoleName(),
 			),
 		},
 	}
@@ -255,6 +257,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 				AccountProvider:   mockAccountProvider(nil),
 				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
 				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}
 
 			// set up log capture

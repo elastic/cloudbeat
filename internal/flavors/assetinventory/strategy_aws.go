@@ -32,11 +32,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
-const (
-	rootRole   = "cloudbeat-asset-inventory-root"
-	memberRole = "cloudbeat-asset-inventory-securityaudit"
-)
-
 func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) (*awssdk.Config, error) {
 	if cfg.CloudConfig.Aws.CloudConnectors {
 		return awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
@@ -46,10 +41,14 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 }
 
 func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
+	s.logger.Infof("initializing asset inventory aws (cloud connectors %t)", s.cfg.CloudConfig.Aws.CloudConnectors)
+
 	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
 	if err != nil {
 		return nil, err
 	}
+
+	orgIAMRoleNamesProvider := getOrgIAMRoleNamesProvider(s.cfg.CloudConfig.Aws)
 
 	idProvider := awslib.IdentityProvider{Logger: s.logger}
 	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
@@ -66,7 +65,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 	rootRoleConfig := assumeRole(
 		sts.NewFromConfig(*awsConfig),
 		*awsConfig,
-		fmtIAMRole(awsIdentity.Account, rootRole),
+		fmtIAMRole(awsIdentity.Account, orgIAMRoleNamesProvider.RootRoleName()),
 	)
 	accountProvider := &awslib.AccountProvider{}
 	accountIdentities, err := accountProvider.ListAccounts(ctx, s.logger, rootRoleConfig)
@@ -79,7 +78,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 		assumedRoleConfig := assumeRole(
 			stsClient,
 			rootRoleConfig,
-			fmtIAMRole(identity.Account, memberRole),
+			fmtIAMRole(identity.Account, orgIAMRoleNamesProvider.MemberRoleName()),
 		)
 		if ok := awslib.CredentialsValid(ctx, assumedRoleConfig, s.logger); !ok {
 			// role does not exist, skip identity/account
@@ -100,4 +99,11 @@ func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn stri
 
 func fmtIAMRole(account string, role string) string {
 	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
+}
+
+func getOrgIAMRoleNamesProvider(cfg config.AwsConfig) awslib.OrgIAMRoleNamesProvider {
+	if cfg.CloudConnectors {
+		return awslib.BenchmarkOrgIAMRoleNamesProvider{} // for reusability with CSPM when cloud connectors are enabled.
+	}
+	return awslib.AssetDiscoveryOrgIAMRoleNamesProvider{}
 }
