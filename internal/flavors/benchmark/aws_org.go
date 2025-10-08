@@ -45,8 +45,6 @@ import (
 )
 
 const (
-	rootRole            = "cloudbeat-root"
-	memberRole          = "cloudbeat-securityaudit"
 	scanSettingTagKey   = "cloudbeat_scan_management_account"
 	scanSettingTagValue = "Yes"
 	scopeName           = "github.com/elastic/cloudbeat/internal/flavors/benchmark/aws_org"
@@ -60,6 +58,7 @@ type AWSOrg struct {
 	AccountProvider   awslib.AccountProviderAPI
 	StatusHandler     statushandler.StatusHandlerAPI
 	AWSCredsValidator awslib.CredentialsValidator
+	RoleNamesProvider awslib.OrgIAMRoleNamesProvider
 }
 
 func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -79,6 +78,8 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
+
+	log.Infof("initializing benchmark aws org (cloud connectors %t)", cfg.CloudConfig.Aws.CloudConnectors)
 
 	var (
 		awsConfigCloudbeatRoot *awssdk.Config
@@ -171,7 +172,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudb
 			awsConfig = assumeRole(
 				stsClient,
 				cfgCloudbeatRoot,
-				fmtIAMRole(identity.Account, memberRole),
+				fmtIAMRole(identity.Account, a.RoleNamesProvider.MemberRoleName()),
 			)
 		}
 
@@ -192,7 +193,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	// had the built-in SecurityAudit policy attached.
 	var foundTagValue string
 	{
-		r, err := a.IAMProvider.GetRole(ctx, rootRole)
+		r, err := a.IAMProvider.GetRole(ctx, a.RoleNamesProvider.RootRoleName())
 		if err != nil {
 			return awssdk.Config{}, fmt.Errorf("error getting root role: %w", err)
 		}
@@ -207,7 +208,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 
 	if foundTagValue == "" {
 		// Legacy. Use 'cloudbeat-root' role for compliance reasons.
-		log.Infof("%q tag not found, using '%s' role for backward compatibility", scanSettingTagKey, rootRole)
+		log.Infof("%q tag not found, using '%s' role for backward compatibility", scanSettingTagKey, a.RoleNamesProvider.RootRoleName())
 		return rootCfg, nil
 	}
 
@@ -216,9 +217,9 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	// without exiting function, since we want to scan other selected
 	// accounts, but at least the error will be visible in the logs.
 	if foundTagValue == scanSettingTagValue {
-		_, err := a.IAMProvider.GetRole(ctx, memberRole)
+		_, err := a.IAMProvider.GetRole(ctx, a.RoleNamesProvider.MemberRoleName())
 		if err != nil {
-			log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, memberRole, err)
+			log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, a.RoleNamesProvider.MemberRoleName(), err)
 		}
 	}
 
@@ -228,11 +229,11 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	// will still try to use "cloudbeat-securityaudit", but it is non-existent,
 	// so we will fail silently and not get any data from the Management
 	// Account.
-	log.Debugf("assuming '%s' role for Account %s", memberRole, identity.Account)
+	log.Debugf("assuming '%s' role for Account %s", a.RoleNamesProvider.MemberRoleName(), identity.Account)
 	config := assumeRole(
 		stsClient,
 		rootCfg,
-		fmtIAMRole(identity.Account, memberRole),
+		fmtIAMRole(identity.Account, a.RoleNamesProvider.MemberRoleName()),
 	)
 	return config, nil
 }
@@ -258,14 +259,14 @@ func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.C
 
 	var cfgCloudbeatRoot awssdk.Config
 
-	if strings.Contains(pointers.Deref(identity.Arn), rootRole) {
+	if strings.Contains(pointers.Deref(identity.Arn), a.RoleNamesProvider.RootRoleName()) {
 		// case A [EC2 Instance] already cloudbeat-root, no need to re-assume.
 		cfgCloudbeatRoot = *awsConfig
 	} else {
 		cfgCloudbeatRoot = assumeRole(
 			sts.NewFromConfig(*awsConfig),
 			*awsConfig,
-			fmtIAMRole(pointers.Deref(identity.Account), rootRole),
+			fmtIAMRole(pointers.Deref(identity.Account), a.RoleNamesProvider.RootRoleName()),
 		)
 	}
 

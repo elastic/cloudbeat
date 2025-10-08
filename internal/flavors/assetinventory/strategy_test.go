@@ -19,6 +19,7 @@ package assetinventory
 
 import (
 	"context"
+	"strconv"
 	"testing"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/inventory"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
@@ -150,6 +152,33 @@ func TestStrategyPicks(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
+		})
+	}
+}
+
+func TestGetOrgIAMRoleNamesProvider(t *testing.T) {
+	tests := []struct {
+		cloudConnectors    bool
+		expectedRootRole   string
+		expectedMemberRole string
+	}{
+		{
+			cloudConnectors:    false,
+			expectedRootRole:   awslib.AssetDiscoveryOrgIAMRoleNamesProvider{}.RootRoleName(),
+			expectedMemberRole: awslib.AssetDiscoveryOrgIAMRoleNamesProvider{}.MemberRoleName(),
+		},
+		{
+			cloudConnectors:    true,
+			expectedRootRole:   awslib.BenchmarkOrgIAMRoleNamesProvider{}.RootRoleName(),
+			expectedMemberRole: awslib.BenchmarkOrgIAMRoleNamesProvider{}.MemberRoleName(),
+		},
+	}
+
+	for i, tc := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := getOrgIAMRoleNamesProvider(config.AwsConfig{CloudConnectors: tc.cloudConnectors})
+			assert.Equal(t, tc.expectedRootRole, got.RootRoleName())
+			assert.Equal(t, tc.expectedMemberRole, got.MemberRoleName())
 		})
 	}
 }

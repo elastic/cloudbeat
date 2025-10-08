@@ -61,6 +61,8 @@ func (a *AWS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 		return nil, nil, nil, err
 	}
 
+	log.Infof("initializing benchmark aws (cloud connectors %t)", cfg.CloudConfig.Aws.CloudConnectors)
+
 	var (
 		awsConfig   *awssdk.Config
 		awsIdentity *cloud.Identity
