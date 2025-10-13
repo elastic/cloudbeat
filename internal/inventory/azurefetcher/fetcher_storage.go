@@ -28,6 +28,10 @@ import (
 
 type storageFetcher struct {
 	logger   *clog.Logger
+<<<<<<< HEAD
+=======
+	tenantID string
+>>>>>>> 04b20493 ([Asset Inventory][Azure] Add missing `cloud.*` section information (#3470))
 	provider storageProvider
 }
 
@@ -108,8 +112,9 @@ func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.A
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				AccountID:   item.TenantId,
+				AccountID:   pickName(item.TenantId, f.tenantID),
 				ServiceName: "Azure",
+				ProjectID:   item.SubscriptionId,
 			}),
 		)
 	}
