@@ -1,6 +1,12 @@
 name: 'Hermit Environment'
 description: 'Activate hermit environment'
 inputs:
+  # This action should not be called with `init-tools: 'false` from standalone workflows.
+  # The purpose is for the ci.yml first to init the tools and cache them,
+  # while the rest of the jobs wait for that, and then the rest of the jobs fetch them from cache
+  # by including this action with `init-tools: false`.
+  # If you want to use this action from a standalone workflow, use `init-tools: 'true`,
+  # or use the step that activates the hermit, directly. Otherwise the
   init-tools:
     description: 'Init tools'
     required: false
@@ -40,6 +46,8 @@ runs:
           ~/.cache/pypoetry
           ~/.cache/pre-commit
         key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
+        restore-keys: |
+          ci-hermit-env-${{ runner.os }}
 
     - id: cache-go-deps
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
@@ -83,10 +91,14 @@ runs:
       name: Install pre-commit repos
       shell: bash
       run: pre-commit || true
-    - if: ${{ inputs.init-tools == 'true' }}
-      name: Download go dependencies
+    - name: Download go dependencies
       shell: bash
-      run: go mod download
+      run: go mod download && go mod tidy
 
-    - shell: bash
-      run: go env
+    - name: Log cached paths
+      shell: bash
+      run: |
+        ls -lah ~/.cache/hermit/pkg
+        ls -lah ./.hermit
+        ls -lah ~/.cache/pypoetry
+        ls -lah ~/.cache/pre-commit

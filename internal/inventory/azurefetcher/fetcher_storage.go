@@ -28,7 +28,7 @@ import (
 
 type storageFetcher struct {
 	logger   *clog.Logger
-	tenantID string //nolint:unused
+	tenantID string
 	provider storageProvider
 }
 
@@ -120,8 +120,9 @@ func (f *storageFetcher) fetch(ctx context.Context, storageAccounts []azurelib.A
 			inventory.WithRawAsset(item),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
-				AccountID:   item.TenantId,
-				ServiceName: "Azure",
+				AccountID:   pickName(item.TenantId, f.tenantID),
+				ServiceName: "Azure Storage",
+				ProjectID:   item.SubscriptionId,
 			}),
 			inventory.WithLabelsFromAny(item.Tags),
 		)
