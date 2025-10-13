@@ -73,8 +73,102 @@ func (f *activedirectoryFetcher) fetchServicePrincipals(ctx context.Context, ass
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AzureCloudProvider,
 				AccountID:   tenantId,
-				ServiceName: "Azure",
+				ServiceName: "Azure Entra",
 			}),
+<<<<<<< HEAD
+=======
+			inventory.WithTags(item.GetTags()),
+		)
+	}
+}
+
+func (f *activedirectoryFetcher) fetchDirectoryRoles(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
+	f.logger.Info("Fetching Directory Roles")
+	defer f.logger.Info("Fetching Directory Roles - Finished")
+
+	items, err := f.provider.ListDirectoryRoles(ctx)
+	if err != nil {
+		f.logger.Errorf("Could not fetch Directory Roles: %v", err)
+	}
+
+	for _, item := range items {
+		assetChan <- inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureRoleDefinition,
+			pointers.Deref(item.GetId()),
+			pickName(pointers.Deref(item.GetDisplayName()), pointers.Deref(item.GetId())),
+			inventory.WithRawAsset(
+				item.GetBackingStore().Enumerate(),
+			),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   f.tenantID,
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   pointers.Deref(item.GetId()),
+				Name: pointers.Deref(item.GetDisplayName()),
+			}),
+		)
+	}
+}
+
+func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
+	f.logger.Info("Fetching Groups")
+	defer f.logger.Info("Fetching Groups - Finished")
+
+	items, err := f.provider.ListGroups(ctx)
+	if err != nil {
+		f.logger.Errorf("Could not fetch Groups: %v", err)
+	}
+
+	for _, item := range items {
+		assetChan <- inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraGroup,
+			pointers.Deref(item.GetId()),
+			pickName(pointers.Deref(item.GetDisplayName()), pointers.Deref(item.GetId())),
+			inventory.WithRawAsset(
+				item.GetBackingStore().Enumerate(),
+			),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   f.tenantID,
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithGroup(inventory.Group{
+				ID:   pointers.Deref(item.GetId()),
+				Name: pointers.Deref(item.GetDisplayName()),
+			}),
+		)
+	}
+}
+
+func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<- inventory.AssetEvent) {
+	f.logger.Info("Fetching Users")
+	defer f.logger.Info("Fetching Users - Finished")
+
+	items, err := f.provider.ListUsers(ctx)
+	if err != nil {
+		f.logger.Errorf("Could not fetch Users: %v", err)
+	}
+
+	for _, item := range items {
+		assetChan <- inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureEntraUser,
+			pointers.Deref(item.GetId()),
+			pickName(pointers.Deref(item.GetDisplayName()), pointers.Deref(item.GetId())),
+			inventory.WithRawAsset(
+				item.GetBackingStore().Enumerate(),
+			),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   f.tenantID,
+				ServiceName: "Azure Entra",
+			}),
+			inventory.WithUser(inventory.User{
+				ID:   pointers.Deref(item.GetId()),
+				Name: pointers.Deref(item.GetDisplayName()),
+			}),
+>>>>>>> 7e3234f1 ([Asset Inventory][Azure] Fix Azure service names (cloud.service.name) (#3466))
 		)
 	}
 }
