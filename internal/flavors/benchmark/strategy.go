@@ -49,6 +49,7 @@ func GetStrategy(cfg *config.Config, log *clog.Logger, statusHandler statushandl
 				AccountProvider:   awslib.AccountProvider{},
 				StatusHandler:     statusHandler,
 				AWSCredsValidator: awslib.CredentialsValidatorFunc(awslib.CredentialsValid),
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}, nil
 		}
 

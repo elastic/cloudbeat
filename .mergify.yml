@@ -400,3 +400,16 @@ pull_request_rules:
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+  - name: backport patches to 9.2 branch
+    conditions:
+      - merged
+      - label=backport-v9.2.0
+    actions:
+      backport:
+        assignees:
+          - "{{ author }}"
+        branches:
+          - "9.2"
+        labels:
+          - "backport"
+        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
