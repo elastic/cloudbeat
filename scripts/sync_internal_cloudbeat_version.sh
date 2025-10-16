@@ -28,8 +28,7 @@ handle_version_changes() {
     current_branch=$(git branch --show-current)
     echo "Current branch is: $current_branch"
 
-    # TODO: Removew dg-fix-sync-wf after testing
-    if [ "$current_branch" = "main" ] || [ "$current_branch" = "dg-fix-sync-wf" ]; then
+    if [ "$current_branch" = "main" ]; then
         branch_name="sync-cloudbeat-version-$(date +%s)"
         echo "Creating new branch: $branch_name"
         git checkout -b $branch_name
@@ -48,7 +47,7 @@ handle_version_changes() {
             --base main \
             --head $branch_name
     else
-        echo "Not on main or testing branch, committing directly to $current_branch"
+        echo "Not on main branch, committing directly to $current_branch"
         echo "Versions changed, commiting changes"
         git add $HERMIT_FILE
         git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
