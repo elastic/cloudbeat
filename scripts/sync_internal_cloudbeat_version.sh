@@ -31,21 +31,21 @@ handle_version_changes() {
     if [ "$current_branch" = "main" ]; then
         branch_name="sync-cloudbeat-version-$(date +%s)"
         echo "Creating new branch: $branch_name"
-        git checkout -b $branch_name
-        
+        git checkout -b "$branch_name"
+
         echo "Versions changed, commiting changes"
         git add $HERMIT_FILE
         git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
-        
+
         echo "Pushing branch to origin"
-        git push origin $branch_name
-        
+        git push origin "$branch_name"
+
         echo "Creating PR with gh cli"
         gh pr create \
             --title "Sync CLOUDBEAT_VERSION in hermit.hcl to $CLOUDBEAT_VERSION" \
             --body "Automated update of CLOUDBEAT_VERSION in hermit.hcl to match version.go" \
             --base main \
-            --head $branch_name
+            --head "$branch_name"
     else
         echo "Not on main branch, committing directly to $current_branch"
         echo "Versions changed, commiting changes"
