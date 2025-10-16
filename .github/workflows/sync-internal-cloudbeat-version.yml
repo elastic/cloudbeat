@@ -20,6 +20,7 @@ jobs:
           ./scripts/sync_internal_cloudbeat_version.sh
       - name: Push changes
         env:
+          GIT_USER: "Cloud Security Machine"
           GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
         run:
           git push origin

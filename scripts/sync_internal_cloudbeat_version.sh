@@ -4,6 +4,9 @@ set -xeuo pipefail
 VERSION_FILE="version/version.go"
 HERMIT_FILE="bin/hermit.hcl"
 
+git config --global user.email "cloudsecmachine@users.noreply.github.com"
+git config --global user.name "Cloud Security Machine"
+
 find_current_cloudbeat_version() {
     echo "Checking current cloudbeat version"
     CLOUDBEAT_VERSION=$(grep -oE 'defaultBeatVersion\s+=\s+".*"' $VERSION_FILE | grep -oE '[0-9]\.[0-9]\.[0-9]')
