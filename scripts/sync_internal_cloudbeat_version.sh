@@ -18,16 +18,43 @@ set_hermit_cloudbeat_version() {
     sed -E -i.tmp "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE && rm $HERMIT_FILE.tmp
 }
 
-commit_if_different() {
+handle_version_changes() {
     if git diff --quiet --exit-code $HERMIT_FILE; then
         echo "No changes to $HERMIT_FILE; I'm done"
         return
     fi
-    echo "Versions changed, commiting changes"
-    git add $HERMIT_FILE
-    git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
+
+    # Get current branch
+    current_branch=$(git branch --show-current)
+    echo "Current branch is: $current_branch"
+
+    # TODO: Removew dg-fix-sync-wf after testing
+    if [ "$current_branch" = "main" ] || [ "$current_branch" = "dg-fix-sync-wf" ]; then
+        branch_name="sync-cloudbeat-version-$(date +%s)"
+        echo "Creating new branch: $branch_name"
+        git checkout -b $branch_name
+        
+        echo "Versions changed, commiting changes"
+        git add $HERMIT_FILE
+        git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
+        
+        echo "Pushing branch to origin"
+        git push origin $branch_name
+        
+        echo "Creating PR with gh cli"
+        gh pr create \
+            --title "Sync CLOUDBEAT_VERSION in hermit.hcl to $CLOUDBEAT_VERSION" \
+            --body "Automated update of CLOUDBEAT_VERSION in hermit.hcl to match version.go" \
+            --base main \
+            --head $branch_name
+    else
+        echo "Not on main or testing branch, committing directly to $current_branch"
+        echo "Versions changed, commiting changes"
+        git add $HERMIT_FILE
+        git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
+    fi
 }
 
 find_current_cloudbeat_version
 set_hermit_cloudbeat_version
-commit_if_different
+handle_version_changes

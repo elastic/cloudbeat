@@ -19,6 +19,3 @@ jobs:
       - name: Synchronize versions using a script
         run: |
           ./scripts/sync_internal_cloudbeat_version.sh
-      - name: Push changes
-        run:
-          git push origin
