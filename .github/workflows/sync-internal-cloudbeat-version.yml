@@ -15,11 +15,10 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: ${{ github.ref }}
+          token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
       - name: Synchronize versions using a script
         run: |
           ./scripts/sync_internal_cloudbeat_version.sh
       - name: Push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
         run:
           git push origin
