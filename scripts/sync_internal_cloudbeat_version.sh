@@ -12,7 +12,7 @@ find_current_cloudbeat_version() {
 
 set_hermit_cloudbeat_version() {
     echo "Setting cloudbeat version for hermit version"
-    sed -E -i '' "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE
+    sed -E -i.tmp "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE && rm $HERMIT_FILE.tmp
 }
 
 commit_if_different() {
@@ -21,8 +21,9 @@ commit_if_different() {
         return
     fi
     echo "Versions changed, commiting changes"
-    git add $HERMIT_FILE
-    git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
+    # TODO: Remove after testing
+    # git add $HERMIT_FILE
+    # git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
 }
 
 find_current_cloudbeat_version
