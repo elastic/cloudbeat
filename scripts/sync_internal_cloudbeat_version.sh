@@ -21,9 +21,8 @@ commit_if_different() {
         return
     fi
     echo "Versions changed, commiting changes"
-    # TODO: Remove after testing
-    # git add $HERMIT_FILE
-    # git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
+    git add $HERMIT_FILE
+    git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
 }
 
 find_current_cloudbeat_version
