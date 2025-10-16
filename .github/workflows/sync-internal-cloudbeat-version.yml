@@ -17,5 +17,7 @@ jobs:
           ref: ${{ github.ref }}
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
       - name: Synchronize versions using a script
+        env:
+          GH_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
         run: |
           ./scripts/sync_internal_cloudbeat_version.sh
