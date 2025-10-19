@@ -33,7 +33,7 @@ handle_version_changes() {
         echo "Creating new branch: $branch_name"
         git checkout -b "$branch_name"
 
-        echo "Versions changed, commiting changes"
+        echo "Versions changed, committing changes"
         git add $HERMIT_FILE
         git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
 
@@ -48,7 +48,7 @@ handle_version_changes() {
             --head "$branch_name"
     else
         echo "Not on main branch, committing directly to $current_branch"
-        echo "Versions changed, commiting changes"
+        echo "Versions changed, committing changes"
         git add $HERMIT_FILE
         git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
     fi
