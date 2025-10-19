@@ -15,7 +15,7 @@ find_current_cloudbeat_version() {
 
 set_hermit_cloudbeat_version() {
     echo "Setting cloudbeat version for hermit version"
-    sed -E -i.tmp "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE && rm $HERMIT_FILE.tmp
+    sed -E -i "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE
 }
 
 handle_version_changes() {
@@ -28,30 +28,23 @@ handle_version_changes() {
     current_branch=$(git branch --show-current)
     echo "Current branch is: $current_branch"
 
-    if [ "$current_branch" = "main" ]; then
-        branch_name="sync-cloudbeat-version-$(date +%s)"
-        echo "Creating new branch: $branch_name"
-        git checkout -b "$branch_name"
+    branch_name="sync-cloudbeat-version-$(date +%s)"
+    echo "Creating new branch: $branch_name"
+    git checkout -b "$branch_name"
 
-        echo "Versions changed, committing changes"
-        git add $HERMIT_FILE
-        git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
+    echo "Versions changed, committing changes"
+    git add $HERMIT_FILE
+    git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
 
-        echo "Pushing branch to origin"
-        git push origin "$branch_name"
+    echo "Pushing branch to origin"
+    git push origin "$branch_name"
 
-        echo "Creating PR with gh cli"
-        gh pr create \
-            --title "Sync CLOUDBEAT_VERSION in hermit.hcl to $CLOUDBEAT_VERSION" \
-            --body "Automated update of CLOUDBEAT_VERSION in hermit.hcl to match version.go" \
-            --base main \
-            --head "$branch_name"
-    else
-        echo "Not on main branch, committing directly to $current_branch"
-        echo "Versions changed, committing changes"
-        git add $HERMIT_FILE
-        git commit -m "bump CLOUDBEAT_VERSION in $HERMIT_FILE to $CLOUDBEAT_VERSION"
-    fi
+    echo "Creating PR with gh cli"
+    gh pr create \
+        --title "Sync CLOUDBEAT_VERSION in hermit.hcl to $CLOUDBEAT_VERSION" \
+        --body "Automated update of CLOUDBEAT_VERSION in hermit.hcl to match version.go" \
+        --base "$current_branch" \
+        --head "$branch_name"
 }
 
 find_current_cloudbeat_version
