@@ -27,10 +27,10 @@ jobs:
           - template: "ARM-for-single-account.json"
             skip: "ResourceIds should not contain"
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
       - name: Checkout arm-ttk
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
           repository: Azure/arm-ttk
           path: arm-ttk
