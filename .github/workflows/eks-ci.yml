@@ -204,7 +204,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@87c4707902ad7187c6e674c08f296353a16176a1  # v2.9.0
+        uses: andrcuns/allure-publish-action@cf51be413d9eb9a9f552f47c11abdb35eeb1c83c  # v2.10.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: eu-west-1
