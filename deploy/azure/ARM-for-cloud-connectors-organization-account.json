@@ -195,7 +195,7 @@
                                         "issuer": "[parameters('elasticCloudIssuer')]",
                                         "subject": "[parameters('elasticStackId')]",
                                         "audiences": [
-                                            "api://AzureADTokenExchange"
+                                            "ElasticCloudConnector"
                                         ]
                                     }
                                 }
