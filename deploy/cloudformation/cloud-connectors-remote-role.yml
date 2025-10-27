@@ -12,30 +12,65 @@ Parameters:
     Type: String
     Default: arn:aws:iam::254766567737:role/cloud_connectors
 
+  ElasticOIDCProviderURL:
+    Description: The OIDC provider URL for Elastic Cloud Connectors.
+    Type: String
+    Default: elastic-cloud-connector.s3.us-east-1.amazonaws.com
+
 Resources:
+  ElasticOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: !Sub 'https://${ElasticOIDCProviderURL}'
+      ClientIdList:
+        - ElasticCloudConnector
+
   ElasticCloudConnectorsRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub 'ElasticCloudConnectorsRole-${AWS::StackName}'
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Ref ElasticRoleARN
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Join
-                  - '-'
-                  - - !Ref ElasticResourceId
-                    - !Select
-
-                      # Extract a UUID from the AWS::StackId by splitting on "/"
-                      - 2
-                      - !Split
-                        - /
-                        - !Ref "AWS::StackId"
+        Fn::Sub:
+          - |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": "${ElasticRoleARN}"
+                  },
+                  "Action": "sts:AssumeRole",
+                  "Condition": {
+                    "StringEquals": {
+                      "sts:ExternalId": "${ExternalId}"
+                    }
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Federated": "${OIDCProviderArn}"
+                  },
+                  "Action": "sts:AssumeRoleWithWebIdentity",
+                  "Condition": {
+                    "StringEquals": {
+                      "${ElasticOIDCProviderURL}:aud": "ElasticCloudConnector",
+                      "${ElasticOIDCProviderURL}:sub": "${ElasticResourceId}"
+                    }
+                  }
+                }
+              ]
+            }
+          - ExternalId: !Join
+              - '-'
+              - - !Ref ElasticResourceId
+                - !Select
+                  - 2
+                  - !Split
+                    - /
+                    - !Ref "AWS::StackId"
+            OIDCProviderArn: !GetAtt ElasticOIDCProvider.Arn
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
