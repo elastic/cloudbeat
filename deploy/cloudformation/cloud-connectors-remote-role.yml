@@ -17,6 +17,17 @@ Parameters:
     Type: String
     Default: elastic-cloud-connector.s3.us-east-1.amazonaws.com
 
+  OIDC:
+    Description: Enable OIDC authentication (true) or use traditional AssumeRole with ExternalId (false).
+    Type: String
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "false"
+
+Conditions:
+  UseOIDC: !Equals [!Ref OIDC, "true"]
+
 Resources:
   ElasticOIDCProvider:
     Type: AWS::IAM::OIDCProvider
@@ -24,52 +35,62 @@ Resources:
       Url: !Sub 'https://${ElasticOIDCProviderURL}'
       ClientIdList:
         - ElasticCloudConnector
+    Condition: UseOIDC
 
   ElasticCloudConnectorsRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub 'ElasticCloudConnectorsRole-${AWS::StackName}'
-      AssumeRolePolicyDocument: !Sub
-        - |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "AWS": "${ElasticRoleARN}"
-                },
-                "Action": "sts:AssumeRole",
-                "Condition": {
-                  "StringEquals": {
-                    "sts:ExternalId": "${ExternalId}"
+      AssumeRolePolicyDocument: !If
+        - UseOIDC
+        - !Sub
+          - |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Federated": "${OIDCProviderArn}"
+                  },
+                  "Action": "sts:AssumeRoleWithWebIdentity",
+                  "Condition": {
+                    "StringEquals": {
+                      "${ElasticOIDCProviderURL}:aud": "ElasticCloudConnector",
+                      "${ElasticOIDCProviderURL}:sub": "${ElasticResourceId}"
+                    }
                   }
                 }
-              },
-              {
-                "Effect": "Allow",
-                "Principal": {
-                  "Federated": "${OIDCProviderArn}"
-                },
-                "Action": "sts:AssumeRoleWithWebIdentity",
-                "Condition": {
-                  "StringEquals": {
-                    "${ElasticOIDCProviderURL}:aud": "ElasticCloudConnector",
-                    "${ElasticOIDCProviderURL}:sub": "${ElasticResourceId}"
+              ]
+            }
+          - OIDCProviderArn: !GetAtt ElasticOIDCProvider.Arn
+        - !Sub
+          - |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "AWS": "${ElasticRoleARN}"
+                  },
+                  "Action": "sts:AssumeRole",
+                  "Condition": {
+                    "StringEquals": {
+                      "sts:ExternalId": "${ExternalId}"
+                    }
                   }
                 }
-              }
-            ]
-          }
-        - ExternalId: !Join
-            - '-'
-            - - !Ref ElasticResourceId
-              - !Select
-                - 2
-                - !Split
-                  - /
-                  - !Ref "AWS::StackId"
-          OIDCProviderArn: !GetAtt ElasticOIDCProvider.Arn
+              ]
+            }
+          - ExternalId: !Join
+              - '-'
+              - - !Ref ElasticResourceId
+                - !Select
+                  - 2
+                  - !Split
+                    - /
+                    - !Ref "AWS::StackId"
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
