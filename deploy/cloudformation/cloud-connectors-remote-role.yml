@@ -29,48 +29,47 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub 'ElasticCloudConnectorsRole-${AWS::StackName}'
-      AssumeRolePolicyDocument:
-        Fn::Sub:
-          - |
-            {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Principal": {
-                    "AWS": "${ElasticRoleARN}"
-                  },
-                  "Action": "sts:AssumeRole",
-                  "Condition": {
-                    "StringEquals": {
-                      "sts:ExternalId": "${ExternalId}"
-                    }
-                  }
+      AssumeRolePolicyDocument: !Sub
+        - |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "AWS": "${ElasticRoleARN}"
                 },
-                {
-                  "Effect": "Allow",
-                  "Principal": {
-                    "Federated": "${OIDCProviderArn}"
-                  },
-                  "Action": "sts:AssumeRoleWithWebIdentity",
-                  "Condition": {
-                    "StringEquals": {
-                      "${ElasticOIDCProviderURL}:aud": "ElasticCloudConnector",
-                      "${ElasticOIDCProviderURL}:sub": "${ElasticResourceId}"
-                    }
+                "Action": "sts:AssumeRole",
+                "Condition": {
+                  "StringEquals": {
+                    "sts:ExternalId": "${ExternalId}"
                   }
                 }
-              ]
-            }
-          - ExternalId: !Join
-              - '-'
-              - - !Ref ElasticResourceId
-                - !Select
-                  - 2
-                  - !Split
-                    - /
-                    - !Ref "AWS::StackId"
-            OIDCProviderArn: !GetAtt ElasticOIDCProvider.Arn
+              },
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Federated": "${OIDCProviderArn}"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                  "StringEquals": {
+                    "${ElasticOIDCProviderURL}:aud": "ElasticCloudConnector",
+                    "${ElasticOIDCProviderURL}:sub": "${ElasticResourceId}"
+                  }
+                }
+              }
+            ]
+          }
+        - ExternalId: !Join
+            - '-'
+            - - !Ref ElasticResourceId
+              - !Select
+                - 2
+                - !Split
+                  - /
+                  - !Ref "AWS::StackId"
+          OIDCProviderArn: !GetAtt ElasticOIDCProvider.Arn
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
