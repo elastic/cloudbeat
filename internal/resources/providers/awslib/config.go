@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -28,7 +29,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	"github.com/elastic/cloudbeat/internal/config"
@@ -65,7 +65,23 @@ func CloudConnectorsExternalID(resourceID, externalIDPart string) string {
 	return fmt.Sprintf("%s-%s", resourceID, externalIDPart)
 }
 
+// InitializeAWSConfigCloudConnectors initializes AWS config for Cloud Connectors deployment.
+// It automatically selects between OIDC-based authentication (if JWT token is available)
+// or IRSA-based authentication, both using multi-role assumption chains.
 func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfig) (*aws.Config, error) {
+	jwtFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
+	if jwtFilePath != "" {
+		return NewAWSConfigOIDCChain(ctx, jwtFilePath, cfg)
+	}
+
+	return NewAWSConfigIRSAChain(ctx, cfg)
+}
+
+// NewAWSConfigIRSAChain creates an AWS config using IRSA (IAM Roles for Service Accounts) with role chaining.
+// This function performs a two-step role assumption chain:
+//  1. Uses IRSA to implicitly authenticate as the local role (via LoadDefaultConfig)
+//  2. Uses the local role credentials to assume the global role, then the remote/target role with an external ID
+func NewAWSConfigIRSAChain(ctx context.Context, cfg config.AwsConfig) (*aws.Config, error) {
 	const defaultDuration = 20 * time.Minute
 
 	// 1. Load initial config - Chain Step 1 - Elastic Super Role Local implicitly assumed through IRSA.
@@ -77,15 +93,15 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 
 	chain := []AWSRoleChainingStep{
 		// Chain Step 2 - Elastic Super Role Global
-		{
+		&AssumeRoleStep{
 			RoleARN: cfg.CloudConnectorsConfig.GlobalRoleARN,
 			Options: func(aro *stscreds.AssumeRoleOptions) {
 				aro.RoleSessionName = "cloudbeat-super-role-global"
 				aro.Duration = defaultDuration
 			},
 		},
-		// Chain Step 3 - Elastic Super Role Local
-		{
+		// Chain Step 3 - Remote Role
+		&AssumeRoleStep{
 			RoleARN: cfg.Cred.RoleArn,
 			Options: func(aro *stscreds.AssumeRoleOptions) {
 				aro.RoleSessionName = "cloudbeat-remote-role"
@@ -101,33 +117,46 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 	return retConf, nil
 }
 
-// AWSConfigRoleChaining initializes an assume role provider and an credential cache for each step on the chain, using the previous one as client.
-func AWSConfigRoleChaining(initialConfig aws.Config, chain []AWSRoleChainingStep) *aws.Config {
-	var client *sts.Client
-	var assumeRoleProvider *stscreds.AssumeRoleProvider
-	var credentialsCache *aws.CredentialsCache
-	cnf := initialConfig
+// NewAWSConfigOIDCChain creates an AWS config using OIDC/Web Identity token-based authentication with role chaining.
+// This function performs a two-step role assumption chain:
+//  1. Uses AssumeRoleWithWebIdentity to authenticate as the global role using a JWT token from the specified file
+//  2. Uses the global role credentials to assume the remote/target role with an external ID
+func NewAWSConfigOIDCChain(ctx context.Context, jwtFilePath string, cfg config.AwsConfig) (*aws.Config, error) {
+	const defaultDuration = 20 * time.Minute
 
-	for _, c := range chain {
-		client = sts.NewFromConfig(cnf) // create client using the credentials from previous or initial step.
-
-		// create a assume role provider for the current chain part role.
-		assumeRoleProvider = stscreds.NewAssumeRoleProvider(
-			client,
-			c.RoleARN,
-			c.Options,
-		)
-		credentialsCache = aws.NewCredentialsCache(assumeRoleProvider)
-
-		cnf.Credentials = credentialsCache
+	// Load base AWS config
+	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load default AWS config: %w", err)
 	}
 
-	return &cnf
-}
+	observability.AppendAWSMiddlewares(&awsConfig)
 
-type AWSRoleChainingStep struct {
-	RoleARN string
-	Options func(aro *stscreds.AssumeRoleOptions)
+	chain := []AWSRoleChainingStep{
+		// Chain Step 1 - Elastic Super Role Global via Web Identity
+		&WebIdentityRoleStep{
+			RoleARN:              cfg.CloudConnectorsConfig.GlobalRoleARN,
+			WebIdentityTokenFile: jwtFilePath,
+			Options: func(o *stscreds.WebIdentityRoleOptions) {
+				o.RoleSessionName = "cloudbeat-super-role-global"
+				o.Duration = defaultDuration
+			},
+		},
+		// Chain Step 2 - Remote Role
+		&AssumeRoleStep{
+			RoleARN: cfg.Cred.RoleArn,
+			Options: func(aro *stscreds.AssumeRoleOptions) {
+				aro.RoleSessionName = "cloudbeat-remote-role"
+				aro.Duration = cfg.Cred.AssumeRoleDuration
+				aro.ExternalID = aws.String(CloudConnectorsExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
+			},
+		},
+	}
+
+	retConf := AWSConfigRoleChaining(awsConfig, chain)
+	retConf.Retryer = awsConfigRetrier
+
+	return retConf, nil
 }
 
 func CredentialsValid(ctx context.Context, cnf aws.Config, log *clog.Logger) bool {
