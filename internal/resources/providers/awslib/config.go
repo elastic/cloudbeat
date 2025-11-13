@@ -69,12 +69,17 @@ func CloudConnectorsExternalID(resourceID, externalIDPart string) string {
 // It automatically selects between OIDC-based authentication (if JWT token is available)
 // or IRSA-based authentication, both using multi-role assumption chains.
 func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfig) (*aws.Config, error) {
-	jwtFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
-	if jwtFilePath != "" {
-		return NewAWSConfigOIDCChain(ctx, jwtFilePath, cfg)
+	irsaFilePath := os.Getenv(config.CloudConnectorsAWSTokenEnvVar)
+	if irsaFilePath != "" {
+		return NewAWSConfigIRSAChain(ctx, cfg)
 	}
 
-	return NewAWSConfigIRSAChain(ctx, cfg)
+	oidcFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
+	if oidcFilePath != "" {
+		return NewAWSConfigOIDCChain(ctx, oidcFilePath, cfg)
+	}
+
+	return nil, fmt.Errorf("unable to initialize AWS config for Cloud Connectors: no authentication method available")
 }
 
 // NewAWSConfigIRSAChain creates an AWS config using IRSA (IAM Roles for Service Accounts) with role chaining.
