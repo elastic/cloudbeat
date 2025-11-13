@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -79,7 +80,7 @@ func InitializeAWSConfigCloudConnectors(ctx context.Context, cfg config.AwsConfi
 		return NewAWSConfigOIDCChain(ctx, oidcFilePath, cfg)
 	}
 
-	return nil, fmt.Errorf("unable to initialize AWS config for Cloud Connectors: no authentication method available")
+	return nil, errors.New("unable to initialize AWS config for Cloud Connectors: no authentication method available")
 }
 
 // NewAWSConfigIRSAChain creates an AWS config using IRSA (IAM Roles for Service Accounts) with role chaining.
