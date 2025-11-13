@@ -90,11 +90,12 @@ func NewAWSConfigIRSAChain(ctx context.Context, cfg config.AwsConfig) (*aws.Conf
 	const defaultDuration = 20 * time.Minute
 
 	// 1. Load initial config - Chain Step 1 - Elastic Super Role Local implicitly assumed through IRSA.
-	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
+	awsConfig, err := LoadDefaultConfigWithRegion(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	observability.AppendAWSMiddlewares(&awsConfig)
+
+	observability.AppendAWSMiddlewares(awsConfig)
 
 	chain := []AWSRoleChainingStep{
 		// Chain Step 2 - Elastic Super Role Global
@@ -116,7 +117,7 @@ func NewAWSConfigIRSAChain(ctx context.Context, cfg config.AwsConfig) (*aws.Conf
 		},
 	}
 
-	retConf := AWSConfigRoleChaining(awsConfig, chain)
+	retConf := AWSConfigRoleChaining(*awsConfig, chain)
 	retConf.Retryer = awsConfigRetrier
 
 	return retConf, nil
@@ -130,12 +131,12 @@ func NewAWSConfigOIDCChain(ctx context.Context, jwtFilePath string, cfg config.A
 	const defaultDuration = 20 * time.Minute
 
 	// Load base AWS config
-	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
+	awsConfig, err := LoadDefaultConfigWithRegion(ctx, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load default AWS config: %w", err)
+		return nil, err
 	}
 
-	observability.AppendAWSMiddlewares(&awsConfig)
+	observability.AppendAWSMiddlewares(awsConfig)
 
 	chain := []AWSRoleChainingStep{
 		// Chain Step 1 - Elastic Super Role Global via Web Identity
@@ -158,7 +159,7 @@ func NewAWSConfigOIDCChain(ctx context.Context, jwtFilePath string, cfg config.A
 		},
 	}
 
-	retConf := AWSConfigRoleChaining(awsConfig, chain)
+	retConf := AWSConfigRoleChaining(*awsConfig, chain)
 	retConf.Retryer = awsConfigRetrier
 
 	return retConf, nil
@@ -191,3 +192,20 @@ func (c CredentialsValidatorFunc) Validate(ctx context.Context, cnf aws.Config, 
 var _ CredentialsValidator = (CredentialsValidatorFunc)(nil)
 
 var CredentialsValidatorNOOP CredentialsValidatorFunc = func(_ context.Context, _ aws.Config, _ *clog.Logger) bool { return true }
+
+func LoadDefaultConfigWithRegion(ctx context.Context, beatsConfig config.AwsConfig) (*aws.Config, error) {
+	awsConfig, err := awsconfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load default AWS config: %w", err)
+	}
+
+	if awsConfig.Region == "" {
+		if beatsConfig.Cred.DefaultRegion != "" {
+			awsConfig.Region = beatsConfig.Cred.DefaultRegion
+		} else {
+			awsConfig.Region = "us-east-1"
+		}
+	}
+
+	return &awsConfig, nil
+}
