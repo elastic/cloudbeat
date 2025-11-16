@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -82,16 +83,17 @@ func (s *ProviderTestSuite) SetupTest() {
 	}
 }
 
-func (s *ProviderTestSuite) NewMockProvider() *Provider {
+func (s *ProviderTestSuite) NewMockProvider() (*Provider, *observer.ObservedLogs) {
+	logger, observedLogs := testhelper.NewObserverLogger(s.T())
 	return &Provider{
-		log:       testhelper.NewObserverLogger(s.T()),
+		log:       logger,
 		inventory: s.mockedInventory,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
 		},
 		crm: s.mockedCrm,
-	}
+	}, observedLogs
 }
 
 func (s *ProviderTestSuite) TestProviderInit() {
@@ -102,7 +104,7 @@ func (s *ProviderTestSuite) TestProviderInit() {
 	}
 	gcpCnf := config.GcpConfig{}
 
-	logger := testhelper.NewObserverLogger(s.T())
+	logger, _ := testhelper.NewObserverLogger(s.T())
 	initMock.EXPECT().Init(mock.Anything, logger, gcpConfig, gcpCnf).Return(&Provider{}, nil).Once()
 	t := s.T()
 	provider, err := initMock.Init(t.Context(), logger, gcpConfig, gcpCnf)
@@ -112,7 +114,7 @@ func (s *ProviderTestSuite) TestProviderInit() {
 
 func (s *ProviderTestSuite) TestListAssetTypes_IteratorsError() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider, _ := s.NewMockProvider()
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
 
@@ -129,7 +131,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_IteratorsError() {
 
 func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider, observedLogs := s.NewMockProvider()
 
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
@@ -141,7 +143,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 	go provider.ListAssetTypes(t.Context(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "IAM_POLICY", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
+	logs := observedLogs.FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "IAM_POLICY", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 
@@ -156,7 +158,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 
 func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider, observedLogs := s.NewMockProvider()
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
 
@@ -167,7 +169,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 	go provider.ListAssetTypes(t.Context(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "RESOURCE", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
+	logs := observedLogs.FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "RESOURCE", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 
@@ -182,7 +184,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 
 func (s *ProviderTestSuite) TestListAssetTypes_Success() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider, _ := s.NewMockProvider()
 	provider.crm.config.Parent = "projects/1"
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
@@ -209,7 +211,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_Success() {
 }
 
 func (s *ProviderTestSuite) TestListMonitoringAssets_Success() {
-	provider := s.NewMockProvider()
+	provider, _ := s.NewMockProvider()
 	logMetricsIterator := new(MockIterator)
 	alertPoliciesIterator := new(MockIterator)
 	projectIterator := new(MockIterator)
@@ -266,7 +268,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets_Success() {
 
 func (s *ProviderTestSuite) TestListProjectAssets() {
 	outCh := make(chan *ProjectAssets)
-	provider := s.NewMockProvider()
+	provider, _ := s.NewMockProvider()
 	mockedProjectIterator := new(MockIterator)
 	mockedResourceIterator := new(MockIterator)
 	provider.inventory = &AssetsInventoryWrapper{
@@ -304,7 +306,7 @@ func (s *ProviderTestSuite) TestListProjectAssets() {
 }
 func (s *ProviderTestSuite) TestListNetworkAssets() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider, _ := s.NewMockProvider()
 
 	mockedDnsIterator := new(MockIterator)
 	mockedNetworkIterator := new(MockIterator)
@@ -361,7 +363,7 @@ func (s *ProviderTestSuite) TestListNetworkAssets() {
 
 func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	outCh := make(chan *ProjectPoliciesAsset)
-	provider := s.NewMockProvider()
+	provider, _ := s.NewMockProvider()
 
 	prjIterator := new(MockIterator)
 	orgIterator := new(MockIterator)

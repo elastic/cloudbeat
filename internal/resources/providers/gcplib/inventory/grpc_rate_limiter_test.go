@@ -69,7 +69,7 @@ func (s *RateLimiterTestSuite) TestRateLimiterWait() {
 }
 
 func TestGAXCallOptionRetrier(t *testing.T) {
-	log := testhelper.NewObserverLogger(t)
+	log, observedLogs := testhelper.NewObserverLogger(t)
 	r := GAXCallOptionRetrier(log)
 	settings := gax.CallSettings{}
 	r.Resolve(&settings)
@@ -94,6 +94,6 @@ func TestGAXCallOptionRetrier(t *testing.T) {
 		require.Equal(t, time.Duration(0), pause)
 	}
 
-	logs := logp.ObserverLogs().FilterMessageSnippet("gax retryer attempt").All()
+	logs := observedLogs.FilterMessageSnippet("gax retryer attempt").All()
 	assert.Len(t, logs, len(c))
 }

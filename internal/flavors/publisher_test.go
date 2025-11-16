@@ -140,7 +140,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			log := testhelper.NewObserverLogger(t)
+			log, observedLogs := testhelper.NewObserverLogger(t)
 			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 			ctx, cancel := context.WithTimeout(t.Context(), tc.ctxTimeout)
 			defer cancel()
@@ -170,7 +170,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			}(tc)
 
 			publisher.HandleEvents(ctx, eventsChannel)
-			logs := logp.ObserverLogs().FilterFieldKey(ecsEventActionField).All()
+			logs := observedLogs.FilterFieldKey(ecsEventActionField).All()
 			assert.Len(t, logs, len(tc.expectedEventSize))
 			for i, size := range tc.expectedEventSize {
 				assert.Equal(t, int64(size), logs[i].ContextMap()[ecsEventCountField])

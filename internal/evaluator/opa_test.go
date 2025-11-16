@@ -28,7 +28,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zapcore"
-	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -64,11 +63,6 @@ func TestOpaTestSuite(t *testing.T) {
 	s := new(OpaTestSuite)
 
 	suite.Run(t, s)
-}
-
-func (s *OpaTestSuite) SetupSuite() {
-	err := logp.TestingSetup(logp.ToObserverOutput())
-	s.Require().NoError(err)
 }
 
 func (s *OpaTestSuite) TestOpaEvaluator_decode() {
@@ -131,7 +125,8 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 	for _, tt := range tests {
 		s.Run(fmt.Sprintf("TestEvaluationsDecisionLogs %+v", tt), func() {
 			cfg := s.getTestConfig()
-			e, err := NewOpaEvaluator(ctx, testhelper.NewLogger(s.T()), cfg)
+			logger, observedLogs := testhelper.NewObserverLogger(s.T())
+			e, err := NewOpaEvaluator(ctx, logger, cfg)
 			s.Require().NoError(err)
 
 			for i := 0; i < tt.evals; i++ {
@@ -142,8 +137,8 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 				s.Require().NoError(err)
 			}
 
-			logs := findDecisionLogs()
-			logp.ObserverLogs().TakeAll()
+			logs := observedLogs.FilterMessageSnippet("Decision Log").TakeAll()
+			observedLogs.TakeAll()
 			s.Len(logs, tt.expected)
 			if tt.expected > 0 {
 				s.Contains(logs[0].ContextMap(), "decision_id")
@@ -161,8 +156,4 @@ func (s *OpaTestSuite) getTestConfig() *config.Config {
 	return &config.Config{
 		BundlePath: path,
 	}
-}
-
-func findDecisionLogs() []observer.LoggedEntry {
-	return logp.ObserverLogs().FilterMessageSnippet("Decision Log").TakeAll()
 }

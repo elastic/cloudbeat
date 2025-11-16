@@ -22,9 +22,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 type LoggerTestSuite struct {
@@ -37,19 +38,17 @@ func TestLoggerTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *LoggerTestSuite) SetupSuite() {
-	err := logp.DevelopmentSetup(logp.ToObserverOutput())
-	s.Require().NoError(err)
-}
-
 func (s *LoggerTestSuite) TestErrorfWithContextCanceled() {
-	logger := NewLogger("test")
+	observedCore, observedLogs := observer.New(zapcore.DebugLevel)
+	logger := NewLogger("test", zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return observedCore
+	}))
 
 	err := context.Canceled
 	logger.Errorf("some error: %s", err)         // error with context.Canceled
 	logger.Errorf("some error: %s", err.Error()) // error string with context Canceled
 
-	logs := logp.ObserverLogs().TakeAll()
+	logs := observedLogs.TakeAll()
 	if s.Len(logs, 2) {
 		s.Equal(zap.WarnLevel, logs[0].Level) // downgraded to warning
 		s.Equal("some error: context canceled", logs[0].Message)
@@ -58,13 +57,17 @@ func (s *LoggerTestSuite) TestErrorfWithContextCanceled() {
 		s.Equal("some error: context canceled", logs[1].Message)
 	}
 }
+
 func (s *LoggerTestSuite) TestLogErrorfWithoutContextCanceled() {
-	logger := NewLogger("test")
+	observedCore, observedLogs := observer.New(zapcore.DebugLevel)
+	logger := NewLogger("test", zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return observedCore
+	}))
 
 	err := errors.New("oops")
 	logger.Errorf("some error: %s", err)
 
-	logs := logp.ObserverLogs().TakeAll()
+	logs := observedLogs.TakeAll()
 	if s.Len(logs, 1) {
 		s.Equal(zap.ErrorLevel, logs[0].Level)
 		s.Equal("some error: oops", logs[0].Message)
