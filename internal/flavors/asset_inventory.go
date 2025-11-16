@@ -48,7 +48,7 @@ func newAssetInventoryFromCfg(b *beat.Beat, cfg *config.Config) (*assetInventory
 	logger := clog.NewLogger("asset_inventory")
 	ctx, cancel := context.WithCancel(context.Background())
 
-	beatClient, err := NewClient(b.Publisher, cfg.Processors)
+	beatClient, err := NewClient(b.Publisher, cfg.Processors, logger)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to init client: %w", err)

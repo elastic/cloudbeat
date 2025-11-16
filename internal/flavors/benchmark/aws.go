@@ -69,11 +69,11 @@ func (a *AWS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 		err         error
 	)
 
-	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg, log)
 	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
 		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
 		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
-		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg, log)
 	}
 
 	if err != nil {
@@ -87,14 +87,14 @@ func (a *AWS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 	), cloud.NewDataProvider(cloud.WithAccount(*awsIdentity)), nil, nil
 }
 
-func (a *AWS) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
+func (a *AWS) getIdentity(ctx context.Context, cfg *config.Config, logger *clog.Logger) (*awssdk.Config, *cloud.Identity, error) {
 	var awsConfig *awssdk.Config
 	var err error
 
 	if cfg.CloudConfig.Aws.CloudConnectors {
 		awsConfig, err = awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
 	} else {
-		awsConfig, err = awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+		awsConfig, err = awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, logger)
 	}
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)

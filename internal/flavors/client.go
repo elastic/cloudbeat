@@ -20,10 +20,11 @@ package flavors
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
-func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (beat.Client, error) {
-	procs, err := configureProcessors(processorsList)
+func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig, logger *clog.Logger) (beat.Client, error) {
+	procs, err := configureProcessors(processorsList, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -36,6 +37,6 @@ func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (
 }
 
 // configureProcessors configure processors to be used by the beat
-func configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
-	return processors.New(processorsList)
+func configureProcessors(processorsList processors.PluginConfig, logger *clog.Logger) (procs *processors.Processors, err error) {
+	return processors.New(processorsList, logger.Logger)
 }
