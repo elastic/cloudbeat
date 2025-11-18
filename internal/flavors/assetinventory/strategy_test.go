@@ -39,37 +39,42 @@ func TestStrategyPicks(t *testing.T) {
 	testCases := []struct {
 		name        string
 		cfg         *config.Config
+		env         map[string]string
 		expectedErr string
 	}{
 		{
-			"expected error: asset_inventory_provider not set",
-			&config.Config{},
-			"missing config.v1.asset_inventory_provider",
+			name:        "expected error: asset_inventory_provider not set",
+			cfg:         &config.Config{},
+			env:         nil,
+			expectedErr: "missing config.v1.asset_inventory_provider",
 		},
 		{
-			"expected error: unsupported provider",
-			&config.Config{
+			name: "expected error: unsupported provider",
+			cfg: &config.Config{
 				AssetInventoryProvider: "NOPE",
 			},
-			"unsupported Asset Inventory provider \"NOPE\"",
+			env:         nil,
+			expectedErr: "unsupported Asset Inventory provider \"NOPE\"",
 		},
 		{
-			"expected success: Azure",
-			&config.Config{
+			name: "expected success: Azure",
+			cfg: &config.Config{
 				AssetInventoryProvider: config.ProviderAzure,
 			},
-			"",
+			env:         nil,
+			expectedErr: "",
 		},
 		{
-			"expected error: GCP missing account type",
-			&config.Config{
+			name: "expected error: GCP missing account type",
+			cfg: &config.Config{
 				AssetInventoryProvider: config.ProviderGCP,
 			},
-			"invalid gcp account type",
+			env:         nil,
+			expectedErr: "invalid gcp account type",
 		},
 		{
-			"expected success: GCP",
-			&config.Config{
+			name: "expected success: GCP",
+			cfg: &config.Config{
 				AssetInventoryProvider: config.ProviderGCP,
 				CloudConfig: config.CloudConfig{
 					Gcp: config.GcpConfig{
@@ -82,11 +87,12 @@ func TestStrategyPicks(t *testing.T) {
 					},
 				},
 			},
-			"could not parse key",
+			env:         nil,
+			expectedErr: "could not parse key",
 		},
 		{
-			"expected error: AWS unsupported account type",
-			&config.Config{
+			name: "expected error: AWS unsupported account type",
+			cfg: &config.Config{
 				AssetInventoryProvider: config.ProviderAWS,
 				CloudConfig: config.CloudConfig{
 					Aws: config.AwsConfig{
@@ -94,11 +100,12 @@ func TestStrategyPicks(t *testing.T) {
 					},
 				},
 			},
-			"unsupported account_type: \"NOPE\"",
+			env:         nil,
+			expectedErr: "unsupported account_type: \"NOPE\"",
 		},
 		{
-			"expected success: AWS",
-			&config.Config{
+			name: "expected success: AWS",
+			cfg: &config.Config{
 				AssetInventoryProvider: config.ProviderAWS,
 				CloudConfig: config.CloudConfig{
 					Aws: config.AwsConfig{
@@ -110,11 +117,12 @@ func TestStrategyPicks(t *testing.T) {
 					},
 				},
 			},
-			"STS: GetCallerIdentity",
+			env:         nil,
+			expectedErr: "STS: GetCallerIdentity",
 		},
 		{
-			"expected success: AWS with cloud connectors",
-			&config.Config{
+			name: "expected success: AWS with cloud connectors",
+			cfg: &config.Config{
 				AssetInventoryProvider: config.ProviderAWS,
 				CloudConfig: config.CloudConfig{
 					Aws: config.AwsConfig{
@@ -132,12 +140,19 @@ func TestStrategyPicks(t *testing.T) {
 					},
 				},
 			},
-			"STS: GetCallerIdentity",
+			env: map[string]string{
+				"AWS_WEB_IDENTITY_TOKEN_FILE": "/tmp/fake-token-file",
+				"AWS_ROLE_ARN":                "arn:aws:iam::123456789012:role/test-local-role",
+			},
+			expectedErr: "STS: GetCallerIdentity",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			for k, v := range tc.env {
+				t.Setenv(k, v)
+			}
 			s := strategy{
 				logger: testhelper.NewLogger(t),
 				cfg:    tc.cfg,
