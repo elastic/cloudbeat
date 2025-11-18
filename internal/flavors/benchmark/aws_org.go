@@ -88,11 +88,11 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	)
 
 	// cloudbeat-root role credentials.
-	awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg)
+	awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg, log)
 	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
 		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
 		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
-		awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg)
+		awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg, log)
 	}
 
 	if err != nil {
@@ -240,8 +240,8 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 
 // getIdentity should assume the cloudbeat-root role and then perform the GetIdentity
 // and return the aws config (having credentials from cloudbeat-root role) and cloud.Identity data.
-func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
-	awsConfig, err := a.getInitialAWSConfig(ctx, cfg)
+func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config, logger *clog.Logger) (*awssdk.Config, *cloud.Identity, error) {
+	awsConfig, err := a.getInitialAWSConfig(ctx, cfg, logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
@@ -280,7 +280,7 @@ func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.C
 }
 
 // getInitialAWSConfig return the initial aws.Config based on the received configuration.
-func (a *AWSOrg) getInitialAWSConfig(ctx context.Context, cfg *config.Config) (*awssdk.Config, error) {
+func (a *AWSOrg) getInitialAWSConfig(ctx context.Context, cfg *config.Config, logger *clog.Logger) (*awssdk.Config, error) {
 	if cfg.CloudConfig.Aws.CloudConnectors {
 		// [Cloud Connectors] On cloud connectors this ends up assuming the customer remote role (using role chaining)
 		return awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
@@ -289,7 +289,7 @@ func (a *AWSOrg) getInitialAWSConfig(ctx context.Context, cfg *config.Config) (*
 	// [EC2 Instance] On EC2 created with our cloud formation, the identity is inferred by the EC2 instance InstanceProfile which has the cloudbeat-root role.
 	// [Direct Credentials] On Direct credentials this identity is the user created by the cloud formation.
 	// [Custom Setup] On custom setup like manual authentication for organization-level onboarding.
-	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, logger)
 }
 
 func (a *AWSOrg) checkDependencies() error {

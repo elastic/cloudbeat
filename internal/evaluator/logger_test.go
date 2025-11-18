@@ -20,7 +20,8 @@ package evaluator
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/elastic-agent-libs/logp/logptest"
 	"github.com/open-policy-agent/opa/v1/logging"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
@@ -40,30 +41,36 @@ func TestLoggerTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *LoggerTestSuite) SetupSuite() {
-	err := logp.DevelopmentSetup(logp.ToObserverOutput())
-	s.Require().NoError(err)
+func newTestLogger(t *testing.T) (logging.Logger, *observer.ObservedLogs) {
+	log := newLogger()
+
+	observedCore, observedLogs := observer.New(zapcore.DebugLevel)
+	testingLogger := logptest.NewTestingLogger(t, "opa", zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return observedCore
+	}), zap.IncreaseLevel(log.(*logger).lvl))
+	log.(*logger).log = &clog.Logger{Logger: testingLogger}
+	return log, observedLogs
 }
 
 func (s *LoggerTestSuite) TestLogFormat() {
-	logger := newLogger()
+	logger, observedLogs := newTestLogger(s.T())
 	logger.SetLevel(logging.Warn)
 	logger.Warn("warn %s", "warn")
-	logs := logp.ObserverLogs().TakeAll()
+	logs := observedLogs.TakeAll()
 	if s.Len(logs, 1) {
 		s.assertLog(logs[0], zap.WarnLevel, "warn warn")
 	}
 }
 
 func (s *LoggerTestSuite) TestLogFields() {
-	logger := newLogger()
+	logger, observedLogs := newTestLogger(s.T())
 	logger.SetLevel(logging.Debug)
 	logger = logger.WithFields(map[string]any{
 		"key": "val",
 	})
 
 	logger.Debug("debug")
-	logs := logp.ObserverLogs().TakeAll()
+	logs := observedLogs.TakeAll()
 	if s.Len(logs, 1) {
 		s.assertLog(logs[0], zap.DebugLevel, "debug")
 		s.Len(logs[0].Context, 1)
@@ -72,7 +79,7 @@ func (s *LoggerTestSuite) TestLogFields() {
 }
 
 func (s *LoggerTestSuite) TestLogMultipleFields() {
-	logger := newLogger()
+	logger, observedLogs := newTestLogger(s.T())
 	logger.SetLevel(logging.Debug)
 	logger = logger.WithFields(map[string]any{
 		"key1": "val1",
@@ -83,7 +90,7 @@ func (s *LoggerTestSuite) TestLogMultipleFields() {
 	})
 
 	logger.Debug("debug")
-	logs := logp.ObserverLogs().TakeAll()
+	logs := observedLogs.TakeAll()
 	if s.Len(logs, 1) {
 		s.assertLog(logs[0], zap.DebugLevel, "debug")
 		s.Len(logs[0].Context, 2)
@@ -108,36 +115,36 @@ func (s *LoggerTestSuite) TestLoggerGetLevel() {
 }
 
 func (s *LoggerTestSuite) TestLoggerSetLevel() {
-	logger := newLogger()
+	logger, observedLogs := newTestLogger(s.T())
 	logger.SetLevel(logging.Debug)
 	logger.Debug("debug")
-	logs := logp.ObserverLogs().TakeAll()
+	logs := observedLogs.TakeAll()
 	if s.Len(logs, 1) {
 		s.assertLog(logs[0], zap.DebugLevel, "debug")
 	}
 
 	logger.SetLevel(logging.Error)
 	logger.Error("error")
-	logs = logp.ObserverLogs().TakeAll()
+	logs = observedLogs.TakeAll()
 	if s.Len(logs, 1) {
 		s.assertLog(logs[0], zap.ErrorLevel, "error")
 	}
 
 	logger.Info("info")
-	logs = logp.ObserverLogs().TakeAll()
+	logs = observedLogs.TakeAll()
 	s.Empty(logs, 1)
 
 	logger.SetLevel(logging.Info)
 	logger.Info("info")
 	logger.Error("error")
-	logs = logp.ObserverLogs().TakeAll()
+	logs = observedLogs.TakeAll()
 	if s.Len(logs, 2) {
 		s.assertLog(logs[0], zap.InfoLevel, "info")
 		s.assertLog(logs[1], zap.ErrorLevel, "error")
 	}
 
 	logger.Debug("debug")
-	logs = logp.ObserverLogs().TakeAll()
+	logs = observedLogs.TakeAll()
 	s.Empty(logs, 1)
 }
 

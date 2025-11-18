@@ -81,6 +81,7 @@ func TestBase_Build_Success(t *testing.T) {
 			_, err = benchmark.Run(t.Context())
 			time.Sleep(100 * time.Millisecond)
 			require.NoError(t, err)
+			benchmark.Stop()
 		})
 	}
 }

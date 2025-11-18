@@ -37,7 +37,7 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 		return awslib.InitializeAWSConfigCloudConnectors(ctx, cfg.CloudConfig.Aws)
 	}
 
-	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, s.logger)
 }
 
 func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {

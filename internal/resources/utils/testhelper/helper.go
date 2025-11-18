@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/require"
+	"github.com/elastic/elastic-agent-libs/logp/logptest"
+	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
@@ -91,17 +91,16 @@ func CreateMockClients[T any](client T, regions []string) map[string]T {
 func NewLogger(t *testing.T) *clog.Logger {
 	t.Helper()
 
-	require.NoError(t, logp.TestingSetup())
-
-	return clog.NewLogger(t.Name())
+	return &clog.Logger{Logger: logptest.NewTestingLogger(t, t.Name())}
 }
 
-func NewObserverLogger(t *testing.T) *clog.Logger {
+func NewObserverLogger(t *testing.T) (*clog.Logger, *observer.ObservedLogs) {
 	t.Helper()
 
-	require.NoError(t, logp.DevelopmentSetup(logp.ToObserverOutput()))
+	logger, observedLogs := logptest.NewTestingLoggerWithObserver(t, t.Name())
+	clogger := clog.Logger{Logger: logger}
 
-	return clog.NewLogger(t.Name())
+	return &clogger, observedLogs
 }
 
 func SkipLong(t *testing.T) {
