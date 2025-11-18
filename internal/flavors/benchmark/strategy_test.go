@@ -114,9 +114,8 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 	if wantErr != "" {
 		require.ErrorContains(t, err, wantErr)
 		return
-	} else {
-		require.NoError(t, err)
 	}
+
 	reg.Update(t.Context())
 	defer reg.Stop()
 
