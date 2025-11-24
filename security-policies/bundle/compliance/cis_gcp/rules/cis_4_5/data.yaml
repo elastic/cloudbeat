@@ -37,8 +37,8 @@ metadata:
 
     or `key` and `value` properties from below command's json response are equal to `serial-port-enable` and `0` or `false` respectively.
 
-    ```
-     {
+    ```json
+    {
         "metadata": {
             "items": [
                 {

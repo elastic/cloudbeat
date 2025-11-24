@@ -40,6 +40,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 var expectedAWSSubtypes = []string{
@@ -116,9 +117,12 @@ func TestAWSOrg_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &AWSOrg{
-				IAMProvider:      tt.iamProvider,
-				IdentityProvider: tt.identityProvider,
-				AccountProvider:  tt.accountProvider,
+				IAMProvider:       tt.iamProvider,
+				IdentityProvider:  tt.identityProvider,
+				AccountProvider:   tt.accountProvider,
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -168,9 +172,12 @@ func Test_getAwsAccounts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				IAMProvider:      getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
-				IdentityProvider: nil,
-				AccountProvider:  tt.accountProvider,
+				IAMProvider:       getMockIAMRoleGetter([]iam.Role{*makeRole("cloudbeat-root")}),
+				IdentityProvider:  nil,
+				AccountProvider:   tt.accountProvider,
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}
 			log := testhelper.NewLogger(t)
 			got, err := a.getAwsAccounts(t.Context(), log, aws.Config{}, &tt.rootIdentity)
@@ -237,7 +244,7 @@ func Test_pickManagementAccountRole(t *testing.T) {
 			},
 			expectedLog: fmt.Sprintf(
 				"should be scanned (%s: %s), but %q role is missing",
-				scanSettingTagKey, scanSettingTagValue, memberRole,
+				scanSettingTagKey, scanSettingTagValue, awslib.BenchmarkOrgIAMRoleNamesProvider{}.MemberRoleName(),
 			),
 		},
 	}
@@ -245,9 +252,12 @@ func Test_pickManagementAccountRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				IAMProvider:      getMockIAMRoleGetter(tt.roles),
-				IdentityProvider: mockAwsIdentityProvider(nil),
-				AccountProvider:  mockAccountProvider(nil),
+				IAMProvider:       getMockIAMRoleGetter(tt.roles),
+				IdentityProvider:  mockAwsIdentityProvider(nil),
+				AccountProvider:   mockAccountProvider(nil),
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}
 
 			// set up log capture

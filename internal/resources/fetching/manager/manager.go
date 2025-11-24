@@ -23,16 +23,22 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
-	"github.com/elastic/cloudbeat/internal/infra/observability"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const scopeName = "github.com/elastic/cloudbeat/internal/resources/fetching/manager"
+
+var (
+	tracer = otel.Tracer(scopeName)
+	meter  = otel.Meter(scopeName)
+)
 
 type Manager struct {
 	log *clog.Logger
@@ -47,9 +53,11 @@ type Manager struct {
 
 	ctx    context.Context //nolint:containedctx
 	cancel context.CancelFunc
+
+	statusHandler statushandler.StatusHandlerAPI
 }
 
-func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
+func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry, statusHandler statushandler.StatusHandlerAPI) (*Manager, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	return &Manager{
@@ -59,6 +67,7 @@ func NewManager(ctx context.Context, log *clog.Logger, interval time.Duration, t
 		fetcherRegistry: fetchers,
 		ctx:             ctx,
 		cancel:          cancel,
+		statusHandler:   statusHandler,
 	}, nil
 }
 
@@ -73,7 +82,7 @@ func (m *Manager) Stop() {
 }
 
 func (m *Manager) fetchAndSleep(ctx context.Context) {
-	counter, err := observability.MeterFromContext(ctx, scopeName).Int64Counter("cloudbeat.fetcher.manager.cycles")
+	counter, err := meter.Int64Counter("cloudbeat.fetcher.manager.cycles")
 	if err != nil {
 		m.log.Errorf("Failed to create fetcher manager cycles counter: %v", err)
 	}
@@ -101,14 +110,15 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
-	ctx, span := observability.StartSpan(
+	ctx, span := tracer.Start(
 		ctx,
-		scopeName,
 		"manager.Manager.fetchIteration",
 		trace.WithAttributes(attribute.String("transaction.type", "request")),
 	)
 	defer span.End()
 	logger := m.log.WithSpanContext(span.SpanContext())
+
+	m.statusHandler.Reset()
 
 	m.fetcherRegistry.Update(ctx)
 	logger.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))

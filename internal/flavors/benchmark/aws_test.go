@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestAWS_Initialize(t *testing.T) {
@@ -39,6 +40,7 @@ func TestAWS_Initialize(t *testing.T) {
 
 	tests := []struct {
 		name             string
+		envsVars         map[string]string
 		identityProvider awslib.IdentityProviderGetter
 		cfg              config.Config
 		want             []string
@@ -68,7 +70,12 @@ func TestAWS_Initialize(t *testing.T) {
 			},
 		},
 		{
-			name: "cloud connectors",
+			name: "cloud connectors irsa",
+			envsVars: map[string]string{
+				config.CloudConnectorsAWSTokenEnvVar: "/abc",
+				"AWS_REGION":                         "eu-west-1",
+				"AWS_ROLE_ARN":                       "arn:aws:iam::111111111111:role/localrole",
+			},
 			cfg: config.Config{
 				Benchmark: "cis_aws",
 				CloudConfig: config.CloudConfig{
@@ -78,6 +85,51 @@ func TestAWS_Initialize(t *testing.T) {
 						CloudConnectors: true,
 						CloudConnectorsConfig: config.CloudConnectorsConfig{
 							LocalRoleARN:  "abc123",
+							GlobalRoleARN: "abc456",
+							ResourceID:    "abc789",
+						},
+					},
+				},
+			},
+			identityProvider: func() awslib.IdentityProviderGetter {
+				cfgMatcher := mock.MatchedBy(func(cfg aws.Config) bool {
+					c, is := cfg.Credentials.(*aws.CredentialsCache)
+					if !is {
+						return false
+					}
+					return c.IsCredentialsProvider(&stscreds.AssumeRoleProvider{})
+				})
+				identityProvider := &awslib.MockIdentityProviderGetter{}
+				identityProvider.EXPECT().GetIdentity(mock.Anything, cfgMatcher).Return(
+					&cloud.Identity{
+						Account: "test-account",
+					},
+					nil,
+				)
+
+				return identityProvider
+			}(),
+			want: []string{
+				fetching.IAMType,
+				fetching.KmsType,
+				fetching.TrailType,
+				fetching.AwsMonitoringType,
+				fetching.EC2NetworkingType,
+				fetching.RdsType,
+				fetching.S3Type,
+			},
+		},
+		{
+			name:     "cloud connectors id token",
+			envsVars: map[string]string{config.CloudConnectorsJWTPathEnvVar: "/abc"},
+			cfg: config.Config{
+				Benchmark: "cis_aws",
+				CloudConfig: config.CloudConfig{
+					Aws: config.AwsConfig{
+						AccountType:     config.SingleAccount,
+						Cred:            libbeataws.ConfigAWS{},
+						CloudConnectors: true,
+						CloudConnectorsConfig: config.CloudConnectorsConfig{
 							GlobalRoleARN: "abc456",
 							ResourceID:    "abc789",
 						},
@@ -155,10 +207,14 @@ func TestAWS_Initialize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallel() // cannot be used with t.Setenv
+			for k, v := range tt.envsVars {
+				t.Setenv(k, v)
+			}
 
 			testInitialize(t, &AWS{
 				IdentityProvider: tt.identityProvider,
+				StatusHandler:    statushandler.NewMockStatusHandlerAPI(t),
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}

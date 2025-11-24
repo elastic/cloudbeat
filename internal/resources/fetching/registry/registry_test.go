@@ -34,6 +34,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/cycle"
 	fetchers "github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type registryTestSuite struct {
@@ -376,7 +377,7 @@ func Test_cleanTypeOf(t *testing.T) {
 			want: "fetching.MockFetcher",
 		},
 		{
-			val:  to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(fetchers.NewLoggingFetcher(nil, nil, nil, nil, nil))))))),
+			val:  to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(to.Ptr(fetchers.NewLoggingFetcher(nil, nil, nil, nil, nil, statushandler.NOOP{}))))))),
 			want: "fetchers.LoggingFetcher",
 		},
 	}

@@ -1,0 +1,344 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "elasticStackId": {
+            "type": "string",
+            "minLength": 1,
+            "metadata": {
+                "description": "Subject of the Federated Identity Credential token"
+            }
+        },
+        "elasticCloudIssuer": {
+            "type": "string",
+            "defaultValue": "https://elastic-cloud-connector.s3.us-east-1.amazonaws.com",
+            "metadata": {
+                "description": "Issuer for the Elastic Cloud Federated Identity Credential"
+            }
+        },
+        "ResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[concat('cloud-connector-rg-', dateTimeToEpoch(utcNow('u')))]",
+            "metadata": {
+                "description": "The resource group name where the cloud connector managed identity will be created"
+            }
+        },
+        "SubscriptionId": {
+            "type": "string",
+            "metadata": {
+                "description": "The id of the subscription where the cloud connector managed identity will be created"
+            }
+        },
+        "DeploymentLocation": {
+            "type": "string",
+            "defaultValue": "[deployment().location]",
+            "metadata": {
+                "description": "Deployment location"
+            }
+        }
+    },
+    "variables": {
+        "elasticCloudConnectorId": "[guid(managementGroup().id, parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name)]",
+        "userAssignedIdentityName": "[concat('ElasticCloudIdentity-', variables('elasticCloudConnectorId'))]",
+        "federatedIdentityCredentialsName": "[concat(variables('userAssignedIdentityName'), '/', 'fic-', uniqueString(parameters('ResourceGroupName')))]",
+        "customRoleDefinition": "[guid('ElasticCloudRoleDefinition-', variables('elasticCloudConnectorId'))]",
+        "customRoleDefinitionName": "[concat('Elastic Cloud Connector Role - ', variables('elasticCloudConnectorId'))]",
+        "resourceGroupDeployment": "[concat('resource-group-deployment-', parameters('DeploymentLocation'))]",
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', parameters('DeploymentLocation'))]",
+        "cloudConnectorDeployment": "[concat('cloud-connector-deployment-', parameters('DeploymentLocation'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2023-07-01",
+            "name": "[variables('resourceGroupDeployment')]",
+            "location": "[parameters('DeploymentLocation')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "DeploymentLocation": {
+                        "value": "[parameters('DeploymentLocation')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "DeploymentLocation": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Resources/resourceGroups",
+                            "apiVersion": "2023-07-01",
+                            "name": "[parameters('ResourceGroupName')]",
+                            "location": "[parameters('DeploymentLocation')]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2023-07-01",
+            "name": "[variables('cloudConnectorDeployment')]",
+            "resourceGroup": "[parameters('ResourceGroupName')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "parameters": {
+                    "elasticStackId": {
+                        "value": "[parameters('elasticStackId')]"
+                    },
+                    "elasticCloudIssuer": {
+                        "value": "[parameters('elasticCloudIssuer')]"
+                    },
+                    "userAssignedIdentityName": {
+                        "value": "[variables('userAssignedIdentityName')]"
+                    },
+                    "federatedIdentityCredentialsName": {
+                        "value": "[variables('federatedIdentityCredentialsName')]"
+                    },
+                    "customRoleDefinition": {
+                        "value": "[variables('customRoleDefinition')]"
+                    },
+                    "customRoleDefinitionName": {
+                        "value": "[variables('customRoleDefinitionName')]"
+                    },
+                    "elasticCloudConnectorId": {
+                        "value": "[variables('elasticCloudConnectorId')]"
+                    },
+                    "ManagementGroupID": {
+                        "value": "[managementGroup().id]"
+                    },
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "SubscriptionId": {
+                        "value": "[parameters('SubscriptionId')]"
+                    },
+                    "location": {
+                        "value": "[parameters('DeploymentLocation')]"
+                    }
+                },
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "elasticStackId": {
+                            "type": "string"
+                        },
+                        "elasticCloudIssuer": {
+                            "type": "string"
+                        },
+                        "userAssignedIdentityName": {
+                            "type": "string"
+                        },
+                        "federatedIdentityCredentialsName": {
+                            "type": "string"
+                        },
+                        "customRoleDefinition": {
+                            "type": "string"
+                        },
+                        "customRoleDefinitionName": {
+                            "type": "string"
+                        },
+                        "elasticCloudConnectorId": {
+                            "type": "string"
+                        },
+                        "ManagementGroupID": {
+                            "type": "string"
+                        },
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "SubscriptionId": {
+                            "type": "string"
+                        },
+                        "location": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+                            "apiVersion": "2023-01-31",
+                            "name": "[parameters('userAssignedIdentityName')]",
+                            "location": "[parameters('location')]",
+                            "tags": {
+                                "elastic-stack-id": "[parameters('elasticStackId')]",
+                                "elastic-cloud-connector-id": "[parameters('elasticCloudConnectorId')]"
+                            },
+                            "resources": [
+                                {
+                                    "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
+                                    "apiVersion": "2023-01-31",
+                                    "name": "[parameters('federatedIdentityCredentialsName')]",
+                                    "dependsOn": [
+                                        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName'))]"
+                                    ],
+                                    "properties": {
+                                        "issuer": "[parameters('elasticCloudIssuer')]",
+                                        "subject": "[parameters('elasticStackId')]",
+                                        "audiences": [
+                                            "ElasticCloudConnector"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleDefinitions",
+                            "apiVersion": "2022-04-01",
+                            "name": "[parameters('customRoleDefinition')]",
+                            "properties": {
+                                "assignableScopes": [
+                                    "[parameters('ManagementGroupID')]",
+                                    "[concat('/subscriptions/', parameters('SubscriptionId'))]",
+                                    "[concat('/subscriptions/', parameters('SubscriptionId'), '/resourcegroups/', parameters('ResourceGroupName'))]"
+                                ],
+                                "description": "Provide Elastic Cloud Connector deployments with read permissions for web app configurations and additional Azure resources",
+                                "permissions": [
+                                    {
+                                        "actions": [
+                                            "Microsoft.Web/sites/*/read",
+                                            "Microsoft.Web/sites/config/Read",
+                                            "Microsoft.Web/sites/config/list/Action"
+                                        ]
+                                    }
+                                ],
+                                "roleName": "[parameters('customRoleDefinitionName')]",
+                                "type": "CustomRole"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "PrincipalId": {
+                            "type": "string",
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').principalId]"
+                        },
+                        "ClientId": {
+                            "type": "string",
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').clientId]"
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('resourceGroupDeployment')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2023-07-01",
+            "name": "[variables('roleAssignmentDeployment')]",
+            "location": "[parameters('DeploymentLocation')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "CustomRoleDefinitionId": {
+                        "value": "[variables('customRoleDefinition')]"
+                    },
+                    "ManagementGroupID": {
+                        "value": "[managementGroup().id]"
+                    },
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "SubscriptionId": {
+                        "value": "[parameters('SubscriptionId')]"
+                    },
+                    "UserAssignedIdentityPrincipalId": {
+                        "value": "[reference(variables('cloudConnectorDeployment')).outputs.PrincipalId.value]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "CustomRoleDefinitionId": {
+                            "type": "string"
+                        },
+                        "ManagementGroupID": {
+                            "type": "string"
+                        },
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "SubscriptionId": {
+                            "type": "string"
+                        },
+                        "UserAssignedIdentityPrincipalId": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(parameters('ManagementGroupID'), parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
+                            "properties": {
+                                "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+                                "principalId": "[parameters('UserAssignedIdentityPrincipalId')]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('CustomRoleDefinitionId'))]",
+                                "principalId": "[parameters('UserAssignedIdentityPrincipalId')]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[variables('resourceGroupDeployment')]",
+                "[variables('cloudConnectorDeployment')]"
+            ]
+        }
+    ],
+    "outputs": {
+        "Identity": {
+            "type": "string",
+            "value": "[resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
+        },
+        "PrincipalId": {
+            "type": "string",
+            "value": "[reference(variables('cloudConnectorDeployment')).outputs.PrincipalId.value]"
+        },
+        "ElasticCloudConnectorId": {
+            "type": "string",
+            "value": "[variables('elasticCloudConnectorId')]"
+        },
+        "ClientId": {
+            "type": "string",
+            "value": "[reference(variables('cloudConnectorDeployment')).outputs.ClientId.value]"
+        },
+        "TenantId": {
+            "type": "string",
+            "value": "[tenant().tenantId]"
+        }
+    }
+}

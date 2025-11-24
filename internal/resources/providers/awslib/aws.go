@@ -64,3 +64,27 @@ func GetClient[T any](region *string, list map[string]T) (T, error) {
 
 	return c, nil
 }
+
+type OrgIAMRoleNamesProvider interface {
+	RootRoleName() string
+	MemberRoleName() string
+}
+
+type BenchmarkOrgIAMRoleNamesProvider struct{}
+
+func (BenchmarkOrgIAMRoleNamesProvider) RootRoleName() string   { return orgBenchmarkRootRole }
+func (BenchmarkOrgIAMRoleNamesProvider) MemberRoleName() string { return orgBenchmarkMemberRole }
+
+type AssetDiscoveryOrgIAMRoleNamesProvider struct{}
+
+func (AssetDiscoveryOrgIAMRoleNamesProvider) RootRoleName() string { return assetInventoryRootRole }
+func (AssetDiscoveryOrgIAMRoleNamesProvider) MemberRoleName() string {
+	return assetInventoryMemberRole
+}
+
+const (
+	orgBenchmarkRootRole     = "cloudbeat-root"
+	orgBenchmarkMemberRole   = "cloudbeat-securityaudit"
+	assetInventoryRootRole   = "cloudbeat-asset-inventory-root"
+	assetInventoryMemberRole = "cloudbeat-asset-inventory-securityaudit"
+)

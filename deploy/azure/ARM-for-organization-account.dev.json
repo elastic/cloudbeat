@@ -27,7 +27,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "9.2.0"
+            "defaultValue": "9.3.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -63,7 +63,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "name": "[variables('resourceGroupDeployment')]",
             "location": "[parameters('DeploymentLocation')]",
             "subscriptionId": "[parameters('SubscriptionId')]",
@@ -94,7 +94,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Resources/resourceGroups",
-                            "apiVersion": "2022-09-01",
+                            "apiVersion": "2023-07-01",
                             "name": "[parameters('ResourceGroupName')]",
                             "location": "[parameters('DeploymentLocation')]"
                         }
@@ -104,7 +104,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "name": "[variables('roleAssignmentDeployment')]",
             "location": "[parameters('DeploymentLocation')]",
             "properties": {
@@ -174,7 +174,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "name": "cloudbeat-vm-deployment",
             "resourceGroup": "[parameters('ResourceGroupName')]",
             "subscriptionId": "[parameters('SubscriptionId')]",
@@ -367,7 +367,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "name": "elastic-agent-deployment",
             "resourceGroup": "[parameters('ResourceGroupName')]",
             "subscriptionId": "[parameters('SubscriptionId')]",

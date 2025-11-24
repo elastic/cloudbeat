@@ -14,7 +14,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "9.2.0"
+            "defaultValue": "9.3.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -43,7 +43,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "name": "[variables('roleAssignmentDeployment')]",
             "subscriptionId": "[subscription().subscriptionId]",
             "location": "[parameters('ResourceGroupLocation')]",
@@ -101,7 +101,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "name": "cloudbeat-vm-deployment",
             "properties": {
                 "expressionEvaluationOptions": {
@@ -285,7 +285,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "name": "elastic-agent-deployment",
             "properties": {
                 "expressionEvaluationOptions": {

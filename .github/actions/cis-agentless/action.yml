@@ -5,6 +5,14 @@ inputs:
     description: "Azure credentials for CSPM agent deployment"
     required: true
     type: string
+  cspm-aws-access-key-id:
+    description: "AWS Access Key ID for CSPM agentless deployment"
+    required: true
+    type: string
+  cspm-aws-secret-access-key:
+    description: "AWS Secret Access Key for CSPM agentless deployment"
+    required: true
+    type: string
   es-user:
     description: "Elasticsearch user"
     default: "elastic"
@@ -34,6 +42,8 @@ runs:
       shell: bash
       env:
         AZURE_CREDENTIALS: ${{ inputs.cspm-azure-creds }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.cspm-aws-access-key-id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.cspm-aws-secret-access-key }}
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}

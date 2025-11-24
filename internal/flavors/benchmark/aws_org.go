@@ -26,6 +26,8 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/samber/lo"
+	"go.opentelemetry.io/otel"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
@@ -39,20 +41,24 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 const (
-	rootRole            = "cloudbeat-root"
-	memberRole          = "cloudbeat-securityaudit"
 	scanSettingTagKey   = "cloudbeat_scan_management_account"
 	scanSettingTagValue = "Yes"
 	scopeName           = "github.com/elastic/cloudbeat/internal/flavors/benchmark/aws_org"
 )
 
+var tracer = otel.Tracer(scopeName)
+
 type AWSOrg struct {
-	IAMProvider      iam.RoleGetter
-	IdentityProvider awslib.IdentityProviderGetter
-	AccountProvider  awslib.AccountProviderAPI
+	IAMProvider       iam.RoleGetter
+	IdentityProvider  awslib.IdentityProviderGetter
+	AccountProvider   awslib.AccountProviderAPI
+	StatusHandler     statushandler.StatusHandlerAPI
+	AWSCredsValidator awslib.CredentialsValidator
+	RoleNamesProvider awslib.OrgIAMRoleNamesProvider
 }
 
 func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Config) (builder.Benchmark, error) {
@@ -64,7 +70,7 @@ func (a *AWSOrg) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, a.StatusHandler)
 }
 
 //revive:disable-next-line:function-result-limit
@@ -72,6 +78,8 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
+
+	log.Infof("initializing benchmark aws org (cloud connectors %t)", cfg.CloudConfig.Aws.CloudConnectors)
 
 	var (
 		awsConfigCloudbeatRoot *awssdk.Config
@@ -98,7 +106,7 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	cache := make(map[string]registry.FetchersMap)
 	reg := registry.NewRegistry(log, registry.WithUpdater(
 		func(ctx context.Context) (registry.FetchersMap, error) {
-			ctx, span := observability.StartSpan(ctx, scopeName, "benchmark.AWSOrg.initialize")
+			ctx, span := tracer.Start(ctx, "benchmark.AWSOrg.initialize")
 			defer span.End()
 			spannedLog := log.WithSpanContext(span.SpanContext())
 
@@ -107,7 +115,13 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 				return nil, observability.FailSpan(span, "failed to get AWS accounts", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, accounts, cache)
+			// Filter the accounts to the ones having valid credentials on each aws account.
+			// Meaning only the accounts that have the security audit role created and thus were selected by customer on cloud formation.
+			filtered := lo.Filter(accounts, func(item preset.AwsAccount, _ int) bool {
+				return a.AWSCredsValidator.Validate(ctx, item.Config, log)
+			})
+
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, spannedLog, ch, filtered, cache, a.StatusHandler)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {
@@ -123,12 +137,12 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 
 // getAwsAccounts returns all the aws accounts of the org.
 // For each account it bundles together the cloud.Identity and the credentials for the cloudbeat-securityaudit role of that account.
-// It requires cloudbeat-root credentials (requires iam:ListAccountAliases and iam:GetRole).
+// It requires cloudbeat-root credentials (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit and iam:GetRole).
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudbeatRoot awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
 	stsClient := sts.NewFromConfig(cfgCloudbeatRoot)
 
 	// accountIdentities array contains all the Accounts and Organizational
-	// Units, even if they are nested. (requires iam:ListAccountAliases)
+	// Units, even if they are nested. (requires organizations:ListAccounts, organizations:ListParents, organizations:DescribeOrganizationalUnit)
 	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, cfgCloudbeatRoot)
 	if err != nil {
 		return nil, err
@@ -158,7 +172,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudb
 			awsConfig = assumeRole(
 				stsClient,
 				cfgCloudbeatRoot,
-				fmtIAMRole(identity.Account, memberRole),
+				fmtIAMRole(identity.Account, a.RoleNamesProvider.MemberRoleName()),
 			)
 		}
 
@@ -179,7 +193,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	// had the built-in SecurityAudit policy attached.
 	var foundTagValue string
 	{
-		r, err := a.IAMProvider.GetRole(ctx, rootRole)
+		r, err := a.IAMProvider.GetRole(ctx, a.RoleNamesProvider.RootRoleName())
 		if err != nil {
 			return awssdk.Config{}, fmt.Errorf("error getting root role: %w", err)
 		}
@@ -194,7 +208,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 
 	if foundTagValue == "" {
 		// Legacy. Use 'cloudbeat-root' role for compliance reasons.
-		log.Infof("%q tag not found, using '%s' role for backward compatibility", scanSettingTagKey, rootRole)
+		log.Infof("%q tag not found, using '%s' role for backward compatibility", scanSettingTagKey, a.RoleNamesProvider.RootRoleName())
 		return rootCfg, nil
 	}
 
@@ -203,9 +217,9 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	// without exiting function, since we want to scan other selected
 	// accounts, but at least the error will be visible in the logs.
 	if foundTagValue == scanSettingTagValue {
-		_, err := a.IAMProvider.GetRole(ctx, memberRole)
+		_, err := a.IAMProvider.GetRole(ctx, a.RoleNamesProvider.MemberRoleName())
 		if err != nil {
-			log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, memberRole, err)
+			log.Errorf("Management Account should be scanned (%s: %s), but %q role is missing: %s", scanSettingTagKey, foundTagValue, a.RoleNamesProvider.MemberRoleName(), err)
 		}
 	}
 
@@ -215,11 +229,11 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	// will still try to use "cloudbeat-securityaudit", but it is non-existent,
 	// so we will fail silently and not get any data from the Management
 	// Account.
-	log.Debugf("assuming '%s' role for Account %s", memberRole, identity.Account)
+	log.Debugf("assuming '%s' role for Account %s", a.RoleNamesProvider.MemberRoleName(), identity.Account)
 	config := assumeRole(
 		stsClient,
 		rootCfg,
-		fmtIAMRole(identity.Account, memberRole),
+		fmtIAMRole(identity.Account, a.RoleNamesProvider.MemberRoleName()),
 	)
 	return config, nil
 }
@@ -245,14 +259,14 @@ func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.C
 
 	var cfgCloudbeatRoot awssdk.Config
 
-	if strings.Contains(pointers.Deref(identity.Arn), rootRole) {
+	if strings.Contains(pointers.Deref(identity.Arn), a.RoleNamesProvider.RootRoleName()) {
 		// case A [EC2 Instance] already cloudbeat-root, no need to re-assume.
 		cfgCloudbeatRoot = *awsConfig
 	} else {
 		cfgCloudbeatRoot = assumeRole(
 			sts.NewFromConfig(*awsConfig),
 			*awsConfig,
-			fmtIAMRole(pointers.Deref(identity.Account), rootRole),
+			fmtIAMRole(pointers.Deref(identity.Account), a.RoleNamesProvider.RootRoleName()),
 		)
 	}
 
