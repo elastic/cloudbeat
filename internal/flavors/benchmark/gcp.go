@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type GCP struct {
@@ -49,7 +50,7 @@ func (g *GCP) NewBenchmark(ctx context.Context, log *clog.Logger, cfg *config.Co
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
 		builder.WithManagerTimeout(cfg.Period),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).Build(ctx, log, cfg, resourceCh, reg, statushandler.NOOP{})
 }
 
 //revive:disable-next-line:function-result-limit

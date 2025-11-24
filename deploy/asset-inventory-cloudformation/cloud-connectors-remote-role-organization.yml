@@ -28,6 +28,11 @@ Parameters:
     Description: Specify the Elastic resource ID that the new role will trust upon.
     Type: String
 
+  ElasticRoleARN:
+    Description: Elastic's Role ARN that the cloud connector will trust upon (change it only if you need to perform test with Elastic's test environments).
+    Type: String
+    Default: arn:aws:iam::254766567737:role/cloud_connectors
+
 Conditions:
   ScanManagementAccountEnabled: !Equals
     - !Ref ScanManagementAccount
@@ -43,7 +48,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::254766567737:role/cloud_connectors
+              AWS: !Ref ElasticRoleARN
             Action: sts:AssumeRole
             Condition:
               StringEquals:
@@ -64,7 +69,7 @@ Resources:
   CloudbeatRootRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: cloudbeat-asset-inventory-root
+      RoleName: cloudbeat-root
       Description: Role that cloudbeat uses to assume roles in other accounts
       Tags:
         - Key: cloudbeat_scan_management_account
@@ -90,7 +95,7 @@ Resources:
               - sts:AssumeRole
       Path: /
       Policies:
-        - PolicyName: cloudbeat-asset-inventory-root-permissions
+        - PolicyName: cloudbeat-root-permissions
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -115,8 +120,8 @@ Resources:
   CloudbeatRoleStackSet:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      StackSetName: cloudbeat-role-asset-inventory-stackset
-      Description: StackSet for deploying the cloudbeat-asset-inventory-securityaudit IAM role to member accounts in the specified organizational units.
+      StackSetName: cloudbeat-role-stackset
+      Description: StackSet for deploying the cloudbeat-securityaudit IAM role to member accounts in the specified organizational units.
       AutoDeployment:
         Enabled: true
         RetainStacksOnAccountRemoval: false
@@ -143,7 +148,7 @@ Resources:
           CloudbeatMemberRole:
             Type: 'AWS::IAM::Role'
             Properties:
-              RoleName: cloudbeat-asset-inventory-securityaudit
+              RoleName: cloudbeat-securityaudit
               AssumeRolePolicyDocument:
                 Version: '2012-10-17'
                 Statement:
@@ -159,7 +164,7 @@ Resources:
   CloudbeatManagementAccountAuditRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: cloudbeat-asset-inventory-securityaudit
+      RoleName: cloudbeat-securityaudit
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:

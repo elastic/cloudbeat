@@ -20,24 +20,16 @@ package assetinventory
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/elastic/cloudbeat/internal/config"
-	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
-)
-
-const (
-	rootRole   = "cloudbeat-asset-inventory-root"
-	memberRole = "cloudbeat-asset-inventory-securityaudit"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) (*awssdk.Config, error) {
@@ -48,11 +40,15 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 }
 
-func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
+func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
+	s.logger.Infof("initializing asset inventory aws (cloud connectors %t)", s.cfg.CloudConfig.Aws.CloudConnectors)
+
 	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
 	if err != nil {
 		return nil, err
 	}
+
+	orgIAMRoleNamesProvider := getOrgIAMRoleNamesProvider(s.cfg.CloudConfig.Aws)
 
 	idProvider := awslib.IdentityProvider{Logger: s.logger}
 	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
@@ -62,14 +58,14 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 
 	// Early exit if we're scanning the entire account.
 	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
-		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig), nil
+		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig, statusHandler), nil
 	}
 
 	// Assume audit roles per selected account and generate fetchers for them
 	rootRoleConfig := assumeRole(
 		sts.NewFromConfig(*awsConfig),
 		*awsConfig,
-		fmtIAMRole(awsIdentity.Account, rootRole),
+		fmtIAMRole(awsIdentity.Account, orgIAMRoleNamesProvider.RootRoleName()),
 	)
 	accountProvider := &awslib.AccountProvider{}
 	accountIdentities, err := accountProvider.ListAccounts(ctx, s.logger, rootRoleConfig)
@@ -82,30 +78,18 @@ func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetche
 		assumedRoleConfig := assumeRole(
 			stsClient,
 			rootRoleConfig,
-			fmtIAMRole(identity.Account, memberRole),
+			fmtIAMRole(identity.Account, orgIAMRoleNamesProvider.MemberRoleName()),
 		)
-		if ok := tryListingBuckets(ctx, s.logger, assumedRoleConfig); !ok {
+		if ok := awslib.CredentialsValid(ctx, assumedRoleConfig, s.logger); !ok {
 			// role does not exist, skip identity/account
 			s.logger.Infof("Skipping identity on purpose %+v", identity)
 			continue
 		}
-		accountFetchers := awsfetcher.New(ctx, s.logger, &identity, assumedRoleConfig)
+		accountFetchers := awsfetcher.New(ctx, s.logger, &identity, assumedRoleConfig, statusHandler)
 		fetchers = append(fetchers, accountFetchers...)
 	}
 
 	return fetchers, nil
-}
-
-func tryListingBuckets(ctx context.Context, log *clog.Logger, roleConfig awssdk.Config) bool {
-	s3Client := s3.NewFromConfig(roleConfig)
-	_, err := s3Client.ListBuckets(ctx, &s3.ListBucketsInput{MaxBuckets: pointers.Ref(int32(1))})
-	if err == nil {
-		return true
-	}
-	if !strings.Contains(err.Error(), "not authorized to perform: sts:AssumeRole") {
-		log.Errorf("Expected a 403 autorization error, but got: %v", err)
-	}
-	return false
 }
 
 func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {
@@ -115,4 +99,11 @@ func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn stri
 
 func fmtIAMRole(account string, role string) string {
 	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
+}
+
+func getOrgIAMRoleNamesProvider(cfg config.AwsConfig) awslib.OrgIAMRoleNamesProvider {
+	if cfg.CloudConnectors {
+		return awslib.BenchmarkOrgIAMRoleNamesProvider{} // for reusability with CSPM when cloud connectors are enabled.
+	}
+	return awslib.AssetDiscoveryOrgIAMRoleNamesProvider{}
 }

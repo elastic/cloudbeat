@@ -55,8 +55,8 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.ClassicStorageAccountAssetType:     {fetching.AzureClassicStorageAccountType, fetching.CloudStorage},
 	inventory.DiskAssetType:                      {fetching.AzureDiskType, fetching.CloudCompute},
 	inventory.DocumentDBDatabaseAccountAssetType: {fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase},
-	inventory.MySQLDBAssetType:                   {fetching.AzureMySQLDBType, fetching.CloudDatabase},
-	inventory.FlexibleMySQLDBAssetType:           {fetching.AzureFlexibleMySQLDBType, fetching.CloudDatabase},
+	inventory.MySQLDBServerAssetType:             {fetching.AzureMySQLDBType, fetching.CloudDatabase},
+	inventory.FlexibleMySQLDBServerAssetType:     {fetching.AzureFlexibleMySQLDBType, fetching.CloudDatabase},
 	inventory.NetworkWatchersFlowLogAssetType:    {fetching.AzureNetworkWatchersFlowLogType, fetching.MonitoringIdentity},
 	inventory.FlexiblePostgreSQLDBAssetType:      {fetching.AzureFlexiblePostgreSQLDBType, fetching.CloudDatabase},
 	inventory.PostgreSQLDBAssetType:              {fetching.AzurePostgreSQLDBType, fetching.CloudDatabase},
@@ -202,6 +202,7 @@ func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
 			m["user.effective.id"] = r.Asset.Id
 			m["user.effective.name"] = r.Asset.Name
 		}
+	default:
 	}
 
 	return m, nil

@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 func TestIAMUserFetcher_Fetch(t *testing.T) {
@@ -127,8 +128,10 @@ func TestIAMUserFetcher_Fetch(t *testing.T) {
 	provider := newMockIamUserProvider(t)
 	provider.EXPECT().GetUsers(mock.Anything).Return(in, nil)
 
+	msh := statushandler.NewMockStatusHandlerAPI(t)
+
 	identity := &cloud.Identity{Account: "123", AccountAlias: "alias"}
-	fetcher := newIamUserFetcher(logger, identity, provider)
+	fetcher := newIamUserFetcher(logger, identity, provider, msh)
 
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }

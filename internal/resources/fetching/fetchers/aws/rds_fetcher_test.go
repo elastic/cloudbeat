@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
 type RdsFetcherTestSuite struct {
@@ -94,9 +95,10 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			}
 
 			rdsFetcher := RdsFetcher{
-				log:        testhelper.NewLogger(s.T()),
-				resourceCh: s.resourceCh,
-				provider:   m,
+				log:           testhelper.NewLogger(s.T()),
+				resourceCh:    s.resourceCh,
+				provider:      m,
+				statusHandler: statushandler.NewMockStatusHandlerAPI(t),
 			}
 
 			ctx := t.Context()

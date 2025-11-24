@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel"
 	metricpb "go.opentelemetry.io/proto/otlp/collector/metrics/v1"
 	tracepb "go.opentelemetry.io/proto/otlp/collector/trace/v1"
 	otlpmetricpb "go.opentelemetry.io/proto/otlp/metrics/v1"
@@ -39,12 +40,15 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
+var tracer = otel.Tracer("test-scope")
+var meter = otel.Meter("test-scope")
+
 func TestOtel(t *testing.T) {
 	testhelper.SkipLong(t)
 	ctx := t.Context()
 
 	t.Run("No OTel Setup", func(t *testing.T) {
-		spanCtx, span := observability.StartSpan(ctx, "test-tracer", "test-span")
+		spanCtx, span := tracer.Start(ctx, "test-span")
 		require.NotNil(t, spanCtx)
 		assert.False(t, span.IsRecording())
 	})
@@ -55,12 +59,12 @@ func TestOtel(t *testing.T) {
 	t.Cleanup(server.Stop)
 
 	log := testhelper.NewObserverLogger(t)
-	ctx, err := observability.SetUpOtel(ctx, log.Logger)
+	err := observability.SetUpOtel(ctx, log.Logger)
 	require.NoError(t, err)
 
 	var spanID, traceID string
 	t.Run("Start Span", func(t *testing.T) {
-		spanCtx, span := observability.StartSpan(ctx, "test-tracer", "test-span")
+		spanCtx, span := tracer.Start(ctx, "test-span")
 		require.NotNil(t, spanCtx)
 		assert.True(t, span.IsRecording())
 		assert.True(t, span.SpanContext().IsValid())
@@ -73,7 +77,7 @@ func TestOtel(t *testing.T) {
 		span.End() // End the span to ensure it is recorded
 	})
 
-	counter, err := observability.MeterFromContext(ctx, "test-meter").Int64Counter("test-counter")
+	counter, err := meter.Int64Counter("test-counter")
 	require.NoError(t, err)
 	counter.Add(ctx, 10)
 

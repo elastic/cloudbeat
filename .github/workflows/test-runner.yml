@@ -14,6 +14,7 @@ jobs:
       branch: main
       region: gcp-us-west2
       serverless: false
+      run-ui-sanity-tests: true
     secrets: inherit
     permissions:
       contents: 'read'
@@ -28,6 +29,7 @@ jobs:
       branch: main
       region: aws-us-east-1
       serverless: true
+      run-ui-sanity-tests: true
     secrets: inherit
     permissions:
       contents: 'read'

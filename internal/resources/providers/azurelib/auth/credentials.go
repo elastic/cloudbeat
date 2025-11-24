@@ -44,11 +44,13 @@ func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFac
 		return p.getSecretCredentialsConfig(cfg)
 	case config.AzureClientCredentialsTypeCertificate:
 		return p.getCertificateCredentialsConfig(cfg)
+	case config.AzureClientCredentialsTypeCloudConnectors:
+		return p.getCloudConnectorsCredentialsConfig(cfg)
 	case "", config.AzureClientCredentialsTypeManagedIdentity, config.AzureClientCredentialsTypeARMTemplate, config.AzureClientCredentialsTypeManual:
 		return p.getDefaultCredentialsConfig()
+	default:
+		return nil, fmt.Errorf("wrong credentials type: %s", cfg.Credentials.ClientCredentialsType)
 	}
-
-	return nil, ErrWrongCredentialsType
 }
 
 func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, error) {
@@ -95,7 +97,21 @@ func (p *ConfigProvider) getCertificateCredentialsConfig(cfg config.AzureConfig)
 	}, nil
 }
 
+func (p *ConfigProvider) getCloudConnectorsCredentialsConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
+	creds, err := p.AuthProvider.FindClientAssertionCredentials(
+		cfg.Credentials.TenantID,
+		cfg.Credentials.ClientID,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cloud connectors credentials: %w", err)
+	}
+
+	return &AzureFactoryConfig{
+		Credentials: creds,
+	}, nil
+}
+
 var (
-	ErrWrongCredentialsType       = errors.New("wrong credentials type")
 	ErrIncompleteUsernamePassword = errors.New("incomplete username and password credentials")
 )

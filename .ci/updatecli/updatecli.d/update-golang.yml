@@ -37,70 +37,20 @@ actions:
         Generated automatically with {{ requiredEnv "JOB_URL" }}
 
 sources:
-  minor:
-    name: Get minor version in .go-version
-    kind: shell
-    transformers:
-      - findsubmatch:
-          pattern: '^\d+.(\d+).\d+$'
-          captureindex: 1
-    spec:
-      command: cat .go-version
-
   latestGoVersion:
-    name: Get Latest Go Release
-    kind: githubrelease
-    dependson:
-      - minor
-    transformers:
-      - trimprefix: go
-    spec:
-      owner: golang
-      repository: go
-      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
-      username: '{{ requiredEnv "GIT_USER" }}'
-      versionfilter:
-        kind: regex
-        pattern: go1\.{{ source "minor" }}\.\d*$
-
-  gomod:
-    dependson:
-      - latestGoVersion
-    name: Get version in go.mod format
-    kind: shell
-    transformers:
-      - findsubmatch:
-          pattern: '^(\d+.\d+).\d*'
-          captureindex: 1
-    spec:
-      command: echo {{ source "latestGoVersion" }}
-
-conditions:
-  dockerTag:
-    name: Is docker image golang:{{ source "latestGoVersion" }} published
-    kind: dockerimage
-    spec:
-      image: golang
-      tag: '{{ source "latestGoVersion" }}'
-    sourceid: latestGoVersion
-
-  goDefaultVersion-check:
-    name: Check if defined golang version differs
-    kind: shell
-    sourceid: latestGoVersion
-    spec:
-      command: 'grep -v -q {{ source "latestGoVersion" }} .go-version #'
+    name: Get Golang version
+    kind: golang
 
 targets:
   update-go-version:
-    name: 'Update .go-version with Golang version {{ source "latestGoVersion" }}'
+    name: "Update Go"
     sourceid: latestGoVersion
     scmid: default
     kind: file
     spec:
-      content: '{{ source "latestGoVersion" }}'
-      file: .go-version
-      matchpattern: '\d+.\d+.\d+'
+      file: ".go-version"
+      content: |
+        {{ source "latestGoVersion" }}
   update-version-asciidoc:
     name: 'Update version.asciidoc with Golang version {{ source "latestGoVersion" }}'
     sourceid: latestGoVersion
@@ -110,16 +60,6 @@ targets:
       file: docs/version.asciidoc
       matchpattern: '(:go-version:) \d+.\d+.\d+'
       replacepattern: '$1 {{ source "latestGoVersion" }}'
-  update-gomod:
-    name: 'Update go.mod files with {{ source "gomod" }}'
-    sourceid: gomod
-    scmid: default
-    kind: file
-    spec:
-      content: 'go {{ source "gomod" }}'
-      files:
-        - go.mod
-      matchpattern: 'go \d+.\d+'
   update-hermit:
     name: 'Update hermit with Golang version {{ source "latestGoVersion" }}'
     sourceid: latestGoVersion
