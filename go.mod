@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	cloud.google.com/go/asset v1.20.4
 	cloud.google.com/go/iam v1.3.1
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.1
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.2
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2 v2.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.4.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.11.0
@@ -47,11 +47,11 @@ require (
 	github.com/aws/smithy-go v1.22.2
 	github.com/dgraph-io/ristretto v0.2.0
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250129050814-e8a6063479c2
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20250924184746-8cb24ce41f4c
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.9.0
 	github.com/elastic/elastic-agent-client/v7 v7.17.0
-	github.com/elastic/elastic-agent-libs v0.18.1
+	github.com/elastic/elastic-agent-libs v0.21.5
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/go-logr/zapr v1.3.0
@@ -127,8 +127,9 @@ require (
 	github.com/digitorus/pkcs7 v0.0.0-20230818184609-3a137a874352 // indirect
 	github.com/digitorus/timestamp v0.0.0-20231217203849-220c5c2851b7 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/ebitengine/purego v0.8.1 // indirect
+	github.com/ebitengine/purego v0.9.0-alpha.3.0.20250507171635-5047c08daa38 // indirect
 	github.com/elastic/pkcs8 v1.0.0 // indirect
+	github.com/elastic/sarama v1.19.1-0.20250603175145-7672917f26b6 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -137,7 +138,7 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-git/go-git/v5 v5.13.1 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.6 // indirect
-	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
+	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gocsaf/csaf/v3 v3.1.0 // indirect
 	github.com/gofrs/uuid/v5 v5.2.0 // indirect
 	github.com/google/certificate-transparency-go v1.1.8 // indirect
@@ -198,7 +199,7 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.35.0 // indirect
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
-	golang.org/x/tools v0.29.0 // indirect
+	golang.org/x/tools v0.33.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/go-jose/go-jose.v2 v2.6.3 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.70 // indirect
@@ -230,7 +231,7 @@ require (
 	github.com/Azure/go-autorest/autorest/date v0.3.0 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
-	github.com/AzureAD/microsoft-authentication-library-for-go v1.3.2 // indirect
+	github.com/AzureAD/microsoft-authentication-library-for-go v1.4.0 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/CycloneDX/cyclonedx-go v0.9.2 // indirect
 	github.com/GoogleCloudPlatform/docker-credential-gcr v2.0.5+incompatible // indirect
@@ -244,7 +245,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Microsoft/hcsshim v0.12.9 // indirect
 	github.com/ProtonMail/go-crypto v1.1.3 // indirect
-	github.com/Shopify/sarama v1.27.0 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/a8m/envsubst v1.4.2 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
@@ -311,10 +311,10 @@ require (
 	github.com/dop251/goja v0.0.0-20231027120936-b396bb4c349d // indirect
 	github.com/dop251/goja_nodejs v0.0.0-20231122114759-e84d9a924c5c // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/eapache/go-resiliency v1.2.0 // indirect
-	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
+	github.com/eapache/go-resiliency v1.7.0 // indirect
+	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.11.7 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.11.11 // indirect
 	github.com/elastic/go-concert v0.3.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.5.0 // indirect
@@ -465,7 +465,6 @@ require (
 	github.com/package-url/packageurl-go v0.1.3 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
@@ -511,26 +510,26 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zclconf/go-cty v1.15.0 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
-	go.elastic.co/apm/module/apmelasticsearch/v2 v2.6.0 // indirect
-	go.elastic.co/apm/module/apmhttp/v2 v2.6.0 // indirect
-	go.elastic.co/apm/v2 v2.6.0 // indirect
+	go.elastic.co/apm/module/apmelasticsearch/v2 v2.6.3 // indirect
+	go.elastic.co/apm/module/apmhttp/v2 v2.6.3 // indirect
+	go.elastic.co/apm/v2 v2.6.3 // indirect
 	go.elastic.co/ecszap v1.0.2 // indirect
-	go.elastic.co/fastjson v1.3.0 // indirect
+	go.elastic.co/fastjson v1.4.0 // indirect
 	go.etcd.io/bbolt v1.3.11 // indirect
-	go.mongodb.org/mongo-driver v1.14.0 // indirect
+	go.mongodb.org/mongo-driver v1.17.4 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/otel v1.35.0 // indirect
 	go.opentelemetry.io/otel/metric v1.35.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.35.0 // indirect
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/term v0.30.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/crypto v0.39.0 // indirect
+	golang.org/x/mod v0.25.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sync v0.15.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/term v0.32.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.11.0
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20250124145028-65684f501c47 // indirect
