@@ -148,9 +148,9 @@ env:
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
-  AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
+  AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=contextual-security Key=project,Value=test-environments"
   GCP_ZONE: "us-central1-a"
-  AZURE_DEFAULT_TAGS: "division=engineering org=security team=cloud-security-posture project=test-environments owner=${{ github.actor }}"
+  AZURE_DEFAULT_TAGS: "division=engineering org=security team=contextual-security project=test-environments owner=${{ github.actor }}"
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_gcp_service_account_json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
 

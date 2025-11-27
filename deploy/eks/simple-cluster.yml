@@ -9,7 +9,7 @@ metadata:
   tags:
     division: engineering
     org: security
-    team: cloud-security
+    team: contextual-security
     project: eks-simple-cluster # change this to reflect your project
 
 vpc:

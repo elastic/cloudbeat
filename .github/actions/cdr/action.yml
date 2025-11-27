@@ -397,7 +397,7 @@ runs:
         # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
         # Convert github.actor to lowercase, replace disallowed characters
         gcp_label=$(echo "$ACTOR" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/_/g')
-        gcp_default_tag="division=engineering,org=security,team=cloud-security-posture,project=test-environments,owner=$gcp_label"
+        gcp_default_tag="division=engineering,org=security,team=contextual-security,project=test-environments,owner=$gcp_label"
         . ./set_env.sh && ./deploy.sh && gcloud compute instances update "${DEPLOYMENT_NAME}" --update-labels "${gcp_default_tag}" --zone="${GCP_ZONE}"
 
     - name: Upload CDR state
