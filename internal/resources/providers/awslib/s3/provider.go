@@ -29,6 +29,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3control"
 	s3ControlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/aws/smithy-go"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -65,7 +66,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	}
 	clientBuckets, err := defaultClient.ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
-		p.log.Errorf("Could not list s3 buckets: %v", err)
+		p.log.With(logp.Error(err)).Error("Could not list s3 buckets")
 		return nil, err
 	}
 
@@ -77,32 +78,35 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 
 	accountPublicAccessBlockConfig, accountPublicAccessBlockErr := p.getAccountPublicAccessBlock(ctx)
 	if accountPublicAccessBlockErr != nil {
-		p.log.Errorf("Could not get account public access block configuration. Err: %v", accountPublicAccessBlockErr)
+		p.log.With(logp.Error(accountPublicAccessBlockErr)).Error("Could not get account public access block configuration")
 	}
 
 	bucketsRegionsMapping := p.getBucketsRegionMapping(ctx, clientBuckets.Buckets)
 	for region, buckets := range bucketsRegionsMapping {
 		for _, bucket := range buckets {
+			// Create a contextual logger with bucket and region information
+			bucketLogger := p.log.With("aws.s3.bucket.name", *bucket.Name, "cloud.region", region)
+
 			// Getting the bucket encryption, policy, versioning  and public access block is not critical for the rest
 			//  of the flow, so we should keep describing the bucket even if getting these objects fails.
 			sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, bucket.Name, region)
 			if encryptionErr != nil {
-				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
+				bucketLogger.With(logp.Error(encryptionErr)).Error("Could not get encryption for bucket")
 			}
 
 			bucketPolicy, policyErr := p.GetBucketPolicy(ctx, bucket.Name, region)
 			if policyErr != nil {
-				p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *bucket.Name, policyErr)
+				bucketLogger.With(logp.Error(policyErr)).Error("Could not get bucket policy")
 			}
 
 			bucketVersioning, versioningErr := p.getBucketVersioning(ctx, bucket.Name, region)
 			if versioningErr != nil {
-				p.log.Errorf("Could not get bucket versioning for bucket %s. Err: %v", *bucket.Name, versioningErr)
+				bucketLogger.With(logp.Error(versioningErr)).Error("Could not get bucket versioning")
 			}
 
 			publicAccessBlockConfiguration, publicAccessBlockErr := p.getPublicAccessBlock(ctx, bucket.Name, region)
 			if publicAccessBlockErr != nil {
-				p.log.Errorf("Could not get public access block configuration for bucket %s. Err: %v", *bucket.Name, publicAccessBlockErr)
+				bucketLogger.With(logp.Error(publicAccessBlockErr)).Error("Could not get public access block configuration")
 			}
 
 			result = append(result, BucketDescription{
@@ -128,7 +132,7 @@ func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region s
 
 	acl, err := client.GetBucketAcl(ctx, &s3Client.GetBucketAclInput{Bucket: bucketName})
 	if err != nil {
-		p.log.Debugf("Error getting bucket ACL: %s", err)
+		p.log.With("aws.s3.bucket.name", *bucketName, "cloud.region", region, logp.Error(err)).Debugf("Error getting bucket ACL: %s", err)
 		return nil, err
 	}
 
@@ -146,7 +150,7 @@ func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, regio
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == PolicyNotFoundCode {
-				p.log.Debugf("Bucket policy for bucket %s does not exist", *bucketName)
+				p.log.With("aws.s3.bucket.name", *bucketName).Debugf("Bucket policy for bucket %s does not exist", *bucketName)
 				return map[string]any{}, nil
 			}
 		}
@@ -171,7 +175,7 @@ func (p Provider) GetBucketLogging(ctx context.Context, bucketName *string, regi
 
 	logging, err := client.GetBucketLogging(ctx, &s3Client.GetBucketLoggingInput{Bucket: bucketName})
 	if err != nil {
-		p.log.Debugf("Error getting bucket logging: %s", err)
+		p.log.With("aws.s3.bucket.name", *bucketName, "cloud.region", region, logp.Error(err)).Debugf("Error getting bucket logging: %s", err)
 		return Logging{}, err
 	}
 
@@ -191,7 +195,7 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 		// If we could not get the Region for a bucket, additional API calls for resources will probably fail, we should
 		//	not describe this bucket.
 		if regionErr != nil {
-			p.log.Errorf("Could not get bucket location for bucket %s. Not describing this bucket. Error: %v", *clientBucket.Name, regionErr)
+			p.log.With("aws.s3.bucket.name", *clientBucket.Name, logp.Error(regionErr)).Error("Could not get bucket location. Not describing this bucket")
 			continue
 		}
 
@@ -212,7 +216,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == EncryptionNotFoundCode {
-				p.log.Debugf("Bucket encryption for bucket %s does not exist", *bucketName)
+				p.log.With("aws.s3.bucket.name", *bucketName).Debugf("Bucket encryption for bucket %s does not exist", *bucketName)
 				return aws.String(NoEncryptionMessage), nil
 			}
 		}
@@ -281,7 +285,7 @@ func (p Provider) getAccountPublicAccessBlock(ctx context.Context) (*s3ControlTy
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == NoPublicAccessBlockConfigurationCode {
-				p.log.Debugf("Account public access block for account %s does not exist", p.accountId)
+				p.log.With("aws.account.id", p.accountId).Debugf("Account public access block for account %s does not exist", p.accountId)
 				return nil, nil
 			}
 		}
@@ -307,7 +311,7 @@ func (p Provider) getPublicAccessBlock(ctx context.Context, bucketName *string, 
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == NoPublicAccessBlockConfigurationCode {
-				p.log.Debugf("Bucket public access block for bucket %s does not exist", *bucketName)
+				p.log.With("aws.s3.bucket.name", *bucketName).Debugf("Bucket public access block for bucket %s does not exist", *bucketName)
 				return nil, nil
 			}
 		}

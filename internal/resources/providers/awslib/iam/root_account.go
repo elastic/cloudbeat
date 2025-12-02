@@ -25,6 +25,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User {
@@ -35,7 +36,7 @@ func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User 
 
 	rootDate, err := time.Parse(time.RFC3339, rootAccount.UserCreation)
 	if err != nil {
-		p.log.Errorf("fail to parse root account user creation, error: %v", err)
+		p.log.With(logp.Error(err)).Error("fail to parse root account user creation")
 		return nil
 	}
 
@@ -45,7 +46,7 @@ func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User 
 	if rootAccount.PasswordLastUsed != "no_information" && rootAccount.PasswordLastUsed != "N/A" {
 		pwdLastUsed, err = time.Parse(time.RFC3339, rootAccount.PasswordLastUsed)
 		if err != nil {
-			p.log.Errorf("fail to parse root account password last used, error: %v", err)
+			p.log.With(logp.Error(err)).Error("fail to parse root account password last used")
 			return nil
 		}
 	}
