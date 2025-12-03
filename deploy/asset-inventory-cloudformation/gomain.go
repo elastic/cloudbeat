@@ -112,7 +112,7 @@ func generateProdTemplate(prodTemplatePath string, devTemplatePath string) error
 } |
 .Resources.ElasticAgentEc2Instance.Properties.Tags += {
 	"Key": "team",
-	"Value": "cloud-security"
+	"Value": "contextual-security"
 } |
 .Resources.ElasticAgentEc2Instance.Properties.Tags += {
 	"Key": "project",

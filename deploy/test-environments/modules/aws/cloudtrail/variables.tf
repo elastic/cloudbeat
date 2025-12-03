@@ -25,7 +25,7 @@ variable "tags" {
   description = "Optional set of tags to use for all deployments"
   type        = map(string)
   default = {
-    "deployment"  = "cloud-security",
+    "deployment"  = "contextual-security",
     "environment" = "test-enviroments",
   }
 }
@@ -44,7 +44,7 @@ variable "org" {
 }
 
 variable "team" {
-  default     = "cloud-security-posture"
+  default     = "contextual-security"
   type        = string
   description = "Optional team resource tag"
 }

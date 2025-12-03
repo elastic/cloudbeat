@@ -23,13 +23,13 @@ variable "deployment_template" {
 variable "deployment_name_prefix" {
   description = "Prefix for the Elastic Cloud deployment name"
   type        = string
-  default     = "cloud-security"
+  default     = "contextual-security"
 }
 
 variable "tags" {
   type = map(string)
   default = {
-    "deployment"  = "cloud-security",
+    "deployment"  = "contextual-security",
     "environment" = "test-enviroment",
   }
   description = "Optional set of tags to use for all deployments"
