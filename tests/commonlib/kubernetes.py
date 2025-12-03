@@ -219,7 +219,7 @@ class KubernetesHelper:
         This function will delete all cloudbeat kubernetes resources.
         Currently, there is no ability to remove through utils due to the following:
         https://github.com/kubernetes-client/python/pull/1392
-        So below is cloud-security-posture own implementation.
+        So below is contextual-security own implementation.
         :return: V1Object - result
         """
         result_list = []

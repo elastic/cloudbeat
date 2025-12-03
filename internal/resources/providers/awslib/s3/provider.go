@@ -87,7 +87,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 			//  of the flow, so we should keep describing the bucket even if getting these objects fails.
 			sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, bucket.Name, region)
 			if encryptionErr != nil {
-				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
+				p.log.Errorf("Could not get bucket encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
 			}
 
 			bucketPolicy, policyErr := p.GetBucketPolicy(ctx, bucket.Name, region)
@@ -102,7 +102,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 
 			publicAccessBlockConfiguration, publicAccessBlockErr := p.getPublicAccessBlock(ctx, bucket.Name, region)
 			if publicAccessBlockErr != nil {
-				p.log.Errorf("Could not get public access block configuration for bucket %s. Err: %v", *bucket.Name, publicAccessBlockErr)
+				p.log.Errorf("Could not get bucket public access block configuration for bucket %s. Err: %v", *bucket.Name, publicAccessBlockErr)
 			}
 
 			result = append(result, BucketDescription{
