@@ -253,6 +253,7 @@ jobs:
       - name: Determine Vault Path
         id: determine-vault-path
         shell: bash
+        working-directory: ./
         env:
           ESS_REGION_INPUT: ${{ inputs.ess-region }}
         run: |
@@ -289,6 +290,7 @@ jobs:
       - name: Map ESS Region
         id: map-ess-region
         shell: bash
+        working-directory: ./
         env:
           ESS_REGION_INPUT: ${{ inputs.ess-region }}
           SERVERLESS_MODE: ${{ inputs.serverless_mode }}
