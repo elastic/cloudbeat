@@ -22,7 +22,8 @@ locals {
 }
 
 provider "ec" {
-  apikey = var.ec_api_key
+  apikey   = var.ec_api_key
+  endpoint = local.ec_url
 }
 
 provider "restapi" {
