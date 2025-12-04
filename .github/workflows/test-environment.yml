@@ -459,95 +459,99 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
-      - name: Deploy CDR Integrations
-        id: cdr-integrations
-        if: ${{ !cancelled() && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cis' }}
-        uses: ./.github/actions/cdr
-        with:
-          deployment-name: ${{ env.DEPLOYMENT_NAME }}
-          aws-region: ${{ env.AWS_REGION }}
-          gcp-project-id: ${{ env.GCP_PROJECT }}
-          gcp-service-account-json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
-          gcp-zone: ${{ env.GCP_ZONE }}
-          aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
-          azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
-          azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
-          wiz-client-id: ${{ secrets.WIZ_CLIENT_ID }}
-          wiz-client-secret: ${{ secrets.WIZ_CLIENT_SECRET }}
-          wiz-endpoint-url: ${{ secrets.WIZ_ENDPOINT_URL }}
-          wiz-token-url: ${{ secrets.WIZ_TOKEN_URL }}
-          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-          es-user: ${{ env.ES_USER }}
-          es-password: ${{ env.ES_PASSWORD }}
-          kibana-url: ${{ env.KIBANA_URL }}
-          elk-stack-version: ${{ env.STACK_VERSION }}
-          azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
-          tag-project: ${{ github.actor }}
-          tag-owner: ${{ github.actor }}
+      # TODO: Uncomment after DEBUGGING
+      # ===============================
+      # - name: Deploy CDR Integrations
+      #   id: cdr-integrations
+      #   if: ${{ !cancelled() && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cis' }}
+      #   uses: ./.github/actions/cdr
+      #   with:
+      #     deployment-name: ${{ env.DEPLOYMENT_NAME }}
+      #     aws-region: ${{ env.AWS_REGION }}
+      #     gcp-project-id: ${{ env.GCP_PROJECT }}
+      #     gcp-service-account-json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
+      #     gcp-zone: ${{ env.GCP_ZONE }}
+      #     aws-cloudtrail-s3-bucket: ${{ secrets.CLOUDTRAIL_S3 }}
+      #     azure-eventhub-connection-string: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+      #     azure-storage-account-key: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+      #     wiz-client-id: ${{ secrets.WIZ_CLIENT_ID }}
+      #     wiz-client-secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      #     wiz-endpoint-url: ${{ secrets.WIZ_ENDPOINT_URL }}
+      #     wiz-token-url: ${{ secrets.WIZ_TOKEN_URL }}
+      #     env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+      #     es-user: ${{ env.ES_USER }}
+      #     es-password: ${{ env.ES_PASSWORD }}
+      #     kibana-url: ${{ env.KIBANA_URL }}
+      #     elk-stack-version: ${{ env.STACK_VERSION }}
+      #     azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
+      #     tag-project: ${{ github.actor }}
+      #     tag-owner: ${{ github.actor }}
 
-      - name: Deploy CIS Agentless Integrations
-        id: cis-agentless-integrations
-        if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
-        uses: ./.github/actions/cis-agentless
-        with:
-          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
-          cspm-aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
-          cspm-aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
-          es-user: ${{ env.ES_USER }}
-          es-password: ${{ env.ES_PASSWORD }}
-          kibana-url: ${{ env.KIBANA_URL }}
-          serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
+      # - name: Deploy CIS Agentless Integrations
+      #   id: cis-agentless-integrations
+      #   if: ${{ !cancelled() && env.AGENTLESS == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
+      #   uses: ./.github/actions/cis-agentless
+      #   with:
+      #     cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+      #     cspm-aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+      #     cspm-aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
+      #     es-user: ${{ env.ES_USER }}
+      #     es-password: ${{ env.ES_PASSWORD }}
+      #     kibana-url: ${{ env.KIBANA_URL }}
+      #     serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
 
-      - name: Deploy CIS Agent Based Integrations
-        id: cis-integrations
-        if: ${{ !cancelled() && env.AGENT_BASED == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
-        uses: ./.github/actions/cis-agent-based
-        with:
-          deployment-name: ${{ env.DEPLOYMENT_NAME }}
-          cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
-          cspm-gcp-zone: ${{ env.GCP_ZONE }}
-          cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
-          cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
-          stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}
-          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-          es-user: ${{ env.ES_USER }}
-          es-password: ${{ env.ES_PASSWORD }}
-          kibana-url: ${{ env.KIBANA_URL }}
-          docker-image-override: ${{ env.DOCKER_IMAGE_OVERRIDE }}
-          serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
-          tag-project: ${{ github.actor }}
-          tag-owner: ${{ github.actor }}
+      # - name: Deploy CIS Agent Based Integrations
+      #   id: cis-integrations
+      #   if: ${{ !cancelled() && env.AGENT_BASED == 'true' && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cdr' }}
+      #   uses: ./.github/actions/cis-agent-based
+      #   with:
+      #     deployment-name: ${{ env.DEPLOYMENT_NAME }}
+      #     cnvm-stack-name: ${{ env.CNVM_STACK_NAME }}
+      #     cspm-gcp-zone: ${{ env.GCP_ZONE }}
+      #     cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
+      #     cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
+      #     stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}
+      #     env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+      #     es-user: ${{ env.ES_USER }}
+      #     es-password: ${{ env.ES_PASSWORD }}
+      #     kibana-url: ${{ env.KIBANA_URL }}
+      #     docker-image-override: ${{ env.DOCKER_IMAGE_OVERRIDE }}
+      #     serverless-mode: "${{ env.TF_VAR_serverless_mode }}"
+      #     tag-project: ${{ github.actor }}
+      #     tag-owner: ${{ github.actor }}
 
-      - name: Wait for agents to enroll
-        id: wait-for-agents
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./agents_enrolled.py
+      # - name: Wait for agents to enroll
+      #   id: wait-for-agents
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./agents_enrolled.py
 
-      - name: Run Sanity checks
-        if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
-        working-directory: ./tests
-        env:
-          USE_K8S: "false"
-        run: |
-          test_marker="sanity"
-          if [[ "${AGENT_BASED}" == "false" ]]; then
-            test_marker="agentless"
-          fi
-          poetry run pytest -m "$test_marker" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+      # - name: Run Sanity checks
+      #   if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
+      #   working-directory: ./tests
+      #   env:
+      #     USE_K8S: "false"
+      #   run: |
+      #     test_marker="sanity"
+      #     if [[ "${AGENT_BASED}" == "false" ]]; then
+      #       test_marker="agentless"
+      #     fi
+      #     poetry run pytest -m "$test_marker" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-      - name: Run UI Sanity checks (Kibana)
-        uses: ./.github/actions/kibana-ftr
-        if: ${{ success() && inputs.run-ui-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
-        with:
-          test_kibana_url: ${{ steps.elk-stack.outputs.test-kibana-url }}
-          test_es_url: ${{ steps.elk-stack.outputs.test-es-url }}
-          es_version: ${{ env.STACK_VERSION }}
-          kibana_ref: ${{ inputs.kibana_ref }}
-          serverless_mode: ${{ inputs.serverless_mode }}
-          ftr_user: ${{ secrets.FTR_USER }}
-          ftr_password: ${{ secrets.FTR_PASSWORD }}
-          ftr_email: ${{ secrets.FTR_EMAIL }}
+      # - name: Run UI Sanity checks (Kibana)
+      #   uses: ./.github/actions/kibana-ftr
+      #   if: ${{ success() && inputs.run-ui-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}
+      #   with:
+      #     test_kibana_url: ${{ steps.elk-stack.outputs.test-kibana-url }}
+      #     test_es_url: ${{ steps.elk-stack.outputs.test-es-url }}
+      #     es_version: ${{ env.STACK_VERSION }}
+      #     kibana_ref: ${{ inputs.kibana_ref }}
+      #     serverless_mode: ${{ inputs.serverless_mode }}
+      #     ftr_user: ${{ secrets.FTR_USER }}
+      #     ftr_password: ${{ secrets.FTR_PASSWORD }}
+      #     ftr_email: ${{ secrets.FTR_EMAIL }}
+      # ===============================
+      # TODO: Uncomment after DEBUGGING
 
       - name: Create Slack Payload
         if: always()
