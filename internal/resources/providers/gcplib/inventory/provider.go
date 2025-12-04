@@ -37,8 +37,7 @@ import (
 )
 
 type Provider struct {
-	log *clog.Logger
-
+	log       *clog.Logger
 	config    auth.GcpFactoryConfig
 	inventory *AssetsInventoryWrapper
 	crm       *ResourceManagerWrapper
