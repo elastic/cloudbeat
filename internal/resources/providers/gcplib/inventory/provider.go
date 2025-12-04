@@ -26,7 +26,6 @@ import (
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
-	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -38,8 +37,7 @@ import (
 )
 
 type Provider struct {
-	log      *clog.Logger
-	observer *observer.ObservedLogs
+	log *clog.Logger
 
 	config    auth.GcpFactoryConfig
 	inventory *AssetsInventoryWrapper
