@@ -25,6 +25,7 @@ import (
 	jsprocessor "github.com/elastic/beats/v7/libbeat/processors/script/javascript/module/processor/registry"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	"k8s.io/klog/v2"
@@ -46,7 +47,7 @@ type addClusterID struct {
 }
 
 // New constructs a new Add ID processor.
-func New(agentCfg *agentconfig.C) (beat.Processor, error) {
+func New(agentCfg *agentconfig.C, _ *logp.Logger) (beat.Processor, error) {
 	cfg := config{}
 	if err := agentCfg.Unpack(&cfg); err != nil {
 		return nil, makeErrConfigUnpack(err)
