@@ -25,7 +25,6 @@ import (
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"cloud.google.com/go/iam/apiv1/iampb"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
@@ -83,8 +82,10 @@ func (s *ProviderTestSuite) SetupTest() {
 }
 
 func (s *ProviderTestSuite) NewMockProvider() *Provider {
+	log, observer := testhelper.NewObserverLogger(s.T())
 	return &Provider{
-		log:       testhelper.NewObserverLogger(s.T()),
+		log:       log,
+		observer:  observer,
 		inventory: s.mockedInventory,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
@@ -102,7 +103,7 @@ func (s *ProviderTestSuite) TestProviderInit() {
 	}
 	gcpCnf := config.GcpConfig{}
 
-	logger := testhelper.NewObserverLogger(s.T())
+	logger := testhelper.NewLogger(s.T())
 	initMock.EXPECT().Init(mock.Anything, logger, gcpConfig, gcpCnf).Return(&Provider{}, nil).Once()
 	t := s.T()
 	provider, err := initMock.Init(t.Context(), logger, gcpConfig, gcpCnf)
@@ -141,7 +142,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 	go provider.ListAssetTypes(t.Context(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "IAM_POLICY", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
+	logs := provider.observer.FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "IAM_POLICY", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 
@@ -167,7 +168,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 	go provider.ListAssetTypes(t.Context(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "RESOURCE", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
+	logs := provider.observer.FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "RESOURCE", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 

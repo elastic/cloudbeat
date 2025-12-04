@@ -20,59 +20,53 @@ package evaluator
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
-	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
-const expectedLoggerName = "opa"
+// createTestLogger creates a logger for testing using newLoggerFromBase
+// Uses a logger created with logptest.NewTestingLogger and an observer core
+func createTestLogger(t *testing.T) (logging.Logger, *observer.ObservedLogs) {
+	t.Helper()
+	core, obs := testhelper.NewObserverLogger(t)
+	opaLogger := newLoggerFromBase(core)
 
-type LoggerTestSuite struct {
-	suite.Suite
+	return opaLogger, obs
 }
 
-func TestLoggerTestSuite(t *testing.T) {
-	s := new(LoggerTestSuite)
-
-	suite.Run(t, s)
-}
-
-func (s *LoggerTestSuite) SetupSuite() {
-	err := logp.DevelopmentSetup(logp.ToObserverOutput())
-	s.Require().NoError(err)
-}
-
-func (s *LoggerTestSuite) TestLogFormat() {
-	logger := newLogger()
+func TestLogFormat(t *testing.T) {
+	logger, obs := createTestLogger(t)
 	logger.SetLevel(logging.Warn)
 	logger.Warn("warn %s", "warn")
-	logs := logp.ObserverLogs().TakeAll()
-	if s.Len(logs, 1) {
-		s.assertLog(logs[0], zap.WarnLevel, "warn warn")
+	logs := obs.TakeAll()
+	if assert.Len(t, logs, 1) {
+		assertLog(t, logs[0], zap.WarnLevel, "warn warn")
 	}
 }
 
-func (s *LoggerTestSuite) TestLogFields() {
-	logger := newLogger()
+func TestLogFields(t *testing.T) {
+	logger, obs := createTestLogger(t)
 	logger.SetLevel(logging.Debug)
 	logger = logger.WithFields(map[string]any{
 		"key": "val",
 	})
 
 	logger.Debug("debug")
-	logs := logp.ObserverLogs().TakeAll()
-	if s.Len(logs, 1) {
-		s.assertLog(logs[0], zap.DebugLevel, "debug")
-		s.Len(logs[0].Context, 1)
-		s.Equal("val", logs[0].ContextMap()["key"])
+	logs := obs.TakeAll()
+	if assert.Len(t, logs, 1) {
+		assertLog(t, logs[0], zap.DebugLevel, "debug")
+		assert.Len(t, logs[0].Context, 1)
+		assert.Equal(t, "val", logs[0].ContextMap()["key"])
 	}
 }
 
-func (s *LoggerTestSuite) TestLogMultipleFields() {
-	logger := newLogger()
+func TestLogMultipleFields(t *testing.T) {
+	logger, obs := createTestLogger(t)
 	logger.SetLevel(logging.Debug)
 	logger = logger.WithFields(map[string]any{
 		"key1": "val1",
@@ -83,17 +77,17 @@ func (s *LoggerTestSuite) TestLogMultipleFields() {
 	})
 
 	logger.Debug("debug")
-	logs := logp.ObserverLogs().TakeAll()
-	if s.Len(logs, 1) {
-		s.assertLog(logs[0], zap.DebugLevel, "debug")
-		s.Len(logs[0].Context, 2)
-		s.Equal("val1", logs[0].ContextMap()["key1"])
-		s.Equal("val2", logs[0].ContextMap()["key2"])
+	logs := obs.TakeAll()
+	if assert.Len(t, logs, 1) {
+		assertLog(t, logs[0], zap.DebugLevel, "debug")
+		assert.Len(t, logs[0].Context, 2)
+		assert.Equal(t, "val1", logs[0].ContextMap()["key1"])
+		assert.Equal(t, "val2", logs[0].ContextMap()["key2"])
 	}
 }
 
-func (s *LoggerTestSuite) TestLoggerGetLevel() {
-	logger := newLogger()
+func TestLoggerGetLevel(t *testing.T) {
+	logger, _ := createTestLogger(t)
 	tests := []logging.Level{
 		logging.Debug,
 		logging.Info,
@@ -103,46 +97,49 @@ func (s *LoggerTestSuite) TestLoggerGetLevel() {
 
 	for _, l := range tests {
 		logger.SetLevel(l)
-		s.Equal(l, logger.GetLevel())
+		assert.Equal(t, l, logger.GetLevel())
 	}
 }
 
-func (s *LoggerTestSuite) TestLoggerSetLevel() {
-	logger := newLogger()
+func TestLoggerSetLevel(t *testing.T) {
+	logger, obs := createTestLogger(t)
 	logger.SetLevel(logging.Debug)
 	logger.Debug("debug")
-	logs := logp.ObserverLogs().TakeAll()
-	if s.Len(logs, 1) {
-		s.assertLog(logs[0], zap.DebugLevel, "debug")
+	logs := obs.TakeAll()
+	if assert.Len(t, logs, 1) {
+		assertLog(t, logs[0], zap.DebugLevel, "debug")
 	}
 
 	logger.SetLevel(logging.Error)
 	logger.Error("error")
-	logs = logp.ObserverLogs().TakeAll()
-	if s.Len(logs, 1) {
-		s.assertLog(logs[0], zap.ErrorLevel, "error")
+	logs = obs.TakeAll()
+	if assert.Len(t, logs, 1) {
+		assertLog(t, logs[0], zap.ErrorLevel, "error")
 	}
 
 	logger.Info("info")
-	logs = logp.ObserverLogs().TakeAll()
-	s.Empty(logs, 1)
+	logs = obs.TakeAll()
+	assert.Empty(t, logs)
 
 	logger.SetLevel(logging.Info)
 	logger.Info("info")
 	logger.Error("error")
-	logs = logp.ObserverLogs().TakeAll()
-	if s.Len(logs, 2) {
-		s.assertLog(logs[0], zap.InfoLevel, "info")
-		s.assertLog(logs[1], zap.ErrorLevel, "error")
+	logs = obs.TakeAll()
+	if assert.Len(t, logs, 2) {
+		assertLog(t, logs[0], zap.InfoLevel, "info")
+		assertLog(t, logs[1], zap.ErrorLevel, "error")
 	}
 
 	logger.Debug("debug")
-	logs = logp.ObserverLogs().TakeAll()
-	s.Empty(logs, 1)
+	logs = obs.TakeAll()
+	assert.Empty(t, logs)
 }
 
-func (s *LoggerTestSuite) assertLog(log observer.LoggedEntry, level zapcore.Level, message string) {
-	s.Equal(level, log.Level)
-	s.Equal(expectedLoggerName, log.LoggerName)
-	s.Equal(message, log.Message)
+func assertLog(t *testing.T, log observer.LoggedEntry, level zapcore.Level, message string) {
+	const expectedLoggerName = "opa"
+
+	t.Helper()
+	assert.Equal(t, level, log.Level)
+	assert.Equal(t, t.Name()+"."+expectedLoggerName, log.LoggerName)
+	assert.Equal(t, message, log.Message)
 }
