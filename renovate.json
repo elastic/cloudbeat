@@ -115,9 +115,10 @@
       "matchPackageNames": [
         "github.com/elastic/**"
       ],
-      "automerge": true,
-      "automergeStrategy": "squash",
-      "automergeType": "pr"
+      "addLabels": [
+        "renovate-auto-approve"
+      ],
+      "automerge": true
     },
     {
       "description": "Manual review for major updates",
