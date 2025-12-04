@@ -6,6 +6,14 @@ on:
   pull_request:
     branches:
       - main
+      - "9.7"
+      - "9.6"
+      - "9.5"
+      - "9.4"
+      - "9.3"
+      - "9.2"
+      - "9.1"
+      - "8.19"
     # auto_merge_enabled is a custom event that is triggered when a PR is created.
     # Auto-merge will be enabled by Renovate -if configured- and this will trigger the GitHub workflow.
     types: [auto_merge_enabled]
