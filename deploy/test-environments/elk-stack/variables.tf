@@ -5,8 +5,14 @@ variable "ec_api_key" {
 }
 
 variable "ess_region" {
-  default     = "gcp-us-west2"
-  description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-west2"
+  default     = ""
+  description = "Elastic Cloud deployment region. Used for both ECH deployments and Serverless projects. If not provided, defaults are set based on serverless_mode (ECH: gcp-us-west2, Serverless: aws-us-east-1)"
+  type        = string
+}
+
+variable "ec_url" {
+  default     = ""
+  description = "Optional Elastic Cloud URL. Defaults to production URL (https://cloud.elastic.co) if not provided"
   type        = string
 }
 

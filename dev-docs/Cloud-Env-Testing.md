@@ -26,9 +26,12 @@ Follow these steps to run the workflow:
       For BC, enter version with additions/commit sha, e.g. `8.12.0-61156bc6`.
       For SNAPSHOT, enter the full version, e.g. `8.13.0-SNAPSHOT`.
 
-    - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
-      supports
-      snapshot and build candidate (BC) versions. Specify a different region only if necessary.
+    - **`ess-region`**: Select the deployment environment and cloud provider from the dropdown. Options include:
+      - Production: `production-cft` (ESS: gcp-us-west2, Serverless: aws-us-east-1)
+      - Staging: `staging-gcp`, `staging-aws`, `staging-azure`
+      - QA: `qa-gcp`, `qa-aws`, `qa-azure`
+
+      Note: ESS and Serverless deployments use different regions for the same environment/cloud combination.
 
    ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
