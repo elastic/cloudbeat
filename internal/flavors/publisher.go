@@ -41,6 +41,8 @@ type Publisher struct {
 	interval  time.Duration
 	threshold int
 	client    client
+
+	eventsBuffer []beat.Event
 }
 
 func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, client client) *Publisher {
@@ -53,50 +55,59 @@ func NewPublisher(log *clog.Logger, interval time.Duration, threshold int, clien
 }
 
 func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
-	var eventsToSend []beat.Event
+	p.initEventsBuffer()
 	flushTicker := time.NewTicker(p.interval)
 	for {
 		select {
 		case <-ctx.Done():
 			p.log.Warnf("Publisher context is done: %v", ctx.Err())
-			p.publish(&eventsToSend)
+			p.publish()
 			return
 
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
 		case <-flushTicker.C:
-			if len(eventsToSend) == 0 {
+			if len(p.eventsBuffer) == 0 {
 				continue
 			}
 
 			p.log.Infof("Publisher time interval reached")
-			p.publish(&eventsToSend)
+			p.publish()
 
 		// Flush events to ES when reaching a certain threshold
 		case event, ok := <-ch:
 			if !ok {
 				p.log.Warn("Publisher channel is closed")
-				p.publish(&eventsToSend)
+				p.publish()
 				return
 			}
 
-			eventsToSend = append(eventsToSend, event...)
-			if len(eventsToSend) < p.threshold {
+			p.eventsBuffer = append(p.eventsBuffer, event...)
+			if len(p.eventsBuffer) < p.threshold {
 				continue
 			}
 
 			p.log.Infof("Publisher buffer threshold:%d reached", p.threshold)
-			p.publish(&eventsToSend)
+			p.publish()
 		}
 	}
 }
 
-func (p *Publisher) publish(events *[]beat.Event) {
-	if len(*events) == 0 {
+func (p *Publisher) publish() {
+	if len(p.eventsBuffer) == 0 {
 		return
 	}
 
-	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(*events)).
-		Infof("Publishing %d events to elasticsearch", len(*events))
-	p.client.PublishAll(*events)
-	*events = nil
+	p.log.With(ecsEventActionField, ecsEventActionValue, ecsEventCountField, len(p.eventsBuffer)).
+		Infof("Publishing %d events to elasticsearch", len(p.eventsBuffer))
+	p.client.PublishAll(p.eventsBuffer)
+	p.eventsBuffer = p.eventsBuffer[:0] // reuse the capacity and set len to 0.
+
+	// Reset the capacity if the slice has grown considerably
+	if cap(p.eventsBuffer) > (4 * p.threshold) {
+		p.initEventsBuffer()
+	}
+}
+
+func (p *Publisher) initEventsBuffer() {
+	p.eventsBuffer = make([]beat.Event, 0, p.threshold+(p.threshold/2)) // init with capacity based on threshold
 }
