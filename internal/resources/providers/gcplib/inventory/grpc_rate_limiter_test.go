@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -69,7 +68,7 @@ func (s *RateLimiterTestSuite) TestRateLimiterWait() {
 }
 
 func TestGAXCallOptionRetrier(t *testing.T) {
-	log := testhelper.NewObserverLogger(t)
+	log, observer := testhelper.NewObserverLogger(t)
 	r := GAXCallOptionRetrier(log)
 	settings := gax.CallSettings{}
 	r.Resolve(&settings)
@@ -94,6 +93,6 @@ func TestGAXCallOptionRetrier(t *testing.T) {
 		require.Equal(t, time.Duration(0), pause)
 	}
 
-	logs := logp.ObserverLogs().FilterMessageSnippet("gax retryer attempt").All()
+	logs := observer.FilterMessageSnippet("gax retryer attempt").All()
 	assert.Len(t, logs, len(c))
 }

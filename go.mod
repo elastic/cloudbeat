@@ -93,6 +93,7 @@ require (
 	go.opentelemetry.io/collector/receiver/receivertest v0.139.0 // indirect
 	go.opentelemetry.io/collector/receiver/xreceiver v0.139.0 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.38.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.63.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.61.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0 // indirect
 	go.opentelemetry.io/otel v1.38.0
@@ -118,8 +119,6 @@ require (
 	k8s.io/klog/v2 v2.130.1
 	modernc.org/sqlite v1.39.0
 )
-
-require go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.63.0
 
 require (
 	cel.dev/expr v0.24.0 // indirect

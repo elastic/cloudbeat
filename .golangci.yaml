@@ -156,10 +156,6 @@ linters:
       - linters:
           - prealloc
         path: resources/utils/testhelper/*.go
-      # TODO: fix deprecated testing functions / global loggers
-      - linters:
-          - staticcheck
-        text: "SA1019: logp.(DevelopmentSetup|TestingSetup|ObserverLogs|ToObserverOutput)"
     paths:
       - third_party$
       - builtin$
