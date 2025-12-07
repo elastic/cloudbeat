@@ -38,7 +38,7 @@ declare -A SERVERLESS_REGIONS=(
     ["staging-aws"]="aws-eu-central-1"
     ["staging-azure"]="azure-canadacentral"
     ["qa-gcp"]="gcp-us-central1"
-    ["qa-aws"]="aws-us-west-1"
+    ["qa-aws"]="aws-eu-west-1"
     ["qa-azure"]="azure-eastus2"
 )
 
