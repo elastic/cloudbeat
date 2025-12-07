@@ -62,14 +62,42 @@ if [[ -z "$ESS_REGION" ]]; then
     exit 1
 fi
 
-# Export variable for use in calling script
+# Extract cloud provider from ESS_REGION_INPUT and map to deployment template
+# Format: {env}-{cloud} (e.g., production-cft, qa-azure, staging-aws)
+IFS='-' read -r _env_type cloud_provider <<<"$ESS_REGION_INPUT"
+
+# Map cloud provider to deployment template
+case "$cloud_provider" in
+azure)
+    DEPLOYMENT_TEMPLATE="azure-storage-optimized"
+    ;;
+aws)
+    DEPLOYMENT_TEMPLATE="aws-storage-optimized-faster-warm"
+    ;;
+gcp | cft)
+    DEPLOYMENT_TEMPLATE="gcp-storage-optimized"
+    ;;
+*)
+    echo "Error: Unknown cloud provider: $cloud_provider" >&2
+    echo "Valid cloud providers: azure, aws, gcp, cft" >&2
+    exit 1
+    ;;
+esac
+
+# Export variables for use in calling script
 export ESS_REGION
+export DEPLOYMENT_TEMPLATE
 
 # Output for GitHub Actions
 if [[ -n "${GITHUB_ENV:-}" ]]; then
-    echo "ESS_REGION=$ESS_REGION" >>"$GITHUB_ENV"
-    echo "TF_VAR_ess_region=$ESS_REGION" >>"$GITHUB_ENV"
+    {
+        echo "ESS_REGION=$ESS_REGION"
+        echo "TF_VAR_ess_region=$ESS_REGION"
+        echo "DEPLOYMENT_TEMPLATE=$DEPLOYMENT_TEMPLATE"
+        echo "TF_VAR_deployment_template=$DEPLOYMENT_TEMPLATE"
+    } >>"$GITHUB_ENV"
 fi
 
 # Also output to stdout for debugging
 echo "Mapped $ESS_REGION_INPUT -> $DEPLOYMENT_TYPE: $ESS_REGION"
+echo "Deployment template: $DEPLOYMENT_TEMPLATE (from cloud provider: $cloud_provider)"
