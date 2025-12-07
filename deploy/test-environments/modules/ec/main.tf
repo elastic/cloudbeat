@@ -9,6 +9,10 @@ locals {
   kibana_docker_image_tag_override = lookup(var.docker_image_tag_override, "kibana", "")
   apm_docker_image                 = lookup(var.docker_image, "apm", "")
   apm_docker_image_tag_override    = lookup(var.docker_image_tag_override, "apm", "")
+
+  # Determine max_size based on cloud provider
+  # GCP supports 128g (131072 MB), AWS and Azure support up to 58g (59392 MB) for hot_content
+  max_size = startswith(var.region, "gcp-") ? "128g" : "58g"
 }
 
 data "ec_stack" "deployment_version" {
@@ -40,7 +44,7 @@ resource "ec_deployment" "deployment" {
 
     hot = {
       autoscaling = {
-        max_size          = "128g"
+        max_size          = local.max_size
         max_size_resource = "memory"
       }
       size       = var.elasticsearch_size
