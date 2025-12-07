@@ -66,16 +66,19 @@ fi
 # Format: {env}-{cloud} (e.g., production-cft, qa-azure, staging-aws)
 IFS='-' read -r _env_type cloud_provider <<<"$ESS_REGION_INPUT"
 
-# Map cloud provider to deployment template
+# Map cloud provider to deployment template and max_size
 case "$cloud_provider" in
 azure)
     DEPLOYMENT_TEMPLATE="azure-storage-optimized"
+    MAX_SIZE="60g"
     ;;
 aws)
     DEPLOYMENT_TEMPLATE="aws-storage-optimized-faster-warm"
+    MAX_SIZE="58g"
     ;;
 gcp | cft)
     DEPLOYMENT_TEMPLATE="gcp-storage-optimized"
+    MAX_SIZE="128g"
     ;;
 *)
     echo "Error: Unknown cloud provider: $cloud_provider" >&2
@@ -87,6 +90,7 @@ esac
 # Export variables for use in calling script
 export ESS_REGION
 export DEPLOYMENT_TEMPLATE
+export MAX_SIZE
 
 # Output for GitHub Actions
 if [[ -n "${GITHUB_ENV:-}" ]]; then
@@ -95,9 +99,12 @@ if [[ -n "${GITHUB_ENV:-}" ]]; then
         echo "TF_VAR_ess_region=$ESS_REGION"
         echo "DEPLOYMENT_TEMPLATE=$DEPLOYMENT_TEMPLATE"
         echo "TF_VAR_deployment_template=$DEPLOYMENT_TEMPLATE"
+        echo "MAX_SIZE=$MAX_SIZE"
+        echo "TF_VAR_max_size=$MAX_SIZE"
     } >>"$GITHUB_ENV"
 fi
 
 # Also output to stdout for debugging
 echo "Mapped $ESS_REGION_INPUT -> $DEPLOYMENT_TYPE: $ESS_REGION"
 echo "Deployment template: $DEPLOYMENT_TEMPLATE (from cloud provider: $cloud_provider)"
+echo "Max size: $MAX_SIZE (from cloud provider: $cloud_provider)"

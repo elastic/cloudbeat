@@ -57,6 +57,12 @@ variable "elasticsearch_zone_count" {
   description = "Optional Elasticsearch zone count"
 }
 
+variable "max_size" {
+  default     = ""
+  type        = string
+  description = "Maximum autoscaling size for hot content nodes. If not provided, defaults are set based on cloud provider (GCP: 128g, AWS: 58g, Azure: 60g)"
+}
+
 variable "docker_image_tag_override" {
   default = {
     "elasticsearch" = "",

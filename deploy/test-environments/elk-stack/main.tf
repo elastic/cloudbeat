@@ -50,6 +50,7 @@ module "ec_deployment" {
 
   deployment_template    = var.deployment_template
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
+  max_size               = var.max_size != "" ? var.max_size : "128g"
 
   elasticsearch_autoscale  = true
   elasticsearch_size       = var.elasticsearch_size
