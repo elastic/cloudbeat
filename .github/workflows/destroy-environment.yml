@@ -157,13 +157,14 @@ jobs:
         env:
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           JOB_STATUS_COLOR: "${{ job.status == 'success' && '#36a64f' || '#D40E0D' }}"
+          ESS_REGION: ${{ inputs.ess-region || 'production-cft' }}
         with:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
           vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
           slack-payload: |
             {
-              "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`",
+              "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> (ESS Region: ${{ env.ESS_REGION }}) triggered by `${{github.actor}}`",
             	"blocks": [
                 {
                   "type": "divider"
@@ -177,7 +178,7 @@ jobs:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`"
+                            "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> (ESS Region: ${{ env.ESS_REGION }}) triggered by `${{github.actor}}`"
                         }
                     }
                   ]

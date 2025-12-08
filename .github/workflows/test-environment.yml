@@ -411,6 +411,9 @@ jobs:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
           ESS_REGION: ${{ inputs.ess-region || 'production-cft' }}
+          ESS_REGION_MAPPED: ${{ env.ESS_REGION }}
+          EC_URL: ${{ env.EC_URL || 'https://cloud.elastic.co' }}
+          SERVERLESS_MODE: ${{ inputs.serverless_mode }}
         run: |
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
@@ -567,6 +570,7 @@ jobs:
           ESS_TYPE: ${{ inputs.serverless_mode }}
           JOB_STATUS: "${{ job.status }}"
           S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
+          ESS_REGION: ${{ inputs.ess-region || 'production-cft' }}
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 
