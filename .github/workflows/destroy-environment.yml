@@ -13,19 +13,6 @@ on:
         type: string
         description: "Ignore all environments starting with `ignore-prefix`"
         required: false
-      ess-region:
-        required: false
-        description: "Environment and cloud provider (e.g., production-cft, staging-aws, qa-azure)"
-        default: "production-cft"
-        type: choice
-        options:
-          - production-cft
-          - staging-gcp
-          - staging-aws
-          - staging-azure
-          - qa-gcp
-          - qa-aws
-          - qa-azure
       ec-api-key:
         type: string
         description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
@@ -42,8 +29,8 @@ on:
         required: false
       ess-region:
         required: false
-        description: "Environment and cloud provider (e.g., production-cft, staging-aws, qa-azure)"
-        default: "production-cft"
+        description: "Environment and cloud provider (e.g., production-cft, staging-aws, qa-azure). If not provided, will be read from env_config.json"
+        default: ""
         type: string
       ec-api-key:
         type: string
@@ -73,13 +60,50 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Read ESS Region from Config
+        id: read-ess-region
+        if: inputs.ess-region == '' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          ENV_PREFIX: ${{ inputs.prefix }}
+        run: |
+          # Find first environment with the prefix
+          BUCKET="s3://tf-state-bucket-test-infra"
+          FIRST_ENV=$(aws s3 ls "$BUCKET/$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g' | head -n 1)
+
+          if [ -z "$FIRST_ENV" ]; then
+            echo "No environments found with prefix $ENV_PREFIX, defaulting to production-cft"
+            echo "ess-region=production-cft" >> $GITHUB_OUTPUT
+            echo "ESS_REGION_INPUT=production-cft" >> $GITHUB_ENV
+          else
+            # Download and read env_config.json
+            if aws s3 cp "$BUCKET/$FIRST_ENV/env_config.json" /tmp/env_config.json 2>/dev/null; then
+              ESS_REGION=$(jq -r '.ess_region // "production-cft"' /tmp/env_config.json)
+              echo "ess-region=$ESS_REGION" >> $GITHUB_OUTPUT
+              echo "ESS_REGION_INPUT=$ESS_REGION" >> $GITHUB_ENV
+              echo "Read ess-region=$ESS_REGION from $FIRST_ENV/env_config.json"
+              rm -f /tmp/env_config.json
+            else
+              echo "env_config.json not found for $FIRST_ENV, defaulting to production-cft"
+              echo "ess-region=production-cft" >> $GITHUB_OUTPUT
+              echo "ESS_REGION_INPUT=production-cft" >> $GITHUB_ENV
+            fi
+          fi
+
       - name: Determine Vault Path
         id: determine-vault-path
         if: inputs.ec-api-key == ''
         shell: bash
         working-directory: ./
         env:
-          ESS_REGION_INPUT: ${{ inputs.ess-region || 'production-cft' }}
+          ESS_REGION_INPUT: ${{ inputs.ess-region || steps.read-ess-region.outputs.ess-region || 'production-cft' }}
         run: |
           source .ci/scripts/determine_vault_path.sh
           echo "vault-path=$VAULT_PATH" >> $GITHUB_OUTPUT
@@ -126,13 +150,6 @@ jobs:
             echo "TF_VAR_ec_url=https://cloud.elastic.co" >> $GITHUB_ENV
           fi
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
       - id: google-auth
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@140bb5113ffb6b65a7e9b937a81fa96cf5064462 # v2
@@ -157,7 +174,7 @@ jobs:
         env:
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           JOB_STATUS_COLOR: "${{ job.status == 'success' && '#36a64f' || '#D40E0D' }}"
-          ESS_REGION: ${{ inputs.ess-region || 'production-cft' }}
+          ESS_REGION: ${{ inputs.ess-region || steps.read-ess-region.outputs.ess-region || 'production-cft' }}
         with:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
