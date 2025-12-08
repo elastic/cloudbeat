@@ -43,7 +43,7 @@ runs:
         echo "hash=$hash" >> "$GITHUB_OUTPUT"
 
     - id: cache-tools
-      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: |
           ~/.cache/hermit/pkg
@@ -55,7 +55,7 @@ runs:
           ci-hermit-env-${{ runner.os }}
 
     - id: cache-go-deps
-      uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       with:
         path: |
           ~/go/pkg/
