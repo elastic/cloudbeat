@@ -414,6 +414,8 @@ jobs:
           ESS_REGION_MAPPED: ${{ env.ESS_REGION }}
           EC_URL: ${{ env.EC_URL || 'https://cloud.elastic.co' }}
           SERVERLESS_MODE: ${{ inputs.serverless_mode }}
+          DEPLOYMENT_TEMPLATE: ${{ env.DEPLOYMENT_TEMPLATE }}
+          MAX_SIZE: ${{ env.MAX_SIZE }}
         run: |
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT

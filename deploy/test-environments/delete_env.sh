@@ -35,15 +35,23 @@ function set_env_vars_from_config() {
         ec_url=$(jq -r '.ec_url // "https://cloud.elastic.co"' /tmp/env_config.json)
         local serverless_mode
         serverless_mode=$(jq -r '.serverless_mode // "false"' /tmp/env_config.json)
+        local deployment_template
+        deployment_template=$(jq -r '.deployment_template // "gcp-storage-optimized"' /tmp/env_config.json)
+        local max_size
+        max_size=$(jq -r '.max_size // "128g"' /tmp/env_config.json)
 
         # Set Terraform variables
         export TF_VAR_ess_region="$ess_region_mapped"
         export TF_VAR_ec_url="$ec_url"
         export TF_VAR_serverless_mode="$serverless_mode"
+        export TF_VAR_deployment_template="$deployment_template"
+        export TF_VAR_max_size="$max_size"
 
         echo "Set TF_VAR_ess_region=$TF_VAR_ess_region"
         echo "Set TF_VAR_ec_url=$TF_VAR_ec_url"
         echo "Set TF_VAR_serverless_mode=$TF_VAR_serverless_mode"
+        echo "Set TF_VAR_deployment_template=$TF_VAR_deployment_template"
+        echo "Set TF_VAR_max_size=$TF_VAR_max_size"
 
         rm -f /tmp/env_config.json
     else
@@ -52,6 +60,8 @@ function set_env_vars_from_config() {
         export TF_VAR_ess_region="gcp-us-west2"
         export TF_VAR_ec_url="https://cloud.elastic.co"
         export TF_VAR_serverless_mode="false"
+        export TF_VAR_deployment_template="gcp-storage-optimized"
+        export TF_VAR_max_size="128g"
     fi
 }
 

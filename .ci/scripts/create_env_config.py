@@ -20,6 +20,8 @@ $ export ESS_REGION="production-cft"  # Optional, defaults to "production-cft"
 $ export ESS_REGION_MAPPED="gcp-us-west2"  # Optional
 $ export EC_URL="https://cloud.elastic.co"  # Optional
 $ export SERVERLESS_MODE="false"  # Optional
+$ export DEPLOYMENT_TEMPLATE="gcp-storage-optimized"  # Optional
+$ export MAX_SIZE="128g"  # Optional
 $ python create_env_config.py
 
 Output:
@@ -30,7 +32,9 @@ Creates a JSON file `env_config.json` with content like:
     "ess_region": "production-cft",
     "ess_region_mapped": "gcp-us-west2",
     "ec_url": "https://cloud.elastic.co",
-    "serverless_mode": "false"
+    "serverless_mode": "false",
+    "deployment_template": "gcp-storage-optimized",
+    "max_size": "128g"
 }
 
 """
@@ -50,6 +54,8 @@ def create_env_config(
     ess_region_mapped_val=None,
     ec_url_val=None,
     serverless_mode_val=None,
+    deployment_template_val=None,
+    max_size_val=None,
 ):
     """
     Create environment configuration dictionary.
@@ -63,6 +69,8 @@ def create_env_config(
             (e.g., "gcp-us-west2").
         ec_url_val (str, optional): The Elastic Cloud URL.
         serverless_mode_val (str, optional): Whether deployment is serverless ("true" or "false").
+        deployment_template_val (str, optional): The deployment template (e.g., "gcp-storage-optimized").
+        max_size_val (str, optional): The max autoscaling size (e.g., "128g").
 
     Returns:
         dict: The environment configuration dictionary.
@@ -90,6 +98,10 @@ def create_env_config(
         config["ec_url"] = ec_url_val
     if serverless_mode_val is not None:
         config["serverless_mode"] = serverless_mode_val
+    if deployment_template_val:
+        config["deployment_template"] = deployment_template_val
+    if max_size_val:
+        config["max_size"] = max_size_val
 
     return config
 
@@ -102,6 +114,8 @@ if __name__ == "__main__":
     ess_region_mapped = os.getenv("ESS_REGION_MAPPED")  # Optional
     ec_url = os.getenv("EC_URL")  # Optional
     serverless_mode = os.getenv("SERVERLESS_MODE")  # Optional
+    deployment_template = os.getenv("DEPLOYMENT_TEMPLATE")  # Optional
+    max_size = os.getenv("MAX_SIZE")  # Optional
 
     if not deployment_name or not expiration_days:
         print("Error: DEPLOYMENT_NAME or EXPIRATION_DAYS environment variables not set.")
@@ -115,6 +129,8 @@ if __name__ == "__main__":
         ess_region_mapped,
         ec_url,
         serverless_mode,
+        deployment_template,
+        max_size,
     )
 
     # Save to JSON file
