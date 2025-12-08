@@ -3,7 +3,7 @@ name: Destroy Expired Environment
 on:
   # Schedule to run every day at 00:00 UTC
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   envs_to_destroy:
@@ -18,7 +18,7 @@ jobs:
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
-          init-tools: 'true'
+          init-tools: "true"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
@@ -38,13 +38,14 @@ jobs:
     secrets: inherit
     # Required for the 'Destroy' job in the 'destroy-environment.yml'
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     if: ${{ needs.envs_to_destroy.outputs.env_found == 'true' }}
     strategy:
       fail-fast: false
       max-parallel: 1 # Destroy environments one by one
       matrix:
-        deployment_name: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
+        deployment: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
     with:
-      prefix: ${{ matrix.deployment_name }}
+      prefix: ${{ matrix.deployment.deployment_name }}
+      ess-region: ${{ matrix.deployment.ess_region }}

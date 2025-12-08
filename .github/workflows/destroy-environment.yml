@@ -13,6 +13,19 @@ on:
         type: string
         description: "Ignore all environments starting with `ignore-prefix`"
         required: false
+      ess-region:
+        required: false
+        description: "Environment and cloud provider (e.g., production-cft, staging-aws, qa-azure)"
+        default: "production-cft"
+        type: choice
+        options:
+          - production-cft
+          - staging-gcp
+          - staging-aws
+          - staging-azure
+          - qa-gcp
+          - qa-aws
+          - qa-azure
       ec-api-key:
         type: string
         description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
@@ -27,6 +40,11 @@ on:
         type: string
         description: "Ignore all environments starting with `ignore-prefix`"
         required: false
+      ess-region:
+        required: false
+        description: "Environment and cloud provider (e.g., production-cft, staging-aws, qa-azure)"
+        default: "production-cft"
+        type: string
       ec-api-key:
         type: string
         description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
@@ -38,7 +56,6 @@ env:
   AWS_REGION: "eu-west-1"
   ENV_PREFIX: ${{ inputs.prefix }}
   ENV_IGNORE_PREFIX: ${{ inputs.ignore-prefix }}
-  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
   Destroy:
@@ -46,8 +63,8 @@ jobs:
     timeout-minutes: 120
     # Add "id-token" with the intended permissions.
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: "read"
+      id-token: "write"
     steps:
       - name: Check out the repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -56,12 +73,58 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
+      - name: Determine Vault Path
+        id: determine-vault-path
+        if: inputs.ec-api-key == ''
+        shell: bash
+        working-directory: ./
+        env:
+          ESS_REGION_INPUT: ${{ inputs.ess-region || 'production-cft' }}
+        run: |
+          source .ci/scripts/determine_vault_path.sh
+          echo "vault-path=$VAULT_PATH" >> $GITHUB_OUTPUT
+
+      - name: Get Elastic Cloud Credentials from Vault
+        id: get-ec-credentials
+        if: inputs.ec-api-key == ''
+        uses: hashicorp/vault-action@affa6f04da5c2d55e6e115b7d1b044a6b1af8c74 # v2.7.4
+        continue-on-error: false
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          method: approle
+          secrets: |
+            ${{ steps.determine-vault-path.outputs.vault-path }} api_key | EC_API_KEY ;
+            ${{ steps.determine-vault-path.outputs.vault-path }} url | EC_URL
+
       - name: Mask API Key
         if: ${{ inputs.ec-api-key != '' }}
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          echo "TF_VAR_ec_url=https://cloud.elastic.co" >> $GITHUB_ENV
+
+      - name: Set Elastic Cloud Credentials
+        id: set-ec-credentials
+        shell: bash
+        run: |
+          # Priority: user-provided key (already set in Mask API Key step) > Vault key > production secret
+          if [[ -n "${TF_VAR_ec_api_key:-}" ]]; then
+            # User-provided key already set, ensure URL is set
+            if [[ -z "${TF_VAR_ec_url:-}" ]]; then
+              echo "TF_VAR_ec_url=https://cloud.elastic.co" >> $GITHUB_ENV
+            fi
+          elif [[ -n "${EC_API_KEY:-}" ]]; then
+            # Use Vault credentials
+            echo "TF_VAR_ec_api_key=$EC_API_KEY" >> $GITHUB_ENV
+            echo "TF_VAR_ec_url=${EC_URL:-https://cloud.elastic.co}" >> $GITHUB_ENV
+          else
+            # Fall back to production secret
+            echo "TF_VAR_ec_api_key=${{ secrets.EC_API_KEY }}" >> $GITHUB_ENV
+            echo "TF_VAR_ec_url=https://cloud.elastic.co" >> $GITHUB_ENV
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
