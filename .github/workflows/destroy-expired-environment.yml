@@ -48,4 +48,3 @@ jobs:
         deployment: ${{fromJson(needs.envs_to_destroy.outputs.matrix_deployments)}}
     with:
       prefix: ${{ matrix.deployment.deployment_name }}
-      ess-region: ${{ matrix.deployment.ess_region }}
