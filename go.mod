@@ -573,5 +573,6 @@ require (
 replace (
 	github.com/apoydence/eachers => github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 //indirect, see https://github.com/elastic/beats/pull/29780 for details.
 	github.com/dop251/goja => github.com/elastic/goja v0.0.0-20190128172624-dd2ac4456e20
+	github.com/eclipse/paho.mqtt.golang v1.3.5 => github.com/eclipse/paho.mqtt.golang v1.5.1
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20241002174017-e8c5fda595e6
 )
