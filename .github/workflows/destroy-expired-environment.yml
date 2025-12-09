@@ -1,8 +1,6 @@
 name: Destroy Expired Environment
 
 on:
-  # TODO: Remove workflow_dispatch after DEBUGGING
-  workflow_dispatch:
   # Schedule to run every day at 00:00 UTC
   schedule:
     - cron: "0 0 * * *"
