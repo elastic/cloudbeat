@@ -93,20 +93,29 @@ jobs:
           fi
           set -e  # Re-enable error handling
 
+      - name: Parse ESS Region Input
+        id: parse-ess-region
+        shell: bash
+        working-directory: ./
+        env:
+          ESS_REGION_INPUT: ${{ steps.read-ess-region.outputs.ess-region || 'production-cft' }}
+        run: |
+          source .ci/scripts/parse_ess_region.sh
+
       - name: Determine Vault Path
         id: determine-vault-path
         if: inputs.ec-api-key == ''
         shell: bash
         working-directory: ./
         env:
-          ESS_REGION_INPUT: ${{ steps.read-ess-region.outputs.ess-region || 'production-cft' }}
+          ENV_TYPE: ${{ env.ENV_TYPE }}
         run: |
           source .ci/scripts/determine_vault_path.sh
           echo "vault-path=$VAULT_PATH" >> $GITHUB_OUTPUT
 
       - name: Get Elastic Cloud Credentials from Vault
         id: get-ec-credentials
-        if: inputs.ec-api-key == ''
+        if: inputs.ec-api-key == '' && steps.determine-vault-path.outcome == 'success'
         uses: hashicorp/vault-action@affa6f04da5c2d55e6e115b7d1b044a6b1af8c74 # v2.7.4
         continue-on-error: false
         with:

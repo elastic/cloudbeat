@@ -62,9 +62,15 @@ if [[ -z "$ESS_REGION" ]]; then
     exit 1
 fi
 
-# Extract cloud provider from ESS_REGION_INPUT and map to deployment template
+# Extract cloud provider and map to deployment template
 # Format: {env}-{cloud} (e.g., production-cft, qa-azure, staging-aws)
-IFS='-' read -r _env_type cloud_provider <<<"$ESS_REGION_INPUT"
+# Use pre-parsed CLOUD_PROVIDER
+if [[ -z "${CLOUD_PROVIDER:-}" ]]; then
+    echo "Error: CLOUD_PROVIDER environment variable is not set" >&2
+    echo "Please run parse_ess_region.sh first" >&2
+    exit 1
+fi
+cloud_provider="${CLOUD_PROVIDER}"
 
 # Map cloud provider to deployment template and max_size
 case "$cloud_provider" in

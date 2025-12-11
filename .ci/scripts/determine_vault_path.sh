@@ -4,11 +4,11 @@ set -euo pipefail
 # Script: determine_vault_path.sh
 #
 # Description:
-# Determines the Vault path for Elastic Cloud credentials based on the ess-region input.
-# Parses the environment from the format {env}-{cloud} (e.g., production-cft, qa-gcp).
+# Determines the Vault path for Elastic Cloud credentials based on the environment type.
+# Requires ENV_TYPE to be set (typically by parse_ess_region.sh).
 #
 # Usage:
-#   export ESS_REGION_INPUT="production-cft"
+#   export ENV_TYPE="production"
 #   source .ci/scripts/determine_vault_path.sh
 #   echo "$VAULT_PATH"
 #
@@ -16,17 +16,13 @@ set -euo pipefail
 #   Sets VAULT_PATH environment variable and writes to GITHUB_ENV if available
 
 # Validate input
-if [[ -z "${ESS_REGION_INPUT:-}" ]]; then
-    echo "Error: ESS_REGION_INPUT environment variable is not set" >&2
+if [[ -z "${ENV_TYPE:-}" ]]; then
+    echo "Error: ENV_TYPE environment variable is not set" >&2
     exit 1
 fi
 
-# Parse environment from ess-region-input
-# Format: {env}-{cloud} (e.g., production-cft, qa-gcp, staging-aws)
-IFS='-' read -r env_type _cloud_provider <<<"$ESS_REGION_INPUT"
-
 # Normalize environment name
-case "$env_type" in
+case "$ENV_TYPE" in
 production)
     ENV_NAME="production"
     ;;
@@ -37,7 +33,7 @@ qa)
     ENV_NAME="qa"
     ;;
 *)
-    echo "Error: Unknown environment type: $env_type" >&2
+    echo "Error: Unknown environment type: $ENV_TYPE" >&2
     echo "Valid environments: production, staging, qa" >&2
     exit 1
     ;;
