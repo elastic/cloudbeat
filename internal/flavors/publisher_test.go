@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/goleak"
@@ -140,7 +139,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			log := testhelper.NewObserverLogger(t)
+			log, observer := testhelper.NewObserverLogger(t)
 			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 			ctx, cancel := context.WithTimeout(t.Context(), tc.ctxTimeout)
 			defer cancel()
@@ -170,7 +169,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			}(tc)
 
 			publisher.HandleEvents(ctx, eventsChannel)
-			logs := logp.ObserverLogs().FilterFieldKey(ecsEventActionField).All()
+			logs := observer.FilterFieldKey(ecsEventActionField).TakeAll()
 			assert.Len(t, logs, len(tc.expectedEventSize))
 			for i, size := range tc.expectedEventSize {
 				assert.Equal(t, int64(size), logs[i].ContextMap()[ecsEventCountField])
