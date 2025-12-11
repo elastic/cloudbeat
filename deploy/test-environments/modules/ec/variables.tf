@@ -53,6 +53,12 @@ variable "elasticsearch_autoscale" {
   description = "Optional autoscale the Elasticsearch cluster"
 }
 
+variable "max_size" {
+  default     = "128g"
+  type        = string
+  description = "Maximum autoscaling size for hot content nodes. Defaults to 128g for GCP, but should be set based on cloud provider (GCP: 128g, AWS: 58g, Azure: 60g)"
+}
+
 # Docker image overrides
 
 # Docker image tag override is used to override the default docker image tag

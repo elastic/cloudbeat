@@ -5,8 +5,14 @@ variable "ec_api_key" {
 }
 
 variable "ess_region" {
-  default     = "gcp-us-west2"
-  description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-west2"
+  default     = ""
+  description = "Elastic Cloud deployment region. Used for both ECH deployments and Serverless projects. If not provided, defaults are set based on serverless_mode (ECH: gcp-us-west2, Serverless: aws-us-east-1)"
+  type        = string
+}
+
+variable "ec_url" {
+  default     = ""
+  description = "Optional Elastic Cloud URL. Defaults to production URL (https://cloud.elastic.co) if not provided"
   type        = string
 }
 
@@ -49,6 +55,12 @@ variable "elasticsearch_zone_count" {
   default     = 2
   type        = number
   description = "Optional Elasticsearch zone count"
+}
+
+variable "max_size" {
+  default     = ""
+  type        = string
+  description = "Maximum autoscaling size for hot content nodes. If not provided, defaults are set based on cloud provider (GCP: 128g, AWS: 58g, Azure: 60g)"
 }
 
 variable "docker_image_tag_override" {
