@@ -68,9 +68,10 @@ jobs:
         env:
           ENV_PREFIX: ${{ inputs.prefix }}
         run: |
+          set +e
           # Find first environment with the prefix
           BUCKET="s3://tf-state-bucket-test-infra"
-          FIRST_ENV=$(aws s3 ls "$BUCKET/$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g' | head -n 1)
+          FIRST_ENV=$(aws s3 ls "$BUCKET/$ENV_PREFIX" 2>/dev/null | awk '{print $2}' | sed 's/\///g' | head -n 1)
 
           if [ -z "$FIRST_ENV" ]; then
             echo "No environments found with prefix $ENV_PREFIX, defaulting to production-cft"
@@ -90,6 +91,7 @@ jobs:
               echo "ESS_REGION_INPUT=production-cft" >> $GITHUB_ENV
             fi
           fi
+          set -e  # Re-enable error handling
 
       - name: Determine Vault Path
         id: determine-vault-path
