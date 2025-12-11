@@ -17,10 +17,61 @@ AWS_REGION="eu-west-1" # Add your desired default AWS region here
 DELETED_ENVS=()
 FAILED_ENVS=()
 
+# Function to set environment variables from env_config.json
+function set_env_vars_from_config() {
+    local env=$1
+    local bucket_folder=$2
+
+    # Try to download env_config.json
+    if aws s3 cp "$BUCKET/$bucket_folder/env_config.json" /tmp/env_config.json 2>/dev/null; then
+        echo "Reading environment configuration from env_config.json for $env"
+
+        # Extract values with defaults for backward compatibility
+        # Note: If ess_region_mapped doesn't exist, default to gcp-us-west2 (most common case)
+        # We can't map ess_region without serverless_mode info, so we use a safe default
+        local ess_region_mapped
+        ess_region_mapped=$(jq -r 'if .ess_region_mapped then .ess_region_mapped else "gcp-us-west2" end' /tmp/env_config.json)
+        local ec_url
+        ec_url=$(jq -r '.ec_url // "https://cloud.elastic.co"' /tmp/env_config.json)
+        local serverless_mode
+        serverless_mode=$(jq -r '.serverless_mode // "false"' /tmp/env_config.json)
+        local deployment_template
+        deployment_template=$(jq -r '.deployment_template // "gcp-storage-optimized"' /tmp/env_config.json)
+        local max_size
+        max_size=$(jq -r '.max_size // "128g"' /tmp/env_config.json)
+
+        # Set Terraform variables
+        export TF_VAR_ess_region="$ess_region_mapped"
+        export TF_VAR_ec_url="$ec_url"
+        export TF_VAR_serverless_mode="$serverless_mode"
+        export TF_VAR_deployment_template="$deployment_template"
+        export TF_VAR_max_size="$max_size"
+
+        echo "Set TF_VAR_ess_region=$TF_VAR_ess_region"
+        echo "Set TF_VAR_ec_url=$TF_VAR_ec_url"
+        echo "Set TF_VAR_serverless_mode=$TF_VAR_serverless_mode"
+        echo "Set TF_VAR_deployment_template=$TF_VAR_deployment_template"
+        echo "Set TF_VAR_max_size=$TF_VAR_max_size"
+
+        rm -f /tmp/env_config.json
+    else
+        # If env_config.json doesn't exist, use defaults for backward compatibility
+        echo "env_config.json not found for $env, using defaults"
+        export TF_VAR_ess_region="gcp-us-west2"
+        export TF_VAR_ec_url="https://cloud.elastic.co"
+        export TF_VAR_serverless_mode="false"
+        export TF_VAR_deployment_template="gcp-storage-optimized"
+        export TF_VAR_max_size="128g"
+    fi
+}
+
 # Function to delete all terraform states from given bucket
 function delete_all_states() {
     local bucket_folder=$1
     echo "Deleting all Terraform states from bucket: $bucket_folder"
+
+    # Set environment variables from env_config.json
+    set_env_vars_from_config "$bucket_folder" "$bucket_folder"
 
     states=("cdr" "cis" "elk-stack")
     # Get all states
@@ -44,6 +95,9 @@ function delete_environment() {
     local ENV=$1
     echo "Deleting Terraform environment: $ENV"
     tfstate="./$ENV-terraform.tfstate"
+
+    # Set environment variables from env_config.json
+    set_env_vars_from_config "$ENV" "$ENV"
 
     # Copy state file
     if aws s3 cp "$BUCKET/$ENV/terraform.tfstate" "$tfstate"; then

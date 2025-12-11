@@ -8,7 +8,13 @@ locals {
     deployment = "${var.deployment_name}"
   }
 
-  ec_url = "https://cloud.elastic.co"
+  ec_url = var.ec_url != "" ? var.ec_url : "https://cloud.elastic.co"
+
+  # Set default ess_region based on deployment type if not provided
+  ess_region = var.ess_region != "" ? var.ess_region : (
+    var.serverless_mode ? "aws-us-east-1" : "gcp-us-west2"
+  )
+
   ec_headers = {
     Content-type  = "application/json"
     Authorization = "ApiKey ${var.ec_api_key}"
@@ -16,7 +22,8 @@ locals {
 }
 
 provider "ec" {
-  apikey = var.ec_api_key
+  apikey   = var.ec_api_key
+  endpoint = local.ec_url
 }
 
 provider "restapi" {
@@ -37,12 +44,13 @@ module "ec_deployment" {
 
   source        = "../modules/ec"
   ec_api_key    = var.ec_api_key
-  region        = var.ess_region
+  region        = local.ess_region
   stack_version = var.stack_version
   tags          = local.common_tags
 
   deployment_template    = var.deployment_template
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
+  max_size               = var.max_size != "" ? var.max_size : "128g"
 
   elasticsearch_autoscale  = true
   elasticsearch_size       = var.elasticsearch_size
@@ -68,5 +76,5 @@ module "ec_project" {
   ec_apikey    = var.ec_api_key
   ec_url       = local.ec_url
   project_name = "${var.deployment_name}-${random_string.suffix.result}"
-  region_id    = "aws-us-east-1" # TODO: replace with var.ess_region when more regions are supported
+  region_id    = local.ess_region
 }

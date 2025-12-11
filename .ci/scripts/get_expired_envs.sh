@@ -16,7 +16,7 @@ file_exists() {
 s3_bucket="tf-state-bucket-test-infra"
 folders=$(aws s3 ls "s3://${s3_bucket}" | awk '{print $2}')
 
-# JSON array to store deployment names
+# JSON array to store deployment objects with name and ess_region
 expired_envs='[]'
 
 # Boolean variable to track if an expired environment was found
@@ -39,11 +39,14 @@ for folder in $folders; do
 
     # Compare expiration date with current date
     if [ "$expiration_seconds" -le "$current_date_seconds" ]; then
-        # Extract the deployment_name field using jq
+        # Extract deployment_name and ess_region (default to production-cft if not found)
         deployment_name=$(echo "$file_content" | jq -r '.deployment_name')
-        echo "Environment $deployment_name is expired."
-        # Add deployment name to JSON object
-        expired_envs=$(echo "$expired_envs" | jq --arg value "$deployment_name" '. += [$value]')
+        ess_region=$(echo "$file_content" | jq -r '.ess_region // "production-cft"')
+
+        echo "Environment $deployment_name is expired (ess-region: $ess_region)."
+
+        # Add deployment object with name and ess_region to JSON array
+        expired_envs=$(echo "$expired_envs" | jq --arg name "$deployment_name" --arg region "$ess_region" '. += [{"deployment_name": $name, "ess_region": $region}]')
 
         # Set found to true
         expired_env_found=true
@@ -52,7 +55,7 @@ for folder in $folders; do
     fi
 done
 
-# Print the deployment names and found status to GITHUB_OUTPUT
+# Print the deployment objects and found status to GITHUB_OUTPUT
 expired_envs_str=$(echo "$expired_envs" | jq -c .)
 echo "deployments=$expired_envs_str" >>"$GITHUB_OUTPUT"
 echo "expired_env_found=$expired_env_found" >>"$GITHUB_OUTPUT"
