@@ -1,0 +1,148 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>elastic/renovate-config"
+  ],
+  "baseBranches": [
+    "main",
+    "9.7",
+    "9.6",
+    "9.5",
+    "9.4",
+    "9.3",
+    "9.2",
+    "9.1",
+    "8.19"
+  ],
+  "schedule": [
+    "after 1am on monday"
+  ],
+  "labels": [
+    "renovate",
+    "dependencies",
+    "Team:Cloud-Security-Posture",
+    "backport-skip"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "separateMajorMinor": true,
+  "prConcurrentLimit": 20,
+  "automergeStrategy": "squash",
+  "automergeType": "pr",
+  "ignorePaths": [
+    "**/vendor/**"
+  ],
+  "packageRules": [
+    {
+      "description": "Ignore elastic/beats v7 - requires manual update",
+      "matchPackageNames": [
+        "github.com/elastic/beats/v7"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Group AWS SDK packages together",
+      "groupName": "aws-sdk",
+      "matchPackageNames": [
+        "github.com/aws/aws-sdk-go-v2",
+        "github.com/aws/aws-sdk-go-v2/**"
+      ]
+    },
+    {
+      "description": "Group Azure SDK packages together",
+      "groupName": "azure-sdk",
+      "matchPackageNames": [
+        "github.com/Azure/azure-sdk-for-go/**"
+      ]
+    },
+    {
+      "description": "Group GCP packages together",
+      "groupName": "gcp-sdk",
+      "matchPackageNames": [
+        "cloud.google.com/go/**"
+      ]
+    },
+    {
+      "description": "Group Kubernetes packages together",
+      "groupName": "k8s",
+      "matchPackageNames": [
+        "k8s.io/api",
+        "k8s.io/apimachinery",
+        "k8s.io/client-go",
+        "k8s.io/kubectl"
+      ]
+    },
+    {
+      "description": "Group golang.org/x packages together",
+      "groupName": "golang.org/x",
+      "matchPackageNames": [
+        "golang.org/x/**"
+      ]
+    },
+    {
+      "description": "Group Elastic packages together",
+      "groupName": "elastic",
+      "matchPackageNames": [
+        "github.com/elastic/**"
+      ]
+    },
+    {
+      "description": "Group Trivy packages together",
+      "groupName": "trivy",
+      "matchPackageNames": [
+        "github.com/aquasecurity/trivy",
+        "github.com/aquasecurity/trivy-db",
+        "github.com/aquasecurity/go-dep-parser"
+      ]
+    },
+    {
+      "description": "Enable indirect Go dependencies",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "indirect"
+      ],
+      "enabled": true
+    },
+    {
+      "description": "Auto-merge minor and patch updates for Elastic packages",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchPackageNames": [
+        "github.com/elastic/**"
+      ],
+      "addLabels": [
+        "renovate-auto-approve"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Manual review for major updates",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Disable digest updates for volatile packages",
+      "matchPackageNames": [
+        "k8s.io/utils",
+        "golang.org/x/crypto",
+        "golang.org/x/net",
+        "golang.org/x/exp",
+        "golang.org/x/oauth2"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "enabled": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  }
+}

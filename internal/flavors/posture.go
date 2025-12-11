@@ -80,7 +80,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 		return nil, err
 	}
 
-	client, err := NewClient(b.Publisher, cfg.Processors)
+	client, err := NewClient(b.Publisher, cfg.Processors, log.Logger)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to init client: %w", err)

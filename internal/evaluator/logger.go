@@ -18,7 +18,6 @@
 package evaluator
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -46,24 +45,33 @@ var zapToOpaLevelsMap = map[zapcore.Level]logging.Level{
 }
 
 func (l *logger) Debug(fmt string, a ...any) {
-	l.log.Debugf(fmt, a...)
+	if l.lvl.Enabled(zapcore.DebugLevel) {
+		l.log.Debugf(fmt, a...)
+	}
 }
 
 func (l *logger) Info(fmt string, a ...any) {
-	l.log.Infof(fmt, a...)
+	if l.lvl.Enabled(zapcore.InfoLevel) {
+		l.log.Infof(fmt, a...)
+	}
 }
 
 func (l *logger) Error(fmt string, a ...any) {
-	l.log.Errorf(fmt, a...)
+	if l.lvl.Enabled(zapcore.ErrorLevel) {
+		l.log.Errorf(fmt, a...)
+	}
 }
 
 func (l *logger) Warn(fmt string, a ...any) {
-	l.log.Warnf(fmt, a...)
+	if l.lvl.Enabled(zapcore.WarnLevel) {
+		l.log.Warnf(fmt, a...)
+	}
 }
 
 func (l *logger) WithFields(m map[string]any) logging.Logger {
 	return &logger{
 		log: l.log.With(mapToArray(m)...),
+		lvl: l.lvl,
 	}
 }
 
@@ -84,16 +92,12 @@ func mapToArray(m map[string]any) []any {
 	return ret
 }
 
-func newLogger() logging.Logger {
-	lvl := zap.NewAtomicLevelAt(logp.GetLevel())
-	log := clog.NewLogger("opa").WithOptions(
-		zap.IncreaseLevel(lvl),
-		zap.AddCallerSkip(1),
-	)
-
+// newLoggerFromBase creates an OPA logger from a base clog.Logger.
+// This avoids using the global logger system and reuses the passed logger.
+func newLoggerFromBase(baseLog *clog.Logger) logging.Logger {
 	return &logger{
-		log: log,
-		lvl: lvl,
+		log: baseLog.Named("opa").WithOptions(zap.AddCallerSkip(1)),
+		lvl: zap.NewAtomicLevelAt(zapcore.LevelOf(baseLog.Core())),
 	}
 }
 
