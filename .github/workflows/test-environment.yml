@@ -21,10 +21,18 @@ on:
         default: "8.13.3"
         type: string
       ess-region:
-        required: true
-        description: "Elastic Cloud deployment region"
-        default: "gcp-us-west2"
-        type: string
+        required: false
+        description: "Environment and cloud provider (e.g., production-cft, staging-aws, qa-azure)"
+        default: "production-cft"
+        type: choice
+        options:
+          - production-cft
+          - staging-gcp
+          - staging-aws
+          - staging-azure
+          - qa-gcp
+          - qa-aws
+          - qa-azure
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
@@ -68,9 +76,9 @@ on:
         default: "8.13.3"
         type: string
       ess-region:
-        required: true
-        description: "Elastic Cloud deployment region"
-        default: "gcp-us-west2"
+        required: false
+        description: "Environment and cloud provider (e.g., production-cft, staging-aws, qa-azure)"
+        default: "production-cft"
         type: string
       docker-image-override:
         required: false
@@ -151,7 +159,6 @@ env:
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=contextual-security Key=project,Value=test-environments"
   GCP_ZONE: "us-central1-a"
   AZURE_DEFAULT_TAGS: "division=engineering org=security team=contextual-security project=test-environments owner=${{ github.actor }}"
-  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_gcp_service_account_json: ${{ secrets.GCP_AGENT_CREDENTIALS }}
 
 jobs:
@@ -162,7 +169,6 @@ jobs:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     env:
-      TF_VAR_ess_region: ${{ inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
       TF_VAR_serverless_mode: ${{ inputs.serverless_mode }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
@@ -206,6 +212,7 @@ jobs:
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          echo "EC_URL=https://cloud.elastic.co" >> $GITHUB_ENV
 
       - name: Process Stack Version
         id: remove-commit-hash
@@ -242,6 +249,62 @@ jobs:
             # integrations_server.config.docker_image
             echo "TF_VAR_pin_version=$stack_version" >> $GITHUB_ENV
           fi
+
+      - name: Parse ESS Region Input
+        id: parse-ess-region
+        shell: bash
+        working-directory: ./
+        env:
+          ESS_REGION_INPUT: ${{ inputs.ess-region }}
+        run: |
+          source .ci/scripts/parse_ess_region.sh
+
+      - name: Determine Vault Path
+        id: determine-vault-path
+        shell: bash
+        working-directory: ./
+        env:
+          ENV_TYPE: ${{ env.ENV_TYPE }}
+        run: |
+          source .ci/scripts/determine_vault_path.sh
+          echo "vault-path=$VAULT_PATH" >> $GITHUB_OUTPUT
+
+      - name: Get Elastic Cloud Credentials from Vault
+        id: get-ec-credentials
+        if: inputs.ec-api-key == '' && steps.determine-vault-path.outcome == 'success'
+        uses: hashicorp/vault-action@affa6f04da5c2d55e6e115b7d1b044a6b1af8c74 # v2.7.4
+        continue-on-error: false
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          method: approle
+          secrets: |
+            ${{ steps.determine-vault-path.outputs.vault-path }} api_key | EC_API_KEY ;
+            ${{ steps.determine-vault-path.outputs.vault-path }} url | EC_URL
+
+      - name: Set Elastic Cloud Credentials
+        id: set-ec-credentials
+        shell: bash
+        run: |
+          # Use Vault credentials if available, otherwise use user-provided key
+          if [[ -n "${EC_API_KEY:-}" ]]; then
+            echo "TF_VAR_ec_api_key=$EC_API_KEY" >> $GITHUB_ENV
+            echo "EC_URL=${EC_URL:-https://cloud.elastic.co}" >> $GITHUB_ENV
+          elif [[ -z "${TF_VAR_ec_api_key:-}" ]]; then
+            echo "Error: No Elastic Cloud API key available" >&2
+            exit 1
+          fi
+
+      - name: Map ESS Region
+        id: map-ess-region
+        shell: bash
+        working-directory: ./
+        env:
+          ESS_REGION_INPUT: ${{ inputs.ess-region }}
+          SERVERLESS_MODE: ${{ inputs.serverless_mode }}
+        run: |
+          source .ci/scripts/map_ess_region.sh
 
       - name: Init Enrollment Token
         run: |
@@ -342,8 +405,9 @@ jobs:
           deployment-name: ${{ env.DEPLOYMENT_NAME }}
           serverless-mode: ${{ env.TF_VAR_serverless_mode }}
           elk-stack-version: ${{ env.STACK_VERSION }}
-          ess-region: ${{ env.TF_VAR_ess_region }}
+          ess-region: ${{ env.ESS_REGION }}
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
+          ec-url: ${{ env.EC_URL }}
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           tag-project: ${{ github.actor }}
@@ -355,6 +419,12 @@ jobs:
         env:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
+          ESS_REGION: ${{ inputs.ess-region || 'production-cft' }}
+          ESS_REGION_MAPPED: ${{ env.ESS_REGION }}
+          EC_URL: ${{ env.EC_URL || 'https://cloud.elastic.co' }}
+          SERVERLESS_MODE: ${{ inputs.serverless_mode }}
+          DEPLOYMENT_TEMPLATE: ${{ env.DEPLOYMENT_TEMPLATE }}
+          MAX_SIZE: ${{ env.MAX_SIZE }}
         run: |
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
@@ -507,6 +577,7 @@ jobs:
           ESS_TYPE: ${{ inputs.serverless_mode }}
           JOB_STATUS: "${{ job.status }}"
           S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
+          ESS_REGION: ${{ inputs.ess-region || 'production-cft' }}
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 
