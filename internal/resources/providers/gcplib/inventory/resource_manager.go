@@ -48,6 +48,8 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 		return nil, err
 	}
 
+	var orgName string
+	var orgNameMu sync.Mutex
 	return &ResourceManagerWrapper{
 		log:                  log,
 		config:               gcpConfig,
@@ -61,12 +63,20 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 			return prj.DisplayName
 		},
 		getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+			orgNameMu.Lock()
+			defer orgNameMu.Unlock()
+
+			if orgName != "" {
+				return orgName
+			}
+
 			org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
 			if err != nil {
 				log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
 				return ""
 			}
-			return org.DisplayName
+			orgName = org.DisplayName
+			return orgName
 		},
 	}, nil
 }
