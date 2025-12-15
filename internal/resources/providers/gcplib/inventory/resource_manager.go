@@ -70,6 +70,7 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 				return orgName
 			}
 
+			// parent is the ID of the organization, and is the same for every call, so we cache it
 			org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
 			if err != nil {
 				log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
