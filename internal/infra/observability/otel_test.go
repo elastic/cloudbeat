@@ -25,7 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel"
@@ -58,7 +57,7 @@ func TestOtel(t *testing.T) {
 	server, traceService, metricService := startMockOtlpServer(t, endpoint)
 	t.Cleanup(server.Stop)
 
-	log := testhelper.NewObserverLogger(t)
+	log, observer := testhelper.NewObserverLogger(t)
 	err := observability.SetUpOtel(ctx, log.Logger)
 	require.NoError(t, err)
 
@@ -82,7 +81,7 @@ func TestOtel(t *testing.T) {
 	counter.Add(ctx, 10)
 
 	t.Run("Check observed logs", func(t *testing.T) {
-		logs := logp.ObserverLogs().TakeAll()
+		logs := observer.TakeAll()
 		require.NotEmpty(t, logs)
 		seen := false
 		for _, entry := range logs {

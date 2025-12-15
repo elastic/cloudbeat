@@ -23,13 +23,13 @@ variable "deployment_template" {
 variable "deployment_name_prefix" {
   description = "Prefix for the Elastic Cloud deployment name"
   type        = string
-  default     = "cloud-security"
+  default     = "contextual-security"
 }
 
 variable "tags" {
   type = map(string)
   default = {
-    "deployment"  = "cloud-security",
+    "deployment"  = "contextual-security",
     "environment" = "test-enviroment",
   }
   description = "Optional set of tags to use for all deployments"
@@ -51,6 +51,12 @@ variable "elasticsearch_autoscale" {
   default     = false
   type        = bool
   description = "Optional autoscale the Elasticsearch cluster"
+}
+
+variable "max_size" {
+  default     = "128g"
+  type        = string
+  description = "Maximum autoscaling size for hot content nodes. Defaults to 128g for GCP, but should be set based on cloud provider (GCP: 128g, AWS: 58g, Azure: 60g)"
 }
 
 # Docker image overrides

@@ -25,7 +25,7 @@ from munch import Munch
 CNVM_TAGS = (
     "Key=division,Value=engineering "
     "Key=org,Value=security "
-    "Key=team,Value=cloud-security-posture "
+    "Key=team,Value=contextual-security "
     "Key=project,Value=test-environments"
 )
 

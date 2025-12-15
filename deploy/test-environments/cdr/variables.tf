@@ -86,7 +86,7 @@ variable "org" {
 }
 
 variable "team" {
-  default     = "cloud-security-posture"
+  default     = "contextual-security"
   type        = string
   description = "Optional team resource tag"
 }
