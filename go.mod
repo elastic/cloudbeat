@@ -465,12 +465,8 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.2.1 // indirect
-<<<<<<< HEAD
-	github.com/opencontainers/selinux v1.12.0 // indirect
-	github.com/opentracing/opentracing-go v1.2.0 // indirect
-=======
 	github.com/opencontainers/selinux v1.13.1 // indirect
->>>>>>> 9631f168 (Update module github.com/opencontainers/selinux to v1.13.1 (main) (#3740))
+	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/openvex/go-vex v0.2.5 // indirect
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
 	github.com/owenrumney/squealer v1.2.11 // indirect
