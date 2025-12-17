@@ -1,5 +1,5 @@
-name: 'Hermit Environment'
-description: 'Activate hermit environment'
+name: "Hermit Environment"
+description: "Activate hermit environment"
 inputs:
   # This action should not be called with `init-tools: 'false` from standalone workflows.
   # The purpose is for the ci.yml first to init the tools and cache them,
@@ -8,13 +8,13 @@ inputs:
   # If you want to use this action from a standalone workflow, use `init-tools: 'true`,
   # or use the step that activates the hermit, directly. Otherwise the
   init-tools:
-    description: 'Init tools'
+    description: "Init tools"
     required: false
-    default: 'false'
+    default: "false"
   free-disk:
-    description: 'Free disk space'
+    description: "Free disk space"
     required: false
-    default: 'true'
+    default: "true"
 runs:
   using: composite
   steps:
@@ -63,7 +63,10 @@ runs:
 
     - name: Initialize hermit
       shell: bash
-      run: ./bin/hermit env --raw >> "$GITHUB_ENV"
+      run: |
+        max_retries=5
+        retry_delay=10
+        ./.ci/scripts/retry.sh "$max_retries" "$retry_delay" './bin/hermit env --raw >> "$GITHUB_ENV"'
 
     # in case of cache miss, an older instance of cache could be selected (with restore-keys).
     # Clean hermit packages to avoid continuously size increment of folder ~/.cache/hermit/pkg.
