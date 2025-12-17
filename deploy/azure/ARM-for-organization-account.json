@@ -27,7 +27,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "9.3.0"
+            "defaultValue": "9.4.0"
         },
         "FleetUrl": {
             "type": "string",
