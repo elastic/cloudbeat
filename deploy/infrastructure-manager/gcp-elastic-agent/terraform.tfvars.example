@@ -1,0 +1,14 @@
+# Example terraform.tfvars file
+# Copy this to terraform.tfvars and fill in your values
+
+project_id             = "your-gcp-project-id"
+deployment_name        = "elastic-agent-cspm"
+zone                   = "us-central1-a"
+fleet_url              = "https://your-fleet-url:443"
+enrollment_token       = "your-enrollment-token"
+elastic_agent_version  = "8.15.0"
+elastic_artifact_server = "https://artifacts.elastic.co/downloads/beats/elastic-agent"
+scope                  = "projects"  # or "organizations"
+parent_id              = "your-gcp-project-id"  # or organization ID
+service_account_name   = ""  # leave empty to create new SA
+allow_ssh              = false
