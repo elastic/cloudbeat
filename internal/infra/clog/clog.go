@@ -70,7 +70,7 @@ func hasErrorType(errorType error, args ...any) bool {
 	errorTypeStr := errorType.Error()
 	for _, arg := range args {
 		// Check if the error is of the same type
-		if err, ok := arg.(error); ok && errors.Is(err, errorType) {
+		if err, ok := arg.(error); ok && (errors.Is(err, errorType) || strings.Contains(err.Error(), errorTypeStr)) {
 			return true
 		}
 
