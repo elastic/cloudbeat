@@ -32,7 +32,7 @@ jobs:
         uses: ./.github/actions/hermit
         with:
           init-tools: "true"
-          free-disk: "false"
+          free-disk: "true"
 
       - name: Build PR branch binary
         run: |
