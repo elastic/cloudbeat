@@ -14,12 +14,23 @@ Deploy Elastic Agent for CIS GCP integration using GCP Infrastructure Manager. C
 
 [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/elastic/cloudbeat.git&cloudshell_git_branch=main&cloudshell_workspace=deploy/infrastructure-manager/gcp-elastic-agent&show=terminal&ephemeral=true)
 
+Setup once
 ```bash
 # Enable required APIs
 gcloud services enable iam.googleapis.com config.googleapis.com compute.googleapis.com \
     cloudresourcemanager.googleapis.com cloudasset.googleapis.com
+
+# Create a service-account to run infra-manager scripts
+gcloud iam service-accounts create infra-manager-deployer \
+    --display-name="Infra Manager Deployment Account"
+
+# Grant permission to manage resources
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member="serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/editor"
 ```
 
+Deploy
 ```bash
 # Set deployment configuration
 export ORG_ID=""  # Optional: Set to your organization ID for org-level monitoring
@@ -46,7 +57,7 @@ export LOCATION=$(echo ${ZONE} | sed 's/-[a-z]$//')  # Extract region from zone
 # Deploy from local source (repo already cloned by Cloud Shell)
 gcloud infra-manager deployments apply ${DEPLOYMENT_NAME} \
     --location=${LOCATION} \
-    --service-account="projects/${PROJECT_ID}/serviceAccounts/$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')@cloudservices.gserviceaccount.com" \
+    --service-account="projects/${PROJECT_ID}/serviceAccounts/infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
     --local-source="." \
     --input-values="\
 project_id=${PROJECT_ID},\
