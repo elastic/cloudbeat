@@ -12,40 +12,54 @@ Deploy Elastic Agent for CIS GCP integration using GCP Infrastructure Manager. C
 
 #### Option 1: Cloud Shell (Recommended)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/elastic/cloudbeat.git&cloudshell_workspace=deploy/infrastructure-manager&show=terminal&ephemeral=true)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/elastic/cloudbeat.git&cloudshell_git_branch=main&cloudshell_workspace=deploy/infrastructure-manager/gcp-elastic-agent&show=terminal&ephemeral=true)
 
 ```bash
 # Enable required APIs
 gcloud services enable iam.googleapis.com config.googleapis.com compute.googleapis.com \
     cloudresourcemanager.googleapis.com cloudasset.googleapis.com
-
-# Set variables from current session
-export PROJECT_ID=$(gcloud config get-value project)
-export ZONE=$(gcloud config get-value compute/zone 2>/dev/null || echo "us-central1-a")
-export LOCATION=$(echo $ZONE | sed 's/-[a-z]$//')  # Extract region from zone (e.g., us-central1-a -> us-central1)
-
-# Deploy
-gcloud infra-manager deployments apply elastic-agent-cspm \
-    --location=${LOCATION} \
-    --service-account="projects/${PROJECT_ID}/serviceAccounts/$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')@cloudservices.gserviceaccount.com" \
-    --git-source-repo="https://github.com/elastic/cloudbeat.git" \
-    --git-source-directory="deploy/infrastructure-manager" \
-    --git-source-ref="main" \
-    --input-values="\
-project_id=${PROJECT_ID},\
-deployment_name=elastic-agent-cspm,\
-zone=${ZONE},\
-fleet_url=YOUR_FLEET_URL,\
-enrollment_token=YOUR_TOKEN,\
-elastic_agent_version=8.19.0,\
-scope=projects,\
-parent_id=${PROJECT_ID},\
-allow_ssh=false"
 ```
 
-Replace `YOUR_FLEET_URL` and `YOUR_TOKEN` with your actual values.
+```bash
+# Set deployment configuration
+export ORG_ID=""  # Optional: Set to your organization ID for org-level monitoring
+export PROJECT_ID="<YOUR_GCP_PROJECT_ID>"
+export DEPLOYMENT_NAME="elastic-agent-cspm"
+export FLEET_URL="<YOUR_FLEET_URL>"
+export ENROLLMENT_TOKEN="<YOUR_TOKEN>"
+export ELASTIC_AGENT_VERSION="<YOUR_AGENT_VERSION>"
+export ZONE="us-central1-a"  # Change if needed
 
-For **organization-level** deployment, use `scope=organizations,parent_id=YOUR_ORG_ID`.
+# Automatically set scope and parent_id based on ORG_ID
+if [ -n "${ORG_ID}" ]; then
+  export SCOPE="organizations"
+  export PARENT_ID="${ORG_ID}"
+else
+  export SCOPE="projects"
+  export PARENT_ID="${PROJECT_ID}"
+fi
+
+# Configure GCP project and location
+gcloud config set project ${PROJECT_ID}
+export LOCATION=$(echo ${ZONE} | sed 's/-[a-z]$//')  # Extract region from zone
+
+# Deploy from local source (repo already cloned by Cloud Shell)
+gcloud infra-manager deployments apply ${DEPLOYMENT_NAME} \
+    --location=${LOCATION} \
+    --service-account="projects/${PROJECT_ID}/serviceAccounts/$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')@cloudservices.gserviceaccount.com" \
+    --local-source="." \
+    --input-values="\
+project_id=${PROJECT_ID},\
+deployment_name=${DEPLOYMENT_NAME},\
+zone=${ZONE},\
+fleet_url=${FLEET_URL},\
+enrollment_token=${ENROLLMENT_TOKEN},\
+elastic_agent_version=${ELASTIC_AGENT_VERSION},\
+scope=${SCOPE},\
+parent_id=${PARENT_ID}"
+```
+
+**For organization-level monitoring:** Set `export ORG_ID="<YOUR_ORG_ID>"` before running the deploy command.
 
 #### Option 2: GCP Console
 
@@ -54,7 +68,7 @@ For **organization-level** deployment, use `scope=organizations,parent_id=YOUR_O
    - **Source**: Git repository
    - **Repository URL**: `https://github.com/elastic/cloudbeat.git`
    - **Branch**: `main`
-   - **Directory**: `deploy/infrastructure-manager`
+   - **Directory**: `deploy/infrastructure-manager/gcp-elastic-agent`
    - **Location**: `us-central1`
 3. Add input variables (see table below)
 4. Click **Create**
@@ -86,19 +100,19 @@ For **organization-level** deployment, use `scope=organizations,parent_id=YOUR_O
 
 **View deployment:**
 ```bash
-gcloud infra-manager deployments describe elastic-agent-cspm --location=us-central1
+gcloud infra-manager deployments describe ${DEPLOYMENT_NAME} --location=${LOCATION}
 ```
 
 **Delete deployment:**
 ```bash
-gcloud infra-manager deployments delete elastic-agent-cspm --location=us-central1
+gcloud infra-manager deployments delete ${DEPLOYMENT_NAME} --location=${LOCATION}
 ```
 
 ### Troubleshooting
 
 **Check agent logs:**
 ```bash
-gcloud compute ssh elastic-agent-cspm --zone us-central1-a
+gcloud compute ssh ${DEPLOYMENT_NAME} --zone ${ZONE}
 sudo journalctl -u google-startup-scripts.service
 ```
 
