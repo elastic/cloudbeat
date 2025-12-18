@@ -90,7 +90,7 @@ runs:
     - if: ${{ inputs.init-tools == 'true' }}
       name: Install tests poetry dependencies
       shell: bash
-      run: cd ./tests && poetry install --no-root
+      run: cd ./tests && poetry install
     - if: ${{ inputs.init-tools == 'true' }}
       name: Install security-policies poetry dependencies
       shell: bash
