@@ -54,52 +54,21 @@ resource "google_compute_firewall" "ssh" {
   source_ranges = ["0.0.0.0/0"]
 }
 
-# Compute Instance
-resource "google_compute_instance" "elastic_agent" {
-  name         = var.deployment_name
-  machine_type = var.machine_type
-  zone         = var.zone
+module "compute_instance" {
+  source = "./modules/compute_instance"
 
-  labels = {
-    name = "elastic-agent"
-  }
-
-  boot_disk {
-    initialize_params {
-      image = "ubuntu-os-cloud/ubuntu-minimal-2204-lts"
-      size  = 32
-      type  = "pd-standard"
-    }
-    auto_delete = true
-  }
-
-  network_interface {
-    network = google_compute_network.elastic_agent.self_link
-
-    access_config {
-      # Ephemeral public IP
-    }
-  }
-
-  service_account {
-    email = local.sa_email
-    scopes = [
-      "https://www.googleapis.com/auth/cloud-platform",
-      "https://www.googleapis.com/auth/cloudplatformorganizations",
-    ]
-  }
-
-  metadata_startup_script = <<-EOT
-    #!/bin/bash
-    set -x
-    ElasticAgentArtifact=elastic-agent-${var.elastic_agent_version}-linux-x86_64
-    curl -L -O ${var.elastic_artifact_server}/$ElasticAgentArtifact.tar.gz
-    tar xzvf $ElasticAgentArtifact.tar.gz
-    cd $ElasticAgentArtifact
-    ${local.install_command} --url=${var.fleet_url} --enrollment-token=${var.enrollment_token}
-  EOT
+  deployment_name         = var.deployment_name
+  machine_type            = var.machine_type
+  zone                    = var.zone
+  network_self_link       = google_compute_network.elastic_agent.self_link
+  sa_email                = local.sa_email
+  elastic_agent_version   = var.elastic_agent_version
+  elastic_artifact_server = var.elastic_artifact_server
+  install_command         = local.install_command
+  fleet_url               = var.fleet_url
+  enrollment_token        = var.enrollment_token
 
   depends_on = [
-    module.service_account,
+    module.service_account
   ]
 }

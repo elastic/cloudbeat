@@ -1,16 +1,16 @@
 output "instance_name" {
   description = "Name of the compute instance"
-  value       = google_compute_instance.elastic_agent.name
+  value       = module.compute_instance.name
 }
 
 output "instance_id" {
   description = "ID of the compute instance"
-  value       = google_compute_instance.elastic_agent.id
+  value       = module.compute_instance.id
 }
 
 output "instance_zone" {
   description = "Zone of the compute instance"
-  value       = google_compute_instance.elastic_agent.zone
+  value       = module.compute_instance.zone
 }
 
 output "network_name" {
