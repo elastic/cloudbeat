@@ -18,7 +18,7 @@ jobs:
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
-          init-tools: "false"
+          init-tools: "true"
           free-disk: "false"
 
       - name: OPA test coverage

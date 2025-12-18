@@ -82,7 +82,7 @@ jobs:
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
-          init-tools: "false"
+          init-tools: "true"
           free-disk: "true"
 
       - name: Build opa bundle
