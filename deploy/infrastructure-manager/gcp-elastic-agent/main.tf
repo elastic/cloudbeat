@@ -15,11 +15,22 @@ provider "google" {
 locals {
   create_service_account = var.service_account_name == ""
   sa_name                = local.create_service_account ? "${var.deployment_name}-sa" : var.service_account_name
-  sa_email               = local.create_service_account ? google_service_account.elastic_agent[0].email : "${var.service_account_name}@${var.project_id}.iam.gserviceaccount.com"
+  sa_email               = local.create_service_account ? module.service_account[0].email : "${var.service_account_name}@${var.project_id}.iam.gserviceaccount.com"
   network_name           = "${var.deployment_name}-network"
 
   # Determine install command based on version
   install_command = startswith(var.elastic_agent_version, "9.") ? "sudo ./elastic-agent install --non-interactive --install-servers" : "sudo ./elastic-agent install --non-interactive"
+}
+
+module "service_account" {
+  count = local.create_service_account ? 1 : 0
+
+  source = "./modules/service_account"
+
+  project_id           = var.project_id
+  service_account_name = local.sa_name
+  scope                = var.scope
+  parent_id            = var.parent_id
 }
 
 # VPC Network
@@ -41,52 +52,6 @@ resource "google_compute_firewall" "ssh" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-}
-
-# Service Account (created only if not provided)
-resource "google_service_account" "elastic_agent" {
-  count        = local.create_service_account ? 1 : 0
-  account_id   = local.sa_name
-  display_name = "Elastic agent service account for CSPM"
-  project      = var.project_id
-}
-
-# IAM Bindings for Cloud Asset Viewer role
-resource "google_project_iam_member" "cloudasset_viewer" {
-  count   = local.create_service_account && var.scope == "projects" ? 1 : 0
-  project = var.parent_id
-  role    = "roles/cloudasset.viewer"
-  member  = "serviceAccount:${local.sa_email}"
-
-  depends_on = [google_service_account.elastic_agent]
-}
-
-resource "google_project_iam_member" "browser" {
-  count   = local.create_service_account && var.scope == "projects" ? 1 : 0
-  project = var.parent_id
-  role    = "roles/browser"
-  member  = "serviceAccount:${local.sa_email}"
-
-  depends_on = [google_service_account.elastic_agent]
-}
-
-# Organization-level IAM bindings
-resource "google_organization_iam_member" "cloudasset_viewer_org" {
-  count  = local.create_service_account && var.scope == "organizations" ? 1 : 0
-  org_id = var.parent_id
-  role   = "roles/cloudasset.viewer"
-  member = "serviceAccount:${local.sa_email}"
-
-  depends_on = [google_service_account.elastic_agent]
-}
-
-resource "google_organization_iam_member" "browser_org" {
-  count  = local.create_service_account && var.scope == "organizations" ? 1 : 0
-  org_id = var.parent_id
-  role   = "roles/browser"
-  member = "serviceAccount:${local.sa_email}"
-
-  depends_on = [google_service_account.elastic_agent]
 }
 
 # Compute Instance
@@ -135,10 +100,6 @@ resource "google_compute_instance" "elastic_agent" {
   EOT
 
   depends_on = [
-    google_service_account.elastic_agent,
-    google_project_iam_member.cloudasset_viewer,
-    google_project_iam_member.browser,
-    google_organization_iam_member.cloudasset_viewer_org,
-    google_organization_iam_member.browser_org,
+    module.service_account,
   ]
 }
