@@ -6,7 +6,7 @@ export ZONE="${ZONE:-us-central1-a}"  # Optional: Set to your desired GCP zone (
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-elastic-agent-cspm}" # Optional: Set to your desired deployment name (default: elastic-agent-cspm)
 export FLEET_URL="${FLEET_URL:-}"
 export ENROLLMENT_TOKEN="${ENROLLMENT_TOKEN:-}"
-export ELASTIC_AGENT_VERSION="${ELASTIC_AGENT_VERSION:-}"
+export STACK_VERSION="${STACK_VERSION:-}"
 
 # Configure GCP project and location
 export PROJECT_ID=$(gcloud config get-value core/project)
@@ -32,6 +32,6 @@ deployment_name=${DEPLOYMENT_NAME},\
 zone=${ZONE},\
 fleet_url=${FLEET_URL},\
 enrollment_token=${ENROLLMENT_TOKEN},\
-elastic_agent_version=${ELASTIC_AGENT_VERSION},\
+elastic_agent_version=${STACK_VERSION},\
 scope=${SCOPE},\
 parent_id=${PARENT_ID}"
