@@ -64,6 +64,7 @@ def test_elastic_index_exists(kspm_client, match_type):
 
 
 @pytest.mark.pre_merge_agent
+@pytest.mark.skip(reason="https://github.com/elastic/cloudbeat/issues/3777")
 @pytest.mark.order(4)
 @pytest.mark.dependency(depends=["test_agent_pods_running"])
 def test_cloudbeat_status(k8s, cloudbeat_agent):
