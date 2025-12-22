@@ -62,6 +62,7 @@ module "startup_validation" {
   source = "./modules/startup_validation"
 
   enabled       = var.startup_validation_enabled
+  project_id    = var.project_id
   instance_name = local.instance_name
   instance_id   = module.compute_instance.id
   zone          = var.zone

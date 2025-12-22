@@ -3,6 +3,11 @@ variable "enabled" {
   type        = bool
 }
 
+variable "project_id" {
+  description = "GCP project ID"
+  type        = string
+}
+
 variable "instance_name" {
   description = "Name of the instance to validate"
   type        = string
