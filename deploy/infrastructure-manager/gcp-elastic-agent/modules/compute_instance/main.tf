@@ -66,7 +66,7 @@ resource "google_compute_instance" "elastic_agent" {
       local status=$1
       curl -X PUT --data "$status" \
         -H "Metadata-Flavor: Google" \
-        "http://metadata.google.internal/computeMetadata/v1/instance/guest-attributes/startup-status" \
+        "http://metadata.google.internal/computeMetadata/v1/instance/guest-attributes/elastic-agent/startup-status" \
         || log "WARNING: Failed to set guest attribute status"
     }
 
