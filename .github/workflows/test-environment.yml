@@ -475,6 +475,7 @@ jobs:
           )
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
+
       - name: Deploy CDR Integrations
         id: cdr-integrations
         if: ${{ !cancelled() && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cis' }}
