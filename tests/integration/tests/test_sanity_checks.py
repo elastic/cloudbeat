@@ -103,59 +103,57 @@ def build_query_list(benchmark_id: str = "", match_type: str = "", version: str 
     return query_list
 
 
-@pytest.mark.sanity
-@pytest.skip(reason="kspm is broken")
-@pytest.mark.parametrize("match_type", tests_data["cis_k8s"])
-def test_kspm_unmanaged_findings(kspm_client, match_type):
-    """
-    Test case to check for unmanaged findings in KSPM.
+# @pytest.mark.sanity
+# @pytest.mark.parametrize("match_type", tests_data["cis_k8s"])
+# def test_kspm_unmanaged_findings(kspm_client, match_type):
+#     """
+#     Test case to check for unmanaged findings in KSPM.
 
-    Args:
-        kspm_client: The kspm client object.
-        match_type (str): The resource type to match.
+#     Args:
+#         kspm_client: The kspm client object.
+#         match_type (str): The resource type to match.
 
-    Returns:
-        None
+#     Returns:
+#         None
 
-    Raises:
-        AssertionError: If the resource type is missing.
-    """
-    query_list = build_query_list(
-        benchmark_id="cis_k8s",
-        match_type=match_type,
-        version=AGENT_VERSION,
-    )
-    query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
-    result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-    assert len(result) > 0, f"The resource type '{match_type}' is missing"
+#     Raises:
+#         AssertionError: If the resource type is missing.
+#     """
+#     query_list = build_query_list(
+#         benchmark_id="cis_k8s",
+#         match_type=match_type,
+#         version=AGENT_VERSION,
+#     )
+#     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
+#     result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+#     assert len(result) > 0, f"The resource type '{match_type}' is missing"
 
 
-@pytest.mark.sanity
-@pytest.skip(reason="kspm is broken")
-@pytest.mark.parametrize("match_type", tests_data["cis_eks"])
-def test_kspm_e_k_s_findings(kspm_client, match_type):
-    """
-    Test case to check for EKS findings in KSPM.
+# @pytest.mark.sanity
+# @pytest.mark.parametrize("match_type", tests_data["cis_eks"])
+# def test_kspm_e_k_s_findings(kspm_client, match_type):
+#     """
+#     Test case to check for EKS findings in KSPM.
 
-    Args:
-        kspm_client: The elastic client object.
-        match_type (str): The resource type to match.
+#     Args:
+#         kspm_client: The elastic client object.
+#         match_type (str): The resource type to match.
 
-    Returns:
-        None
+#     Returns:
+#         None
 
-    Raises:
-        AssertionError: If the resource type is missing.
-    """
-    query_list = build_query_list(
-        benchmark_id="cis_eks",
-        match_type=match_type,
-        version=AGENT_VERSION,
-    )
-    query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
+#     Raises:
+#         AssertionError: If the resource type is missing.
+#     """
+#     query_list = build_query_list(
+#         benchmark_id="cis_eks",
+#         match_type=match_type,
+#         version=AGENT_VERSION,
+#     )
+#     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
 
-    results = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
-    assert len(results) > 0, f"The resource type '{match_type}' is missing"
+#     results = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+#     assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
 
 @pytest.mark.sanity
