@@ -7,10 +7,16 @@ export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-elastic-agent-cspm}" # Optional: Set 
 export FLEET_URL="${FLEET_URL:-}"
 export ENROLLMENT_TOKEN="${ENROLLMENT_TOKEN:-}"
 export STACK_VERSION="${STACK_VERSION:-}"
+export ELASTIC_ARTIFACT_SERVER="${ELASTIC_ARTIFACT_SERVER%/}" # Remove trailing slash if present
+export ELASTIC_ARTIFACT_SERVER="${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}"
 
 # Configure GCP project and location
 export PROJECT_ID=$(gcloud config get-value core/project)
 export LOCATION=$(echo ${ZONE} | sed 's/-[a-z]$//')  # Extract region from zone
+
+# Generate unique suffix for resource names (8 hex characters)
+export RESOURCE_SUFFIX=$(openssl rand -hex 4)
+export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}-${RESOURCE_SUFFIX}"
 
 # Set scope and parent_id based on ORG_ID
 if [ -n "${ORG_ID}" ]; then
@@ -28,10 +34,11 @@ gcloud infra-manager deployments apply ${DEPLOYMENT_NAME} \
     --local-source="." \
     --input-values="\
 project_id=${PROJECT_ID},\
-deployment_name=${DEPLOYMENT_NAME},\
 zone=${ZONE},\
 fleet_url=${FLEET_URL},\
 enrollment_token=${ENROLLMENT_TOKEN},\
 elastic_agent_version=${STACK_VERSION},\
+elastic_artifact_server=${ELASTIC_ARTIFACT_SERVER},\
 scope=${SCOPE},\
-parent_id=${PARENT_ID}"
+parent_id=${PARENT_ID},\
+resource_suffix=${RESOURCE_SUFFIX}"

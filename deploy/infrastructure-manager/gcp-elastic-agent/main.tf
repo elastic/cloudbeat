@@ -5,10 +5,6 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.0"
-    }
   }
 }
 
@@ -17,34 +13,21 @@ provider "google" {
 }
 
 locals {
-  create_service_account = var.service_account_name == ""
-  # Use random suffix to ensure all resource names stay within GCP limits and allow multiple deployments
-  resource_suffix        = random_id.resource_suffix.hex
-  sa_name                = local.create_service_account ? "elastic-agent-sa-${local.resource_suffix}" : var.service_account_name
-  sa_email               = local.create_service_account ? module.service_account[0].email : "${var.service_account_name}@${var.project_id}.iam.gserviceaccount.com"
-  network_name           = "elastic-agent-net-${local.resource_suffix}"
-  instance_name          = "elastic-agent-vm-${local.resource_suffix}"
+  # Use suffix from deploy.sh to ensure all resource names stay within GCP limits and allow multiple deployments
+  resource_suffix = var.resource_suffix
+  sa_name         = "elastic-agent-sa-${local.resource_suffix}"
+  sa_email        = module.service_account.email
+  network_name    = "elastic-agent-net-${local.resource_suffix}"
+  instance_name   = "elastic-agent-vm-${local.resource_suffix}"
 }
 
-# Generate random suffix for all resource names
-# Each deployment (terraform state) gets a unique suffix, allowing multiple deployments per project
-resource "random_id" "resource_suffix" {
-  byte_length = 4
-
-  keepers = {
-    # Unique per deployment - use deployment_name + timestamp to ensure uniqueness
-    # This allows multiple deployments with same name over time
-    deployment_id = "${var.deployment_name}-${formatdate("YYYYMMDDhhmmss", timestamp())}"
-  }
-
-  lifecycle {
-    ignore_changes = [keepers]
-  }
+# Resource suffix for all resource names
+variable "resource_suffix" {
+  description = "Unique suffix for resource names (8 hex characters)"
+  type        = string
 }
 
 module "service_account" {
-  count = local.create_service_account ? 1 : 0
-
   source = "./modules/service_account"
 
   project_id           = var.project_id

@@ -3,11 +3,6 @@ variable "project_id" {
   type        = string
 }
 
-variable "deployment_name" {
-  description = "Name of the deployment"
-  type        = string
-}
-
 variable "zone" {
   description = "GCP Zone for the compute instance"
   type        = string
@@ -45,12 +40,6 @@ variable "scope" {
 variable "parent_id" {
   description = "Parent ID (project ID or organization ID)"
   type        = string
-}
-
-variable "service_account_name" {
-  description = "Optional service account name to use. If not provided, a new one will be created"
-  type        = string
-  default     = ""
 }
 
 variable "machine_type" {

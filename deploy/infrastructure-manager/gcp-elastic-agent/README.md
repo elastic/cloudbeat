@@ -75,14 +75,12 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `project_id` | Yes | - | GCP Project ID |
-| `deployment_name` | Yes | - | Deployment name |
 | `fleet_url` | Yes | - | Fleet Server URL |
 | `enrollment_token` | Yes | - | Enrollment token (sensitive) |
 | `elastic_agent_version` | Yes | - | Agent version (e.g., `8.15.0`) |
 | `zone` | No | `us-central1-a` | GCP zone |
 | `scope` | No | `projects` | `projects` or `organizations` |
 | `parent_id` | Yes | - | Project ID or Organization ID |
-| `service_account_name` | No | `""` | Existing SA (creates new if empty) |
 
 ### Resources Created
 
