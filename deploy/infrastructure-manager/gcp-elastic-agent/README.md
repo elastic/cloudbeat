@@ -83,6 +83,8 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 | `zone` | No | `us-central1-a` | GCP zone |
 | `scope` | No | `projects` | `projects` or `organizations` |
 | `parent_id` | Yes | - | Project ID or Organization ID |
+| `startup_validation_enabled` | No | `true` | Enable validation of startup script completion |
+| `startup_timeout_seconds` | No | `600` | Maximum time to wait for startup (seconds) |
 
 ### Resources Created
 
@@ -90,6 +92,39 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 - Service account with `cloudasset.viewer` and `browser` roles
 - VPC network with auto-created subnets
 - IAM bindings (project or organization level)
+
+### Startup Validation
+
+By default, Terraform waits for the startup script to complete and validates success:
+- **Enabled**: Deployment fails if agent installation fails
+- **Timeout**: 10 minutes (configurable via `startup_timeout_seconds`)
+- **Requires**: `gcloud` CLI installed where Terraform runs
+
+**Disable validation** (for testing or debugging):
+```bash
+# Via environment variable (for deploy.sh)
+export STARTUP_VALIDATION_ENABLED=false
+./deploy.sh
+
+# Or pass to gcloud directly
+gcloud infra-manager deployments apply ${DEPLOYMENT_NAME} \
+  --location=${LOCATION} \
+  --input-values="...,startup_validation_enabled=false"
+```
+
+**Guest Attributes Written**:
+
+The startup script writes these attributes for monitoring:
+- `elastic-agent/startup-status`: `"in-progress"`, `"success"`, or `"failed"`
+- `elastic-agent/startup-error`: Error message (only when failed)
+- `elastic-agent/startup-timestamp`: Completion timestamp (UTC)
+
+Query manually:
+```bash
+gcloud compute instances get-guest-attributes ${INSTANCE_NAME} \
+  --zone ${ZONE} \
+  --query-path=elastic-agent/
+```
 
 ### Management
 
@@ -105,10 +140,46 @@ gcloud infra-manager deployments delete ${DEPLOYMENT_NAME} --location=${LOCATION
 
 ### Troubleshooting
 
-**Check agent logs:**
+**Check deployment status:**
 ```bash
-gcloud compute ssh ${DEPLOYMENT_NAME} --zone ${ZONE}
+# The instance name is based on the deployment name with a random suffix
+# Format: elastic-agent-vm-<random-suffix>
+# Example: elastic-agent-vm-0bc08b82
+
+# Check startup script status via guest attributes
+gcloud compute instances get-guest-attributes elastic-agent-vm-<suffix> \
+  --zone ${ZONE} \
+  --query-path=elastic-agent/startup-status
+
+# Expected values:
+# - "in-progress": Installation is running
+# - "success": Installation completed successfully
+# - "failed": Installation failed (check logs below)
+
+# To find your instance name:
+gcloud compute instances list --filter="name~^elastic-agent-vm-"
+```
+
+**Check agent logs (without SSH):**
+```bash
+# View serial console output (includes startup script execution)
+gcloud compute instances get-serial-port-output ${INSTANCE_NAME} --zone ${ZONE}
+
+# Filter for elastic-agent specific logs
+gcloud compute instances get-serial-port-output ${INSTANCE_NAME} --zone ${ZONE} \
+  | grep elastic-agent-setup
+```
+
+**Check agent logs (with SSH):**
+```bash
+gcloud compute ssh ${INSTANCE_NAME} --zone ${ZONE}
 sudo journalctl -u google-startup-scripts.service
 ```
+
+**Common Issues:**
+
+1. **404 error downloading agent**: Check `ELASTIC_ARTIFACT_SERVER` and `STACK_VERSION` are correct
+2. **Guest attributes show "failed"**: Check serial console logs for error details
+3. **Guest attributes not available**: Guest attributes are enabled by default and populate during startup
 
 **Console:** [Infrastructure Manager Deployments](https://console.cloud.google.com/infrastructure-manager/deployments)

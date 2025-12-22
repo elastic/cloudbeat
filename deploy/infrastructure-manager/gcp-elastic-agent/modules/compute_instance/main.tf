@@ -61,19 +61,25 @@ resource "google_compute_instance" "elastic_agent" {
       logger -t elastic-agent-setup "$1"
     }
 
-    # Function to set guest attribute for deployment status
-    set_status() {
-      local status=$1
-      curl -X PUT --data "$status" \
+    # Function to set guest attribute
+    set_guest_attribute() {
+      local key=$1
+      local value=$2
+      curl -X PUT --data "$value" \
         -H "Metadata-Flavor: Google" \
-        "http://metadata.google.internal/computeMetadata/v1/instance/guest-attributes/elastic-agent/startup-status" \
-        || log "WARNING: Failed to set guest attribute status"
+        "http://metadata.google.internal/computeMetadata/v1/instance/guest-attributes/elastic-agent/$key" \
+        || log "WARNING: Failed to set guest attribute $key"
     }
 
     # Function to cleanup on error
     cleanup_on_error() {
-      log "ERROR: Elastic Agent installation failed at line $1"
-      set_status "failed"
+      local error_line=$1
+      local error_msg="Elastic Agent installation failed at line $error_line"
+
+      log "ERROR: $error_msg"
+      set_guest_attribute "startup-status" "failed"
+      set_guest_attribute "startup-error" "$error_msg"
+      set_guest_attribute "startup-timestamp" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       exit 1
     }
 
@@ -81,7 +87,7 @@ resource "google_compute_instance" "elastic_agent" {
     trap 'cleanup_on_error $LINENO' ERR
 
     log "Starting Elastic Agent installation"
-    set_status "in-progress"
+    set_guest_attribute "startup-status" "in-progress"
 
     # Download Elastic Agent
     ElasticAgentArtifact=elastic-agent-${var.elastic_agent_version}-linux-x86_64
@@ -117,7 +123,8 @@ resource "google_compute_instance" "elastic_agent" {
     log "Verifying Elastic Agent installation"
     if systemctl is-active --quiet elastic-agent; then
       log "SUCCESS: Elastic Agent is running"
-      set_status "success"
+      set_guest_attribute "startup-status" "success"
+      set_guest_attribute "startup-timestamp" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     else
       log "ERROR: Elastic Agent service is not running"
       systemctl status elastic-agent || true

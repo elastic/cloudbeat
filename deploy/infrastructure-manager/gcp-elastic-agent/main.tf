@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -51,5 +55,19 @@ module "compute_instance" {
 
   depends_on = [
     module.service_account
+  ]
+}
+
+module "startup_validation" {
+  source = "./modules/startup_validation"
+
+  enabled       = var.startup_validation_enabled
+  instance_name = local.instance_name
+  instance_id   = module.compute_instance.id
+  zone          = var.zone
+  timeout       = var.startup_timeout_seconds
+
+  depends_on = [
+    module.compute_instance
   ]
 }

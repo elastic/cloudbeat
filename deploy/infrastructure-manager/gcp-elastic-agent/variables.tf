@@ -47,3 +47,15 @@ variable "machine_type" {
   type        = string
   default     = "n2-standard-4"
 }
+
+variable "startup_validation_enabled" {
+  description = "Enable validation of startup script completion via guest attributes"
+  type        = bool
+  default     = true
+}
+
+variable "startup_timeout_seconds" {
+  description = "Maximum time to wait for startup script to complete (seconds)"
+  type        = number
+  default     = 600
+}

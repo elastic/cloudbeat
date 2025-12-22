@@ -22,3 +22,8 @@ output "service_account_email" {
   description = "Email of the service account used by the instance"
   value       = local.sa_email
 }
+
+output "startup_validation_enabled" {
+  description = "Whether startup script validation was enabled"
+  value       = var.startup_validation_enabled
+}
