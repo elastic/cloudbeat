@@ -48,7 +48,9 @@ resource "google_compute_instance" "elastic_agent" {
     ]
   }
 
-  metadata_startup_script = <<-EOT
+  metadata = {
+    enable-guest-attributes = "TRUE"
+    startup-script          = <<-EOT
     #!/bin/bash
     set -euo pipefail  # Exit on error, undefined variables, and pipe failures
     set -x             # Enable debug output
@@ -126,5 +128,6 @@ resource "google_compute_instance" "elastic_agent" {
     cd ..
     rm -rf "$ElasticAgentArtifact.tar.gz" "$ElasticAgentArtifact"
     log "Cleanup completed"
-  EOT
+    EOT
+  }
 }
