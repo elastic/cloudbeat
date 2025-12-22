@@ -1,6 +1,13 @@
+# VPC Network
+resource "google_compute_network" "elastic_agent" {
+  name                    = var.network_name
+  auto_create_subnetworks = true
+  routing_mode            = "REGIONAL"
+}
+
 # Compute Instance
 resource "google_compute_instance" "elastic_agent" {
-  name         = var.deployment_name
+  name         = var.instance_name
   machine_type = var.machine_type
   zone         = var.zone
 
@@ -18,7 +25,7 @@ resource "google_compute_instance" "elastic_agent" {
   }
 
   network_interface {
-    network = var.network_self_link
+    network = google_compute_network.elastic_agent.self_link
 
     access_config {
       # Ephemeral public IP

@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -14,12 +18,20 @@ provider "google" {
 
 locals {
   create_service_account = var.service_account_name == ""
-  sa_name                = local.create_service_account ? "${var.deployment_name}-sa" : var.service_account_name
+  # Use random suffix to ensure all resource names stay within GCP limits
+  resource_suffix        = random_id.resource_suffix.hex
+  sa_name                = local.create_service_account ? "elastic-agent-sa-${local.resource_suffix}" : var.service_account_name
   sa_email               = local.create_service_account ? module.service_account[0].email : "${var.service_account_name}@${var.project_id}.iam.gserviceaccount.com"
-  network_name           = "${var.deployment_name}-network"
+  network_name           = "elastic-agent-net-${local.resource_suffix}"
+  instance_name          = "elastic-agent-vm-${local.resource_suffix}"
 
   # Determine install command based on version
   install_command = startswith(var.elastic_agent_version, "9.") ? "sudo ./elastic-agent install --non-interactive --install-servers" : "sudo ./elastic-agent install --non-interactive"
+}
+
+# Generate random suffix for all resource names
+resource "random_id" "resource_suffix" {
+  byte_length = 4
 }
 
 module "service_account" {
@@ -33,20 +45,13 @@ module "service_account" {
   parent_id            = var.parent_id
 }
 
-# VPC Network
-resource "google_compute_network" "elastic_agent" {
-  name                    = local.network_name
-  auto_create_subnetworks = true
-  routing_mode            = "REGIONAL"
-}
-
 module "compute_instance" {
   source = "./modules/compute_instance"
 
-  deployment_name         = var.deployment_name
+  instance_name           = local.instance_name
+  network_name            = local.network_name
   machine_type            = var.machine_type
   zone                    = var.zone
-  network_self_link       = google_compute_network.elastic_agent.self_link
   sa_email                = local.sa_email
   elastic_agent_version   = var.elastic_agent_version
   elastic_artifact_server = var.elastic_artifact_server

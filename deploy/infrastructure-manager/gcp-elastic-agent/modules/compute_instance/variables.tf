@@ -1,5 +1,10 @@
-variable "deployment_name" {
-  description = "Name of the deployment"
+variable "instance_name" {
+  description = "Name of the compute instance"
+  type        = string
+}
+
+variable "network_name" {
+  description = "Name of the VPC network"
   type        = string
 }
 
@@ -10,11 +15,6 @@ variable "machine_type" {
 
 variable "zone" {
   description = "GCP Zone for the compute instance"
-  type        = string
-}
-
-variable "network_self_link" {
-  description = "Self link of the VPC network"
   type        = string
 }
 
