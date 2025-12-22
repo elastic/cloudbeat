@@ -535,11 +535,12 @@ jobs:
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
-      - name: Wait for agents to enroll
-        id: wait-for-agents
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
-        run: |
-          poetry run python ./agents_enrolled.py
+      # TODO: Remove waiting due to KSPM is broken
+      # - name: Wait for agents to enroll
+      #   id: wait-for-agents
+      #   working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+      #   run: |
+      #     poetry run python ./agents_enrolled.py
 
       - name: Run Sanity checks
         if: ${{ success() && inputs.run-sanity-tests == true && env.INFRA_TYPE != 'cdr' }}

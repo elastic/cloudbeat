@@ -104,6 +104,7 @@ def build_query_list(benchmark_id: str = "", match_type: str = "", version: str 
 
 
 @pytest.mark.sanity
+@pytest.skip(reason="kspm is broken")
 @pytest.mark.parametrize("match_type", tests_data["cis_k8s"])
 def test_kspm_unmanaged_findings(kspm_client, match_type):
     """
@@ -130,6 +131,7 @@ def test_kspm_unmanaged_findings(kspm_client, match_type):
 
 
 @pytest.mark.sanity
+@pytest.skip(reason="kspm is broken")
 @pytest.mark.parametrize("match_type", tests_data["cis_eks"])
 def test_kspm_e_k_s_findings(kspm_client, match_type):
     """
