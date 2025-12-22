@@ -20,9 +20,6 @@ resource "google_compute_instance" "elastic_agent" {
     name = "elastic-agent"
   }
 
-  # Enable guest attributes to allow startup script to report status
-  enable_guest_attributes = true
-
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-minimal-2204-lts"
