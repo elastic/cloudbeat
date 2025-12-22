@@ -49,8 +49,7 @@ resource "google_compute_instance" "elastic_agent" {
     enable-guest-attributes = "TRUE"
     startup-script          = <<-EOT
     #!/bin/bash
-    set -euo pipefail  # Exit on error, undefined variables, and pipe failures
-    set -x             # Enable debug output
+    set -x  # Enable debug output
 
     # Logging function - logs to both stdout and Cloud Logging
     log() {
@@ -68,20 +67,15 @@ resource "google_compute_instance" "elastic_agent" {
         || log "WARNING: Failed to set guest attribute $key"
     }
 
-    # Function to cleanup on error
-    cleanup_on_error() {
-      local error_line=$1
-      local error_msg="Elastic Agent installation failed at line $error_line"
-
+    # Function to report failure
+    report_failure() {
+      local error_msg="$1"
       log "ERROR: $error_msg"
       set_guest_attribute "startup-status" "failed"
       set_guest_attribute "startup-error" "$error_msg"
       set_guest_attribute "startup-timestamp" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       exit 1
     }
-
-    # Trap errors and run cleanup
-    trap 'cleanup_on_error $LINENO' ERR
 
     log "Starting Elastic Agent installation"
     set_guest_attribute "startup-status" "in-progress"
@@ -91,30 +85,34 @@ resource "google_compute_instance" "elastic_agent" {
     ARTIFACT_URL="${var.elastic_artifact_server}/$ElasticAgentArtifact.tar.gz"
 
     log "Downloading Elastic Agent from $ARTIFACT_URL"
-    curl -f -L -O --connect-timeout 30 --max-time 300 "$ARTIFACT_URL"
+    if ! curl -f -L -O --connect-timeout 30 --max-time 300 "$ARTIFACT_URL"; then
+      report_failure "Failed to download Elastic Agent from $ARTIFACT_URL"
+    fi
     log "Download successful"
 
     # Verify download
     if [ ! -f "$ElasticAgentArtifact.tar.gz" ]; then
-      log "ERROR: Downloaded file not found"
-      exit 1
+      report_failure "Downloaded file not found: $ElasticAgentArtifact.tar.gz"
     fi
 
     # Extract archive
     log "Extracting $ElasticAgentArtifact.tar.gz"
-    tar xzvf "$ElasticAgentArtifact.tar.gz"
+    if ! tar xzvf "$ElasticAgentArtifact.tar.gz"; then
+      report_failure "Failed to extract $ElasticAgentArtifact.tar.gz"
+    fi
 
     # Verify extraction
     if [ ! -d "$ElasticAgentArtifact" ]; then
-      log "ERROR: Extracted directory not found"
-      exit 1
+      report_failure "Extracted directory not found: $ElasticAgentArtifact"
     fi
 
     cd "$ElasticAgentArtifact"
 
     # Install Elastic Agent
     log "Installing Elastic Agent with command: ${local.install_command}"
-    ${local.install_command} --url=${var.fleet_url} --enrollment-token=${var.enrollment_token}
+    if ! ${local.install_command} --url=${var.fleet_url} --enrollment-token=${var.enrollment_token}; then
+      report_failure "Elastic Agent installation command failed"
+    fi
 
     # Verify installation
     log "Verifying Elastic Agent installation"
@@ -123,9 +121,7 @@ resource "google_compute_instance" "elastic_agent" {
       set_guest_attribute "startup-status" "success"
       set_guest_attribute "startup-timestamp" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     else
-      log "ERROR: Elastic Agent service is not running"
-      systemctl status elastic-agent || true
-      exit 1
+      report_failure "Elastic Agent service is not running after installation"
     fi
 
     # Cleanup downloaded files
