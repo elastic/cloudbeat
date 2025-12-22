@@ -51,7 +51,7 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 
 # Optional: Set these to override defaults
 # export ORG_ID="<YOUR_ORG_ID>"  # For org-level monitoring
-# export DEPLOYMENT_NAME="elastic-agent-cspm"  # Default: elastic-agent-cspm
+# export DEPLOYMENT_NAME="elastic-agent-gcp"  # Default: elastic-agent-gcp
 # export ZONE="us-central1-a"  # Default: us-central1-a
 
 # Deploy using the deploy script

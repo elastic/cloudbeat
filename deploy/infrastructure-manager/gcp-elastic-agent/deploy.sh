@@ -3,7 +3,7 @@
 # Set deployment configuration (accepts values from environment or uses defaults)
 export ORG_ID="${ORG_ID:-}"  # Optional: Set to your organization ID for org-level monitoring
 export ZONE="${ZONE:-us-central1-a}"  # Optional: Set to your desired GCP zone (default: us-central1-a)
-export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-elastic-agent-cspm}" # Optional: Set to your desired deployment name (default: elastic-agent-cspm)
+export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-elastic-agent-gcp}" # Optional: Set to your desired deployment name (default: elastic-agent-gcp)
 export FLEET_URL="${FLEET_URL:-}"
 export ENROLLMENT_TOKEN="${ENROLLMENT_TOKEN:-}"
 export STACK_VERSION="${STACK_VERSION:-}"
