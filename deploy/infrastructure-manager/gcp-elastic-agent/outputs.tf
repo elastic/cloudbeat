@@ -15,7 +15,7 @@ output "instance_zone" {
 
 output "network_name" {
   description = "Name of the VPC network"
-  value       = google_compute_network.elastic_agent.name
+  value       = module.compute_instance.network_name
 }
 
 output "service_account_email" {

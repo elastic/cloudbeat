@@ -33,11 +33,6 @@ variable "elastic_artifact_server" {
   type        = string
 }
 
-variable "install_command" {
-  description = "Elastic agent install command"
-  type        = string
-}
-
 variable "fleet_url" {
   description = "Elastic Agent Fleet URL"
   type        = string
