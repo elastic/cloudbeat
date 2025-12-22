@@ -53,6 +53,7 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 # export ORG_ID="<YOUR_ORG_ID>"  # For org-level monitoring
 # export DEPLOYMENT_NAME="elastic-agent-gcp"  # Default: elastic-agent-gcp
 # export ZONE="us-central1-a"  # Default: us-central1-a
+# export ELASTIC_ARTIFACT_SERVER="<CUSTOM_SERVER_URL>"  # Default: https://artifacts.elastic.co/downloads/beats/elastic-agent
 
 # Deploy using the deploy script
 ./deploy.sh
@@ -78,6 +79,7 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 | `fleet_url` | Yes | - | Fleet Server URL |
 | `enrollment_token` | Yes | - | Enrollment token (sensitive) |
 | `elastic_agent_version` | Yes | - | Agent version (e.g., `8.15.0`) |
+| `elastic_artifact_server` | No | `https://artifacts.elastic.co/downloads/beats/elastic-agent` | Artifact server URL for downloading Elastic Agent |
 | `zone` | No | `us-central1-a` | GCP zone |
 | `scope` | No | `projects` | `projects` or `organizations` |
 | `parent_id` | Yes | - | Project ID or Organization ID |
