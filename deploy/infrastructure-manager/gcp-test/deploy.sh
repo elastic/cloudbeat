@@ -3,7 +3,7 @@
 # Set deployment configuration (accepts values from environment or uses defaults)
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-infra-manager-amir-test}"
 export REGION="${REGION:-us-central1}"
-export GIT_REPO="${GIT_REPO:-https://github.com/elastic/cloudbeat.git}"
+export GIT_REPO="${GIT_REPO:-https://github.com/amirbenun/cloudbeat.git}"
 export GIT_REF="${GIT_REF:-infra-manager-agent}"
 export GIT_SOURCE_DIR="${GIT_SOURCE_DIR:-deploy/infrastructure-manager/gcp-test}"
 
