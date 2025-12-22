@@ -40,20 +40,6 @@ resource "google_compute_network" "elastic_agent" {
   routing_mode            = "REGIONAL"
 }
 
-# Firewall rule for SSH (optional)
-resource "google_compute_firewall" "ssh" {
-  count   = var.allow_ssh ? 1 : 0
-  name    = "elastic-agent-firewall-rule"
-  network = google_compute_network.elastic_agent.self_link
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22"]
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-}
-
 module "compute_instance" {
   source = "./modules/compute_instance"
 

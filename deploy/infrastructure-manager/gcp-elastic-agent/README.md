@@ -5,7 +5,7 @@ Deploy Elastic Agent for CIS GCP integration using GCP Infrastructure Manager. C
 ### Prerequisites
 
 1. Elastic Stack with Fleet Server deployed
-2. GCP project with required permissions (Editor, IAM Admin)
+2. GCP project with required permissions (see [Required Permissions](#required-permissions))
 3. Fleet URL and enrollment token from Kibana
 
 ### Quick Deploy
@@ -24,53 +24,39 @@ gcloud services enable iam.googleapis.com config.googleapis.com compute.googleap
 gcloud iam service-accounts create infra-manager-deployer \
     --display-name="Infra Manager Deployment Account"
 
-# Grant permission to manage resources
+# Grant permissions to manage resources and Infrastructure Manager state
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
-    --role="roles/editor"
+    --role="roles/compute.admin"
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member="serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/iam.serviceAccountAdmin"
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member="serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/resourcemanager.projectIamAdmin"
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+    --member="serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/config.admin"
 ```
 
 Deploy
 ```bash
-# Set deployment configuration
-export ORG_ID=""  # Optional: Set to your organization ID for org-level monitoring
-export PROJECT_ID="<YOUR_GCP_PROJECT_ID>"
-export DEPLOYMENT_NAME="elastic-agent-cspm"
+# Set required configuration
 export FLEET_URL="<YOUR_FLEET_URL>"
 export ENROLLMENT_TOKEN="<YOUR_TOKEN>"
-export ELASTIC_AGENT_VERSION="<YOUR_AGENT_VERSION>"
-export ZONE="us-central1-a"  # Change if needed
+export STACK_VERSION="<YOUR_AGENT_VERSION>"
 
-# Automatically set scope and parent_id based on ORG_ID
-if [ -n "${ORG_ID}" ]; then
-  export SCOPE="organizations"
-  export PARENT_ID="${ORG_ID}"
-else
-  export SCOPE="projects"
-  export PARENT_ID="${PROJECT_ID}"
-fi
+# Optional: Set these to override defaults
+# export ORG_ID="<YOUR_ORG_ID>"  # For org-level monitoring
+# export DEPLOYMENT_NAME="elastic-agent-cspm"  # Default: elastic-agent-cspm
+# export ZONE="us-central1-a"  # Default: us-central1-a
 
-# Configure GCP project and location
-gcloud config set project ${PROJECT_ID}
-export LOCATION=$(echo ${ZONE} | sed 's/-[a-z]$//')  # Extract region from zone
-
-# Deploy from local source (repo already cloned by Cloud Shell)
-gcloud infra-manager deployments apply ${DEPLOYMENT_NAME} \
-    --location=${LOCATION} \
-    --service-account="projects/${PROJECT_ID}/serviceAccounts/infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
-    --local-source="." \
-    --input-values="\
-project_id=${PROJECT_ID},\
-deployment_name=${DEPLOYMENT_NAME},\
-zone=${ZONE},\
-fleet_url=${FLEET_URL},\
-enrollment_token=${ENROLLMENT_TOKEN},\
-elastic_agent_version=${ELASTIC_AGENT_VERSION},\
-scope=${SCOPE},\
-parent_id=${PARENT_ID}"
+# Deploy using the deploy script
+./deploy.sh
 ```
-
-**For organization-level monitoring:** Set `export ORG_ID="<YOUR_ORG_ID>"` before running the deploy command.
 
 #### Option 2: GCP Console
 
@@ -97,7 +83,6 @@ parent_id=${PARENT_ID}"
 | `scope` | No | `projects` | `projects` or `organizations` |
 | `parent_id` | Yes | - | Project ID or Organization ID |
 | `service_account_name` | No | `""` | Existing SA (creates new if empty) |
-| `allow_ssh` | No | `false` | Enable SSH firewall rule |
 
 ### Resources Created
 
@@ -105,7 +90,6 @@ parent_id=${PARENT_ID}"
 - Service account with `cloudasset.viewer` and `browser` roles
 - VPC network with auto-created subnets
 - IAM bindings (project or organization level)
-- Optional: SSH firewall rule
 
 ### Management
 

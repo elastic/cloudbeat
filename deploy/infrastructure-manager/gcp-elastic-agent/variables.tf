@@ -53,12 +53,6 @@ variable "service_account_name" {
   default     = ""
 }
 
-variable "allow_ssh" {
-  description = "Allow SSH connections to the instance"
-  type        = bool
-  default     = false
-}
-
 variable "machine_type" {
   description = "Machine type for the compute instance"
   type        = string
