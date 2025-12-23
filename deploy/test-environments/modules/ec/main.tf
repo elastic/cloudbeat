@@ -40,7 +40,7 @@ resource "ec_deployment" "deployment" {
 
     hot = {
       autoscaling = {
-        max_size          = "128g"
+        max_size          = var.max_size
         max_size_resource = "memory"
       }
       size       = var.elasticsearch_size

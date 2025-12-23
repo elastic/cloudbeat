@@ -27,6 +27,8 @@ def check_env_var(env_var: str) -> str:
     if not value:
         if env_var == "DOCKER_IMAGE_OVERRIDE":
             return "N/A"  # If docker image is not set, slack notification will display N/A
+        if env_var == "ESS_REGION":
+            return "production-cft"  # Default to production-cft if not set
         raise ValueError(f"The env var '{env_var}' isn't defined.")
     if env_var == "ESS_TYPE":
         return "Project" if value == "true" else "Deployment"
@@ -44,6 +46,7 @@ env_vars = {
     "stack_version": check_env_var("STACK_VERSION"),
     "docker_image": check_env_var("DOCKER_IMAGE_OVERRIDE"),
     "ess_type": check_env_var("ESS_TYPE"),
+    "ess_region": check_env_var("ESS_REGION"),
 }
 
 
@@ -78,9 +81,10 @@ def generate_slack_payload() -> dict:
     """
     color = color_by_job_status.get(env_vars.get("job_status"), "#439FE0")
     ess_type_msg = f"*ESS Type:* `{env_vars.get('ess_type')}`"
+    ess_region_msg = f"*ESS Region:* `{env_vars.get('ess_region')}`"
     stack_version_msg = f"*Stack Version: *`{env_vars.get('stack_version')}`"
     docker_image_msg = f"*Docker Override:* `{env_vars.get('docker_image')}`"
-    message = f"{ess_type_msg}\n{stack_version_msg}\n{docker_image_msg}"
+    message = f"{ess_type_msg}\n{ess_region_msg}\n{stack_version_msg}\n{docker_image_msg}"
     workflow = env_vars.get("workflow")
     deployment = env_vars.get("deployment_name")
     actor = env_vars.get("github_actor")

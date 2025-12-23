@@ -1,13 +1,17 @@
-name: 'ELK Cloud Stack Installation'
-description: 'Install ELK Cloud Stack ESS or Serverless'
+name: "ELK Cloud Stack Installation"
+description: "Install ELK Cloud Stack ESS or Serverless"
 inputs:
   ec-api-key:
     description: "API key for authenticating with Elastic Cloud."
     type: string
     required: true
   ess-region:
-    description: "Elastic Cloud deployment region"
+    description: "Elastic Cloud deployment region. Used for both ECH deployments and Serverless projects"
     default: "gcp-us-west2"
+    type: string
+    required: false
+  ec-url:
+    description: "Elastic Cloud URL"
     type: string
     required: false
   deployment-name:
@@ -73,8 +77,11 @@ runs:
         TF_VAR_serverless_mode: ${{ inputs.serverless-mode }}
         TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
         TF_VAR_ess_region: ${{ inputs.ess-region }}
+        TF_VAR_ec_url: ${{ inputs.ec-url }}
         TF_VAR_pin_version: ${{ inputs.docker-image-version-override }}
         TF_VAR_ec_api_key: ${{ inputs.ec-api-key }}
+        TF_VAR_deployment_template: ${{ env.TF_VAR_deployment_template }}
+        TF_VAR_max_size: ${{ env.TF_VAR_max_size }}
         TF_VAR_project: ${{ inputs.tag-project }}
         TF_VAR_owner: ${{ inputs.tag-owner }}
       shell: bash
