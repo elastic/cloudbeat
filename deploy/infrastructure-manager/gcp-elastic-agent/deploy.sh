@@ -28,6 +28,7 @@ else
 fi
 
 # Deploy from local source (repo already cloned by Cloud Shell)
+echo "Starting deployment ${DEPLOYMENT_NAME}..."
 gcloud infra-manager deployments apply ${DEPLOYMENT_NAME} \
     --location=${LOCATION} \
     --service-account="projects/${PROJECT_ID}/serviceAccounts/infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
@@ -42,3 +43,31 @@ elastic_artifact_server=${ELASTIC_ARTIFACT_SERVER},\
 scope=${SCOPE},\
 parent_id=${PARENT_ID},\
 resource_suffix=${RESOURCE_SUFFIX}"
+
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "Deployment failed with exit code $EXIT_CODE"
+    echo ""
+    echo "Common failure reasons:"
+    echo "  - Wrong artifacts server for pre-release artifact (check ELASTIC_ARTIFACT_SERVER for snapshots/pre-releases)"
+    echo "  - Service account permissions missing (check infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com)"
+    echo "  - Invalid input values (fleet_url, enrollment_token, etc.)"
+    echo "  - Terraform validation errors in the configuration"
+    echo "  - Resource quota limits exceeded"
+    echo ""
+    echo "Useful debugging commands:"
+    echo "  # View deployment status"
+    echo "  gcloud infra-manager deployments describe ${DEPLOYMENT_NAME} --location=${LOCATION}"
+    echo ""
+    echo "  # View Cloud Build logs"
+    echo "  gsutil cat \$(gcloud infra-manager revisions describe \$(gcloud infra-manager deployments describe ${DEPLOYMENT_NAME} --location=${LOCATION} --format='value(latestRevision)') --location=${LOCATION} --format='value(logs)')/*.txt"
+    echo ""
+    echo "  # View VM startup script logs"
+    echo "  gcloud compute instances get-serial-port-output elastic-agent-vm-${RESOURCE_SUFFIX} --zone=${ZONE} --project=${PROJECT_ID}"
+    echo ""
+    exit $EXIT_CODE
+fi
+
+echo ""
+echo "Deployment successful!"
