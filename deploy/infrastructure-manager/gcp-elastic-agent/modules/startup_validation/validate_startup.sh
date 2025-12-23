@@ -2,12 +2,14 @@
 set -e
 set +x
 
+# Token from environment variable (sensitive)
+TOKEN="$GCP_ACCESS_TOKEN"
+
 # Arguments passed from Terraform
-TOKEN="$1"
-PROJECT_ID="$2"
-ZONE="$3"
-INSTANCE_NAME="$4"
-TIMEOUT="$5"
+PROJECT_ID="$1"
+ZONE="$2"
+INSTANCE_NAME="$3"
+TIMEOUT="$4"
 
 MAX_ATTEMPTS=$((TIMEOUT / 10))
 ATTEMPT=0
