@@ -7,6 +7,7 @@ resource "terraform_data" "validate_startup" {
     command     = <<-EOT
       #!/bin/bash
       set -e
+      set +x
 
       TOKEN="${data.google_client_config.default.access_token}"
       MAX_ATTEMPTS=$((${var.timeout} / 10))
@@ -18,7 +19,7 @@ resource "terraform_data" "validate_startup" {
         local response=$(curl -s -H "Authorization: Bearer $TOKEN" \
           "https://compute.googleapis.com/compute/v1/projects/${var.project_id}/zones/${var.zone}/instances/${var.instance_name}/getGuestAttributes?queryPath=elastic-agent/$key" \
           2>/dev/null || echo '{}')
-        echo "$response" | sed -n "s/.*\"key\": \"$key\",[[:space:]]*\"value\": \"\([^\"]*\)\".*/\1/p"
+        echo "$response" | sed -n 's/.*"value":[[:space:]]*"\([^"]*\)".*/\1/p' | head -1
       }
 
       echo "Waiting for Elastic Agent startup script to complete..."
