@@ -1,3 +1,5 @@
+data "google_client_config" "default" {}
+
 resource "terraform_data" "validate_startup" {
   count = var.enabled ? 1 : 0
 
