@@ -12,7 +12,7 @@ jobs:
     uses: ./.github/workflows/test-e2e-flow.yml
     with:
       branch: main
-      region: gcp-us-west2
+      region: production-cft
       serverless: false
       run-ui-sanity-tests: true
     secrets: inherit
@@ -27,7 +27,7 @@ jobs:
     if: always()
     with:
       branch: main
-      region: aws-us-east-1
+      region: production-cft
       serverless: true
       run-ui-sanity-tests: true
     secrets: inherit
