@@ -11,11 +11,14 @@ export ELASTIC_ARTIFACT_SERVER="${ELASTIC_ARTIFACT_SERVER%/}" # Remove trailing 
 export ELASTIC_ARTIFACT_SERVER="${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}"
 
 # Configure GCP project and location
-export PROJECT_ID=$(gcloud config get-value core/project)
-export LOCATION=$(echo ${ZONE} | sed 's/-[a-z]$//')  # Extract region from zone
+PROJECT_ID=$(gcloud config get-value core/project)
+export PROJECT_ID
+LOCATION="${ZONE%-?}"  # Extract region from zone
+export LOCATION
 
 # Generate unique suffix for resource names (8 hex characters)
-export RESOURCE_SUFFIX=$(openssl rand -hex 4)
+RESOURCE_SUFFIX=$(openssl rand -hex 4)
+export RESOURCE_SUFFIX
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}-${RESOURCE_SUFFIX}"
 
 # Set scope and parent_id based on ORG_ID
@@ -29,8 +32,8 @@ fi
 
 # Deploy from local source (repo already cloned by Cloud Shell)
 echo "Starting deployment ${DEPLOYMENT_NAME}..."
-gcloud infra-manager deployments apply ${DEPLOYMENT_NAME} \
-    --location=${LOCATION} \
+gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
+    --location="${LOCATION}" \
     --service-account="projects/${PROJECT_ID}/serviceAccounts/infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
     --local-source="." \
     --input-values="\

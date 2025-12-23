@@ -17,7 +17,8 @@ ATTEMPT=0
 # Function to get guest attribute value
 get_guest_attribute() {
   local key=$1
-  local response=$(curl -s -H "Authorization: Bearer $TOKEN" \
+  local response
+  response=$(curl -s -H "Authorization: Bearer $TOKEN" \
     "https://compute.googleapis.com/compute/v1/projects/${PROJECT_ID}/zones/${ZONE}/instances/${INSTANCE_NAME}/getGuestAttributes?queryPath=elastic-agent/$key" \
     2>/dev/null || echo '{}')
   echo "$response" | sed -n 's/.*"value":[[:space:]]*"\([^"]*\)".*/\1/p' | head -1
