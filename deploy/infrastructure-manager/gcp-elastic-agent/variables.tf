@@ -57,5 +57,5 @@ variable "startup_validation_enabled" {
 variable "startup_timeout_seconds" {
   description = "Maximum time to wait for startup script to complete (seconds)"
   type        = number
-  default     = 600
+  default     = 300
 }
