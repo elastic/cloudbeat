@@ -59,7 +59,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "  gcloud infra-manager deployments describe ${DEPLOYMENT_NAME} --location=${LOCATION}"
     echo ""
     echo "  # Verify service account permissions"
-    echo "  gcloud projects get-iam-policy ${PROJECT_ID} --flatten=\"bindings[].members\" --filter=\"bindings.members:serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com\" --format=\"table(bindings.role)\""
+    echo "  gcloud projects get-iam-policy ${PROJECT_ID} --flatten='bindings[].members' --filter='bindings.members:serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com' --format='table(bindings.role)'"
     echo ""
     echo "  # View Cloud Build logs"
     echo "  gsutil cat \$(gcloud infra-manager revisions describe \$(gcloud infra-manager deployments describe ${DEPLOYMENT_NAME} --location=${LOCATION} --format='value(latestRevision)') --location=${LOCATION} --format='value(logs)')/*.txt"
