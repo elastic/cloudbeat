@@ -223,13 +223,15 @@ type Host struct {
 	Type         string   `json:"type,omitempty"`
 	IP           string   `json:"ip,omitempty"`
 	MacAddress   []string `json:"mac,omitempty"`
+	Entity       *Entity  `json:"entity,omitempty"`
 }
 
 type User struct {
-	ID    string   `json:"id,omitempty"`
-	Name  string   `json:"name,omitempty"`
-	Email string   `json:"email,omitempty"`
-	Roles []string `json:"roles,omitempty"`
+	ID     string   `json:"id,omitempty"`
+	Name   string   `json:"name,omitempty"`
+	Email  string   `json:"email,omitempty"`
+	Roles  []string `json:"roles,omitempty"`
+	Entity *Entity  `json:"entity,omitempty"`
 }
 
 type Orchestrator struct {
@@ -332,6 +334,7 @@ func WithGroup(group Group) AssetEnricher {
 func WithHost(host Host) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Host = &host
+		a.Host.Entity = &a.Entity
 	}
 }
 
@@ -347,6 +350,7 @@ func WithTags(tags []string) AssetEnricher {
 func WithUser(user User) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.User = &user
+		a.User.Entity = &a.Entity
 	}
 }
 
