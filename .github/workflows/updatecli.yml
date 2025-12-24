@@ -51,7 +51,7 @@ jobs:
         pipeline-name: [beats, golang, hermit, mods]
         git-branch: [main]
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
@@ -88,7 +88,7 @@ jobs:
         pipeline-name: [golang, beats]
         git-branch: ${{ fromJSON(needs.active-branches.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
