@@ -84,7 +84,7 @@ jobs:
           echo "::add-mask::$ec_api_key"
           echo "USER_PROVIDED_EC_API_KEY=$ec_api_key" >> $GITHUB_ENV
 
-      - name: Set Elastic Cloud Credentials Environment Variables
+      - name: Set Elastic Cloud Credentials as environment variables
         id: set-ec-credentials
         shell: bash
         run: |
