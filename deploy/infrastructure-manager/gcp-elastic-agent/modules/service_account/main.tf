@@ -5,12 +5,6 @@ resource "google_service_account" "elastic_agent" {
   project      = var.project_id
 }
 
-# Service Account Key
-resource "google_service_account_key" "elastic_agent_key" {
-  count              = var.create_key ? 1 : 0
-  service_account_id = google_service_account.elastic_agent.name
-}
-
 # Project-level IAM bindings
 resource "google_project_iam_member" "cloudasset_viewer" {
   count   = var.scope == "projects" ? 1 : 0

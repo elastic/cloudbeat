@@ -68,7 +68,7 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 
 By default, Terraform waits for the startup script to complete and validates success:
 - **Enabled**: Deployment fails if agent installation fails
-- **Timeout**: 10 minutes (configurable via `startup_timeout_seconds`)
+- **Timeout**: 5 minutes (configurable via `startup_timeout_seconds`)
 - **Requires**: `gcloud` CLI installed where Terraform runs
 
 **Disable validation** (for testing or debugging):
