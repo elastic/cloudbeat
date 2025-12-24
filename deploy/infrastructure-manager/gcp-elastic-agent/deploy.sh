@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
 
+# Configure GCP project
+PROJECT_ID=$(gcloud config get-value core/project)
+SERVICE_ACCOUNT="infra-manager-deployer"
+
 # Ensure prerequisites are configured
-"$(dirname "$0")/setup.sh"
+"$(dirname "$0")/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
 
 # Set deployment configuration (accepts values from environment or uses defaults)
 export ORG_ID="${ORG_ID:-}"                                    # Optional: Set to your organization ID for org-level monitoring
@@ -14,8 +18,6 @@ export STACK_VERSION="${STACK_VERSION:-}"
 export ELASTIC_ARTIFACT_SERVER="${ELASTIC_ARTIFACT_SERVER%/}" # Remove trailing slash if present
 export ELASTIC_ARTIFACT_SERVER="${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}"
 
-# Configure GCP project and location
-PROJECT_ID=$(gcloud config get-value core/project)
 export PROJECT_ID
 LOCATION="${ZONE%-?}" # Extract region from zone
 export LOCATION
@@ -38,7 +40,7 @@ fi
 echo "Starting deployment ${DEPLOYMENT_NAME}..."
 gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
     --location="${LOCATION}" \
-    --service-account="projects/${PROJECT_ID}/serviceAccounts/infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --service-account="projects/${PROJECT_ID}/serviceAccounts/${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --local-source="." \
     --input-values="\
 project_id=${PROJECT_ID},\
@@ -58,7 +60,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo ""
     echo "Common failure reasons:"
     echo "  - Wrong artifacts server for pre-release artifact (check ELASTIC_ARTIFACT_SERVER for snapshots/pre-releases)"
-    echo "  - Service account permissions missing for infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com"
+    echo "  - Service account permissions missing for ${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
     echo "  - Invalid input values (fleet_url, enrollment_token, etc.)"
     echo ""
     echo "Useful debugging commands:"
@@ -66,7 +68,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "  gcloud infra-manager deployments describe ${DEPLOYMENT_NAME} --location=${LOCATION}"
     echo ""
     echo "  # Verify service account permissions"
-    echo "  gcloud projects get-iam-policy ${PROJECT_ID} --flatten='bindings[].members' --filter='bindings.members:serviceAccount:infra-manager-deployer@${PROJECT_ID}.iam.gserviceaccount.com' --format='table(bindings.role)'"
+    echo "  gcloud projects get-iam-policy ${PROJECT_ID} --flatten='bindings[].members' --filter='bindings.members:serviceAccount:${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com' --format='table(bindings.role)'"
     echo ""
     echo "  # View Cloud Build logs"
     echo "  gsutil cat \$(gcloud infra-manager revisions describe \$(gcloud infra-manager deployments describe ${DEPLOYMENT_NAME} --location=${LOCATION} --format='value(latestRevision)') --location=${LOCATION} --format='value(logs)')/*.txt"

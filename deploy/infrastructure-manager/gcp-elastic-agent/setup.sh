@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-# Configuration
-PROJECT_ID=$(gcloud config get-value core/project 2>/dev/null)
-SERVICE_ACCOUNT="infra-manager-deployer"
+# Accept parameters
+PROJECT_ID="$1"
+SERVICE_ACCOUNT="$2"
 SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 REQUIRED_APIS=(
@@ -17,8 +17,10 @@ REQUIRED_APIS=(
 REQUIRED_ROLES=(
     roles/compute.admin
     roles/iam.serviceAccountAdmin
+    roles/iam.serviceAccountUser
     roles/resourcemanager.projectIamAdmin
     roles/config.admin
+    roles/storage.admin
 )
 
 # Check if already configured
