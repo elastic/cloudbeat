@@ -1,4 +1,8 @@
 #!/bin/bash
+set -e
+
+# Ensure prerequisites are configured
+"$(dirname "$0")/setup.sh"
 
 # Set deployment configuration (accepts values from environment or uses defaults)
 export ORG_ID="${ORG_ID:-}"                                    # Optional: Set to your organization ID for org-level monitoring
