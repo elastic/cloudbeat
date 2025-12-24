@@ -66,7 +66,7 @@ runs:
       run: |
         max_retries=5
         retry_delay=10
-        ./.ci/scripts/retry.sh "$max_retries" "$retry_delay" './bin/hermit env --raw >> "$GITHUB_ENV"'
+        ./.ci/scripts/retry.sh "$max_retries" "$retry_delay" './bin/hermit env --raw' >> "$GITHUB_ENV"
 
     # in case of cache miss, an older instance of cache could be selected (with restore-keys).
     # Clean hermit packages to avoid continuously size increment of folder ~/.cache/hermit/pkg.

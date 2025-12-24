@@ -33,19 +33,20 @@ while [ $attempt -le "$max_retries" ]; do
     echo "Command: $command"
     echo "Working directory: $(pwd)"
 
-    if eval "$command"; then
+    eval "$command"
+    exit_code=$?
+    if [ $exit_code -eq 0 ]; then
         echo "Command succeeded on attempt $attempt"
         exit 0
     fi
 
-    exit_code=$?
     if [ $attempt -lt "$max_retries" ]; then
         echo "Command failed (exit code: $exit_code). Retrying in ${current_delay}s..."
         sleep "$current_delay"
         current_delay=$((current_delay * 2)) # Exponential backoff
         attempt=$((attempt + 1))
     else
-        echo "Command failed after $max_retries attempts"
+        echo "Command failed after $max_retries attempts with exit code: $exit_code"
         exit $exit_code
     fi
 done
