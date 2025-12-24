@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set deployment configuration (accepts values from environment or uses defaults)
-export ORG_ID="${ORG_ID:-}"  # Optional: Set to your organization ID for org-level monitoring
-export ZONE="${ZONE:-us-central1-a}"  # Optional: Set to your desired GCP zone (default: us-central1-a)
+export ORG_ID="${ORG_ID:-}"                                    # Optional: Set to your organization ID for org-level monitoring
+export ZONE="${ZONE:-us-central1-a}"                           # Optional: Set to your desired GCP zone (default: us-central1-a)
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-elastic-agent-gcp}" # Optional: Set to your desired deployment name (default: elastic-agent-gcp)
 export FLEET_URL="${FLEET_URL:-}"
 export ENROLLMENT_TOKEN="${ENROLLMENT_TOKEN:-}"
@@ -13,7 +13,7 @@ export ELASTIC_ARTIFACT_SERVER="${ELASTIC_ARTIFACT_SERVER:-https://artifacts.ela
 # Configure GCP project and location
 PROJECT_ID=$(gcloud config get-value core/project)
 export PROJECT_ID
-LOCATION="${ZONE%-?}"  # Extract region from zone
+LOCATION="${ZONE%-?}" # Extract region from zone
 export LOCATION
 
 # Generate unique suffix for resource names (8 hex characters)
@@ -23,11 +23,11 @@ export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}-${RESOURCE_SUFFIX}"
 
 # Set scope and parent_id based on ORG_ID
 if [ -n "${ORG_ID}" ]; then
-  export SCOPE="organizations"
-  export PARENT_ID="${ORG_ID}"
+    export SCOPE="organizations"
+    export PARENT_ID="${ORG_ID}"
 else
-  export SCOPE="projects"
-  export PARENT_ID="${PROJECT_ID}"
+    export SCOPE="projects"
+    export PARENT_ID="${PROJECT_ID}"
 fi
 
 # Deploy from local source (repo already cloned by Cloud Shell)
