@@ -17,36 +17,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   lint:
     name: Lint
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: true
-
       - name: Check out the repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Initialize hermit
-        shell: bash
-        run: |
-          ./bin/hermit env --raw >> "$GITHUB_ENV"
-
-      - name: Initialize poetry
-        shell: bash
-        run: |
-          pip3 install poetry
-          (cd security-policies && poetry install --no-root)
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: "true"
+          free-disk: "true"
 
       - name: Pre-commit Hooks
         env:
@@ -86,24 +69,14 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # main
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: true
-
       - name: Check out the repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Initialize hermit
-        shell: bash
-        run: |
-          ./bin/hermit env --raw >> "$GITHUB_ENV"
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: "true"
+          free-disk: "true"
 
       - name: Build opa bundle
         shell: bash
