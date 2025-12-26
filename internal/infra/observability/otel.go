@@ -33,7 +33,7 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.34.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.38.0"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
@@ -138,7 +138,6 @@ func newDefaultMeterProvider(ctx context.Context, res *resource.Resource) error 
 func newResource(ctx context.Context) (*resource.Resource, error) {
 	res, err := resource.New(
 		ctx,
-		resource.WithSchemaURL(semconv.SchemaURL),
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(serviceName),
 			semconv.ServiceVersion(version.CloudbeatSemanticVersion()),
