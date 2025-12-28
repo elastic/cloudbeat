@@ -265,6 +265,14 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 		expected.Event = actual.Event
 		expected.Entity = actual.Entity
 
+		// Set Entity field on Host and User if they exist (WithHost and WithUser set this)
+		if expected.Host != nil {
+			expected.Host.Entity = &expected.Entity
+		}
+		if expected.User != nil {
+			expected.User.Entity = &expected.Entity
+		}
+
 		// Cloud is the only field where we have both common and enriched fields
 		if expected.Cloud == nil {
 			// Use the actual cloud fields when there are no cloud enrichments
