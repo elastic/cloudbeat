@@ -23,19 +23,16 @@ REQUIRED_ROLES=(
     roles/storage.admin
 )
 
-# Check if already configured
-if gcloud iam service-accounts describe "${SERVICE_ACCOUNT_EMAIL}" >/dev/null 2>&1; then
-    exit 0
-fi
-
 echo "Setting up GCP Infrastructure Manager prerequisites..."
 
 # Enable APIs
 gcloud services enable "${REQUIRED_APIS[@]}" --quiet
 
-# Create service account
-gcloud iam service-accounts create "${SERVICE_ACCOUNT}" \
-    --display-name="Infra Manager Deployment Account" --quiet
+# Create service account if it doesn't exist
+if ! gcloud iam service-accounts describe "${SERVICE_ACCOUNT_EMAIL}" >/dev/null 2>&1; then
+    gcloud iam service-accounts create "${SERVICE_ACCOUNT}" \
+        --display-name="Infra Manager Deployment Account" --quiet
+fi
 
 # Grant permissions
 for role in "${REQUIRED_ROLES[@]}"; do
