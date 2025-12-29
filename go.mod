@@ -48,7 +48,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.39.8
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.3
 	github.com/aws/smithy-go v1.24.0
-	github.com/dgraph-io/ristretto v1.0.0
+	github.com/dgraph-io/ristretto v1.0.1
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20251203075221-fdd2b2168d34
 	github.com/elastic/e2e-testing v1.2.3
@@ -327,7 +327,7 @@ require (
 	github.com/bytecodealliance/wasmtime-go/v3 v3.0.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/chai2010/gettext-go v1.0.2 // indirect
+	github.com/chai2010/gettext-go v1.0.3 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.7 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cloudfoundry-community/go-cfclient v0.0.0-20220930021109-9c4e6c59ccf1 // indirect
