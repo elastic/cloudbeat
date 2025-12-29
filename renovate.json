@@ -140,20 +140,24 @@
       ]
     },
     {
-      "description": "Group Docker and Moby packages together",
-      "groupName": "docker-moby",
+      "description": "Group Docker packages together",
+      "groupName": "docker",
       "matchPackageNames": [
-        "github.com/docker/**",
+        "github.com/docker/**"
+      ]
+    },
+    {
+      "description": "Group Moby packages together",
+      "groupName": "moby",
+      "matchPackageNames": [
         "github.com/moby/**"
       ]
     },
     {
-      "description": "Group Sigstore supply chain security packages together",
+      "description": "Group Sigstore packages together",
       "groupName": "sigstore",
       "matchPackageNames": [
-        "github.com/sigstore/**",
-        "github.com/in-toto/**",
-        "github.com/secure-systems-lab/**"
+        "github.com/sigstore/**"
       ]
     },
     {
