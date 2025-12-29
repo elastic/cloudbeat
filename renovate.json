@@ -97,6 +97,66 @@
       ]
     },
     {
+      "description": "Group google.golang.org/genproto packages together",
+      "groupName": "google-genproto",
+      "matchPackageNames": [
+        "google.golang.org/genproto",
+        "google.golang.org/genproto/**"
+      ]
+    },
+    {
+      "description": "Group OpenTelemetry packages together",
+      "groupName": "opentelemetry",
+      "matchPackageNames": [
+        "go.opentelemetry.io/**"
+      ]
+    },
+    {
+      "description": "Group Microsoft Kiota packages together",
+      "groupName": "microsoft-kiota",
+      "matchPackageNames": [
+        "github.com/microsoft/kiota-*"
+      ]
+    },
+    {
+      "description": "Group Microsoft Graph SDK packages together",
+      "groupName": "microsoft-graph-sdk",
+      "matchPackageNames": [
+        "github.com/microsoftgraph/**"
+      ]
+    },
+    {
+      "description": "Group Kubernetes SIG packages together",
+      "groupName": "k8s-sigs",
+      "matchPackageNames": [
+        "sigs.k8s.io/**"
+      ]
+    },
+    {
+      "description": "Group containerd packages together",
+      "groupName": "containerd",
+      "matchPackageNames": [
+        "github.com/containerd/**"
+      ]
+    },
+    {
+      "description": "Group Docker and Moby packages together",
+      "groupName": "docker-moby",
+      "matchPackageNames": [
+        "github.com/docker/**",
+        "github.com/moby/**"
+      ]
+    },
+    {
+      "description": "Group Sigstore supply chain security packages together",
+      "groupName": "sigstore",
+      "matchPackageNames": [
+        "github.com/sigstore/**",
+        "github.com/in-toto/**",
+        "github.com/secure-systems-lab/**"
+      ]
+    },
+    {
       "description": "Enable indirect Go dependencies",
       "matchManagers": [
         "gomod"
