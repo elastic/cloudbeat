@@ -49,7 +49,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -62,102 +62,48 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Read ESS Region from Config
-        id: read-ess-region
-        shell: bash
-        env:
-          ENV_PREFIX: ${{ inputs.prefix }}
-        run: |
-          set +e
-          # Find first environment with the prefix
-          BUCKET="s3://tf-state-bucket-test-infra"
-          FIRST_ENV=$(aws s3 ls "$BUCKET/$ENV_PREFIX" 2>/dev/null | awk '{print $2}' | sed 's/\///g' | head -n 1)
-
-          if [ -z "$FIRST_ENV" ]; then
-            echo "No environments found with prefix $ENV_PREFIX, defaulting to production-cft"
-            echo "ess-region=production-cft" >> $GITHUB_OUTPUT
-            echo "ESS_REGION_INPUT=production-cft" >> $GITHUB_ENV
-          else
-            # Download and read env_config.json
-            if aws s3 cp "$BUCKET/$FIRST_ENV/env_config.json" /tmp/env_config.json 2>/dev/null; then
-              ESS_REGION=$(jq -r '.ess_region // "production-cft"' /tmp/env_config.json)
-              echo "ess-region=$ESS_REGION" >> $GITHUB_OUTPUT
-              echo "ESS_REGION_INPUT=$ESS_REGION" >> $GITHUB_ENV
-              echo "Read ess-region=$ESS_REGION from $FIRST_ENV/env_config.json"
-              rm -f /tmp/env_config.json
-            else
-              echo "env_config.json not found for $FIRST_ENV, defaulting to production-cft"
-              echo "ess-region=production-cft" >> $GITHUB_OUTPUT
-              echo "ESS_REGION_INPUT=production-cft" >> $GITHUB_ENV
-            fi
-          fi
-          set -e  # Re-enable error handling
-
-      - name: Parse ESS Region Input
-        id: parse-ess-region
-        shell: bash
-        working-directory: ./
-        env:
-          ESS_REGION_INPUT: ${{ steps.read-ess-region.outputs.ess-region || 'production-cft' }}
-        run: |
-          source .ci/scripts/parse_ess_region.sh
-
-      - name: Determine Vault Path
-        id: determine-vault-path
-        if: inputs.ec-api-key == ''
-        shell: bash
-        working-directory: ./
-        env:
-          ENV_TYPE: ${{ env.ENV_TYPE }}
-        run: |
-          source .ci/scripts/determine_vault_path.sh
-          echo "vault-path=$VAULT_PATH" >> $GITHUB_OUTPUT
-
-      - name: Get Elastic Cloud Credentials from Vault
+      - name: Get Elastic Cloud API Keys from Vault
         id: get-ec-credentials
-        if: inputs.ec-api-key == '' && steps.determine-vault-path.outcome == 'success'
+        if: inputs.ec-api-key == ''
         uses: hashicorp/vault-action@affa6f04da5c2d55e6e115b7d1b044a6b1af8c74 # v2.7.4
-        continue-on-error: false
+        continue-on-error: true
         with:
           url: ${{ secrets.VAULT_ADDR }}
           roleId: ${{ secrets.CSP_VAULT_ROLE_ID }}
           secretId: ${{ secrets.CSP_VAULT_SECRET_ID }}
           method: approle
           secrets: |
-            ${{ steps.determine-vault-path.outputs.vault-path }} api_key | EC_API_KEY ;
-            ${{ steps.determine-vault-path.outputs.vault-path }} url | EC_URL
+            secret/csp-team/ci/elastic-cloud/production api_key | EC_API_KEY_PRODUCTION ;
+            secret/csp-team/ci/elastic-cloud/staging api_key | EC_API_KEY_STAGING ;
+            secret/csp-team/ci/elastic-cloud/qa api_key | EC_API_KEY_QA
 
       - name: Mask API Key
         if: ${{ inputs.ec-api-key != '' }}
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
-          echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
-          echo "TF_VAR_ec_url=https://cloud.elastic.co" >> $GITHUB_ENV
+          echo "USER_PROVIDED_EC_API_KEY=$ec_api_key" >> $GITHUB_ENV
 
-      - name: Set Elastic Cloud Credentials
+      - name: Set Elastic Cloud Credentials as environment variables
         id: set-ec-credentials
         shell: bash
         run: |
-          # Priority: user-provided key (already set in Mask API Key step) > Vault key > production secret
-          if [[ -n "${TF_VAR_ec_api_key:-}" ]]; then
-            # User-provided key already set, ensure URL is set
-            if [[ -z "${TF_VAR_ec_url:-}" ]]; then
-              echo "TF_VAR_ec_url=https://cloud.elastic.co" >> $GITHUB_ENV
-            fi
-          elif [[ -n "${EC_API_KEY:-}" ]]; then
-            # Use Vault credentials
-            echo "TF_VAR_ec_api_key=$EC_API_KEY" >> $GITHUB_ENV
-            echo "TF_VAR_ec_url=${EC_URL:-https://cloud.elastic.co}" >> $GITHUB_ENV
+          # If user provided API key, use it as fallback for all environments
+          if [[ -n "${USER_PROVIDED_EC_API_KEY:-}" ]]; then
+            echo "Using user-provided API key for all environments"
+            echo "EC_API_KEY_PRODUCTION=${USER_PROVIDED_EC_API_KEY}" >> $GITHUB_ENV
+            echo "EC_API_KEY_STAGING=${USER_PROVIDED_EC_API_KEY}" >> $GITHUB_ENV
+            echo "EC_API_KEY_QA=${USER_PROVIDED_EC_API_KEY}" >> $GITHUB_ENV
           else
-            # Fall back to production secret
-            echo "TF_VAR_ec_api_key=${{ secrets.EC_API_KEY }}" >> $GITHUB_ENV
-            echo "TF_VAR_ec_url=https://cloud.elastic.co" >> $GITHUB_ENV
+            # Use Vault credentials, with fallback to production secret if vault fails
+            echo "EC_API_KEY_PRODUCTION=${EC_API_KEY_PRODUCTION:-${{ secrets.EC_API_KEY }}}" >> $GITHUB_ENV
+            echo "EC_API_KEY_STAGING=${EC_API_KEY_STAGING:-${EC_API_KEY_PRODUCTION:-${{ secrets.EC_API_KEY }}}}" >> $GITHUB_ENV
+            echo "EC_API_KEY_QA=${EC_API_KEY_QA:-${EC_API_KEY_PRODUCTION:-${{ secrets.EC_API_KEY }}}}" >> $GITHUB_ENV
           fi
 
       - id: google-auth
         name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@140bb5113ffb6b65a7e9b937a81fa96cf5064462 # v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
@@ -169,6 +115,10 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Destroy Environment
+        env:
+          EC_API_KEY_PRODUCTION: ${{ env.EC_API_KEY_PRODUCTION }}
+          EC_API_KEY_STAGING: ${{ env.EC_API_KEY_STAGING }}
+          EC_API_KEY_QA: ${{ env.EC_API_KEY_QA }}
         run: |
           just delete-cloud-env "${ENV_PREFIX}" "${ENV_IGNORE_PREFIX}" "false"
 
@@ -179,14 +129,13 @@ jobs:
         env:
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           JOB_STATUS_COLOR: "${{ job.status == 'success' && '#36a64f' || '#D40E0D' }}"
-          ESS_REGION: ${{ steps.read-ess-region.outputs.ess-region || 'production-cft' }}
         with:
           vault-url: ${{ secrets.VAULT_ADDR }}
           vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
           vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
           slack-payload: |
             {
-              "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> (ESS Region: ${{ env.ESS_REGION }}) triggered by `${{github.actor}}`",
+              "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`",
             	"blocks": [
                 {
                   "type": "divider"
@@ -200,7 +149,7 @@ jobs:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> (ESS Region: ${{ env.ESS_REGION }}) triggered by `${{github.actor}}`"
+                            "text": "${{ github.workflow }} job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`"
                         }
                     }
                   ]

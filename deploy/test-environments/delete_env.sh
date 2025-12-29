@@ -40,6 +40,18 @@ function set_env_vars_from_config() {
         local max_size
         max_size=$(jq -r '.max_size // "128g"' /tmp/env_config.json)
 
+        # Extract ess_region to determine which API key to use
+        local ess_region
+        ess_region=$(jq -r '.ess_region // "production-cft"' /tmp/env_config.json)
+
+        # Parse environment type from ess_region (format: {env}-{cloud}, e.g., production-cft, qa-gcp, staging-aws)
+        local env_type="${ess_region%%-*}"
+
+        # Convert env_type to uppercase and construct the environment variable name
+        local env_type_upper
+        env_type_upper=$(echo "$env_type" | tr '[:lower:]' '[:upper:]')
+        local api_key_var="EC_API_KEY_${env_type_upper}"
+
         # Set Terraform variables
         export TF_VAR_ess_region="$ess_region_mapped"
         export TF_VAR_ec_url="$ec_url"
@@ -47,11 +59,20 @@ function set_env_vars_from_config() {
         export TF_VAR_deployment_template="$deployment_template"
         export TF_VAR_max_size="$max_size"
 
+        # Set TF_VAR_ec_api_key based on environment type using indirect variable reference
+        if [[ -n "${!api_key_var:-}" ]]; then
+            export TF_VAR_ec_api_key="${!api_key_var}"
+            echo "Using ${env_type_upper} API key for $env (ess_region: $ess_region)"
+        else
+            echo "Warning: ${api_key_var} not set, falling back to TF_VAR_ec_api_key if available"
+        fi
+
         echo "Set TF_VAR_ess_region=$TF_VAR_ess_region"
         echo "Set TF_VAR_ec_url=$TF_VAR_ec_url"
         echo "Set TF_VAR_serverless_mode=$TF_VAR_serverless_mode"
         echo "Set TF_VAR_deployment_template=$TF_VAR_deployment_template"
         echo "Set TF_VAR_max_size=$TF_VAR_max_size"
+        echo "Set TF_VAR_ec_api_key (from $env_type environment)"
 
         rm -f /tmp/env_config.json
     else
@@ -62,6 +83,15 @@ function set_env_vars_from_config() {
         export TF_VAR_serverless_mode="false"
         export TF_VAR_deployment_template="gcp-storage-optimized"
         export TF_VAR_max_size="128g"
+        # If no env_config.json, rely on existing TF_VAR_ec_api_key if set
+        echo "Using existing TF_VAR_ec_api_key if available"
+    fi
+
+    # Final validation: ensure TF_VAR_ec_api_key is set
+    if [[ -z "${TF_VAR_ec_api_key:-}" ]]; then
+        echo "Error: TF_VAR_ec_api_key is not set for environment $env" >&2
+        echo "Please ensure EC_API_KEY_PRODUCTION, EC_API_KEY_STAGING, or EC_API_KEY_QA is set, or provide TF_VAR_ec_api_key" >&2
+        return 1
     fi
 }
 
@@ -71,7 +101,11 @@ function delete_all_states() {
     echo "Deleting all Terraform states from bucket: $bucket_folder"
 
     # Set environment variables from env_config.json
-    set_env_vars_from_config "$bucket_folder" "$bucket_folder"
+    if ! set_env_vars_from_config "$bucket_folder" "$bucket_folder"; then
+        echo "Failed to set environment variables for $bucket_folder"
+        FAILED_ENVS+=("$bucket_folder")
+        return 1
+    fi
 
     states=("cdr" "cis" "elk-stack")
     # Get all states
@@ -97,7 +131,11 @@ function delete_environment() {
     tfstate="./$ENV-terraform.tfstate"
 
     # Set environment variables from env_config.json
-    set_env_vars_from_config "$ENV" "$ENV"
+    if ! set_env_vars_from_config "$ENV" "$ENV"; then
+        echo "Failed to set environment variables for $ENV"
+        FAILED_ENVS+=("$ENV")
+        return 1
+    fi
 
     # Copy state file
     if aws s3 cp "$BUCKET/$ENV/terraform.tfstate" "$tfstate"; then
@@ -163,7 +201,13 @@ done
 
 # Ensure required environment variables and parameters are set
 : "${ENV_PREFIX:?$(echo "Missing -p|--prefix. Please provide an environment prefix to delete" && usage && exit 1)}"
-: "${TF_VAR_ec_api_key:?Please set TF_VAR_ec_api_key with an Elastic Cloud API Key}"
+
+# Note: TF_VAR_ec_api_key will be set per-environment in set_env_vars_from_config
+# But we still need at least one API key available as fallback
+if [[ -z "${EC_API_KEY_PRODUCTION:-}" ]] && [[ -z "${EC_API_KEY_STAGING:-}" ]] && [[ -z "${EC_API_KEY_QA:-}" ]] && [[ -z "${TF_VAR_ec_api_key:-}" ]]; then
+    echo "Error: At least one of EC_API_KEY_PRODUCTION, EC_API_KEY_STAGING, EC_API_KEY_QA, or TF_VAR_ec_api_key must be set" >&2
+    exit 1
+fi
 
 BUCKET=s3://tf-state-bucket-test-infra
 ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')

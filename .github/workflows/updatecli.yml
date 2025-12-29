@@ -48,23 +48,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [ beats, golang, hermit, mods ]
-        git-branch: [ main ]
+        pipeline-name: [beats, golang, hermit, mods]
+        git-branch: [main]
     steps:
-      # Disk cleanup
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
         with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: true
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+          init-tools: "true"
+          free-disk: "true"
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
       - name: Run Updatecli in Apply mode
@@ -93,23 +85,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [ golang, beats ]
+        pipeline-name: [golang, beats]
         git-branch: ${{ fromJSON(needs.active-branches.outputs.matrix) }}
     steps:
-      # Disk cleanup
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
         with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: true
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+          init-tools: "true"
+          free-disk: "true"
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
       - name: Run Updatecli in Apply mode
