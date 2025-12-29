@@ -97,6 +97,70 @@
       ]
     },
     {
+      "description": "Group google.golang.org/genproto packages together",
+      "groupName": "google-genproto",
+      "matchPackageNames": [
+        "google.golang.org/genproto",
+        "google.golang.org/genproto/**"
+      ]
+    },
+    {
+      "description": "Group OpenTelemetry packages together",
+      "groupName": "opentelemetry",
+      "matchPackageNames": [
+        "go.opentelemetry.io/**"
+      ]
+    },
+    {
+      "description": "Group Microsoft Kiota packages together",
+      "groupName": "microsoft-kiota",
+      "matchPackageNames": [
+        "github.com/microsoft/kiota-*"
+      ]
+    },
+    {
+      "description": "Group Microsoft Graph SDK packages together",
+      "groupName": "microsoft-graph-sdk",
+      "matchPackageNames": [
+        "github.com/microsoftgraph/**"
+      ]
+    },
+    {
+      "description": "Group Kubernetes SIG packages together",
+      "groupName": "k8s-sigs",
+      "matchPackageNames": [
+        "sigs.k8s.io/**"
+      ]
+    },
+    {
+      "description": "Group containerd packages together",
+      "groupName": "containerd",
+      "matchPackageNames": [
+        "github.com/containerd/**"
+      ]
+    },
+    {
+      "description": "Group Docker packages together",
+      "groupName": "docker",
+      "matchPackageNames": [
+        "github.com/docker/**"
+      ]
+    },
+    {
+      "description": "Group Moby packages together",
+      "groupName": "moby",
+      "matchPackageNames": [
+        "github.com/moby/**"
+      ]
+    },
+    {
+      "description": "Group Sigstore packages together",
+      "groupName": "sigstore",
+      "matchPackageNames": [
+        "github.com/sigstore/**"
+      ]
+    },
+    {
       "description": "Enable indirect Go dependencies",
       "matchManagers": [
         "gomod"
