@@ -54,6 +54,11 @@ var ErrInvalidCredentialsJSON = errors.New("invalid credentials JSON")
 var ErrProjectNotFound = errors.New("no project ID was found")
 
 func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
+	// used in cloud connectors flow
+	if cfg.CloudConnectors {
+		return p.getCloudConnectorsCredentials(ctx, cfg, log)
+	}
+
 	// used in cloud shell flow (and development)
 	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
 		return p.getApplicationDefaultCredentials(ctx, cfg, log)
@@ -78,6 +83,19 @@ func (p *ConfigProvider) getGcpFactoryConfig(ctx context.Context, cfg config.Gcp
 func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getDefaultCredentialsConfig create credentials options")
 	return p.getGcpFactoryConfig(ctx, cfg, nil)
+}
+
+func (p *ConfigProvider) getCloudConnectorsCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
+	log.Info("getCloudConnectorsCredentials create credentials options using OIDC token and service account impersonation")
+
+	// Import the gcplib package for OIDC authentication
+	// This is defined in a separate file to avoid circular dependencies
+	opts, err := initializeGCPConfigCloudConnectors(ctx, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize GCP Cloud Connectors config: %w", err)
+	}
+
+	return p.getGcpFactoryConfig(ctx, cfg, opts)
 }
 
 func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {

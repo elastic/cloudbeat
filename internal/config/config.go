@@ -91,11 +91,16 @@ type GcpConfig struct {
 	GcpCallOpt GcpCallOpt `config:"call_options"`
 
 	GcpClientOpt `config:"credentials"`
+
+	CloudConnectors       bool `config:"supports_cloud_connectors"`
+	CloudConnectorsConfig CloudConnectorsGCPConfig
 }
 
 type GcpClientOpt struct {
 	CredentialsJSON     string `config:"credentials_json"`
 	CredentialsFilePath string `config:"credentials_file_path"`
+	// ServiceAccountEmail is used for Cloud Connectors impersonation (the target/customer service account)
+	ServiceAccountEmail string `config:"service_account_email"`
 }
 
 type GcpCallOpt struct {
@@ -199,6 +204,10 @@ func New(cfg *config.C) (*Config, error) {
 		c.CloudConfig.Aws.CloudConnectorsConfig = newCloudConnectorsConfig()
 	}
 
+	if c.CloudConfig.Gcp.CloudConnectors {
+		c.CloudConfig.Gcp.CloudConnectorsConfig = newCloudConnectorsGCPConfig()
+	}
+
 	return c, nil
 }
 
@@ -255,6 +264,12 @@ const (
 	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
 	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
 	CloudConnectorsAWSTokenEnvVar   = "AWS_WEB_IDENTITY_TOKEN_FILE"
+
+	// GCP Cloud Connectors environment variables
+	CloudConnectorsGCPGlobalServiceAccountEnvVar = "CLOUD_CONNECTORS_GCP_GLOBAL_SERVICE_ACCOUNT"
+	CloudConnectorsGCPWorkloadPoolEnvVar         = "CLOUD_CONNECTORS_GCP_WORKLOAD_POOL"
+	CloudConnectorsGCPWorkloadProviderEnvVar     = "CLOUD_CONNECTORS_GCP_WORKLOAD_PROVIDER"
+	CloudConnectorsGCPProjectNumberEnvVar        = "CLOUD_CONNECTORS_GCP_PROJECT_NUMBER"
 )
 
 type CloudConnectorsConfig struct {
@@ -263,11 +278,32 @@ type CloudConnectorsConfig struct {
 	ResourceID    string
 }
 
+type CloudConnectorsGCPConfig struct {
+	// Global/Super service account (Elastic-owned) - authenticated via OIDC
+	GlobalServiceAccount string
+	// Target/Remote service account (Customer-owned) - impersonated via global service account
+	TargetServiceAccount string
+	// Workload Identity Federation configuration
+	WorkloadIdentityPool     string
+	WorkloadIdentityProvider string
+	ProjectNumber            string
+}
+
 func newCloudConnectorsConfig() CloudConnectorsConfig {
 	return CloudConnectorsConfig{
 		LocalRoleARN:  os.Getenv(CloudConnectorsLocalRoleEnvVar),
 		GlobalRoleARN: os.Getenv(CloudConnectorsGlobalRoleEnvVar),
 		ResourceID:    os.Getenv(CloudResourceIDEnvVar),
+	}
+}
+
+func newCloudConnectorsGCPConfig() CloudConnectorsGCPConfig {
+	return CloudConnectorsGCPConfig{
+		GlobalServiceAccount:     os.Getenv(CloudConnectorsGCPGlobalServiceAccountEnvVar),
+		WorkloadIdentityPool:     os.Getenv(CloudConnectorsGCPWorkloadPoolEnvVar),
+		WorkloadIdentityProvider: os.Getenv(CloudConnectorsGCPWorkloadProviderEnvVar),
+		ProjectNumber:            os.Getenv(CloudConnectorsGCPProjectNumberEnvVar),
+		// TargetServiceAccount comes from GcpConfig, not env vars
 	}
 }
 
