@@ -29,6 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
+	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib"
 )
 
 type GcpFactoryConfig struct {
@@ -88,9 +89,7 @@ func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, c
 func (p *ConfigProvider) getCloudConnectorsCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getCloudConnectorsCredentials create credentials options using OIDC token and service account impersonation")
 
-	// Import the gcplib package for OIDC authentication
-	// This is defined in a separate file to avoid circular dependencies
-	opts, err := initializeGCPConfigCloudConnectors(ctx, cfg)
+	opts, err := gcplib.InitializeGCPConfigCloudConnectors(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize GCP Cloud Connectors config: %w", err)
 	}
