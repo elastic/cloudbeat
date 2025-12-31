@@ -15,8 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Init Hermit
-        run: ../bin/hermit env -r >> $GITHUB_ENV
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: "true"
+          free-disk: "true"
 
       - name: OPA test coverage
         run: |
