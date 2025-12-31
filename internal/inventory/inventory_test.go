@@ -37,21 +37,22 @@ import (
 func TestAssetInventory_Run(t *testing.T) {
 	var emptyRef *any
 	now := func() time.Time { return time.Date(2024, 1, 1, 1, 1, 1, 0, time.Local) }
+	entity := Entity{
+		Id:     "arn:aws:ec2:us-east::ec2/234567890",
+		Name:   "test-server",
+		Source: pointers.Ref(AwsCloudProvider),
+		AssetClassification: AssetClassification{
+			Category: CategoryInfrastructure,
+			Type:     "Virtual Machine",
+		},
+		Raw: emptyRef,
+	}
 	expected := []beat.Event{
 		{
 			Meta:      mapstr.M{libevents.FieldMetaIndex: "logs-cloud_asset_inventory.asset_inventory-infrastructure_virtual_machine-default"},
 			Timestamp: now(),
 			Fields: mapstr.M{
-				"entity": Entity{
-					Id:     "arn:aws:ec2:us-east::ec2/234567890",
-					Name:   "test-server",
-					Source: pointers.Ref(AwsCloudProvider),
-					AssetClassification: AssetClassification{
-						Category: CategoryInfrastructure,
-						Type:     "Virtual Machine",
-					},
-					Raw: emptyRef,
-				},
+				"entity": entity,
 				"event": Event{
 					Kind: "asset",
 				},
@@ -64,13 +65,15 @@ func TestAssetInventory_Run(t *testing.T) {
 					Architecture: string(types.ArchitectureValuesX8664),
 					Type:         "instance-type",
 					ID:           "i-a2",
+					Entity:       &entity,
 				},
 				"network": &Network{
 					Name: "vpc-id",
 				},
 				"user": &User{
-					ID:   "a123123",
-					Name: "name",
+					ID:     "a123123",
+					Name:   "name",
+					Entity: &entity,
 				},
 				"related.entity": []string{"arn:aws:ec2:us-east::ec2/234567890"},
 				"tags":           []string{"foo", "bar"},

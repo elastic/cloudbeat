@@ -107,6 +107,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, serviceN
 					Name: vmProperties.Extended.InstanceView.ComputerName,
 					Type: vmProperties.HardwareProfile.VmSize,
 				}
+				asset.Host.Entity = &asset.Entity
 				asset.Cloud.MachineType = vmProperties.HardwareProfile.VmSize
 			}
 			asset.Cloud.InstanceID = item.Id
