@@ -281,8 +281,6 @@ type CloudConnectorsConfig struct {
 type CloudConnectorsGCPConfig struct {
 	// Global/Super service account (Elastic-owned) - authenticated via OIDC
 	GlobalServiceAccount string
-	// Target/Remote service account (Customer-owned) - impersonated via global service account
-	TargetServiceAccount string
 	// Workload Identity Federation configuration
 	WorkloadIdentityPool     string
 	WorkloadIdentityProvider string
@@ -303,7 +301,6 @@ func newCloudConnectorsGCPConfig() CloudConnectorsGCPConfig {
 		WorkloadIdentityPool:     os.Getenv(CloudConnectorsGCPWorkloadPoolEnvVar),
 		WorkloadIdentityProvider: os.Getenv(CloudConnectorsGCPWorkloadProviderEnvVar),
 		ProjectNumber:            os.Getenv(CloudConnectorsGCPProjectNumberEnvVar),
-		// TargetServiceAccount comes from GcpConfig, not env vars
 	}
 }
 
