@@ -106,14 +106,14 @@ func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.Gc
 			return nil, err
 		}
 		log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
-		opts = append(opts, option.WithCredentialsFile(cfg.CredentialsFilePath))
+		opts = append(opts, option.WithAuthCredentialsFile(option.ServiceAccount, cfg.CredentialsFilePath))
 	}
 	if cfg.CredentialsJSON != "" {
 		if !json.Valid([]byte(cfg.CredentialsJSON)) {
 			return nil, ErrInvalidCredentialsJSON
 		}
 		log.Info("Appending credentials JSON to client options")
-		opts = append(opts, option.WithCredentialsJSON([]byte(cfg.CredentialsJSON)))
+		opts = append(opts, option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(cfg.CredentialsJSON)))
 	}
 
 	return p.getGcpFactoryConfig(ctx, cfg, opts)
