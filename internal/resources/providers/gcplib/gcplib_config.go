@@ -55,24 +55,9 @@ func NewGCPConfigOIDCChain(ctx context.Context, jwtFilePath string, cfg config.G
 	if cfg.ServiceAccountEmail == "" {
 		return nil, errors.New("target service account email is required for Cloud Connectors")
 	}
-	if ccCfg.WorkloadIdentityPool == "" {
-		return nil, errors.New("workload identity pool is required for Cloud Connectors")
+	if ccCfg.GlobalAudience == "" {
+		return nil, errors.New("global audience is required for Cloud Connectors")
 	}
-	if ccCfg.WorkloadIdentityProvider == "" {
-		return nil, errors.New("workload identity provider is required for Cloud Connectors")
-	}
-	if ccCfg.ProjectNumber == "" {
-		return nil, errors.New("project number is required for Cloud Connectors")
-	}
-
-	// Construct the audience for Workload Identity Federation
-	// Format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
-	audience := fmt.Sprintf(
-		"//iam.googleapis.com/projects/%s/locations/global/workloadIdentityPools/%s/providers/%s",
-		ccCfg.ProjectNumber,
-		ccCfg.WorkloadIdentityPool,
-		ccCfg.WorkloadIdentityProvider,
-	)
 
 	// Construct the service account impersonation URL for the Global Service Account
 	impersonationURL := fmt.Sprintf(
@@ -85,7 +70,7 @@ func NewGCPConfigOIDCChain(ctx context.Context, jwtFilePath string, cfg config.G
 		// Chain Step 1 - Authenticate via OIDC and impersonate Elastic Global Service Account
 		&ExternalAccountStep{
 			Config: externalaccount.Config{
-				Audience:         audience,
+				Audience:         ccCfg.GlobalAudience,
 				SubjectTokenType: "urn:ietf:params:oauth:token-type:jwt",
 				TokenURL:         "https://sts.googleapis.com/v1/token",
 				CredentialSource: &externalaccount.CredentialSource{

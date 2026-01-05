@@ -267,9 +267,7 @@ const (
 
 	// GCP Cloud Connectors environment variables
 	CloudConnectorsGCPGlobalServiceAccountEnvVar = "CLOUD_CONNECTORS_GCP_GLOBAL_SERVICE_ACCOUNT"
-	CloudConnectorsGCPWorkloadPoolEnvVar         = "CLOUD_CONNECTORS_GCP_WORKLOAD_POOL"
-	CloudConnectorsGCPWorkloadProviderEnvVar     = "CLOUD_CONNECTORS_GCP_WORKLOAD_PROVIDER"
-	CloudConnectorsGCPProjectNumberEnvVar        = "CLOUD_CONNECTORS_GCP_PROJECT_NUMBER"
+	CloudConnectorsGCPGlobalAudienceEnvVar       = "CLOUD_CONNECTORS_GCP_GLOBAL_AUDIENCE"
 )
 
 type CloudConnectorsConfig struct {
@@ -281,10 +279,9 @@ type CloudConnectorsConfig struct {
 type CloudConnectorsGCPConfig struct {
 	// Global/Super service account (Elastic-owned) - authenticated via OIDC
 	GlobalServiceAccount string
-	// Workload Identity Federation configuration
-	WorkloadIdentityPool     string
-	WorkloadIdentityProvider string
-	ProjectNumber            string
+	// GlobalAudience is the full audience URL for Workload Identity Federation
+	// Format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+	GlobalAudience string
 }
 
 func newCloudConnectorsConfig() CloudConnectorsConfig {
@@ -297,10 +294,8 @@ func newCloudConnectorsConfig() CloudConnectorsConfig {
 
 func newCloudConnectorsGCPConfig() CloudConnectorsGCPConfig {
 	return CloudConnectorsGCPConfig{
-		GlobalServiceAccount:     os.Getenv(CloudConnectorsGCPGlobalServiceAccountEnvVar),
-		WorkloadIdentityPool:     os.Getenv(CloudConnectorsGCPWorkloadPoolEnvVar),
-		WorkloadIdentityProvider: os.Getenv(CloudConnectorsGCPWorkloadProviderEnvVar),
-		ProjectNumber:            os.Getenv(CloudConnectorsGCPProjectNumberEnvVar),
+		GlobalServiceAccount: os.Getenv(CloudConnectorsGCPGlobalServiceAccountEnvVar),
+		GlobalAudience:       os.Getenv(CloudConnectorsGCPGlobalAudienceEnvVar),
 	}
 }
 
