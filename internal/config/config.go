@@ -260,7 +260,6 @@ const (
 	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
 	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
 	CloudConnectorsAWSTokenEnvVar   = "AWS_WEB_IDENTITY_TOKEN_FILE"
-
 )
 
 type CloudConnectorsConfig struct {
