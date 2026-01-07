@@ -91,9 +91,6 @@ type GcpConfig struct {
 	GcpCallOpt GcpCallOpt `config:"call_options"`
 
 	GcpClientOpt `config:"credentials"`
-
-	CloudConnectors       bool `config:"supports_cloud_connectors"`
-	CloudConnectorsConfig CloudConnectorsGCPConfig
 }
 
 type GcpClientOpt struct {
@@ -101,6 +98,9 @@ type GcpClientOpt struct {
 	CredentialsFilePath string `config:"credentials_file_path"`
 	// ServiceAccountEmail is used for Cloud Connectors impersonation (the target/customer service account)
 	ServiceAccountEmail string `config:"service_account_email"`
+	// Audience is the Workload Identity Federation audience URL
+	// Format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+	Audience string `config:"audience"`
 }
 
 type GcpCallOpt struct {
@@ -204,10 +204,6 @@ func New(cfg *config.C) (*Config, error) {
 		c.CloudConfig.Aws.CloudConnectorsConfig = newCloudConnectorsConfig()
 	}
 
-	if c.CloudConfig.Gcp.CloudConnectors {
-		c.CloudConfig.Gcp.CloudConnectorsConfig = newCloudConnectorsGCPConfig()
-	}
-
 	return c, nil
 }
 
@@ -265,9 +261,6 @@ const (
 	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
 	CloudConnectorsAWSTokenEnvVar   = "AWS_WEB_IDENTITY_TOKEN_FILE"
 
-	// GCP Cloud Connectors environment variables
-	CloudConnectorsGCPGlobalServiceAccountEnvVar = "CLOUD_CONNECTORS_GCP_GLOBAL_SERVICE_ACCOUNT"
-	CloudConnectorsGCPGlobalAudienceEnvVar       = "CLOUD_CONNECTORS_GCP_GLOBAL_AUDIENCE"
 )
 
 type CloudConnectorsConfig struct {
@@ -276,26 +269,11 @@ type CloudConnectorsConfig struct {
 	ResourceID    string
 }
 
-type CloudConnectorsGCPConfig struct {
-	// Global/Super service account (Elastic-owned) - authenticated via OIDC
-	GlobalServiceAccount string
-	// GlobalAudience is the full audience URL for Workload Identity Federation
-	// Format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
-	GlobalAudience string
-}
-
 func newCloudConnectorsConfig() CloudConnectorsConfig {
 	return CloudConnectorsConfig{
 		LocalRoleARN:  os.Getenv(CloudConnectorsLocalRoleEnvVar),
 		GlobalRoleARN: os.Getenv(CloudConnectorsGlobalRoleEnvVar),
 		ResourceID:    os.Getenv(CloudResourceIDEnvVar),
-	}
-}
-
-func newCloudConnectorsGCPConfig() CloudConnectorsGCPConfig {
-	return CloudConnectorsGCPConfig{
-		GlobalServiceAccount: os.Getenv(CloudConnectorsGCPGlobalServiceAccountEnvVar),
-		GlobalAudience:       os.Getenv(CloudConnectorsGCPGlobalAudienceEnvVar),
 	}
 }
 

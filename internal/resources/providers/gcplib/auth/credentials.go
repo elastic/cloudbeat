@@ -29,7 +29,6 @@ import (
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
-	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib"
 )
 
 type GcpFactoryConfig struct {
@@ -44,6 +43,7 @@ type ConfigProviderAPI interface {
 
 type GoogleAuthProviderAPI interface {
 	FindDefaultCredentials(ctx context.Context) (*google.Credentials, error)
+	FindCloudConnectorsCredentials(ctx context.Context, audience string, serviceAccountEmail string) ([]option.ClientOption, error)
 }
 
 type ConfigProvider struct {
@@ -56,7 +56,7 @@ var ErrProjectNotFound = errors.New("no project ID was found")
 
 func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	// used in cloud connectors flow
-	if cfg.CloudConnectors {
+	if cfg.GcpClientOpt.ServiceAccountEmail != "" {
 		return p.getCloudConnectorsCredentials(ctx, cfg, log)
 	}
 
@@ -87,11 +87,11 @@ func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, c
 }
 
 func (p *ConfigProvider) getCloudConnectorsCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
-	log.Info("getCloudConnectorsCredentials create credentials options using OIDC token and service account impersonation")
+	log.Info("getCloudConnectorsCredentials: creating credentials using OIDC token and service account impersonation")
 
-	opts, err := gcplib.InitializeGCPConfigCloudConnectors(ctx, cfg)
+	opts, err := p.AuthProvider.FindCloudConnectorsCredentials(ctx, cfg.Audience, cfg.ServiceAccountEmail)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize GCP Cloud Connectors config: %w", err)
+		return nil, fmt.Errorf("failed to get cloud connectors credentials: %w", err)
 	}
 
 	return p.getGcpFactoryConfig(ctx, cfg, opts)

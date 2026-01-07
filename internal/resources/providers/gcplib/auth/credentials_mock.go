@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	mock "github.com/stretchr/testify/mock"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
 
 // NewMockConfigProviderAPI creates a new instance of MockConfigProviderAPI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
@@ -217,6 +218,72 @@ func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) Return(credenti
 }
 
 func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) RunAndReturn(run func(ctx context.Context) (*google.Credentials, error)) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// FindCloudConnectorsCredentials provides a mock function for the type MockGoogleAuthProviderAPI
+func (_mock *MockGoogleAuthProviderAPI) FindCloudConnectorsCredentials(ctx context.Context, audience string, serviceAccountEmail string) ([]option.ClientOption, error) {
+	ret := _mock.Called(ctx, audience, serviceAccountEmail)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindCloudConnectorsCredentials")
+	}
+
+	var r0 []option.ClientOption
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) ([]option.ClientOption, error)); ok {
+		return returnFunc(ctx, audience, serviceAccountEmail)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string) []option.ClientOption); ok {
+		r0 = returnFunc(ctx, audience, serviceAccountEmail)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]option.ClientOption)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = returnFunc(ctx, audience, serviceAccountEmail)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindCloudConnectorsCredentials'
+type MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call struct {
+	*mock.Call
+}
+
+// FindCloudConnectorsCredentials is a helper method to define mock.On call
+//   - ctx context.Context
+//   - audience string
+//   - serviceAccountEmail string
+func (_e *MockGoogleAuthProviderAPI_Expecter) FindCloudConnectorsCredentials(ctx interface{}, audience interface{}, serviceAccountEmail interface{}) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
+	return &MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call{Call: _e.mock.On("FindCloudConnectorsCredentials", ctx, audience, serviceAccountEmail)}
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Run(run func(ctx context.Context, audience string, serviceAccountEmail string)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+			args[1].(string),
+			args[2].(string),
+		)
+	})
+	return _c
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Return(opts []option.ClientOption, err error) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
+	_c.Call.Return(opts, err)
+	return _c
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) RunAndReturn(run func(ctx context.Context, audience string, serviceAccountEmail string) ([]option.ClientOption, error)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
 	_c.Call.Return(run)
 	return _c
 }
