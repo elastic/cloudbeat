@@ -18,7 +18,7 @@
 package version
 
 // name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
-const defaultBeatVersion = "9.1.10"
+const defaultBeatVersion = "9.1.11"
 
 var qualifier = ""
 
