@@ -18,9 +18,3 @@ variable "parent_id" {
   description = "Parent ID (project ID or organization ID)"
   type        = string
 }
-
-variable "create_key" {
-  description = "Whether to create a service account key"
-  type        = bool
-  default     = false
-}
