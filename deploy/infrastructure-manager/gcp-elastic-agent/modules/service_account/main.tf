@@ -1,7 +1,7 @@
 # Service Account
 resource "google_service_account" "elastic_agent" {
   account_id   = var.service_account_name
-  display_name = "Elastic agent service account for CSPM"
+  display_name = "Elastic agent service account for Cloud Assets"
   project      = var.project_id
 }
 
