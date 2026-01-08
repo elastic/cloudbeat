@@ -87,7 +87,7 @@ func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, c
 }
 
 func (p *ConfigProvider) getCloudConnectorsCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
-	log.Info("getCloudConnectorsCredentials: creating credentials using OIDC token and service account impersonation")
+	log.Info("creating credentials using OIDC token and service account impersonation", "provider", "GCP")
 
 	opts, err := p.AuthProvider.FindCloudConnectorsCredentials(ctx, cfg.Audience, cfg.ServiceAccountEmail)
 	if err != nil {
