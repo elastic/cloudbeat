@@ -96,6 +96,11 @@ type GcpConfig struct {
 type GcpClientOpt struct {
 	CredentialsJSON     string `config:"credentials_json"`
 	CredentialsFilePath string `config:"credentials_file_path"`
+	// ServiceAccountEmail is used for Cloud Connectors impersonation (the target/customer service account)
+	ServiceAccountEmail string `config:"service_account_email"`
+	// Audience is the Workload Identity Federation audience URL
+	// Format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+	Audience string `config:"audience"`
 }
 
 type GcpCallOpt struct {

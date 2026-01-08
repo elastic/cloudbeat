@@ -43,6 +43,7 @@ type ConfigProviderAPI interface {
 
 type GoogleAuthProviderAPI interface {
 	FindDefaultCredentials(ctx context.Context) (*google.Credentials, error)
+	FindCloudConnectorsCredentials(ctx context.Context, audience string, serviceAccountEmail string) ([]option.ClientOption, error)
 }
 
 type ConfigProvider struct {
@@ -54,6 +55,11 @@ var ErrInvalidCredentialsJSON = errors.New("invalid credentials JSON")
 var ErrProjectNotFound = errors.New("no project ID was found")
 
 func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
+	// used in cloud connectors flow
+	if cfg.GcpClientOpt.ServiceAccountEmail != "" {
+		return p.getCloudConnectorsCredentials(ctx, cfg, log)
+	}
+
 	// used in cloud shell flow (and development)
 	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
 		return p.getApplicationDefaultCredentials(ctx, cfg, log)
@@ -80,6 +86,17 @@ func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, c
 	return p.getGcpFactoryConfig(ctx, cfg, nil)
 }
 
+func (p *ConfigProvider) getCloudConnectorsCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
+	log.Info("creating credentials using OIDC token and service account impersonation", "provider", "GCP")
+
+	opts, err := p.AuthProvider.FindCloudConnectorsCredentials(ctx, cfg.Audience, cfg.ServiceAccountEmail)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cloud connectors credentials: %w", err)
+	}
+
+	return p.getGcpFactoryConfig(ctx, cfg, opts)
+}
+
 func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getCustomCredentialsConfig create credentials options")
 
@@ -89,14 +106,14 @@ func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.Gc
 			return nil, err
 		}
 		log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
-		opts = append(opts, option.WithCredentialsFile(cfg.CredentialsFilePath))
+		opts = append(opts, option.WithAuthCredentialsFile(option.ServiceAccount, cfg.CredentialsFilePath))
 	}
 	if cfg.CredentialsJSON != "" {
 		if !json.Valid([]byte(cfg.CredentialsJSON)) {
 			return nil, ErrInvalidCredentialsJSON
 		}
 		log.Info("Appending credentials JSON to client options")
-		opts = append(opts, option.WithCredentialsJSON([]byte(cfg.CredentialsJSON)))
+		opts = append(opts, option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(cfg.CredentialsJSON)))
 	}
 
 	return p.getGcpFactoryConfig(ctx, cfg, opts)
