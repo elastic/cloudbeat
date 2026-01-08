@@ -22,7 +22,7 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 
 # Optional: Set these to override defaults
 # export ORG_ID="<YOUR_ORG_ID>"  # For org-level monitoring
-# export DEPLOYMENT_NAME="elastic-agent-gcp"  # Default: elastic-agent-gcp
+# export DEPLOYMENT_NAME="elastic-agent-deployment"  # Default: elastic-agent-deployment
 # export ZONE="us-central1-a"  # Default: us-central1-a
 # export ELASTIC_ARTIFACT_SERVER="<CUSTOM_SERVER_URL>"  # Default: https://artifacts.elastic.co/downloads/beats/elastic-agent
 

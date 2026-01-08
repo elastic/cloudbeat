@@ -14,14 +14,14 @@ SERVICE_ACCOUNT="infra-manager-deployer"
 # Optional environment variables (defaults are in variables.tf)
 # ORG_ID          - Set for org-level monitoring
 # ZONE            - GCP zone (default: us-central1-a)
-# DEPLOYMENT_NAME - Deployment name prefix (default: elastic-agent-gcp)
+# DEPLOYMENT_NAME - Deployment name prefix (default: elastic-agent-deployment)
 # ELASTIC_ARTIFACT_SERVER - Artifact server URL
 
 # Generate unique suffix for resource names (8 hex characters)
 RESOURCE_SUFFIX=$(openssl rand -hex 4)
 
 # Set deployment name with suffix
-DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-elastic-agent-gcp}-${RESOURCE_SUFFIX}"
+DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-elastic-agent-deployment}-${RESOURCE_SUFFIX}"
 
 # Determine zone for location extraction
 # We need the zone to derive the region (location) - use default if not set
