@@ -96,7 +96,7 @@ if [ -z "$SECRET_NAME" ]; then
 fi
 
 # Access the secret from Secret Manager and save to file
-gcloud secrets versions access latest --secret="${SECRET_NAME}" --project="${PROJECT_ID}" | base64 -d > KEY_FILE.json
+gcloud secrets versions access latest --secret="${SECRET_NAME}" --project="${PROJECT_ID}" | base64 -d >KEY_FILE.json
 
 echo ""
 echo -e "${GREEN}Deployment complete.${RESET}"
@@ -106,4 +106,3 @@ echo ""
 echo -e "${GREEN}Run 'cat KEY_FILE.json' to view the service account key."
 echo -e "Copy and paste it in the Elastic Agent GCP integration."
 echo -e "Save the key securely for future use.${RESET}"
-
