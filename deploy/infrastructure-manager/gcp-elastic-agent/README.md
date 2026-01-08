@@ -32,7 +32,7 @@ export STACK_VERSION="<YOUR_AGENT_VERSION>"
 
 #### Option 2: GCP Console
 
-1. Go to [Infrastructure Manager Console](https://console.cloud.google.com/infrastructure-manager/deployments/create)
+1. Go to [Infrastructure Manager Console](https://console.cloud.google.com/infra-manager/deployments/create)
 2. Configure:
    - **Source**: Git repository
    - **Repository URL**: `https://github.com/elastic/cloudbeat.git`
@@ -153,4 +153,4 @@ sudo journalctl -u google-startup-scripts.service
 2. **Guest attributes show "failed"**: Check serial console logs for error details
 3. **Guest attributes not available**: Guest attributes are enabled by default and populate during startup
 
-**Console:** [Infrastructure Manager Deployments](https://console.cloud.google.com/infrastructure-manager/deployments)
+**Console:** [Infrastructure Manager Deployments](https://console.cloud.google.com/infra-manager/deployments)
