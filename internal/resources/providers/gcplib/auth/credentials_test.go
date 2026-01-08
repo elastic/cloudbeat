@@ -33,12 +33,14 @@ import (
 )
 
 const (
-	saCredentialsJSON   = `{ "client_id": "test" }`
-	saFilePath          = "sa-credentials.json"
-	testProjectId       = "test-project"
-	testParentProjectId = "projects/test-project"
-	testOrgId           = "test-organization"
-	testParentOrgId     = "organizations/test-organization"
+	saCredentialsJSON       = `{ "client_id": "test" }`
+	saFilePath              = "sa-credentials.json"
+	testProjectId           = "test-project"
+	testParentProjectId     = "projects/test-project"
+	testOrgId               = "test-organization"
+	testParentOrgId         = "organizations/test-organization"
+	testServiceAccountEmail = "test-sa@test-project.iam.gserviceaccount.com"
+	testAudience            = "//iam.googleapis.com/projects/123456/locations/global/workloadIdentityPools/test-pool/providers/test-provider"
 )
 
 func TestGetGcpClientConfig(t *testing.T) {
@@ -76,11 +78,11 @@ func TestGetGcpClientConfig(t *testing.T) {
 			want: []*GcpFactoryConfig{
 				{
 					Parent:     testParentProjectId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+					ClientOpts: []option.ClientOption{option.WithAuthCredentialsFile(option.ServiceAccount, saFilePath)},
 				},
 				{
 					Parent:     testParentOrgId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+					ClientOpts: []option.ClientOption{option.WithAuthCredentialsFile(option.ServiceAccount, saFilePath)},
 				},
 			},
 			wantErr: false,
@@ -129,11 +131,11 @@ func TestGetGcpClientConfig(t *testing.T) {
 			want: []*GcpFactoryConfig{
 				{
 					Parent:     testParentProjectId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+					ClientOpts: []option.ClientOption{option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(saCredentialsJSON))},
 				},
 				{
 					Parent:     testParentOrgId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+					ClientOpts: []option.ClientOption{option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(saCredentialsJSON))},
 				},
 			},
 			wantErr: false,
@@ -185,15 +187,15 @@ func TestGetGcpClientConfig(t *testing.T) {
 				{
 					Parent: testParentProjectId,
 					ClientOpts: []option.ClientOption{
-						option.WithCredentialsFile(saFilePath),
-						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+						option.WithAuthCredentialsFile(option.ServiceAccount, saFilePath),
+						option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(saCredentialsJSON)),
 					},
 				},
 				{
 					Parent: testParentOrgId,
 					ClientOpts: []option.ClientOption{
-						option.WithCredentialsFile(saFilePath),
-						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+						option.WithAuthCredentialsFile(option.ServiceAccount, saFilePath),
+						option.WithAuthCredentialsJSON(option.ServiceAccount, []byte(saCredentialsJSON)),
 					},
 				},
 			},
@@ -282,6 +284,64 @@ func TestGetGcpClientConfig(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name: "Should return credentials for cloud connectors flow with single account",
+			cfg: []config.GcpConfig{
+				{
+					AccountType: config.SingleAccount,
+					ProjectId:   testProjectId,
+					GcpClientOpt: config.GcpClientOpt{
+						ServiceAccountEmail: testServiceAccountEmail,
+						Audience:            testAudience,
+					},
+				},
+			},
+			authProvider: mockGoogleAuthProviderWithCloudConnectors(nil),
+			want: []*GcpFactoryConfig{
+				{
+					Parent:     testParentProjectId,
+					ClientOpts: []option.ClientOption{option.WithTokenSource(nil)},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Should return credentials for cloud connectors flow with organization account",
+			cfg: []config.GcpConfig{
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt: config.GcpClientOpt{
+						ServiceAccountEmail: testServiceAccountEmail,
+						Audience:            testAudience,
+					},
+				},
+			},
+			authProvider: mockGoogleAuthProviderWithCloudConnectors(nil),
+			want: []*GcpFactoryConfig{
+				{
+					Parent:     testParentOrgId,
+					ClientOpts: []option.ClientOption{option.WithTokenSource(nil)},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Should return error when cloud connectors credentials fail",
+			cfg: []config.GcpConfig{
+				{
+					AccountType: config.SingleAccount,
+					ProjectId:   testProjectId,
+					GcpClientOpt: config.GcpClientOpt{
+						ServiceAccountEmail: testServiceAccountEmail,
+						Audience:            testAudience,
+					},
+				},
+			},
+			authProvider: mockGoogleAuthProviderWithCloudConnectors(errors.New("failed to get cloud connectors credentials")),
+			want:         nil,
+			wantErr:      true,
+		},
 	}
 	for _, tt := range tests {
 		p := ConfigProvider{
@@ -326,6 +386,20 @@ func mockGoogleAuthProvider(err error) *MockGoogleAuthProviderAPI {
 	if err == nil {
 		on.Return(
 			&google.Credentials{ProjectID: testProjectId},
+			nil,
+		)
+	} else {
+		on.Return(nil, err)
+	}
+	return googleProviderAPI
+}
+
+func mockGoogleAuthProviderWithCloudConnectors(err error) *MockGoogleAuthProviderAPI {
+	googleProviderAPI := &MockGoogleAuthProviderAPI{}
+	on := googleProviderAPI.EXPECT().FindCloudConnectorsCredentials(mock.Anything, testAudience, testServiceAccountEmail)
+	if err == nil {
+		on.Return(
+			[]option.ClientOption{option.WithTokenSource(nil)},
 			nil,
 		)
 	} else {
