@@ -22,4 +22,3 @@ output "audience" {
   description = "GCP audience URL for Workload Identity Federation (use in Elastic Agent config)"
   value       = "//iam.googleapis.com/${google_iam_workload_identity_pool_provider.oidc.name}"
 }
-
