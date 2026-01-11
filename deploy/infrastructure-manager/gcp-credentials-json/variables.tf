@@ -23,4 +23,3 @@ variable "parent_id" {
   description = "Parent ID (project ID or organization ID depending on scope)"
   type        = string
 }
-

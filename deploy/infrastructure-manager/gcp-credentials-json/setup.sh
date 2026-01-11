@@ -42,4 +42,3 @@ for role in "${REQUIRED_ROLES[@]}"; do
 done
 
 echo "✓ Setup complete"
-

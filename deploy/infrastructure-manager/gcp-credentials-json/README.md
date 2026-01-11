@@ -84,4 +84,3 @@ gcloud infra-manager deployments delete ${DEPLOYMENT_NAME} --location=${LOCATION
 3. **Organization scope fails**: Verify the ORG_ID is correct and you have org-level permissions
 
 **Console:** [Infrastructure Manager Deployments](https://console.cloud.google.com/infra-manager/deployments)
-
