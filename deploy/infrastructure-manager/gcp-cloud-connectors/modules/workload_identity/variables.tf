@@ -13,7 +13,17 @@ variable "provider_name" {
   type        = string
 }
 
-variable "oidc_issuer_uri" {
-  description = "OIDC issuer URI (e.g., https://sts.elastic.cloud)"
+variable "aws_account_id" {
+  description = "AWS Account ID that hosts the trusted role"
+  type        = string
+}
+
+variable "aws_role_name" {
+  description = "Name of the AWS role to trust (without ARN prefix)"
+  type        = string
+}
+
+variable "elastic_resource_id" {
+  description = "Unique identifier for the Elastic deployment (must match the AWS role session name)"
   type        = string
 }

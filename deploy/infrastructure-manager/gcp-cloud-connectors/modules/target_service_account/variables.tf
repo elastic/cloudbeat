@@ -23,7 +23,7 @@ variable "parent_id" {
   type        = string
 }
 
-variable "elastic_resource_id" {
-  description = "Unique identifier for the Elastic deployment (JWT subject claim)"
+variable "aws_role_name" {
+  description = "Name of the AWS role that can impersonate this service account"
   type        = string
 }

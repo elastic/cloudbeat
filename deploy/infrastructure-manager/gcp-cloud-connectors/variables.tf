@@ -3,10 +3,15 @@ variable "project_id" {
   type        = string
 }
 
-variable "oidc_issuer_uri" {
-  description = "OIDC issuer URI"
+variable "elastic_role_arn" {
+  description = "ARN of Elastic's AWS IAM role to trust (e.g., arn:aws:iam::254766567737:role/cloud_connectors)"
   type        = string
-  default     = "https://elastic-cloud-connector.s3.us-east-1.amazonaws.com"
+  default     = "arn:aws:iam::254766567737:role/cloud_connectors"
+
+  validation {
+    condition     = can(regex("^arn:aws:iam::[0-9]+:role/.+$", var.elastic_role_arn))
+    error_message = "elastic_role_arn must be a valid AWS IAM role ARN (e.g., arn:aws:iam::123456789012:role/my-role)"
+  }
 }
 
 variable "wif_pool_name" {
@@ -18,7 +23,7 @@ variable "wif_pool_name" {
 variable "wif_provider_name" {
   description = "Name of the Workload Identity Provider"
   type        = string
-  default     = "elastic-oidc-provider"
+  default     = "elastic-aws-provider"
 }
 
 variable "target_service_account_name" {
@@ -44,6 +49,6 @@ variable "parent_id" {
 }
 
 variable "elastic_resource_id" {
-  description = "Unique identifier for the Elastic deployment"
+  description = "Unique identifier for the Elastic deployment (must match the AWS role session name)"
   type        = string
 }

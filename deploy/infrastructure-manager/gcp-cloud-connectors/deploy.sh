@@ -9,21 +9,13 @@ SERVICE_ACCOUNT="infra-manager-deployer"
 "$(dirname "$0")/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
 
 # Required environment variables (no defaults - must be provided)
-# ELASTIC_RESOURCE_ID - Unique identifier for your Elastic deployment
+# ELASTIC_RESOURCE_ID - Unique identifier for your Elastic deployment (must match AWS role session name)
 
 # Optional environment variables (defaults are in variables.tf or below)
 # ORGANIZATION_ID     - Set for org-level monitoring
 # DEPLOYMENT_NAME     - Deployment name prefix (default: elastic-agent-sa)
 # LOCATION            - GCP region for deployment (default: us-central1)
-# OIDC_ISSUER_URI     - OIDC issuer URI
-
-# Validate required inputs
-if [ -z "${ELASTIC_RESOURCE_ID}" ]; then
-    echo "Error: ELASTIC_RESOURCE_ID environment variable is required"
-    echo "This is a unique identifier for your Elastic deployment"
-    echo "Example: export ELASTIC_RESOURCE_ID='my-deployment-uuid'"
-    exit 1
-fi
+# ELASTIC_ROLE_ARN    - Elastic's AWS Role ARN to trust (default: arn:aws:iam::254766567737:role/cloud_connectors)
 
 # Generate unique suffix for resource names (8 hex characters)
 RESOURCE_SUFFIX=$(openssl rand -hex 4)
@@ -50,7 +42,7 @@ else
 fi
 
 # Optional values - only add if explicitly set (let TF use its defaults otherwise)
-[ -n "${OIDC_ISSUER_URI}" ] && INPUT_VALUES="${INPUT_VALUES},oidc_issuer_uri=${OIDC_ISSUER_URI}"
+[ -n "${ELASTIC_ROLE_ARN}" ] && INPUT_VALUES="${INPUT_VALUES},elastic_role_arn=${ELASTIC_ROLE_ARN}"
 
 # Deploy from local source (repo already cloned by Cloud Shell)
 echo "Starting deployment ${DEPLOYMENT_NAME}..."
@@ -66,7 +58,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "Deployment failed with exit code $EXIT_CODE"
     echo ""
     echo "Common failure reasons:"
-    echo "  - Invalid oidc_issuer_uri (verify the OIDC issuer URL is correct)"
+    echo "  - Invalid AWS role ARN format"
     echo "  - Service account permissions missing for ${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
     echo "  - Organization ID incorrect (if using organization scope)"
     echo ""

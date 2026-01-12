@@ -37,9 +37,10 @@ resource "google_organization_iam_member" "browser_org" {
 }
 
 # Allow Workload Identity Federation to impersonate Target Service Account
-# Only the specific JWT subject (elastic_resource_id) can impersonate this SA
+# Only the specific AWS role can impersonate this SA
 resource "google_service_account_iam_member" "workload_identity_user" {
   service_account_id = google_service_account.target.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principal://iam.googleapis.com/${var.wif_pool_name}/subject/${var.elastic_resource_id}"
+  # Trust the AWS role from Elastic's account
+  member             = "principalSet://iam.googleapis.com/${var.wif_pool_name}/attribute.aws_role/${var.aws_role_name}"
 }
