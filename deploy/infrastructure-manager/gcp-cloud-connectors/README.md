@@ -112,7 +112,7 @@ This module implements security best practices:
 - **Two-layer validation**:
   1. AWS role ARN must match `arn:aws:iam::254766567737:role/cloud_connectors`
   2. AWS role session name must match the `elastic_resource_id`
-  
+
 The attribute condition validates the full assumed-role ARN:
 ```
 arn:aws:sts::254766567737:assumed-role/cloud_connectors/<elastic_resource_id>
