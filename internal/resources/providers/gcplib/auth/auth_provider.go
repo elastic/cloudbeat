@@ -19,6 +19,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
@@ -61,15 +62,15 @@ func (p *GoogleAuthProvider) FindDefaultCredentials(ctx context.Context) (*googl
 func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, audience string, serviceAccountEmail string) ([]option.ClientOption, error) {
 	// Validate required configuration
 	if ccConfig.JWTFilePath == "" {
-		return nil, fmt.Errorf("cloud connectors config JWTFilePath is required")
+		return nil, errors.New("cloud connectors config JWTFilePath is required")
 	}
 
 	if ccConfig.GlobalRoleARN == "" {
-		return nil, fmt.Errorf("cloud connectors config GlobalRoleARN is required")
+		return nil, errors.New("cloud connectors config GlobalRoleARN is required")
 	}
 
 	if ccConfig.ResourceID == "" {
-		return nil, fmt.Errorf("cloud connectors config ResourceID is required")
+		return nil, errors.New("cloud connectors config ResourceID is required")
 	}
 
 	// Create the AWS credentials supplier that handles the JWT -> AWS role assumption
@@ -107,12 +108,12 @@ type awsCredentialsSupplier struct {
 }
 
 // AwsRegion returns the AWS region for the credentials.
-func (s *awsCredentialsSupplier) AwsRegion(ctx context.Context, options externalaccount.SupplierOptions) (string, error) {
+func (s *awsCredentialsSupplier) AwsRegion(_ context.Context, _ externalaccount.SupplierOptions) (string, error) {
 	return s.region, nil
 }
 
 // AwsSecurityCredentials assumes the AWS role using the JWT and returns the temporary credentials.
-func (s *awsCredentialsSupplier) AwsSecurityCredentials(ctx context.Context, options externalaccount.SupplierOptions) (*externalaccount.AwsSecurityCredentials, error) {
+func (s *awsCredentialsSupplier) AwsSecurityCredentials(ctx context.Context, _ externalaccount.SupplierOptions) (*externalaccount.AwsSecurityCredentials, error) {
 	// Create STS client without credentials (we're using web identity)
 	stsClient := sts.New(sts.Options{
 		Region: s.region,
