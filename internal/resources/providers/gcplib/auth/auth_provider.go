@@ -20,8 +20,9 @@ package auth
 import (
 	"context"
 	"fmt"
-	"os"
 
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/google/externalaccount"
 	"google.golang.org/api/option"
@@ -34,10 +35,12 @@ const (
 	gcpSTSTokenURL = "https://sts.googleapis.com/v1/token"
 	// GCP IAM Credentials API endpoint for service account impersonation
 	gcpIAMCredentialsURL = "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/"
-	// Token type for JWT-based authentication
-	jwtTokenType = "urn:ietf:params:oauth:token-type:jwt"
+	// Token type for AWS-based authentication
+	awsTokenType = "urn:ietf:params:aws:token-type:aws4_request"
 	// Default scope for GCP Cloud Platform access
 	gcpCloudPlatformScope = "https://www.googleapis.com/auth/cloud-platform"
+	// Default AWS region for STS operations
+	defaultAWSRegion = "us-east-1"
 )
 
 type GoogleAuthProvider struct{}
@@ -47,23 +50,42 @@ func (p *GoogleAuthProvider) FindDefaultCredentials(ctx context.Context) (*googl
 	return google.FindDefaultCredentials(ctx)
 }
 
-// FindCloudConnectorsCredentials creates GCP client options using OIDC/Web Identity token-based authentication
-// with direct service account impersonation. The target Service Account must trust the OIDC provider.
-func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context, audience string, serviceAccountEmail string) ([]option.ClientOption, error) {
-	jwtFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
-	if jwtFilePath == "" {
-		return nil, fmt.Errorf("environment variable %s is required for cloud connectors credentials", config.CloudConnectorsJWTPathEnvVar)
+// FindCloudConnectorsCredentials creates GCP client options using AWS Workload Identity Federation
+// with direct service account impersonation.
+//
+// The authentication flow:
+// 1. Reads JWT from file (ccConfig.JWTFilePath)
+// 2. Assumes Elastic's AWS role using AssumeRoleWithWebIdentity
+// 3. Uses AWS credentials for GCP Workload Identity Federation token exchange
+// 4. Impersonates the target service account in the customer's GCP project
+func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, audience string, serviceAccountEmail string) ([]option.ClientOption, error) {
+	// Validate required configuration
+	if ccConfig.JWTFilePath == "" {
+		return nil, fmt.Errorf("cloud connectors config JWTFilePath is required")
+	}
+
+	if ccConfig.GlobalRoleARN == "" {
+		return nil, fmt.Errorf("cloud connectors config GlobalRoleARN is required")
+	}
+
+	if ccConfig.ResourceID == "" {
+		return nil, fmt.Errorf("cloud connectors config ResourceID is required")
+	}
+
+	// Create the AWS credentials supplier that handles the JWT -> AWS role assumption
+	credSupplier := &awsCredentialsSupplier{
+		jwtFilePath:   ccConfig.JWTFilePath,
+		globalRoleARN: ccConfig.GlobalRoleARN,
+		roleSessionID: ccConfig.ResourceID,
+		region:        defaultAWSRegion,
 	}
 
 	cfg := externalaccount.Config{
-		Audience:         audience,
-		SubjectTokenType: jwtTokenType,
-		TokenURL:         gcpSTSTokenURL,
-		Scopes:           []string{gcpCloudPlatformScope},
-		CredentialSource: &externalaccount.CredentialSource{
-			File:   jwtFilePath,
-			Format: externalaccount.Format{Type: "text"},
-		},
+		Audience:                       audience,
+		SubjectTokenType:               awsTokenType,
+		TokenURL:                       gcpSTSTokenURL,
+		Scopes:                         []string{gcpCloudPlatformScope},
+		AwsSecurityCredentialsSupplier: credSupplier,
 		ServiceAccountImpersonationURL: gcpIAMCredentialsURL + serviceAccountEmail + ":generateAccessToken",
 	}
 
@@ -73,4 +95,48 @@ func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context,
 	}
 
 	return []option.ClientOption{option.WithTokenSource(tokenSource)}, nil
+}
+
+// awsCredentialsSupplier implements externalaccount.AwsSecurityCredentialsSupplier
+// It assumes an AWS role using a JWT token and provides the resulting credentials to GCP.
+type awsCredentialsSupplier struct {
+	jwtFilePath   string
+	globalRoleARN string
+	roleSessionID string
+	region        string
+}
+
+// AwsRegion returns the AWS region for the credentials.
+func (s *awsCredentialsSupplier) AwsRegion(ctx context.Context, options externalaccount.SupplierOptions) (string, error) {
+	return s.region, nil
+}
+
+// AwsSecurityCredentials assumes the AWS role using the JWT and returns the temporary credentials.
+func (s *awsCredentialsSupplier) AwsSecurityCredentials(ctx context.Context, options externalaccount.SupplierOptions) (*externalaccount.AwsSecurityCredentials, error) {
+	// Create STS client without credentials (we're using web identity)
+	stsClient := sts.New(sts.Options{
+		Region: s.region,
+	})
+
+	// Use the AWS SDK's built-in web identity provider
+	webIdentityProvider := stscreds.NewWebIdentityRoleProvider(
+		stsClient,
+		s.globalRoleARN,
+		stscreds.IdentityTokenFile(s.jwtFilePath),
+		func(o *stscreds.WebIdentityRoleOptions) {
+			o.RoleSessionName = s.roleSessionID
+		},
+	)
+
+	// Retrieve credentials using the web identity provider
+	creds, err := webIdentityProvider.Retrieve(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to assume role %s with web identity: %w", s.globalRoleARN, err)
+	}
+
+	return &externalaccount.AwsSecurityCredentials{
+		AccessKeyID:     creds.AccessKeyID,
+		SecretAccessKey: creds.SecretAccessKey,
+		SessionToken:    creds.SessionToken,
+	}, nil
 }
