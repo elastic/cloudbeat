@@ -74,7 +74,6 @@ func (s *lambdaFetcher) fetch(ctx context.Context, resourceName string, function
 	awsResources, err := function(ctx)
 	if err != nil {
 		s.logger.Errorf("Could not fetch %s: %v", resourceName, err)
-		return
 	}
 
 	for _, item := range awsResources {

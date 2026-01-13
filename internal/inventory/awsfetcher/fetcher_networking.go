@@ -89,7 +89,6 @@ func (s *networkingFetcher) fetch(ctx context.Context, resourceName string, func
 	awsResources, err := function(ctx)
 	if err != nil {
 		s.logger.Errorf("Could not fetch %s: %v", resourceName, err)
-		return
 	}
 
 	for _, item := range awsResources {

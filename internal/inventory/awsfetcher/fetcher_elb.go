@@ -74,7 +74,6 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 	awsResources, err := function(ctx)
 	if err != nil {
 		f.logger.Errorf("Could not fetch %s: %v", resourceName, err)
-		return
 	}
 
 	for _, item := range awsResources {

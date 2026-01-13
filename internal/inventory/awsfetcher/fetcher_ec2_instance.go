@@ -54,7 +54,11 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 	instances, err := e.provider.DescribeInstances(ctx)
 	if err != nil {
 		e.logger.Errorf("Could not list ec2 instances: %v", err)
+<<<<<<< HEAD
 		return
+=======
+		awslib.ReportMissingPermission(e.statusHandler, err)
+>>>>>>> 07423dac (report existing resources (#3852))
 	}
 
 	for _, i := range instances {
