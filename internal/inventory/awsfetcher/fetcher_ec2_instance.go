@@ -59,7 +59,6 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 	if err != nil {
 		e.logger.Errorf("Could not list ec2 instances: %v", err)
 		awslib.ReportMissingPermission(e.statusHandler, err)
-		return
 	}
 
 	for _, i := range instances {

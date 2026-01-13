@@ -57,7 +57,6 @@ func (s *snsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	if err != nil {
 		s.logger.Errorf("Could not fetch SNS Topics: %v", err)
 		awslib.ReportMissingPermission(s.statusHandler, err)
-		return
 	}
 
 	for _, item := range awsResources {
