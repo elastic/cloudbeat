@@ -4,8 +4,8 @@ set -e
 # This script:
 # 1. Enables necessary APIs for Elastic Agent GCP integration
 # 2. Deploys Terraform via GCP Infrastructure Manager to create a service account with roles and key
-# 3. Saves generated key to KEY_FILE.json
-# 4. Outputs instructions for using the key in Elastic Agent GCP integration
+# 3. Stores the key in Secret Manager
+# 4. Outputs command to retrieve the key for Elastic Agent GCP integration
 
 # Configure GCP project
 PROJECT_ID=$(gcloud config get-value core/project)
@@ -75,7 +75,6 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 # Get the latest revision name from the deployment
-echo -e "${GREEN}Retrieving service account key from Secret Manager...${RESET}"
 REVISION=$(gcloud infra-manager deployments describe "${DEPLOYMENT_NAME}" \
     --location="${LOCATION}" \
     --format='value(latestRevision)')
@@ -95,14 +94,14 @@ if [ -z "$SECRET_NAME" ]; then
     exit 1
 fi
 
-# Access the secret from Secret Manager and save to file
-gcloud secrets versions access latest --secret="${SECRET_NAME}" --project="${PROJECT_ID}" | base64 -d >KEY_FILE.json
-
 echo ""
 echo -e "${GREEN}Deployment complete.${RESET}"
 gcloud infra-manager deployments describe "${DEPLOYMENT_NAME}" --location="${LOCATION}" --format='table(resources)'
 
 echo ""
-echo -e "${GREEN}Run 'cat KEY_FILE.json' to view the service account key."
-echo -e "Copy and paste it in the Elastic Agent GCP integration."
-echo -e "Save the key securely for future use.${RESET}"
+echo -e "${GREEN}The service account key is stored in Secret Manager.${RESET}"
+echo -e "${GREEN}To retrieve it, run:${RESET}"
+echo ""
+echo "  gcloud secrets versions access latest --secret=\"${SECRET_NAME}\" --project=\"${PROJECT_ID}\" | base64 -d"
+echo ""
+echo -e "${GREEN}Copy and paste the output in the Elastic Agent GCP integration.${RESET}"
