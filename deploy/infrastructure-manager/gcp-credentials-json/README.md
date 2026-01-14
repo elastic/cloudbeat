@@ -17,25 +17,28 @@ This creates a service account with the necessary permissions and generates a JS
 
 ```bash
 # For project-level monitoring (default)
-./deploy_service_account.sh
+./deploy.sh
 
 # For organization-level monitoring
 export ORG_ID="<YOUR_ORG_ID>"
-./deploy_service_account.sh
+./deploy.sh
 ```
 
-#### Option 2: Local Terminal
+#### Option 2: GCP Console
 
-```bash
-cd deploy/infrastructure-manager/gcp-credentials-json
-
-# For project-level monitoring (default)
-./deploy_service_account.sh
-
-# For organization-level monitoring
-export ORG_ID="<YOUR_ORG_ID>"
-./deploy_service_account.sh
-```
+1. Go to [Infrastructure Manager Console](https://console.cloud.google.com/infra-manager/deployments/create)
+2. Configure:
+   - **Source**: Git repository
+   - **Repository URL**: `https://github.com/elastic/cloudbeat.git`
+   - **Branch**: `main`
+   - **Directory**: `deploy/infrastructure-manager/gcp-credentials-json`
+   - **Location**: `us-central1`
+3. Add input variables:
+   - `project_id`: Your GCP project ID
+   - `resource_suffix`: Unique suffix (e.g., `abc123`)
+   - `scope`: `projects` or `organizations`
+   - `parent_id`: Project ID or Organization ID
+4. Click **Create**
 
 ### Environment Variables
 
@@ -54,14 +57,13 @@ export ORG_ID="<YOUR_ORG_ID>"
 
 ### Output
 
-After successful deployment, a `KEY_FILE.json` file is created containing the service account credentials.
+After successful deployment, the script outputs a `gcloud` command to retrieve the service account credentials from Secret Manager.
 
 **To use the credentials:**
 
-1. Run `cat KEY_FILE.json` to view the key
+1. Run the `gcloud secrets versions access ...` command shown in the output
 2. Copy the entire JSON content
 3. Paste it in the Elastic Agent GCP integration in Kibana
-4. Save the key securely for future use
 
 ### Management
 
