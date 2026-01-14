@@ -17,10 +17,10 @@ resource "google_iam_workload_identity_pool_provider" "aws" {
   disabled                           = false
 
   attribute_mapping = {
-    "google.subject"           = "assertion.arn"
-    "attribute.aws_role"       = "assertion.arn.extract('assumed-role/{role}/')"
-    "attribute.aws_account"    = "assertion.account"
-    "attribute.session_name"   = "assertion.arn.extract('assumed-role/${var.aws_role_name}/{session}/')"
+    "google.subject"         = "assertion.arn"
+    "attribute.aws_role"     = "assertion.arn.extract('assumed-role/{role}/')"
+    "attribute.aws_account"  = "assertion.account"
+    "attribute.session_name" = "assertion.arn.extract('assumed-role/${var.aws_role_name}/{session}/')"
   }
 
   # Validate: AWS role ARN + session name must match the elastic_resource_id

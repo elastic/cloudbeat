@@ -21,8 +21,8 @@ locals {
 
   # Parse Elastic's AWS role ARN: arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME
   elastic_role_arn_parts = regex("arn:aws:iam::([0-9]+):role/(.+)", var.elastic_role_arn)
-  aws_account_id     = local.elastic_role_arn_parts[0]
-  aws_role_name      = local.elastic_role_arn_parts[1]
+  aws_account_id         = local.elastic_role_arn_parts[0]
+  aws_role_name          = local.elastic_role_arn_parts[1]
 }
 
 # Resource suffix for all resource names

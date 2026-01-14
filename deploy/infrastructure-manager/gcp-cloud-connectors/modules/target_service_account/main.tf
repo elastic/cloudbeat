@@ -42,5 +42,5 @@ resource "google_service_account_iam_member" "workload_identity_user" {
   service_account_id = google_service_account.target.name
   role               = "roles/iam.workloadIdentityUser"
   # Trust the AWS role from Elastic's account
-  member             = "principalSet://iam.googleapis.com/${var.wif_pool_name}/attribute.aws_role/${var.aws_role_name}"
+  member = "principalSet://iam.googleapis.com/${var.wif_pool_name}/attribute.aws_role/${var.aws_role_name}"
 }
