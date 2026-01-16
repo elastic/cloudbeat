@@ -2,7 +2,7 @@
 
 Deploy a GCP service account with JSON credentials for Elastic Agent GCP integration using GCP Infrastructure Manager.
 
-This creates a service account with the necessary permissions and generates a JSON key file that can be used in the Elastic Agent GCP integration in Kibana.
+This creates a service account with the necessary permissions and stores the JSON key in Secret Manager for use in the Elastic Agent GCP integration in Kibana.
 
 ### Prerequisites
 
