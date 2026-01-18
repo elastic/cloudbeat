@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"golang.org/x/oauth2/google"
@@ -29,6 +30,7 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 const (
@@ -73,12 +75,21 @@ func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context,
 		return nil, errors.New("cloud connectors config ResourceID is required")
 	}
 
-	// Create the AWS credentials supplier that handles the JWT -> AWS role assumption
+	// Create STS client and credentials cache at initialization (like role chaining)
+	stsClient := sts.New(sts.Options{Region: defaultAWSRegion})
+	credsCache := awslib.NewWebIdentityCredentialsCache(
+		stsClient,
+		ccConfig.GlobalRoleARN,
+		ccConfig.JWTFilePath,
+		func(o *stscreds.WebIdentityRoleOptions) {
+			o.RoleSessionName = ccConfig.ResourceID
+		},
+	)
+
+	// Create the AWS credentials supplier with the pre-initialized cache
 	credSupplier := &awsCredentialsSupplier{
-		jwtFilePath:   ccConfig.JWTFilePath,
-		globalRoleARN: ccConfig.GlobalRoleARN,
-		roleSessionID: ccConfig.ResourceID,
-		region:        defaultAWSRegion,
+		region:     defaultAWSRegion,
+		credsCache: credsCache,
 	}
 
 	cfg := externalaccount.Config{
@@ -99,12 +110,11 @@ func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context,
 }
 
 // awsCredentialsSupplier implements externalaccount.AwsSecurityCredentialsSupplier
-// It assumes an AWS role using a JWT token and provides the resulting credentials to GCP.
+// It provides cached AWS credentials to GCP for Workload Identity Federation.
+// The credentials cache is initialized once and automatically refreshes when expired.
 type awsCredentialsSupplier struct {
-	jwtFilePath   string
-	globalRoleARN string
-	roleSessionID string
-	region        string
+	region     string
+	credsCache *aws.CredentialsCache
 }
 
 // AwsRegion returns the AWS region for the credentials.
@@ -112,27 +122,12 @@ func (s *awsCredentialsSupplier) AwsRegion(_ context.Context, _ externalaccount.
 	return s.region, nil
 }
 
-// AwsSecurityCredentials assumes the AWS role using the JWT and returns the temporary credentials.
+// AwsSecurityCredentials retrieves cached AWS credentials for GCP WIF.
+// The cache automatically refreshes credentials when they expire.
 func (s *awsCredentialsSupplier) AwsSecurityCredentials(ctx context.Context, _ externalaccount.SupplierOptions) (*externalaccount.AwsSecurityCredentials, error) {
-	// Create STS client without credentials (we're using web identity)
-	stsClient := sts.New(sts.Options{
-		Region: s.region,
-	})
-
-	// Use the AWS SDK's built-in web identity provider
-	webIdentityProvider := stscreds.NewWebIdentityRoleProvider(
-		stsClient,
-		s.globalRoleARN,
-		stscreds.IdentityTokenFile(s.jwtFilePath),
-		func(o *stscreds.WebIdentityRoleOptions) {
-			o.RoleSessionName = s.roleSessionID
-		},
-	)
-
-	// Retrieve credentials using the web identity provider
-	creds, err := webIdentityProvider.Retrieve(ctx)
+	creds, err := s.credsCache.Retrieve(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to assume role %s with web identity: %w", s.globalRoleARN, err)
+		return nil, fmt.Errorf("failed to retrieve AWS credentials: %w", err)
 	}
 
 	return &externalaccount.AwsSecurityCredentials{
