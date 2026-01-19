@@ -60,16 +60,13 @@ fi
 
 # Deploy from local source (repo already cloned by Cloud Shell)
 echo "Starting deployment ${DEPLOYMENT_NAME}..."
-gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
+if ! gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
     --location="${LOCATION}" \
     --service-account="projects/${PROJECT_ID}/serviceAccounts/${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --local-source="." \
-    --input-values="${INPUT_VALUES}"
-
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
+    --input-values="${INPUT_VALUES}"; then
     echo ""
-    echo "Deployment failed with exit code $EXIT_CODE"
+    echo "Deployment failed"
     echo ""
     echo "Common failure reasons:"
     echo "  - Wrong artifacts server for pre-release artifact (check ELASTIC_ARTIFACT_SERVER for snapshots/pre-releases)"
@@ -89,7 +86,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "  # View VM startup script logs"
     echo "  gcloud compute instances get-serial-port-output elastic-agent-vm-${RESOURCE_SUFFIX} --zone=${EFFECTIVE_ZONE} --project=${PROJECT_ID}"
     echo ""
-    exit $EXIT_CODE
+    exit 1
 fi
 
 echo ""
