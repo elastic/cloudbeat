@@ -40,14 +40,10 @@ type TrailBucket struct {
 	ACL     *s3Client.GetBucketAclOutput `json:"acl,omitempty"`
 }
 
-// logBucketError logs an error with appropriate level based on the error message.
-// If the error is nil, it returns early. If the error message contains "NoSuchBucket",
-// it uses Warnf, otherwise Errorf.
 func (p *Provider) logBucketError(err error, bucketName, operation string) {
 	if err == nil {
 		return
 	}
-	
 	errMsg := err.Error()
 	if strings.Contains(errMsg, "NoSuchBucket") {
 		p.log.Warnf("Error getting bucket %s for bucket %s: %v", operation, bucketName, err)
@@ -61,7 +57,6 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 	if trailsErr != nil {
 		return nil, trailsErr
 	}
-
 	enrichedTrails := make([]awslib.AwsResource, 0, len(trails))
 	for _, info := range trails {
 		if info.Trail.S3BucketName == nil {
