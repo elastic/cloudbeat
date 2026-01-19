@@ -49,16 +49,13 @@ fi
 echo -e "${GREEN}Starting deployment '${DEPLOYMENT_NAME}'...${RESET}"
 
 # Deploy from local source
-gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
+if ! gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
     --location="${LOCATION}" \
     --service-account="projects/${PROJECT_ID}/serviceAccounts/${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com" \
     --local-source="." \
-    --input-values="${INPUT_VALUES}"
-
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
+    --input-values="${INPUT_VALUES}"; then
     echo ""
-    echo -e "${RED}Deployment failed with exit code $EXIT_CODE${RESET}"
+    echo -e "${RED}Deployment failed${RESET}"
     echo ""
     echo "Common failure reasons:"
     echo "  - Service account permissions missing for ${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
@@ -71,7 +68,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "  # Verify service account permissions"
     echo "  gcloud projects get-iam-policy ${PROJECT_ID} --flatten='bindings[].members' --filter='bindings.members:serviceAccount:${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com' --format='table(bindings.role)'"
     echo ""
-    exit $EXIT_CODE
+    exit 1
 fi
 
 # Get the latest revision name from the deployment
