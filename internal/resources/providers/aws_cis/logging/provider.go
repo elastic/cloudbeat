@@ -1,5 +1,5 @@
-// Licensed to Elasticsearch B.V. under one or more contributor
 // license agreements. See the NOTICE file distributed with
+// Licensed to Elasticsearch B.V. under one or more contributor
 // this work for additional information regarding copyright
 // ownership. Elasticsearch B.V. licenses this file to you under
 // the Apache License, Version 2.0 (the "License"); you may
@@ -19,9 +19,10 @@ package logging
 
 import (
 	"context"
-	"strings"
+	"errors"
 
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
+	types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -44,8 +45,8 @@ func (p *Provider) logBucketError(err error, bucketName, operation string) {
 	if err == nil {
 		return
 	}
-	errMsg := err.Error()
-	if strings.Contains(errMsg, "NoSuchBucket") {
+	var nsb *types.NoSuchBucket
+	if errors.As(err, &nsb) {
 		p.log.Warnf("Error getting bucket %s for bucket %s: %v", operation, bucketName, err)
 	} else {
 		p.log.Errorf("Error getting bucket %s for bucket %s: %v", operation, bucketName, err)
