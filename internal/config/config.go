@@ -91,6 +91,8 @@ type GcpConfig struct {
 	GcpCallOpt GcpCallOpt `config:"call_options"`
 
 	GcpClientOpt `config:"credentials"`
+
+	CloudConnectorsConfig CloudConnectorsConfig
 }
 
 type GcpClientOpt struct {
@@ -204,6 +206,11 @@ func New(cfg *config.C) (*Config, error) {
 		c.CloudConfig.Aws.CloudConnectorsConfig = newCloudConnectorsConfig()
 	}
 
+	// GCP Cloud Connectors flow is indicated by service_account_email being set
+	if c.CloudConfig.Gcp.ServiceAccountEmail != "" {
+		c.CloudConfig.Gcp.CloudConnectorsConfig = newCloudConnectorsConfig()
+	}
+
 	return c, nil
 }
 
@@ -266,6 +273,7 @@ type CloudConnectorsConfig struct {
 	LocalRoleARN  string
 	GlobalRoleARN string
 	ResourceID    string
+	JWTFilePath   string
 }
 
 func newCloudConnectorsConfig() CloudConnectorsConfig {
@@ -273,6 +281,7 @@ func newCloudConnectorsConfig() CloudConnectorsConfig {
 		LocalRoleARN:  os.Getenv(CloudConnectorsLocalRoleEnvVar),
 		GlobalRoleARN: os.Getenv(CloudConnectorsGlobalRoleEnvVar),
 		ResourceID:    os.Getenv(CloudResourceIDEnvVar),
+		JWTFilePath:   os.Getenv(CloudConnectorsJWTPathEnvVar),
 	}
 }
 

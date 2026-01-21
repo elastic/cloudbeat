@@ -396,7 +396,7 @@ func mockGoogleAuthProvider(err error) *MockGoogleAuthProviderAPI {
 
 func mockGoogleAuthProviderWithCloudConnectors(err error) *MockGoogleAuthProviderAPI {
 	googleProviderAPI := &MockGoogleAuthProviderAPI{}
-	on := googleProviderAPI.EXPECT().FindCloudConnectorsCredentials(mock.Anything, testAudience, testServiceAccountEmail)
+	on := googleProviderAPI.EXPECT().FindCloudConnectorsCredentials(mock.Anything, mock.Anything, testAudience, testServiceAccountEmail)
 	if err == nil {
 		on.Return(
 			[]option.ClientOption{option.WithTokenSource(nil)},
