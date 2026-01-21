@@ -6,4 +6,4 @@ set -e
 #
 # See ../gcp-credentials-json/README.md for details.
 
-exec "$(dirname "$0")/../gcp-credentials-json/deploy.sh" "$@"
+"$(dirname "$0")/../gcp-credentials-json/deploy.sh" "$@"
