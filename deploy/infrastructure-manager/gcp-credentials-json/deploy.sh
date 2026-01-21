@@ -96,7 +96,7 @@ fi
 
 # Retrieve the key from Secret Manager and save locally
 KEY_FILE="KEY_FILE.json"
-if ! gcloud secrets versions access latest --secret="${SECRET_NAME}" --project="${PROJECT_ID}" | base64 -d > "${KEY_FILE}"; then
+if ! gcloud secrets versions access latest --secret="${SECRET_NAME}" --project="${PROJECT_ID}" | base64 -d >"${KEY_FILE}"; then
     echo -e "${RED}Error: Failed to retrieve key from Secret Manager.${RESET}"
     exit 1
 fi
