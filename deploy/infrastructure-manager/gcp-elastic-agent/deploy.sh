@@ -1,12 +1,15 @@
 #!/bin/bash
 set -e
 
+# Get the directory where this script lives (for Terraform source files)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 # Configure GCP project
 PROJECT_ID=$(gcloud config get-value core/project)
 SERVICE_ACCOUNT="infra-manager-deployer"
 
 # Ensure prerequisites are configured
-"$(dirname "$0")/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
+"${SCRIPT_DIR}/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
 
 # Required environment variables (no defaults - must be provided)
 # FLEET_URL, ENROLLMENT_TOKEN, STACK_VERSION
@@ -60,16 +63,13 @@ fi
 
 # Deploy from local source (repo already cloned by Cloud Shell)
 echo "Starting deployment ${DEPLOYMENT_NAME}..."
-gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
+if ! gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
     --location="${LOCATION}" \
     --service-account="projects/${PROJECT_ID}/serviceAccounts/${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com" \
-    --local-source="." \
-    --input-values="${INPUT_VALUES}"
-
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
+    --local-source="${SCRIPT_DIR}" \
+    --input-values="${INPUT_VALUES}"; then
     echo ""
-    echo "Deployment failed with exit code $EXIT_CODE"
+    echo "Deployment failed"
     echo ""
     echo "Common failure reasons:"
     echo "  - Wrong artifacts server for pre-release artifact (check ELASTIC_ARTIFACT_SERVER for snapshots/pre-releases)"
@@ -89,7 +89,7 @@ if [ $EXIT_CODE -ne 0 ]; then
     echo "  # View VM startup script logs"
     echo "  gcloud compute instances get-serial-port-output elastic-agent-vm-${RESOURCE_SUFFIX} --zone=${EFFECTIVE_ZONE} --project=${PROJECT_ID}"
     echo ""
-    exit $EXIT_CODE
+    exit 1
 fi
 
 echo ""
