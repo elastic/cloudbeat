@@ -1,12 +1,15 @@
 #!/bin/bash
 set -e
 
+# Get the directory where this script lives (for Terraform source files)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 # Configure GCP project
 PROJECT_ID=$(gcloud config get-value core/project)
 SERVICE_ACCOUNT="infra-manager-deployer"
 
 # Ensure prerequisites are configured
-"$(dirname "$0")/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
+"${SCRIPT_DIR}/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
 
 # Required environment variables (no defaults - must be provided)
 # FLEET_URL, ENROLLMENT_TOKEN, STACK_VERSION
@@ -63,7 +66,7 @@ echo "Starting deployment ${DEPLOYMENT_NAME}..."
 if ! gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
     --location="${LOCATION}" \
     --service-account="projects/${PROJECT_ID}/serviceAccounts/${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com" \
-    --local-source="." \
+    --local-source="${SCRIPT_DIR}" \
     --input-values="${INPUT_VALUES}"; then
     echo ""
     echo "Deployment failed"
