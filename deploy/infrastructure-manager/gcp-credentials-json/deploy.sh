@@ -5,7 +5,10 @@ set -e
 # 1. Enables necessary APIs for Elastic Agent GCP integration
 # 2. Deploys Terraform via GCP Infrastructure Manager to create a service account with roles and key
 # 3. Stores the key in Secret Manager
-# 4. Outputs command to retrieve the key for Elastic Agent GCP integration
+# 4. Saves the key locally to KEY_FILE.json for easy access
+
+# Get the directory where this script lives (for Terraform source files)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Configure GCP project
 PROJECT_ID=$(gcloud config get-value core/project)
@@ -52,7 +55,7 @@ echo -e "${GREEN}Starting deployment '${DEPLOYMENT_NAME}'...${RESET}"
 if ! gcloud infra-manager deployments apply "${DEPLOYMENT_NAME}" \
     --location="${LOCATION}" \
     --service-account="projects/${PROJECT_ID}/serviceAccounts/${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com" \
-    --local-source="." \
+    --local-source="${SCRIPT_DIR}" \
     --input-values="${INPUT_VALUES}"; then
     echo ""
     echo -e "${RED}Deployment failed${RESET}"
@@ -91,14 +94,20 @@ if [ -z "$SECRET_NAME" ]; then
     exit 1
 fi
 
+# Retrieve the key from Secret Manager and save locally
+KEY_FILE="KEY_FILE.json"
+if ! gcloud secrets versions access latest --secret="${SECRET_NAME}" --project="${PROJECT_ID}" | base64 -d > "${KEY_FILE}"; then
+    echo -e "${RED}Error: Failed to retrieve key from Secret Manager.${RESET}"
+    exit 1
+fi
+
 echo ""
 echo -e "${GREEN}Deployment complete.${RESET}"
 gcloud infra-manager deployments describe "${DEPLOYMENT_NAME}" --location="${LOCATION}" --format='table(resources)'
 
 echo ""
-echo -e "${GREEN}The service account key is stored in Secret Manager.${RESET}"
-echo -e "${GREEN}To retrieve it, run:${RESET}"
+echo -e "${GREEN}Run 'cat ${KEY_FILE}' to view the service account key. Copy and paste it in the Elastic Agent GCP integration."
+echo -e "Save the key securely for future use.${RESET}"
 echo ""
+echo -e "${GREEN}The key is also stored in Secret Manager for future access:${RESET}"
 echo "  gcloud secrets versions access latest --secret=\"${SECRET_NAME}\" --project=\"${PROJECT_ID}\" | base64 -d"
-echo ""
-echo -e "${GREEN}Copy and paste the output in the Elastic Agent GCP integration.${RESET}"

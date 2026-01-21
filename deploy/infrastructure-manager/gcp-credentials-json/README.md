@@ -51,19 +51,22 @@ export ORG_ID="<YOUR_ORG_ID>"
 ### Resources Created
 
 - Service account with `cloudasset.viewer` and `browser` roles
-- Service account key (stored securely in Secret Manager)
+- Service account key (stored securely in Secret Manager and saved locally)
 - Secret Manager secret containing the JSON credentials
 - IAM bindings (project or organization level)
+- Local `KEY_FILE.json` with the service account credentials
 
 ### Output
 
-After successful deployment, the script outputs a `gcloud` command to retrieve the service account credentials from Secret Manager.
+After successful deployment, the script saves the service account credentials to `KEY_FILE.json` in the current directory.
 
 **To use the credentials:**
 
-1. Run the `gcloud secrets versions access ...` command shown in the output
+1. Run `cat KEY_FILE.json` to view the service account key
 2. Copy the entire JSON content
 3. Paste it in the Elastic Agent GCP integration in Kibana
+
+> **Note:** The key is also stored in Secret Manager for future access. The script outputs the `gcloud` command to retrieve it if needed.
 
 ### Management
 

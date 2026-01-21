@@ -6,6 +6,4 @@ set -e
 #
 # See ../gcp-credentials-json/README.md for details.
 
-SCRIPT_DIR="$(dirname "$0")"
-cd "${SCRIPT_DIR}/../gcp-credentials-json"
-exec "./deploy.sh" "$@"
+exec "$(dirname "$0")/../gcp-credentials-json/deploy.sh" "$@"
