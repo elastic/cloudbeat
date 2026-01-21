@@ -1932,8 +1932,8 @@ github.com/openvex/go-vex v0.2.5/go.mod h1:j+oadBxSUELkrKh4NfNb+BPo77U3q7gdKME88
 github.com/owenrumney/go-sarif v1.1.1/go.mod h1:dNDiPlF04ESR/6fHlPyq7gHKmrM0sHUvAGjsoh8ZH0U=
 github.com/owenrumney/go-sarif/v2 v2.3.3 h1:ubWDJcF5i3L/EIOER+ZyQ03IfplbSU1BLOE26uKQIIU=
 github.com/owenrumney/go-sarif/v2 v2.3.3/go.mod h1:MSqMMx9WqlBSY7pXoOZWgEsVB4FDNfhcaXDA1j6Sr+w=
-github.com/owenrumney/squealer v1.2.11 h1:vMudrj70VeOzY+t7Phz9Yo0wAgm4kXes9DcTLBVDqGY=
-github.com/owenrumney/squealer v1.2.11/go.mod h1:8KOuitfOfmS/OtzgxQbxnnrbngAGopfgKB/BiGGpqGA=
+github.com/owenrumney/squealer v1.2.12 h1:6VQxQ323q7q0eKNP5p7MX4nbTW1z8wK44YvyHLwDcx0=
+github.com/owenrumney/squealer v1.2.12/go.mod h1:yBdddxW+31mPHXgjOAYiqCtK1/f1S3o5Jq6S6vZGtxc=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2 h1:CXwSGu/LYmbjEab5aMCs5usQRVBGThelUKBNnoSOuso=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2/go.mod h1:L3UMQOThbttwfYRNFOWLLVXMhk5Lkio4GGOtw5UrxS0=
 github.com/package-url/packageurl-go v0.1.3 h1:4juMED3hHiz0set3Vq3KeQ75KD1avthoXLtmE3I0PLs=
