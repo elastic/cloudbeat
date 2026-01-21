@@ -74,7 +74,7 @@ gh api repos/elastic/security/issues --jq '.[] | select(.title | contains("<CVE-
 To determine which versions need patches, check the future releases:
 ```bash
 # Fetch future releases to identify maintained versions
-curl -s https://artifacts.elastic.co/releases/api/public/future-releases.json | jq ".releases[].version"
+curl -s https://elastic-release-api.s3.us-west-2.amazonaws.com/public/future-releases.json | jq ".releases[].version"
 ```
 
 These are the versions that must receive patches when Cloudbeat is affected by a CVE.
