@@ -396,7 +396,8 @@ def update_package_version(cfg: Munch, package_name: str, package_version: str):
         APICallException: If the API call fails with an error.
 
     """
-    url = f"{cfg.kibana_url}/api/fleet/epm/packages/{package_name}/{package_version}"
+    # url = f"{cfg.kibana_url}/api/fleet/epm/packages/{package_name}/{package_version}"
+    url = f"{cfg.kibana_url}/api/fleet/epm/packages/{package_name}/3.1.2" # DEBUG
     try:
         perform_api_call(
             method="POST",
