@@ -93,7 +93,10 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
 	id := t.idProvider.GetId(resMetadata.Type, resMetadata.ID)
-	t.log.Infof("resource of type %s with id %s got a new id %s", resMetadata.Type, resMetadata.ID, id)
+	if resMetadata.ID != id {
+		t.log.Infof("resource of type %s with id %s got a new id %s", resMetadata.Type, resMetadata.ID, id)
+	}
+
 	resMetadata.ID = id
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
