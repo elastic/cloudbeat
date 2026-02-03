@@ -21,6 +21,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
@@ -29,14 +30,47 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
-// a gax.CallOption that defines a retry strategy which retries the request on ResourceExhausted error.
-var RetryOnResourceExhausted = gax.WithRetry(func() gax.Retryer {
-	return gax.OnCodes([]codes.Code{codes.ResourceExhausted}, gax.Backoff{
-		Initial:    1 * time.Second,
-		Max:        1 * time.Minute,
-		Multiplier: 1.2,
+// retryer wraps another gax Retryer and logs each retry attempt.
+type retryer struct {
+	gaxRetryer gax.Retryer
+	log        *clog.Logger
+}
+
+func (r retryer) Retry(err error) (time.Duration, bool) {
+	pause, shouldRetry := r.gaxRetryer.Retry(err)
+
+	if shouldRetry {
+		s := ""
+		// This should always be not nil, but let's be extra cautious.
+		if err != nil {
+			s = err.Error()
+		}
+		r.log.Debugw(
+			"gax retryer attempt",
+			logp.String("error", s),
+			logp.Duration("pause", pause),
+		)
+	}
+
+	return pause, shouldRetry
+}
+
+func GAXCallOptionRetrier(log *clog.Logger) gax.CallOption {
+	return gax.WithRetry(func() gax.Retryer {
+		return retryer{
+			log: log,
+			gaxRetryer: gax.OnCodes([]codes.Code{
+				codes.ResourceExhausted,
+				codes.DeadlineExceeded,
+				codes.Unavailable,
+			}, gax.Backoff{
+				Initial:    1 * time.Second,
+				Max:        1 * time.Minute,
+				Multiplier: 1.2,
+			}),
+		}
 	})
-})
+}
 
 type AssetsInventoryRateLimiter struct {
 	methods map[string]*rate.Limiter
