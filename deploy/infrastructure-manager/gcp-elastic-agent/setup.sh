@@ -4,7 +4,7 @@ set -e
 # Accept parameters
 PROJECT_ID="$1"
 SERVICE_ACCOUNT="$2"
-ORGANIZATION_ID="$3"  # Optional: required for organization-scope deployments
+ORGANIZATION_ID="$3" # Optional: required for organization-scope deployments
 SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 REQUIRED_APIS=(
