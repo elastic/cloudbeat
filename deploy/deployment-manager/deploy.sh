@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Deploying the CIS GCP integration using Deployment Manager
 
@@ -40,8 +41,10 @@ ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/
 SERVICE_ACCOUNT_NAME=${SERVICE_ACCOUNT_NAME:-false}
 
 # Set environment variables with the name and number of your project.
-export PROJECT_NAME=$(gcloud config get-value core/project)
-export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NAME
+PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+export PROJECT_NUMBER
 
 source ./common.sh
 
@@ -57,7 +60,7 @@ check_env_not_provided() {
 
 # Function to run a gcloud command and check its exit code
 run_command() {
-    eval $1
+    eval "$1"
     local status=$?
     if [ $status -ne 0 ]; then
         echo "Error: Command \"$1\" failed with exit code $status. Exiting..."
@@ -66,8 +69,10 @@ run_command() {
 }
 
 # Set environment variables with the name and number of your project.
-export PROJECT_NAME=$(gcloud config get-value core/project)
-export PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NAME
+PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+export PROJECT_NUMBER
 
 # Fail fast if any of the required environment variables are not provided
 check_env_not_provided "FLEET_URL"
