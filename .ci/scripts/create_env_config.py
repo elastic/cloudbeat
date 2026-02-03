@@ -22,6 +22,8 @@ $ export EC_URL="https://cloud.elastic.co"  # Optional
 $ export SERVERLESS_MODE="false"  # Optional
 $ export DEPLOYMENT_TEMPLATE="gcp-storage-optimized"  # Optional
 $ export MAX_SIZE="128g"  # Optional
+$ export AZURE_EVENTHUB_CONNECTION_STRING="..."  # Optional
+$ export AZURE_STORAGE_ACCOUNT_KEY="..."  # Optional
 $ python create_env_config.py
 
 Output:
@@ -34,7 +36,9 @@ Creates a JSON file `env_config.json` with content like:
     "ec_url": "https://cloud.elastic.co",
     "serverless_mode": "false",
     "deployment_template": "gcp-storage-optimized",
-    "max_size": "128g"
+    "max_size": "128g",
+    "azure_eventhub_connection_string": "...",
+    "azure_storage_account_key": "..."
 }
 
 """
@@ -56,6 +60,8 @@ def create_env_config(
     serverless_mode_val=None,
     deployment_template_val=None,
     max_size_val=None,
+    az_eventhub_connection_string=None,
+    az_storage_account_key=None,
 ):
     """
     Create environment configuration dictionary.
@@ -71,6 +77,8 @@ def create_env_config(
         serverless_mode_val (str, optional): Whether deployment is serverless ("true" or "false").
         deployment_template_val (str, optional): The deployment template (e.g., "gcp-storage-optimized").
         max_size_val (str, optional): The max autoscaling size (e.g., "128g").
+        az_eventhub_connection_string (str, optional): Azure Event Hub connection string.
+        az_storage_account_key (str, optional): Azure storage account key.
 
     Returns:
         dict: The environment configuration dictionary.
@@ -102,6 +110,10 @@ def create_env_config(
         config["deployment_template"] = deployment_template_val
     if max_size_val:
         config["max_size"] = max_size_val
+    if az_eventhub_connection_string:
+        config["azure_eventhub_connection_string"] = az_eventhub_connection_string
+    if az_storage_account_key:
+        config["azure_storage_account_key"] = az_storage_account_key
 
     return config
 
@@ -116,6 +128,8 @@ if __name__ == "__main__":
     serverless_mode = os.getenv("SERVERLESS_MODE")  # Optional
     deployment_template = os.getenv("DEPLOYMENT_TEMPLATE")  # Optional
     max_size = os.getenv("MAX_SIZE")  # Optional
+    azure_eventhub_connection_string = os.getenv("AZURE_EVENTHUB_CONNECTION_STRING")  # Optional
+    azure_storage_account_key = os.getenv("AZURE_STORAGE_ACCOUNT_KEY")  # Optional
 
     if not deployment_name or not expiration_days:
         print("Error: DEPLOYMENT_NAME or EXPIRATION_DAYS environment variables not set.")
@@ -131,6 +145,8 @@ if __name__ == "__main__":
         serverless_mode,
         deployment_template,
         max_size,
+        azure_eventhub_connection_string,
+        azure_storage_account_key,
     )
 
     # Save to JSON file

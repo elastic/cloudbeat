@@ -411,6 +411,8 @@ jobs:
           SERVERLESS_MODE: ${{ inputs.serverless_mode }}
           DEPLOYMENT_TEMPLATE: ${{ env.DEPLOYMENT_TEMPLATE }}
           MAX_SIZE: ${{ env.MAX_SIZE }}
+          AZURE_EVENTHUB_CONNECTION_STRING: ${{ secrets.AZURE_EVENTHUB_CONNECTION_STRING }}
+          AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
         run: |
           echo "s3-bucket-folder=${S3_BUCKET}" >> $GITHUB_OUTPUT
           echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> $GITHUB_OUTPUT
