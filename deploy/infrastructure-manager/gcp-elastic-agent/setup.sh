@@ -4,7 +4,7 @@ set -e
 # Accept parameters
 PROJECT_ID="$1"
 SERVICE_ACCOUNT="$2"
-ORGANIZATION_ID="$3" # Optional: required for organization-scope deployments
+ORG_ID="$3" # Optional: required for organization-scope deployments
 SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 REQUIRED_APIS=(
@@ -46,11 +46,11 @@ for role in "${REQUIRED_ROLES[@]}"; do
         --role="${role}" --condition=None --quiet >/dev/null
 done
 
-# Grant organization-level permissions if ORGANIZATION_ID is provided
-if [ -n "${ORGANIZATION_ID}" ]; then
-    echo "Granting organization-level permissions for org ${ORGANIZATION_ID}..."
+# Grant organization-level permissions if ORG_ID is provided
+if [ -n "${ORG_ID}" ]; then
+    echo "Granting organization-level permissions for org ${ORG_ID}..."
     for role in "${ORG_LEVEL_ROLES[@]}"; do
-        gcloud organizations add-iam-policy-binding "${ORGANIZATION_ID}" \
+        gcloud organizations add-iam-policy-binding "${ORG_ID}" \
             --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
             --role="${role}" --condition=None --quiet >/dev/null
     done
