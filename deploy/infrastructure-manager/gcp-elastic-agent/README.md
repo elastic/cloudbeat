@@ -97,6 +97,19 @@ gcloud compute instances get-guest-attributes ${INSTANCE_NAME} \
   --query-path=elastic-agent/
 ```
 
+### Required Permissions
+
+The deployment service account needs these roles:
+- `roles/compute.admin` - Create and manage compute instances
+- `roles/iam.serviceAccountAdmin` - Create and manage service accounts
+- `roles/iam.serviceAccountUser` - Attach service accounts to instances
+- `roles/resourcemanager.projectIamAdmin` - Manage project-level IAM bindings
+- `roles/config.admin` - Infrastructure Manager operations
+- `roles/storage.admin` - Store Terraform state
+
+For organization-level deployments (when `ORG_ID` is set), you also need:
+- `roles/iam.securityAdmin` - Manage organization IAM bindings (granted at organization level)
+
 ### Management
 
 **View deployment:**
