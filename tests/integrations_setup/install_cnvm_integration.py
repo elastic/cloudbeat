@@ -13,7 +13,7 @@ from pathlib import Path
 
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.common_api import (
+from fleet_api.common_api import update_package_version, (
     get_artifact_server,
     get_cnvm_template,
     get_enrollment_token,
@@ -65,6 +65,11 @@ if __name__ == "__main__":
     ):
         logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
+    update_package_version(
+        cfg=cnfg.elk_config,
+        package_name="vuln_mgmt",
+        package_version="3.1.2",
+    )
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,

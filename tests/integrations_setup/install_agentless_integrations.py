@@ -12,6 +12,7 @@ import os
 
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
+from fleet_api.common_api import update_package_version
 from fleet_api.package_policy_api import create_cspm_integration
 from loguru import logger
 from package_policy import generate_policy_template, generate_random_name, load_data
@@ -87,6 +88,11 @@ if __name__ == "__main__":
     cspm_template = generate_policy_template(
         cfg=cnfg.elk_config,
         stream_prefix="cloud_security_posture",
+    )
+    update_package_version(
+        cfg=cnfg.elk_config,
+        package_name="cloud_security_posture",
+        package_version="3.1.2",
     )
     for integration_data in integrations:
         INTEGRATION_NAME = integration_data["name"]
