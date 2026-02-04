@@ -15,7 +15,7 @@ PROJECT_ID=$(gcloud config get-value core/project)
 SERVICE_ACCOUNT="infra-manager-deployer"
 
 # Ensure prerequisites are configured
-"${SCRIPT_DIR}/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
+"${SCRIPT_DIR}/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}" "${ORG_ID}"
 
 # Optional environment variables (defaults are in variables.tf or below)
 # ORG_ID          - Set for org-level monitoring
