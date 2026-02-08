@@ -19,7 +19,7 @@ Deploy a target service account in your GCP environment for Elastic Cloud Connec
 export ELASTIC_RESOURCE_ID="<YOUR_DEPLOYMENT_ID>"  # Your Elastic deployment ID (must match AWS role session name)
 
 # Optional: For organization-level monitoring
-# export ORGANIZATION_ID="<YOUR_ORG_ID>"
+# export ORG_ID="<YOUR_ORG_ID>"
 
 # Optional: Override defaults
 # export DEPLOYMENT_NAME="elastic-agent-sa"                                    # Default: elastic-agent-sa
@@ -100,7 +100,7 @@ Customer's GCP Resources (monitored)
 
 **Organization Account**:
 - Monitors all projects in a GCP organization
-- Set `ORGANIZATION_ID` environment variable
+- Set `ORG_ID` environment variable
 - Requires organization-level permissions
 
 ### Security
@@ -144,16 +144,17 @@ The deployment service account needs these roles:
 - `roles/iam.workloadIdentityPoolAdmin` - Create Workload Identity Pool and Provider
 - `roles/resourcemanager.projectIamAdmin` - Manage IAM bindings
 - `roles/config.admin` - Infrastructure Manager operations
+- `roles/storage.admin` - Store Terraform state
 
-For organization-level deployments, you also need:
-- `roles/resourcemanager.organizationAdmin` - Manage organization IAM
+For organization-level deployments (when `ORG_ID` is set), you also need:
+- `roles/iam.securityAdmin` - Manage organization IAM bindings (granted at organization level)
 
 ### Troubleshooting
 
 **Common Issues:**
 
 1. **Permission denied on Workload Identity Pool creation**: Ensure you have `roles/iam.workloadIdentityPoolAdmin`
-2. **Permission denied on organization**: Ensure you have `roles/resourcemanager.organizationAdmin` for org-level deployments
+2. **Permission denied on organization**: Ensure you have `roles/iam.securityAdmin` at the organization level for org-level deployments
 3. **IAM binding failed**: Check that the service account has required permissions
 
 **Verify deployment:**

@@ -9,13 +9,13 @@ PROJECT_ID=$(gcloud config get-value core/project)
 SERVICE_ACCOUNT="infra-manager-deployer"
 
 # Ensure prerequisites are configured
-"${SCRIPT_DIR}/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}"
+"${SCRIPT_DIR}/setup.sh" "${PROJECT_ID}" "${SERVICE_ACCOUNT}" "${ORG_ID}"
 
 # Required environment variables (no defaults - must be provided)
 # ELASTIC_RESOURCE_ID - Unique identifier for your Elastic deployment (must match AWS role session name)
 
 # Optional environment variables (defaults are in variables.tf or below)
-# ORGANIZATION_ID     - Set for org-level monitoring
+# ORG_ID     - Set for org-level monitoring
 # DEPLOYMENT_NAME     - Deployment name prefix (default: elastic-agent-sa)
 # LOCATION            - GCP region for deployment (default: us-central1)
 # ELASTIC_ROLE_ARN    - Elastic's AWS Role ARN to trust (default: arn:aws:iam::254766567737:role/cloud_connectors)
@@ -35,10 +35,10 @@ INPUT_VALUES="project_id=${PROJECT_ID}"
 INPUT_VALUES="${INPUT_VALUES},resource_suffix=${RESOURCE_SUFFIX}"
 INPUT_VALUES="${INPUT_VALUES},elastic_resource_id=${ELASTIC_RESOURCE_ID}"
 
-# Set scope and parent_id based on ORGANIZATION_ID
-if [ -n "${ORGANIZATION_ID}" ]; then
+# Set scope and parent_id based on ORG_ID
+if [ -n "${ORG_ID}" ]; then
     INPUT_VALUES="${INPUT_VALUES},scope=organizations"
-    INPUT_VALUES="${INPUT_VALUES},parent_id=${ORGANIZATION_ID}"
+    INPUT_VALUES="${INPUT_VALUES},parent_id=${ORG_ID}"
 else
     INPUT_VALUES="${INPUT_VALUES},scope=projects"
     INPUT_VALUES="${INPUT_VALUES},parent_id=${PROJECT_ID}"
