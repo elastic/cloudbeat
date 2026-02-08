@@ -4,6 +4,7 @@ set -e
 # Accept parameters
 PROJECT_ID="$1"
 SERVICE_ACCOUNT="$2"
+ORG_ID="$3" # Optional: required for organization-scope deployments
 SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
 
 REQUIRED_APIS=(
@@ -23,6 +24,10 @@ REQUIRED_ROLES=(
     roles/secretmanager.admin
 )
 
+ORG_LEVEL_ROLES=(
+    roles/iam.securityAdmin
+)
+
 echo "Setting up GCP Infrastructure Manager prerequisites..."
 
 # Enable APIs
@@ -34,11 +39,21 @@ if ! gcloud iam service-accounts describe "${SERVICE_ACCOUNT_EMAIL}" >/dev/null 
         --display-name="Infra Manager Deployment Account" --quiet
 fi
 
-# Grant permissions
+# Grant project-level permissions
 for role in "${REQUIRED_ROLES[@]}"; do
     gcloud projects add-iam-policy-binding "${PROJECT_ID}" \
         --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
         --role="${role}" --condition=None --quiet >/dev/null
 done
+
+# Grant organization-level permissions if ORG_ID is provided
+if [ -n "${ORG_ID}" ]; then
+    echo "Granting organization-level permissions for org ${ORG_ID}..."
+    for role in "${ORG_LEVEL_ROLES[@]}"; do
+        gcloud organizations add-iam-policy-binding "${ORG_ID}" \
+            --member="serviceAccount:${SERVICE_ACCOUNT_EMAIL}" \
+            --role="${role}" --condition=None --quiet >/dev/null
+    done
+fi
 
 echo "✓ Setup complete"

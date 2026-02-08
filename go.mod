@@ -150,7 +150,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
-	github.com/cncf/xds/go v0.0.0-20251210132809-ee656c7534f5 // indirect
+	github.com/cncf/xds/go v0.0.0-20260121142036-a486691bba94 // indirect
 	github.com/containerd/cgroups/v3 v3.0.5 // indirect
 	github.com/containerd/containerd/api v1.9.0 // indirect
 	github.com/containerd/containerd/v2 v2.1.5 // indirect
@@ -234,7 +234,7 @@ require (
 	github.com/shirou/gopsutil/v4 v4.25.11 // indirect
 	github.com/sigstore/cosign/v2 v2.2.4 // indirect
 	github.com/sigstore/protobuf-specs v0.5.0 // indirect
-	github.com/sigstore/sigstore v1.10.3 // indirect
+	github.com/sigstore/sigstore v1.10.4 // indirect
 	github.com/sigstore/timestamp-authority v1.2.2 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
@@ -249,11 +249,12 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/scram v1.1.2 // indirect
+	github.com/xdg-go/scram v1.2.0 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
+	go.mongodb.org/mongo-driver v1.17.6 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp v0.0.0-20250911091902-df9299821621 // indirect
@@ -433,7 +434,7 @@ require (
 	github.com/hashicorp/go-version v1.8.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl/v2 v2.24.0 // indirect
-	github.com/hashicorp/nomad/api v0.0.0-20260119133310-d0d6640fc36a // indirect
+	github.com/hashicorp/nomad/api v0.0.0-20260130141625-d99775b13412 // indirect
 	github.com/in-toto/in-toto-golang v0.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
@@ -551,7 +552,6 @@ require (
 	go.elastic.co/ecszap v1.0.3 // indirect
 	go.elastic.co/fastjson v1.5.1 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
-	go.mongodb.org/mongo-driver v1.17.6 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.47.0 // indirect
@@ -563,9 +563,9 @@ require (
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
-	google.golang.org/genproto v0.0.0-20260114163908-3f89685c29c3 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260114163908-3f89685c29c3 // indirect
+	google.golang.org/genproto v0.0.0-20260128011058-8636f8732409 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260128011058-8636f8732409 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260128011058-8636f8732409 // indirect
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect

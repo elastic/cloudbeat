@@ -68,6 +68,19 @@ After successful deployment, the script saves the service account credentials to
 
 > **Note:** The key is also stored in Secret Manager for future access. The script outputs the `gcloud` command to retrieve it if needed.
 
+### Required Permissions
+
+The deployment service account needs these roles:
+- `roles/iam.serviceAccountAdmin` - Create and manage service accounts
+- `roles/iam.serviceAccountKeyAdmin` - Create service account keys
+- `roles/resourcemanager.projectIamAdmin` - Manage project-level IAM bindings
+- `roles/config.admin` - Infrastructure Manager operations
+- `roles/storage.admin` - Store Terraform state
+- `roles/secretmanager.admin` - Create and manage secrets
+
+For organization-level deployments (when `ORG_ID` is set), you also need:
+- `roles/iam.securityAdmin` - Manage organization IAM bindings (granted at organization level)
+
 ### Management
 
 **View deployment:**
