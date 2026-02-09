@@ -23,6 +23,8 @@ import (
 	clog "github.com/elastic/cloudbeat/internal/infra/clog"
 	auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
 
+	config "github.com/elastic/cloudbeat/internal/config"
+
 	context "context"
 
 	mock "github.com/stretchr/testify/mock"
@@ -41,9 +43,9 @@ func (_m *MockProviderInitializerAPI) EXPECT() *MockProviderInitializerAPI_Expec
 	return &MockProviderInitializerAPI_Expecter{mock: &_m.Mock}
 }
 
-// Init provides a mock function with given fields: ctx, log, gcpConfig
-func (_m *MockProviderInitializerAPI) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
-	ret := _m.Called(ctx, log, gcpConfig)
+// Init provides a mock function with given fields: ctx, log, gcpConfig, cfg
+func (_m *MockProviderInitializerAPI) Init(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig, cfg config.GcpConfig) (ServiceAPI, error) {
+	ret := _m.Called(ctx, log, gcpConfig, cfg)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Init")
@@ -51,19 +53,19 @@ func (_m *MockProviderInitializerAPI) Init(ctx context.Context, log *clog.Logger
 
 	var r0 ServiceAPI
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig) (ServiceAPI, error)); ok {
-		return rf(ctx, log, gcpConfig)
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig, config.GcpConfig) (ServiceAPI, error)); ok {
+		return rf(ctx, log, gcpConfig, cfg)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig) ServiceAPI); ok {
-		r0 = rf(ctx, log, gcpConfig)
+	if rf, ok := ret.Get(0).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig, config.GcpConfig) ServiceAPI); ok {
+		r0 = rf(ctx, log, gcpConfig, cfg)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(ServiceAPI)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig) error); ok {
-		r1 = rf(ctx, log, gcpConfig)
+	if rf, ok := ret.Get(1).(func(context.Context, *clog.Logger, auth.GcpFactoryConfig, config.GcpConfig) error); ok {
+		r1 = rf(ctx, log, gcpConfig, cfg)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -80,13 +82,14 @@ type MockProviderInitializerAPI_Init_Call struct {
 //   - ctx context.Context
 //   - log *clog.Logger
 //   - gcpConfig auth.GcpFactoryConfig
-func (_e *MockProviderInitializerAPI_Expecter) Init(ctx interface{}, log interface{}, gcpConfig interface{}) *MockProviderInitializerAPI_Init_Call {
-	return &MockProviderInitializerAPI_Init_Call{Call: _e.mock.On("Init", ctx, log, gcpConfig)}
+//   - cfg config.GcpConfig
+func (_e *MockProviderInitializerAPI_Expecter) Init(ctx interface{}, log interface{}, gcpConfig interface{}, cfg interface{}) *MockProviderInitializerAPI_Init_Call {
+	return &MockProviderInitializerAPI_Init_Call{Call: _e.mock.On("Init", ctx, log, gcpConfig, cfg)}
 }
 
-func (_c *MockProviderInitializerAPI_Init_Call) Run(run func(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig)) *MockProviderInitializerAPI_Init_Call {
+func (_c *MockProviderInitializerAPI_Init_Call) Run(run func(ctx context.Context, log *clog.Logger, gcpConfig auth.GcpFactoryConfig, cfg config.GcpConfig)) *MockProviderInitializerAPI_Init_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*clog.Logger), args[2].(auth.GcpFactoryConfig))
+		run(args[0].(context.Context), args[1].(*clog.Logger), args[2].(auth.GcpFactoryConfig), args[3].(config.GcpConfig))
 	})
 	return _c
 }
@@ -96,7 +99,7 @@ func (_c *MockProviderInitializerAPI_Init_Call) Return(_a0 ServiceAPI, _a1 error
 	return _c
 }
 
-func (_c *MockProviderInitializerAPI_Init_Call) RunAndReturn(run func(context.Context, *clog.Logger, auth.GcpFactoryConfig) (ServiceAPI, error)) *MockProviderInitializerAPI_Init_Call {
+func (_c *MockProviderInitializerAPI_Init_Call) RunAndReturn(run func(context.Context, *clog.Logger, auth.GcpFactoryConfig, config.GcpConfig) (ServiceAPI, error)) *MockProviderInitializerAPI_Init_Call {
 	_c.Call.Return(run)
 	return _c
 }
