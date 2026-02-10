@@ -22,7 +22,7 @@ import (
 	"errors"
 
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
-	types "github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
