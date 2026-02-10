@@ -144,9 +144,7 @@ func (c *ResourceManagerWrapper) getMetadata(ctx context.Context, orgId string, 
 	}
 }
 
-func (c *ResourceManagerWrapper) Clear() {
-	c.accountMetadataCache.Clear()
-}
+func (c *ResourceManagerWrapper) Clear() {}
 
 func getOrganizationId(ancestors []string) string {
 	last := ancestors[len(ancestors)-1]
