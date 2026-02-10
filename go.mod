@@ -260,8 +260,8 @@ require (
 	golang.org/x/exp v0.0.0-20250911091902-df9299821621 // indirect
 	golang.org/x/tools v0.40.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
-	kernel.org/pub/linux/libs/security/libcap/cap v1.2.76 // indirect
-	kernel.org/pub/linux/libs/security/libcap/psx v1.2.76 // indirect
+	kernel.org/pub/linux/libs/security/libcap/cap v1.2.77 // indirect
+	kernel.org/pub/linux/libs/security/libcap/psx v1.2.77 // indirect
 	modernc.org/libc v1.66.3 // indirect
 	mvdan.cc/sh/v3 v3.11.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
