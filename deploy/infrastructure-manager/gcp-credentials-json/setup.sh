@@ -10,18 +10,18 @@ SERVICE_ACCOUNT_EMAIL="${SERVICE_ACCOUNT}@${PROJECT_ID}.iam.gserviceaccount.com"
 REQUIRED_APIS=(
     iam.googleapis.com
     config.googleapis.com
-    compute.googleapis.com
     cloudresourcemanager.googleapis.com
     cloudasset.googleapis.com
+    secretmanager.googleapis.com
 )
 
 REQUIRED_ROLES=(
-    roles/compute.admin
     roles/iam.serviceAccountAdmin
-    roles/iam.serviceAccountUser
+    roles/iam.serviceAccountKeyAdmin
     roles/resourcemanager.projectIamAdmin
     roles/config.admin
     roles/storage.admin
+    roles/secretmanager.admin
 )
 
 ORG_LEVEL_ROLES=(

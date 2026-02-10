@@ -76,14 +76,7 @@ type WebIdentityRoleStep struct {
 
 // BuildCredentialsCache implements AWSRoleChainingStep for AssumeRoleWithWebIdentity operations.
 func (s *WebIdentityRoleStep) BuildCredentialsCache(client *sts.Client) *aws.CredentialsCache {
-	tokenRetriever := stscreds.IdentityTokenFile(s.WebIdentityTokenFile)
-	webIdentityProvider := stscreds.NewWebIdentityRoleProvider(
-		client,
-		s.RoleARN,
-		tokenRetriever,
-		s.Options,
-	)
-	return aws.NewCredentialsCache(webIdentityProvider)
+	return NewWebIdentityCredentialsCache(client, s.RoleARN, s.WebIdentityTokenFile, s.Options)
 }
 
 // Compile-time checks to ensure types implement AWSRoleChainingStep
