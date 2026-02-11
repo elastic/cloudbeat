@@ -5,12 +5,18 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 5.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
 provider "google" {
   project = var.project_id
 }
+
+resource "random_uuid" "cloud_connector_id" {}
 
 locals {
   # Use suffix from deploy.sh to ensure all resource names stay within GCP limits
@@ -41,6 +47,7 @@ module "workload_identity" {
   aws_account_id      = local.aws_account_id
   aws_role_name       = local.aws_role_name
   elastic_resource_id = var.elastic_resource_id
+  cloud_connector_id  = random_uuid.cloud_connector_id.result
 }
 
 module "target_service_account" {

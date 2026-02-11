@@ -1,3 +1,8 @@
+output "cloud_connector_id" {
+  description = "Unique identifier for the cloud connector deployment"
+  value       = random_uuid.cloud_connector_id.result
+}
+
 output "target_service_account_email" {
   description = "Email of the target service account (use this in Elastic Agent configuration)"
   value       = module.target_service_account.email
