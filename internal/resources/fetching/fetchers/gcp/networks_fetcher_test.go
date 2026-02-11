@@ -67,7 +67,6 @@ func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 			AccountId: "1",
 		},
 	}
-	mockInventoryService.EXPECT().Clear()
 	mockInventoryService.On("ListNetworkAssets", mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
 			ch := args.Get(1).(chan<- *inventory.ExtendedGcpAsset)
