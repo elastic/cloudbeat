@@ -20,10 +20,13 @@ package inventory
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/time/rate"
 	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
@@ -164,4 +167,64 @@ func (s *ResourceManagerTestSuite) TestGetOrganizationId() {
 }
 func (s *ResourceManagerTestSuite) TestGetProjectId() {
 	s.Equal("5", getProjectId(ancestors))
+}
+
+func (s *ResourceManagerTestSuite) TestProjectsRateLimiterWait() {
+	t := s.T()
+	ctx := t.Context()
+	duration := time.Millisecond
+	crm := s.NewMockResourceManagerWrapper()
+	crm.projectsRateLimiter = rate.NewLimiter(rate.Every(duration), 1)
+	crm.getProjectDisplayName = func(ctx context.Context, _ string) string {
+		if err := crm.projectsRateLimiter.Wait(ctx); err != nil {
+			return ""
+		}
+		return "projectName"
+	}
+
+	totalRequests := 5
+	startTime := time.Now()
+	for range totalRequests {
+		crm.getProjectDisplayName(ctx, "projects/test")
+	}
+	endTime := time.Now()
+
+	actualDuration := endTime.Sub(startTime)
+	minDuration := duration * time.Duration(totalRequests-1) // 1st request is instant, rest wait
+	s.GreaterOrEqual(actualDuration, minDuration)
+}
+
+func (s *ResourceManagerTestSuite) TestSingleflightDeduplicatesConcurrentRequests() {
+	t := s.T()
+	ctx := t.Context()
+	crm := s.NewMockResourceManagerWrapper()
+
+	var fetchCount atomic.Int32
+	crm.getProjectDisplayName = func(_ context.Context, _ string) string {
+		fetchCount.Add(1)
+		time.Sleep(10 * time.Millisecond)
+		return "projectName"
+	}
+
+	asset := &assetpb.Asset{
+		Name: "projects/1",
+		Ancestors: []string{
+			"projects/1",
+			"organizations/1",
+		},
+	}
+
+	const numRequests = 10
+	var wg sync.WaitGroup
+	wg.Add(numRequests)
+	for range numRequests {
+		go func() {
+			defer wg.Done()
+			crm.GetCloudMetadata(ctx, asset)
+		}()
+	}
+	wg.Wait()
+
+	// only 1 fetch, rest waited on singleflight
+	s.Equal(int32(1), fetchCount.Load())
 }

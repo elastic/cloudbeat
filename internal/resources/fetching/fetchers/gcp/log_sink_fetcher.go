@@ -57,7 +57,6 @@ func NewGcpLogSinkFetcher(_ context.Context, log *clog.Logger, ch chan fetching.
 func (f *GcpLogSinkFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpLogSinkFetcher.Fetch")
 	defer f.log.Info("GcpLogSinkFetcher.Fetch done")
-	defer f.provider.Clear()
 
 	resultsCh := make(chan *inventory.ProjectAssets)
 	go f.provider.ListProjectAssets(ctx, []string{inventory.LogSinkAssetType}, resultsCh)
