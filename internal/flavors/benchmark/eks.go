@@ -25,6 +25,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
@@ -108,7 +109,7 @@ func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.C
 		return awssdk.Config{}, nil, nil
 	}
 
-	awsCfg, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	awsCfg, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, logp.L())
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

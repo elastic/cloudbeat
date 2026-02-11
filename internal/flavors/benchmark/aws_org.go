@@ -26,6 +26,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"go.opentelemetry.io/otel"
 
@@ -289,7 +290,7 @@ func (a *AWSOrg) getInitialAWSConfig(ctx context.Context, cfg *config.Config) (*
 	// [EC2 Instance] On EC2 created with our cloud formation, the identity is inferred by the EC2 instance InstanceProfile which has the cloudbeat-root role.
 	// [Direct Credentials] On Direct credentials this identity is the user created by the cloud formation.
 	// [Custom Setup] On custom setup like manual authentication for organization-level onboarding.
-	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, logp.L())
 }
 
 func (a *AWSOrg) checkDependencies() error {

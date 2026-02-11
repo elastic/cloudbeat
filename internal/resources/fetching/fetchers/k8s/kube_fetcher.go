@@ -24,9 +24,11 @@ import (
 	"time"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/cache"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -113,7 +115,7 @@ func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) erro
 	watcher, err := kubernetes.NewWatcher(client, r.resource, kubernetes.WatchOptions{
 		SyncTimeout: interval,
 		Namespace:   r.namespace,
-	}, nil)
+	}, cache.Indexers{}, logp.L())
 	if err != nil {
 		return fmt.Errorf("could not create watcher: %w", err)
 	}
