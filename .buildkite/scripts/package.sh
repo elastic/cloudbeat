@@ -17,7 +17,6 @@ if [ "$WORKFLOW" = "snapshot" ]; then
 fi
 
 mage pythonEnv
-$PYTHON_BIN/pip install setuptools
 mage package
 
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
