@@ -46,6 +46,13 @@ const (
 	defaultAWSRegion = "us-east-1"
 )
 
+// GCPCloudConnectorsParams holds GCP-specific parameters for the Cloud Connectors auth flow.
+type GCPCloudConnectorsParams struct {
+	Audience            string // Workload Identity Federation audience URL
+	ServiceAccountEmail string // Target service account to impersonate
+	CloudConnectorID    string // Deployment connector ID (Terraform output); session name = ResourceID-CloudConnectorID
+}
+
 type GoogleAuthProvider struct{}
 
 // FindDefaultCredentials is a wrapper around google.FindDefaultCredentials to make it easier to mock
@@ -61,7 +68,7 @@ func (p *GoogleAuthProvider) FindDefaultCredentials(ctx context.Context) (*googl
 // 2. Assumes Elastic's AWS role using AssumeRoleWithWebIdentity
 // 3. Uses AWS credentials for GCP Workload Identity Federation token exchange
 // 4. Impersonates the target service account in the customer's GCP project
-func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, audience string, serviceAccountEmail string) ([]option.ClientOption, error) {
+func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error) {
 	// Validate required configuration
 	if ccConfig.JWTFilePath == "" {
 		return nil, errors.New("cloud connectors config JWTFilePath is required")
@@ -75,6 +82,13 @@ func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context,
 		return nil, errors.New("cloud connectors config ResourceID is required")
 	}
 
+	if params.CloudConnectorID == "" {
+		return nil, errors.New("cloud connectors config CloudConnectorID is required")
+	}
+
+	// Session name must match GCP Workload Identity Federation: elastic_resource_id-cloud_connector_id
+	sessionName := ccConfig.ResourceID + "-" + params.CloudConnectorID
+
 	// Create STS client and credentials cache at initialization (like role chaining)
 	stsClient := sts.New(sts.Options{Region: defaultAWSRegion})
 	credsCache := awslib.NewWebIdentityCredentialsCache(
@@ -82,7 +96,7 @@ func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context,
 		ccConfig.GlobalRoleARN,
 		ccConfig.JWTFilePath,
 		func(o *stscreds.WebIdentityRoleOptions) {
-			o.RoleSessionName = ccConfig.ResourceID
+			o.RoleSessionName = sessionName
 		},
 	)
 
@@ -93,12 +107,12 @@ func (p *GoogleAuthProvider) FindCloudConnectorsCredentials(ctx context.Context,
 	}
 
 	cfg := externalaccount.Config{
-		Audience:                       audience,
+		Audience:                       params.Audience,
 		SubjectTokenType:               awsTokenType,
 		TokenURL:                       gcpSTSTokenURL,
 		Scopes:                         []string{gcpCloudPlatformScope},
 		AwsSecurityCredentialsSupplier: credSupplier,
-		ServiceAccountImpersonationURL: gcpIAMCredentialsURL + serviceAccountEmail + ":generateAccessToken",
+		ServiceAccountImpersonationURL: gcpIAMCredentialsURL + params.ServiceAccountEmail + ":generateAccessToken",
 	}
 
 	tokenSource, err := externalaccount.NewTokenSource(ctx, cfg)
