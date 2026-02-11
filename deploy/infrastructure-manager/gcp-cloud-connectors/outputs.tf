@@ -1,6 +1,6 @@
 output "cloud_connector_id" {
   description = "Unique identifier for the cloud connector deployment"
-  value       = random_uuid.cloud_connector_id.result
+  value       = random_string.cloud_connector_id.result
 }
 
 output "target_service_account_email" {
