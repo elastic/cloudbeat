@@ -52,7 +52,6 @@ func NewGcpPoliciesFetcher(_ context.Context, log *clog.Logger, ch chan fetching
 func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpPoliciesFetcher.Fetch")
 	defer f.log.Info("GcpPoliciesFetcher.Fetch done")
-	defer f.provider.Clear()
 
 	resultsCh := make(chan *inventory.ProjectPoliciesAsset)
 	go f.provider.ListProjectsAncestorsPolicies(ctx, resultsCh)
