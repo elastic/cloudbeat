@@ -30,6 +30,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -49,7 +50,8 @@ func awsConfigRetrier() aws.Retryer {
 }
 
 func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
-	awsConfig, err := libbeataws.InitializeAWSConfig(cfg)
+	logger := logp.NewLogger("awslib")
+	awsConfig, err := libbeataws.InitializeAWSConfig(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
