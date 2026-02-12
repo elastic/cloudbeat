@@ -89,6 +89,7 @@ func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.Gc
 			return nil, err
 		}
 		log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
+		//nolint:staticcheck
 		opts = append(opts, option.WithCredentialsFile(cfg.CredentialsFilePath))
 	}
 	if cfg.CredentialsJSON != "" {
@@ -96,6 +97,7 @@ func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.Gc
 			return nil, ErrInvalidCredentialsJSON
 		}
 		log.Info("Appending credentials JSON to client options")
+		//nolint:staticcheck
 		opts = append(opts, option.WithCredentialsJSON([]byte(cfg.CredentialsJSON)))
 	}
 
