@@ -57,7 +57,11 @@ require (
 	github.com/go-logr/zapr v1.3.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/gofrs/uuid v4.4.0+incompatible
+<<<<<<< HEAD
 	github.com/googleapis/gax-go/v2 v2.14.2
+=======
+	github.com/googleapis/gax-go/v2 v2.16.0
+>>>>>>> 3a954c0c (Bump github.com/sigstore/rekor from 1.4.0 to 1.5.0 (#3883))
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/huandu/xstrings v1.5.0
 	github.com/magefile/mage v1.15.0
@@ -79,6 +83,7 @@ require (
 	go.uber.org/zap v1.27.0
 	go.uber.org/zap/exp v0.3.0
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
+<<<<<<< HEAD
 	golang.org/x/oauth2 v0.30.0
 	google.golang.org/api v0.236.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -86,13 +91,27 @@ require (
 	k8s.io/api v0.33.3
 	k8s.io/apimachinery v0.33.3
 	k8s.io/client-go v0.33.3
+=======
+	golang.org/x/oauth2 v0.34.0
+	google.golang.org/api v0.260.0
+	gopkg.in/yaml.v3 v3.0.1
+	gotest.tools/gotestsum v1.13.0
+	k8s.io/api v0.34.3
+	k8s.io/apimachinery v0.34.3
+	k8s.io/client-go v0.34.3
+>>>>>>> 3a954c0c (Bump github.com/sigstore/rekor from 1.4.0 to 1.5.0 (#3883))
 	k8s.io/klog/v2 v2.130.1
 	modernc.org/sqlite v1.38.0
 )
 
 require (
+<<<<<<< HEAD
 	cel.dev/expr v0.23.0 // indirect
 	cloud.google.com/go/auth v0.16.1 // indirect
+=======
+	cel.dev/expr v0.24.0 // indirect
+	cloud.google.com/go/auth v0.18.0 // indirect
+>>>>>>> 3a954c0c (Bump github.com/sigstore/rekor from 1.4.0 to 1.5.0 (#3883))
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/monitoring v1.24.2 // indirect
 	dario.cat/mergo v1.0.1 // indirect
@@ -134,6 +153,7 @@ require (
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
+<<<<<<< HEAD
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
@@ -146,6 +166,32 @@ require (
 	github.com/gofrs/uuid/v5 v5.2.0 // indirect
 	github.com/google/certificate-transparency-go v1.1.8 // indirect
 	github.com/google/gnostic-models v0.6.9 // indirect
+=======
+	github.com/fvbommel/sortorder v1.1.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
+	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667 // indirect
+	github.com/go-chi/chi/v5 v5.2.4 // indirect
+	github.com/go-git/go-git/v5 v5.16.4 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-json-experiment/json v0.0.0-20251027170946-4849db3c2f7e // indirect
+	github.com/go-ldap/ldap/v3 v3.4.12 // indirect
+	github.com/go-openapi/swag/cmdutils v0.25.4 // indirect
+	github.com/go-openapi/swag/conv v0.25.4 // indirect
+	github.com/go-openapi/swag/fileutils v0.25.4 // indirect
+	github.com/go-openapi/swag/jsonname v0.25.4 // indirect
+	github.com/go-openapi/swag/jsonutils v0.25.4 // indirect
+	github.com/go-openapi/swag/loading v0.25.4 // indirect
+	github.com/go-openapi/swag/mangling v0.25.4 // indirect
+	github.com/go-openapi/swag/netutils v0.25.4 // indirect
+	github.com/go-openapi/swag/stringutils v0.25.4 // indirect
+	github.com/go-openapi/swag/typeutils v0.25.4 // indirect
+	github.com/go-openapi/swag/yamlutils v0.25.4 // indirect
+	github.com/gocsaf/csaf/v3 v3.3.0 // indirect
+	github.com/gofrs/uuid/v5 v5.4.0 // indirect
+	github.com/gohugoio/hashstructure v0.6.0 // indirect
+	github.com/google/certificate-transparency-go v1.3.2-0.20250507091337-0eddb39e94f8 // indirect
+	github.com/google/gnostic-models v0.7.1 // indirect
+>>>>>>> 3a954c0c (Bump github.com/sigstore/rekor from 1.4.0 to 1.5.0 (#3883))
 	github.com/google/go-github/v62 v62.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect
@@ -165,6 +211,10 @@ require (
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481 // indirect
+<<<<<<< HEAD
+=======
+	github.com/oklog/ulid v1.3.1 // indirect
+>>>>>>> 3a954c0c (Bump github.com/sigstore/rekor from 1.4.0 to 1.5.0 (#3883))
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/openvex/discovery v0.1.1-0.20240802171711-7c54efc57553 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -491,7 +541,11 @@ require (
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
+<<<<<<< HEAD
 	github.com/sigstore/rekor v1.3.10 // indirect
+=======
+	github.com/sigstore/rekor v1.5.0 // indirect
+>>>>>>> 3a954c0c (Bump github.com/sigstore/rekor from 1.4.0 to 1.5.0 (#3883))
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
 	github.com/spdx/tools-golang v0.5.5 // indirect
