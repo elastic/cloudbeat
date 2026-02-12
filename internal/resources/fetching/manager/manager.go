@@ -98,7 +98,7 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 	m.log.Infof("Cycle %d has started", seq)
 	wg := &sync.WaitGroup{}
 	for _, key := range m.fetcherRegistry.Keys() {
-		wg.Add(1)
+		wg.Add(1) //nolint:revive
 		go func(k string) {
 			defer wg.Done()
 			err := m.fetchSingle(ctx, k, cycle.Metadata{Sequence: seq})

@@ -80,7 +80,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 	}
 
 	for region, client := range set {
-		wg.Add(1)
+		wg.Add(1) //nolint:revive
 		go func(client T, region string, errCn chan error) {
 			defer wg.Done()
 			results, fetchErr := fetcher(ctx, region, client)

@@ -165,7 +165,7 @@ func (s *ListenerTestSuite) TestReloadAndStop() {
 			wg := sync.WaitGroup{}
 
 			for _, val := range tcase.values {
-				wg.Add(1)
+				wg.Add(1) //nolint:revive
 				go func(listener *Listener, update configUpdate) {
 					err := listener.Reload(update)
 					s.NoError(err)
