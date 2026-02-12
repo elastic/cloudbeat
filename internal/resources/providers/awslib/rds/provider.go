@@ -91,7 +91,7 @@ func (p Provider) getDBInstanceSubnets(ctx context.Context, region string, dbIns
 		if err != nil {
 			p.log.Errorf("Could not get route table for subnet %s of DB %s. Error: %v", *subnet.SubnetIdentifier, *dbInstance.DBInstanceIdentifier, err)
 		} else {
-			var routes []Route
+			routes := make([]Route, 0, len(routeTableForSubnet.Routes))
 			for _, route := range routeTableForSubnet.Routes {
 				routes = append(routes, Route{DestinationCidrBlock: route.DestinationCidrBlock, GatewayId: route.GatewayId})
 			}

@@ -35,6 +35,8 @@ func init() {
 				vcsTime, _ = time.Parse(time.RFC3339, setting.Value)
 			case "vcs.revision":
 				vcsRevision = setting.Value
+			default:
+				continue
 			}
 		}
 	}
