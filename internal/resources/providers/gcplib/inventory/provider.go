@@ -449,7 +449,7 @@ func findDnsPolicyByNetwork(dnsPolicies []*dnsPolicyFields, networkIdentifier st
 }
 
 func decodeDnsPolicies(dnsPolicyAssets []*assetpb.Asset) []*dnsPolicyFields {
-	dnsPolicies := make([]*dnsPolicyFields, 0)
+	dnsPolicies := make([]*dnsPolicyFields, 0, len(dnsPolicyAssets))
 	for _, dnsPolicyAsset := range dnsPolicyAssets {
 		fields := new(dnsPolicyFields)
 		dnsPolicyData := dnsPolicyAsset.GetResource().GetData().GetFields()

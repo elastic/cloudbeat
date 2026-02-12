@@ -146,22 +146,18 @@ func New(cfg *config.C) (*Config, error) {
 		}
 	}
 
-	switch c.CloudConfig.Aws.AccountType {
-	case "":
-	case SingleAccount:
-	case OrganizationAccount:
-	default:
+	if c.CloudConfig.Aws.AccountType != "" &&
+		c.CloudConfig.Aws.AccountType != SingleAccount &&
+		c.CloudConfig.Aws.AccountType != OrganizationAccount {
 		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
 			"aws.account_type '%s' is not supported",
 			c.CloudConfig.Aws.AccountType,
 		))
 	}
 
-	switch c.CloudConfig.Azure.AccountType {
-	case "":
-	case SingleAccount:
-	case OrganizationAccount:
-	default:
+	if c.CloudConfig.Azure.AccountType != "" &&
+		c.CloudConfig.Azure.AccountType != SingleAccount &&
+		c.CloudConfig.Azure.AccountType != OrganizationAccount {
 		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
 			"azure.account_type '%s' is not supported",
 			c.CloudConfig.Azure.AccountType,
