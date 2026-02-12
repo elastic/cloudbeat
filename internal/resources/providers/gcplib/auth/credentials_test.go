@@ -76,12 +76,12 @@ func TestGetGcpClientConfig(t *testing.T) {
 			want: []*GcpFactoryConfig{
 				{
 					Parent: testParentProjectId,
-					// nolint:staticcheck
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
 				},
 				{
 					Parent: testParentOrgId,
-					// nolint:staticcheck
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
 				},
 			},
@@ -131,12 +131,12 @@ func TestGetGcpClientConfig(t *testing.T) {
 			want: []*GcpFactoryConfig{
 				{
 					Parent: testParentProjectId,
-					// nolint:staticcheck
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
 				},
 				{
 					Parent: testParentOrgId,
-					// nolint:staticcheck
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
 				},
 			},
@@ -189,18 +189,18 @@ func TestGetGcpClientConfig(t *testing.T) {
 				{
 					Parent: testParentProjectId,
 					ClientOpts: []option.ClientOption{
-						// nolint:staticcheck
+						//nolint:staticcheck
 						option.WithCredentialsFile(saFilePath),
-						// nolint:staticcheck
+						//nolint:staticcheck
 						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
 					},
 				},
 				{
 					Parent: testParentOrgId,
 					ClientOpts: []option.ClientOption{
-						// nolint:staticcheck
+						//nolint:staticcheck
 						option.WithCredentialsFile(saFilePath),
-						// nolint:staticcheck
+						//nolint:staticcheck
 						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
 					},
 				},
