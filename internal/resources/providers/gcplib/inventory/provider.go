@@ -159,7 +159,7 @@ func (p *Provider) ListMonitoringAssets(ctx context.Context, out chan<- *Monitor
 		var logAssets, alertAssets []*ExtendedGcpAsset
 		var wg sync.WaitGroup
 
-		wg.Add(2)
+		wg.Add(2) //nolint:revive
 		go func() {
 			defer wg.Done()
 			logAssets = collect(logsAssetCh)
@@ -278,7 +278,7 @@ func (p *Provider) getAssetAncestorsPolicies(ctx context.Context, ancestors []st
 			ContentType: assetpb.ContentType_IAM_POLICY,
 		})
 
-		wg.Add(1)
+		wg.Add(1) //nolint:revive
 		go func() {
 			defer wg.Done()
 			ancestorPolicies := collect(prjAncestorPolicyCh)
