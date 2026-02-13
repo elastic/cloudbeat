@@ -168,7 +168,7 @@ func TestCache_Lock(t *testing.T) {
 	cache := NewCache[int](testhelper.NewLogger(t))
 
 	var wg sync.WaitGroup
-	wg.Add(1)
+	wg.Add(1)       //nolint:revive
 	defer wg.Wait() // wait for tests in goroutine
 	go func() {
 		defer wg.Done()

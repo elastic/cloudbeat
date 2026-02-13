@@ -103,7 +103,7 @@ func (c *ResourceManagerWrapper) getMetadata(ctx context.Context, orgId string, 
 	var orgName string
 	var projectName string
 	wg := sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(2) //nolint:revive
 	go func() {
 		defer wg.Done()
 		if isOrganization(c.config.Parent) {
