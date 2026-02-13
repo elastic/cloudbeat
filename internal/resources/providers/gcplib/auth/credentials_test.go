@@ -76,11 +76,11 @@ func TestGetGcpClientConfig(t *testing.T) {
 			want: []*GcpFactoryConfig{
 				{
 					Parent:     testParentProjectId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)}, //nolint:staticcheck
 				},
 				{
 					Parent:     testParentOrgId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)}, //nolint:staticcheck
 				},
 			},
 			wantErr: false,
@@ -129,11 +129,11 @@ func TestGetGcpClientConfig(t *testing.T) {
 			want: []*GcpFactoryConfig{
 				{
 					Parent:     testParentProjectId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))}, //nolint:staticcheck
 				},
 				{
 					Parent:     testParentOrgId,
-					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))}, //nolint:staticcheck
 				},
 			},
 			wantErr: false,
@@ -185,15 +185,15 @@ func TestGetGcpClientConfig(t *testing.T) {
 				{
 					Parent: testParentProjectId,
 					ClientOpts: []option.ClientOption{
-						option.WithCredentialsFile(saFilePath),
-						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+						option.WithCredentialsFile(saFilePath),                //nolint:staticcheck
+						option.WithCredentialsJSON([]byte(saCredentialsJSON)), //nolint:staticcheck
 					},
 				},
 				{
 					Parent: testParentOrgId,
 					ClientOpts: []option.ClientOption{
-						option.WithCredentialsFile(saFilePath),
-						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+						option.WithCredentialsFile(saFilePath),                //nolint:staticcheck
+						option.WithCredentialsJSON([]byte(saCredentialsJSON)), //nolint:staticcheck
 					},
 				},
 			},

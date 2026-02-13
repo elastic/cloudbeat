@@ -44,6 +44,8 @@ func CustomizePackaging() {
 			switch filespec.Source {
 			case "_meta/kibana.generated", "fields.yml", "{{.BeatName}}.reference.yml":
 				delete(args.Spec.Files, filename)
+			default:
+				continue
 			}
 		}
 	}

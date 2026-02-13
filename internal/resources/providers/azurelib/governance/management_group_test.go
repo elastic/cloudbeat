@@ -120,7 +120,7 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 		p := NewProvider(testhelper.NewLogger(t), m)
 
 		var wg sync.WaitGroup
-		wg.Add(1)
+		wg.Add(1) //nolint:revive
 		defer wg.Wait()
 		go func() {
 			defer wg.Done()
