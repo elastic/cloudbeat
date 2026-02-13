@@ -146,7 +146,6 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250223041408-d3c622f1b874 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.6 // indirect
-	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/go-openapi/swag/cmdutils v0.25.4 // indirect
 	github.com/go-openapi/swag/conv v0.25.4 // indirect
 	github.com/go-openapi/swag/fileutils v0.25.4 // indirect
