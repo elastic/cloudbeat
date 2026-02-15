@@ -53,6 +53,8 @@ func (p *idProvider) getIdInCluster(resourceType string, resourceId string) stri
 		id = p.clusterID + p.nodeID + resourceId
 	case fetching.CloudContainerMgmt, fetching.CloudIdentity, fetching.CloudLoadBalancer, fetching.CloudContainerRegistry:
 		id = p.clusterID
+	default:
+		// no-op
 	}
 
 	return id

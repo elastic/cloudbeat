@@ -176,13 +176,11 @@ func (t testAwsResource) GetRegion() string { return "" }
 
 func (d dummyTester) DummyFunc() ([]AwsResource, error) {
 	awsRes := []AwsResource{testAwsResource{resRegion: d.region}}
-	switch d.region {
-	case euRegion:
-		return awsRes, nil
-	case usRegion:
-		return awsRes, nil
-	case afRegion:
+	if d.region == afRegion {
 		return nil, errors.New("api error")
+	}
+	if d.region == euRegion || d.region == usRegion {
+		return awsRes, nil
 	}
 
 	return nil, nil

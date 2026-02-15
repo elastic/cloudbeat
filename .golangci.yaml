@@ -84,6 +84,8 @@ linters:
     revive:
       enable-all-rules: true
       rules:
+        - name: package-directory-mismatch
+          disabled: true
         - name: cognitive-complexity
           arguments:
             - 30

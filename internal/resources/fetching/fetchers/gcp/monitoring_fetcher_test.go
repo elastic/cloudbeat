@@ -83,7 +83,7 @@ func (s *GcpMonitoringFetcherTestSuite) TestMonitoringFetcher_Fetch_Success() {
 			close(ch)
 		}).Once()
 
-	wg.Add(1)
+	wg.Add(1) //nolint:revive
 
 	go func() {
 		defer wg.Done()

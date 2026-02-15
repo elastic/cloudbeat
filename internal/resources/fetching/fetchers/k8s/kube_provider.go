@@ -145,5 +145,7 @@ func nullifyManagedFields(resource any) {
 		val.ManagedFields = nil
 	case *kubernetes.Node:
 		val.ManagedFields = nil
+	default:
+		// no-op
 	}
 }
