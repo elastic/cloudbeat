@@ -22,8 +22,11 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
+	"golang.org/x/sync/singleflight"
+	"golang.org/x/time/rate"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
 
@@ -36,6 +39,8 @@ type ResourceManagerWrapper struct {
 	log                        *clog.Logger
 	config                     auth.GcpFactoryConfig
 	accountMetadataCache       sync.Map
+	metadataGroup              singleflight.Group
+	projectsRateLimiter        *rate.Limiter
 	getProjectDisplayName      func(ctx context.Context, parent string) string
 	getOrganizationDisplayName func(ctx context.Context, parent string) string
 }
@@ -50,36 +55,43 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 
 	var orgName string
 	var orgNameMu sync.Mutex
-	return &ResourceManagerWrapper{
+
+	wrapper := &ResourceManagerWrapper{
 		log:                  log,
 		config:               gcpConfig,
 		accountMetadataCache: sync.Map{},
-		getProjectDisplayName: func(ctx context.Context, parent string) string {
-			prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
-			if err != nil {
-				log.Errorf("error fetching GCP Project: %s, error: %s", parent, err)
-				return ""
-			}
-			return prj.DisplayName
-		},
-		getOrganizationDisplayName: func(ctx context.Context, parent string) string {
-			orgNameMu.Lock()
-			defer orgNameMu.Unlock()
+		projectsRateLimiter:  rate.NewLimiter(rate.Every(time.Minute/600), 1),
+	}
+	wrapper.getProjectDisplayName = func(ctx context.Context, parent string) string {
+		if err := wrapper.projectsRateLimiter.Wait(ctx); err != nil {
+			log.Errorf("rate limiter error for GCP Project: %s, error: %s", parent, err)
+			return ""
+		}
+		prj, err := crmService.Projects.Get(parent).Context(ctx).Do()
+		if err != nil {
+			log.Errorf("error fetching GCP Project: %s, error: %s", parent, err)
+			return ""
+		}
+		return prj.DisplayName
+	}
+	wrapper.getOrganizationDisplayName = func(ctx context.Context, parent string) string {
+		orgNameMu.Lock()
+		defer orgNameMu.Unlock()
 
-			if orgName != "" {
-				return orgName
-			}
-
-			// parent is the ID of the organization, and is the same for every call, so we cache it
-			org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
-			if err != nil {
-				log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
-				return ""
-			}
-			orgName = org.DisplayName
+		if orgName != "" {
 			return orgName
-		},
-	}, nil
+		}
+
+		// parent is the ID of the organization, and is the same for every call, so we cache it
+		org, err := crmService.Organizations.Get(parent).Context(ctx).Do()
+		if err != nil {
+			log.Errorf("error fetching GCP Org: %s, error: %s", parent, err)
+			return ""
+		}
+		orgName = org.DisplayName
+		return orgName
+	}
+	return wrapper, nil
 }
 
 func (c *ResourceManagerWrapper) GetCloudMetadata(ctx context.Context, asset *assetpb.Asset) *fetching.CloudAccountMetadata {
@@ -94,9 +106,14 @@ func (c *ResourceManagerWrapper) GetCloudMetadata(ctx context.Context, asset *as
 		}
 		c.log.Errorf("error casting cloud account metadata for key: %s", key)
 	}
-	cloudAccountMetadata := c.getMetadata(ctx, orgId, projectId)
-	c.accountMetadataCache.Store(key, cloudAccountMetadata)
-	return cloudAccountMetadata
+
+	result, _, _ := c.metadataGroup.Do(key, func() (any, error) {
+		metadata := c.getMetadata(ctx, orgId, projectId)
+		c.accountMetadataCache.Store(key, metadata)
+		return metadata, nil
+	})
+
+	return result.(*fetching.CloudAccountMetadata)
 }
 
 func (c *ResourceManagerWrapper) getMetadata(ctx context.Context, orgId string, projectId string) *fetching.CloudAccountMetadata {
@@ -127,9 +144,7 @@ func (c *ResourceManagerWrapper) getMetadata(ctx context.Context, orgId string, 
 	}
 }
 
-func (c *ResourceManagerWrapper) Clear() {
-	c.accountMetadataCache.Clear()
-}
+func (c *ResourceManagerWrapper) Clear() {}
 
 func getOrganizationId(ancestors []string) string {
 	last := ancestors[len(ancestors)-1]
