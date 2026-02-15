@@ -54,3 +54,4 @@ jobs:
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
+          GOTOOLCHAIN: auto
