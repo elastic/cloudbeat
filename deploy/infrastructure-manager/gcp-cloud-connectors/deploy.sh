@@ -80,5 +80,6 @@ REVISION=$(gcloud infra-manager deployments describe "${DEPLOYMENT_NAME}" --loca
 gcloud infra-manager revisions describe "${REVISION}" --location="${LOCATION}" --format="yaml(applyResults.outputs)"
 echo ""
 echo "Use these outputs in your Elastic Agent configuration:"
+echo "  - cloud_connector_id: Connector binding key (save securely)"
 echo "  - target_service_account_email: The service account to impersonate"
 echo "  - gcp_audience: The GCP audience URL for Workload Identity Federation"
