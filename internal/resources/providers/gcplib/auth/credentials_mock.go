@@ -161,8 +161,8 @@ func (_m *MockGoogleAuthProviderAPI) EXPECT() *MockGoogleAuthProviderAPI_Expecte
 }
 
 // FindCloudConnectorsCredentials provides a mock function for the type MockGoogleAuthProviderAPI
-func (_mock *MockGoogleAuthProviderAPI) FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, audience string, serviceAccountEmail string) ([]option.ClientOption, error) {
-	ret := _mock.Called(ctx, ccConfig, audience, serviceAccountEmail)
+func (_mock *MockGoogleAuthProviderAPI) FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error) {
+	ret := _mock.Called(ctx, ccConfig, params)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FindCloudConnectorsCredentials")
@@ -170,18 +170,18 @@ func (_mock *MockGoogleAuthProviderAPI) FindCloudConnectorsCredentials(ctx conte
 
 	var r0 []option.ClientOption
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, string, string) ([]option.ClientOption, error)); ok {
-		return returnFunc(ctx, ccConfig, audience, serviceAccountEmail)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, GCPCloudConnectorsParams) ([]option.ClientOption, error)); ok {
+		return returnFunc(ctx, ccConfig, params)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, string, string) []option.ClientOption); ok {
-		r0 = returnFunc(ctx, ccConfig, audience, serviceAccountEmail)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, GCPCloudConnectorsParams) []option.ClientOption); ok {
+		r0 = returnFunc(ctx, ccConfig, params)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]option.ClientOption)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, config.CloudConnectorsConfig, string, string) error); ok {
-		r1 = returnFunc(ctx, ccConfig, audience, serviceAccountEmail)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, config.CloudConnectorsConfig, GCPCloudConnectorsParams) error); ok {
+		r1 = returnFunc(ctx, ccConfig, params)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -196,13 +196,12 @@ type MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call struct {
 // FindCloudConnectorsCredentials is a helper method to define mock.On call
 //   - ctx context.Context
 //   - ccConfig config.CloudConnectorsConfig
-//   - audience string
-//   - serviceAccountEmail string
-func (_e *MockGoogleAuthProviderAPI_Expecter) FindCloudConnectorsCredentials(ctx interface{}, ccConfig interface{}, audience interface{}, serviceAccountEmail interface{}) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
-	return &MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call{Call: _e.mock.On("FindCloudConnectorsCredentials", ctx, ccConfig, audience, serviceAccountEmail)}
+//   - params GCPCloudConnectorsParams
+func (_e *MockGoogleAuthProviderAPI_Expecter) FindCloudConnectorsCredentials(ctx interface{}, ccConfig interface{}, params interface{}) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
+	return &MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call{Call: _e.mock.On("FindCloudConnectorsCredentials", ctx, ccConfig, params)}
 }
 
-func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Run(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, audience string, serviceAccountEmail string)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
+func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Run(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -212,19 +211,14 @@ func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Run(run
 		if args[1] != nil {
 			arg1 = args[1].(config.CloudConnectorsConfig)
 		}
-		var arg2 string
+		var arg2 GCPCloudConnectorsParams
 		if args[2] != nil {
-			arg2 = args[2].(string)
-		}
-		var arg3 string
-		if args[3] != nil {
-			arg3 = args[3].(string)
+			arg2 = args[2].(GCPCloudConnectorsParams)
 		}
 		run(
 			arg0,
 			arg1,
 			arg2,
-			arg3,
 		)
 	})
 	return _c
@@ -235,7 +229,7 @@ func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Return(
 	return _c
 }
 
-func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) RunAndReturn(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, audience string, serviceAccountEmail string) ([]option.ClientOption, error)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
+func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) RunAndReturn(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
 	_c.Call.Return(run)
 	return _c
 }
