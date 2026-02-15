@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 func RetryableCodesOption(o *retry.StandardOptions) {
@@ -37,8 +38,8 @@ func awsConfigRetrier() aws.Retryer {
 	return retry.NewStandard(RetryableCodesOption)
 }
 
-func InitializeAWSConfig(cfg libbeataws.ConfigAWS) (*aws.Config, error) {
-	awsConfig, err := libbeataws.InitializeAWSConfig(cfg)
+func InitializeAWSConfig(cfg libbeataws.ConfigAWS, logger *logp.Logger) (*aws.Config, error) {
+	awsConfig, err := libbeataws.InitializeAWSConfig(cfg, logger)
 	if err != nil {
 		return nil, err
 	}
