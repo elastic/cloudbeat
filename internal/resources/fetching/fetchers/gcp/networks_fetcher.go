@@ -51,7 +51,6 @@ func NewGcpNetworksFetcher(_ context.Context, log *clog.Logger, ch chan fetching
 func (f *GcpNetworksFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpNetworksFetcher.Fetch")
 	defer f.log.Info("GcpNetworksFetcher.Fetch done")
-	defer f.provider.Clear()
 
 	resultsCh := make(chan *inventory.ExtendedGcpAsset)
 	go f.provider.ListNetworkAssets(ctx, resultsCh)
