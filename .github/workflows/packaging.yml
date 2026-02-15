@@ -46,11 +46,13 @@ jobs:
         shell: bash
         run: ./bin/hermit env --raw >> "$GITHUB_ENV"
 
-      - name: Clean Hermit symlinks
-        run: rm -rf .hermit
-
       - name: Install Hermit packages
-        run: hermit install
+        run: hermit install -v
+
+      - name: Reinstall Go to fix symlinks
+        run: |
+          hermit uninstall go || true
+          hermit install go
 
       - name: Debug Go installation
         run: |
