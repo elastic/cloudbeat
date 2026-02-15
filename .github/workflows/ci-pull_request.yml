@@ -44,11 +44,11 @@ jobs:
         run: |
           ./bin/hermit env --raw >> "$GITHUB_ENV"
 
-      - name: Clean Hermit symlinks
-        run: rm -rf .hermit
+      # - name: Clean Hermit symlinks
+      #   run: rm -rf .hermit
 
-      - name: Install Hermit packages
-        run: hermit install
+      # - name: Install Hermit packages
+      #   run: hermit install
 
       - name: Initialize poetry
         shell: bash
@@ -108,8 +108,8 @@ jobs:
         run: |
           ./bin/hermit env --raw >> "$GITHUB_ENV"
 
-      - name: Install Hermit packages
-        run: hermit install
+      # - name: Install Hermit packages
+      #   run: hermit install
 
       - name: Build opa bundle
         shell: bash
