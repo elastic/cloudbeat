@@ -19,8 +19,10 @@ package logging
 
 import (
 	"context"
+	"errors"
 
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -39,31 +41,36 @@ type TrailBucket struct {
 	ACL     *s3Client.GetBucketAclOutput `json:"acl,omitempty"`
 }
 
+func (p *Provider) logBucketError(err error, bucketName, operation string) {
+	if err == nil {
+		return
+	}
+	var nsb *types.NoSuchBucket
+	if errors.As(err, &nsb) {
+		p.log.Warnf("Error getting bucket %s for bucket %s: %v", operation, bucketName, err)
+	} else {
+		p.log.Errorf("Error getting bucket %s for bucket %s: %v", operation, bucketName, err)
+	}
+}
+
 func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error) {
 	trails, trailsErr := p.trailProvider.DescribeTrails(ctx)
 	if trailsErr != nil {
 		return nil, trailsErr
 	}
-
 	enrichedTrails := make([]awslib.AwsResource, 0, len(trails))
 	for _, info := range trails {
 		if info.Trail.S3BucketName == nil {
 			continue
 		}
 		bucketPolicy, policyErr := p.s3Provider.GetBucketPolicy(ctx, info.Trail.S3BucketName, *info.Trail.HomeRegion)
-		if policyErr != nil {
-			p.log.Errorf("Error getting bucket policy for bucket %s: %v", *info.Trail.S3BucketName, policyErr)
-		}
+		p.logBucketError(policyErr, *info.Trail.S3BucketName, "policy")
 
 		aclGrants, aclErr := p.s3Provider.GetBucketACL(ctx, info.Trail.S3BucketName, *info.Trail.HomeRegion)
-		if aclErr != nil {
-			p.log.Errorf("Error getting bucket ACL for bucket %s: %v", *info.Trail.S3BucketName, aclErr)
-		}
+		p.logBucketError(aclErr, *info.Trail.S3BucketName, "ACL")
 
 		bucketLogging, loggingErr := p.s3Provider.GetBucketLogging(ctx, info.Trail.S3BucketName, *info.Trail.HomeRegion)
-		if loggingErr != nil {
-			p.log.Errorf("Error getting bucket logging for bucket %s: %v", *info.Trail.S3BucketName, loggingErr)
-		}
+		p.logBucketError(loggingErr, *info.Trail.S3BucketName, "logging")
 
 		enrichedTrails = append(enrichedTrails, EnrichedTrail{
 			TrailInfo: info,

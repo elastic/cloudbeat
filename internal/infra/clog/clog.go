@@ -33,7 +33,7 @@ type Logger struct {
 
 func (l *Logger) Errorf(template string, args ...any) {
 	// Downgrade context.Canceled errors to warning level
-	if hasErrorType(context.Canceled, args...) {
+	if hasErrorType(context.Canceled, append(args, template)...) {
 		l.Warnf(template, args...)
 		return
 	}
