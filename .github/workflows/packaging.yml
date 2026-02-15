@@ -52,6 +52,23 @@ jobs:
       - name: Install Hermit packages
         run: hermit install
 
+      - name: Debug Go installation
+        run: |
+          echo "=== Which go ==="
+          which go
+          echo "=== Go version ==="
+          go version
+          echo "=== GOROOT ==="
+          echo $GOROOT
+          echo "=== GOROOT contents ==="
+          ls -la $GOROOT || echo "GOROOT does not exist!"
+          echo "=== Hermit cache ==="
+          ls -la ~/.cache/hermit/pkg/ | grep go
+          echo "=== Hermit go bin ==="
+          ls -la .hermit/go/bin/go
+          echo "=== Go env ==="
+          go env
+
       - name: Packaging
         run: |
           mage -v package
