@@ -113,7 +113,7 @@ jobs:
         shell: bash
         run: |
           go install gotest.tools/gotestsum
-          GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn GOOS=linux TEST_DIRECTORY=./... gotestsum --format pkgname -- -race -coverpkg=./... -coverprofile=cover.out.tmp
+          GOOS=linux TEST_DIRECTORY=./... gotestsum --format pkgname -- -race -coverpkg=./... -coverprofile=cover.out.tmp
           grep -v "mock.go" cover.out.tmp | grep -v mock_old.go | grep -v "elastic/cloudbeat/deploy" | grep -v "internal/inventory/asset.go" > cover.out # remove mock files and deploy dir
 
       - name: Upload coverage artifact
