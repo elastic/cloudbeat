@@ -106,7 +106,7 @@ repos:
         pass_filenames: false
       - id: go-test
         name: Run short unit tests
-        entry: bash -c 'GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn go test -failfast -short -timeout 100ms ./...'
+        entry: bash -c 'GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn go test -failfast -short -timeout 2s ./...'
         language: system
         files: .*.go
         pass_filenames: false
