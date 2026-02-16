@@ -75,7 +75,7 @@ func (k *EKS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 	benchmarkHelper := NewK8sBenchmarkHelper(log, cfg, kubeClient)
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
-	awsConfig, awsIdentity, err := k.getEksAwsConfig(ctx, cfg)
+	awsConfig, awsIdentity, err := k.getEksAwsConfig(ctx, cfg, log)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
@@ -102,13 +102,13 @@ func (k *EKS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 	), dp, idp, nil
 }
 
-func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.Config, *cloud.Identity, error) {
+func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config, log *clog.Logger) (awssdk.Config, *cloud.Identity, error) {
 	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.Aws.Cred == (aws.ConfigAWS{}) {
 		// Optional for EKS
 		return awssdk.Config{}, nil, nil
 	}
 
-	awsCfg, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+	awsCfg, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, log.Logger)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

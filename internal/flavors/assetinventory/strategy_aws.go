@@ -41,7 +41,7 @@ const (
 )
 
 func (s *strategy) initAwsFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
-	awsConfig, err := awslib.InitializeAWSConfig(s.cfg.CloudConfig.Aws.Cred)
+	awsConfig, err := awslib.InitializeAWSConfig(s.cfg.CloudConfig.Aws.Cred, s.logger.Logger)
 	if err != nil {
 		return nil, err
 	}

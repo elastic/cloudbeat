@@ -76,11 +76,11 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 		err         error
 	)
 
-	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg, log)
 	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
 		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
 		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
-		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg)
+		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg, log)
 	}
 
 	if err != nil {
@@ -217,8 +217,8 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	return config, nil
 }
 
-func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config) (*awssdk.Config, *cloud.Identity, error) {
-	awsConfig, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
+func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config, log *clog.Logger) (*awssdk.Config, *cloud.Identity, error) {
+	awsConfig, err := awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, log.Logger)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
