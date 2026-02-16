@@ -99,7 +99,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		},
 	}
 	for _, test := range tests {
-		kubeclient := k8sfake.NewClientset()
+		kubeclient := k8sfake.NewSimpleClientset()
 
 		services := &v1.Service{
 			TypeMeta: metav1.TypeMeta{
@@ -173,7 +173,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			errors.New("elb error")},
 	}
 	for _, test := range tests {
-		kubeclient := k8sfake.NewClientset()
+		kubeclient := k8sfake.NewSimpleClientset()
 
 		services := &v1.Service{
 			TypeMeta: metav1.TypeMeta{

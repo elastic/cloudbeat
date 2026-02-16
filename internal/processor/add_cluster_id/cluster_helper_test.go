@@ -45,7 +45,7 @@ func (s *ClusterHelperTestSuite) TestClusterId() {
 			UID:  types.UID(kubeSystemNamespaceId),
 		},
 	}
-	client := fake.NewClientset(ns)
+	client := fake.NewSimpleClientset(ns)
 	sut, err := newClusterHelper(client)
 	s.Require().NoError(err)
 
@@ -60,7 +60,7 @@ func (s *ClusterHelperTestSuite) TestClusterIdNotFound() {
 			UID:  types.UID(kubeSystemNamespaceId),
 		},
 	}
-	client := fake.NewClientset(ns)
+	client := fake.NewSimpleClientset(ns)
 	_, err := newClusterHelper(client)
 	s.Require().Error(err)
 }
