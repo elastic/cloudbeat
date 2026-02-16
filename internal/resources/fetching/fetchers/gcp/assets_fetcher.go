@@ -81,7 +81,6 @@ func NewGcpAssetsFetcher(_ context.Context, log *clog.Logger, ch chan fetching.R
 func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("GcpAssetsFetcher.Fetch start")
 	defer f.log.Info("GcpAssetsFetcher.Fetch done")
-	defer f.provider.Clear()
 
 	resultsCh := make(chan *inventory.ExtendedGcpAsset)
 	go f.provider.ListAssetTypes(ctx, lo.Keys(reversedGcpAssetTypes), resultsCh)
