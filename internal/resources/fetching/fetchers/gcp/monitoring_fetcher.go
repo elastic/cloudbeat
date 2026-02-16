@@ -52,7 +52,6 @@ func NewGcpMonitoringFetcher(_ context.Context, log *clog.Logger, ch chan fetchi
 func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
 	defer f.log.Info("GcpMonitoringFetcher.Fetch done")
-	defer f.provider.Clear()
 
 	resultsCh := make(chan *inventory.MonitoringAsset)
 	go f.provider.ListMonitoringAssets(ctx, resultsCh)
