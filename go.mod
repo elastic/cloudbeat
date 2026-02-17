@@ -55,6 +55,7 @@ require (
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.8.8
 	github.com/go-logr/zapr v1.3.0
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.17.0
@@ -157,7 +158,6 @@ require (
 	github.com/go-openapi/swag/stringutils v0.25.4 // indirect
 	github.com/go-openapi/swag/typeutils v0.25.4 // indirect
 	github.com/go-openapi/swag/yamlutils v0.25.4 // indirect
-	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gocsaf/csaf/v3 v3.3.0 // indirect
 	github.com/gofrs/uuid/v5 v5.3.2 // indirect
 	github.com/gohugoio/hashstructure v0.5.0 // indirect

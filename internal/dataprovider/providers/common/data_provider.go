@@ -18,7 +18,7 @@
 package common
 
 import (
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/version"
