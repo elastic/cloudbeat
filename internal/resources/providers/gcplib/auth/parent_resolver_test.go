@@ -73,7 +73,7 @@ func TestDefaultParentResolver_GetParent(t *testing.T) {
 
 		resolver := &defaultParentResolver{project: mockProject, org: mockOrg}
 		parent, err := resolver.GetParent(ctx, cfgSingle, nil)
-		assert.ErrorIs(t, err, wantErr)
+		require.ErrorIs(t, err, wantErr)
 		assert.Empty(t, parent)
 	})
 
@@ -88,7 +88,7 @@ func TestDefaultParentResolver_GetParent(t *testing.T) {
 
 		resolver := &defaultParentResolver{project: mockProject, org: mockOrg}
 		parent, err := resolver.GetParent(ctx, cfgOrg, nil)
-		assert.ErrorIs(t, err, wantErr)
+		require.ErrorIs(t, err, wantErr)
 		assert.Empty(t, parent)
 	})
 
