@@ -52,6 +52,12 @@ runs:
       with:
         node-version-file: ${{ steps.globals.outputs.KIBANA_DIR }}/package.json
 
+    - name: Setup Chrome
+      id: chrome
+      uses: browser-actions/setup-chrome@b94431e051d1c52dcbe9a7092a4f10f827795416 # v2.1.0
+      with:
+        chrome-version: 145
+
     - name: Bootstrap Kibana
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
@@ -103,6 +109,7 @@ runs:
         TEST_BROWSER_HEADLESS: "1"
         TEST_CLOUD_HOST_NAME: "cloud.elastic.co"
         TEST_CONFIG: ${{ env.TEST_CONFIG }}
+        TEST_BROWSER_BINARY_PATH: ${{ steps.chrome.outputs.chrome-path }}
       run: |
         node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"
 
