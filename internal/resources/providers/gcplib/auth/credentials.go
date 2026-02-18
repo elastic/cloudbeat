@@ -43,7 +43,7 @@ type ConfigProviderAPI interface {
 
 type GoogleAuthProviderAPI interface {
 	FindDefaultCredentials(ctx context.Context) (*google.Credentials, error)
-	FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, audience string, serviceAccountEmail string) ([]option.ClientOption, error)
+	FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error)
 }
 
 type ConfigProvider struct {
@@ -89,7 +89,12 @@ func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, c
 func (p *ConfigProvider) getCloudConnectorsCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	log.Info("creating credentials using AWS Workload Identity Federation and service account impersonation", "provider", "GCP")
 
-	opts, err := p.AuthProvider.FindCloudConnectorsCredentials(ctx, cfg.CloudConnectorsConfig, cfg.Audience, cfg.ServiceAccountEmail)
+	params := GCPCloudConnectorsParams{
+		Audience:            cfg.Audience,
+		ServiceAccountEmail: cfg.ServiceAccountEmail,
+		CloudConnectorID:    cfg.CloudConnectorID,
+	}
+	opts, err := p.AuthProvider.FindCloudConnectorsCredentials(ctx, cfg.CloudConnectorsConfig, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cloud connectors credentials: %w", err)
 	}
