@@ -57,14 +57,14 @@ const resourceIdTypeOrganization = "organization"
 // the project via v3, then calls v1 getAncestry to resolve the organization in one call.
 // clientOpts must authenticate with resourcemanager.projects.get.
 func resolveOrganizationIdFromAudience(ctx context.Context, clientOpts []option.ClientOption, audience string) (string, error) {
+	projectNumber, ok := projectNumberFromAudience(audience)
+	if !ok {
+		return "", fmt.Errorf("audience does not contain a valid project number: %w", ErrMissingOrgId)
+	}
 	opts := append([]option.ClientOption{option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope)}, clientOpts...)
 	svcV3, err := cloudresourcemanager.NewService(ctx, opts...)
 	if err != nil {
 		return "", fmt.Errorf("failed to create Resource Manager client: %w", err)
-	}
-	projectNumber, ok := projectNumberFromAudience(audience)
-	if !ok {
-		return "", fmt.Errorf("audience does not contain a valid project number: %w", ErrMissingOrgId)
 	}
 	project, err := svcV3.Projects.Get("projects/" + projectNumber).Context(ctx).Do()
 	if err != nil {
