@@ -123,7 +123,7 @@ require (
 require gopkg.in/yaml.v2 v2.4.0 // indirect
 
 require (
-	cel.dev/expr v0.24.0 // indirect
+	cel.dev/expr v0.25.1 // indirect
 	cloud.google.com/go/auth v0.18.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/monitoring v1.24.3 // indirect
@@ -151,7 +151,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
-	github.com/cncf/xds/go v0.0.0-20260121142036-a486691bba94 // indirect
+	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
 	github.com/containerd/cgroups/v3 v3.0.5 // indirect
 	github.com/containerd/containerd/api v1.9.0 // indirect
 	github.com/containerd/containerd/v2 v2.1.5 // indirect
