@@ -77,8 +77,8 @@ func TestDefaultProjectParentResolver_GetProjectParent(t *testing.T) {
 
 		parent, err := resolver.GetProjectParent(ctx, cfg, nil)
 		require.Error(t, err)
-		assert.ErrorContains(t, err, "failed to get project ID")
-		assert.ErrorIs(t, err, wantErr)
+		require.ErrorContains(t, err, "failed to get project ID")
+		require.ErrorIs(t, err, wantErr)
 		assert.Empty(t, parent)
 	})
 
@@ -93,7 +93,7 @@ func TestDefaultProjectParentResolver_GetProjectParent(t *testing.T) {
 
 		parent, err := resolver.GetProjectParent(ctx, cfg, nil)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrProjectNotFound)
+		require.ErrorIs(t, err, ErrProjectNotFound)
 		assert.Empty(t, parent)
 	})
 
@@ -101,15 +101,15 @@ func TestDefaultProjectParentResolver_GetProjectParent(t *testing.T) {
 		mockAuth := NewMockDefaultCredentialsFinder(t)
 		resolver := NewDefaultProjectParentResolver(mockAuth)
 		cfg := config.GcpConfig{
-			ProjectId: "",
+			ProjectId:    "",
 			GcpClientOpt: config.GcpClientOpt{Audience: "//iam.googleapis.com/locations/global/not-a-valid-audience"},
 		}
 		clientOpts := []option.ClientOption{option.WithRequestReason("test")}
 
 		parent, err := resolver.GetProjectParent(ctx, cfg, clientOpts)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrProjectNotFound)
-		assert.ErrorContains(t, err, "audience does not contain a valid project number")
+		require.ErrorIs(t, err, ErrProjectNotFound)
+		require.ErrorContains(t, err, "audience does not contain a valid project number")
 		assert.Empty(t, parent)
 		// Should not fall back to ADC when clientOpts and Audience are present
 		mockAuth.AssertNotCalled(t, "FindDefaultCredentials")

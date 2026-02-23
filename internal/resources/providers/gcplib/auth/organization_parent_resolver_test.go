@@ -51,7 +51,7 @@ func TestDefaultOrganizationParentResolver_GetOrganizationParent(t *testing.T) {
 
 		parent, err := resolver.GetOrganizationParent(ctx, cfg, nil)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrMissingOrgId)
+		require.ErrorIs(t, err, ErrMissingOrgId)
 		assert.Empty(t, parent)
 	})
 
@@ -65,7 +65,7 @@ func TestDefaultOrganizationParentResolver_GetOrganizationParent(t *testing.T) {
 
 		parent, err := resolver.GetOrganizationParent(ctx, cfg, clientOpts)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrMissingOrgId)
+		require.ErrorIs(t, err, ErrMissingOrgId)
 		assert.Empty(t, parent)
 	})
 
@@ -79,8 +79,8 @@ func TestDefaultOrganizationParentResolver_GetOrganizationParent(t *testing.T) {
 
 		parent, err := resolver.GetOrganizationParent(ctx, cfg, clientOpts)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, ErrMissingOrgId)
-		assert.ErrorContains(t, err, "audience does not contain a valid project number")
+		require.ErrorIs(t, err, ErrMissingOrgId)
+		require.ErrorContains(t, err, "audience does not contain a valid project number")
 		assert.Empty(t, parent)
 	})
 }
