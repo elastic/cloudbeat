@@ -27,7 +27,7 @@
     "gomodTidy"
   ],
   "separateMajorMinor": true,
-  "prConcurrentLimit": 20,
+  "prConcurrentLimit": 50,
   "automergeStrategy": "squash",
   "automergeType": "pr",
   "ignorePaths": [
