@@ -348,7 +348,8 @@ func TestGetGcpClientConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		p := ConfigProvider{
-			AuthProvider: tt.authProvider,
+			AuthProvider:   tt.authProvider,
+			ParentResolver: NewDefaultParentResolver(tt.authProvider),
 		}
 		t.Run(tt.name, func(t *testing.T) {
 			for idx, cfg := range tt.cfg {

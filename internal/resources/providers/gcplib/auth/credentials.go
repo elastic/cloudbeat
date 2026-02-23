@@ -46,8 +46,31 @@ type GoogleAuthProviderAPI interface {
 	FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error)
 }
 
+// DefaultCredentialsFinder is the minimal interface needed to resolve project ID from
+// application default credentials (e.g. metadata server on GCP). *GoogleAuthProvider implements it.
+type DefaultCredentialsFinder interface {
+	FindDefaultCredentials(ctx context.Context) (*google.Credentials, error)
+}
+
+// ParentResolver returns the GCP parent (e.g. "projects/pid" or "organizations/oid")
+// for the given config and client options.
+type ParentResolver interface {
+	GetParent(ctx context.Context, cfg config.GcpConfig, clientOpts []option.ClientOption) (string, error)
+}
+
 type ConfigProvider struct {
-	AuthProvider GoogleAuthProviderAPI
+	AuthProvider   GoogleAuthProviderAPI
+	ParentResolver ParentResolver // required; use DefaultParentResolver in production
+}
+
+// NewConfigProvider returns a ConfigProvider wired with the default auth provider
+// and default parent resolver (project + organization). Use this in production.
+func NewConfigProvider() *ConfigProvider {
+	auth := &GoogleAuthProvider{}
+	return &ConfigProvider{
+		AuthProvider:   auth,
+		ParentResolver: NewDefaultParentResolver(auth),
+	}
 }
 
 var ErrMissingOrgId = errors.New("organization ID is required for organization account type")
@@ -70,7 +93,7 @@ func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpC
 }
 
 func (p *ConfigProvider) getGcpFactoryConfig(ctx context.Context, cfg config.GcpConfig, clientOpts []option.ClientOption) (*GcpFactoryConfig, error) {
-	parent, err := getGcpConfigParentValue(ctx, *p, cfg)
+	parent, err := p.ParentResolver.GetParent(ctx, cfg, clientOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -123,19 +146,6 @@ func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.Gc
 
 	return p.getGcpFactoryConfig(ctx, cfg, opts)
 }
-func (p *ConfigProvider) getProjectId(ctx context.Context, cfg config.GcpConfig) (string, error) {
-	if cfg.ProjectId != "" {
-		return cfg.ProjectId, nil
-	}
-
-	// Try to get project ID from metadata server in case we are running on GCP VM
-	cred, err := p.AuthProvider.FindDefaultCredentials(ctx)
-	if err == nil {
-		return cred.ProjectID, nil
-	}
-
-	return "", ErrProjectNotFound
-}
 
 func validateJSONFromFile(filePath string) error {
 	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
@@ -152,22 +162,4 @@ func validateJSONFromFile(filePath string) error {
 	}
 
 	return nil
-}
-
-func getGcpConfigParentValue(ctx context.Context, provider ConfigProvider, cfg config.GcpConfig) (string, error) {
-	switch cfg.AccountType {
-	case config.OrganizationAccount:
-		if cfg.OrganizationId == "" {
-			return "", ErrMissingOrgId
-		}
-		return fmt.Sprintf("organizations/%s", cfg.OrganizationId), nil
-	case config.SingleAccount:
-		projectId, err := provider.getProjectId(ctx, cfg)
-		if err != nil {
-			return "", fmt.Errorf("failed to get project ID: %v", err)
-		}
-		return fmt.Sprintf("projects/%s", projectId), nil
-	default:
-		return "", fmt.Errorf("invalid gcp account type: %s", cfg.AccountType)
-	}
 }
