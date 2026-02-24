@@ -39,7 +39,7 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: cloudbeat-version-bump-pipeline
+  name: cloudbeat-version-bump
   description: Buildkite pipeline for cloudbeat Version Bump
   links:
     - title: Pipeline
@@ -52,7 +52,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: cloudbeat-version-bump-pipeline
+      name: cloudbeat-version-bump
       description: Buildkite pipeline for cloudbeat Version Bump
     spec:
       repository: elastic/cloudbeat
