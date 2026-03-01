@@ -113,7 +113,7 @@ func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) erro
 	watcher, err := kubernetes.NewWatcher(client, r.resource, kubernetes.WatchOptions{
 		SyncTimeout: interval,
 		Namespace:   r.namespace,
-	}, nil)
+	}, nil, f.log.Logger)
 	if err != nil {
 		return fmt.Errorf("could not create watcher: %w", err)
 	}

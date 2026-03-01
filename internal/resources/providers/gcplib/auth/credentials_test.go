@@ -75,11 +75,13 @@ func TestGetGcpClientConfig(t *testing.T) {
 			authProvider: mockGoogleAuthProvider(nil),
 			want: []*GcpFactoryConfig{
 				{
-					Parent:     testParentProjectId,
+					Parent: testParentProjectId,
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
 				},
 				{
-					Parent:     testParentOrgId,
+					Parent: testParentOrgId,
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
 				},
 			},
@@ -128,11 +130,13 @@ func TestGetGcpClientConfig(t *testing.T) {
 			authProvider: mockGoogleAuthProvider(nil),
 			want: []*GcpFactoryConfig{
 				{
-					Parent:     testParentProjectId,
+					Parent: testParentProjectId,
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
 				},
 				{
-					Parent:     testParentOrgId,
+					Parent: testParentOrgId,
+					//nolint:staticcheck
 					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
 				},
 			},
@@ -185,14 +189,18 @@ func TestGetGcpClientConfig(t *testing.T) {
 				{
 					Parent: testParentProjectId,
 					ClientOpts: []option.ClientOption{
+						//nolint:staticcheck
 						option.WithCredentialsFile(saFilePath),
+						//nolint:staticcheck
 						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
 					},
 				},
 				{
 					Parent: testParentOrgId,
 					ClientOpts: []option.ClientOption{
+						//nolint:staticcheck
 						option.WithCredentialsFile(saFilePath),
+						//nolint:staticcheck
 						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
 					},
 				},
