@@ -70,7 +70,6 @@ func (s *GcpLogSinkFetcherTestSuite) TestLogSinkFetcher_Fetch_Success() {
 			AccountId: "1",
 		},
 	}
-	mockInventoryService.EXPECT().Clear()
 	mockInventoryService.On("ListProjectAssets", mock.Anything, []string{inventory.LogSinkAssetType}, mock.Anything).
 		Run(func(args mock.Arguments) {
 			ch := args.Get(2).(chan<- *inventory.ProjectAssets)
