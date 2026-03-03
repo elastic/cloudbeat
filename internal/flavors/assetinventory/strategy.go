@@ -100,7 +100,7 @@ func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetche
 }
 
 func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
-	cfgProvider := &gcp_auth.ConfigProvider{AuthProvider: &gcp_auth.GoogleAuthProvider{}}
+	cfgProvider := gcp_auth.NewConfigProvider()
 	gcpConfig, err := cfgProvider.GetGcpClientConfig(ctx, s.cfg.CloudConfig.Gcp, s.logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize gcp config: %w", err)

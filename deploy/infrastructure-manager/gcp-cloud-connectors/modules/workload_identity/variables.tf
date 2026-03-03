@@ -24,6 +24,11 @@ variable "aws_role_name" {
 }
 
 variable "elastic_resource_id" {
-  description = "Unique identifier for the Elastic deployment (must match the AWS role session name)"
+  description = "Unique identifier for the Elastic deployment (first part of AWS role session name)"
+  type        = string
+}
+
+variable "cloud_connector_id" {
+  description = "Unique identifier for the cloud connector (second part of AWS role session name)"
   type        = string
 }

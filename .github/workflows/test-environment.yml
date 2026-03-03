@@ -274,7 +274,7 @@ jobs:
       - name: Get Elastic Cloud Credentials from Vault
         id: get-ec-credentials
         if: inputs.ec-api-key == '' && steps.determine-vault-path.outcome == 'success'
-        uses: hashicorp/vault-action@affa6f04da5c2d55e6e115b7d1b044a6b1af8c74 # v2.7.4
+        uses: hashicorp/vault-action@9c2d817b85b9fff56bcab21cb74b485aee9e9d73 # v2.8.1
         continue-on-error: false
         with:
           url: ${{ secrets.VAULT_ADDR }}
@@ -359,7 +359,7 @@ jobs:
           echo "AGENTLESS=$agentless_flag" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@010d0da01d0b5a38af31e9c3470dbfdabdecca3a # v4.0.1
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}

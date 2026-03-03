@@ -123,8 +123,6 @@ Use the three steps below; the script covers main and all maintained branches an
 
 **Upstream refs:** Run `git fetch origin` first. The script uses `origin/main`, `origin/X.Y`, and tags on `origin` only.
 
-
-
 ### Status Determination
 
 **not_affected** when:
