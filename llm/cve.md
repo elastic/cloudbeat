@@ -80,15 +80,50 @@ gh api repos/elastic/security/issues --jq '.[] | select(.title | contains("<CVE-
 - ✅ **ALWAYS** include version numbers
 - ✅ **ALWAYS** list ALL maintained versions
 
-### Maintained Cloudbeat Versions
+### Cloudbeat versioning model (why the algorithm looks like this)
 
-To determine which versions need patches, check the future releases:
-```bash
-# Fetch future releases to identify maintained versions
-curl -s https://artifacts.elastic.co/releases/TfEVhiaBGqR64ie0g0r0uUwNAbEQMu1Z/future-releases/stack.json | jq ".releases[].version"
-```
+Cloudbeat uses **branch-per-minor, tag-per-patch** versioning:
 
-These are the versions that must receive patches when Cloudbeat is affected by a CVE.
+- **Branches** = minor versions. Each maintained minor has a long-lived branch: `8.19`, `9.2`, `9.3`, etc. New minors are cut from `main` when a release is created.
+- **Tags** = patch releases. Every release is a tag: `v8.19.0`, `v8.19.1`, … `v8.19.10`. So branch `8.19` contains commits that produced tags v8.19.0 through v8.19.N.
+- **main** = development for the next major/minor; no patch number until a release is cut. A minor branch can exist **before** its first tag (e.g. branch `9.3` exists before `v9.3.0` is released).
+
+**Why CVE analysis is hard across versions:** The vulnerable **dependency** (e.g. in `go.mod`) can differ at every ref (each tag and each branch tip). We must answer: (1) Which **released** Cloudbeat versions (tags) are affected? (2) What is the **first fixed** release (tag) on each branch? (3) Are **branch tips** or **main** infected with no fix released yet? The algorithm below uses one script to scan all refs, then you classify and derive; it covers “CVE introduced in a later patch” and “branch exists but vX.Y.0 not released yet.”
+
+### Cloudbeat version branches: affected and fix versions
+
+This section applies to **Cloudbeat version branches** only. Use it to determine, per maintained minor branch, **which Cloudbeat versions are affected** and **which version is the fix**. The CVE or security statement should include both when applicable:
+- **Infected Cloudbeat version(s)** — e.g. “affected from 8.19.0” or “affected from 8.19.4 onward” (when the CVE was introduced in a later patch).
+- **Fix version(s)** — e.g. 8.19.11, 9.2.5 (first release on that branch that contains the fix).
+
+Use the three steps below; the script covers main and all maintained branches and tags. There can be **multiple affected ranges and multiple fix versions** (one per minor branch).
+
+**Algorithm (three steps)**
+
+1. **Scan** — Run the script. Use `-f` or `--fetch` to fetch `origin` first; otherwise it uses existing refs. It gets maintained minors from the future-releases API, then prints dependency version (or N/A) for `origin/main`, each maintained branch tip, and every tag `vX.Y.*`. It uses upstream refs only.
+   ```bash
+   ./scripts/scan-go-mod-refs.sh [-f|--fetch] "<module_path>"
+   # Example: ./scripts/scan-go-mod-refs.sh -f "elastic/beats/v7"
+   ```
+   Output: one line per ref, e.g. `ref: <go.mod line>` or `ref: N/A`.
+
+2. **Classify** — Using the CVE's known fixed version (or list of fixed pseudo-versions / commit hashes), mark each ref as **infected** or **fixed**. Prefer known fixed versions over parsing pseudo-version dates. Missing or unparseable version → treat as infected or document as manual.
+
+3. **Derive** — From the classified table:
+   - **main:** If `origin/main` is infected → main requires a fix.
+   - **Per minor X.Y:** If there are **no tags** for X.Y yet (branch exists, vX.Y.0 not released): branch tip infected → "branch requires patch before vX.Y.0"; else branch safe. If **tags exist:** first tag (in sort order) that is infected = **affected from** that version; first tag after that which is fixed = **fix version**; if no fixed tag, use branch tip (fix in next release vs branch needs a fix).
+
+**Summary – What to document**
+
+| Ref / situation | Document for CVE/statement |
+|-----------------|----------------------------|
+| **origin/main** infected | Main requires a fix (next release from main must include fix). |
+| **Branch, no tags yet** (e.g. 9.3), tip infected | e.g. "9.3 branch infected; requires patch before v9.3.0". |
+| **Branch with tags** | Infected: from X.Y.(first infected tag). Fix: X.Y.(first fixed tag) or "next release" / "needs fix". |
+
+**Upstream refs:** Run `git fetch origin` first. The script uses `origin/main`, `origin/X.Y`, and tags on `origin` only.
+
+
 
 ### Status Determination
 
@@ -111,10 +146,12 @@ Cloudbeat is [not affected|affected] by {CVE-ID} because {detailed justification
 
 [If not affected:] Nevertheless, {dependency} will be upgraded to version {X.Y.Z} as part of Cloudbeat's standard maintenance practices in Cloudbeat version {A.B.C}.
 
-[If affected:] The dependency is upgraded to version {X.Y.Z} as part of Cloudbeat's standard maintenance practices in Cloudbeat versions {A.B.C}, {D.E.F}, and {G.H.I}.
+[If affected:] Include the **Cloudbeat version(s) that are infected** (e.g. affected from 8.19.0, or from 8.19.4 onward) and the **fix version(s)** (e.g. Cloudbeat 8.19.11, 9.2.5). The dependency is upgraded to version {X.Y.Z} as part of Cloudbeat's standard maintenance practices in those fix versions. There may be multiple affected ranges and multiple fix versions—one per minor branch.
 ```
 
 ## Output Format
+
+When **affected**, the statement (and optionally the YAML) should include **infected Cloudbeat version(s)** and **fix version(s)** (see [Cloudbeat version branches](#cloudbeat-version-branches-affected-infected-and-fix-versions)).
 
 ````
 @prodsecmachine create statement
@@ -123,6 +160,7 @@ cve: "CVE-YYYY-NNNNN"
 status: "not_affected"  # or "affected"
 statement: |
   Cloudbeat uses {dependency} as part of {functionality}. Cloudbeat is not affected by CVE-YYYY-NNNNN because {justification}. Nevertheless, {dependency} will be upgraded to version X.Y.Z as part of Cloudbeat's standard maintenance practices in Cloudbeat version A.B.C.
+# When affected, include infected and fix Cloudbeat versions (e.g. affected from 8.19.0; fixed in 8.19.11, 9.2.5)
 product: "Cloudbeat"
 dependency: "{dependency-name}:{version}"
 ```
@@ -148,10 +186,13 @@ dependency: "{dependency-name}:{version}"
 - [ ] Analyzed if vulnerable code path is reachable in main runtime logic
 - [ ] Checked if vulnerability can be exploited in Cloudbeat's usage context
 
-### Version & Remediation
-- [ ] Fetched maintained versions (use future releases API)
-- [ ] Verified patched version is available
-- [ ] Planned upgrade path (direct upgrade or via parent dependency)
+### Version & Remediation (per maintained branch)
+- [ ] **Step 0:** Always scanned **main branch** (`origin/main`); if infected, document that main requires a fix
+- [ ] **Used upstream refs only**: ran with `-f` (e.g. `scripts/scan-go-mod-refs.sh -f <module>`) to fetch origin, or ran `git fetch origin` before; used `origin/X.Y` for branch tips and origin’s tags (do not assume local branches/tags are in sync)
+- [ ] Fetched maintained minor branches (future releases API)
+- [ ] Ran `scripts/scan-go-mod-refs.sh -f <module>` (or without `-f` if refs already fresh), classified each ref (infected/fixed), and derived per-branch infected from / fix version (including branches with no tags yet)
+- [ ] Verified patched dependency version exists (e.g. upstream)
+- [ ] Documented **infected** Cloudbeat version(s) or range per branch (e.g. from 8.19.0 or from 8.19.4 onward) and **fix version(s)** per branch; include both in CVE/statement when affected
 
 ### Statement Quality
 - [ ] Used "Cloudbeat uses..." (NEVER "We use...")
@@ -167,6 +208,9 @@ dependency: "{dependency-name}:{version}"
 - [ ] All version numbers are accurate and complete
 
 ## Common Mistakes to Avoid
+
+❌ **Using local branches/tags for version-branch checks**
+✅ Always use upstream: `git fetch origin`, then `origin/X.Y` for branch tips and origin’s tags (local state may be stale; e.g. 9.2 tip may already have the fix only on origin)
 
 ❌ **Only listing the latest version when affected**
 ✅ List ALL maintained versions (check future releases)
@@ -243,6 +287,24 @@ affected by this issue. The Go version will be updated to version 1.25.2 as part
 of Cloudbeat's standard maintenance practices in Cloudbeat versions 8.19.8, 9.1.8,
 and 9.2.2.
 ```
+
+### Example 5: AFFECTED – Per-branch algorithm (CVE-2025-68383)
+**Issue**: https://github.com/elastic/security/issues/8380  
+**Dependency**: github.com/elastic/beats/v7 (Libbeat Dissect processor).
+
+**Algorithm applied per maintained branch:**
+1. **Maintained branches (future releases):** 8.19, 9.2, 9.3, … (9.1 not in list → skip).
+2. **Branch 8.19:**  
+   - **v8.19.0** infected? Yes (beats Jun 2025 in go.mod).  
+   - **2b** Iterate tags v8.19.1 … v8.19.10; find first tag where beats is updated → that is the fix version. If none has the fix → **2c** check branch tip: if tip has fix → fix in next release, else branch needs a fix. (At investigation time, no tag had the fix → 2c: either “fix in next release” or “branch needs a fix”.)
+3. **Branch 9.2:** Same: v9.2.0 infected; **2b** iterate tags v9.2.1 … v9.2.4; if no fix in tags, **2c** check branch tip.
+
+**Statement** (with multiple fix versions):
+```
+Cloudbeat uses github.com/elastic/beats/v7 for the beat framework and event processor pipeline. The Libbeat Dissect processor can be invoked via processor configuration. Cloudbeat is affected by CVE-2025-68383 because a malicious dissect tokenizer pattern could cause a denial of service (panic/crash). The dependency is upgraded to a version that includes the fix as part of Cloudbeat's standard maintenance practices in Cloudbeat 8.19.11 and 9.2.5.
+```
+
+(If the fix is not yet released: “The dependency will be upgraded … in an upcoming Cloudbeat release on the 8.19 and 9.2 branches.”)
 
 ## Common Dependency Categories
 
