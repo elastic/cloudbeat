@@ -9,28 +9,28 @@ set -euo pipefail
 FETCH_ORIGIN=false
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    -f|--fetch)
-      FETCH_ORIGIN=true
-      shift
-      ;;
+    case "$1" in
+    -f | --fetch)
+        FETCH_ORIGIN=true
+        shift
+        ;;
     *)
-      break
-      ;;
-  esac
+        break
+        ;;
+    esac
 done
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 [-f|--fetch] <library_name>" >&2
-  echo "Example: $0 --fetch \"elastic/beats/v7\"" >&2
-  exit 1
+    echo "Usage: $0 [-f|--fetch] <library_name>" >&2
+    echo "Example: $0 --fetch \"elastic/beats/v7\"" >&2
+    exit 1
 fi
 
 LIBRARY_NAME="$1"
 
 if [[ "$FETCH_ORIGIN" == true ]]; then
-  echo "Fetching origin..." >&2
-  git fetch origin
+    echo "Fetching origin..." >&2
+    git fetch origin
 fi
 
 # Get maintained minor branches (e.g. 8.19, 9.2, 9.3)
@@ -41,32 +41,32 @@ REFS=()
 
 # main branch
 if git ls-remote --exit-code --heads origin main &>/dev/null; then
-  REFS+=("origin/main")
+    REFS+=("origin/main")
 fi
 
 # For each maintained minor: branch tip, then all tags vX.Y.*
 while IFS= read -r minor; do
-  [[ -z "$minor" ]] && continue
-  if git ls-remote --exit-code --heads origin "$minor" &>/dev/null; then
-    REFS+=("origin/$minor")
-  fi
-  while IFS= read -r tag; do
-    [[ -z "$tag" ]] && continue
-    REFS+=("$tag")
-  done < <(git tag -l "v${minor}.*" 2>/dev/null | sort -V || true)
-done <<< "$MINORS"
+    [[ -z "$minor" ]] && continue
+    if git ls-remote --exit-code --heads origin "$minor" &>/dev/null; then
+        REFS+=("origin/$minor")
+    fi
+    while IFS= read -r tag; do
+        [[ -z "$tag" ]] && continue
+        REFS+=("$tag")
+    done < <(git tag -l "v${minor}.*" 2>/dev/null | sort -V || true)
+done <<<"$MINORS"
 
 # Print go.mod line for each ref in order
 show_ref() {
-  local ref="$1"
-  local line
-  if line=$(git show "$ref":go.mod 2>/dev/null | grep -F "$LIBRARY_NAME"); then
-    echo "$ref: $line"
-  else
-    echo "$ref: N/A"
-  fi
+    local ref="$1"
+    local line
+    if line=$(git show "$ref":go.mod 2>/dev/null | grep -F "$LIBRARY_NAME"); then
+        echo "$ref: $line"
+    else
+        echo "$ref: N/A"
+    fi
 }
 
 for ref in "${REFS[@]}"; do
-  show_ref "$ref"
+    show_ref "$ref"
 done
