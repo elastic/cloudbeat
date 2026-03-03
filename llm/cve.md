@@ -289,13 +289,13 @@ and 9.2.2.
 ```
 
 ### Example 5: AFFECTED – Per-branch algorithm (CVE-2025-68383)
-**Issue**: https://github.com/elastic/security/issues/8380  
+**Issue**: https://github.com/elastic/security/issues/8380
 **Dependency**: github.com/elastic/beats/v7 (Libbeat Dissect processor).
 
 **Algorithm applied per maintained branch:**
 1. **Maintained branches (future releases):** 8.19, 9.2, 9.3, … (9.1 not in list → skip).
-2. **Branch 8.19:**  
-   - **v8.19.0** infected? Yes (beats Jun 2025 in go.mod).  
+2. **Branch 8.19:**
+   - **v8.19.0** infected? Yes (beats Jun 2025 in go.mod).
    - **2b** Iterate tags v8.19.1 … v8.19.10; find first tag where beats is updated → that is the fix version. If none has the fix → **2c** check branch tip: if tip has fix → fix in next release, else branch needs a fix. (At investigation time, no tag had the fix → 2c: either “fix in next release” or “branch needs a fix”.)
 3. **Branch 9.2:** Same: v9.2.0 infected; **2b** iterate tags v9.2.1 … v9.2.4; if no fix in tags, **2c** check branch tip.
 
