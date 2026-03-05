@@ -318,7 +318,7 @@ require (
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.6.0 // indirect
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/CycloneDX/cyclonedx-go v0.9.3 // indirect
-	github.com/GoogleCloudPlatform/docker-credential-gcr v2.0.5+incompatible // indirect
+	github.com/GoogleCloudPlatform/docker-credential-gcr v2.1.32 // indirect
 	github.com/Jeffail/gabs/v2 v2.6.0 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
