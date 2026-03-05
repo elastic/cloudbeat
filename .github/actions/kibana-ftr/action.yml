@@ -69,7 +69,7 @@ runs:
           yarn kbn bootstrap --force-install --no-validation || echo "⚠️ yarn kbn bootstrap failed, continuing..."
           yarn kbn clean && yarn kbn reset || echo "⚠️ yarn kbn reset failed, continuing..."
         fi
-        yarn kbn bootstrap
+        "${GITHUB_WORKSPACE}/.ci/scripts/retry.sh" 3 60 "rm -rf ~/.moon/temp ~/.moon/plugins/toolchains && yarn kbn bootstrap"
 
     - name: Set test configuration
       shell: bash
