@@ -278,7 +278,7 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
-	go.mongodb.org/mongo-driver v1.17.6 // indirect
+	go.mongodb.org/mongo-driver v1.17.9 // indirect
 	go.opentelemetry.io/collector/config/configoptional v1.51.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v1.51.0 // indirect
 	go.opentelemetry.io/collector/confmap v1.51.0 // indirect
