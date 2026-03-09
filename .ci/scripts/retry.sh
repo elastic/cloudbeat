@@ -33,8 +33,10 @@ while [ $attempt -le "$max_retries" ]; do
     echo "Command: $command"
     echo "Working directory: $(pwd)"
 
+    set +e
     eval "$command"
     exit_code=$?
+    set -e
     if [ $exit_code -eq 0 ]; then
         echo "Command succeeded on attempt $attempt"
         exit 0

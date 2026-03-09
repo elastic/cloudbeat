@@ -63,13 +63,14 @@ runs:
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       env:
         ES_VERSION: ${{ inputs.es_version }}
+        MOON_CONCURRENCY: "1"
       run: |
         if [[ $ES_VERSION == 8.19* ]]; then
           echo "Bootstrapping Kibana..."
           yarn kbn bootstrap --force-install --no-validation || echo "⚠️ yarn kbn bootstrap failed, continuing..."
           yarn kbn clean && yarn kbn reset || echo "⚠️ yarn kbn reset failed, continuing..."
         fi
-        yarn kbn bootstrap
+        "${GITHUB_WORKSPACE}/.ci/scripts/retry.sh" 3 60 "rm -rf ~/.moon && yarn kbn bootstrap"
 
     - name: Set test configuration
       shell: bash
