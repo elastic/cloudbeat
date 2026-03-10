@@ -294,7 +294,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93 // indirect
 	golang.org/x/tools v0.41.0 // indirect
-	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
+	gopkg.in/cheggaaa/pb.v2 v2.0.7 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.77 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.77 // indirect
