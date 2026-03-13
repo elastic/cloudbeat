@@ -33,6 +33,16 @@
   "ignorePaths": [
     "**/vendor/**"
   ],
+  "customManagers": [
+    {
+      "description": "Update .go-version file",
+      "customType": "regex",
+      "fileMatch": ["^\\.go-version$"],
+      "matchStrings": ["(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    }
+  ],
   "packageRules": [
     {
       "description": "Ignore elastic/beats v7 - requires manual update",
@@ -204,6 +214,17 @@
         "digest"
       ],
       "enabled": false
+    },
+    {
+      "description": "Allow minor Go version updates in go.mod",
+      "matchDepNames": ["go"],
+      "matchManagers": ["gomod"],
+      "versioning": "semver"
+    },
+    {
+      "description": "Group Go toolchain version updates together",
+      "groupName": "go-version",
+      "matchDepNames": ["go"]
     }
   ],
   "vulnerabilityAlerts": {
