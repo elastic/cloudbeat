@@ -228,6 +228,6 @@
     }
   ],
   "vulnerabilityAlerts": {
-    "enabled": true
+    "enabled": false
   }
 }
