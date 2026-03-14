@@ -222,9 +222,9 @@
       "versioning": "semver"
     },
     {
-      "description": "Group Go toolchain version updates together",
+      "description": "Group Go toolchain and golangci-lint version updates together",
       "groupName": "go-version",
-      "matchDepNames": ["go"]
+      "matchDepNames": ["go", "golangci-lint"]
     }
   ],
   "vulnerabilityAlerts": {
