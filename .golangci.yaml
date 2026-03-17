@@ -137,6 +137,8 @@ linters:
           disabled: true
         - name: package-naming
           disabled: true
+        - name: epoch-naming
+          disabled: true
     staticcheck:
       checks:
         - "all"
