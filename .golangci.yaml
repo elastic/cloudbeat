@@ -125,6 +125,18 @@ linters:
           disabled: true
         - name: unused-receiver
           disabled: true
+        - name: package-directory-mismatch
+          disabled: true
+        - name: enforce-switch-style
+          disabled: true
+        - name: use-waitgroup-go
+          disabled: true
+        - name: use-slices-sort
+          disabled: true
+        - name: identical-switch-branches
+          disabled: true
+        - name: package-naming
+          disabled: true
     staticcheck:
       checks:
         - "all"
