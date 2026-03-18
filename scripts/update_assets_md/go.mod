@@ -1,6 +1,10 @@
 module github.com/elastic/cloudbeat/scripts/update_assets_md
 
+<<<<<<< HEAD
 go 1.23.0
+=======
+go 1.26.1
+>>>>>>> 535c223c (chore: update Go version to 1.26.1 (#4052))
 
 require (
 	github.com/ettle/strcase v0.2.0
