@@ -41,7 +41,7 @@ jobs:
       - name: Install Poetry
         working-directory: cloudbeat
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
+          curl -sSL https://install.python-poetry.org | python3 - --version 2.1.1
           poetry --version
 
       - name: Install dependencies
