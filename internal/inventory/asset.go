@@ -187,7 +187,8 @@ type Entity struct {
 }
 
 type Event struct {
-	Kind string `json:"kind"`
+	Kind     string   `json:"kind"`
+	Category []string `json:"category"`
 }
 
 type Network struct {
@@ -249,6 +250,56 @@ type Container struct {
 // AssetEnricher functional builder function
 type AssetEnricher func(asset *AssetEvent)
 
+// eventCategoryByAssetType maps entity categories to ECS event.category values.
+// See https://www.elastic.co/docs/reference/ecs/ecs-allowed-values-event-category
+var eventCategoryByAssetType = map[AssetType]string{
+	CategoryAccessManagement:       "iam",
+	CategoryAccount:                "configuration",
+	CategoryContainerRegistry:      "configuration",
+	CategoryContainerService:       "configuration",
+	CategoryDatabase:               "database",
+	CategoryFaaS:                   "configuration",
+	CategoryFileSystemService:      "file",
+	CategoryFirewall:               "network",
+	CategoryGateway:                "network",
+	CategoryGroup:                  "iam",
+	CategoryHost:                   "host",
+	CategoryIdentity:               "iam",
+	CategoryInfrastructure:         "database",
+	CategoryLoadBalancer:           "network",
+	CategoryMessagingService:       "configuration",
+	CategoryNetworking:             "network",
+	CategoryOrchestrator:           "configuration",
+	CategoryOrganization:           "configuration",
+	CategoryPrivateEndpoint:        "file",
+	CategoryServiceAccount:         "iam",
+	CategoryServiceUsageTechnology: "configuration",
+	CategorySnapshot:               "host",
+	CategoryStorageBucket:          "file",
+	CategorySubnet:                 "network",
+	CategoryVolume:                 "host",
+	CategoryWebService:             "web",
+}
+
+// eventCategoryOverrides provides per-classification overrides when the
+// AssetType-level mapping is not accurate.
+var eventCategoryOverrides = map[AssetClassification]string{
+	AssetClassificationGcpIamRole:                  "iam",
+	AssetClassificationAzureCosmosDBAccount:         "database",
+	AssetClassificationAzureCosmosDBSQLDatabase:     "database",
+	AssetClassificationAzureStorageTableService:     "database",
+}
+
+func eventCategory(c AssetClassification) []string {
+	if cat, ok := eventCategoryOverrides[c]; ok {
+		return []string{cat}
+	}
+	if cat, ok := eventCategoryByAssetType[c.Category]; ok {
+		return []string{cat}
+	}
+	return nil
+}
+
 func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...AssetEnricher) AssetEvent {
 	a := AssetEvent{
 		Entity: Entity{
@@ -257,7 +308,8 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 			AssetClassification: c,
 		},
 		Event: Event{
-			Kind: "asset",
+			Kind:     "asset",
+			Category: eventCategory(c),
 		},
 	}
 
