@@ -284,10 +284,10 @@ var eventCategoryByAssetType = map[AssetType]string{
 // eventCategoryOverrides provides per-classification overrides when the
 // AssetType-level mapping is not accurate.
 var eventCategoryOverrides = map[AssetClassification]string{
-	AssetClassificationGcpIamRole:                  "iam",
-	AssetClassificationAzureCosmosDBAccount:         "database",
-	AssetClassificationAzureCosmosDBSQLDatabase:     "database",
-	AssetClassificationAzureStorageTableService:     "database",
+	AssetClassificationGcpIamRole:               "iam",
+	AssetClassificationAzureCosmosDBAccount:     "database",
+	AssetClassificationAzureCosmosDBSQLDatabase: "database",
+	AssetClassificationAzureStorageTableService: "database",
 }
 
 func eventCategory(c AssetClassification) []string {
