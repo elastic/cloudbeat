@@ -188,6 +188,7 @@ type Entity struct {
 
 type Event struct {
 	Kind     string   `json:"kind"`
+	Module   string   `json:"module"`
 	Category []string `json:"category"`
 }
 
@@ -309,6 +310,7 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 		},
 		Event: Event{
 			Kind:     "asset",
+			Module:   "asset discovery",
 			Category: eventCategory(c),
 		},
 	}
