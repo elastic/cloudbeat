@@ -36,31 +36,17 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-        working-directory: ./
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: 'true'
+          free-disk: 'true'
 
       - name: Set up unique deployment names
         run: |
           suffix="$(date +%s | tail -c 3)"
           echo "TF_VAR_deployment_name=DEPLOY_PR${{ github.event.number }}-$suffix" >> $GITHUB_ENV
           echo "CNVM_STACK_NAME=cnvm-stack-pr${{ github.event.number }}-$suffix" >> $GITHUB_ENV
-
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-        with:
-          python-version: '3.9'
-
-      - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          poetry --version
-
-      - name: Install Fleet API dependencies
-        id: fleet-api-deps
-        working-directory: ./tests
-        run: |
-          poetry install
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4
