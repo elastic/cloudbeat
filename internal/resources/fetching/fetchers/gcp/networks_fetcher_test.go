@@ -74,7 +74,7 @@ func (s *GcpNetworksFetcherTestSuite) TestNetworksFetcher_Fetch_Success() {
 			close(ch)
 		}).Once()
 
-	wg.Add(1) //nolint:revive
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		err := fetcher.Fetch(ctx, cycle.Metadata{})

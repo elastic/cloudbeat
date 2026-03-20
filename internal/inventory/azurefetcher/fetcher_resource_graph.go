@@ -113,14 +113,13 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, serviceN
 	}
 }
 
-//nolint:revive
 type vmProperties struct {
-	Extended struct {
-		InstanceView struct {
+	Extended struct { //nolint:revive
+		InstanceView struct { //nolint:revive
 			ComputerName string
 		}
 	}
-	HardwareProfile struct {
+	HardwareProfile struct { //nolint:revive
 		VmSize string
 	}
 }
