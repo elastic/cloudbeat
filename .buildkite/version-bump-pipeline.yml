@@ -1,11 +1,11 @@
 notify:
   - slack:
       channels:
-        - "#test-channel-for-plugin"
+        - "#security-cloud-services-team"
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/) && (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
-        - "#test-channel-for-plugin"
+        - "#security-cloud-services-team"
       message: |
         🚦 Pipeline waiting for approval 🚦
         Repo: `${REPO}`
