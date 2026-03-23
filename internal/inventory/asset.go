@@ -310,7 +310,7 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 		},
 		Event: Event{
 			Kind:     "asset",
-			Module:   "asset discovery",
+			Module:   "asset_discovery",
 			Category: eventCategory(c),
 		},
 	}

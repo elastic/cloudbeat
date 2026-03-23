@@ -55,7 +55,7 @@ func TestAssetInventory_Run(t *testing.T) {
 				"entity": entity,
 				"event": Event{
 					Kind:     "asset",
-					Module:   "asset discovery",
+					Module:   "asset_discovery",
 					Category: []string{"database"},
 				},
 				"labels": map[string]string{"Name": "test-server", "key": "value"},
