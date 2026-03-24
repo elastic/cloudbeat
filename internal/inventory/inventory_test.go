@@ -54,7 +54,10 @@ func TestAssetInventory_Run(t *testing.T) {
 			Fields: mapstr.M{
 				"entity": entity,
 				"event": Event{
-					Kind: "asset",
+					Kind:     "asset",
+					Module:   "asset_discovery",
+					Dataset:  "asset_discovery.aws",
+					Category: []string{"database"},
 				},
 				"labels": map[string]string{"Name": "test-server", "key": "value"},
 				"cloud": &Cloud{
