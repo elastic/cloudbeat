@@ -58,6 +58,8 @@ const (
 type AssetSubType string
 
 const (
+	AssetDiscoveryModule = "asset_discovery"
+
 	AwsCloudProvider   = "aws"
 	AzureCloudProvider = "azure"
 	GcpCloudProvider   = "gcp"
@@ -190,6 +192,7 @@ type Event struct {
 	Kind     string   `json:"kind"`
 	Module   string   `json:"module"`
 	Category []string `json:"category"`
+	Dataset  string   `json:"dataset"`
 }
 
 type Network struct {
@@ -310,7 +313,7 @@ func NewAssetEvent(c AssetClassification, id string, name string, enrichers ...A
 		},
 		Event: Event{
 			Kind:     "asset",
-			Module:   "asset_discovery",
+			Module:   AssetDiscoveryModule,
 			Category: eventCategory(c),
 		},
 	}
@@ -376,6 +379,7 @@ func WithCloud(cloud Cloud) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Cloud = &cloud
 		a.Entity.Source = &cloud.Provider
+		a.Event.Dataset = AssetDiscoveryModule + "." + cloud.Provider
 	}
 }
 
