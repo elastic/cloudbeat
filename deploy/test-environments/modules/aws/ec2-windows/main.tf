@@ -79,11 +79,20 @@ resource "aws_instance" "windows" {
 
   user_data = <<-EOT
     <powershell>
+    $ErrorActionPreference = "Continue"
+    try {
+      Get-NetConnectionProfile | Where-Object { $_.IPv4Connectivity -eq "Internet" } | Set-NetConnectionProfile -NetworkCategory Private -ErrorAction SilentlyContinue
+    } catch {}
+    winrm quickconfig -q -force
     Enable-PSRemoting -Force -SkipNetworkProfileCheck
     Set-Item WSMan:\localhost\Service\AllowUnencrypted $true
     Set-Item WSMan:\localhost\Service\Auth\Basic $true
     Set-Item WSMan:\localhost\Client\AllowUnencrypted $true
     Set-Item WSMan:\localhost\Client\Auth\Basic $true
+    netsh advfirewall firewall set rule group="Windows Remote Management" new enable=yes 2>$null
+    Get-NetFirewallRule -DisplayGroup "Windows Remote Management" -ErrorAction SilentlyContinue | Where-Object { $_.Direction -eq "Inbound" } | Enable-NetFirewallRule -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "WinRM-5985-CDR" -Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow -ErrorAction SilentlyContinue
+    Set-Service WinRM -StartupType Automatic
     Restart-Service WinRM
     </powershell>
   EOT
