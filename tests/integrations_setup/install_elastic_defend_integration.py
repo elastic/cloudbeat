@@ -11,7 +11,6 @@ from typing import Dict, Tuple
 
 import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.endpoint_package_policy import enable_endpoint_malware_ransomware_detect
 from fleet_api.common_api import (
     get_artifact_server,
     get_enrollment_token,
@@ -19,6 +18,7 @@ from fleet_api.common_api import (
     get_package_version,
     update_package_version,
 )
+from fleet_api.endpoint_package_policy import enable_endpoint_malware_ransomware_detect
 from fleet_api.package_policy_api import create_integration
 from fleet_api.utils import get_install_servers_option, read_json, render_template
 from loguru import logger
@@ -53,19 +53,20 @@ def _agent_version() -> str:
 
 
 def load_policies() -> Tuple[Dict, Dict]:
-    base = Path(__file__).parent
-    agent_policy = read_json(base / AGENT_POLICY_JSON)
-    package_policy = read_json(base / PACKAGE_POLICY_JSON)
+    """Load agent and package policy JSON from this package's data directory."""
+    policies_dir = Path(__file__).parent
+    agent_policy = read_json(policies_dir / AGENT_POLICY_JSON)
+    package_policy = read_json(policies_dir / PACKAGE_POLICY_JSON)
     return agent_policy, package_policy
 
 
 def _write_hosts_metadata(
-    agent_policy_id: str,
-    package_policy_id: str,
+    agt_policy_id: str,
+    pkg_policy_id: str,
 ) -> None:
     meta = {
-        "agent_policy_id": agent_policy_id,
-        "package_policy_id": package_policy_id,
+        "agent_policy_id": agt_policy_id,
+        "package_policy_id": pkg_policy_id,
         "integration": INTEGRATION_LABEL,
         "elastic_defend_linux_public_ip": os.getenv("ELASTIC_DEFEND_LINUX_PUBLIC_IP", ""),
         "elastic_defend_windows_public_ip": os.getenv("ELASTIC_DEFEND_WINDOWS_PUBLIC_IP", ""),
@@ -76,7 +77,8 @@ def _write_hosts_metadata(
     logger.info(f"Wrote {out}")
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Create Fleet policies and write Elastic Defend install artifacts for CDR."""
     package_version = get_package_version(cfg=cnfg.elk_config, package_name="endpoint", prerelease=True)
     if not package_version:
         logger.error("Could not resolve endpoint package version from Fleet")
@@ -106,13 +108,13 @@ if __name__ == "__main__":
     logger.info("Set endpoint malware/ransomware modes to detect")
     enable_endpoint_malware_ransomware_detect(cfg=cnfg.elk_config, package_policy_id=package_policy_id)
 
-    expected = _expected_enrolled_agents()
-    if expected > 0:
+    enroll_expected = _expected_enrolled_agents()
+    if enroll_expected > 0:
         state_manager.add_policy(
             PolicyState(
                 agent_policy_id,
                 package_policy_id,
-                expected,
+                enroll_expected,
                 [],
                 HostType.LINUX_TAR.value,
                 agent_data["name"],
@@ -148,3 +150,7 @@ if __name__ == "__main__":
     logger.info("Wrote elastic-defend-windows.ps1")
 
     logger.info("Elastic Defend Fleet setup finished")
+
+
+if __name__ == "__main__":
+    main()

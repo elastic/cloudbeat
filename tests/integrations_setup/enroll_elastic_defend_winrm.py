@@ -8,6 +8,7 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import Optional
 
 from loguru import logger
 
@@ -24,6 +25,7 @@ def _load_creds(path: Path) -> dict:
 
 
 def main() -> None:
+    """Run elastic-defend-windows.ps1 on the Windows host via WinRM until success or retries exhausted."""
     cred_path = os.getenv("WINDOWS_DEFEND_CREDENTIALS_FILE", "").strip()
     ps1_path = os.getenv("ELASTIC_DEFEND_WINDOWS_PS1", "").strip()
     if not cred_path or not ps1_path:
@@ -54,10 +56,10 @@ def main() -> None:
         server_cert_validation="ignore",
     )
 
-    last_err: Exception | None = None
+    last_err: Optional[Exception] = None
     for attempt in range(1, max_attempts + 1):
         try:
-            logger.info(f"WinRM exec attempt {attempt}/{max_attempts} on {endpoint}")
+            logger.info(f"WinRM exec attempt {attempt}/{max_attempts} on {target}")
             result = session.run_ps(script)
             if result.status_code != 0:
                 logger.error(result.std_err.decode("utf-8", errors="replace"))

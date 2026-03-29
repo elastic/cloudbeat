@@ -55,6 +55,7 @@ def apply_endpoint_malware_ransomware_detect_modes(package_policy: Dict[str, Any
 
 
 def update_package_policy(cfg: Munch, package_policy_id: str, body: Dict[str, Any]) -> None:
+    """PUT the given package policy body to Fleet (Kibana package_policies API)."""
     url = f"{cfg.kibana_url}/api/fleet/package_policies/{package_policy_id}"
     try:
         perform_api_call(
@@ -72,6 +73,7 @@ def update_package_policy(cfg: Munch, package_policy_id: str, body: Dict[str, An
 
 
 def enable_endpoint_malware_ransomware_detect(cfg: Munch, package_policy_id: str) -> None:
+    """Fetch package policy, set malware/ransomware to detect, and persist via update_package_policy."""
     item = get_package_policy_by_id(cfg=cfg, policy_id=package_policy_id)
     if not item:
         raise ValueError(f"No package policy returned for id {package_policy_id}")

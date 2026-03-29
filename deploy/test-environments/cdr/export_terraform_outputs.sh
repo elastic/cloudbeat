@@ -9,13 +9,13 @@ TF_OUT=$(terraform output -json)
 
 # Append "name=value" to GITHUB_OUTPUT; mask non-empty values in logs.
 out_masked() {
-  local out_name="$1" tf_key="$2"
-  local val
-  val=$(echo "$TF_OUT" | jq -r --arg k "$tf_key" '.[$k].value // empty')
-  if [ -n "$val" ]; then
-    echo "::add-mask::$val"
-  fi
-  printf '%s=%s\n' "$out_name" "$val" >>"$GITHUB_OUTPUT"
+    local out_name="$1" tf_key="$2"
+    local val
+    val=$(echo "$TF_OUT" | jq -r --arg k "$tf_key" '.[$k].value // empty')
+    if [ -n "$val" ]; then
+        echo "::add-mask::$val"
+    fi
+    printf '%s=%s\n' "$out_name" "$val" >>"$GITHUB_OUTPUT"
 }
 
 out_masked aws-ec2-cloudtrail-public-ip ec2_cloudtrail_public_ip
