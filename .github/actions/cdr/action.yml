@@ -279,15 +279,17 @@ runs:
         cmd="chmod +x $scriptname && ./$scriptname"
         ../remote_setup.sh -k "$DEFEND_KEY" -s "$src" -h "$DEFEND_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
-    - name: Enroll Elastic Defend agent (Windows WinRM)
+    # PEM path in Terraform output is relative to deploy/test-environments/cdr (same as terraform apply).
+    - name: Prepare Windows Defend credentials (WinRM)
+      id: windows-defend-credentials
       if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-windows-public-ip != '' }}
-      working-directory: tests/integrations_setup
+      working-directory: deploy/test-environments/cdr
       shell: bash
       env:
+        AWS_DEFAULT_REGION: ${{ inputs.aws-region }}
         DEFEND_WIN_KEY: ${{ steps.generate-data.outputs.elastic-defend-windows-key }}
         DEFEND_WIN_INSTANCE: ${{ steps.generate-data.outputs.elastic-defend-windows-instance-id }}
         DEFEND_WIN_IP: ${{ steps.generate-data.outputs.elastic-defend-windows-public-ip }}
-        ELASTIC_DEFEND_WINDOWS_PS1: "${{ github.workspace }}/tests/integrations_setup/elastic-defend-windows.ps1"
         WINDOWS_DEFEND_CREDENTIALS_FILE: "${{ github.workspace }}/tests/integrations_setup/.windows-defend-connection.json"
       run: |
         set -euo pipefail
@@ -306,9 +308,13 @@ runs:
           echo "Timed out waiting for TCP 5985 on ${DEFEND_WIN_IP}"
           exit 1
         fi
+        if [ ! -f "$DEFEND_WIN_KEY" ]; then
+          echo "Windows PEM not found at DEFEND_WIN_KEY=$DEFEND_WIN_KEY (cwd=$(pwd); resolve paths from deploy/test-environments/cdr)"
+          exit 1
+        fi
         PASSWORD=""
         for j in $(seq 1 30); do
-          PASSWORD="$(aws ec2 get-password-data --instance-id "$DEFEND_WIN_INSTANCE" --priv-launch-key "$DEFEND_WIN_KEY" --query PasswordData --output text 2>/dev/null || true)"
+          PASSWORD="$(aws ec2 get-password-data --region "$AWS_DEFAULT_REGION" --instance-id "$DEFEND_WIN_INSTANCE" --priv-launch-key "$DEFEND_WIN_KEY" --query PasswordData --output text || true)"
           if [ -n "$PASSWORD" ] && [ "$PASSWORD" != "None" ]; then
             break
           fi
@@ -341,6 +347,16 @@ runs:
             encoding="utf-8",
         )
         PY
+
+    - name: Enroll Elastic Defend agent (Windows WinRM)
+      if: ${{ !cancelled() && steps.windows-defend-credentials.outcome == 'success' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        ELASTIC_DEFEND_WINDOWS_PS1: "${{ github.workspace }}/tests/integrations_setup/elastic-defend-windows.ps1"
+        WINDOWS_DEFEND_CREDENTIALS_FILE: "${{ github.workspace }}/tests/integrations_setup/.windows-defend-connection.json"
+      run: |
+        set -euo pipefail
         poetry run python ./enroll_elastic_defend_winrm.py
 
     - name: Check Asset Inventory supported version
