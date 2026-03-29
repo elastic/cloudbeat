@@ -33,6 +33,11 @@ on:
         description: "Number of days until environment expiration"
         required: false
         default: "5"
+      cdr-elastic-defend-only:
+        description: "Skip CloudTrail, Azure, GCP, Wiz, and Asset Inventory; deploy ESS and Elastic Defend only"
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   init:
@@ -65,3 +70,4 @@ jobs:
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       infra-type: ${{ needs.init.outputs.infra-type }}
       expiration_days: ${{ inputs.expiration-days }}
+      cdr-elastic-defend-only: ${{ inputs.cdr-elastic-defend-only }}

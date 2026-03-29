@@ -55,6 +55,11 @@ on:
         required: false
         default: "5"
         type: string
+      cdr-elastic-defend-only:
+        description: "CDR: skip CloudTrail, Azure, GCP, Wiz, and Asset Inventory; stack and Elastic Defend only"
+        required: false
+        default: false
+        type: boolean
       ec-api-key:
         type: string
         description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
@@ -142,6 +147,11 @@ on:
         type: boolean
         required: false
         default: true
+      cdr-elastic-defend-only:
+        description: "CDR: skip CloudTrail, Azure, GCP, Wiz, and Asset Inventory; stack and Elastic Defend only"
+        type: boolean
+        required: false
+        default: false
     outputs:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
@@ -487,6 +497,7 @@ jobs:
           azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
+          cdr-elastic-defend-only: ${{ inputs.cdr-elastic-defend-only }}
 
       - name: Deploy CIS Agentless Integrations
         id: cis-agentless-integrations

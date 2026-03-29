@@ -1,0 +1,5 @@
+{
+    "name": "tf-ap-elastic-defend",
+    "namespace": "default",
+    "monitoring_enabled": ["logs", "metrics"]
+}

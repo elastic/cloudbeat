@@ -20,6 +20,16 @@ terraform {
       version = "~> 3.5.1"
     }
 
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.4"
+    }
+
   }
 
   required_version = ">= 1.3, <2.0.0"
