@@ -42,12 +42,6 @@ variable "gcp_service_account_json" {
   sensitive   = true
 }
 
-variable "cdr_elastic_defend_only" {
-  description = "When true, deploy Wiz EC2 only among log-integration VMs (no CloudTrail, Azure, GCP, Asset Inventory) and skip Elastic Defend Linux/Windows. Wiz/Okta Fleet steps run in CI. When false, full CDR including those VMs and Elastic Defend per deploy_aws_elastic_defend_*."
-  type        = bool
-  default     = false
-}
-
 variable "deploy_az_vm" {
   description = "Deploy Azure VM resources"
   type        = bool

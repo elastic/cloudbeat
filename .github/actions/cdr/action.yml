@@ -115,11 +115,6 @@ inputs:
     default: "cloudbeat"
     required: false
     type: string
-  cdr-elastic-defend-only:
-    description: "When true: Wiz EC2 plus Wiz/Okta Fleet only; omit CloudTrail, Azure/GCP audit logs, Asset Inventory, and Elastic Defend. When false: full CDR including Elastic Defend."
-    default: false
-    required: false
-    type: boolean
 
 runs:
   using: composite
@@ -136,7 +131,6 @@ runs:
         # This workflow always provisions both Elastic Defend VMs; use Terraform variables for selective applies outside CI.
         TF_VAR_deploy_aws_elastic_defend_linux: true
         TF_VAR_deploy_aws_elastic_defend_windows: true
-        TF_VAR_cdr_elastic_defend_only: ${{ inputs.cdr-elastic-defend-only == true || inputs.cdr-elastic-defend-only == 'true' }}
       shell: bash
       working-directory: "deploy/test-environments/cdr"
       run: |
@@ -153,7 +147,7 @@ runs:
 
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -165,7 +159,7 @@ runs:
         poetry run python ./install_cloudtrail_integration.py
 
     - name: Deploy AWS Cloudtrail agent
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.cloudtrail-integration.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -179,7 +173,7 @@ runs:
 
     - name: Install Azure Activity Logs integration
       id: az-activity-logs-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -194,7 +188,7 @@ runs:
         poetry run python ./install_az_activity_logs_integration.py
 
     - name: Deploy Azure Activity Logs agent
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.az-activity-logs-integration.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.az-activity-logs-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -208,7 +202,7 @@ runs:
 
     - name: Install GCP Audit Logs integration
       id: gcp-audit-logs-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -221,7 +215,7 @@ runs:
         poetry run python ./install_gcp_audit_logs_integration.py
 
     - name: Deploy GCP Audit Logs agent
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.gcp-audit-logs-integration.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.gcp-audit-logs-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -296,7 +290,7 @@ runs:
 
     - name: Install Elastic Defend (Fleet)
       id: elastic-defend-fleet
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -314,7 +308,7 @@ runs:
         poetry run python ./install_elastic_defend_integration.py
 
     - name: Deploy Elastic Defend agent (Linux)
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-linux-public-ip != '' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-linux-public-ip != '' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -329,7 +323,7 @@ runs:
     # PEM path in Terraform output is relative to deploy/test-environments/cdr (same as terraform apply).
     - name: Prepare Windows Defend credentials (WinRM)
       id: windows-defend-credentials
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-windows-public-ip != '' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-windows-public-ip != '' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -396,7 +390,7 @@ runs:
         PY
 
     - name: Enroll Elastic Defend agent (Windows WinRM)
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.windows-defend-credentials.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.windows-defend-credentials.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -408,7 +402,7 @@ runs:
 
     - name: Check Asset Inventory supported version
       id: asset-inventory-version-check
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
       shell: bash
       env:
         STACK_VERSION: ${{ inputs.elk-stack-version }}
@@ -423,7 +417,7 @@ runs:
         fi
 
     - name: Enable Entity Store
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -437,7 +431,7 @@ runs:
     - name: Install Azure Asset Inventory integration
       id: azure-asset-inventory-integration
       working-directory: tests/integrations_setup
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'}}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true'}}
       shell: bash
       env:
         ES_USER: ${{ inputs.es-user }}
@@ -450,7 +444,7 @@ runs:
     - name: Deploy Azure Asset Inventory agent
       id: azure-asset-inventory-agent
       working-directory: deploy/azure
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       shell: bash
       env:
         AZURE_TAGS: ${{ inputs.azure-tags }}
@@ -459,7 +453,7 @@ runs:
 
     - name: Install AWS Asset Inventory integration
       id: aws-asset-inventory
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -471,7 +465,7 @@ runs:
         poetry run python ./install_aws_asset_inventory_integration.py
 
     - name: Deploy AWS Asset Inventory agent
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -485,7 +479,7 @@ runs:
 
     - name: Create GCP Service Account
       id: create-service-account-cdr
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       shell: bash
       working-directory: deploy/deployment-manager
       env:
@@ -498,7 +492,7 @@ runs:
 
     - name: Install GCP Asset Inventory integration
       id: gcp-asset-inventory
-      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       shell: bash
       working-directory: tests/integrations_setup
       env:

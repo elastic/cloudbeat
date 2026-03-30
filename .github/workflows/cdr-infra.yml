@@ -33,11 +33,6 @@ on:
         description: "Number of days until environment expiration"
         required: false
         default: "5"
-      cdr-elastic-defend-only:
-        description: "When true: Wiz host plus Wiz/Okta Fleet only; skip CloudTrail, Azure, GCP, Asset Inventory, and Elastic Defend. When false: full CDR with Elastic Defend."
-        type: boolean
-        required: false
-        default: true
 
 jobs:
   init:
@@ -70,4 +65,3 @@ jobs:
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       infra-type: ${{ needs.init.outputs.infra-type }}
       expiration_days: ${{ inputs.expiration-days }}
-      cdr-elastic-defend-only: ${{ inputs.cdr-elastic-defend-only }}
