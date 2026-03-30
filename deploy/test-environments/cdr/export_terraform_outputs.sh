@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Writes CDR Terraform outputs to GITHUB_OUTPUT (null-safe via terraform output -json).
-# Used by the CDR composite action when some modules are disabled (e.g. Elastic Defend-only mode).
+# Used by the CDR composite action when some modules are disabled (e.g. Wiz-only or full CDR).
 set -euo pipefail
 
 : "${GITHUB_OUTPUT:?GITHUB_OUTPUT must be set}"

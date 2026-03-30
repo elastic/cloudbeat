@@ -34,7 +34,7 @@ on:
         required: false
         default: "5"
       cdr-elastic-defend-only:
-        description: "Skip CloudTrail, Azure, GCP, Wiz, and Asset Inventory; deploy ESS and Elastic Defend only"
+        description: "When true: Wiz host plus Wiz/Okta Fleet only; skip CloudTrail, Azure, GCP, Asset Inventory, and Elastic Defend. When false: full CDR with Elastic Defend."
         type: boolean
         required: false
         default: true

@@ -56,7 +56,7 @@ on:
         default: "5"
         type: string
       cdr-elastic-defend-only:
-        description: "CDR: skip CloudTrail, Azure, GCP, Wiz, and Asset Inventory; stack and Elastic Defend only"
+        description: "CDR: when true, Wiz/Okta path only (skip CloudTrail, Azure, GCP, Asset Inventory, Elastic Defend); when false, full CDR"
         required: false
         default: false
         type: boolean
@@ -148,7 +148,7 @@ on:
         required: false
         default: true
       cdr-elastic-defend-only:
-        description: "CDR: skip CloudTrail, Azure, GCP, Wiz, and Asset Inventory; stack and Elastic Defend only"
+        description: "CDR: when true, Wiz/Okta path only (skip CloudTrail, Azure, GCP, Asset Inventory, Elastic Defend); when false, full CDR"
         type: boolean
         required: false
         default: false

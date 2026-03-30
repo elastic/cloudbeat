@@ -43,7 +43,7 @@ variable "gcp_service_account_json" {
 }
 
 variable "cdr_elastic_defend_only" {
-  description = "When true, skip CloudTrail, Azure activity-logs, GCP audit-logs, Wiz, and Asset Inventory CDR VMs. Elastic Defend hosts follow deploy_aws_elastic_defend_linux and deploy_aws_elastic_defend_windows."
+  description = "When true, deploy Wiz EC2 only among log-integration VMs (no CloudTrail, Azure, GCP, Asset Inventory) and skip Elastic Defend Linux/Windows. Wiz/Okta Fleet steps run in CI. When false, full CDR including those VMs and Elastic Defend per deploy_aws_elastic_defend_*."
   type        = bool
   default     = false
 }

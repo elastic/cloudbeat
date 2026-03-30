@@ -111,7 +111,7 @@ inputs:
     required: false
     type: string
   cdr-elastic-defend-only:
-    description: "Omit CloudTrail, Azure/GCP audit logs, Wiz, and Asset Inventory; keep ESS and Elastic Defend"
+    description: "When true: Wiz EC2 plus Wiz/Okta Fleet only; omit CloudTrail, Azure/GCP audit logs, Asset Inventory, and Elastic Defend. When false: full CDR including Elastic Defend."
     default: false
     required: false
     type: boolean
@@ -230,7 +230,7 @@ runs:
 
     - name: Install WIZ integration
       id: wiz-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -246,7 +246,7 @@ runs:
 
     - name: Install Okta integration (Fleet, Wiz agent policy)
       id: okta-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.wiz-integration.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wiz-integration.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -261,7 +261,7 @@ runs:
         poetry run python ./install_okta_integration.py
 
     - name: Deploy WIZ agent
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.wiz-integration.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wiz-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -275,7 +275,7 @@ runs:
 
     - name: Install Elastic Defend (Fleet)
       id: elastic-defend-fleet
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -293,7 +293,7 @@ runs:
         poetry run python ./install_elastic_defend_integration.py
 
     - name: Deploy Elastic Defend agent (Linux)
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-linux-public-ip != '' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-linux-public-ip != '' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -308,7 +308,7 @@ runs:
     # PEM path in Terraform output is relative to deploy/test-environments/cdr (same as terraform apply).
     - name: Prepare Windows Defend credentials (WinRM)
       id: windows-defend-credentials
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-windows-public-ip != '' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.elastic-defend-fleet.outcome == 'success' && steps.generate-data.outputs.elastic-defend-windows-public-ip != '' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -375,7 +375,7 @@ runs:
         PY
 
     - name: Enroll Elastic Defend agent (Windows WinRM)
-      if: ${{ !cancelled() && steps.windows-defend-credentials.outcome == 'success' }}
+      if: ${{ !cancelled() && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.windows-defend-credentials.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:

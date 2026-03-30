@@ -23,8 +23,11 @@ locals {
   deploy_gcp_vm              = var.cdr_elastic_defend_only ? false : var.deploy_gcp_vm
   deploy_az_vm               = var.cdr_elastic_defend_only ? false : var.deploy_az_vm
   deploy_aws_ec2             = var.cdr_elastic_defend_only ? false : var.deploy_aws_ec2
-  deploy_aws_ec2_wiz         = var.cdr_elastic_defend_only ? false : var.deploy_aws_ec2_wiz
+  deploy_aws_ec2_wiz         = var.cdr_elastic_defend_only ? true : var.deploy_aws_ec2_wiz
   deploy_aws_asset_inventory = var.cdr_elastic_defend_only ? false : var.deploy_aws_asset_inventory
+
+  deploy_aws_elastic_defend_linux   = var.cdr_elastic_defend_only ? false : var.deploy_aws_elastic_defend_linux
+  deploy_aws_elastic_defend_windows = var.cdr_elastic_defend_only ? false : var.deploy_aws_elastic_defend_windows
 }
 
 resource "random_string" "suffix" {
@@ -88,7 +91,7 @@ module "aws_ec2_for_asset_inventory" {
 }
 
 module "aws_ec2_elastic_defend_linux" {
-  count           = var.deploy_aws_elastic_defend_linux ? 1 : 0
+  count           = local.deploy_aws_elastic_defend_linux ? 1 : 0
   source          = "../modules/aws/ec2"
   providers       = { aws : aws }
   aws_ami         = var.ami_map[var.region]
@@ -99,7 +102,7 @@ module "aws_ec2_elastic_defend_linux" {
 }
 
 module "aws_ec2_elastic_defend_windows" {
-  count                 = var.deploy_aws_elastic_defend_windows ? 1 : 0
+  count                 = local.deploy_aws_elastic_defend_windows ? 1 : 0
   source                = "../modules/aws/ec2-windows"
   providers             = { aws : aws }
   deployment_name       = "${var.deployment_name}-${random_string.suffix.result}"
