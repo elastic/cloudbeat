@@ -109,7 +109,7 @@ def enable_entity_store_v2(cfg: Munch) -> None:
             time.sleep(_ENTITY_STORE_V2_POLL_INTERVAL_SEC)
     except APICallException as api_ex:
         logger.error(
-            "enable_entity_store_v2 failed, status %s. Response: %s",
+            "enable_entity_store_v2 failed, status {}. Response: {}",
             api_ex.status_code,
             api_ex.response_text,
         )
@@ -132,13 +132,13 @@ def install_entity_store_v2(cfg: Munch) -> dict:
             auth=cfg.auth,
             headers=_ENTITY_STORE_V2_INTERNAL_HEADERS.copy(),
             params={"json": {}, "params": {"apiVersion": "2"}},
-            ok_statuses=(200, 204),
+            ok_statuses=(200, 201, 204),
         )
         logger.info("Entity Store v2 install completed.")
         return result
     except APICallException as api_ex:
         logger.error(
-            "install_entity_store_v2 failed, status %s. Response: %s",
+            "install_entity_store_v2 failed, status {}. Response: {}",
             api_ex.status_code,
             api_ex.response_text,
         )
@@ -155,13 +155,13 @@ def init_entity_store_v2_maintainers(cfg: Munch) -> dict:
             auth=cfg.auth,
             headers=_ENTITY_STORE_V2_INTERNAL_HEADERS.copy(),
             params={"json": {}, "params": {"apiVersion": "2"}},
-            ok_statuses=(200, 204),
+            ok_statuses=(200, 201, 204),
         )
         logger.info("Entity Store v2 maintainers init completed.")
         return result
     except APICallException as api_ex:
         logger.error(
-            "init_entity_store_v2_maintainers failed, status %s. Response: %s",
+            "init_entity_store_v2_maintainers failed, status {}. Response: {}",
             api_ex.status_code,
             api_ex.response_text,
         )
