@@ -75,6 +75,11 @@ inputs:
     default: "default"
     required: false
     type: string
+  okta-entity-analytics-domain:
+    description: "Okta org hostname for Entity Analytics (e.g. dev-123456.okta.com); empty skips that integration"
+    default: "default"
+    required: false
+    type: string
   es-user:
     description: "Elasticsearch user"
     default: "elastic"
@@ -259,6 +264,22 @@ runs:
         AGENT_VERSION: ${{ inputs.elk-stack-version }}
       run: |
         poetry run python ./install_okta_integration.py
+
+    - name: Install Okta Entity Analytics (Fleet, Wiz agent policy)
+      id: okta-entityanalytics-integration
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wiz-integration.outcome == 'success' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        OKTA_ENTITY_ANALYTICS_DOMAIN: ${{ inputs.okta-entity-analytics-domain }}
+        OKTA_API_KEY: ${{ inputs.okta-api-key }}
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
+        AGENT_VERSION: ${{ inputs.elk-stack-version }}
+      run: |
+        poetry run python ./install_entityanalytics_okta_integration.py
 
     - name: Deploy WIZ agent
       if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wiz-integration.outcome == 'success' }}

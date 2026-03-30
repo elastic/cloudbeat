@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 import configuration_fleet as cnfg
-from fleet_api.common_api import get_package_version
+from cdr_wiz_fleet_helpers import cdr_wiz_agent_policy_id, fleet_epm_package_version
 from fleet_api.package_policy_api import create_integration
 from fleet_api.utils import read_json, update_key_value
 from loguru import logger
@@ -31,24 +31,15 @@ def main() -> None:
         logger.error("OKTA_API_KEY is required when OKTA_LOGS_URL is set")
         sys.exit(1)
 
-    wiz_context = read_json(Path(__file__).parent / "cdr_wiz_agent_policy.json")
-    agent_policy_id = (wiz_context.get("agent_policy_id") or "").strip()
-    if not agent_policy_id:
-        logger.error("cdr_wiz_agent_policy.json has no agent_policy_id")
-        sys.exit(1)
-
-    prerelease = "SNAPSHOT" in (cnfg.elk_config.stack_version or "")
-    package_version = get_package_version(
-        cfg=cnfg.elk_config,
-        package_name="okta",
-        prerelease=prerelease,
+    base = Path(__file__).parent
+    agent_policy_id = cdr_wiz_agent_policy_id(base)
+    package_version = fleet_epm_package_version(
+        "okta",
+        "Could not resolve okta package version from Fleet",
     )
-    if not package_version:
-        logger.error("Could not resolve okta package version from Fleet")
-        sys.exit(1)
     logger.info(f"Okta package version: {package_version}")
 
-    package_data = read_json(Path(__file__).parent / "data/okta-pkg.json")
+    package_data = read_json(base / "data/okta-pkg.json")
     package_data["name"] = generate_random_name("pkg-okta-cdr")
     package_data["package"]["version"] = package_version
 

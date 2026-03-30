@@ -1,0 +1,43 @@
+{
+  "policy_ids": [
+    ""
+  ],
+  "package": {
+    "name": "entityanalytics_okta",
+    "version": ""
+  },
+  "name": "",
+  "description": "",
+  "namespace": "default",
+  "inputs": {
+    "entity-entity-analytics": {
+      "enabled": true,
+      "streams": {
+        "entityanalytics_okta.entity": {
+          "enabled": true,
+          "vars": {
+            "okta_domain": "",
+            "okta_token": "",
+            "okta_scopes": [
+              "okta.users.read",
+              "okta.devices.read"
+            ],
+            "dataset": "all",
+            "enrich_user_roles": true,
+            "sync_interval": "24h",
+            "update_interval": "15m",
+            "http_client_timeout": "30s",
+            "ssl": "",
+            "enable_request_tracer": false,
+            "tags": [
+              "forwarded",
+              "entityanalytics_okta-entity"
+            ],
+            "preserve_original_event": false,
+            "preserve_duplicate_custom_fields": false
+          }
+        }
+      }
+    }
+  }
+}
