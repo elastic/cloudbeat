@@ -91,9 +91,9 @@ variable "deploy_aws_elastic_defend_windows" {
 }
 
 variable "windows_elastic_defend_ami_id" {
-  description = "Optional Windows AMI override per account/region; leave empty to use latest Amazon Windows Server 2022 Base"
+  description = "Windows AMI for Elastic Defend host (e.g. custom image with test signing for snapshot Endpoint). AMIs are per-region/account; override with -var when deploying outside the region where this AMI exists."
   type        = string
-  default     = ""
+  default     = "ami-088e59921fa34288d"
 }
 
 variable "windows_elastic_defend_instance_type" {
