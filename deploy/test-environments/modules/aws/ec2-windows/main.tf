@@ -94,6 +94,13 @@ resource "aws_instance" "windows" {
     New-NetFirewallRule -DisplayName "WinRM-5985-CDR" -Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow -ErrorAction SilentlyContinue
     Set-Service WinRM -StartupType Automatic
     Restart-Service WinRM
+
+    # Test-signed drivers / relaxed integrity — takes effect after reboot below (isolated test VMs only).
+    bcdedit /set testsigning on
+    if ($LASTEXITCODE -ne 0) { throw "bcdedit testsigning failed (exit $LASTEXITCODE)" }
+    bcdedit /set nointegritychecks on
+    if ($LASTEXITCODE -ne 0) { throw "bcdedit nointegritychecks failed (exit $LASTEXITCODE)" }
+    shutdown /r /t 30 /c "bcdedit applied for Elastic Defend test host"
     </powershell>
   EOT
 
