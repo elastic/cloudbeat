@@ -29,6 +29,11 @@ inputs:
     default: "latest"
     type: string
     required: false
+  kibana-security-solution-experimental:
+    description: "ESS only: set Kibana user_settings_yaml for Security Solution experimental flags"
+    type: boolean
+    default: true
+    required: false
   docker-image-version-override:
     description: "Optional Docker image version to override the default stack image. Accepts formats like 8.x.y, 8.x.y-hash, or 8.x.y-SNAPSHOT."
     type: string
@@ -79,6 +84,7 @@ runs:
         TF_VAR_ess_region: ${{ inputs.ess-region }}
         TF_VAR_ec_url: ${{ inputs.ec-url }}
         TF_VAR_pin_version: ${{ inputs.docker-image-version-override }}
+        TF_VAR_kibana_security_solution_experimental: ${{ inputs.kibana-security-solution-experimental }}
         TF_VAR_ec_api_key: ${{ inputs.ec-api-key }}
         TF_VAR_deployment_template: ${{ env.TF_VAR_deployment_template }}
         TF_VAR_max_size: ${{ env.TF_VAR_max_size }}

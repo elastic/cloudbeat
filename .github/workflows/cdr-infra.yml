@@ -33,6 +33,11 @@ on:
         description: "Number of days until environment expiration"
         required: false
         default: "5"
+      kibana_security_solution_experimental:
+        description: "ESS only: apply Kibana Security Solution experimental user settings (new home, watchlist)"
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   init:
@@ -65,3 +70,4 @@ jobs:
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       infra-type: ${{ needs.init.outputs.infra-type }}
       expiration_days: ${{ inputs.expiration-days }}
+      kibana_security_solution_experimental: ${{ inputs.kibana_security_solution_experimental }}

@@ -37,6 +37,11 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
+      kibana_security_solution_experimental:
+        description: "ESS only: apply Kibana user_settings_yaml for Security Solution experimental flags (new home, watchlist)"
+        type: boolean
+        required: false
+        default: true
       run-sanity-tests:
         description: "Run sanity tests after provision"
         default: false
@@ -84,6 +89,11 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
+      kibana_security_solution_experimental:
+        description: "ESS only: apply Kibana user_settings_yaml for Security Solution experimental flags (new home, watchlist)"
+        type: boolean
+        required: false
+        default: true
       run-sanity-tests:
         description: "Run sanity tests after provision"
         default: false
@@ -395,6 +405,7 @@ jobs:
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
           ec-url: ${{ env.EC_URL }}
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
+          kibana-security-solution-experimental: ${{ inputs.kibana_security_solution_experimental }}
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}

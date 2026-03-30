@@ -9,6 +9,22 @@ locals {
   kibana_docker_image_tag_override = lookup(var.docker_image_tag_override, "kibana", "")
   apm_docker_image                 = lookup(var.docker_image, "apm", "")
   apm_docker_image_tag_override    = lookup(var.docker_image_tag_override, "apm", "")
+
+  security_solution_experimental_yaml = <<-EOT
+xpack.securitySolution.enableExperimental:
+  - entityAnalyticsNewHomePageEnabled
+  - entityAnalyticsWatchlistEnabled
+EOT
+
+  kibana_docker_config = local.kibana_docker_image_tag_override != "" ? {
+    docker_image = "${local.kibana_docker_image}:${local.kibana_docker_image_tag_override}"
+  } : {}
+
+  kibana_experimental_config = var.kibana_enable_security_solution_experimental ? {
+    user_settings_yaml = local.security_solution_experimental_yaml
+  } : {}
+
+  kibana_config_merged = merge(local.kibana_docker_config, local.kibana_experimental_config)
 }
 
 data "ec_stack" "deployment_version" {
@@ -53,9 +69,7 @@ resource "ec_deployment" "deployment" {
   }
 
   kibana = {
-    config = local.kibana_docker_image_tag_override != "" ? {
-      docker_image = "${local.kibana_docker_image}:${local.kibana_docker_image_tag_override}"
-    } : null
+    config = length(local.kibana_config_merged) > 0 ? local.kibana_config_merged : null
   }
 
   integrations_server = {
