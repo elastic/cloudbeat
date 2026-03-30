@@ -1,0 +1,41 @@
+{
+  "policy_ids": [
+    ""
+  ],
+  "package": {
+    "name": "okta",
+    "version": ""
+  },
+  "name": "",
+  "description": "",
+  "namespace": "default",
+  "inputs": {
+    "okta-httpjson": {
+      "enabled": true,
+      "vars": {
+        "interval": "60s",
+        "initial_interval": "24h",
+        "url": "",
+        "api_key": "",
+        "okta_scopes": [
+          "okta.logs.read"
+        ],
+        "enable_request_tracer": false
+      },
+      "streams": {
+        "okta.system": {
+          "enabled": true,
+          "vars": {
+            "tags": [
+              "forwarded",
+              "okta-system"
+            ],
+            "preserve_original_event": false,
+            "disable_keep_alive": false,
+            "limit": 1000
+          }
+        }
+      }
+    }
+  }
+}

@@ -87,3 +87,8 @@ wiz_config.client_id = os.getenv("WIZ_CLIENT_ID", "")
 wiz_config.client_secret = os.getenv("WIZ_CLIENT_SECRET", "")
 wiz_config.url = os.getenv("WIZ_URL", "")
 wiz_config.token_url = os.getenv("WIZ_TOKEN_URL", "")
+
+# Okta integration (CDR, same agent policy as Wiz)
+okta_config = Munch()
+okta_config.url = os.getenv("OKTA_LOGS_URL", "")
+okta_config.api_key = os.getenv("OKTA_API_KEY", "")

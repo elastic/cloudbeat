@@ -65,6 +65,16 @@ inputs:
     default: "default"
     required: false
     type: string
+  okta-logs-url:
+    description: "Okta System Log API URL (e.g. https://dev-xxx.okta.com/api/v1/logs); empty skips Okta"
+    default: "default"
+    required: false
+    type: string
+  okta-api-key:
+    description: "Okta API token for System Log"
+    default: "default"
+    required: false
+    type: string
   es-user:
     description: "Elasticsearch user"
     default: "elastic"
@@ -233,6 +243,22 @@ runs:
         KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_wiz_integration.py
+
+    - name: Install Okta integration (Fleet, Wiz agent policy)
+      id: okta-integration
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.wiz-integration.outcome == 'success' }}
+      working-directory: tests/integrations_setup
+      shell: bash
+      env:
+        OKTA_LOGS_URL: ${{ inputs.okta-logs-url }}
+        OKTA_API_KEY: ${{ inputs.okta-api-key }}
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
+        AGENT_VERSION: ${{ inputs.elk-stack-version }}
+      run: |
+        poetry run python ./install_okta_integration.py
 
     - name: Deploy WIZ agent
       if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && (inputs.cdr-elastic-defend-only != true && inputs.cdr-elastic-defend-only != 'true') && steps.wiz-integration.outcome == 'success' }}
