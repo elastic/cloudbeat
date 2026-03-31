@@ -115,6 +115,11 @@ inputs:
     default: "cloudbeat"
     required: false
     type: string
+  enable-entity-store-v2:
+    description: "When true, run Entity Store v2 installer; when false, run Entity Store v1 only"
+    default: true
+    required: false
+    type: boolean
 
 runs:
   using: composite
@@ -416,19 +421,7 @@ runs:
           echo "asset_inventory_supported=false" >> $GITHUB_OUTPUT
         fi
 
-    # - name: Enable Entity Store
-    #   if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
-    #   working-directory: tests/integrations_setup
-    #   shell: bash
-    #   env:
-    #     ES_USER: ${{ inputs.es-user }}
-    #     ES_PASSWORD: ${{ inputs.es-password }}
-    #     KIBANA_URL: ${{ inputs.kibana-url }}
-    #     STACK_VERSION: ${{ inputs.elk-stack-version }}
-    #   run: |
-    #     poetry run python ./enable_entity_store.py
-
-    - name: Enable Entity Store v2
+    - name: Enable Entity Store (v1 or v2)
       if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
       working-directory: tests/integrations_setup
       shell: bash
@@ -437,8 +430,14 @@ runs:
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
         STACK_VERSION: ${{ inputs.elk-stack-version }}
+        ENABLE_ENTITY_STORE_V2: ${{ inputs.enable-entity-store-v2 }}
       run: |
-        poetry run python ./enable_entity_store_v2.py
+        set -euo pipefail
+        if [[ "${ENABLE_ENTITY_STORE_V2}" == "true" ]]; then
+          poetry run python ./enable_entity_store_v2.py
+        else
+          poetry run python ./enable_entity_store.py
+        fi
 
     - name: Install Azure Asset Inventory integration
       id: azure-asset-inventory-integration

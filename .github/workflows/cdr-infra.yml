@@ -38,6 +38,11 @@ on:
         type: boolean
         required: false
         default: true
+      enable-entity-store-v2:
+        description: "CDR: when true run Entity Store v2; when false run Entity Store v1 only"
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   init:
@@ -71,3 +76,4 @@ jobs:
       infra-type: ${{ needs.init.outputs.infra-type }}
       expiration_days: ${{ inputs.expiration-days }}
       kibana_security_solution_experimental: ${{ inputs.kibana_security_solution_experimental }}
+      enable-entity-store-v2: ${{ fromJSON(inputs.enable-entity-store-v2) }}

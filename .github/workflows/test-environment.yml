@@ -94,6 +94,11 @@ on:
         type: boolean
         required: false
         default: true
+      enable-entity-store-v2:
+        description: "CDR: when true run Entity Store v2; when false run Entity Store v1 only"
+        type: boolean
+        required: false
+        default: true
       run-sanity-tests:
         description: "Run sanity tests after provision"
         default: false
@@ -498,6 +503,7 @@ jobs:
           es-password: ${{ env.ES_PASSWORD }}
           kibana-url: ${{ env.KIBANA_URL }}
           elk-stack-version: ${{ env.STACK_VERSION }}
+          enable-entity-store-v2: ${{ inputs.enable-entity-store-v2 }}
           azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
