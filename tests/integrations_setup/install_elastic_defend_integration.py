@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import configuration_fleet as cnfg
+from cdr_wiz_fleet_helpers import stack_version_uses_epm_prerelease
 from fleet_api.agent_policy_api import create_agent_policy
 from fleet_api.common_api import (
     get_artifact_server,
@@ -79,7 +80,12 @@ def _write_hosts_metadata(
 
 def main() -> None:
     """Create Fleet policies and write Elastic Defend install artifacts for CDR."""
-    package_version = get_package_version(cfg=cnfg.elk_config, package_name="endpoint", prerelease=True)
+    prerelease = stack_version_uses_epm_prerelease(cnfg.elk_config.stack_version or "")
+    package_version = get_package_version(
+        cfg=cnfg.elk_config,
+        package_name="endpoint",
+        prerelease=prerelease,
+    )
     if not package_version:
         logger.error("Could not resolve endpoint package version from Fleet")
         raise SystemExit(1)
