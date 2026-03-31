@@ -34,7 +34,15 @@ class APICallException(Exception):
         self.response_text = response_text
 
 
-def perform_api_call(method, url, return_json=True, headers=None, auth=None, params=None):
+def perform_api_call(
+    method,
+    url,
+    return_json=True,
+    headers=None,
+    auth=None,
+    params=None,
+    ok_statuses=None,
+):
     """
     Perform an API call using the provided parameters.
 
@@ -50,12 +58,13 @@ def perform_api_call(method, url, return_json=True, headers=None, auth=None, par
                                         Defaults to None.
         params (dict, optional): The parameters to be included in the API request.
                                  Defaults to None.
+        ok_statuses (tuple, optional): HTTP status codes treated as success. Defaults to (200,).
 
     Returns:
-        dict: The JSON response from the API call.
+        dict or bytes: Parsed JSON (empty dict for 204 or empty body), or raw content.
 
     Raises:
-        APICallException: If the API call returns a non-200 status code.
+        APICallException: If the API call returns a non-success status code.
     """
     if headers is None:
         headers = {
@@ -66,13 +75,17 @@ def perform_api_call(method, url, return_json=True, headers=None, auth=None, par
         auth = ()
     if params is None:
         params = {}
+    if ok_statuses is None:
+        ok_statuses = (200,)
 
     response = requests.request(method=method, url=url, headers=headers, auth=auth, **params)
-    if response.status_code != 200:
+    if response.status_code not in ok_statuses:
         raise APICallException(response.status_code, response.text)
 
     if not return_json:
         return response.content
+    if response.status_code == 204 or not (response.content or b"").strip():
+        return {}
     return response.json()
 
 

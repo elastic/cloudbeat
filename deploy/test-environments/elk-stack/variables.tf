@@ -34,6 +34,12 @@ variable "serverless_mode" {
   type        = bool
 }
 
+variable "kibana_security_solution_experimental" {
+  default     = true
+  description = "When true (ESS only), apply Kibana user_settings_yaml for Security Solution experimental flags"
+  type        = bool
+}
+
 variable "deployment_template" {
   default     = "gcp-general-purpose"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"

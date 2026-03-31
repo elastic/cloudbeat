@@ -3,6 +3,7 @@ This module provides utility functions for working with JSON files and performin
 
 Functions:
 - read_json(json_path: Path) -> dict: Read JSON data from a file.
+- write_json(json_path: Path, data: dict, indent: int = 2) -> None: Write a dict to a JSON file (UTF-8).
 - save_state(file_path: Path, data: list) -> None: Save data to a JSON file.
 - delete_file(file_path: Path): Delete a file.
 
@@ -45,6 +46,18 @@ def read_json(json_path: Path) -> dict:
     except json.JSONDecodeError as ex:
         logger.error(f"Error reading file {json_path}: {ex}")
         sys.exit(1)
+
+
+def write_json(json_path: Path, data: dict, indent: int = 2) -> None:
+    """
+    Write a dictionary to a JSON file using UTF-8.
+
+    Args:
+        json_path: Output file path.
+        data: Serializable dict.
+        indent: Pretty-print indentation (default 2).
+    """
+    json_path.write_text(json.dumps(data, indent=indent), encoding="utf-8")
 
 
 def delete_file(file_path: Path):

@@ -65,6 +65,8 @@ module "ec_deployment" {
     "kibana"        = "",
     "apm"           = ""
   }
+
+  kibana_enable_security_solution_experimental = var.kibana_security_solution_experimental
 }
 
 module "ec_project" {

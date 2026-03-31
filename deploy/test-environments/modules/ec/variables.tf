@@ -84,3 +84,9 @@ variable "docker_image" {
   type        = map(string)
   description = "Optional docker image overrides. The full map needs to be specified"
 }
+
+variable "kibana_enable_security_solution_experimental" {
+  type        = bool
+  default     = true
+  description = "When true, set Kibana user_settings_yaml with Security Solution experimental feature flags (ESS only)"
+}

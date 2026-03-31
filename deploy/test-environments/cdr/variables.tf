@@ -72,6 +72,36 @@ variable "deploy_aws_asset_inventory" {
   default     = true
 }
 
+variable "deploy_aws_elastic_defend_linux" {
+  description = "Deploy Ubuntu EC2 for Elastic Defend. Selective for local/terraform applies (-var / .tfvars). The CDR GitHub composite always forces true."
+  type        = bool
+  default     = true
+}
+
+variable "deploy_aws_elastic_defend_windows" {
+  description = "Deploy Windows EC2 for Elastic Defend. Selective for local/terraform applies (-var / .tfvars). The CDR GitHub composite always forces true."
+  type        = bool
+  default     = true
+}
+
+variable "windows_elastic_defend_ami_id" {
+  description = "Optional Windows AMI override for Elastic Defend host. When empty, the latest Amazon Windows Server 2022 Base image for the region is used."
+  type        = string
+  default     = ""
+}
+
+variable "windows_elastic_defend_instance_type" {
+  description = "Instance type for Elastic Defend Windows VM"
+  type        = string
+  default     = "t3.large"
+}
+
+variable "windows_elastic_defend_winrm_ingress_cidr" {
+  description = "Source CIDR for WinRM HTTP (5985) on the Elastic Defend Windows host"
+  type        = string
+  default     = ""
+}
+
 # ========= Cloud Tags ========================
 variable "division" {
   default     = "engineering"

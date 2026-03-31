@@ -149,6 +149,29 @@ The [`Create Environment with Cloud Logs`](https://github.com/elastic/cloudbeat/
 
 The workflow requires a subset of input parameters. All required inputs are described [here](#how-to-run-the-workflow).
 
+### How to run the workflow (manual)
+
+1. Go to `Actions → Create Environment with Cloud Logs (CDR)` and click **Run workflow**.
+2. Fill the inputs:
+   - **`deployment-name`** (**required**): lowercase, starts with a letter, max 20 chars. Example: `cdr-<yourname>-001`.
+   - **`elk-stack-version`** (**required**): stack version string. Examples:
+     - released: `8.16.0`
+     - snapshot: `8.16.0-SNAPSHOT`
+   - **`serverless_mode`**: if `true`, deploys a Serverless project instead of ESS. Default is `false`.
+   - **`docker-image-override`**: optional docker image override for agent installs (mostly for BC/SNAPSHOT testing).
+   - **`expiration-days`**: how long the environment should be kept before cleanup. Default is `5`.
+   - **`cis-infra`**: optional. When `true`, also deploy CIS infrastructure (`infra_type=all`). When `false`, CDR only (`infra_type=cdr`).
+   - **`kibana_security_solution_experimental`** (ESS only): when `true`, applies Kibana advanced setting YAML to enable Security Solution experimental UI flags (Entity Analytics home + watchlist). Default is `true`.
+   - **`enable-entity-store-v2`**: when `true`, the workflow installs **Entity Store v2** (v2 installer script). When `false`, it installs **Entity Store v1 only**. Default is `true`.
+
+3. Click **Run workflow** and wait for completion.
+
+#### What gets installed
+
+- **Infrastructure**: CDR VMs (AWS CloudTrail EC2, Azure activity logs VM, GCP audit logs VM, Wiz EC2, Asset Inventory EC2, Elastic Defend Linux + Windows, depending on the `deploy_*` Terraform vars defaults).
+- **Integrations / agents**: CloudTrail, Azure Activity Logs, GCP Audit Logs, Wiz, Okta (optional), Elastic Defend (Fleet), Asset Inventory (gated by stack version), and Entity Store (v1 or v2 based on the checkbox).
+
+
 ## Install Integrations Worfklow
 
 The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workflows/install-integrations.yml) GitHub workflow is used when the Elastic Stack is already installed, and the user wants to add `CIS` and/or `CDR` integrations.

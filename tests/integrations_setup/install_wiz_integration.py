@@ -23,6 +23,7 @@ from fleet_api.utils import (
     read_json,
     render_template,
     update_key_value,
+    write_json,
 )
 from loguru import logger
 from munch import Munch
@@ -63,6 +64,10 @@ if __name__ == "__main__":
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
+
+    wiz_context_path = Path(__file__).parent / "cdr_wiz_agent_policy.json"
+    write_json(wiz_context_path, {"agent_policy_id": agent_policy_id})
+    logger.info(f"Wrote {wiz_context_path} for shared CDR integrations (e.g. Okta)")
 
     logger.info(f"Create {INTEGRATION_NAME} integration")
     package_policy_id = create_integration(
