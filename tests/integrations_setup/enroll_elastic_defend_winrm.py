@@ -48,7 +48,7 @@ def main() -> None:
     delay_s = int(os.getenv("ELASTIC_DEFEND_WINRM_RETRY_DELAY", "10"))
 
     transport = "ssl" if use_ssl else "plaintext"
-    target = f"{host}:{port}" if not use_ssl else f"https://{host}:{port}/wsman"
+    target = f"http://{host}:{port}/wsman" if not use_ssl else f"https://{host}:{port}/wsman"
     session = winrm.Session(
         target,
         auth=(username, password),

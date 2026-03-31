@@ -30,5 +30,10 @@ variable "iam_instance_profile" {
 variable "winrm_ingress_cidr" {
   description = "Source CIDR for WinRM HTTP (5985)"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = ""
+
+  validation {
+    condition     = var.winrm_ingress_cidr != "" && var.winrm_ingress_cidr != "0.0.0.0/0"
+    error_message = "winrm_ingress_cidr must be set to a restrictive CIDR and must not be 0.0.0.0/0, as this would expose WinRM to the public internet."
+  }
 }

@@ -99,7 +99,7 @@ variable "windows_elastic_defend_instance_type" {
 variable "windows_elastic_defend_winrm_ingress_cidr" {
   description = "Source CIDR for WinRM HTTP (5985) on the Elastic Defend Windows host"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = ""
 }
 
 # ========= Cloud Tags ========================

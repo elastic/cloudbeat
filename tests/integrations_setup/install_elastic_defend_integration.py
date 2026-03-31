@@ -129,7 +129,7 @@ def main() -> None:
     fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     agent_version = _agent_version()
     artifacts_url = get_artifact_server(agent_version)
-    install_servers = get_install_servers_option(cnfg.elk_config.stack_version)
+    install_servers = get_install_servers_option(agent_version)
 
     manifest_params = Munch(
         enrollment_token=enrollment_token,

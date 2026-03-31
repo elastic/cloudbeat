@@ -86,6 +86,29 @@ def entity_store_status(cfg: Munch) -> dict:
         raise api_ex
 
 
+def entity_store_status_v2(cfg: Munch) -> dict:
+    """Checks the status of Entity Store v2 using the internal API (apiVersion=2)."""
+    url = f"{cfg.kibana_url}/internal/security/entity_store/status"
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            auth=cfg.auth,
+            headers=_ENTITY_STORE_V2_INTERNAL_HEADERS.copy(),
+            params={"params": {"apiVersion": "2"}},
+            ok_statuses=(200, 201, 204),
+        )
+        logger.info("Entity Store v2 status retrieved successfully.")
+        return response
+    except APICallException as api_ex:
+        logger.error(
+            "Entity Store v2 status API call failed, status {}. Response: {}",
+            api_ex.status_code,
+            api_ex.response_text,
+        )
+        raise api_ex
+
+
 def enable_entity_store_v2(cfg: Munch) -> None:
     """Turn on Entity Store v2 via internal settings and poll until active.
 
@@ -183,4 +206,26 @@ def is_entity_store_fully_started(cfg: Munch) -> bool:
             return False
         logger.info(f"Engine {engine.get('type')} is started.")
     logger.info("Entity store is fully started.")
+    return True
+
+
+def is_entity_store_v2_fully_started(cfg: Munch) -> bool:
+    """Checks if Entity Store v2 is fully started (internal v2 status is running and all engines started)."""
+    status_response = entity_store_status_v2(cfg)
+    global_status = status_response.get("status")
+    engines = status_response.get("engines", [])
+    if global_status != "running":
+        logger.info("Entity Store v2 global status is: '{}'", global_status)
+        return False
+    logger.info("====== Entity Store v2 Engines Status ====")
+    for engine in engines:
+        if engine.get("status") != "started":
+            logger.error(
+                "Entity Store v2 engine {} status is not started: {}",
+                engine.get("type"),
+                engine.get("status"),
+            )
+            return False
+        logger.info("Entity Store v2 engine {} is started.", engine.get("type"))
+    logger.info("Entity Store v2 is fully started.")
     return True

@@ -139,6 +139,15 @@ runs:
       shell: bash
       working-directory: "deploy/test-environments/cdr"
       run: |
+        # Restrict WinRM (5985) ingress to the runner egress IP.
+        # The ec2-windows module rejects empty / 0.0.0.0/0 to avoid exposing WinRM to the internet by default.
+        RUNNER_EGRESS_IP="$(curl -fsS https://checkip.amazonaws.com | tr -d '\n')"
+        if [[ -z "$RUNNER_EGRESS_IP" ]]; then
+          echo "Failed to determine runner egress IP for WinRM allowlist"
+          exit 1
+        fi
+        export TF_VAR_windows_elastic_defend_winrm_ingress_cidr="${RUNNER_EGRESS_IP}/32"
+
         terraform init
         terraform validate
         terraform apply -auto-approve
@@ -433,10 +442,12 @@ runs:
         ENABLE_ENTITY_STORE_V2: ${{ inputs.enable-entity-store-v2 }}
       run: |
         set -euo pipefail
+        # v1 prerequisites (kibana settings + data view + entity store API enable)
+        poetry run python ./enable_entity_store.py
+
         if [[ "${ENABLE_ENTITY_STORE_V2}" == "true" ]]; then
+          # v2 install/maintainers init + status poll
           poetry run python ./enable_entity_store_v2.py
-        else
-          poetry run python ./enable_entity_store.py
         fi
 
     - name: Install Azure Asset Inventory integration

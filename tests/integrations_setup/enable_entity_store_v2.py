@@ -19,12 +19,12 @@ from fleet_api.entity_store_api import (
     enable_entity_store_v2,
     init_entity_store_v2_maintainers,
     install_entity_store_v2,
-    is_entity_store_fully_started,
+    is_entity_store_v2_fully_started,
 )
 from loguru import logger
 
 elk_config = config_fleet.elk_config
-ENTITY_STORE_INIT_TIMEOUT = 60  # seconds
+ENTITY_STORE_INIT_TIMEOUT = 180  # seconds
 
 if __name__ == "__main__":
     try:
@@ -35,23 +35,23 @@ if __name__ == "__main__":
         start_time = time.time()
         logger.info("====== Entity Store v2 status poll ====")
         while time.time() - start_time < ENTITY_STORE_INIT_TIMEOUT:
-            if is_entity_store_fully_started(elk_config):
+            if is_entity_store_v2_fully_started(elk_config):
                 logger.info("Entity store is fully started after v2 install.")
                 break
             time.sleep(1)
         else:
             logger.error(
-                "Entity store did not fully start within %s seconds after v2 install.",
+                "Entity store did not fully start within {} seconds after v2 install.",
                 ENTITY_STORE_INIT_TIMEOUT,
             )
             sys.exit(1)
 
     except TimeoutError as exc:
-        logger.error("Entity Store v2 setup timed out: %s", exc)
+        logger.error("Entity Store v2 setup timed out: {}", exc)
         sys.exit(1)
     except requests.RequestException as exc:
-        logger.error("HTTP error while enabling entity store v2: %s", exc)
+        logger.error("HTTP error while enabling entity store v2: {}", exc)
         sys.exit(1)
     except (ValueError, KeyError) as exc:
-        logger.error("Configuration error while enabling entity store v2: %s", exc)
+        logger.error("Configuration error while enabling entity store v2: {}", exc)
         sys.exit(1)
