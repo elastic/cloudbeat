@@ -442,12 +442,12 @@ runs:
         ENABLE_ENTITY_STORE_V2: ${{ inputs.enable-entity-store-v2 }}
       run: |
         set -euo pipefail
-        # v1 prerequisites (kibana settings + data view + entity store API enable)
-        poetry run python ./enable_entity_store.py
-
         if [[ "${ENABLE_ENTITY_STORE_V2}" == "true" ]]; then
-          # v2 install/maintainers init + status poll
+          # Entity Store v2 prerequisites + install + maintainers + v2 status poll
           poetry run python ./enable_entity_store_v2.py
+        else
+          # Entity Store v1 prerequisites + enable + v1 status poll (includes data view creation)
+          poetry run python ./enable_entity_store.py
         fi
 
     - name: Install Azure Asset Inventory integration

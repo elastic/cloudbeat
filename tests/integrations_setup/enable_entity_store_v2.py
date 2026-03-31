@@ -1,5 +1,5 @@
 """
-Enable Entity Store v2 on Kibana after v1 setup.
+Enable Entity Store v2 on Kibana (v2-only).
 
 Uses the same three-step flow as ecp-synthetics-monitors kibana-api.ts:
 internal settings (entityStoreEnableV2), install, then maintainers init;
@@ -7,7 +7,6 @@ then polls public entity store status until running or timeout.
 
 Requires:
     - configuration_fleet / elk_config with Kibana URL and auth.
-    - v1 flow (enable_entity_store.py) should run first in CI for shared prerequisites.
 """
 
 import sys
