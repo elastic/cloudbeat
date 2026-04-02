@@ -221,7 +221,7 @@ runs:
           if [[ "$HTTP_CODE" == "200" ]]; then
             IS_INITIALIZED=$(jq -r '.isInitialized // false' /tmp/fleet_status.json 2>/dev/null || true)
             if [[ "$IS_INITIALIZED" == "true" ]]; then
-              echo "Fleet setup complete"
+              echo "Fleet setup complete (isInitialized=true)"
               FLEET_OK=1
               break
             fi
@@ -235,6 +235,30 @@ runs:
         done
         if [ -z "$FLEET_OK" ]; then
           echo "Timed out waiting for Fleet setup to complete after 300s"
+          exit 1
+        fi
+
+        echo "Waiting for Fleet Server to be ready at ${KIBANA_URL}/api/fleet/epm/packages"
+        FLEET_SERVER_OK=""
+        for i in $(seq 1 30); do
+          HTTP_CODE=$(curl -s \
+            -u "${ES_USER}:${ES_PASSWORD}" \
+            -H "Content-Type: application/json" \
+            -H "kbn-xsrf: true" \
+            -o /tmp/fleet_epm.json \
+            -w "%{http_code}" \
+            "${KIBANA_URL}/api/fleet/epm/packages")
+          if [[ "$HTTP_CODE" == "200" ]]; then
+            echo "Fleet Server is ready"
+            FLEET_SERVER_OK=1
+            break
+          fi
+          BODY=$(cat /tmp/fleet_epm.json 2>/dev/null | head -c 300 || true)
+          echo "attempt $i/30: Fleet Server returned HTTP ${HTTP_CODE}, body: ${BODY}, sleeping 10s"
+          sleep 10
+        done
+        if [ -z "$FLEET_SERVER_OK" ]; then
+          echo "Timed out waiting for Fleet Server to become ready after 300s"
           exit 1
         fi
 
