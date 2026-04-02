@@ -466,12 +466,18 @@ runs:
     - name: Deploy Azure Asset Inventory agent
       id: azure-asset-inventory-agent
       working-directory: deploy/azure
-      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.azure-asset-inventory-integration.outcome == 'success' }}
       shell: bash
       env:
         AZURE_TAGS: ${{ inputs.azure-tags }}
         DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-inventory"
-      run: DEPLOYMENT_NAME="$DEPLOYMENT_NAME-$(openssl rand -hex 3)" ./install_agent_az_cli.sh
+        STACK_VERSION: ${{ inputs.elk-stack-version }}
+      run: |
+        if [ ! -f arm_parameters.json ]; then
+          echo "ERROR: arm_parameters.json not found in $(pwd). Azure installer may have failed." >&2
+          exit 1
+        fi
+        DEPLOYMENT_NAME="$DEPLOYMENT_NAME-$(openssl rand -hex 3)" ./install_agent_az_cli.sh
 
     - name: Install AWS Asset Inventory integration
       id: aws-asset-inventory
@@ -487,7 +493,7 @@ runs:
         poetry run python ./install_aws_asset_inventory_integration.py
 
     - name: Deploy AWS Asset Inventory agent
-      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.aws-asset-inventory.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
@@ -496,6 +502,10 @@ runs:
       run: |
         scriptname="aws-asset-inventory-linux.sh"
         src="../../../tests/integrations_setup/$scriptname"
+        if [ ! -f "$src" ]; then
+          echo "ERROR: $src not found. AWS asset inventory installer may have failed." >&2
+          exit 1
+        fi
         cmd="chmod +x $scriptname && ./$scriptname"
         ../remote_setup.sh -k "$EC2_ASSET_INV_KEY" -s "$src" -h "$ASSET_INV_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
 
@@ -506,7 +516,7 @@ runs:
       working-directory: deploy/deployment-manager
       env:
         SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
-        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-acc"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-acc-${{ github.run_id }}"
       run: |
           # Deploys a GCP Service Account
           ./deploy_service_account.sh
