@@ -159,9 +159,71 @@ runs:
       working-directory: "deploy/test-environments/cdr"
       run: ./export_terraform_outputs.sh
 
+    - name: Wait for Kibana and Fleet to be ready
+      id: wait-for-kibana
+      if: success()
+      shell: bash
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+      run: |
+        set -euo pipefail
+
+        echo "Waiting for Kibana to report 'available' at ${KIBANA_URL}/api/status"
+        KIBANA_OK=""
+        for i in $(seq 1 30); do
+          HTTP_CODE=$(curl -s -u "${ES_USER}:${ES_PASSWORD}" \
+            -o /tmp/kibana_status.json \
+            -w "%{http_code}" \
+            "${KIBANA_URL}/api/status")
+          if [[ "$HTTP_CODE" == "200" ]]; then
+            LEVEL=$(jq -r '.status.overall.level // empty' /tmp/kibana_status.json 2>/dev/null || true)
+            STATE=$(jq -r '.status.overall.state // empty' /tmp/kibana_status.json 2>/dev/null || true)
+            if [[ "$LEVEL" == "available" || "$STATE" == "green" ]]; then
+              echo "Kibana is ready (level=${LEVEL:-n/a}, state=${STATE:-n/a})"
+              KIBANA_OK=1
+              break
+            fi
+            echo "attempt $i/30: Kibana not ready yet (level=${LEVEL:-n/a}, state=${STATE:-n/a}), sleeping 10s"
+          else
+            echo "attempt $i/30: Kibana returned HTTP ${HTTP_CODE}, sleeping 10s"
+          fi
+          sleep 10
+        done
+        if [ -z "$KIBANA_OK" ]; then
+          echo "Timed out waiting for Kibana to become ready after 300s"
+          exit 1
+        fi
+
+        echo "Waiting for Fleet to be ready at ${KIBANA_URL}/api/fleet/status"
+        FLEET_OK=""
+        for i in $(seq 1 30); do
+          HTTP_CODE=$(curl -s -u "${ES_USER}:${ES_PASSWORD}" \
+            -o /tmp/fleet_status.json \
+            -w "%{http_code}" \
+            "${KIBANA_URL}/api/fleet/status")
+          if [[ "$HTTP_CODE" == "200" ]]; then
+            IS_READY=$(jq -r '.isReady // false' /tmp/fleet_status.json 2>/dev/null || true)
+            if [[ "$IS_READY" == "true" ]]; then
+              echo "Fleet is ready"
+              FLEET_OK=1
+              break
+            fi
+            echo "attempt $i/30: Fleet not ready (isReady=${IS_READY:-unknown}), sleeping 10s"
+          else
+            echo "attempt $i/30: Fleet returned HTTP ${HTTP_CODE}, sleeping 10s"
+          fi
+          sleep 10
+        done
+        if [ -z "$FLEET_OK" ]; then
+          echo "Timed out waiting for Fleet to become ready after 300s"
+          exit 1
+        fi
+
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -187,7 +249,7 @@ runs:
 
     - name: Install Azure Activity Logs integration
       id: az-activity-logs-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -216,7 +278,7 @@ runs:
 
     - name: Install GCP Audit Logs integration
       id: gcp-audit-logs-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -243,7 +305,7 @@ runs:
 
     - name: Install WIZ integration
       id: wiz-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -304,7 +366,7 @@ runs:
 
     - name: Install Elastic Defend (Fleet)
       id: elastic-defend-fleet
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -416,7 +478,7 @@ runs:
 
     - name: Check Asset Inventory supported version
       id: asset-inventory-version-check
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       shell: bash
       env:
         STACK_VERSION: ${{ inputs.elk-stack-version }}
@@ -466,7 +528,7 @@ runs:
     - name: Deploy Azure Asset Inventory agent
       id: azure-asset-inventory-agent
       working-directory: deploy/azure
-      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' && steps.azure-asset-inventory-integration.outcome == 'success' }}
       shell: bash
       env:
         AZURE_TAGS: ${{ inputs.azure-tags }}
