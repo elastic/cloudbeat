@@ -90,7 +90,8 @@ def perform_api_call(
         _fleet_not_ready = (
             response.status_code == 400 and "not available with the current configuration" in response.text
         )
-        if (response.status_code >= 500 or _fleet_not_ready) and attempt < max_retries - 1:
+        _transient = response.status_code >= 500 or response.status_code == 429 or _fleet_not_ready
+        if _transient and attempt < max_retries - 1:
             delay = min(retry_backoff_sec * (2**attempt), retry_backoff_max_sec)
             print(
                 f"perform_api_call: {method} {url} returned {response.status_code} "
