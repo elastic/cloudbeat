@@ -240,7 +240,7 @@ runs:
 
         echo "Waiting for Fleet Server to be stable at ${KIBANA_URL}/api/fleet/epm/packages"
         CONSECUTIVE_OK=0
-        REQUIRED_OK=3
+        REQUIRED_OK=5
         for i in $(seq 1 60); do
           HTTP_CODE=$(curl -s \
             -u "${ES_USER}:${ES_PASSWORD}" \

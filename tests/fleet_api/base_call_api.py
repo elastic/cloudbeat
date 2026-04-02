@@ -44,8 +44,9 @@ def perform_api_call(
     auth=None,
     params=None,
     ok_statuses=None,
-    max_retries: int = 3,
+    max_retries: int = 8,
     retry_backoff_sec: float = 5.0,
+    retry_backoff_max_sec: float = 30.0,
 ):
     """
     Perform an API call using the provided parameters.
@@ -87,14 +88,13 @@ def perform_api_call(
         if response.status_code in ok_statuses:
             break
         _fleet_not_ready = (
-            response.status_code == 400
-            and "not available with the current configuration" in response.text
+            response.status_code == 400 and "not available with the current configuration" in response.text
         )
         if (response.status_code >= 500 or _fleet_not_ready) and attempt < max_retries - 1:
-            delay = retry_backoff_sec * (2 ** attempt)
+            delay = min(retry_backoff_sec * (2**attempt), retry_backoff_max_sec)
             print(
                 f"perform_api_call: {method} {url} returned {response.status_code} "
-                f"(attempt {attempt + 1}/{max_retries}), retrying in {delay:.0f}s"
+                f"(attempt {attempt + 1}/{max_retries}), retrying in {delay:.0f}s",
             )
             time.sleep(delay)
             continue
