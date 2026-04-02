@@ -238,9 +238,10 @@ runs:
           exit 1
         fi
 
-        echo "Waiting for Fleet Server to be ready at ${KIBANA_URL}/api/fleet/epm/packages"
-        FLEET_SERVER_OK=""
-        for i in $(seq 1 30); do
+        echo "Waiting for Fleet Server to be stable at ${KIBANA_URL}/api/fleet/epm/packages"
+        CONSECUTIVE_OK=0
+        REQUIRED_OK=3
+        for i in $(seq 1 60); do
           HTTP_CODE=$(curl -s \
             -u "${ES_USER}:${ES_PASSWORD}" \
             -H "Content-Type: application/json" \
@@ -249,16 +250,21 @@ runs:
             -w "%{http_code}" \
             "${KIBANA_URL}/api/fleet/epm/packages")
           if [[ "$HTTP_CODE" == "200" ]]; then
-            echo "Fleet Server is ready"
-            FLEET_SERVER_OK=1
-            break
+            CONSECUTIVE_OK=$((CONSECUTIVE_OK + 1))
+            echo "attempt $i/60: Fleet Server OK (${CONSECUTIVE_OK}/${REQUIRED_OK} consecutive)"
+            if [[ "$CONSECUTIVE_OK" -ge "$REQUIRED_OK" ]]; then
+              echo "Fleet Server is stable"
+              break
+            fi
+          else
+            CONSECUTIVE_OK=0
+            BODY=$(cat /tmp/fleet_epm.json 2>/dev/null | head -c 300 || true)
+            echo "attempt $i/60: Fleet Server returned HTTP ${HTTP_CODE}, body: ${BODY}, resetting consecutive counter, sleeping 10s"
           fi
-          BODY=$(cat /tmp/fleet_epm.json 2>/dev/null | head -c 300 || true)
-          echo "attempt $i/30: Fleet Server returned HTTP ${HTTP_CODE}, body: ${BODY}, sleeping 10s"
           sleep 10
         done
-        if [ -z "$FLEET_SERVER_OK" ]; then
-          echo "Timed out waiting for Fleet Server to become ready after 300s"
+        if [[ "$CONSECUTIVE_OK" -lt "$REQUIRED_OK" ]]; then
+          echo "Timed out waiting for Fleet Server to stabilise"
           exit 1
         fi
 
