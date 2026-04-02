@@ -38,7 +38,7 @@ on:
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
       kibana_security_solution_experimental:
-        description: "ESS only: apply Kibana user_settings_yaml for Security Solution experimental flags (new home, watchlist)"
+        description: "ESS only: Apply Entity Store v2 and Entity Analytics Feature flags (new home, watchlist, etc)"
         type: boolean
         required: false
         default: true
@@ -90,7 +90,7 @@ on:
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
       kibana_security_solution_experimental:
-        description: "ESS only: apply Kibana user_settings_yaml for Security Solution experimental flags (new home, watchlist)"
+        description: "ESS only: Apply Entity Store v2 and Entity Analytics Feature flags (new home, watchlist, etc)"
         type: boolean
         required: false
         default: true
@@ -477,6 +477,63 @@ jobs:
           )
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
+
+      - name: Enable Entity Store v2 Kibana Setting
+        if: >-
+          ${{
+            !cancelled()
+            && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false')
+            && inputs.kibana_security_solution_experimental == true
+            && env.TF_VAR_serverless_mode != 'true'
+          }}
+        run: |
+          curl -s -f -X POST "$KIBANA_URL/internal/kibana/settings" \
+            -u "$ES_USER:$ES_PASSWORD" \
+            -H "kbn-xsrf: true" \
+            -H "x-elastic-internal-origin: kibana" \
+            -H "Content-Type: application/json" \
+            -d '{"changes":{"securitySolution:entityStoreEnableV2":true}}'
+          echo "Entity Store v2 setting posted, polling for activation..."
+
+          for i in $(seq 1 12); do
+            value=$(curl -s -f -X GET "$KIBANA_URL/internal/kibana/settings" \
+              -u "$ES_USER:$ES_PASSWORD" \
+              -H "kbn-xsrf: true" \
+              -H "x-elastic-internal-origin: kibana" | \
+              jq -r '.settings["securitySolution:entityStoreEnableV2"].userValue // empty')
+            if [ "$value" = "true" ]; then
+              echo "Entity Store v2 setting is active."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::warning::Entity Store v2 setting not confirmed active within 60s"
+
+      - name: Install Entity Store v2
+        if: >-
+          ${{
+            !cancelled()
+            && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false')
+            && inputs.kibana_security_solution_experimental == true
+            && env.TF_VAR_serverless_mode != 'true'
+          }}
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "$KIBANA_URL/internal/security/entity_store/install?apiVersion=2" \
+            -u "$ES_USER:$ES_PASSWORD" \
+            -H "kbn-xsrf: true" \
+            -H "x-elastic-internal-origin: kibana" \
+            -H "Content-Type: application/json" \
+            -d '{}')
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | sed '$d')
+          if [[ "$http_code" =~ ^2 ]]; then
+            echo "Entity Store v2 install succeeded (HTTP $http_code)."
+            echo "$body"
+          else
+            echo "::error::Entity Store v2 install failed (HTTP $http_code): $body"
+            exit 1
+          fi
 
       - name: Deploy CDR Integrations
         id: cdr-integrations
