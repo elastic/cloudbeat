@@ -120,6 +120,11 @@ inputs:
     default: true
     required: false
     type: boolean
+  serverless-mode:
+    description: "When true, skip the Fleet status check (serverless deployments manage Fleet internally)"
+    default: false
+    required: false
+    type: boolean
 
 runs:
   using: composite
@@ -167,6 +172,7 @@ runs:
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
+        SERVERLESS_MODE: ${{ inputs.serverless-mode }}
       run: |
         set -euo pipefail
 
@@ -196,7 +202,12 @@ runs:
           exit 1
         fi
 
-        echo "Waiting for Fleet to be ready at ${KIBANA_URL}/api/fleet/status"
+        if [[ "${SERVERLESS_MODE}" == "true" ]]; then
+          echo "Serverless mode: skipping Fleet status check (Fleet is managed by Elastic Cloud)"
+          exit 0
+        fi
+
+        echo "Waiting for Fleet to be ready at ${KIBANA_URL}/api/fleet/agent_policies"
         FLEET_OK=""
         for i in $(seq 1 30); do
           HTTP_CODE=$(curl -s \
@@ -205,19 +216,14 @@ runs:
             -H "kbn-xsrf: true" \
             -o /tmp/fleet_status.json \
             -w "%{http_code}" \
-            "${KIBANA_URL}/api/fleet/status")
+            "${KIBANA_URL}/api/fleet/agent_policies")
           if [[ "$HTTP_CODE" == "200" ]]; then
-            IS_READY=$(jq -r '.isReady // false' /tmp/fleet_status.json 2>/dev/null || true)
-            if [[ "$IS_READY" == "true" ]]; then
-              echo "Fleet is ready"
-              FLEET_OK=1
-              break
-            fi
-            echo "attempt $i/30: Fleet not ready (isReady=${IS_READY:-unknown}), sleeping 10s"
-          else
-            BODY=$(cat /tmp/fleet_status.json 2>/dev/null | head -c 300 || true)
-            echo "attempt $i/30: Fleet returned HTTP ${HTTP_CODE}, body: ${BODY}, sleeping 10s"
+            echo "Fleet is ready"
+            FLEET_OK=1
+            break
           fi
+          BODY=$(cat /tmp/fleet_status.json 2>/dev/null | head -c 300 || true)
+          echo "attempt $i/30: Fleet returned HTTP ${HTTP_CODE}, body: ${BODY}, sleeping 10s"
           sleep 10
         done
         if [ -z "$FLEET_OK" ]; then
