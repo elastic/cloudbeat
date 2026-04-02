@@ -207,27 +207,34 @@ runs:
           exit 0
         fi
 
-        echo "Waiting for Fleet to be ready at ${KIBANA_URL}/api/fleet/agent_policies"
+        echo "Triggering Fleet setup at ${KIBANA_URL}/api/fleet/setup"
         FLEET_OK=""
         for i in $(seq 1 30); do
           HTTP_CODE=$(curl -s \
+            -X POST \
             -u "${ES_USER}:${ES_PASSWORD}" \
             -H "Content-Type: application/json" \
             -H "kbn-xsrf: true" \
             -o /tmp/fleet_status.json \
             -w "%{http_code}" \
-            "${KIBANA_URL}/api/fleet/agent_policies")
+            "${KIBANA_URL}/api/fleet/setup")
           if [[ "$HTTP_CODE" == "200" ]]; then
-            echo "Fleet is ready"
-            FLEET_OK=1
-            break
+            IS_INITIALIZED=$(jq -r '.isInitialized // false' /tmp/fleet_status.json 2>/dev/null || true)
+            if [[ "$IS_INITIALIZED" == "true" ]]; then
+              echo "Fleet setup complete"
+              FLEET_OK=1
+              break
+            fi
+            BODY=$(cat /tmp/fleet_status.json 2>/dev/null | head -c 300 || true)
+            echo "attempt $i/30: Fleet setup not complete yet, body: ${BODY}, sleeping 10s"
+          else
+            BODY=$(cat /tmp/fleet_status.json 2>/dev/null | head -c 300 || true)
+            echo "attempt $i/30: Fleet setup returned HTTP ${HTTP_CODE}, body: ${BODY}, sleeping 10s"
           fi
-          BODY=$(cat /tmp/fleet_status.json 2>/dev/null | head -c 300 || true)
-          echo "attempt $i/30: Fleet returned HTTP ${HTTP_CODE}, body: ${BODY}, sleeping 10s"
           sleep 10
         done
         if [ -z "$FLEET_OK" ]; then
-          echo "Timed out waiting for Fleet to become ready after 300s"
+          echo "Timed out waiting for Fleet setup to complete after 300s"
           exit 1
         fi
 
