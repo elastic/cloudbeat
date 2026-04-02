@@ -34,7 +34,7 @@ on:
         required: false
         default: "5"
       kibana_security_solution_experimental:
-        description: "ESS only: apply Kibana Security Solution experimental user settings (new home, watchlist)"
+        description: "ESS only: Apply Entity Store v2 and Entity Analytics Feature flags (new home, watchlist, etc)"
         type: boolean
         required: false
         default: true
