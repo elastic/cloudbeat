@@ -199,7 +199,10 @@ runs:
         echo "Waiting for Fleet to be ready at ${KIBANA_URL}/api/fleet/status"
         FLEET_OK=""
         for i in $(seq 1 30); do
-          HTTP_CODE=$(curl -s -u "${ES_USER}:${ES_PASSWORD}" \
+          HTTP_CODE=$(curl -s \
+            -u "${ES_USER}:${ES_PASSWORD}" \
+            -H "Content-Type: application/json" \
+            -H "kbn-xsrf: true" \
             -o /tmp/fleet_status.json \
             -w "%{http_code}" \
             "${KIBANA_URL}/api/fleet/status")
@@ -212,7 +215,8 @@ runs:
             fi
             echo "attempt $i/30: Fleet not ready (isReady=${IS_READY:-unknown}), sleeping 10s"
           else
-            echo "attempt $i/30: Fleet returned HTTP ${HTTP_CODE}, sleeping 10s"
+            BODY=$(cat /tmp/fleet_status.json 2>/dev/null | head -c 300 || true)
+            echo "attempt $i/30: Fleet returned HTTP ${HTTP_CODE}, body: ${BODY}, sleeping 10s"
           fi
           sleep 10
         done
