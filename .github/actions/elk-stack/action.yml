@@ -30,7 +30,7 @@ inputs:
     type: string
     required: false
   kibana-security-solution-experimental:
-    description: "ESS only: set Kibana user_settings_yaml for Security Solution experimental flags"
+    description: "ESS only: Apply Entity Store v2 and Entity Analytics Feature flags (new home, watchlist, etc)"
     type: boolean
     default: true
     required: false

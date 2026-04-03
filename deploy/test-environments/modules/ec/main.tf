@@ -12,8 +12,11 @@ locals {
 
   security_solution_experimental_yaml = <<-EOT
 xpack.securitySolution.enableExperimental:
-  - entityAnalyticsNewHomePageEnabled
+  - entityAnalyticsEntityStoreV2
   - entityAnalyticsWatchlistEnabled
+  - entityAnalyticsNewHomePageEnabled
+  - leadGenerationEnabled
+  - leadGenerationDetailsEnabled
 EOT
 
   kibana_docker_config = local.kibana_docker_image_tag_override != "" ? {

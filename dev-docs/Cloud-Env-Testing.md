@@ -161,7 +161,7 @@ The workflow requires a subset of input parameters. All required inputs are desc
    - **`docker-image-override`**: optional docker image override for agent installs (mostly for BC/SNAPSHOT testing).
    - **`expiration-days`**: how long the environment should be kept before cleanup. Default is `5`.
    - **`cis-infra`**: optional. When `true`, also deploy CIS infrastructure (`infra_type=all`). When `false`, CDR only (`infra_type=cdr`).
-   - **`kibana_security_solution_experimental`** (ESS only): when `true`, applies Kibana advanced setting YAML to enable Security Solution experimental UI flags (Entity Analytics home + watchlist). Default is `true`.
+   - **`kibana_security_solution_experimental`** (ESS only): when `true`, applies Kibana `user_settings_yaml` with Entity Analytics feature flags and calls the internal Kibana settings API to enable and install Entity Store v2. Default is `true`.
    - **`enable-entity-store-v2`**: when `true`, the workflow installs **Entity Store v2** (v2 installer script). When `false`, it installs **Entity Store v1 only**. Default is `true`.
 
 3. Click **Run workflow** and wait for completion.
