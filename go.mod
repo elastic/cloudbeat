@@ -146,7 +146,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.24 // indirect
 	github.com/bitfield/gotestdox v0.2.2 // indirect
-	github.com/bitnami/go-version v0.0.0-20260324143405-0aeab956d77a // indirect
+	github.com/bitnami/go-version v0.0.0-20260331073141-f5c14d56a65f // indirect
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
