@@ -72,6 +72,7 @@ resource "ec_deployment" "deployment" {
   }
 
   kibana = {
+    size   = "8g"
     config = length(local.kibana_config_merged) > 0 ? local.kibana_config_merged : null
   }
 
