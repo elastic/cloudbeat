@@ -568,8 +568,8 @@ require (
 	github.com/zclconf/go-cty v1.16.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.elastic.co/apm/module/apmelasticsearch/v2 v2.7.3 // indirect
-	go.elastic.co/apm/module/apmhttp/v2 v2.7.3 // indirect
-	go.elastic.co/apm/v2 v2.7.3 // indirect
+	go.elastic.co/apm/module/apmhttp/v2 v2.7.6 // indirect
+	go.elastic.co/apm/v2 v2.7.6 // indirect
 	go.elastic.co/ecszap v1.0.3 // indirect
 	go.elastic.co/fastjson v1.5.1 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
