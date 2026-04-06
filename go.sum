@@ -2069,8 +2069,8 @@ github.com/tklauser/numcpus v0.11.0 h1:nSTwhKH5e1dMNsCdVBukSZrURJRoHbSEQjdEbY+9R
 github.com/tklauser/numcpus v0.11.0/go.mod h1:z+LwcLq54uWZTX0u/bGobaV34u6V7KNlTZejzM6/3MQ=
 github.com/tonistiigi/go-csvvalue v0.0.0-20240814133006-030d3b2625d0 h1:2f304B10LaZdB8kkVEaoXvAMVan2tl9AiK4G0odjQtE=
 github.com/tonistiigi/go-csvvalue v0.0.0-20240814133006-030d3b2625d0/go.mod h1:278M4p8WsNh3n4a1eqiFcV2FGk7wE5fwUpUom9mK9lE=
-github.com/transparency-dev/formats v0.0.0-20251017110053-404c0d5b696c h1:5a2XDQ2LiAUV+/RjckMyq9sXudfrPSuCY4FuPC1NyAw=
-github.com/transparency-dev/formats v0.0.0-20251017110053-404c0d5b696c/go.mod h1:g85IafeFJZLxlzZCDRu4JLpfS7HKzR+Hw9qRh3bVzDI=
+github.com/transparency-dev/formats v0.1.0 h1:oL0zUFuYUjg8AbtjPMnIRDmjbaHo5jCjEWU5yaNuz0g=
+github.com/transparency-dev/formats v0.1.0/go.mod h1:d2FibUOHfCMdCe/+/rbKt1IPLBbPTDfwj46kt541/mU=
 github.com/transparency-dev/merkle v0.0.2 h1:Q9nBoQcZcgPamMkGn7ghV8XiTZ/kRxn1yCG81+twTK4=
 github.com/transparency-dev/merkle v0.0.2/go.mod h1:pqSy+OXefQ1EDUVmAJ8MUhHB9TXGuzVAT58PqBoHz1A=
 github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b h1:X/8hkb4rQq3+QuOxpJK7gWmAXmZucF0EI1s1BfBLq6U=
