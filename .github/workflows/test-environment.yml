@@ -535,6 +535,7 @@ jobs:
           kibana-url: ${{ env.KIBANA_URL }}
           elk-stack-version: ${{ env.STACK_VERSION }}
           enable-entity-store-v2: ${{ inputs.enable-entity-store-v2 }}
+          serverless-mode: ${{ inputs.serverless_mode }}
           azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}

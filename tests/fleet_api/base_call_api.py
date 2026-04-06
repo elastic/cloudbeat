@@ -10,6 +10,8 @@ Dependencies:
     - requests: Library for making HTTP requests
 """
 
+import time
+
 import requests
 
 
@@ -42,6 +44,9 @@ def perform_api_call(
     auth=None,
     params=None,
     ok_statuses=None,
+    max_retries: int = 8,
+    retry_backoff_sec: float = 5.0,
+    retry_backoff_max_sec: float = 30.0,
 ):
     """
     Perform an API call using the provided parameters.
@@ -78,7 +83,24 @@ def perform_api_call(
     if ok_statuses is None:
         ok_statuses = (200,)
 
-    response = requests.request(method=method, url=url, headers=headers, auth=auth, **params)
+    for attempt in range(max_retries):
+        response = requests.request(method=method, url=url, headers=headers, auth=auth, **params)
+        if response.status_code in ok_statuses:
+            break
+        _fleet_not_ready = (
+            response.status_code == 400 and "not available with the current configuration" in response.text
+        )
+        _transient = response.status_code >= 500 or response.status_code == 429 or _fleet_not_ready
+        if _transient and attempt < max_retries - 1:
+            delay = min(retry_backoff_sec * (2**attempt), retry_backoff_max_sec)
+            print(
+                f"perform_api_call: {method} {url} returned {response.status_code} "
+                f"(attempt {attempt + 1}/{max_retries}), retrying in {delay:.0f}s",
+            )
+            time.sleep(delay)
+            continue
+        raise APICallException(response.status_code, response.text)
+
     if response.status_code not in ok_statuses:
         raise APICallException(response.status_code, response.text)
 

@@ -336,7 +336,7 @@ def get_package_version(
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return None
+        raise
 
 
 def get_package(
