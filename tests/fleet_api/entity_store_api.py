@@ -143,11 +143,11 @@ def enable_entity_store_v2(cfg: Munch) -> None:
 
 
 def install_entity_store_v2(cfg: Munch) -> dict:
-    """Install Entity Store v2 (POST /internal/security/entity_store/install?apiVersion=2, empty body).
+    """Install Entity Store v2 (POST /api/security/entity_store/install?apiVersion=2, empty body).
 
     Same as installEntityStoreV2 in kibana-api.ts.
     """
-    url = f"{cfg.kibana_url}/internal/security/entity_store/install"
+    url = f"{cfg.kibana_url}/api/security/entity_store/install"
     try:
         result = perform_api_call(
             "POST",
