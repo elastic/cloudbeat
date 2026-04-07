@@ -28,9 +28,6 @@
   ],
   "separateMajorMinor": true,
   "prConcurrentLimit": 50,
-  "prHourlyLimit": 10,
-  "automerge": true,
-  "platformAutomerge": true,
   "automergeStrategy": "squash",
   "automergeType": "pr",
   "ignorePaths": [
