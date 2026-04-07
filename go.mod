@@ -426,7 +426,7 @@ require (
 	github.com/go-openapi/strfmt v0.25.0 // indirect
 	github.com/go-openapi/swag v0.25.4 // indirect
 	github.com/go-openapi/validate v0.25.1 // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
+	github.com/go-redis/redis/v9 v9.18.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
