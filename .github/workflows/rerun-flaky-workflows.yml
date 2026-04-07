@@ -48,7 +48,7 @@ jobs:
           fi
       - name: Check out the repo
         if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Update env vars
         if: ${{ !cancelled() && failure() }} # Run only if the previous step failed
