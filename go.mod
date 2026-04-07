@@ -298,7 +298,7 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.77 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.77 // indirect
-	modernc.org/libc v1.66.3 // indirect
+	modernc.org/libc/v2 v2.1.30 // indirect
 	mvdan.cc/sh/v3 v3.11.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
