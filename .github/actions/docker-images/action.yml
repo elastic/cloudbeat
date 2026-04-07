@@ -69,7 +69,7 @@ runs:
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Build cloudbeat-docker image
-      uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
       with:
         context: .
         file: ./deploy/Dockerfile
@@ -83,7 +83,7 @@ runs:
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Build elastic-agent
-      uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
       env:
         GOOS: ${{ inputs.goos }}
         GOARCH: ${{ inputs.goarch }}
@@ -103,7 +103,7 @@ runs:
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Build pytest-docker
-      uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
       with:
         context: ./tests/.
         push: false
