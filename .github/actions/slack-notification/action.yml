@@ -56,7 +56,7 @@ runs:
 
     - name: Send Slack notification
       id: send-slack-notification
-      uses: slackapi/slack-github-action@e28cf165c92ffef168d23c5c9000cffc8a25e117 # v1.24.0
+      uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
       env:
         SLACK_BOT_TOKEN: ${{ env.SLACK_BOT_TOKEN }}
       with:
