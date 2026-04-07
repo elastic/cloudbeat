@@ -202,7 +202,7 @@ jobs:
     needs: [ init-hermit ]
     name: CNVM CI
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 75
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
