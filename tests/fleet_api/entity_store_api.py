@@ -154,7 +154,7 @@ def install_entity_store_v2(cfg: Munch) -> dict:
             url,
             auth=cfg.auth,
             headers=_ENTITY_STORE_V2_INTERNAL_HEADERS.copy(),
-            params={"json": {}, "params": {"apiVersion": "2"}},
+            params={"json": {}},
             ok_statuses=(200, 201, 204),
         )
         logger.info("Entity Store v2 install completed.")
