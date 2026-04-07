@@ -87,15 +87,14 @@ def entity_store_status(cfg: Munch) -> dict:
 
 
 def entity_store_status_v2(cfg: Munch) -> dict:
-    """Checks the status of Entity Store v2 using the internal API (apiVersion=2)."""
-    url = f"{cfg.kibana_url}/internal/security/entity_store/status"
+    """Checks the status of Entity Store v2 using the API."""
+    url = f"{cfg.kibana_url}/api/security/entity_store/status"
     try:
         response = perform_api_call(
             method="GET",
             url=url,
             auth=cfg.auth,
             headers=_ENTITY_STORE_V2_INTERNAL_HEADERS.copy(),
-            params={"params": {"apiVersion": "2"}},
             ok_statuses=(200, 201, 204),
         )
         logger.info("Entity Store v2 status retrieved successfully.")
@@ -143,7 +142,7 @@ def enable_entity_store_v2(cfg: Munch) -> None:
 
 
 def install_entity_store_v2(cfg: Munch) -> dict:
-    """Install Entity Store v2 (POST /api/security/entity_store/install?apiVersion=2, empty body).
+    """Install Entity Store v2 (POST /api/security/entity_store/install, empty body).
 
     Same as installEntityStoreV2 in kibana-api.ts.
     """
