@@ -24,7 +24,7 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "9.3.2"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
@@ -82,7 +82,7 @@ jobs:
 
       - name: Build elastic-agent
         env:
-          BASE_IMAGE: docker.elastic.co/beats/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+          BASE_IMAGE: docker.elastic.co/elastic-agent/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
           GOOS: linux
           GOARCH: amd64
         run: ./scripts/packaging/docker/elastic-agent/build.sh -t ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }}:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}

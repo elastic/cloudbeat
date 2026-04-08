@@ -13,11 +13,11 @@ inputs:
   elastic-agent-docker-image:
     description: 'Elastic-Agent docker image'
     required: false
-    default: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
+    default: "docker.elastic.co/elastic-agent/elastic-agent"
   elastic-agent-docker-image-tag:
     description: 'Elastic-Agent docker image tag'
     required: false
-    default: "8.14.0-SNAPSHOT"
+    default: "9.3.2"
 
   docker-build-cache-folder:
     description: 'Docker build cache folder'
@@ -97,7 +97,7 @@ runs:
         cache-to: type=local,mode=max,dest=${{ inputs.docker-build-cache-folder }}-new/agent
         outputs: type=docker,dest=${{ inputs.docker-images-folder }}/elastic-agent.tar
         build-args: |
-          ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:${{ inputs.elastic-agent-docker-image-tag }}
+          ELASTIC_AGENT_IMAGE=docker.elastic.co/elastic-agent/elastic-agent:${{ inputs.elastic-agent-docker-image-tag }}
         no-cache: false
         platforms: ${{ inputs.docker-build-platforms }}
 
