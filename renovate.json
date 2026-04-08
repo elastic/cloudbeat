@@ -181,13 +181,10 @@
       "enabled": true
     },
     {
-      "description": "Auto-merge minor and patch updates for Elastic packages",
+      "description": "Auto-merge minor and patch updates for all packages",
       "matchUpdateTypes": [
         "minor",
         "patch"
-      ],
-      "matchPackageNames": [
-        "github.com/elastic/**"
       ],
       "addLabels": [
         "renovate-auto-approve"
