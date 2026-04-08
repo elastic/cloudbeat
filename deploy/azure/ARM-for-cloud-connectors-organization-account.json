@@ -176,7 +176,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-                            "apiVersion": "2023-01-31",
+                            "apiVersion": "2024-11-30",
                             "name": "[parameters('userAssignedIdentityName')]",
                             "location": "[parameters('location')]",
                             "tags": {
@@ -186,7 +186,7 @@
                             "resources": [
                                 {
                                     "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
-                                    "apiVersion": "2023-01-31",
+                                    "apiVersion": "2024-11-30",
                                     "name": "[parameters('federatedIdentityCredentialsName')]",
                                     "dependsOn": [
                                         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName'))]"
@@ -229,11 +229,11 @@
                     "outputs": {
                         "PrincipalId": {
                             "type": "string",
-                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').principalId]"
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2024-11-30').principalId]"
                         },
                         "ClientId": {
                             "type": "string",
-                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').clientId]"
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2024-11-30').clientId]"
                         }
                     }
                 }

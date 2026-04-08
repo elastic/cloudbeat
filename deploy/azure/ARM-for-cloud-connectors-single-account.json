@@ -35,7 +35,7 @@
     "resources": [
         {
             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-            "apiVersion": "2023-01-31",
+            "apiVersion": "2024-11-30",
             "name": "[variables('userAssignedIdentityName')]",
             "location": "[parameters('location')]",
             "tags": {
@@ -45,7 +45,7 @@
             "resources": [
                 {
                     "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
-                    "apiVersion": "2023-01-31",
+                    "apiVersion": "2024-11-30",
                     "name": "[variables('federatedIdentityCredentialsName')]",
                     "dependsOn": [
                         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName'))]"
@@ -106,7 +106,7 @@
                         "value": "[variables('customRoleDefinition')]"
                     },
                     "UserAssignedIdentityPrincipalId": {
-                        "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]"
+                        "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2024-11-30').principalId]"
                     }
                 },
                 "template": {
@@ -156,7 +156,7 @@
         },
         "PrincipalId": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').principalId]"
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2024-11-30').principalId]"
         },
         "ElasticCloudConnectorId": {
             "type": "string",
@@ -164,7 +164,7 @@
         },
         "ClientId": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2023-01-31').clientId]"
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('userAssignedIdentityName')), '2024-11-30').clientId]"
         },
         "TenantId": {
             "type": "string",
