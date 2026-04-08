@@ -50,7 +50,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('resourceGroupDeployment')]",
             "location": "[parameters('DeploymentLocation')]",
             "subscriptionId": "[parameters('SubscriptionId')]",
@@ -81,7 +81,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Resources/resourceGroups",
-                            "apiVersion": "2023-07-01",
+                            "apiVersion": "2024-11-01",
                             "name": "[parameters('ResourceGroupName')]",
                             "location": "[parameters('DeploymentLocation')]"
                         }
@@ -91,7 +91,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('cloudConnectorDeployment')]",
             "resourceGroup": "[parameters('ResourceGroupName')]",
             "subscriptionId": "[parameters('SubscriptionId')]",
@@ -244,7 +244,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('roleAssignmentDeployment')]",
             "location": "[parameters('DeploymentLocation')]",
             "properties": {

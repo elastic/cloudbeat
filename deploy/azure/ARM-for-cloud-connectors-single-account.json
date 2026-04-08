@@ -85,7 +85,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('roleAssignmentDeployment')]",
             "subscriptionId": "[subscription().subscriptionId]",
             "location": "[parameters('location')]",
