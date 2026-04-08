@@ -16,7 +16,6 @@ xpack.securitySolution.enableExperimental:
   - entityAnalyticsWatchlistEnabled
   - entityAnalyticsNewHomePageEnabled
   - leadGenerationEnabled
-  - leadGenerationDetailsEnabled
 EOT
 
   kibana_docker_config = local.kibana_docker_image_tag_override != "" ? {

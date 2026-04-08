@@ -275,6 +275,7 @@ runs:
       shell: bash
       env:
         CLOUDTRAIL_S3: ${{ inputs.aws-cloudtrail-s3-bucket }}
+        AWS_REGION: ${{ inputs.aws-region }}
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
