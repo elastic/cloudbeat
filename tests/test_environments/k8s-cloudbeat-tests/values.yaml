@@ -181,7 +181,6 @@ elasticsearch:
             #!/bin/bash
             ES_URL=http://localhost:9200
             while [[ "$(curl -s -o /dev/null -w '%{http_code}\n' $ES_URL)" != "200" ]]; do sleep 1; done
-            curl -s -XPUT "$ES_URL/_cluster/settings" -H 'Content-Type: application/json' -d '{"persistent":{"cluster.routing.allocation.disk.threshold_enabled":false}}'
             curl -s -XPUT "$ES_URL/_index_template/common_template" -H 'Content-Type: application/json' -d '{
               "index_patterns": ["logs-cloud_security_posture.findings*"],
               "priority": 500,
