@@ -252,7 +252,7 @@
                         },
                         {
                             "type": "Microsoft.Network/virtualNetworks",
-                            "apiVersion": "2023-06-01",
+                            "apiVersion": "2024-10-01",
                             "name": "cloudbeatVNet",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "properties": {
@@ -279,7 +279,7 @@
                         },
                         {
                             "type": "Microsoft.Network/networkInterfaces",
-                            "apiVersion": "2023-06-01",
+                            "apiVersion": "2024-10-01",
                             "name": "cloudbeatNic",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "dependsOn": [
