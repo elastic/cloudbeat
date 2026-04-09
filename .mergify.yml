@@ -8,12 +8,12 @@ queue_rules:
   - name: default
     merge_method: squash
     conditions:
-      - check-success=Cloudbeat-CI / Integration Tests (pull_request)
-      - check-success=Cloudbeat-CI / Build (pull_request)
-      - check-success=UnitTests / Unit Tests (pull_request)
-      - check-success=Test Rego Policies (pull_request)
-      - check-success=Update rules status (pull_request)
-      - check-success=Update rules metadata (pull_request)
+      - check-success=Unit Test
+      - check-success=Lint
+      - check-success=Test Rego Policies
+      - check-success=Package Cloudbeat (docker)
+      - check-success=Package Cloudbeat (tar.gz)
+      - check-success=Manifest Tests
 defaults:
   actions:
     backport:
@@ -87,9 +87,9 @@ pull_request_rules:
   - name: automatic approval for mergify pull requests with changes in bump-rules
     conditions:
       - author=mergify[bot]
-      - check-success=Cloudbeat-CI / Integration Tests (pull_request)
-      - check-success=Cloudbeat-CI / Build (pull_request)
-      - check-success=UnitTests / Unit Tests (pull_request)
+      - check-success=Unit Test
+      - check-success=Lint
+      - check-success=Test Rego Policies
       - label=automation
       - files~=^\.mergify\.yml$
       - head~=^add-backport-next.*
@@ -99,9 +99,9 @@ pull_request_rules:
         message: Automatically approving mergify
   - name: automatic squash and merge with success checks and the files matching the regex ^.mergify.yml is modified.
     conditions:
-      - check-success=Cloudbeat-CI / Integration Tests (pull_request)
-      - check-success=Cloudbeat-CI / Build (pull_request)
-      - check-success=UnitTests / Unit Tests (pull_request)
+      - check-success=Unit Test
+      - check-success=Lint
+      - check-success=Test Rego Policies
       - label=automation
       - files~=^\.mergify\.yml$
       - head~=^add-backport-next.*
