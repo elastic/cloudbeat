@@ -20,7 +20,7 @@
   "labels": [
     "renovate",
     "dependencies",
-    "Team:Cloud-Security-Posture",
+    "Team:Security-Cloud Services",
     "backport-skip"
   ],
   "postUpdateOptions": [
