@@ -1,37 +1,35 @@
-# This workflow automatically approves Renovate PRs created by the Renovate bot.
-# It checks if the PR is created by the Renovate bot and has the 'renovate-auto-approve' label before approving it.
-# Its functionality is complimentary to the Renovate functionality in order to enable a 2-step PR based automerge.
+# This workflow automatically approves Renovate PRs created by the Renovate bot, for PRs which are set to perform PR-based automerge.
+# It checks that the PR is created by the Renovate bot and has the 'renovate-auto-approve' label, before it will auto-approve the changes.
+# Its functionality is complimentary to the Renovate functionality in order to enable PR-based automerge without needing a human to be in the loop.
 name: GitHub Actions Bot Auto-Approve Renovate PRs
+
 on:
   pull_request:
     branches:
       - main
-      - "9.7"
-      - "9.6"
-      - "9.5"
-      - "9.4"
-      - "9.3"
-      - "9.2"
-      - "9.1"
-      - "8.19"
-    # auto_merge_enabled is a custom event that is triggered when a PR is created.
-    # Auto-merge will be enabled by Renovate -if configured- and this will trigger the GitHub workflow.
-    types: [auto_merge_enabled]
+      - "9.*"
+      - "8.*"
+    # Auto-merge will be enabled by Renovate (if configured) and this will trigger the GitHub Actions workflow.
+    #  - 'auto_merge_enabled' is a custom event that is triggered when a PR is created.
+    #  - 'synchronize' will be triggered when a PR is synchronized (e.g. when a new commit is pushed to the PR).
+    types: [auto_merge_enabled, synchronize]
+
 permissions:
   pull-requests: write
+
 jobs:
   approve:
     runs-on: ubuntu-latest
     # The condition checks if the PR is created by the Renovate bot and has the 'renovate-auto-approve' label
     if: (github.event.pull_request.user.login == 'elastic-renovate-prod[bot]') && contains(github.event.pull_request.labels.*.name, 'renovate-auto-approve')
     steps:
-    - name: Approve Renovate PR using GitHub Actions Bot
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const result = await github.rest.pulls.createReview({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number,
-            event: "APPROVE"
-          })
+      - name: Approve Renovate PR using GitHub Actions Bot
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const result = await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: "APPROVE"
+            })
