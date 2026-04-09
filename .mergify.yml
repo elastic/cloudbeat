@@ -5,6 +5,12 @@ commands_restrictions:
         - sender-permission>=write
         - sender=github-actions[bot]
 queue_rules:
+  - name: renovate
+    merge_method: squash
+    conditions:
+      - check-success=Unit Test
+      - check-success=Test Rego Policies
+      - check-success=Lint
   - name: default
     merge_method: squash
     conditions:
@@ -23,6 +29,20 @@ defaults:
       labels:
         - "backport"
 pull_request_rules:
+  - name: auto-approve and merge Renovate minor/patch updates
+    conditions:
+      - author=renovate[bot]
+      - label=renovate-auto-approve
+      - -closed
+      - check-success=Unit Test
+      - check-success=Test Rego Policies
+      - check-success=Lint
+    actions:
+      review:
+        type: APPROVE
+        message: Automatically approving Renovate minor/patch dependency update
+      queue:
+        name: renovate
   - name: self-assign PRs
     conditions:
       - -merged
