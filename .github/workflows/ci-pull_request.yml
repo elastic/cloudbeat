@@ -94,7 +94,7 @@ jobs:
           grep -v "mock.go" cover.out.tmp | grep -v mock_old.go | grep -v "elastic/cloudbeat/deploy" | grep -v "internal/inventory/asset.go" > cover.out # remove mock files and deploy dir
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: coverage-file
           path: cover.out
