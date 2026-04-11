@@ -229,12 +229,12 @@ require (
 	github.com/microsoft/kiota-serialization-text-go v1.1.2 // indirect
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/moby/moby/api v1.53.0 // indirect
-	github.com/moby/moby/client v0.2.2 // indirect
+	github.com/moby/moby/api v1.54.1 // indirect
+	github.com/moby/moby/client v0.4.0 // indirect
 	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
-	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/morikuni/aec v1.1.0 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481 // indirect
@@ -383,7 +383,11 @@ require (
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
+<<<<<<< HEAD
 	github.com/docker/cli v29.2.1+incompatible // indirect
+=======
+	github.com/docker/cli v29.3.1+incompatible // indirect
+>>>>>>> 5cf36ac8 (chore(deps): update moby (main) (#4352))
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker v28.5.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.5 // indirect
@@ -505,7 +509,11 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
+<<<<<<< HEAD
 	github.com/moby/buildkit v0.23.2 // indirect
+=======
+	github.com/moby/buildkit v0.29.0 // indirect
+>>>>>>> 5cf36ac8 (chore(deps): update moby (main) (#4352))
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/spdystream v0.5.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
