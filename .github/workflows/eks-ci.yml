@@ -24,7 +24,7 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "9.3.2"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
@@ -82,7 +82,7 @@ jobs:
 
       - name: Build elastic-agent
         env:
-          BASE_IMAGE: docker.elastic.co/beats/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+          BASE_IMAGE: docker.elastic.co/elastic-agent/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
           GOOS: linux
           GOARCH: amd64
         run: ./scripts/packaging/docker/elastic-agent/build.sh -t ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }}:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
@@ -173,7 +173,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: allure_results-${{ matrix.k8s_context}}
           path: ${{ env.REPORTS_DIR }}
@@ -191,7 +191,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: allure_results-*
           path: artifacts

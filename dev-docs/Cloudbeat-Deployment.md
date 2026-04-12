@@ -118,7 +118,7 @@ This is useful for testing and development purposes.
    -e "FLEET_URL=<fleet-server-host-url>" \
    -e "FLEET_ENROLLMENT_TOKEN=<enrollment-token>" \
    -e "FLEET_ENROLL=1" \
-   docker.elastic.co/beats/elastic-agent:8.13.0-SNAPSHOT
+   docker.elastic.co/beats/elastic-agent:8.19.15-SNAPSHOT
    ```
 
 ## Deploying Fleet enrolled Elastic Agent in a container with custom cloudbeat binary (and optionally custom integration)
@@ -133,7 +133,7 @@ This is useful for testing and development purposes.
    ```
 4. Build elastic agent docker image overwriting with the locally produced cloudbeat
    ```bash
-    export BASE_IMAGE="docker.elastic.co/beats/elastic-agent:8.13.0-SNAPSHOT"
+    export BASE_IMAGE="docker.elastic.co/beats/elastic-agent:8.19.15-SNAPSHOT"
     docker pull $BASE_IMAGE
     export STACK_VERSION=$(docker inspect -f '{{index .Config.Labels "org.label-schema.version"}}' $BASE_IMAGE)
     export VCS_REF=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vcs-ref"}}' $BASE_IMAGE)
