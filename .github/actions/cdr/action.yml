@@ -268,9 +268,11 @@ runs:
           exit 1
         fi
 
+    # CloudTrail install temporarily disabled until the follow-up PR that fixes CloudTrail lands (https://github.com/elastic/cloudbeat/pull/4284).
+    # Restore: if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
+      if: ${{ false }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -281,8 +283,10 @@ runs:
       run: |
         poetry run python ./install_cloudtrail_integration.py
 
+    # CloudTrail agent deploy skipped with install above; re-enable with the same follow-up PR as CloudTrail install.
+    # Restore: if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success' }}
     - name: Deploy AWS Cloudtrail agent
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success' }}
+      if: ${{ false }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
