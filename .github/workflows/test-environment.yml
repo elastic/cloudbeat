@@ -519,10 +519,9 @@ jobs:
           }}
         run: |
           response=$(curl -s -w "\n%{http_code}" -X POST \
-            "$KIBANA_URL/internal/security/entity_store/install?apiVersion=2" \
+            "$KIBANA_URL/api/security/entity_store/install?apiVersion=2023-10-31" \
             -u "$ES_USER:$ES_PASSWORD" \
             -H "kbn-xsrf: true" \
-            -H "x-elastic-internal-origin: kibana" \
             -H "Content-Type: application/json" \
             -d '{}')
           http_code=$(echo "$response" | tail -1)
