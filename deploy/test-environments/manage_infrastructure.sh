@@ -20,6 +20,10 @@ run_terraform() {
             echo "Removing aws_auth resource from state in cis..."
             terraform state rm "$(terraform state list | grep "kubernetes_config_map_v1_data.aws_auth")"
         fi
+        # Destroy still evaluates module variable validation; CDR apply sets TF_VAR_* in CI, generic destroy does not.
+        if [ "$dir" == "cdr" ] && [ -z "${TF_VAR_windows_elastic_defend_winrm_ingress_cidr:-}" ]; then
+            export TF_VAR_windows_elastic_defend_winrm_ingress_cidr="127.0.0.1/32"
+        fi
         terraform destroy -auto-approve && rm terraform.tfstate
         ;;
     "output")
