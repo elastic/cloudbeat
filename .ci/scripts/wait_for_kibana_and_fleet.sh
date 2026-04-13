@@ -6,6 +6,9 @@
 #   ES_USER, ES_PASSWORD, KIBANA_URL
 # Optional:
 #   SERVERLESS_MODE — when "true", skip Fleet checks (Elastic Cloud manages Fleet).
+#
+# Curl resilience (timeouts, transport failures as retriable non-200) addresses Copilot review on
+# https://github.com/elastic/cloudbeat/pull/4092 — discussions r3043340796, r3043340806, r3043340816.
 
 set -euo pipefail
 
