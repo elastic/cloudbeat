@@ -47,7 +47,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.69.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.39.15
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.10
+<<<<<<< HEAD
 	github.com/aws/smithy-go v1.25.0
+=======
+	github.com/aws/smithy-go v1.24.3
+>>>>>>> aef4dc21 (fix(deps): update opentelemetry (main) (#4375))
 	github.com/dgraph-io/ristretto v1.0.1
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260331215106-39bdcbe67899
@@ -275,7 +279,11 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
+<<<<<<< HEAD
 	github.com/yuin/gopher-lua v1.1.2 // indirect
+=======
+	github.com/yuin/gopher-lua v1.1.1 // indirect
+>>>>>>> aef4dc21 (fix(deps): update opentelemetry (main) (#4375))
 	go.opentelemetry.io/collector/config/configoptional v1.56.0 // indirect
 	go.opentelemetry.io/collector/config/configretry v1.56.0 // indirect
 	go.opentelemetry.io/collector/confmap v1.56.0 // indirect
@@ -287,7 +295,11 @@ require (
 	go.opentelemetry.io/collector/internal/componentalias v0.150.0 // indirect
 	go.opentelemetry.io/collector/pdata/xpdata v0.150.0 // indirect
 	go.opentelemetry.io/collector/pipeline/xpipeline v0.150.0 // indirect
+<<<<<<< HEAD
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
+=======
+	go.yaml.in/yaml/v2 v2.4.3 // indirect
+>>>>>>> aef4dc21 (fix(deps): update opentelemetry (main) (#4375))
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/tools v0.43.0 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
@@ -451,6 +463,10 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-getter v1.8.6 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+<<<<<<< HEAD
+=======
+	github.com/hashicorp/go-safetemp v1.0.0 // indirect
+>>>>>>> aef4dc21 (fix(deps): update opentelemetry (main) (#4375))
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl/v2 v2.24.0 // indirect
