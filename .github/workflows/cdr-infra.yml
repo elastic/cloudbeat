@@ -17,8 +17,8 @@ on:
         default: false
       elk-stack-version:
         required: true
-        description: "The version of the ELK stack: For BC use version without hash 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.16.0"
+        description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        default: "9.4.0-SNAPSHOT"
         type: string
       cis-infra:
         required: false
