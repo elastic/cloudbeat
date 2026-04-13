@@ -93,7 +93,7 @@ variable "windows_elastic_defend_ami_id" {
 variable "windows_elastic_defend_instance_type" {
   description = "Instance type for Elastic Defend Windows VM"
   type        = string
-  default     = "t3.large"
+  default     = "t3.medium"
 }
 
 variable "windows_elastic_defend_winrm_ingress_cidr" {

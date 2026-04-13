@@ -12,7 +12,7 @@ variable "specific_tags" {
 variable "aws_ec2_instance_type" {
   description = "AWS instance type for Windows Server"
   type        = string
-  default     = "t3.large"
+  default     = "t3.medium"
 }
 
 variable "windows_ami_id" {
