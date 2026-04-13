@@ -10,7 +10,18 @@ Dependencies:
     - requests: Library for making HTTP requests
 """
 
+import random
+import time
+
 import requests
+from loguru import logger
+
+TRANSIENT_STATUSES = {502, 503, 504}
+TRANSIENT_EXCEPTIONS = (
+    requests.exceptions.ConnectionError,
+    requests.exceptions.Timeout,
+    requests.exceptions.ChunkedEncodingError,
+)
 
 
 class APICallException(Exception):
@@ -42,6 +53,9 @@ def perform_api_call(
     auth=None,
     params=None,
     ok_statuses=None,
+    retries=8,
+    retry_backoff_sec=2.0,
+    retry_max_sleep_sec=60.0,
 ):
     """
     Perform an API call using the provided parameters.
@@ -59,6 +73,9 @@ def perform_api_call(
         params (dict, optional): The parameters to be included in the API request.
                                  Defaults to None.
         ok_statuses (tuple, optional): HTTP status codes treated as success. Defaults to (200,).
+        retries (int, optional): Number of retry attempts on transient failures. Defaults to 8.
+        retry_backoff_sec (float, optional): Base backoff seconds for exponential delay. Defaults to 2.0.
+        retry_max_sleep_sec (float, optional): Maximum sleep seconds between retries. Defaults to 60.0.
 
     Returns:
         dict or bytes: Parsed JSON (empty dict for 204 or empty body), or raw content.
@@ -78,15 +95,52 @@ def perform_api_call(
     if ok_statuses is None:
         ok_statuses = (200,)
 
-    response = requests.request(method=method, url=url, headers=headers, auth=auth, **params)
-    if response.status_code not in ok_statuses:
-        raise APICallException(response.status_code, response.text)
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            response = requests.request(
+                method=method,
+                url=url,
+                headers=headers,
+                auth=auth,
+                timeout=60,
+                **params,
+            )
+        except TRANSIENT_EXCEPTIONS as exc:
+            if attempt <= retries:
+                sleep = _retry_sleep(attempt, retry_backoff_sec, retry_max_sleep_sec)
+                logger.warning(
+                    f"Transient request error on attempt {attempt}/{retries} ({exc}). "
+                    f"Retrying in {sleep:.1f}s..."
+                )
+                time.sleep(sleep)
+                continue
+            raise
 
-    if not return_json:
-        return response.content
-    if response.status_code == 204 or not (response.content or b"").strip():
-        return {}
-    return response.json()
+        if response.status_code not in ok_statuses:
+            if response.status_code in TRANSIENT_STATUSES and attempt <= retries:
+                sleep = _retry_sleep(attempt, retry_backoff_sec, retry_max_sleep_sec)
+                logger.warning(
+                    f"Transient HTTP {response.status_code} on attempt {attempt}/{retries}. "
+                    f"Retrying in {sleep:.1f}s... Response: {response.text[:200]}"
+                )
+                time.sleep(sleep)
+                continue
+            raise APICallException(response.status_code, response.text)
+
+        if not return_json:
+            return response.content
+        if response.status_code == 204 or not (response.content or b"").strip():
+            return {}
+        return response.json()
+
+
+def _retry_sleep(attempt: int, base: float, maximum: float) -> float:
+    """Return a jittered exponential backoff sleep duration, capped at maximum."""
+    sleep = base * (2 ** (attempt - 1))
+    sleep = sleep * (0.75 + random.random() * 0.5)
+    return min(maximum, sleep)
 
 
 def uses_new_fleet_api_response(version: str) -> bool:

@@ -63,6 +63,9 @@ AGENT_INPUT = {
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config, package_name=PACKAGE_NAME)
+    if not package_version:
+        logger.error(f"Could not resolve {PACKAGE_NAME} package version from Fleet (Kibana may be unavailable).")
+        raise SystemExit(1)
     logger.info(f"Package version: {package_version}")
     if not version_compatible(
         current_version=package_version,

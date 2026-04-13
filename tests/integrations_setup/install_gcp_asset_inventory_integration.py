@@ -51,6 +51,9 @@ AGENT_INPUT = {
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config, package_name="cloud_asset_inventory")
+    if not package_version:
+        logger.error("Could not resolve cloud_asset_inventory package version from Fleet (Kibana may be unavailable).")
+        raise SystemExit(1)
     if not version_compatible(
         current_version=package_version,
         required_version=PKG_DEFAULT_VERSION,
