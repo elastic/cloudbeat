@@ -7,7 +7,7 @@ variable "aws_ami" {
 variable "aws_ec2_instance_type" {
   description = "AWS instance type to be used"
   type        = string
-  default     = "m7i.large"
+  default     = "c5.large"
 }
 
 variable "yml" {
