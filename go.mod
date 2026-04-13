@@ -79,6 +79,7 @@ require (
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
 	go.elastic.co/go-licence-detector v0.10.0
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+<<<<<<< HEAD
 	go.opentelemetry.io/collector/client v1.56.0 // indirect
 	go.opentelemetry.io/collector/component v1.56.0 // indirect
 	go.opentelemetry.io/collector/component/componenttest v0.150.0 // indirect
@@ -100,6 +101,29 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.43.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
+=======
+	go.opentelemetry.io/collector/client v1.54.0 // indirect
+	go.opentelemetry.io/collector/component v1.54.0 // indirect
+	go.opentelemetry.io/collector/component/componenttest v0.148.0 // indirect
+	go.opentelemetry.io/collector/consumer v1.54.0 // indirect
+	go.opentelemetry.io/collector/consumer/consumererror v0.148.0 // indirect
+	go.opentelemetry.io/collector/consumer/xconsumer v0.148.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.54.0 // indirect
+	go.opentelemetry.io/collector/pdata v1.54.0 // indirect
+	go.opentelemetry.io/collector/pdata/pprofile v0.148.0 // indirect
+	go.opentelemetry.io/collector/pipeline v1.54.0 // indirect
+	go.opentelemetry.io/collector/receiver v1.54.0 // indirect
+	go.opentelemetry.io/collector/receiver/receivertest v0.148.0 // indirect
+	go.opentelemetry.io/collector/receiver/xreceiver v0.148.0 // indirect
+	go.opentelemetry.io/contrib/detectors/gcp v1.40.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.63.0
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.67.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.67.0 // indirect
+	go.opentelemetry.io/otel v1.43.0
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.42.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.42.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.42.0
+>>>>>>> d5f9e4e9 (chore(deps): update gcp-sdk (main) (#4371))
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.43.0
 	go.opentelemetry.io/otel/sdk/metric v1.43.0
@@ -310,12 +334,21 @@ require (
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/accesscontextmanager v1.12.0 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
+<<<<<<< HEAD
 	cloud.google.com/go/longrunning v0.11.0 // indirect
 	cloud.google.com/go/orgpolicy v1.18.0 // indirect
 	cloud.google.com/go/osconfig v1.19.0 // indirect
 	cloud.google.com/go/storage v1.62.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.1
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 // indirect
+=======
+	cloud.google.com/go/longrunning v0.10.0 // indirect
+	cloud.google.com/go/orgpolicy v1.17.0 // indirect
+	cloud.google.com/go/osconfig v1.18.0 // indirect
+	cloud.google.com/go/storage v1.62.1 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.0
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 // indirect
+>>>>>>> d5f9e4e9 (chore(deps): update gcp-sdk (main) (#4371))
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.7.1 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
