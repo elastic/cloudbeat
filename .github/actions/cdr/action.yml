@@ -175,25 +175,22 @@ runs:
         SERVERLESS_MODE: ${{ inputs.serverless-mode }}
       run: "${{ github.workspace }}/.ci/scripts/wait_for_kibana_and_fleet.sh"
 
-    # CloudTrail install temporarily disabled until the follow-up PR that fixes CloudTrail lands (https://github.com/elastic/cloudbeat/pull/4284).
-    # Restore: if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
-      if: ${{ false }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
         CLOUDTRAIL_S3: ${{ inputs.aws-cloudtrail-s3-bucket }}
+        AWS_REGION: ${{ inputs.aws-region }}
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
       run: |
         poetry run python ./install_cloudtrail_integration.py
 
-    # CloudTrail agent deploy skipped with install above; re-enable with the same follow-up PR as CloudTrail install.
-    # Restore: if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success' }}
     - name: Deploy AWS Cloudtrail agent
-      if: ${{ false }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' && steps.cloudtrail-integration.outcome == 'success' }}
       working-directory: deploy/test-environments/cdr
       shell: bash
       env:
