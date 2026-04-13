@@ -18,6 +18,14 @@ _ENTITY_STORE_V2_INTERNAL_HEADERS = {
     "x-elastic-internal-origin": "kibana",
 }
 
+# Public versioned routes (/api/security/entity_store/*, apiVersion=2023-10-31); see elastic/kibana#260396.
+_ENTITY_STORE_V2_PUBLIC_HEADERS = {
+    "Content-Type": "application/json",
+    "kbn-xsrf": "true",
+}
+
+_ENTITY_STORE_V2_PUBLIC_API_VERSION = "2023-10-31"
+
 _ENTITY_STORE_V2_SETTING_KEY = "securitySolution:entityStoreEnableV2"
 _ENTITY_STORE_V2_POLL_TIMEOUT_SEC = 60
 _ENTITY_STORE_V2_POLL_INTERVAL_SEC = 5
@@ -87,14 +95,15 @@ def entity_store_status(cfg: Munch) -> dict:
 
 
 def entity_store_status_v2(cfg: Munch) -> dict:
-    """Checks the status of Entity Store v2 using the API."""
+    """Checks Entity Store v2 status via the public API (GET /api/security/entity_store/status)."""
     url = f"{cfg.kibana_url}/api/security/entity_store/status"
     try:
         response = perform_api_call(
             method="GET",
             url=url,
             auth=cfg.auth,
-            headers=_ENTITY_STORE_V2_INTERNAL_HEADERS.copy(),
+            headers=_ENTITY_STORE_V2_PUBLIC_HEADERS.copy(),
+            params={"params": {"apiVersion": _ENTITY_STORE_V2_PUBLIC_API_VERSION}},
             ok_statuses=(200, 201, 204),
         )
         logger.info("Entity Store v2 status retrieved successfully.")
@@ -142,18 +151,18 @@ def enable_entity_store_v2(cfg: Munch) -> None:
 
 
 def install_entity_store_v2(cfg: Munch) -> dict:
-    """Install Entity Store v2 (POST /api/security/entity_store/install, empty body).
-
-    Same as installEntityStoreV2 in kibana-api.ts.
-    """
+    """Install Entity Store v2 (POST /api/security/entity_store/install, public apiVersion, empty body)."""
     url = f"{cfg.kibana_url}/api/security/entity_store/install"
     try:
         result = perform_api_call(
             "POST",
             url,
             auth=cfg.auth,
-            headers=_ENTITY_STORE_V2_INTERNAL_HEADERS.copy(),
-            params={"json": {}},
+            headers=_ENTITY_STORE_V2_PUBLIC_HEADERS.copy(),
+            params={
+                "json": {},
+                "params": {"apiVersion": _ENTITY_STORE_V2_PUBLIC_API_VERSION},
+            },
             ok_statuses=(200, 201, 204),
         )
         logger.info("Entity Store v2 install completed.")
@@ -209,7 +218,7 @@ def is_entity_store_fully_started(cfg: Munch) -> bool:
 
 
 def is_entity_store_v2_fully_started(cfg: Munch) -> bool:
-    """Checks if Entity Store v2 is fully started (internal v2 status is running and all engines started)."""
+    """Checks if Entity Store v2 is fully started (public status is running and all engines started)."""
     status_response = entity_store_status_v2(cfg)
     global_status = status_response.get("status")
     engines = status_response.get("engines", [])

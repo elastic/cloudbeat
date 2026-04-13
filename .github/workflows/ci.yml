@@ -202,7 +202,7 @@ jobs:
     needs: [ init-hermit ]
     name: CNVM CI
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
+    timeout-minutes: 75
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
@@ -234,7 +234,7 @@ jobs:
     name: Build docker images
     # Since we build the cloudbeat in the worker's OS and as non static,
     # we need to keep the OS version same as elastic-agent docker image base.
-    # docker run --interactive --tty --rm --entrypoint bash docker.elastic.co/elastic-agent/elastic-agent-complete:8.14.0-SNAPSHOT -c 'cat /etc/os-release'
+    # docker run --interactive --tty --rm --entrypoint bash docker.elastic.co/elastic-agent/elastic-agent-complete:9.3.2 -c 'cat /etc/os-release'
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     steps:

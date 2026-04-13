@@ -5,7 +5,7 @@ This module contains API calls related to Fleet settings
 import codecs
 import json
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from fleet_api.base_call_api import (
     APICallException,
@@ -294,7 +294,7 @@ def get_package_version(
     cfg: Munch,
     package_name: str = "cloud_security_posture",
     prerelease: bool = True,
-) -> str:
+) -> Optional[str]:
     """
     Retrieve the version of a specified package.
 
@@ -306,7 +306,11 @@ def get_package_version(
                                      Default is True.
 
     Returns:
-        str: The version of the specified package, or None if the API call fails or the package is not found.
+        Optional[str]: The package version string when found in the Fleet EPM list; ``None`` when
+            the package is not listed (not an API error).
+
+    Raises:
+        APICallException: When the Fleet EPM API request fails after retries (including transport errors).
     """
     url = f"{cfg.kibana_url}/api/fleet/epm/packages"
 
