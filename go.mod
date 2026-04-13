@@ -109,13 +109,8 @@ require (
 	go.uber.org/zap v1.27.1
 	go.uber.org/zap/exp v0.3.0
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
-<<<<<<< HEAD
-	golang.org/x/oauth2 v0.35.0
-	google.golang.org/api v0.265.0
-=======
 	golang.org/x/oauth2 v0.36.0
 	google.golang.org/api v0.269.0
->>>>>>> 1cc106b6 (chore(deps): update module github.com/coreos/go-oidc/v3 to v3.18.0 (main) (#4353))
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/gotestsum v1.13.0
 	k8s.io/api v0.34.3
