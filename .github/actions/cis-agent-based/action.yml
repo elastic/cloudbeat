@@ -161,6 +161,7 @@ runs:
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
         SERVICE_ACCOUNT_JSON_PATH: "KEY_FILE.json"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-cis"
       run: |
         poetry run python ./install_cspm_gcp_integration.py
 
