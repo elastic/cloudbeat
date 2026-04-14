@@ -228,9 +228,10 @@ jobs:
         if: success()
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version-file: "${{ github.workspace }}/security-documents-generator/.nvmrc"
+          # Paths are relative to repository root (do not prefix github.workspace — setup-node joins it and duplicates the path).
+          node-version-file: security-documents-generator/.nvmrc
           cache: yarn
-          cache-dependency-path: "${{ github.workspace }}/security-documents-generator/yarn.lock"
+          cache-dependency-path: security-documents-generator/yarn.lock
 
       - name: Install Yarn classic
         if: success()
@@ -238,7 +239,7 @@ jobs:
 
       - name: Install dependencies and run org-data
         if: success()
-        working-directory: ${{ github.workspace }}/security-documents-generator
+        working-directory: security-documents-generator
         env:
           ELASTIC_NODE: ${{ steps.elk-stack.outputs.es-url }}
           ELASTIC_USERNAME: ${{ steps.elk-stack.outputs.es-user }}
