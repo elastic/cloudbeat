@@ -90,3 +90,9 @@ variable "kibana_enable_security_solution_experimental" {
   default     = true
   description = "When true, set Kibana user_settings_yaml with Security Solution experimental feature flags (ESS only)"
 }
+
+variable "kibana_enable_entity_analytics_settings" {
+  type        = bool
+  default     = false
+  description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (feature flags, uiSettings, enableExperimental)"
+}

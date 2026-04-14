@@ -1,0 +1,252 @@
+name: create-env-ea
+run-name: EA env ${{ inputs.deployment_name }} by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_name:
+        type: string
+        description: |
+          Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'ea-env-01'
+        required: true
+      elk-stack-version:
+        required: true
+        description: "Stack version: released 8.x.y / 9.x.y, BC 8.x.y-hash, SNAPSHOT 8.x.y-SNAPSHOT"
+        default: "9.4.0-SNAPSHOT"
+        type: string
+      expiration_days:
+        description: "Number of days until environment expiration (metadata in S3)"
+        required: false
+        default: "5"
+        type: string
+      ec-api-key:
+        type: string
+        description: "**Optional** Elastic Cloud API key; default uses Vault credentials for production."
+        required: false
+  workflow_call:
+    inputs:
+      deployment_name:
+        type: string
+        description: "Deployment name prefix (same rules as workflow_dispatch)."
+        required: true
+      elk-stack-version:
+        type: string
+        required: true
+        default: "9.4.0-SNAPSHOT"
+      expiration_days:
+        type: string
+        required: false
+        default: "5"
+      ec-api-key:
+        type: string
+        required: false
+        description: "Optional Elastic Cloud API key."
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: "eu-west-1"
+  WORKING_DIR: deploy/test-environments
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    env:
+      DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
+      S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
+      S3_BUCKET_URL: "https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra"
+      CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
+    permissions:
+      contents: "read"
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: "true"
+          free-disk: "true"
+
+      - name: Check Deployment Name
+        run: |
+          deployment_name="${{ inputs.deployment_name }}"
+          if [ ${#deployment_name} -gt 20 ]; then
+            echo "error: Deployment name is too long (max 20 characters)"
+            exit 1
+          fi
+          if ! [[ $deployment_name =~ ^[a-z][-a-z0-9]*$ ]]; then
+            echo "error: Deployment name doesn't match the required pattern [a-z][-a-z0-9]*"
+            exit 1
+          fi
+
+      - name: Mask Sensitive Data
+        if: inputs.ec-api-key != ''
+        env:
+          EC_API_KEY_INPUT: ${{ inputs.ec-api-key }}
+        run: |
+          ec_api_key="${EC_API_KEY_INPUT}"
+          echo "::add-mask::$ec_api_key"
+          echo "TF_VAR_ec_api_key=$ec_api_key" >> "$GITHUB_ENV"
+          echo "EC_URL=https://cloud.elastic.co" >> "$GITHUB_ENV"
+
+      - name: Process Stack Version
+        id: remove-commit-hash
+        run: |
+          stack_version="${{ inputs.elk-stack-version }}"
+          echo "TF_VAR_stack_version=$stack_version" >> "$GITHUB_ENV"
+          echo "STACK_VERSION=$stack_version" >> "$GITHUB_ENV"
+          if [[ $stack_version =~ -[a-f0-9]+ ]]; then
+            cleaned_version=$(echo "$stack_version" | awk -F"-" '{print $1}')
+            echo "TF_VAR_stack_version=$cleaned_version" >> "$GITHUB_ENV"
+            echo "STACK_VERSION=$cleaned_version" >> "$GITHUB_ENV"
+            echo "TF_VAR_pin_version=$stack_version" >> "$GITHUB_ENV"
+          fi
+
+      - name: Parse ESS Region Input
+        id: parse-ess-region
+        shell: bash
+        working-directory: ./
+        env:
+          ESS_REGION_INPUT: production-cft
+        run: |
+          source .ci/scripts/parse_ess_region.sh
+
+      - name: Determine Vault Path
+        id: determine-vault-path
+        shell: bash
+        working-directory: ./
+        env:
+          ENV_TYPE: ${{ env.ENV_TYPE }}
+        run: |
+          source .ci/scripts/determine_vault_path.sh
+          echo "vault-path=$VAULT_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Get Elastic Cloud Credentials from Vault
+        id: get-ec-credentials
+        if: inputs.ec-api-key == '' && steps.determine-vault-path.outcome == 'success'
+        uses: hashicorp/vault-action@9c2d817b85b9fff56bcab21cb74b485aee9e9d73 # v2.8.1
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          method: approle
+          secrets: |
+            ${{ steps.determine-vault-path.outputs.vault-path }} api_key | EC_API_KEY ;
+            ${{ steps.determine-vault-path.outputs.vault-path }} url | EC_URL
+
+      - name: Set Elastic Cloud Credentials
+        shell: bash
+        run: |
+          if [[ -n "${EC_API_KEY:-}" ]]; then
+            echo "TF_VAR_ec_api_key=$EC_API_KEY" >> "$GITHUB_ENV"
+            echo "EC_URL=${EC_URL:-https://cloud.elastic.co}" >> "$GITHUB_ENV"
+          elif [[ -z "${TF_VAR_ec_api_key:-}" ]]; then
+            echo "Error: No Elastic Cloud API key available" >&2
+            exit 1
+          fi
+
+      - name: Map ESS Region
+        id: map-ess-region
+        shell: bash
+        working-directory: ./
+        env:
+          ESS_REGION_INPUT: production-cft
+          SERVERLESS_MODE: "false"
+        run: |
+          source .ci/scripts/map_ess_region.sh
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update Vars
+        run: |
+          echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> "$GITHUB_ENV"
+
+      - name: Deploy ELK Cloud Stack
+        id: elk-stack
+        uses: ./.github/actions/elk-stack
+        with:
+          deployment-name: ${{ env.DEPLOYMENT_NAME }}
+          serverless-mode: false
+          elk-stack-version: ${{ env.STACK_VERSION }}
+          ess-region: ${{ env.ESS_REGION }}
+          ec-api-key: ${{ env.TF_VAR_ec_api_key }}
+          ec-url: ${{ env.EC_URL }}
+          kibana-security-solution-experimental: false
+          kibana-enable-entity-analytics-settings: true
+          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          tag-project: ${{ github.actor }}
+          tag-owner: ${{ github.actor }}
+
+      - name: Upload environment info
+        id: upload-state
+        if: always()
+        env:
+          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          EXPIRATION_DAYS: ${{ inputs.expiration_days }}
+          ESS_REGION: production-cft
+          ESS_REGION_MAPPED: ${{ env.ESS_REGION }}
+          EC_URL: ${{ env.EC_URL || 'https://cloud.elastic.co' }}
+          SERVERLESS_MODE: "false"
+          DEPLOYMENT_TEMPLATE: ${{ env.DEPLOYMENT_TEMPLATE }}
+          MAX_SIZE: ${{ env.MAX_SIZE }}
+        run: |
+          echo "s3-bucket-folder=${S3_BUCKET}" >> "$GITHUB_OUTPUT"
+          echo "aws-cnvm-stack=${CNVM_STACK_NAME}" >> "$GITHUB_OUTPUT"
+          python3 ../../.ci/scripts/create_env_config.py
+          aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
+
+      - name: Summary
+        if: success()
+        run: |
+          summary=$(cat <<-EOF
+          Kibana URL: [kibana]($KIBANA_URL)
+          Environment details: [S3](${S3_BUCKET_URL}?region=${AWS_REGION}&prefix=${DEPLOYMENT_NAME}_${TF_STATE_FOLDER}/)
+          EOF
+          )
+          echo "$summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "$summary"
+
+      - name: Checkout security-documents-generator
+        if: success()
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: elastic/security-documents-generator
+          path: security-documents-generator
+          ref: main
+
+      - name: Setup Node for security-documents-generator
+        if: success()
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: "${{ github.workspace }}/security-documents-generator/.nvmrc"
+          cache: yarn
+          cache-dependency-path: "${{ github.workspace }}/security-documents-generator/yarn.lock"
+
+      - name: Install Yarn classic
+        if: success()
+        run: npm install -g yarn@1.22.22
+
+      - name: Install dependencies and run org-data
+        if: success()
+        working-directory: ${{ github.workspace }}/security-documents-generator
+        env:
+          ELASTIC_NODE: ${{ steps.elk-stack.outputs.es-url }}
+          ELASTIC_USERNAME: ${{ steps.elk-stack.outputs.es-user }}
+          ELASTIC_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          KIBANA_NODE: ${{ steps.elk-stack.outputs.kibana-url }}
+          KIBANA_USERNAME: ${{ steps.elk-stack.outputs.es-user }}
+          KIBANA_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          SERVERLESS: "false"
+        run: |
+          yarn install --frozen-lockfile
+          yarn start org-data --size enterprise --productivity-suite google --all --detection-rules

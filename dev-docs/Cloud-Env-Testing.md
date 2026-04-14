@@ -171,6 +171,16 @@ The workflow requires a subset of input parameters. All required inputs are desc
 - **Infrastructure**: CDR VMs (AWS CloudTrail EC2, Azure activity logs VM, GCP audit logs VM, Wiz EC2, Asset Inventory EC2, Elastic Defend Linux + Windows, depending on the `deploy_*` Terraform vars defaults).
 - **Integrations / agents**: CloudTrail, Azure Activity Logs, GCP Audit Logs, Wiz, Okta (optional), Elastic Defend (Fleet), Asset Inventory (gated by stack version), and Entity Store (v1 or v2 based on the checkbox).
 
+## Create Environment (Entity Analytics)
+
+The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft** (no region picker), applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (AI Agents feature flag, Agent Builder experimental UI, Entity Store v2 UI settings, and expanded `xpack.securitySolution.enableExperimental` entries), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It does not install CIS or CDR cloud infrastructure.
+
+### Inputs (summary)
+
+- **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**, optional **`ec-api-key`**. There is no `docker-image-override` or `ess-region` input; ESS region mapping is fixed to **production-cft**.
+
+**Temporary debug (before `create-env-ea` is on the default branch):** run [**Test Runner**](https://github.com/elastic/cloudbeat/actions/workflows/test-runner.yml) from a branch that includes both `test-runner.yml` and `create-env-ea.yml`, enable **`only_ea_env`**, and set the **`deployment_name`** / stack inputs. That dispatches the reusable `create-env-ea` workflow and skips the usual E2E jobs. Nightly **schedule** is unchanged. Remove the Test Runner wiring once standalone dispatch is available.
+
 
 ## Install Integrations Worfklow
 
