@@ -218,18 +218,6 @@ jobs:
           echo "KIBANA_URL=$STACK_KIBANA_URL" >> "$GITHUB_ENV"
           echo "ES_URL=$STACK_ES_URL" >> "$GITHUB_ENV"
 
-      - name: Install Entity Store v2
-        if: success()
-        working-directory: tests/integrations_setup
-        env:
-          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
-          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
-          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
-          STACK_VERSION: ${{ env.STACK_VERSION }}
-        run: |
-          set -euo pipefail
-          poetry run python ./enable_entity_store_v2.py
-
       - name: Summary
         if: success()
         run: |
