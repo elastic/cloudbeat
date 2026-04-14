@@ -246,6 +246,15 @@ jobs:
           yarn install --frozen-lockfile
           yarn start org-data --size enterprise --productivity-suite google --all --detection-rules
 
+      - name: Setup ML Job
+        if: success()
+        working-directory: ./
+        env:
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+        run: bash .ci/scripts/setup_ml_security_auth_module.sh
+
       - name: Create Slack Payload
         if: always()
         id: prepare-slack-data
