@@ -205,6 +205,19 @@ jobs:
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
 
+      - name: Export stack connection env
+        if: success()
+        env:
+          STACK_ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          STACK_ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          STACK_KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          STACK_ES_URL: ${{ steps.elk-stack.outputs.es-url }}
+        run: |
+          echo "ES_USER=$STACK_ES_USER" >> "$GITHUB_ENV"
+          echo "ES_PASSWORD=$STACK_ES_PASSWORD" >> "$GITHUB_ENV"
+          echo "KIBANA_URL=$STACK_KIBANA_URL" >> "$GITHUB_ENV"
+          echo "ES_URL=$STACK_ES_URL" >> "$GITHUB_ENV"
+
       - name: Install Entity Store v2
         if: success()
         working-directory: tests/integrations_setup
@@ -276,6 +289,11 @@ jobs:
           JOB_STATUS: "${{ job.status }}"
           S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
           ESS_REGION: "production-cft"
+          # Prefer exported env; when stack failed, elk outputs may be empty (prepare_slack_data tolerates missing Kibana).
+          KIBANA_URL: ${{ env.KIBANA_URL || steps.elk-stack.outputs.kibana-url }}
+          DEPLOYMENT_NAME: ${{ env.DEPLOYMENT_NAME }}
+          STACK_VERSION: ${{ env.STACK_VERSION }}
+          DOCKER_IMAGE_OVERRIDE: "N/A"
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 
