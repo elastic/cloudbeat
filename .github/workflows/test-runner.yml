@@ -4,11 +4,6 @@ run-name: Test E2E Flow by @${{ github.actor }}
 on:
   workflow_dispatch:
     inputs:
-      only_ea_env:
-        description: "Debug: when true, skip E2E jobs and run create-env-ea only (use workflow branch that contains both files)."
-        type: boolean
-        required: false
-        default: false
       deployment_name:
         type: string
         description: "create-env-ea (when only_ea_env): deployment name, max 20 chars, [a-z][-a-z0-9]*"
@@ -24,11 +19,7 @@ on:
         description: "create-env-ea (when only_ea_env): expiration metadata for S3"
         required: false
         default: "5"
-      ec-api-key:
-        type: string
-        description: "create-env-ea (when only_ea_env): optional Elastic Cloud API key"
-        required: false
-        default: ""
+
   schedule:
     - cron: '0 2 * * *' # every day at 02:00
 
@@ -64,7 +55,7 @@ jobs:
 
   run-create-env-ea:
     name: Run create-env-ea (debug)
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.only_ea_env == true }}
+    if: ${{ github.event_name == 'workflow_dispatch'}}
     uses: ./.github/workflows/create-env-ea.yml
     secrets: inherit
     permissions:
@@ -73,4 +64,3 @@ jobs:
       deployment_name: ${{ inputs.deployment_name }}
       elk-stack-version: ${{ inputs.elk-stack-version }}
       expiration_days: ${{ inputs.expiration_days }}
-      ec-api-key: ${{ inputs.ec-api-key }}

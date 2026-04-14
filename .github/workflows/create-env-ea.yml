@@ -19,10 +19,7 @@ on:
         required: false
         default: "5"
         type: string
-      ec-api-key:
-        type: string
-        description: "**Optional** Elastic Cloud API key; default uses Vault credentials for production."
-        required: false
+
   workflow_call:
     inputs:
       deployment_name:
@@ -37,10 +34,6 @@ on:
         type: string
         required: false
         default: "5"
-      ec-api-key:
-        type: string
-        required: false
-        description: "Optional Elastic Cloud API key."
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -66,11 +59,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
-        with:
-          init-tools: "true"
-          free-disk: "true"
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+        working-directory: ./
 
       - name: Check Deployment Name
         run: |
@@ -83,16 +74,6 @@ jobs:
             echo "error: Deployment name doesn't match the required pattern [a-z][-a-z0-9]*"
             exit 1
           fi
-
-      - name: Mask Sensitive Data
-        if: inputs.ec-api-key != ''
-        env:
-          EC_API_KEY_INPUT: ${{ inputs.ec-api-key }}
-        run: |
-          ec_api_key="${EC_API_KEY_INPUT}"
-          echo "::add-mask::$ec_api_key"
-          echo "TF_VAR_ec_api_key=$ec_api_key" >> "$GITHUB_ENV"
-          echo "EC_URL=https://cloud.elastic.co" >> "$GITHUB_ENV"
 
       - name: Process Stack Version
         id: remove-commit-hash
@@ -128,7 +109,7 @@ jobs:
 
       - name: Get Elastic Cloud Credentials from Vault
         id: get-ec-credentials
-        if: inputs.ec-api-key == '' && steps.determine-vault-path.outcome == 'success'
+        if: steps.determine-vault-path.outcome == 'success'
         uses: hashicorp/vault-action@9c2d817b85b9fff56bcab21cb74b485aee9e9d73 # v2.8.1
         with:
           url: ${{ secrets.VAULT_ADDR }}
@@ -246,7 +227,7 @@ jobs:
           cache: yarn
           cache-dependency-path: security-documents-generator/yarn.lock
 
-      - name: Install Yarn classic
+      - name: Install Yarn
         if: success()
         run: npm install -g yarn@1.22.22
 
