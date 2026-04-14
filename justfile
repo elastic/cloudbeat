@@ -68,7 +68,7 @@ build-opa-bundle:
 build-binary $GOARCH=LOCAL_GOARCH:
   @echo "Building cloudbeat binary for linux/$GOARCH"
   GOOS=linux go mod vendor
-  GOOS=linux go build -v
+  GOOS=linux GOEXPERIMENT=jsonv2 go build -v
 
 # For backwards compatibility
 alias build-cloudbeat := build-cloudbeat-docker-image
@@ -94,7 +94,7 @@ deploy-cloudbeat-nocert:
 # Builds cloudbeat docker image with the OPA bundle included and the debug flag
 build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
   GOOS=linux go mod vendor
-  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f deploy/Dockerfile.debug -t cloudbeat . --platform=linux/$GOARCH
+  GOOS=linux CGO_ENABLED=0 GOEXPERIMENT=jsonv2 go build -gcflags "all=-N -l" && docker build -f deploy/Dockerfile.debug -t cloudbeat . --platform=linux/$GOARCH
 
 delete-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
