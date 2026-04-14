@@ -1,4 +1,4 @@
-name: create-env-ea
+name: Create EA Environment
 run-name: EA env ${{ inputs.deployment_name }} by @${{ github.actor }}
 
 on:
@@ -205,6 +205,18 @@ jobs:
           python3 ../../.ci/scripts/create_env_config.py
           aws s3 cp "./env_config.json" "${S3_BUCKET}/env_config.json"
 
+      - name: Install Entity Store v2
+        if: success()
+        working-directory: tests/integrations_setup
+        env:
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          STACK_VERSION: ${{ env.STACK_VERSION }}
+        run: |
+          set -euo pipefail
+          poetry run python ./enable_entity_store_v2.py
+
       - name: Summary
         if: success()
         run: |
@@ -251,3 +263,28 @@ jobs:
         run: |
           yarn install --frozen-lockfile
           yarn start org-data --size enterprise --productivity-suite google --all --detection-rules
+
+      - name: Create Slack Payload
+        if: always()
+        id: prepare-slack-data
+        working-directory: ./
+        env:
+          WORKFLOW: "${{ github.workflow }}"
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          GITHUB_ACTOR: "${{ github.actor }}"
+          ESS_TYPE: "false"
+          JOB_STATUS: "${{ job.status }}"
+          S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
+          ESS_REGION: "production-cft"
+        run: |
+          python3 ./.ci/scripts/prepare_slack_data.py
+
+      - name: Send Slack Notification
+        uses: ./.github/actions/slack-notification
+        if: always()
+        continue-on-error: true
+        with:
+          vault-url: ${{ secrets.VAULT_ADDR }}
+          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          slack-payload: ${{ steps.prepare-slack-data.outputs.payload }}
