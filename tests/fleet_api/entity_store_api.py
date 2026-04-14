@@ -121,9 +121,6 @@ def enable_entity_store_v2(cfg: Munch) -> None:
     """Turn on Entity Store v2 via internal settings and poll until active.
 
     Same sequence as enableEntityStoreV2 in kibana-api.ts (POST then GET until userValue is true).
-
-    If the setting is already forced via Kibana ``user_settings`` / ``uiSettings.overrides`` (e.g. EA
-    deployments), POST returns 400 with "overridden" — treat as already enabled and skip.
     """
     url = f"{cfg.kibana_url}/internal/kibana/settings"
     try:
@@ -142,12 +139,6 @@ def enable_entity_store_v2(cfg: Munch) -> None:
                 return
             time.sleep(_ENTITY_STORE_V2_POLL_INTERVAL_SEC)
     except APICallException as api_ex:
-        if api_ex.status_code == 400 and "overridden" in (api_ex.response_text or "").lower():
-            logger.info(
-                "Entity Store v2 setting is already applied via Kibana config ({}); skipping internal POST.",
-                _ENTITY_STORE_V2_SETTING_KEY,
-            )
-            return
         logger.error(
             "enable_entity_store_v2 failed, status {}. Response: {}",
             api_ex.status_code,
