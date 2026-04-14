@@ -173,14 +173,11 @@ The workflow requires a subset of input parameters. All required inputs are desc
 
 ## Create Environment (Entity Analytics)
 
-The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft** (no region picker), applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (AI Agents feature flag, Agent Builder experimental UI, Entity Store v2 UI settings, and expanded `xpack.securitySolution.enableExperimental` entries), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It does not install CIS or CDR cloud infrastructure.
+The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft**, applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (AI Agents feature flag, Agent Builder experimental UI, Entity Store v2 UI settings, and expanded `xpack.securitySolution.enableExperimental` entries), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It does not install CIS or CDR cloud infrastructure.
 
 ### Inputs (summary)
 
-- **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**, optional **`ec-api-key`**. There is no `docker-image-override` or `ess-region` input; ESS region mapping is fixed to **production-cft**.
-
-**Temporary debug (before `create-env-ea` is on the default branch):** run [**Test Runner**](https://github.com/elastic/cloudbeat/actions/workflows/test-runner.yml) from a branch that includes both `test-runner.yml` and `create-env-ea.yml`, enable **`only_ea_env`**, and set the **`deployment_name`** / stack inputs. That dispatches the reusable `create-env-ea` workflow and skips the usual E2E jobs. Nightly **schedule** is unchanged. Remove the Test Runner wiring once standalone dispatch is available.
-**GCP naming (CDR vs CIS):** When workflows provision GCP via Deployment Manager, CDR uses a `-cdr` suffix and CIS agent-based uses a `-cis` suffix so both can run in the same project without colliding. For a `deployment-name` of `my-env`, expect service account ids `my-env-cdr-sa` / `my-env-cis-sa`, DM stacks `my-env-cdr-acc` / `my-env-cis-acc`, and compute instances `my-env-cdr` / `my-env-cis`. Keep `deployment-name` within the documented length limit (20 characters) so service account ids stay within GCP’s 30-character maximum.
+- **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**. ESS region mapping is fixed to **production-cft**.
 
 
 ## Install Integrations Worfklow
