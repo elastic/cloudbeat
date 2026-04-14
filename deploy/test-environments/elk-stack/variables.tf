@@ -40,6 +40,12 @@ variable "kibana_security_solution_experimental" {
   type        = bool
 }
 
+variable "kibana_enable_entity_analytics_settings" {
+  default     = false
+  description = "When true (ESS only), apply Kibana user_settings_yaml for Entity Analytics (EA) feature flags and UI overrides"
+  type        = bool
+}
+
 variable "deployment_template" {
   default     = "gcp-general-purpose"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"

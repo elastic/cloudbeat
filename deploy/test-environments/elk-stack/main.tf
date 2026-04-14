@@ -67,6 +67,7 @@ module "ec_deployment" {
   }
 
   kibana_enable_security_solution_experimental = var.kibana_security_solution_experimental
+  kibana_enable_entity_analytics_settings      = var.kibana_enable_entity_analytics_settings
 }
 
 module "ec_project" {

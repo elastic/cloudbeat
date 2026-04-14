@@ -171,7 +171,13 @@ The workflow requires a subset of input parameters. All required inputs are desc
 - **Infrastructure**: CDR VMs (AWS CloudTrail EC2, Azure activity logs VM, GCP audit logs VM, Wiz EC2, Asset Inventory EC2, Elastic Defend Linux + Windows, depending on the `deploy_*` Terraform vars defaults).
 - **Integrations / agents**: CloudTrail, Azure Activity Logs, GCP Audit Logs, Wiz, Okta (optional), Elastic Defend (Fleet), Asset Inventory (gated by stack version), and Entity Store (v1 or v2 based on the checkbox).
 
-**GCP naming (CDR vs CIS):** When workflows provision GCP via Deployment Manager, CDR uses a `-cdr` suffix and CIS agent-based uses a `-cis` suffix so both can run in the same project without colliding. For a `deployment-name` of `my-env`, expect service account ids `my-env-cdr-sa` / `my-env-cis-sa`, DM stacks `my-env-cdr-acc` / `my-env-cis-acc`, and compute instances `my-env-cdr` / `my-env-cis`. Keep `deployment-name` within the documented length limit (20 characters) so service account ids stay within GCP’s 30-character maximum.
+## Create Environment (Entity Analytics)
+
+The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft**, applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (AI Agents feature flag, Agent Builder experimental UI, Entity Store v2 UI settings, and expanded `xpack.securitySolution.enableExperimental` entries), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It does not install CIS or CDR cloud infrastructure.
+
+### Inputs (summary)
+
+- **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**. ESS region mapping is fixed to **production-cft**.
 
 
 ## Install Integrations Worfklow
