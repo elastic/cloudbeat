@@ -171,6 +171,8 @@ The workflow requires a subset of input parameters. All required inputs are desc
 - **Infrastructure**: CDR VMs (AWS CloudTrail EC2, Azure activity logs VM, GCP audit logs VM, Wiz EC2, Asset Inventory EC2, Elastic Defend Linux + Windows, depending on the `deploy_*` Terraform vars defaults).
 - **Integrations / agents**: CloudTrail, Azure Activity Logs, GCP Audit Logs, Wiz, Okta (optional), Elastic Defend (Fleet), Asset Inventory (gated by stack version), and Entity Store (v1 or v2 based on the checkbox).
 
+**GCP naming (CDR vs CIS):** When workflows provision GCP via Deployment Manager, CDR uses a `-cdr` suffix and CIS agent-based uses a `-cis` suffix so both can run in the same project without colliding. For a `deployment-name` of `my-env`, expect service account ids `my-env-cdr-sa` / `my-env-cis-sa`, DM stacks `my-env-cdr-acc` / `my-env-cis-acc`, and compute instances `my-env-cdr` / `my-env-cis`. Keep `deployment-name` within the documented length limit (20 characters) so service account ids stay within GCP’s 30-character maximum.
+
 
 ## Install Integrations Worfklow
 
@@ -186,7 +188,9 @@ The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workfl
   - **`all`** - Installs both `CIS` and `CDR` integrations.
   - **`cis`** - Installs `CSPM`, `KSPM`, and `CNVM` integrations.
   - **`cdr`** - Installs `Audit Logs`, `Asset Inventory`, and `Wiz` integrations.
-- **`docker-image-override`** - For build candidate versions, specifies a custom Docker image path for agent installations.
+- **`docker-image-override`** - For build candidate versions, specifies a custom docker image path for agent installations.
+
+When **`infra-type`** is **`all`**, GCP CSPM and GCP Asset Inventory each get their own Deployment Manager stacks and service accounts (see **GCP naming (CDR vs CIS)** above).
 
 ## Cleanup Procedure
 
