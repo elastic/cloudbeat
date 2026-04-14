@@ -180,6 +180,7 @@ The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/cre
 - **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**, optional **`ec-api-key`**. There is no `docker-image-override` or `ess-region` input; ESS region mapping is fixed to **production-cft**.
 
 **Temporary debug (before `create-env-ea` is on the default branch):** run [**Test Runner**](https://github.com/elastic/cloudbeat/actions/workflows/test-runner.yml) from a branch that includes both `test-runner.yml` and `create-env-ea.yml`, enable **`only_ea_env`**, and set the **`deployment_name`** / stack inputs. That dispatches the reusable `create-env-ea` workflow and skips the usual E2E jobs. Nightly **schedule** is unchanged. Remove the Test Runner wiring once standalone dispatch is available.
+**GCP naming (CDR vs CIS):** When workflows provision GCP via Deployment Manager, CDR uses a `-cdr` suffix and CIS agent-based uses a `-cis` suffix so both can run in the same project without colliding. For a `deployment-name` of `my-env`, expect service account ids `my-env-cdr-sa` / `my-env-cis-sa`, DM stacks `my-env-cdr-acc` / `my-env-cis-acc`, and compute instances `my-env-cdr` / `my-env-cis`. Keep `deployment-name` within the documented length limit (20 characters) so service account ids stay within GCP’s 30-character maximum.
 
 
 ## Install Integrations Worfklow
@@ -196,7 +197,9 @@ The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workfl
   - **`all`** - Installs both `CIS` and `CDR` integrations.
   - **`cis`** - Installs `CSPM`, `KSPM`, and `CNVM` integrations.
   - **`cdr`** - Installs `Audit Logs`, `Asset Inventory`, and `Wiz` integrations.
-- **`docker-image-override`** - For build candidate versions, specifies a custom Docker image path for agent installations.
+- **`docker-image-override`** - For build candidate versions, specifies a custom docker image path for agent installations.
+
+When **`infra-type`** is **`all`**, GCP CSPM and GCP Asset Inventory each get their own Deployment Manager stacks and service accounts (see **GCP naming (CDR vs CIS)** above).
 
 ## Cleanup Procedure
 

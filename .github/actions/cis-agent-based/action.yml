@@ -144,8 +144,8 @@ runs:
       shell: bash
       working-directory: deploy/deployment-manager
       env:
-        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
-        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-acc"
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-cis-sa"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-cis-acc"
       run: |
           # Deploys a GCP Service Account
           ./deploy_service_account.sh
@@ -161,6 +161,7 @@ runs:
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
         SERVICE_ACCOUNT_JSON_PATH: "KEY_FILE.json"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-cis"
       run: |
         poetry run python ./install_cspm_gcp_integration.py
 
@@ -171,9 +172,9 @@ runs:
       working-directory: deploy/deployment-manager
       env:
         ACTOR: ${{ github.actor }}
-        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-cis"
         GCP_ZONE: "${{ inputs.cspm-gcp-zone }}"
-        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-cis-sa"
       run: |
         # GCP labeling rules:
         # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
