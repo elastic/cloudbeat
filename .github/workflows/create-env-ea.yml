@@ -20,21 +20,6 @@ on:
         default: "5"
         type: string
 
-  workflow_call:
-    inputs:
-      deployment_name:
-        type: string
-        description: "Deployment name prefix (same rules as workflow_dispatch)."
-        required: true
-      elk-stack-version:
-        type: string
-        required: true
-        default: "9.4.0-SNAPSHOT"
-      expiration_days:
-        type: string
-        required: false
-        default: "5"
-
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

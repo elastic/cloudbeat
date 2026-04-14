@@ -3,30 +3,12 @@ run-name: Test E2E Flow by @${{ github.actor }}
 
 on:
   workflow_dispatch:
-    inputs:
-      deployment_name:
-        type: string
-        description: "create-env-ea (when only_ea_env): deployment name, max 20 chars, [a-z][-a-z0-9]*"
-        required: false
-        default: ""
-      elk-stack-version:
-        type: string
-        description: "create-env-ea (when only_ea_env): stack version string"
-        required: false
-        default: "9.4.0-SNAPSHOT"
-      expiration_days:
-        type: string
-        description: "create-env-ea (when only_ea_env): expiration metadata for S3"
-        required: false
-        default: "5"
-
   schedule:
     - cron: '0 2 * * *' # every day at 02:00
 
 jobs:
   run-ech-main:
     name: Run ECH on main
-    if: false
     uses: ./.github/workflows/test-e2e-flow.yml
     with:
       branch: main
@@ -41,7 +23,7 @@ jobs:
   run-serverless-main:
     name: Run Serverless on main
     needs: run-ech-main
-    if: false
+    if: always()
     uses: ./.github/workflows/test-e2e-flow.yml
     with:
       branch: main
@@ -52,15 +34,3 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-
-  run-create-env-ea:
-    name: Run create-env-ea (debug)
-    if: ${{ github.event_name == 'workflow_dispatch'}}
-    uses: ./.github/workflows/create-env-ea.yml
-    secrets: inherit
-    permissions:
-      contents: 'read'
-    with:
-      deployment_name: ${{ inputs.deployment_name }}
-      elk-stack-version: ${{ inputs.elk-stack-version }}
-      expiration_days: ${{ inputs.expiration_days }}
