@@ -242,7 +242,7 @@ jobs:
         
         # TODO: Remove this once we have a way to run the entity store risk score maintainers (internal API)
       - name: Run entity store risk score maintainers (internal API)
-        if: false
+        if: ${{ false }}
         working-directory: ./
         env:
           KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
