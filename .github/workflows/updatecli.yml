@@ -63,6 +63,18 @@ jobs:
           GIT_USER: "Cloud Security Machine"
           GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
+  active-branches:
+    name: Build active branches matrix JSON
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+    steps:
+      - name: Fetch active branches
+        id: mk
+        run: |
+          MATRIX_JSON="$(curl -s https://elastic-release-api.s3.us-west-2.amazonaws.com/public/future-releases.json | jq -Mc '[ .releases[] | select(.active_release == true) | .branch | select(. != "main" and . != "7.17") ]')"
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
+
   updatecli-backport:
     name: Update ${{ matrix.pipeline-name }} dependencies - backport
     runs-on: ubuntu-latest
