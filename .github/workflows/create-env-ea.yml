@@ -239,8 +239,8 @@ jobs:
           ES_USER: ${{ steps.elk-stack.outputs.es-user }}
           ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
         run: bash .ci/scripts/setup_ml_security_auth_module.sh
-        
-        # TODO: Remove this once we have a way to run the entity store risk score maintainers (internal API)
+
+      # TODO: Remove this once we have a way to run the entity store risk score maintainers (internal API)
       - name: Run entity store risk score maintainers (internal API)
         if: ${{ false }}
         working-directory: ./
