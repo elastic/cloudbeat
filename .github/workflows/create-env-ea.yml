@@ -149,6 +149,7 @@ jobs:
           ec-url: ${{ env.EC_URL }}
           kibana-security-solution-experimental: false
           kibana-enable-entity-analytics-settings: true
+          elasticsearch-ml-enabled: true
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
@@ -242,7 +243,7 @@ jobs:
 
       # TODO: Remove this once we have a way to run the entity store risk score maintainers (internal API)
       - name: Run entity store risk score maintainers (internal API)
-        if: ${{ false }}
+        if: success()
         working-directory: ./
         env:
           KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}

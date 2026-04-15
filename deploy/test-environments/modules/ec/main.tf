@@ -49,21 +49,8 @@ EOT
   } : {}
 
   kibana_config_merged = merge(local.kibana_docker_config, local.kibana_experimental_config)
-}
 
-data "ec_stack" "deployment_version" {
-  version_regex = local.version
-  region        = local.region
-}
-
-resource "ec_deployment" "deployment" {
-  name                   = "${local.name_prefix}-${data.ec_stack.deployment_version.version}"
-  version                = data.ec_stack.deployment_version.version
-  region                 = local.region
-  deployment_template_id = local.deployment_template
-  tags                   = var.tags
-
-  elasticsearch = {
+  elasticsearch_base = {
     autoscale = var.elasticsearch_autoscale
     strategy  = "rolling_all"
     config = local.es_docker_image_tag_override != "" ? {
@@ -91,6 +78,32 @@ resource "ec_deployment" "deployment" {
       autoscaling = {}
     }
   }
+
+  elasticsearch = merge(
+    local.elasticsearch_base,
+    var.elasticsearch_ml_enabled ? {
+      ml = {
+        size        = "4g"
+        zone_count  = 1
+        autoscaling = {}
+      }
+    } : {}
+  )
+}
+
+data "ec_stack" "deployment_version" {
+  version_regex = local.version
+  region        = local.region
+}
+
+resource "ec_deployment" "deployment" {
+  name                   = "${local.name_prefix}-${data.ec_stack.deployment_version.version}"
+  version                = data.ec_stack.deployment_version.version
+  region                 = local.region
+  deployment_template_id = local.deployment_template
+  tags                   = var.tags
+
+  elasticsearch = local.elasticsearch
 
   kibana = {
     size   = "8g"

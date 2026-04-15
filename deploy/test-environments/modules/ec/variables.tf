@@ -53,6 +53,12 @@ variable "elasticsearch_autoscale" {
   description = "Optional autoscale the Elasticsearch cluster"
 }
 
+variable "elasticsearch_ml_enabled" {
+  default     = false
+  type        = bool
+  description = "When true, provision an Elasticsearch ML topology tier (ESS only)"
+}
+
 variable "max_size" {
   default     = "128g"
   type        = string
