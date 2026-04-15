@@ -80,10 +80,10 @@ require (
 	go.uber.org/zap v1.27.1
 	go.uber.org/zap/exp v0.3.0
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
-	golang.org/x/oauth2 v0.35.0
-	google.golang.org/api v0.266.0
+	golang.org/x/oauth2 v0.36.0
+	google.golang.org/api v0.269.0
 	gopkg.in/yaml.v2 v2.4.0
-	gotest.tools/gotestsum v1.12.2
+	gotest.tools/gotestsum v1.13.0
 	k8s.io/api v0.34.3
 	k8s.io/apimachinery v0.34.3
 	k8s.io/client-go v0.34.3
@@ -93,7 +93,7 @@ require (
 
 require (
 	cel.dev/expr v0.25.1 // indirect
-	cloud.google.com/go/auth v0.18.1 // indirect
+	cloud.google.com/go/auth v0.18.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/monitoring v1.24.3 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
@@ -128,6 +128,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v1.0.0-rc.2 // indirect
 	github.com/containerd/plugin v1.0.0 // indirect
+	github.com/coreos/go-oidc/v3 v3.18.0 // indirect
 	github.com/cyberphone/json-canonicalization v0.0.0-20241213102144-19d51d7fe467 // indirect
 	github.com/dgraph-io/badger/v4 v4.8.0 // indirect
 	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
@@ -145,7 +146,7 @@ require (
 	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
 	github.com/go-chi/chi/v5 v5.2.4 // indirect
 	github.com/go-git/go-git/v5 v5.16.2 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250223041408-d3c622f1b874 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.6 // indirect
 	github.com/go-openapi/swag/cmdutils v0.25.4 // indirect
@@ -246,6 +247,7 @@ require (
 	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
 	golang.org/x/tools v0.42.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.77 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.77 // indirect
 	mvdan.cc/sh/v3 v3.11.0 // indirect
@@ -564,7 +566,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.18.6 // indirect
 	howett.net/plist v1.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.33.3 // indirect
