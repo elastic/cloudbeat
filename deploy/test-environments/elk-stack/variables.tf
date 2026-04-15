@@ -69,6 +69,12 @@ variable "elasticsearch_zone_count" {
   description = "Optional Elasticsearch zone count"
 }
 
+variable "elasticsearch_ml_enabled" {
+  default     = false
+  type        = bool
+  description = "When true (ESS only), provision an Elasticsearch ML topology tier on the deployment"
+}
+
 variable "max_size" {
   default     = ""
   type        = string
