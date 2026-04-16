@@ -83,7 +83,7 @@ EOT
     local.elasticsearch_base,
     var.elasticsearch_ml_enabled ? {
       ml = {
-        size        = "4g"
+        size        = "1g"
         zone_count  = 1
         autoscaling = {}
       }
