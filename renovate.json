@@ -3,7 +3,7 @@
   "extends": [
     "local>elastic/renovate-config"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main",
     "9.4",
     "9.3",
@@ -11,7 +11,7 @@
     "8.19"
   ],
   "schedule": [
-    "0 1 * * 1-5"
+    "* 1 * * 1-5"
   ],
   "automergeSchedule": [
     "at any time"
