@@ -3,8 +3,8 @@ module github.com/elastic/cloudbeat
 go 1.26.2
 
 require (
-	cloud.google.com/go/asset v1.24.0
-	cloud.google.com/go/iam v1.8.0
+	cloud.google.com/go/asset v1.25.0
+	cloud.google.com/go/iam v1.9.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2 v2.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.5.0
@@ -126,7 +126,7 @@ require (
 	cel.dev/expr v0.25.1 // indirect
 	cloud.google.com/go/auth v0.20.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
-	cloud.google.com/go/monitoring v1.26.0 // indirect
+	cloud.google.com/go/monitoring v1.27.0 // indirect
 	cyphar.com/go-pathrs v0.2.4 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/containers/azcontainerregistry v0.2.3 // indirect
@@ -302,11 +302,11 @@ require (
 
 require (
 	cloud.google.com/go v0.123.0 // indirect
-	cloud.google.com/go/accesscontextmanager v1.11.0 // indirect
+	cloud.google.com/go/accesscontextmanager v1.12.0 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
-	cloud.google.com/go/longrunning v0.10.0 // indirect
-	cloud.google.com/go/orgpolicy v1.17.0 // indirect
-	cloud.google.com/go/osconfig v1.18.0 // indirect
+	cloud.google.com/go/longrunning v0.11.0 // indirect
+	cloud.google.com/go/orgpolicy v1.18.0 // indirect
+	cloud.google.com/go/osconfig v1.19.0 // indirect
 	cloud.google.com/go/storage v1.62.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.0
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 // indirect
