@@ -24,8 +24,6 @@ on:
         type: choice
         default: "4g"
         options:
-          - "1g"
-          - "2g"
           - "4g"
           - "8g"
 
