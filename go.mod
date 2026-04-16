@@ -248,7 +248,7 @@ require (
 	github.com/sassoftware/go-rpmutils v0.4.0 // indirect
 	github.com/sassoftware/relic v7.2.1+incompatible // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
-	github.com/shirou/gopsutil/v4 v4.26.2 // indirect
+	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
 	github.com/sigstore/cosign/v2 v2.6.2 // indirect
 	github.com/sigstore/protobuf-specs v0.5.0 // indirect
 	github.com/sigstore/rekor-tiles/v2 v2.0.1 // indirect
