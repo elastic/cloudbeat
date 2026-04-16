@@ -1742,8 +1742,8 @@ github.com/microsoftgraph/msgraph-sdk-go v1.85.0 h1:52NqLxAtSoFtKVMiN08f8JSkvsYG
 github.com/microsoftgraph/msgraph-sdk-go v1.85.0/go.mod h1:h2fx0PGMpIfVX8u5nWTVXmTKTYzIR/uOwZQnX4ixwcM=
 github.com/microsoftgraph/msgraph-sdk-go-core v1.4.0 h1:0SrIoFl7TQnMRrsi5TFaeNe0q8KO5lRzRp4GSCCL2So=
 github.com/microsoftgraph/msgraph-sdk-go-core v1.4.0/go.mod h1:A1iXs+vjsRjzANxF6UeKv2ACExG7fqTwHHbwh1FL+EE=
-github.com/miekg/dns v1.1.70 h1:DZ4u2AV35VJxdD9Fo9fIWm119BsQL5cZU1cQ9s0LkqA=
-github.com/miekg/dns v1.1.70/go.mod h1:+EuEPhdHOsfk6Wk5TT2CzssZdqkmFhf8r+aVyDEToIs=
+github.com/miekg/dns v1.1.72 h1:vhmr+TF2A3tuoGNkLDFK9zi36F2LS+hKTRW0Uf8kbzI=
+github.com/miekg/dns v1.1.72/go.mod h1:+EuEPhdHOsfk6Wk5TT2CzssZdqkmFhf8r+aVyDEToIs=
 github.com/mikefarah/yq/v4 v4.47.2 h1:Jb5fHlvgK5eeaPbreG9UJs1E5w6l5hUzXjeaY6LTTWY=
 github.com/mikefarah/yq/v4 v4.47.2/go.mod h1:ulYbZUzGJsBDDwO5ohvk/KOW4vW5Iddd/DBeAY1Q09g=
 github.com/mileusna/useragent v1.3.5 h1:SJM5NzBmh/hO+4LGeATKpaEX9+b4vcGg2qXGLiNGDws=
