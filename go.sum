@@ -1683,8 +1683,9 @@ github.com/letsencrypt/boulder v0.20260223.0 h1:xdS2OnJNUasR6TgVIOpqqcvdkOu47+PQ
 github.com/letsencrypt/boulder v0.20260223.0/go.mod h1:r3aTSA7UZ7dbDfiGK+HLHJz0bWNbHk6YSPiXgzl23sA=
 github.com/liamg/memoryfs v1.6.0 h1:jAFec2HI1PgMTem5gR7UT8zi9u4BfG5jorCRlLH06W8=
 github.com/liamg/memoryfs v1.6.0/go.mod h1:z7mfqXFQS8eSeBBsFjYLlxYRMRyiPktytvYCYTb3BSk=
-github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
+github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
 github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de h1:9TO3cAIGXtEhnIaL+V+BEER86oLrvS+kWobKpbJuye0=
 github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de/go.mod h1:zAbeS9B/r2mtpb6U+EI2rYA5OAXxsYw6wTamcNW+zcE=
 github.com/lufia/plan9stats v0.0.0-20260330125221-c963978e514e h1:Q6MvJtQK/iRcRtzAscm/zF23XxJlbECiGPyRicsX+Ak=
