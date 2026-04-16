@@ -124,7 +124,7 @@ runs:
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Upload docker images
       # Pin action version to 4.3.4 See https://github.com/actions/upload-artifact/issues/589
-      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: docker-images
         path: ${{ inputs.docker-images-folder }}
