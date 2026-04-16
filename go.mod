@@ -297,7 +297,7 @@ require (
 	modernc.org/libc v1.72.0 // indirect
 	mvdan.cc/sh/v3 v3.11.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
+	sigs.k8s.io/structured-merge-diff/v6 v6.4.0 // indirect
 )
 
 require (
