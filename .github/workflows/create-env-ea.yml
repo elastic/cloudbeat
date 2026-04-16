@@ -20,7 +20,7 @@ on:
         default: "5"
         type: string
       kibana_instance_size:
-        description: "Kibana memory (Elastic Cloud size: 1g = 1 GB, 2g, 4g default, 8g)"
+        description: "Kibana memory (Elastic Cloud size: 4g = 4 GB default, 8g)"
         type: choice
         default: "4g"
         options:
