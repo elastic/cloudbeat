@@ -3,7 +3,7 @@
   "extends": [
     "local>elastic/renovate-config"
   ],
-  "baseBranchPatterns": [
+  "baseBranches": [
     "main",
     "9.4",
     "9.3",
