@@ -214,7 +214,7 @@ require (
 	github.com/lestrrat-go/httprc/v3 v3.0.5 // indirect
 	github.com/lestrrat-go/jwx/v3 v3.0.10 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
-	github.com/letsencrypt/boulder v0.20260223.0 // indirect
+	github.com/letsencrypt/boulder v0.20260413.0 // indirect
 	github.com/mattn/go-shellwords v1.0.13 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.3.1 // indirect
 	github.com/microsoft/kiota-http-go v1.5.5 // indirect
