@@ -23,6 +23,20 @@ defaults:
       labels:
         - "backport"
 pull_request_rules:
+  - name: auto-merge Renovate PRs
+    conditions:
+      - author=elastic-renovate-prod[bot]
+      - label=renovate-auto-approve
+      - "#approved-reviews-by>=1"
+      - check-success=Unit Test
+      - check-success=Lint
+      - check-success=Test Rego Policies
+      - check-success=Package Cloudbeat (docker)
+      - check-success=Package Cloudbeat (tar.gz)
+      - check-success=Manifest Tests
+    actions:
+      queue:
+        name: default
   - name: self-assign PRs
     conditions:
       - -merged

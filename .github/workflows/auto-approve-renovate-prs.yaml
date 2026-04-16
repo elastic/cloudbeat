@@ -12,7 +12,8 @@ on:
     # Auto-merge will be enabled by Renovate (if configured) and this will trigger the GitHub Actions workflow.
     #  - 'auto_merge_enabled' is a custom event that is triggered when a PR is created.
     #  - 'synchronize' will be triggered when a PR is synchronized (e.g. when a new commit is pushed to the PR).
-    types: [auto_merge_enabled, synchronize]
+    #  - 'labeled' will be triggered when a label is added to a PR (handles cases where the label is applied after PR creation).
+    types: [auto_merge_enabled, synchronize, labeled]
 
 permissions:
   pull-requests: write
