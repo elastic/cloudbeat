@@ -11,7 +11,10 @@
     "8.19"
   ],
   "schedule": [
-    "* 1 * * 1-5"
+    "0 1 * * 1-5"
+  ],
+  "automergeSchedule": [
+    "at any time"
   ],
   "labels": [
     "renovate",
@@ -178,15 +181,18 @@
       "enabled": true
     },
     {
-      "description": "Auto-merge minor and patch updates for all packages",
+      "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
-        "patch"
+        "patch",
+        "digest",
+        "pin"
       ],
       "addLabels": [
         "renovate-auto-approve"
       ],
-      "automerge": true
+      "automerge": true,
+      "minimumReleaseAge": "2 days"
     },
     {
       "description": "Manual review for major updates",
