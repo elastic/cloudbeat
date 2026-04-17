@@ -73,7 +73,7 @@ require (
 	github.com/mitchellh/gox v1.0.1
 	github.com/open-policy-agent/opa v1.8.0
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
-	github.com/samber/lo v1.52.0
+	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
