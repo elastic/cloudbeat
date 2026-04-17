@@ -564,7 +564,7 @@ require (
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/yashtewari/glob-intersection v0.2.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	github.com/zclconf/go-cty v1.18.0 // indirect
+	github.com/zclconf/go-cty v1.18.1 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.elastic.co/apm/module/apmelasticsearch/v2 v2.7.8 // indirect
 	go.elastic.co/apm/module/apmhttp/v2 v2.7.8 // indirect
