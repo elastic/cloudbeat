@@ -32,7 +32,7 @@ concurrency: EKS-Functional-Tests
 
 jobs:
   Setup:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     timeout-minutes: 40
@@ -54,7 +54,7 @@ jobs:
 
   Build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Check out the repo
@@ -132,7 +132,7 @@ jobs:
             k8s_context: "test-eks-config-2"
             label: "EKS functional tests: config 2"
     name: ${{ matrix.label }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - name: Check out the repo
@@ -188,7 +188,7 @@ jobs:
     name: Publish Results
     needs: Test_Matrix
     if: always()
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
