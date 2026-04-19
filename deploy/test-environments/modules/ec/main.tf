@@ -85,7 +85,10 @@ EOT
       ml = {
         size        = "1g"
         zone_count  = 1
-        autoscaling = {}
+        autoscaling = {
+          max_size          = "1g"
+          max_size_resource = "memory"
+        }
       }
     } : {}
   )
