@@ -83,10 +83,10 @@ EOT
     local.elasticsearch_base,
     var.elasticsearch_ml_enabled ? {
       ml = {
-        size        = "1g"
-        zone_count  = 1
+        size       = "1g"
+        zone_count = 1
         autoscaling = {
-          max_size          = "1g"
+          max_size          = var.elasticsearch_ml_max_size
           max_size_resource = "memory"
         }
       }

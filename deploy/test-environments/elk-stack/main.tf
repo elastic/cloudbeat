@@ -52,10 +52,11 @@ module "ec_deployment" {
   deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
   max_size               = var.max_size != "" ? var.max_size : "128g"
 
-  elasticsearch_autoscale  = true
-  elasticsearch_size       = var.elasticsearch_size
-  elasticsearch_zone_count = var.elasticsearch_zone_count
-  elasticsearch_ml_enabled = var.elasticsearch_ml_enabled
+  elasticsearch_autoscale   = true
+  elasticsearch_size        = var.elasticsearch_size
+  elasticsearch_zone_count  = var.elasticsearch_zone_count
+  elasticsearch_ml_enabled  = var.elasticsearch_ml_enabled
+  elasticsearch_ml_max_size = var.elasticsearch_ml_max_size
 
   docker_image_tag_override = var.pin_version != "" ? {
     "elasticsearch" = "${var.pin_version}",
