@@ -81,12 +81,6 @@ variable "elasticsearch_ml_enabled" {
   description = "When true (ESS only), provision an Elasticsearch ML topology tier on the deployment"
 }
 
-variable "elasticsearch_ml_max_size" {
-  default     = "1g"
-  type        = string
-  description = "ESS ML tier autoscale memory cap (1g/2g/4g). 1g is cheapest; some ML jobs may not run. 2g/4g cost more but improve capacity. Ignored when elasticsearch_ml_enabled is false."
-}
-
 variable "max_size" {
   default     = ""
   type        = string
