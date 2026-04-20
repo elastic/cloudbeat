@@ -46,6 +46,12 @@ variable "kibana_enable_entity_analytics_settings" {
   type        = bool
 }
 
+variable "kibana_instance_size" {
+  default     = "4g"
+  type        = string
+  description = "ESS Kibana topology memory size (e.g. 4g, 8g)"
+}
+
 variable "deployment_template" {
   default     = "gcp-general-purpose"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"

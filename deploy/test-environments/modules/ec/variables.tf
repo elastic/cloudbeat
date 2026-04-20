@@ -102,3 +102,9 @@ variable "kibana_enable_entity_analytics_settings" {
   default     = false
   description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (feature flags, uiSettings, enableExperimental)"
 }
+
+variable "kibana_instance_size" {
+  type        = string
+  default     = "4g"
+  description = "ESS Kibana topology memory size (e.g. 4g, 8g)"
+}

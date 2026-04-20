@@ -44,6 +44,11 @@ inputs:
     type: boolean
     default: false
     required: false
+  kibana-instance-size:
+    description: "ESS Kibana topology memory size (e.g. 4g, 8g)"
+    type: string
+    default: "4g"
+    required: false
   docker-image-version-override:
     description: "Optional Docker image version to override the default stack image. Accepts formats like 8.x.y, 8.x.y-hash, or 8.x.y-SNAPSHOT."
     type: string
@@ -97,6 +102,7 @@ runs:
         TF_VAR_kibana_security_solution_experimental: ${{ inputs.kibana-security-solution-experimental }}
         TF_VAR_kibana_enable_entity_analytics_settings: ${{ inputs.kibana-enable-entity-analytics-settings }}
         TF_VAR_elasticsearch_ml_enabled: ${{ inputs.elasticsearch-ml-enabled }}
+        TF_VAR_kibana_instance_size: ${{ inputs.kibana-instance-size }}
         TF_VAR_ec_api_key: ${{ inputs.ec-api-key }}
         TF_VAR_deployment_template: ${{ env.TF_VAR_deployment_template }}
         TF_VAR_max_size: ${{ env.TF_VAR_max_size }}
