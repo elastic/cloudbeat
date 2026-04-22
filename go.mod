@@ -53,9 +53,9 @@ require (
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.10.2
 	github.com/elastic/elastic-agent-client/v7 v7.18.1
-	github.com/elastic/elastic-agent-libs v0.33.3
+	github.com/elastic/elastic-agent-libs v0.36.0
 	github.com/elastic/go-licenser v0.4.2
-	github.com/elastic/go-ucfg v0.8.8
+	github.com/elastic/go-ucfg v0.9.1
 	github.com/go-logr/zapr v1.3.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
@@ -390,9 +390,9 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/elastic-agent-system-metrics v0.14.3 // indirect
-	github.com/elastic/go-concert v0.3.0 // indirect
-	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
-	github.com/elastic/go-seccomp-bpf v1.5.0 // indirect
+	github.com/elastic/go-concert v0.3.1 // indirect
+	github.com/elastic/go-lumber v0.1.2-0.20240913080619-93ccc4a69e6a // indirect
+	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
 	github.com/elastic/go-structform v0.0.12 // indirect
 	github.com/elastic/go-sysinfo v1.15.4 // indirect
 	github.com/elastic/go-windows v1.0.2 // indirect
