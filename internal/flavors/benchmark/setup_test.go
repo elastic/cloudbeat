@@ -18,7 +18,6 @@
 package benchmark
 
 import (
-	"os"
 	"testing"
 
 	clientfeatures "k8s.io/client-go/features"
@@ -46,5 +45,5 @@ func TestMain(m *testing.M) {
 	// This runs before m.Run() so the slow first-call cost doesn't count against
 	// the per-test timeout imposed by the pre-commit go-test hook (-timeout 100ms).
 	fake.NewClientset()
-	os.Exit(m.Run())
+	m.Run()
 }
