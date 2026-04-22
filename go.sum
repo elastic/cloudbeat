@@ -718,8 +718,8 @@ github.com/Intevation/gval v1.3.0 h1:+Ze5sft5MmGbZrHj06NVUbcxCb67l9RaPTLMNr37mjw
 github.com/Intevation/gval v1.3.0/go.mod h1:xmGyGpP5be12EL0P12h+dqiYG8qn2j3PJxIgkoOHO5o=
 github.com/Intevation/jsonpath v0.2.1 h1:rINNQJ0Pts5XTFEG+zamtdL7l9uuE1z0FBA+r55Sw+A=
 github.com/Intevation/jsonpath v0.2.1/go.mod h1:WnZ8weMmwAx/fAO3SutjYFU+v7DFreNYnibV7CiaYIw=
-github.com/Jeffail/gabs/v2 v2.6.0 h1:WdCnGaDhNa4LSRTMwhLZzJ7SRDXjABNP13SOKvCpL5w=
-github.com/Jeffail/gabs/v2 v2.6.0/go.mod h1:xCn81vdHKxFUuWWAaD5jCTQDNPBMh5pPs9IJ+NcziBI=
+github.com/Jeffail/gabs/v2 v2.7.0 h1:Y2edYaTcE8ZpRsR2AtmPu5xQdFDIthFG0jYhu5PY8kg=
+github.com/Jeffail/gabs/v2 v2.7.0/go.mod h1:dp5ocw1FvBBQYssgHsG7I1WYsiLRtkUaB1FEtSwvNUw=
 github.com/JohnCGriffin/overflow v0.0.0-20211019200055-46fa312c352c/go.mod h1:X0CRv0ky0k6m906ixxpzmDRLvX58TFUKS2eePweuyxk=
 github.com/MakeNowJust/heredoc v1.0.0 h1:cXCdzVdstXyiTqTvfqk9SDHpKNjxuom+DOlyEeQ4pzQ=
 github.com/MakeNowJust/heredoc v1.0.0/go.mod h1:mG5amYoWBHf8vpLOuehzbGGw0EHxpZZ6lCpQ4fNJ8LE=
