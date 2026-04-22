@@ -108,7 +108,7 @@ func NewKubeFetcher(log *clog.Logger, ch chan fetching.ResourceInfo, provider k8
 }
 
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {
-	interval := time.Duration(time.Duration.Seconds(30)) // todo: hard coded - need to get from config
+	interval := 30 * time.Second
 
 	watcher, err := kubernetes.NewWatcher(client, r.resource, kubernetes.WatchOptions{
 		SyncTimeout: interval,
