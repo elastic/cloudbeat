@@ -25,6 +25,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	libbeatazure "github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation/azure"
+
 	"github.com/elastic/cloudbeat/internal/config"
 )
 
@@ -93,7 +95,7 @@ func TestReadJWTFromFile(t *testing.T) {
 				return "/path/that/does/not/exist/jwt.token"
 			},
 			expectError: true,
-			errorMsg:    "error trying to read JWT file",
+			errorMsg:    "reading JWT file",
 		},
 		{
 			name: "Should fail when file is empty",
@@ -115,7 +117,7 @@ func TestReadJWTFromFile(t *testing.T) {
 				return jwtFile
 			},
 			expectError: true,
-			errorMsg:    "invalid JWT format",
+			errorMsg:    "invalid JWT in",
 		},
 		{
 			name: "Should trim whitespace from JWT",
@@ -135,7 +137,7 @@ func TestReadJWTFromFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			jwtFile := tt.setupFile()
 
-			jwt, err := readJWTFromFile(jwtFile)
+			jwt, err := libbeatazure.ReadJWT(jwtFile)
 
 			if tt.expectError {
 				require.Error(t, err)
