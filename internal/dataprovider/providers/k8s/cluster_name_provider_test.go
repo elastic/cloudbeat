@@ -64,7 +64,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 		BinaryData: nil,
 	}
 	cfg := &config.Config{KubeConfig: "/dev/null"}
-	client := fake.NewSimpleClientset(ns, cfgMap)
+	client := fake.NewClientset(ns, cfgMap)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
 	t := s.T()
@@ -82,7 +82,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoCluster
 		},
 	}
 	cfg := &config.Config{KubeConfig: "/dev/null"}
-	client := fake.NewSimpleClientset(ns)
+	client := fake.NewClientset(ns)
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
 	t := s.T()
