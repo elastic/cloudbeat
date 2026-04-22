@@ -106,7 +106,7 @@ resource "ec_deployment" "deployment" {
   elasticsearch = local.elasticsearch
 
   kibana = {
-    size   = "8g"
+    size   = var.kibana_instance_size
     config = length(local.kibana_config_merged) > 0 ? local.kibana_config_merged : null
   }
 

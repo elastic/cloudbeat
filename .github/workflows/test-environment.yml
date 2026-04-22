@@ -411,6 +411,7 @@ jobs:
           ec-url: ${{ env.EC_URL }}
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
           kibana-security-solution-experimental: ${{ inputs.kibana_security_solution_experimental }}
+          kibana-instance-size: "4g"
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
