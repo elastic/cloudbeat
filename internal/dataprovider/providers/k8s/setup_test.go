@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	clientfeatures "k8s.io/client-go/features"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 // noWatchListGates wraps the default feature gates and disables WatchListClient.
@@ -41,5 +42,9 @@ func (g noWatchListGates) Enabled(key clientfeatures.Feature) bool {
 
 func TestMain(m *testing.M) {
 	clientfeatures.ReplaceFeatureGates(noWatchListGates{clientfeatures.FeatureGates()})
+	// Pre-warm the k8s type converter (sync.Once in fake.NewClientset → NewTypeConverter).
+	// This runs before m.Run() so the slow first-call cost doesn't count against
+	// the per-test timeout imposed by the pre-commit go-test hook (-timeout 100ms).
+	fake.NewClientset()
 	os.Exit(m.Run())
 }
