@@ -57,7 +57,7 @@ func TestLeaderElectionTestSuite(t *testing.T) {
 func (s *LeaderElectionTestSuite) SetupTest() {
 	s.wg = &sync.WaitGroup{}
 	s.opts = goleak.IgnoreCurrent()
-	s.kubeClient = k8sFake.NewSimpleClientset()
+	s.kubeClient = k8sFake.NewClientset()
 	s.manager = &LeaderelectionManager{
 		log:        testhelper.NewLogger(s.T()),
 		leader:     nil,
@@ -95,7 +95,7 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
-	s.manager.kubeClient = k8sFake.NewSimpleClientset(lease)
+	s.manager.kubeClient = k8sFake.NewClientset(lease)
 	t := s.T()
 	err := s.manager.Run(t.Context())
 	s.Require().NoError(err)
@@ -116,7 +116,7 @@ func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 	podId := "this_pod"
 	s.Require().NoError(os.Setenv(PodNameEnvar, podId))
 
-	s.manager.kubeClient = k8sFake.NewSimpleClientset()
+	s.manager.kubeClient = k8sFake.NewClientset()
 	t := s.T()
 	err := s.manager.Run(t.Context())
 	s.Require().NoError(err)
