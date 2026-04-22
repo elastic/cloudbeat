@@ -3,6 +3,11 @@ name: Bump Cloudbeat version
 on:
   workflow_dispatch:
     inputs:
+      target_branch:
+        description: "Target branch for the bump (e.g. main, 9.2). Defaults to the triggered branch."
+        type: string
+        required: false
+        default: ""
       bump_cloudbeat:
         description: "Bump cloudbeat version"
         type: boolean
@@ -30,7 +35,7 @@ jobs:
       - name: Checkout Cloudbeat Repo
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ inputs.target_branch != '' && inputs.target_branch || github.ref_name }}
           token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
           fetch-depth: 0
 
@@ -53,7 +58,7 @@ jobs:
         if: ${{ inputs.bump_cloudbeat }}
         # bump_cloudbeat.sh will create multiple PRs with different HEAD branches
         env:
-          GIT_BASE_BRANCH: ${{ github.ref_name }}
+          GIT_BASE_BRANCH: ${{ inputs.target_branch != '' && inputs.target_branch || github.ref_name }}
         run: scripts/bump_cloudbeat.sh
 
       - name: Bump Cloud Security Posture Integration

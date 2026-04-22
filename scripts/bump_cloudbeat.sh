@@ -282,6 +282,27 @@ bump_snyk_branch_monitoring() {
 
 }
 
+check_already_bumped() {
+    local current_version
+    current_version=$(grep defaultBeatVersion version/version.go | cut -f2 -d '"')
+    if [[ "$current_version" == "$NEXT_CLOUDBEAT_VERSION" ]]; then
+        echo "INFO: version/version.go already shows $NEXT_CLOUDBEAT_VERSION — bump already complete. Exiting."
+        exit 0
+    fi
+
+    local existing_pr
+    existing_pr=$(gh pr list \
+        --repo elastic/cloudbeat \
+        --head "bump-to-$NEXT_CLOUDBEAT_VERSION" \
+        --state open \
+        --json number \
+        --jq '.[0].number' 2>/dev/null || echo "")
+    if [[ -n "$existing_pr" ]]; then
+        echo "INFO: Bump PR #$existing_pr already exists for $NEXT_CLOUDBEAT_VERSION — skipping."
+        exit 0
+    fi
+}
+
 validate_base_branch() {
     if [[ "$BASE_BRANCH" == "main" || "$BASE_BRANCH" =~ ^[89].x$ || "$BASE_BRANCH" =~ ^[89]\.[0-9]+\.[0-9]+$ ]]; then
         echo "Allowed to bump version for $BASE_BRANCH"
@@ -291,6 +312,7 @@ validate_base_branch() {
     exit 1
 }
 
+check_already_bumped
 validate_base_branch
 run_version_changes_for_base_branch
 run_version_changes_for_release_branch
