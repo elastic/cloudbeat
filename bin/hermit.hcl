@@ -1,4 +1,5 @@
 env = {
   "CLOUDBEAT_VERSION": "9.4.0",
   "ELK_VERSION": "${CLOUDBEAT_VERSION}-SNAPSHOT",
+  "GOEXPERIMENT": "jsonv2",
 }
