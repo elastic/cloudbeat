@@ -20,7 +20,7 @@ concurrency:
 jobs:
   init-hermit:
     name: Init Hermit Tools
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Check out the repo
@@ -33,7 +33,7 @@ jobs:
   check-asset-inventory-supported-version:
     needs: [ init-hermit ]
     name: Check Asset Inventory supported version
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       asset_inventory_supported: ${{ steps.check-asset-inventory-supported-version.outputs.asset_inventory_supported }}
     steps:
@@ -60,7 +60,7 @@ jobs:
   ci-azure:
     needs: [ init-hermit ]
     name: CIS Azure CI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: "read"
@@ -83,7 +83,7 @@ jobs:
   ci-azure-asset-inventory:
     needs: [ init-hermit, check-asset-inventory-supported-version ]
     name: Azure Asset Inventory CI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
     timeout-minutes: 60
     permissions:
@@ -107,7 +107,7 @@ jobs:
   ci-aws:
     needs: [ init-hermit ]
     name: CIS AWS CI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: "read"
@@ -130,7 +130,7 @@ jobs:
   ci-aws-asset-inventory:
     needs: [ init-hermit, check-asset-inventory-supported-version ]
     name: AWS Asset Inventory CI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
     timeout-minutes: 60
     permissions:
@@ -153,7 +153,7 @@ jobs:
   ci-gcp:
     needs: [ init-hermit ]
     name: CIS GCP CI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: 'read'
@@ -177,7 +177,7 @@ jobs:
   ci-gcp-asset-inventory:
     needs: [ init-hermit, check-asset-inventory-supported-version ]
     name: GCP Asset Inventory CI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: needs.check-asset-inventory-supported-version.outputs.asset_inventory_supported == 'true'
     timeout-minutes: 60
     permissions:
@@ -201,7 +201,7 @@ jobs:
   ci-cnvm:
     needs: [ init-hermit ]
     name: CNVM CI
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 75
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -235,7 +235,7 @@ jobs:
     # Since we build the cloudbeat in the worker's OS and as non static,
     # we need to keep the OS version same as elastic-agent docker image base.
     # docker run --interactive --tty --rm --entrypoint bash docker.elastic.co/elastic-agent/elastic-agent-complete:8.14.0-SNAPSHOT -c 'cat /etc/os-release'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -263,7 +263,7 @@ jobs:
   ci-k8s:
     needs: [ init-hermit, docker-images ]
     name: ${{ matrix.test-target }}-${{ matrix.kind-config }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     strategy:
       fail-fast: false
@@ -330,7 +330,7 @@ jobs:
       - ci-cnvm
       - ci-k8s
     name: Upload integration tests results
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       pull-requests: write
