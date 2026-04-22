@@ -100,6 +100,10 @@ func GolangCrossBuild() error {
 	args := devtools.DefaultGolangCrossBuildArgs()
 	args.CGO = false
 	args.ExtraFlags = append(args.ExtraFlags, "-tags=grpcnotrace,release")
+	if args.Env == nil {
+		args.Env = map[string]string{}
+	}
+	args.Env["GOEXPERIMENT"] = "jsonv2"
 	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
 		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
 	}
