@@ -295,7 +295,7 @@ require (
 	go.opentelemetry.io/collector/internal/componentalias v0.150.0 // indirect
 	go.opentelemetry.io/collector/pdata/xpdata v0.150.0 // indirect
 	go.opentelemetry.io/collector/pipeline/xpipeline v0.150.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.4 // indirect
+	go.yaml.in/yaml/v2/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/tools v0.43.0 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
