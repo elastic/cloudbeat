@@ -16,7 +16,7 @@ jobs:
   auto-approve:
     runs-on: ubuntu-latest
     if: |
-      github.actor == 'cloudsecmachine[bot]' &&
+      github.actor == 'cloudsecmachine' &&
       (
         startsWith(github.event.pull_request.title, 'Bump cloudbeat version') ||
         startsWith(github.event.pull_request.title, 'Release cloudbeat version')
