@@ -488,7 +488,7 @@ require (
 	github.com/masahiro331/go-ebs-file v0.0.0-20260414033931-3a3a92f3e315 // indirect
 	github.com/masahiro331/go-ext4-filesystem v0.0.0-20240620024024-ca14e6327bbd // indirect
 	github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1 // indirect
-	github.com/masahiro331/go-vmdk-parser v0.0.0-20221225061455-612096e4bbbd // indirect
+	github.com/masahiro331/go-vmdk-parser v0.0.0-20260422020701-a12df6824e31 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.21 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
