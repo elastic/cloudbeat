@@ -411,6 +411,7 @@ jobs:
           ec-url: ${{ env.EC_URL }}
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
           kibana-security-solution-experimental: ${{ inputs.kibana_security_solution_experimental }}
+          kibana-instance-size: "4g"
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
@@ -478,63 +479,6 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
-      - name: Enable Entity Store v2 Kibana Setting
-        if: >-
-          ${{
-            !cancelled()
-            && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false')
-            && inputs.kibana_security_solution_experimental == true
-            && env.TF_VAR_serverless_mode != 'true'
-          }}
-        run: |
-          curl -s -f -X POST "$KIBANA_URL/internal/kibana/settings" \
-            -u "$ES_USER:$ES_PASSWORD" \
-            -H "kbn-xsrf: true" \
-            -H "x-elastic-internal-origin: kibana" \
-            -H "Content-Type: application/json" \
-            -d '{"changes":{"securitySolution:entityStoreEnableV2":true}}'
-          echo "Entity Store v2 setting posted, polling for activation..."
-
-          for i in $(seq 1 12); do
-            value=$(curl -s -f -X GET "$KIBANA_URL/internal/kibana/settings" \
-              -u "$ES_USER:$ES_PASSWORD" \
-              -H "kbn-xsrf: true" \
-              -H "x-elastic-internal-origin: kibana" | \
-              jq -r '.settings["securitySolution:entityStoreEnableV2"].userValue // empty')
-            if [ "$value" = "true" ]; then
-              echo "Entity Store v2 setting is active."
-              exit 0
-            fi
-            sleep 5
-          done
-          echo "::warning::Entity Store v2 setting not confirmed active within 60s"
-
-      - name: Install Entity Store v2
-        if: >-
-          ${{
-            !cancelled()
-            && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false')
-            && inputs.kibana_security_solution_experimental == true
-            && env.TF_VAR_serverless_mode != 'true'
-          }}
-        run: |
-          response=$(curl -s -w "\n%{http_code}" -X POST \
-            "$KIBANA_URL/internal/security/entity_store/install?apiVersion=2" \
-            -u "$ES_USER:$ES_PASSWORD" \
-            -H "kbn-xsrf: true" \
-            -H "x-elastic-internal-origin: kibana" \
-            -H "Content-Type: application/json" \
-            -d '{}')
-          http_code=$(echo "$response" | tail -1)
-          body=$(echo "$response" | sed '$d')
-          if [[ "$http_code" =~ ^2 ]]; then
-            echo "Entity Store v2 install succeeded (HTTP $http_code)."
-            echo "$body"
-          else
-            echo "::error::Entity Store v2 install failed (HTTP $http_code): $body"
-            exit 1
-          fi
-
       - name: Deploy CDR Integrations
         id: cdr-integrations
         if: ${{ !cancelled() && (steps.elk-stack.outcome == 'success' || env.DEPLOY_STACK == 'false') && env.INFRA_TYPE != 'cis' }}
@@ -561,6 +505,7 @@ jobs:
           kibana-url: ${{ env.KIBANA_URL }}
           elk-stack-version: ${{ env.STACK_VERSION }}
           enable-entity-store-v2: ${{ inputs.enable-entity-store-v2 }}
+          serverless-mode: ${{ inputs.serverless_mode }}
           azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}

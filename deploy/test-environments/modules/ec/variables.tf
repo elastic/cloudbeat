@@ -53,6 +53,12 @@ variable "elasticsearch_autoscale" {
   description = "Optional autoscale the Elasticsearch cluster"
 }
 
+variable "elasticsearch_ml_enabled" {
+  default     = false
+  type        = bool
+  description = "When true, provision an Elasticsearch ML topology tier (ESS only)"
+}
+
 variable "max_size" {
   default     = "128g"
   type        = string
@@ -89,4 +95,16 @@ variable "kibana_enable_security_solution_experimental" {
   type        = bool
   default     = true
   description = "When true, set Kibana user_settings_yaml with Security Solution experimental feature flags (ESS only)"
+}
+
+variable "kibana_enable_entity_analytics_settings" {
+  type        = bool
+  default     = false
+  description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (feature flags, uiSettings, enableExperimental)"
+}
+
+variable "kibana_instance_size" {
+  type        = string
+  default     = "4g"
+  description = "ESS Kibana topology memory size (e.g. 4g, 8g)"
 }

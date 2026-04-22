@@ -40,6 +40,18 @@ variable "kibana_security_solution_experimental" {
   type        = bool
 }
 
+variable "kibana_enable_entity_analytics_settings" {
+  default     = false
+  description = "When true (ESS only), apply Kibana user_settings_yaml for Entity Analytics (EA) feature flags and UI overrides"
+  type        = bool
+}
+
+variable "kibana_instance_size" {
+  default     = "4g"
+  type        = string
+  description = "ESS Kibana topology memory size (e.g. 4g, 8g)"
+}
+
 variable "deployment_template" {
   default     = "gcp-general-purpose"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"
@@ -61,6 +73,12 @@ variable "elasticsearch_zone_count" {
   default     = 2
   type        = number
   description = "Optional Elasticsearch zone count"
+}
+
+variable "elasticsearch_ml_enabled" {
+  default     = false
+  type        = bool
+  description = "When true (ESS only), provision an Elasticsearch ML topology tier on the deployment"
 }
 
 variable "max_size" {
