@@ -18,12 +18,12 @@
 package auth
 
 import (
-	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+
+	libbeatazure "github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation/azure"
 
 	"github.com/elastic/cloudbeat/internal/config"
 )
@@ -67,36 +67,19 @@ func (a *AzureAuthProvider) FindCertificateCredential(tenantID string, clientID 
 	return azidentity.NewClientCertificateCredential(tenantID, clientID, certs, key, options)
 }
 
-// FindClientAssertionCredentials is a wrapper around azidentity.NewClientAssertionCredential that loads JWT from environment variable, similar to cloud connectors pattern
+// FindClientAssertionCredentials creates an Azure credential using the JWT identity token
+// at the path specified by the CLOUD_CONNECTORS_ID_TOKEN_FILE environment variable.
+// The JWT file is re-read on each token refresh via the shared beats azure package.
 func (a *AzureAuthProvider) FindClientAssertionCredentials(tenantID string, clientID string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error) {
 	jwtFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
 	if jwtFilePath == "" {
 		return nil, fmt.Errorf("environment variable %s is required for client assertion credentials", config.CloudConnectorsJWTPathEnvVar)
 	}
 
-	getAssertion := func(_ context.Context) (string, error) {
-		return readJWTFromFile(jwtFilePath)
-	}
-
-	return azidentity.NewClientAssertionCredential(tenantID, clientID, getAssertion, options)
-}
-
-func readJWTFromFile(filePath string) (string, error) {
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return "", fmt.Errorf("error trying to read JWT file %s: %s", filePath, err.Error())
-	}
-
-	jwt := strings.TrimSpace(string(data))
-	if jwt == "" {
-		return "", fmt.Errorf("JWT file %s is empty", filePath)
-	}
-
-	// Basic validation - JWT should have 3 parts separated by dots
-	parts := strings.Count(jwt, ".")
-	if parts != 2 {
-		return "", fmt.Errorf("invalid JWT format in file %s: expected 3 parts separated by dots, got %d", filePath, parts+1)
-	}
-
-	return jwt, nil
+	return libbeatazure.NewClientAssertionCredential(libbeatazure.Params{
+		TenantID:    tenantID,
+		ClientID:    clientID,
+		JWTFilePath: jwtFilePath,
+		Options:     options,
+	})
 }
