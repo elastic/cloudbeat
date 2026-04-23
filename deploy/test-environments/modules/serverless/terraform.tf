@@ -2,7 +2,7 @@ terraform {
   required_providers {
     restapi = {
       source                = "mastercard/restapi"
-      version               = "~> 1.20.0"
+      version               = "~> 3.0.0"
       configuration_aliases = [restapi.elastic_cloud]
     }
     http = {
