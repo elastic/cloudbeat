@@ -151,7 +151,6 @@ require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bytecodealliance/wasmtime-go/v39 v39.0.1 // indirect
-	github.com/carabiner-dev/attestation v0.2.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20251210132809-ee656c7534f5 // indirect
@@ -515,7 +514,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.3.0 // indirect
 	github.com/opencontainers/selinux v1.13.1 // indirect
-	github.com/openvex/go-vex v0.2.8 // indirect
+	github.com/openvex/go-vex v0.2.7 // indirect
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
 	github.com/owenrumney/squealer v1.2.12 // indirect
 	github.com/package-url/packageurl-go v0.1.5 // indirect
@@ -611,7 +610,7 @@ require (
 
 replace (
 	github.com/apoydence/eachers => github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 //indirect, see https://github.com/elastic/beats/pull/29780 for details.
-	github.com/dop251/goja => github.com/elastic/goja v0.0.0-20240927123429-241b342198c2
+	github.com/dop251/goja => github.com/elastic/goja v0.0.0-20190128172624-dd2ac4456e20
 	github.com/eclipse/paho.mqtt.golang v1.3.5 => github.com/eclipse/paho.mqtt.golang v1.5.1
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20210429153827-3eaba0894325
 )
