@@ -7,7 +7,7 @@ terraform {
 
     restapi = {
       source  = "mastercard/restapi"
-      version = "~> 1.18.0"
+      version = "~> 1.20.0"
     }
 
     random = {
