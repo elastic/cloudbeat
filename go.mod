@@ -51,7 +51,7 @@ require (
 	github.com/dgraph-io/ristretto v1.0.1
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260331192023-d9d5d914b7fe
-	github.com/elastic/e2e-testing v1.99.1
+	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.10.2
 	github.com/elastic/elastic-agent-client/v7 v7.18.1
 	github.com/elastic/elastic-agent-libs v0.36.0
@@ -172,7 +172,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/elastic/gokrb5/v8 v8.0.0-20251105095404-23cc45e6a102 // indirect
-	github.com/elastic/sarama v1.24.1-elastic // indirect
+	github.com/elastic/sarama v1.19.1-0.20260310070522-abae92ca1603 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -387,14 +387,14 @@ require (
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dop251/goja v0.0.0-20251201205617-2bb4c724c0f9 // indirect
-	github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6 // indirect
+	github.com/dop251/goja_nodejs v0.0.0-20211022123610-8dd9abb0616d // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/elastic-agent-system-metrics v0.14.3 // indirect
 	github.com/elastic/go-concert v0.3.1 // indirect
-	github.com/elastic/go-lumber 93ccc4a69e6a // indirect
+	github.com/elastic/go-lumber v0.1.2-0.20240913080619-93ccc4a69e6a // indirect
 	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
 	github.com/elastic/go-structform v0.0.12 // indirect
 	github.com/elastic/go-sysinfo v1.15.4 // indirect
@@ -611,7 +611,7 @@ require (
 
 replace (
 	github.com/apoydence/eachers => github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 //indirect, see https://github.com/elastic/beats/pull/29780 for details.
-	github.com/dop251/goja => github.com/elastic/goja 241b342198c2
+	github.com/dop251/goja => github.com/elastic/goja v0.0.0-20240927123429-241b342198c2
 	github.com/eclipse/paho.mqtt.golang v1.3.5 => github.com/eclipse/paho.mqtt.golang v1.5.1
-	github.com/google/gopacket => github.com/elastic/gopacket 3eaba0894325
+	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20210429153827-3eaba0894325
 )
