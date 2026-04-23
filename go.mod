@@ -117,7 +117,7 @@ require (
 	k8s.io/apimachinery v0.35.4
 	k8s.io/client-go v0.35.4
 	k8s.io/klog/v2 v2.130.1
-	modernc.org/sqlite v1.44.2
+	modernc.org/sqlite v1.49.1
 )
 
 require gopkg.in/yaml.v2 v2.4.0
