@@ -1688,8 +1688,8 @@ github.com/lestrrat-go/jwx/v3 v3.0.13 h1:AdHKiPIYeCSnOJtvdpipPg/0SuFh9rdkN+HF3O0
 github.com/lestrrat-go/jwx/v3 v3.0.13/go.mod h1:2m0PV1A9tM4b/jVLMx8rh6rBl7F6WGb3EG2hufN9OQU=
 github.com/lestrrat-go/option/v2 v2.0.0 h1:XxrcaJESE1fokHy3FpaQ/cXW8ZsIdWcdFzzLOcID3Ss=
 github.com/lestrrat-go/option/v2 v2.0.0/go.mod h1:oSySsmzMoR0iRzCDCaUfsCzxQHUEuhOViQObyy7S6Vg=
-github.com/letsencrypt/boulder v0.20260202.0 h1:bP+VOXpcmsL9L2hmZBKE/a4faZH7KV/7k4D1+6wXj9Y=
-github.com/letsencrypt/boulder v0.20260202.0/go.mod h1:lq9WRC5fABH/Bsy90uOrXaKBvCyul3KO7NN0DvEynlA=
+github.com/letsencrypt/boulder v0.20260420.0 h1:PMFy37+tQAfNe2Qks7NhTrKbULzhVmj19LbaZIaz0SE=
+github.com/letsencrypt/boulder v0.20260420.0/go.mod h1:ZisB912eU757QUU0PTH+zq2JScaegVjPVKtPn2K1U3w=
 github.com/liamg/memoryfs v1.6.0 h1:jAFec2HI1PgMTem5gR7UT8zi9u4BfG5jorCRlLH06W8=
 github.com/liamg/memoryfs v1.6.0/go.mod h1:z7mfqXFQS8eSeBBsFjYLlxYRMRyiPktytvYCYTb3BSk=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
