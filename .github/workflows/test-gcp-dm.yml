@@ -32,7 +32,7 @@ jobs:
   # Test a GCP Deployment Manager deployment using Application Default Credentials
   gcp_dm_adc:
     name: CSPM GCP with ADC
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: "read"
@@ -133,7 +133,7 @@ jobs:
   gcp_dm_sa:
     needs: gcp_dm_adc
     name: CSPM GCP with SA
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: "read"
