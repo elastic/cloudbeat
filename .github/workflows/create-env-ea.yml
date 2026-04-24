@@ -102,7 +102,7 @@ jobs:
       - name: Get Elastic Cloud Credentials from Vault
         id: get-ec-credentials
         if: steps.determine-vault-path.outcome == 'success'
-        uses: hashicorp/vault-action@9c2d817b85b9fff56bcab21cb74b485aee9e9d73 # v2.8.1
+        uses: hashicorp/vault-action@4c06c5ccf5c0761b6029f56cfb1dcf5565918a3b # v3.4.0
         with:
           url: ${{ secrets.VAULT_ADDR }}
           roleId: ${{ secrets.CSP_VAULT_ROLE_ID }}
