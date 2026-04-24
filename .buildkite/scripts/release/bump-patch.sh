@@ -15,10 +15,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=common.sh
 source "${SCRIPT_DIR}/common.sh"
 
+BASE_BRANCH="${BRANCH}"
+BUMP_BRANCH="bump-to-${NEW_VERSION}"
+
+git fetch origin "${BASE_BRANCH}"
+git checkout "${BASE_BRANCH}"
+
 NEXT_CLOUDBEAT_VERSION="${NEW_VERSION}"
 CURRENT_CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d '"')
-BASE_BRANCH="${BRANCH}"
-BUMP_BRANCH="bump-to-${NEXT_CLOUDBEAT_VERSION}"
 
 DRY_RUN="${DRY_RUN:-false}"
 
@@ -40,7 +44,6 @@ update_version_beat() {
 }
 
 run_patch_bump() {
-    git fetch origin "${BASE_BRANCH}"
     git checkout -b "${BUMP_BRANCH}" "origin/${BASE_BRANCH}"
 
     update_version_beat
