@@ -28,16 +28,25 @@ gh --version
 echo "--- Verify authenticated actor"
 gh auth status
 
-echo "--- Verify repository permissions"
-CAN_PUSH=$(gh api "repos/${REPO}" --jq '.permissions.push')
-echo "can_push: ${CAN_PUSH}"
+echo "--- Configure git identity"
+git config --global user.email "cloudsecmachine@users.noreply.github.com"
+git config --global user.name "Cloud Security Machine"
 
-echo "--- Dry-run: gh pr create"
-gh pr create --repo "${REPO}" --dry-run \
-  --title "chore: verify ephemeral token can create PRs" \
-  --body "dry-run verification — no PR created" \
-  --base main \
-  --head "$(git rev-parse --abbrev-ref HEAD)"
+TEST_BRANCH="verify-gh-token/${BUILDKITE_BUILD_NUMBER:-local}"
+
+echo "--- Create test branch ${TEST_BRANCH}"
+git checkout -b "${TEST_BRANCH}"
+
+echo "--- gh pr create"
+touch .gh-pr-create-test-file
+git add .gh-pr-create-test-file
+git commit -m "chore: test gh pr create permissions"
+git push origin "${TEST_BRANCH}"
+gh pr create --repo "${REPO}" \
+  --head "${TEST_BRANCH}" \
+  --title "chore: verify ephemeral token — delete me" \
+  --body "Automated verification that the ephemeral vault token can create PRs. Safe to close and delete." \
+  --base main
 
 echo ""
 echo "All checks passed:"
