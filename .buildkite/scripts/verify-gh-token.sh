@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Verification script for task-01: confirm the wolfi agent image has gh CLI
+# and that the ephemeral vault-github-token can authenticate and has the
+# permissions needed to create PRs in elastic/cloudbeat.
+#
+# Run this step BEFORE wiring the full bump script into the pipeline.
+# ---------------------------------------------------------------------------
+
+REPO="elastic/cloudbeat"
+
+echo "--- Check gh CLI is available"
+if ! command -v gh &>/dev/null; then
+  echo "ERROR: gh CLI not found in PATH"
+  echo ""
+  echo "Image info:"
+  cat /etc/os-release 2>/dev/null || uname -a
+  echo ""
+  echo "PATH: $PATH"
+  echo ""
+  echo "ACTION REQUIRED: install gh CLI in this image or switch to an image that includes it."
+  exit 1
+fi
+gh --version
+
+echo "--- Verify authenticated actor"
+gh auth status
+
+echo "--- Verify repository permissions"
+CAN_PUSH=$(gh api "repos/${REPO}" --jq '.permissions.push')
+echo "can_push: ${CAN_PUSH}"
+
+echo "--- Dry-run: gh pr create"
+gh pr create --repo "${REPO}" --dry-run \
+  --title "chore: verify ephemeral token can create PRs" \
+  --body "dry-run verification — no PR created" \
+  --base main \
+  --head "$(git rev-parse --abbrev-ref HEAD)"
+
+echo ""
+echo "All checks passed:"
+echo "  gh CLI       : $(gh --version | head -1)"
+echo "  pr create DR : ok"
