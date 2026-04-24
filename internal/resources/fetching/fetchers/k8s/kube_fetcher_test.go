@@ -186,7 +186,7 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 
 	for i, tt := range tests {
 		s.Run(fmt.Sprintf("Kube api test %v", i), func() {
-			client := k8sfake.NewSimpleClientset(tt)
+			client := k8sfake.NewClientset(tt)
 			kubeFetcher := NewKubeFetcher(testhelper.NewLogger(s.T()), s.resourceCh, client)
 
 			err := kubeFetcher.Fetch(context.TODO(), cycle.Metadata{})
