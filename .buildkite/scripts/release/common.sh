@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sourced by bump scripts — do not execute directly.
 # Expects callers to have validated: BRANCH, NEW_VERSION, REPO, WORKFLOW
-# and to have set: BUMP_BRANCH, NEXT_CLOUDBEAT_VERSION
+# and to have set: BUMP_BRANCH, NEXT_CLOUDBEAT_VERSION, GH_REPO (=elastic/${REPO})
 
 setup_git_identity() {
     git config --global user.email "cloudsecmachine@users.noreply.github.com"
@@ -14,7 +14,7 @@ check_already_bumped() {
         exit 0
     fi
     local existing_pr
-    existing_pr=$(gh pr list --repo "${REPO}" --head "${BUMP_BRANCH}" --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
+    existing_pr=$(gh pr list --repo "${GH_REPO}" --head "${BUMP_BRANCH}" --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
     if [[ -n "${existing_pr}" ]]; then
         echo "INFO: PR #${existing_pr} already open for ${BUMP_BRANCH} — skipping."
         exit 0

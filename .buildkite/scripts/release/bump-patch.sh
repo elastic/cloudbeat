@@ -17,6 +17,7 @@ source "${SCRIPT_DIR}/common.sh"
 
 BASE_BRANCH="${BRANCH}"
 BUMP_BRANCH="bump-to-${NEW_VERSION}"
+GH_REPO="elastic/${REPO}"
 
 git fetch origin "${BASE_BRANCH}"
 git checkout "${BASE_BRANCH}"
@@ -56,7 +57,7 @@ run_patch_bump() {
     if [[ "${DRY_RUN}" == "true" ]]; then
         echo "--- Dry run: skipping push and PR creation"
         gh pr create \
-            --repo "${REPO}" \
+            --repo "${GH_REPO}" \
             --head "${BUMP_BRANCH}" \
             --base "${BASE_BRANCH}" \
             --title "Bump ${BASE_BRANCH} to ${NEXT_CLOUDBEAT_VERSION}" \
@@ -69,7 +70,7 @@ run_patch_bump() {
 
     git push origin "${BUMP_BRANCH}"
     gh pr create \
-        --repo "${REPO}" \
+        --repo "${GH_REPO}" \
         --head "${BUMP_BRANCH}" \
         --base "${BASE_BRANCH}" \
         --title "Bump ${BASE_BRANCH} to ${NEXT_CLOUDBEAT_VERSION}" \
