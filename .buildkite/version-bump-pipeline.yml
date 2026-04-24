@@ -18,8 +18,10 @@ notify:
     if: build.state == "blocked"
 
 steps:
-  - label: ":mag: Verify: gh CLI + ephemeral token"
-    key: verify-gh-token
+
+  - label: ":arrow_up: Bump version (patch)"
+    key: bump-version-patch
+    if: build.env("WORKFLOW") == "patch"
     agents:
       image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
       cpu: 250m
@@ -28,55 +30,8 @@ steps:
     plugins:
       - elastic/vault-github-token#v0.2.0: ~
     command:
-      - .buildkite/scripts/verify-gh-token.sh
-    timeout_in_minutes: 10
-
-  # - label: "Validate WORKFLOW input"
-  #   key: validate-workflow
-  #   command: |
-  #     if [[ "${WORKFLOW}" != "minor" && "${WORKFLOW}" != "patch" ]]; then
-  #       echo "ERROR: WORKFLOW must be 'minor' or 'patch', got '${WORKFLOW}'"
-  #       exit 1
-  #     fi
-  #     echo "WORKFLOW=${WORKFLOW} is valid"
-  #   agents:
-  #     image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
-  #     cpu: 250m
-  #     memory: 512Mi
-
-  # - wait:
-
-  # - label: "Bump version minor"
-  #   key: bump-version-minor
-  #   if: build.env("WORKFLOW") == "minor"
-  #   agents:
-  #     image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
-  #     cpu: 250m
-  #     memory: 512Mi
-  #   plugins:
-  #     - elastic/vault-github-token#v0.1.0: ~
-  #     - elastic/gh-cli#v0.1.1:
-  #         workflow-file: "bump-version.yml"
-  #         workflow-ref: "main"
-  #         workflow-inputs: |
-  #           target_branch=main
-  #           bump_cloudbeat=true
-
-  # - label: "Bump version patch"
-  #   key: bump-version-patch
-  #   if: build.env("WORKFLOW") == "patch"
-  #   agents:
-  #     image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
-  #     cpu: 250m
-  #     memory: 512Mi
-  #   plugins:
-  #     - elastic/vault-github-token#v0.1.0: ~
-  #     - elastic/gh-cli#v0.1.1:
-  #         workflow-file: "bump-version.yml"
-  #         workflow-ref: "main"
-  #         workflow-inputs: |
-  #           target_branch=${BRANCH}
-  #           bump_cloudbeat=true
+      - .buildkite/scripts/release/bump-patch.sh
+    timeout_in_minutes: 15
 
   - block: "Ready to poll for DRA artifacts?"
     prompt: |
@@ -118,3 +73,16 @@ steps:
           field: ".version"
           expected_value: "${NEW_VERSION}-SNAPSHOT"
           polling_interval: "30"
+
+  - label: ":hammer: Post-bump ops (CFT + Snyk)"
+    key: post-bump
+    if: build.env("WORKFLOW") == "patch"
+    depends_on: fetch-dra-artifacts
+    agents:
+      image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+      cpu: 250m
+      memory: 512Mi
+      ephemeralStorage: 1Gi
+    command:
+      - .buildkite/scripts/release/post-bump.sh
+    timeout_in_minutes: 30
