@@ -13,7 +13,7 @@ env:
 jobs:
   Sync-Templates:
     name: Sync CIS Rule Templates
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Checkout Integrations repo
