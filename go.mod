@@ -21,8 +21,8 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.56.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.56.0 // indirect
 	github.com/aquasecurity/go-dep-parser v0.0.0-20240606050805-1de9a375c629
-	github.com/aquasecurity/trivy v0.66.0
-	github.com/aquasecurity/trivy-db v0.0.0-20250731052236-c7c831e2254d
+	github.com/aquasecurity/trivy v0.70.0
+	github.com/aquasecurity/trivy-db 722777bbcf5e
 	github.com/aws/aws-sdk-go-v2 v1.41.6
 	github.com/aws/aws-sdk-go-v2/config v1.32.16
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.15
