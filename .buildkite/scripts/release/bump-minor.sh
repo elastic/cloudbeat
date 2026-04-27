@@ -71,6 +71,21 @@ EOF
 }
 
 run_minor_bump() {
+    # If an open PR already exists for this bump branch, skip — don't overwrite
+    # in-flight work. Individual file changes are idempotent via git diff.
+    local existing_pr
+    existing_pr=$(gh pr list --repo "${GH_REPO}" --head "${BUMP_BRANCH}" --state open \
+        --json number --jq '.[0].number' 2>/dev/null || echo "")
+    if [[ -n "${existing_pr}" ]]; then
+        echo "INFO: PR #${existing_pr} already open for ${BUMP_BRANCH} — skipping."
+        return
+    fi
+
+    if git ls-remote --exit-code --heads origin "${BUMP_BRANCH}" &>/dev/null; then
+        echo "Deleting stale remote branch: ${BUMP_BRANCH}"
+        git push origin --delete "${BUMP_BRANCH}"
+    fi
+
     git checkout -b "${BUMP_BRANCH}" origin/main
 
     sed -i'' -E "s/const defaultBeatVersion = .*/const defaultBeatVersion = \"${NEXT_CLOUDBEAT_VERSION}\"/g" version/version.go
@@ -89,7 +104,7 @@ run_minor_bump() {
 
     if git diff --cached --quiet; then
         echo "No changes after bump — nothing to push."
-        exit 0
+        return
     fi
 
     git commit -m "Bump to ${NEXT_CLOUDBEAT_VERSION}"
@@ -125,6 +140,4 @@ run_minor_bump() {
         --label "version-bump-auto-approve"
 }
 
-check_already_bumped
-clear_stale_branch
 run_minor_bump
