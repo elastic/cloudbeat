@@ -10,7 +10,6 @@ notify:
         🚦 Pipeline waiting for approval 🚦
         Repo: `${REPO}`
 
-        Ready to fetch DRA artifacts - please unblock when ready.
         New version: `${NEW_VERSION}`
         Branch: `${BRANCH}`
         Workflow: `${WORKFLOW}`
@@ -32,6 +31,42 @@ steps:
     command:
       - .buildkite/scripts/release/bump-patch.sh
     timeout_in_minutes: 15
+
+  - label: ":arrow_up: Bump version (minor)"
+    key: bump-version-minor
+    if: build.env("WORKFLOW") == "minor"
+    agents:
+      image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+      cpu: 250m
+      memory: 512Mi
+      ephemeralStorage: 1Gi
+    plugins:
+      - elastic/vault-github-token#v0.2.0: ~
+    command:
+      - .buildkite/scripts/release/bump-minor.sh
+    timeout_in_minutes: 15
+
+  # - block: "Wait for PR merge"
+  #   prompt: "Continue after the bump PR is merged and all checks have passed."
+  #   key: wait-for-merge
+  #   if: build.env("WORKFLOW") == "minor"
+  #   depends_on: bump-version-minor
+  #   blocked_state: running
+
+  # - label: ":twisted_rightwards_arrows: Minor finalize (hermit PR + branch out)"
+  #   key: bump-minor-finalize
+  #   if: build.env("WORKFLOW") == "minor"
+  #   depends_on: wait-for-merge
+  #   agents:
+  #     image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+  #     cpu: 250m
+  #     memory: 512Mi
+  #     ephemeralStorage: 1Gi
+  #   plugins:
+  #     - elastic/vault-github-token#v0.2.0: ~
+  #   command:
+  #     - .buildkite/scripts/release/bump-minor-finalize.sh
+  #   timeout_in_minutes: 15
 
   # - block: "Ready to poll for DRA artifacts?"
   #   prompt: |
