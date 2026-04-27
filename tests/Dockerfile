@@ -1,4 +1,4 @@
-FROM python:3.9-slim@sha256:2d97f6910b16bd338d3060f261f53f144965f755599aab1acda1e13cf1731b1b as builder
+FROM python:3.14-slim@sha256:5b3879b6f3cb77e712644d50262d05a7c146b7312d784a18eff7ff5462e77033 as builder
 
 WORKDIR /usr/src/app
 
@@ -11,7 +11,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry export --without-hashes -f requirements.txt --output requirements.txt
 
 
-FROM python:3.9-slim@sha256:2d97f6910b16bd338d3060f261f53f144965f755599aab1acda1e13cf1731b1b
+FROM python:3.14-slim@sha256:5b3879b6f3cb77e712644d50262d05a7c146b7312d784a18eff7ff5462e77033
 
 ENV PYTHONUNBUFFERED=1
 
