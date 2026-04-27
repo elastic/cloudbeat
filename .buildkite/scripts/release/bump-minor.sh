@@ -81,11 +81,6 @@ run_minor_bump() {
         return
     fi
 
-    if git ls-remote --exit-code --heads origin "${BUMP_BRANCH}" &>/dev/null; then
-        echo "Deleting stale remote branch: ${BUMP_BRANCH}"
-        git push origin --delete "${BUMP_BRANCH}"
-    fi
-
     git checkout -b "${BUMP_BRANCH}" origin/main
 
     sed -i'' -E "s/const defaultBeatVersion = .*/const defaultBeatVersion = \"${NEXT_CLOUDBEAT_VERSION}\"/g" version/version.go
