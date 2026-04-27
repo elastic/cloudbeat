@@ -120,7 +120,7 @@ run_minor_bump() {
         return
     fi
 
-    git push origin "${BUMP_BRANCH}"
+    git push --force origin "${BUMP_BRANCH}"
     gh pr create \
         --repo "${GH_REPO}" \
         --head "${BUMP_BRANCH}" \
