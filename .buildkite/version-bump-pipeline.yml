@@ -111,7 +111,7 @@ steps:
 
   # - label: ":hammer: Post-bump ops (CFT + Snyk)"
   #   key: post-bump
-  #   if: build.env("WORKFLOW") == "patch"
+  #   if: build.env("WORKFLOW") == "minor"
   #   depends_on: fetch-dra-artifacts
   #   agents:
   #     image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
