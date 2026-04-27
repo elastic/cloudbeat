@@ -42,11 +42,7 @@ update_mergify() {
         return
     fi
 
-    local tmp_rule tmp_file
-    tmp_rule=$(mktemp)
-    tmp_file=$(mktemp)
-
-    cat > "${tmp_rule}" << EOF
+    cat >> .mergify.yml << EOF
   - name: backport patches to ${BRANCH} branch
     conditions:
       - merged
@@ -60,18 +56,8 @@ update_mergify() {
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
-
 EOF
 
-    while IFS= read -r line; do
-        if [[ "${line}" == "  - name: auto-merge version bump PRs"* ]]; then
-            cat "${tmp_rule}"
-        fi
-        printf '%s\n' "${line}"
-    done < .mergify.yml > "${tmp_file}"
-
-    mv "${tmp_file}" .mergify.yml
-    rm "${tmp_rule}"
     git add .mergify.yml
 }
 
