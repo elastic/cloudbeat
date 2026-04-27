@@ -484,7 +484,7 @@ require (
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/masahiro331/go-disk v0.0.0-20260414034434-72394bf9a4a6 // indirect
 	github.com/masahiro331/go-ebs-file v0.0.0-20260414033931-3a3a92f3e315 // indirect
-	github.com/masahiro331/go-ext4-filesystem v0.0.0-20240620024024-ca14e6327bbd // indirect
+	github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b // indirect
 	github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1 // indirect
 	github.com/masahiro331/go-vmdk-parser v0.0.0-20260414040134-12d581667e8e // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
