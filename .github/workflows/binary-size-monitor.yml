@@ -10,6 +10,7 @@ on:
 env:
   # Binary size threshold in MiB
   SIZE_THRESHOLD_MIB: 5
+  GOEXPERIMENT: jsonv2 # required by trivy v0.69.3+ (encoding/json/v2)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}

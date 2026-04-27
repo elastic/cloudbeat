@@ -26,6 +26,7 @@ env:
   KUBE_NAMESPACE: kube-system
   CI_ELASTIC_AGENT_DOCKER_TAG: "9.3.2"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
+  GOEXPERIMENT: jsonv2 # required by trivy v0.69.3+ (encoding/json/v2)
 
 # run only a single job at a time
 concurrency: EKS-Functional-Tests
