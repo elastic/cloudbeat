@@ -37,6 +37,11 @@ echo "  DRY_RUN:         ${DRY_RUN}"
 setup_git_identity
 
 update_mergify() {
+    if grep -q "backport patches to ${BRANCH} branch" .mergify.yml; then
+        echo "Mergify backport rule for ${BRANCH} already exists — skipping."
+        return
+    fi
+
     local tmp_rule tmp_file
     tmp_rule=$(mktemp)
     tmp_file=$(mktemp)
