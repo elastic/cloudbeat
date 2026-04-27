@@ -46,7 +46,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.69.1
 	github.com/aws/aws-sdk-go-v2/service/sns v1.39.16
 	github.com/aws/aws-sdk-go-v2/service/sts v1.42.0
-	github.com/aws/smithy-go v1.25.0
+	github.com/aws/smithy-go v1.25.1
 	github.com/dgraph-io/ristretto/v2 v2.4.0
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260331215106-39bdcbe67899
