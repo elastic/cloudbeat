@@ -50,10 +50,10 @@ require (
 	github.com/dgraph-io/ristretto/v2 v2.4.0
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260331215106-39bdcbe67899
-	github.com/elastic/e2e-testing v1.2.3
+	github.com/elastic/e2e-testing v1.99.1
 	github.com/elastic/elastic-agent-autodiscover v0.10.2
 	github.com/elastic/elastic-agent-client/v7 v7.18.1
-	github.com/elastic/elastic-agent-libs v0.36.0
+	github.com/elastic/elastic-agent-libs v0.40.0
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.9.1
 	github.com/go-logr/zapr v1.3.0
@@ -169,7 +169,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/elastic/gokrb5/v8 v8.0.0-20251105095404-23cc45e6a102 // indirect
-	github.com/elastic/sarama v1.19.1-0.20260310070522-abae92ca1603 // indirect
+	github.com/elastic/sarama v1.24.1-elastic // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -603,7 +603,7 @@ require (
 
 replace (
 	github.com/apoydence/eachers => github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 //indirect, see https://github.com/elastic/beats/pull/29780 for details.
-	github.com/dop251/goja => github.com/elastic/goja v0.0.0-20190128172624-dd2ac4456e20
+	github.com/dop251/goja => github.com/elastic/goja 241b342198c2
 	github.com/eclipse/paho.mqtt.golang v1.3.5 => github.com/eclipse/paho.mqtt.golang v1.5.1
-	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20241002174017-e8c5fda595e6
+	github.com/google/gopacket => github.com/elastic/gopacket 3eaba0894325
 )
