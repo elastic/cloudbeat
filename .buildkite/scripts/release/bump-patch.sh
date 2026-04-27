@@ -45,13 +45,21 @@ update_version_beat() {
 }
 
 run_patch_bump() {
+    local existing_pr
+    existing_pr=$(gh pr list --repo "${GH_REPO}" --head "${BUMP_BRANCH}" --state open \
+        --json number --jq '.[0].number' 2>/dev/null || echo "")
+    if [[ -n "${existing_pr}" ]]; then
+        echo "INFO: PR #${existing_pr} already open for ${BUMP_BRANCH} — skipping."
+        return
+    fi
+
     git checkout -b "${BUMP_BRANCH}" "origin/${BASE_BRANCH}"
 
     update_version_beat
 
     if git diff "origin/${BASE_BRANCH}..HEAD" --quiet; then
         echo "No changes after bump — nothing to push."
-        exit 0
+        return
     fi
 
     if [[ "${DRY_RUN}" == "true" ]]; then
@@ -79,6 +87,4 @@ run_patch_bump() {
         --label "version-bump-auto-approve"
 }
 
-check_already_bumped
-clear_stale_branch
 run_patch_bump
