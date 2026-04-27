@@ -950,8 +950,8 @@ github.com/magiconair/properties v1.8.10 h1:s31yESBquKXCV9a/ScB3ESkOjUYYv+X0rg8S
 github.com/magiconair/properties v1.8.10/go.mod h1:Dhd985XPs7jluiymwWYZ0G4Z61jb3vdS329zhj2hYo0=
 github.com/masahiro331/go-disk v0.0.0-20260423015231-f7a470ebd472 h1:QAY4If99Ee10TUP4mdcB6Qlm036ayfYruTLjvlaczbs=
 github.com/masahiro331/go-disk v0.0.0-20260423015231-f7a470ebd472/go.mod h1:rojbW5tVhH1cuVYFKZS+QX+VGXK45JVsRO+jW92kkKM=
-github.com/masahiro331/go-ebs-file v0.0.0-20260414033931-3a3a92f3e315 h1:PQC4R1xVqWKWRjdlby9Bpqs4CKNc70Wk2ZzuDCVSuYo=
-github.com/masahiro331/go-ebs-file v0.0.0-20260414033931-3a3a92f3e315/go.mod h1:XFWPTlAcEL733RUjbr0QBybdt6oK2DH7LZk8id2qtd4=
+github.com/masahiro331/go-ebs-file v0.0.0-20260422020928-9d24e29aac27 h1:IrxbYTVKTDTckgMf7DZz2LZ+izZZpidH2mDP4D7GUt4=
+github.com/masahiro331/go-ebs-file v0.0.0-20260422020928-9d24e29aac27/go.mod h1:XFWPTlAcEL733RUjbr0QBybdt6oK2DH7LZk8id2qtd4=
 github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b h1:IAYuiQq6BVizPeXTKBoY3Jcin3gGn8No7h31lvH0aKo=
 github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b/go.mod h1:3XMMY1M486mWGTD13WPItg6FsgflQR72ZMAkd+gsyoQ=
 github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1 h1:XC9v1PB6rMOCTnQIInoFvgSA+vhTCt0wQ7B+Tjpombk=
