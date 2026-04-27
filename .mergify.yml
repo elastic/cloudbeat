@@ -431,3 +431,16 @@ pull_request_rules:
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+  - name: auto-merge version bump PRs from cloudsecmachine
+    conditions:
+      - author=cloudsecmachine[bot]
+      - or:
+          - title~=^Bump cloudbeat version
+          - title~=^Release cloudbeat version
+      - label=backport-skip
+      - "#approved-reviews-by>=1"
+      - check-success=Unit Test
+      - check-success=Lint
+    actions:
+      queue:
+        name: default
