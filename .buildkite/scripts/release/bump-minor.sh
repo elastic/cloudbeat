@@ -77,14 +77,19 @@ run_minor_bump() {
     sed -i'' -E "s/const defaultBeatVersion = .*/const defaultBeatVersion = \"${NEXT_CLOUDBEAT_VERSION}\"/g" version/version.go
     git add version/version.go
 
-    for f in \
+    jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"${NEXT_CLOUDBEAT_VERSION}\"" \
+        deploy/azure/ARM-for-single-account.json > tmp.json && mv tmp.json deploy/azure/ARM-for-single-account.json
+    jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"${NEXT_CLOUDBEAT_VERSION}\"" \
+        deploy/azure/ARM-for-organization-account.json > tmp.json && mv tmp.json deploy/azure/ARM-for-organization-account.json
+
+    ./deploy/azure/generate_dev_template.py --template-type single-account
+    ./deploy/azure/generate_dev_template.py --template-type organization-account
+
+    git add \
         deploy/azure/ARM-for-single-account.json \
         deploy/azure/ARM-for-single-account.dev.json \
         deploy/azure/ARM-for-organization-account.json \
-        deploy/azure/ARM-for-organization-account.dev.json; do
-        jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"${NEXT_CLOUDBEAT_VERSION}\"" "$f" > tmp.json && mv tmp.json "$f"
-        git add "$f"
-    done
+        deploy/azure/ARM-for-organization-account.dev.json
 
     update_mergify
 
