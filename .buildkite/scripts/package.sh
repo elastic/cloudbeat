@@ -3,6 +3,7 @@ set -uox pipefail
 
 export TYPES="tar.gz"
 source ./bin/activate-hermit
+export GOEXPERIMENT=jsonv2 # required by trivy v0.69.3+ (encoding/json/v2)
 
 CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
 PYTHON_BIN=./build/ve/$(go env GOOS)/bin
