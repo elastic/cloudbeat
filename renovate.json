@@ -225,6 +225,12 @@
       "description": "Group Go toolchain and golangci-lint version updates together",
       "groupName": "go-version",
       "matchDepNames": ["go", "golangci-lint"]
+    },
+    {
+      "description": "Disable CI/infrastructure/test-environment updates on release branches",
+      "matchBaseBranches": ["9.4", "9.3", "9.2", "8.19"],
+      "matchPaths": [".github/workflows/**", ".buildkite/**", "**/pyproject.toml", "deploy/test-environments/**"],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
