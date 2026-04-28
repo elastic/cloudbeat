@@ -20,8 +20,8 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.56.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.56.0 // indirect
 	github.com/aquasecurity/go-dep-parser v0.0.0-20240606050805-1de9a375c629
-	github.com/aquasecurity/trivy v0.69.3
-	github.com/aquasecurity/trivy-db v0.0.0-20251222105351-a833f47f8f0d
+	github.com/aquasecurity/trivy v0.70.0
+	github.com/aquasecurity/trivy-db v0.0.0-20260421063530-722777bbcf5e
 	github.com/aws/aws-sdk-go-v2 v1.41.6
 	github.com/aws/aws-sdk-go-v2/config v1.32.16
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.15
@@ -72,7 +72,7 @@ require (
 	github.com/mitchellh/gox v1.0.1
 	github.com/open-policy-agent/opa v1.15.2
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
-	github.com/samber/lo v1.52.0
+	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
@@ -133,7 +133,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal/v3 v3.2.0 // indirect
 	github.com/Azure/go-ntlmssp v0.1.0 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
-	github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.1.30 // indirect
+	github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.1.32 // indirect
 	github.com/Intevation/gval v1.3.0 // indirect
 	github.com/Intevation/jsonpath v0.2.1 // indirect
 	github.com/alexbrainman/sspi v0.0.0-20250919150558-7d374ff0d59e // indirect
@@ -237,7 +237,7 @@ require (
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/morikuni/aec v1.1.0 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
-	github.com/nikolalohinski/gonja/v2 v2.4.2 // indirect
+	github.com/nikolalohinski/gonja/v2 v2.7.0 // indirect
 	github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/openvex/discovery v0.1.1-0.20260330110702-0b302247f562 // indirect
@@ -262,7 +262,6 @@ require (
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/std-uritemplate/std-uritemplate/go/v2 v2.0.8 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
-	github.com/testcontainers/testcontainers-go v0.42.0 // indirect
 	github.com/theupdateframework/go-tuf v0.7.0 // indirect
 	github.com/theupdateframework/go-tuf/v2 v2.4.1 // indirect
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
