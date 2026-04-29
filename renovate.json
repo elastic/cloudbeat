@@ -37,8 +37,12 @@
     {
       "description": "Update .go-version file",
       "customType": "regex",
-      "fileMatch": ["^\\.go-version$"],
-      "matchStrings": ["(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"],
+      "fileMatch": [
+        "^\\.go-version$"
+      ],
+      "matchStrings": [
+        "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
+      ],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version"
     }
@@ -217,19 +221,36 @@
     },
     {
       "description": "Allow minor Go version updates in go.mod",
-      "matchDepNames": ["go"],
-      "matchManagers": ["gomod"],
+      "matchDepNames": [
+        "go"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
       "versioning": "semver"
     },
     {
       "description": "Group Go toolchain and golangci-lint version updates together",
       "groupName": "go-version",
-      "matchDepNames": ["go", "golangci-lint"]
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
+      ]
     },
     {
       "description": "Disable CI/infrastructure/test-environment updates on release branches",
-      "matchBaseBranches": ["9.4", "9.3", "9.2", "8.19"],
-      "matchPaths": [".github/workflows/**", ".buildkite/**", "**/pyproject.toml", "deploy/test-environments/**"],
+      "matchBaseBranches": [
+        "9.4",
+        "9.3",
+        "9.2",
+        "8.19"
+      ],
+      "matchFileNames": [
+        ".github/workflows/**",
+        ".buildkite/**",
+        "**/pyproject.toml",
+        "deploy/test-environments/**"
+      ],
       "enabled": false
     }
   ],
