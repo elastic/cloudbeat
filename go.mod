@@ -601,7 +601,7 @@ require (
 	k8s.io/apiserver v0.35.4 // indirect
 	k8s.io/cli-runtime v0.35.4 // indirect
 	k8s.io/component-base v0.35.4 // indirect
-	k8s.io/kube-openapi v0.0.0-20260330154417-16be699c7b31 // indirect
+	k8s.io/kube-openapi v0.0.0-20260430154526-c903c4073796 // indirect
 	k8s.io/kubectl v0.35.4 // indirect
 	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
