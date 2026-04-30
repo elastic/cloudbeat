@@ -207,7 +207,7 @@ require (
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-github/v62 v62.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
-	github.com/google/pprof v0.0.0-20260302011040-a15ffb7f9dcc // indirect
+	github.com/google/pprof v0.0.0-20260402051712-545e8a4df936 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/hashicorp/go-getter v1.7.9 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
@@ -249,8 +249,8 @@ require (
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
-	github.com/onsi/ginkgo/v2 v2.28.2 // indirect
-	github.com/onsi/gomega v1.39.1 // indirect
+	github.com/onsi/ginkgo/v2 v2.28.3 // indirect
+	github.com/onsi/gomega v1.40.0 // indirect
 	github.com/openvex/discovery v0.1.1-0.20240802171711-7c54efc57553 // indirect
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
