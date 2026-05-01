@@ -30,6 +30,7 @@
   "prConcurrentLimit": 20,
   "automergeStrategy": "squash",
   "automergeType": "pr",
+  "platformAutomerge": true,
   "ignorePaths": [
     "**/vendor/**"
   ],
