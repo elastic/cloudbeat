@@ -30,7 +30,6 @@
   "prHourlyLimit": 10,
   "automergeStrategy": "squash",
   "automergeType": "pr",
-  "platformAutomerge": true,
   "ignorePaths": [
     "**/vendor/**"
   ],
