@@ -4,16 +4,6 @@ commands_restrictions:
       - or:
           - sender-permission>=write
           - sender=github-actions[bot]
-queue_rules:
-  - name: default
-    merge_method: squash
-    conditions:
-      - check-success=Unit Test
-      - check-success=Lint
-      - check-success=Test Rego Policies
-      - check-success=Package Cloudbeat (docker)
-      - check-success=Package Cloudbeat (tar.gz)
-      - check-success=Manifest Tests
 defaults:
   actions:
     backport:
@@ -35,8 +25,8 @@ pull_request_rules:
       - check-success=Package Cloudbeat (tar.gz)
       - check-success=Manifest Tests
     actions:
-      queue:
-        name: default
+      merge:
+        method: squash
   - name: self-assign PRs
     conditions:
       - -merged
@@ -110,8 +100,8 @@ pull_request_rules:
       - head~=^add-backport-next.*
       - "#approved-reviews-by>=1"
     actions:
-      queue:
-        name: default
+      merge:
+        method: squash
   - name: notify the backport has not been merged yet
     conditions:
       - -merged
