@@ -89,7 +89,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 	// Configure the beats Manager to start after all the reloadable hooks are initialized
 	// and shutdown when the function returns.
 	l.beat = b
-	if err := b.Manager.Start(); err != nil {
+	if err := b.Manager.Start(); err != nil { //nolint:staticcheck
 		return err
 	}
 
