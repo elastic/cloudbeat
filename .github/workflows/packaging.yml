@@ -6,6 +6,10 @@ on:
       - main
       - "[0-9]+.[0-9]+"
     types: [opened, synchronize, reopened]
+  merge_group:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
 
 env:
   DEV: true
