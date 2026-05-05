@@ -7,7 +7,6 @@
     "main",
     "9.4",
     "9.3",
-    "9.2",
     "8.19"
   ],
   "schedule": [
@@ -242,7 +241,6 @@
       "matchBaseBranches": [
         "9.4",
         "9.3",
-        "9.2",
         "8.19"
       ],
       "matchFileNames": [
