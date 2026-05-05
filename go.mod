@@ -21,9 +21,8 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.56.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.56.0 // indirect
 	github.com/aquasecurity/go-dep-parser v0.0.0-20240606050805-1de9a375c629
-<<<<<<< HEAD
-	github.com/aquasecurity/trivy v0.66.0
-	github.com/aquasecurity/trivy-db v0.0.0-20250731052236-c7c831e2254d
+	github.com/aquasecurity/trivy v0.69.3
+	github.com/aquasecurity/trivy-db v0.0.0-20251222105351-a833f47f8f0d
 	github.com/aws/aws-sdk-go-v2 v1.41.7
 	github.com/aws/aws-sdk-go-v2/config v1.32.17
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.16
@@ -49,35 +48,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.39.17
 	github.com/aws/aws-sdk-go-v2/service/sts v1.42.1
 	github.com/aws/smithy-go v1.25.1
-=======
-	github.com/aquasecurity/trivy v0.69.3
-	github.com/aquasecurity/trivy-db v0.0.0-20251222105351-a833f47f8f0d
-	github.com/aws/aws-sdk-go-v2 v1.41.6
-	github.com/aws/aws-sdk-go-v2/config v1.32.16
-	github.com/aws/aws-sdk-go-v2/credentials v1.19.15
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.22
-	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.47.1
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.66.1
-	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.71.10
-	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.55.10
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.56.2
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.70.0
-	github.com/aws/aws-sdk-go-v2/service/configservice v1.62.2
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.299.0
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.57.1
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.33.24
-	github.com/aws/aws-sdk-go-v2/service/iam v1.53.8
-	github.com/aws/aws-sdk-go-v2/service/kms v1.50.5
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.90.0
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.51.2
-	github.com/aws/aws-sdk-go-v2/service/rds v1.118.1
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.100.0
-	github.com/aws/aws-sdk-go-v2/service/s3control v1.70.0
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.69.1
-	github.com/aws/aws-sdk-go-v2/service/sns v1.39.16
-	github.com/aws/aws-sdk-go-v2/service/sts v1.42.0
-	github.com/aws/smithy-go v1.25.0
->>>>>>> cfd61d8f (chore: upgrade trivy to v0.69.3 with GOEXPERIMENT=jsonv2 (#4380))
 	github.com/dgraph-io/ristretto/v2 v2.4.0
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260331215106-39bdcbe67899
@@ -170,19 +140,11 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aquasecurity/iamgo v0.0.10 // indirect
 	github.com/aquasecurity/jfather v0.0.8 // indirect
-<<<<<<< HEAD
-	github.com/aquasecurity/trivy-checks v1.11.3-0.20250604022615-9a7efa7c9169 // indirect
+	github.com/aquasecurity/trivy-checks v1.12.2-0.20251219190323-79d27547baf5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.57.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.11.23 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.11 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.27 // indirect
-=======
-	github.com/aquasecurity/trivy-checks v1.12.2-0.20251219190323-79d27547baf5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.57.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.11.22 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.0.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.26 // indirect
->>>>>>> cfd61d8f (chore: upgrade trivy to v0.69.3 with GOEXPERIMENT=jsonv2 (#4380))
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bitnami/go-version v0.0.0-20260425104222-0af72917255b // indirect
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb // indirect
@@ -317,12 +279,8 @@ require (
 	github.com/theupdateframework/go-tuf/v2 v2.4.1 // indirect
 	github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 // indirect
 	github.com/tonistiigi/go-csvvalue v0.0.0-20240814133006-030d3b2625d0 // indirect
-<<<<<<< HEAD
-	github.com/transparency-dev/formats v0.0.0-20251017110053-404c0d5b696c // indirect
-=======
 	github.com/toqueteos/webbrowser v1.2.0 // indirect
 	github.com/transparency-dev/formats v0.1.0 // indirect
->>>>>>> cfd61d8f (chore: upgrade trivy to v0.69.3 with GOEXPERIMENT=jsonv2 (#4380))
 	github.com/transparency-dev/merkle v0.0.2 // indirect
 	github.com/valyala/fastjson v1.6.10 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.33 // indirect
@@ -351,11 +309,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.4 // indirect
-<<<<<<< HEAD
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
-=======
-	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa // indirect
->>>>>>> cfd61d8f (chore: upgrade trivy to v0.69.3 with GOEXPERIMENT=jsonv2 (#4380))
 	golang.org/x/tools v0.44.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.1 // indirect
