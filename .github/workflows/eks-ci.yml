@@ -137,7 +137,7 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Check out the repo
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        uses: actions/checkout@900f2210b1d28bbbd0bd22d17926b9e224e8f231
 
       # Setup all required tools
       - name: Init Hermit
