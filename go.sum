@@ -1190,8 +1190,8 @@ github.com/sigstore/protobuf-specs v0.5.1 h1:/5OPaNuolRJmQfeZLayJGFXMpsRJEdgC6ah
 github.com/sigstore/protobuf-specs v0.5.1/go.mod h1:DRBzpFuE+LnvQMN10/dU6nBeKwVLGEQ6o2FovN2Rats=
 github.com/sigstore/rekor v1.5.1 h1:Ca1egHRWRuDvXV4tZu9aXEXc3Gej9FG+HKeapV9OAMQ=
 github.com/sigstore/rekor v1.5.1/go.mod h1:gTLDuZuo3SyQCuZvKqwRPA79Qo/2rw39/WtLP/rZjUQ=
-github.com/sigstore/rekor-tiles/v2 v2.0.1 h1:1Wfz15oSRNGF5Dzb0lWn5W8+lfO50ork4PGIfEKjZeo=
-github.com/sigstore/rekor-tiles/v2 v2.0.1/go.mod h1:Pjsbhzj5hc3MKY8FfVTYHBUHQEnP0ozC4huatu4x7OU=
+github.com/sigstore/rekor-tiles/v2 v2.2.1 h1:UmV1CBQ3SjxxPGpFmwDoOhoIwiKpM2Qm1pU5tPGmvNk=
+github.com/sigstore/rekor-tiles/v2 v2.2.1/go.mod h1:z8n6l6oidpaLjjE6rJERuQqY9X38ulnHZCXyL+DEL7U=
 github.com/sigstore/sigstore v1.10.5 h1:KqrOjDhNOVY+uOzQFat2FrGLClPPCb3uz8pK3wuI+ow=
 github.com/sigstore/sigstore v1.10.5/go.mod h1:k/mcVVXw3I87dYG/iCVTSW2xTrW7vPzxxGic4KqsqXs=
 github.com/sigstore/sigstore-go v1.1.4 h1:wTTsgCHOfqiEzVyBYA6mDczGtBkN7cM8mPpjJj5QvMg=
@@ -1204,8 +1204,8 @@ github.com/sigstore/sigstore/pkg/signature/kms/gcp v1.10.5 h1:BpQx6AhjwIN9LmlO4y
 github.com/sigstore/sigstore/pkg/signature/kms/gcp v1.10.5/go.mod h1:ejMD/17lMJ4HykQRPdj5NNr+OQYIEZto8HjDKghVMOA=
 github.com/sigstore/sigstore/pkg/signature/kms/hashivault v1.10.5 h1:OFwQZgWkB/6J6W5sy3SkXE4pJnhNRnE2cJd8ySXmHpo=
 github.com/sigstore/sigstore/pkg/signature/kms/hashivault v1.10.5/go.mod h1:Ee/enmyxi/RFLVlajbnjgH2wOWQwlJ0wY8qZrk43hEw=
-github.com/sigstore/timestamp-authority/v2 v2.0.3 h1:sRyYNtdED/ttLCMdaYnwpf0zre1A9chvjTnCmWWxN8Y=
-github.com/sigstore/timestamp-authority/v2 v2.0.3/go.mod h1:mDaHxkt3HmZYoIlwYj4QWo0RUr7VjYU52aVO5f5Qb3I=
+github.com/sigstore/timestamp-authority/v2 v2.0.6 h1:1Vh7/SdmLsVLG6Br6/bisd1SnlicfDm0MJYiA+D7Ppw=
+github.com/sigstore/timestamp-authority/v2 v2.0.6/go.mod h1:Nk5ucGBDyH0tXAIMZ0prf6xn8qfTnbJhSq+CDabYcfc=
 github.com/sirupsen/logrus v1.7.0/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=
 github.com/sirupsen/logrus v1.9.4/go.mod h1:ftWc9WdOfJ0a92nsE2jF5u5ZwH8Bv2zdeOC42RjbV2g=
@@ -1271,8 +1271,8 @@ github.com/tink-crypto/tink-go-awskms/v2 v2.1.0 h1:N9UxlsOzu5mttdjhxkDLbzwtEecuX
 github.com/tink-crypto/tink-go-awskms/v2 v2.1.0/go.mod h1:PxSp9GlOkKL9rlybW804uspnHuO9nbD98V/fDX4uSis=
 github.com/tink-crypto/tink-go-gcpkms/v2 v2.2.0 h1:3B9i6XBXNTRspfkTC0asN5W0K6GhOSgcujNiECNRNb0=
 github.com/tink-crypto/tink-go-gcpkms/v2 v2.2.0/go.mod h1:jY5YN2BqD/KSCHM9SqZPIpJNG/u3zwfLXHgws4x2IRw=
-github.com/tink-crypto/tink-go-hcvault/v2 v2.3.0 h1:6nAX1aRGnkg2SEUMwO5toB2tQkP0Jd6cbmZ/K5Le1V0=
-github.com/tink-crypto/tink-go-hcvault/v2 v2.3.0/go.mod h1:HOC5NWW1wBI2Vke1FGcRBvDATkEYE7AUDiYbXqi2sBw=
+github.com/tink-crypto/tink-go-hcvault/v2 v2.4.0 h1:j+S+WKBQ5ya26A5EM/uXoVe+a2IaPQN8KgBJZ22cJ+4=
+github.com/tink-crypto/tink-go-hcvault/v2 v2.4.0/go.mod h1:OCKJIujnTzDq7f+73NhVs99oA2c1TR6nsOpuasYM6Yo=
 github.com/tink-crypto/tink-go/v2 v2.6.0 h1:+KHNBHhWH33Vn+igZWcsgdEPUxKwBMEe0QC60t388v4=
 github.com/tink-crypto/tink-go/v2 v2.6.0/go.mod h1:2WbBA6pfNsAfBwDCggboaHeB2X29wkU8XHtGwh2YIk8=
 github.com/titanous/rocacheck v0.0.0-20171023193734-afe73141d399 h1:e/5i7d4oYZ+C1wj2THlRK+oAhjeS/TRQwMfkIuet3w0=
