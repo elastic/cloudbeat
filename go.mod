@@ -130,7 +130,7 @@ require (
 	github.com/aquasecurity/iamgo v0.0.10 // indirect
 	github.com/aquasecurity/jfather v0.0.8 // indirect
 	github.com/aquasecurity/trivy-checks v1.11.3-0.20250604022615-9a7efa7c9169 // indirect
-	github.com/aws/aws-sdk-go v1.55.7 // indirect
+	github.com/aws/aws-sdk-go v1.55.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.9 // indirect
 	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bitnami/go-version v0.0.0-20260425104222-0af72917255b // indirect
