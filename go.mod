@@ -62,7 +62,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/huandu/xstrings v1.5.0
 	github.com/magefile/mage v1.15.0
-	github.com/masahiro331/go-xfs-filesystem v0.0.0-20231205045356-1b22259a6c44
+	github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb
 	github.com/microsoft/kiota-abstractions-go v1.9.2
 	github.com/microsoftgraph/msgraph-sdk-go v1.62.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.3.2
