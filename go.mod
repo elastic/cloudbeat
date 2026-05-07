@@ -3,8 +3,8 @@ module github.com/elastic/cloudbeat
 go 1.26.2
 
 require (
-	cloud.google.com/go/asset v1.22.0
-	cloud.google.com/go/iam v1.5.3
+	cloud.google.com/go/asset v1.26.0
+	cloud.google.com/go/iam v1.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2 v2.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.5.0
@@ -58,7 +58,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/googleapis/gax-go/v2 v2.17.0
+	github.com/googleapis/gax-go/v2 v2.21.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/huandu/xstrings v1.5.0
 	github.com/magefile/mage v1.15.0
@@ -100,7 +100,7 @@ require (
 	go.uber.org/zap/exp v0.3.0
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/api v0.269.0
+	google.golang.org/api v0.274.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.13.0
 	k8s.io/api v0.34.3
@@ -114,7 +114,7 @@ require (
 	cel.dev/expr v0.25.1 // indirect
 	cloud.google.com/go/auth v0.18.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
-	cloud.google.com/go/monitoring v1.24.3 // indirect
+	cloud.google.com/go/monitoring v1.28.0 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/containers/azcontainerregistry v0.2.3 // indirect
@@ -277,11 +277,11 @@ require (
 
 require (
 	cloud.google.com/go v0.123.0 // indirect
-	cloud.google.com/go/accesscontextmanager v1.9.7 // indirect
+	cloud.google.com/go/accesscontextmanager v1.13.0 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
-	cloud.google.com/go/longrunning v0.8.0 // indirect
-	cloud.google.com/go/orgpolicy v1.15.1 // indirect
-	cloud.google.com/go/osconfig v1.16.0 // indirect
+	cloud.google.com/go/longrunning v0.12.0 // indirect
+	cloud.google.com/go/orgpolicy v1.19.0 // indirect
+	cloud.google.com/go/osconfig v1.20.0 // indirect
 	cloud.google.com/go/storage v1.56.0 // indirect
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
 	code.cloudfoundry.org/go-loggregator v7.4.0+incompatible // indirect
@@ -426,7 +426,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.7.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.12 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.14 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
@@ -568,11 +568,11 @@ require (
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.41.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
-	golang.org/x/time v0.14.0
+	golang.org/x/time v0.15.0
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
-	google.golang.org/genproto v0.0.0-20260209200024-4cfbd4190f57 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260406210006-6f92a3bedf2d // indirect
+	google.golang.org/genproto v0.0.0-20260504160031-60b97b32f348 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20260504160031-60b97b32f348 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260504160031-60b97b32f348 // indirect
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
