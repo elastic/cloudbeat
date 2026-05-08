@@ -201,7 +201,7 @@ require (
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-github/v62 v62.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
-	github.com/google/pprof v0.0.0-20260402051712-545e8a4df936 // indirect
+	github.com/google/pprof v0.0.0-20260507013755-92041b743c96 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/hashicorp/aws-sdk-go-base/v2 v2.0.0-beta.72 // indirect
 	github.com/hashicorp/go-getter v1.8.6 // indirect
