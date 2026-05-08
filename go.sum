@@ -952,8 +952,8 @@ github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b h1:
 github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b/go.mod h1:3XMMY1M486mWGTD13WPItg6FsgflQR72ZMAkd+gsyoQ=
 github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1 h1:XC9v1PB6rMOCTnQIInoFvgSA+vhTCt0wQ7B+Tjpombk=
 github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1/go.mod h1:jZ3F25l7DbD7l7DcA8aj7eo1EZ84nbzcQHBB4lCSrI8=
-github.com/masahiro331/go-vmdk-parser v0.0.0-20260414040134-12d581667e8e h1:bUjrHSpqS5EVuTcDiibOvFLQrHZ4jnrbUFb5HM+jzUw=
-github.com/masahiro331/go-vmdk-parser v0.0.0-20260414040134-12d581667e8e/go.mod h1:5f7mCJGW9cJb8SDn3z8qodGxpMCOo8d/2nls/tiwRrw=
+github.com/masahiro331/go-vmdk-parser v0.0.0-20260425175348-040a3994f0b4 h1:BE5b10JnIaa2QcZmJnMdJTMNPyM4xenp4SAyu4q2c0U=
+github.com/masahiro331/go-vmdk-parser v0.0.0-20260425175348-040a3994f0b4/go.mod h1:5f7mCJGW9cJb8SDn3z8qodGxpMCOo8d/2nls/tiwRrw=
 github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb h1:2c5hvZu2o6ccumpPVlyGiRT3aXvc6Yxj1Kqh+usy1iM=
 github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb/go.mod h1:QKBZqdn6teT0LK3QhAf3K6xakItd1LonOShOEC44idQ=
 github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
