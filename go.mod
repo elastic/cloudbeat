@@ -554,7 +554,7 @@ require (
 	go.elastic.co/apm/module/apmelasticsearch/v2 v2.7.8 // indirect
 	go.elastic.co/apm/module/apmhttp/v2 v2.7.8 // indirect
 	go.elastic.co/apm/v2 v2.7.8 // indirect
-	go.elastic.co/ecszap v1.0.2 // indirect
+	go.elastic.co/ecszap v1.0.3 // indirect
 	go.elastic.co/fastjson v1.5.1 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
