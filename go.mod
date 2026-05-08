@@ -61,7 +61,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.21.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/huandu/xstrings v1.5.0
-	github.com/magefile/mage v1.15.0
+	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb
 	github.com/microsoft/kiota-abstractions-go v1.9.4
 	github.com/microsoftgraph/msgraph-sdk-go v1.62.0
