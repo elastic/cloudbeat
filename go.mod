@@ -58,7 +58,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/googleapis/gax-go/v2 v2.21.0
+	github.com/googleapis/gax-go/v2 v2.22.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/huandu/xstrings v1.5.0
 	github.com/magefile/mage v1.15.0
@@ -100,7 +100,7 @@ require (
 	go.uber.org/zap/exp v0.3.0
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/api v0.274.0
+	google.golang.org/api v0.278.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.13.0
 	k8s.io/api v0.34.3
