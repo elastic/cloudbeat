@@ -1083,8 +1083,8 @@ github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJw
 github.com/opencontainers/image-spec v1.1.1/go.mod h1:qpqAh3Dmcf36wStyyWU+kCeDgrGnAve2nCC8+7h8Q0M=
 github.com/opencontainers/runtime-spec v1.3.0 h1:YZupQUdctfhpZy3TM39nN9Ika5CBWT5diQ8ibYCRkxg=
 github.com/opencontainers/runtime-spec v1.3.0/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
-github.com/openvex/discovery v0.1.1-0.20260330110702-0b302247f562 h1:+GB5e1K1bKCf0n8ufy2nu91t/cZrDvi08ZZvJeXeEOg=
-github.com/openvex/discovery v0.1.1-0.20260330110702-0b302247f562/go.mod h1:xgG2B4o5OIYTGuL4aa9eTQkDXKA3/Uh9uhAShFcqz1A=
+github.com/openvex/discovery v0.1.1-0.20260507110217-ced9edfa25bc h1:gqQUFhLQNK+eu7uh7FVOlOe58vrt/lahGDhmX7IMoZU=
+github.com/openvex/discovery v0.1.1-0.20260507110217-ced9edfa25bc/go.mod h1:xgG2B4o5OIYTGuL4aa9eTQkDXKA3/Uh9uhAShFcqz1A=
 github.com/openvex/go-vex v0.2.7 h1:/pN3bqvS4QOc6WkkL0hbKzJuAtsUD9vmvk9IZkzD3Zc=
 github.com/openvex/go-vex v0.2.7/go.mod h1:ZyQC3NXl9jjS53JOpBG3LAUXySkW8IlJ/GIhsnf5D54=
 github.com/owenrumney/go-sarif v1.1.1/go.mod h1:dNDiPlF04ESR/6fHlPyq7gHKmrM0sHUvAGjsoh8ZH0U=
