@@ -63,7 +63,7 @@ require (
 	github.com/huandu/xstrings v1.5.0
 	github.com/magefile/mage v1.15.0
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb
-	github.com/microsoft/kiota-abstractions-go v1.9.2
+	github.com/microsoft/kiota-abstractions-go v1.9.4
 	github.com/microsoftgraph/msgraph-sdk-go v1.62.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.3.2
 	github.com/mikefarah/yq/v4 v4.45.4
@@ -195,12 +195,12 @@ require (
 	github.com/knadh/koanf/providers/confmap v1.0.0 // indirect
 	github.com/knadh/koanf/v2 v2.3.4 // indirect
 	github.com/mattn/go-shellwords v1.0.13 // indirect
-	github.com/microsoft/kiota-authentication-azure-go v1.3.0 // indirect
-	github.com/microsoft/kiota-http-go v1.5.4 // indirect
-	github.com/microsoft/kiota-serialization-form-go v1.0.0 // indirect
+	github.com/microsoft/kiota-authentication-azure-go v1.3.1 // indirect
+	github.com/microsoft/kiota-http-go v1.5.6 // indirect
+	github.com/microsoft/kiota-serialization-form-go v1.1.3 // indirect
 	github.com/microsoft/kiota-serialization-json-go v1.1.2 // indirect
-	github.com/microsoft/kiota-serialization-multipart-go v1.0.0 // indirect
-	github.com/microsoft/kiota-serialization-text-go v1.0.0 // indirect
+	github.com/microsoft/kiota-serialization-multipart-go v1.1.2 // indirect
+	github.com/microsoft/kiota-serialization-text-go v1.1.3 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/moby/api v1.54.2 // indirect
 	github.com/moby/moby/client v0.4.1 // indirect
