@@ -112,7 +112,7 @@ require (
 
 require (
 	cel.dev/expr v0.25.1 // indirect
-	cloud.google.com/go/auth v0.18.2 // indirect
+	cloud.google.com/go/auth v0.20.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/monitoring v1.28.0 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
@@ -281,7 +281,7 @@ require (
 	cloud.google.com/go/longrunning v0.12.0 // indirect
 	cloud.google.com/go/orgpolicy v1.19.0 // indirect
 	cloud.google.com/go/osconfig v1.20.0 // indirect
-	cloud.google.com/go/storage v1.56.0 // indirect
+	cloud.google.com/go/storage v1.62.1 // indirect
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
 	code.cloudfoundry.org/go-loggregator v7.4.0+incompatible // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a // indirect
