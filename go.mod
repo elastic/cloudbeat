@@ -69,7 +69,7 @@ require (
 	github.com/microsoft/kiota-abstractions-go v1.9.4
 	github.com/microsoftgraph/msgraph-sdk-go v1.97.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.0
-	github.com/mikefarah/yq/v4 v4.47.2
+	github.com/mikefarah/yq/v4 v4.53.2
 	github.com/mitchellh/gox v1.0.1
 	github.com/open-policy-agent/opa v1.16.2
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
@@ -135,7 +135,6 @@ require (
 	github.com/Intevation/gval v1.3.0 // indirect
 	github.com/Intevation/jsonpath v0.2.1 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
-	github.com/alecthomas/repr v0.5.2 // indirect
 	github.com/alexbrainman/sspi v0.0.0-20250919150558-7d374ff0d59e // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aquasecurity/iamgo v0.0.10 // indirect
@@ -295,6 +294,7 @@ require (
 	go.opentelemetry.io/collector/pipeline/xpipeline v0.152.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.4 // indirect
 	golang.org/x/tools v0.45.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.2 // indirect
@@ -582,7 +582,6 @@ require (
 	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	helm.sh/helm/v3 v3.20.2 // indirect
 	howett.net/plist v1.0.1 // indirect
