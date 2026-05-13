@@ -617,5 +617,5 @@ replace (
 	github.com/golang/glog => github.com/golang/glog v1.2.4 // indirect
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
 	github.com/lestrrat-go/jwx => github.com/lestrrat-go/jwx v1.2.31
-	k8s.io/kubernetes => k8s.io/kubernetes v1.36.0
+	k8s.io/kubernetes => k8s.io/kubernetes v1.36.1
 )
