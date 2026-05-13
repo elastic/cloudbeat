@@ -1,4 +1,4 @@
-FROM golang
+FROM golang@sha256:313faae491b410a35402c05d35e7518ae99103d957308e940e1ae2cfa0aac29b
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 RUN set -x && \
     apt-get update && \
