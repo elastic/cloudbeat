@@ -117,7 +117,6 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, serviceN
 	}
 }
 
-//nolint:revive
 type vmProperties struct {
 	Extended struct {
 		InstanceView struct {
