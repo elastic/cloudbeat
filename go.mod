@@ -230,7 +230,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/onsi/ginkgo/v2 v2.29.0 // indirect
 	github.com/onsi/gomega v1.41.0 // indirect
-	github.com/openvex/discovery v0.1.1-0.20240802171711-7c54efc57553 // indirect
+	github.com/openvex/discovery v0.1.1-0.20260507110217-ced9edfa25bc // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20250313105119-ba97887b0a25 // indirect
 	github.com/redis/go-redis/extra/redisotel/v9 v9.19.0 // indirect
@@ -511,7 +511,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.3.0 // indirect
 	github.com/opencontainers/selinux v1.14.1 // indirect
-	github.com/openvex/go-vex v0.2.5 // indirect
+	github.com/openvex/go-vex v0.2.7 // indirect
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
 	github.com/owenrumney/squealer v1.2.12 // indirect
 	github.com/package-url/packageurl-go v0.1.6 // indirect
