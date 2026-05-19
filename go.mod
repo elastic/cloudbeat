@@ -32,7 +32,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.71.11
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.55.11
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.57.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.73.0
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.74.0
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.62.3
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.302.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.57.2
@@ -242,7 +242,7 @@ require (
 	github.com/nikolalohinski/gonja/v2 v2.4.2 // indirect
 	github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
-	github.com/onsi/ginkgo/v2 v2.28.3 // indirect
+	github.com/onsi/ginkgo/v2 v2.29.0 // indirect
 	github.com/onsi/gomega v1.41.0 // indirect
 	github.com/openvex/discovery v0.1.1-0.20260507110217-ced9edfa25bc // indirect
 	github.com/pandatix/go-cvss v0.6.2 // indirect
