@@ -114,7 +114,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 func shouldDrop(t any) bool {
 	v := reflect.ValueOf(t)
 	kind := v.Kind()
-	if kind == reflect.Ptr && v.IsNil() {
+	if kind == reflect.Pointer && v.IsNil() {
 		return true
 	}
 
