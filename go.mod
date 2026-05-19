@@ -366,7 +366,6 @@ require (
 	github.com/containerd/containerd v1.7.27 // indirect
 	github.com/containerd/continuity v0.4.5 // indirect
 	github.com/containerd/fifo v1.1.0 // indirect
-	github.com/containerd/stargz-snapshotter/estargz v0.18.2 // indirect
 	github.com/containerd/ttrpc v1.2.8 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
@@ -432,7 +431,7 @@ require (
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/go-containerregistry v0.21.5
+	github.com/google/go-containerregistry v0.21.6
 	github.com/google/licenseclassifier v0.0.0-20260218193730-3cfbab2d0e0d // indirect
 	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
@@ -550,7 +549,6 @@ require (
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/twitchtv/twirp v8.1.3+incompatible // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
-	github.com/vbatts/tar-split v0.12.3 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
