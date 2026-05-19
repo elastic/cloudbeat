@@ -23,7 +23,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 
-	libbeatazure "github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation/azure"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 
 	"github.com/elastic/cloudbeat/internal/config"
 )
@@ -76,7 +76,7 @@ func (a *AzureAuthProvider) FindClientAssertionCredentials(tenantID string, clie
 		return nil, fmt.Errorf("environment variable %s is required for client assertion credentials", config.CloudConnectorsJWTPathEnvVar)
 	}
 
-	return libbeatazure.NewClientAssertionCredential(libbeatazure.Params{
+	return identityfederation.AzureNewClientAssertionCredential(identityfederation.AzureParams{
 		TenantID:    tenantID,
 		ClientID:    clientID,
 		JWTFilePath: jwtFilePath,

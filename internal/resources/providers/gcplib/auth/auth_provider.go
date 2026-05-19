@@ -25,7 +25,7 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
-	libbeatgcp "github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation/gcp"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 
 	"github.com/elastic/cloudbeat/internal/config"
 )
@@ -69,7 +69,7 @@ func (p *GoogleAuthProvider) FindIdentityFederationCredentials(ctx context.Conte
 	// Session name must match GCP Workload Identity Federation: elastic_resource_id-identity_federation_id
 	sessionName := ccConfig.ResourceID + "-" + params.IdentityFederationID
 
-	tokenSource, err := libbeatgcp.NewTokenSource(ctx, libbeatgcp.Params{
+	tokenSource, err := identityfederation.GCPNewTokenSource(ctx, identityfederation.GCPParams{
 		Audience:            params.Audience,
 		GlobalRoleARN:       ccConfig.GlobalRoleARN,
 		JWTFilePath:         ccConfig.JWTFilePath,

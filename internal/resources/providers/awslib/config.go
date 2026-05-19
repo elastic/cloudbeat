@@ -31,7 +31,7 @@ import (
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	libbeatidaws "github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
@@ -96,9 +96,9 @@ func NewAWSConfigIRSAChain(ctx context.Context, cfg config.AwsConfig) (*aws.Conf
 
 	observability.AppendAWSMiddlewares(awsConfig)
 
-	chain := []libbeatidaws.AWSRoleChainingStep{
+	chain := []identityfederation.AWSRoleChainingStep{
 		// Chain Step 2 - Elastic Super Role Global
-		&libbeatidaws.AssumeRoleStep{
+		&identityfederation.AWSAssumeRoleStep{
 			RoleARN: cfg.CloudConnectorsConfig.GlobalRoleARN,
 			Options: func(aro *stscreds.AssumeRoleOptions) {
 				aro.RoleSessionName = "cloudbeat-super-role-global"
@@ -106,17 +106,17 @@ func NewAWSConfigIRSAChain(ctx context.Context, cfg config.AwsConfig) (*aws.Conf
 			},
 		},
 		// Chain Step 3 - Remote Role
-		&libbeatidaws.AssumeRoleStep{
+		&identityfederation.AWSAssumeRoleStep{
 			RoleARN: cfg.Cred.RoleArn,
 			Options: func(aro *stscreds.AssumeRoleOptions) {
 				aro.RoleSessionName = "cloudbeat-remote-role"
 				aro.Duration = cfg.Cred.AssumeRoleDuration
-				aro.ExternalID = aws.String(libbeatidaws.FormatExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
+				aro.ExternalID = aws.String(identityfederation.AWSFormatExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
 			},
 		},
 	}
 
-	retConf := libbeatidaws.AWSConfigRoleChaining(*awsConfig, chain)
+	retConf := identityfederation.AWSConfigRoleChaining(*awsConfig, chain)
 	retConf.Retryer = awsConfigRetrier
 
 	return retConf, nil
@@ -136,9 +136,9 @@ func NewAWSConfigOIDCChain(ctx context.Context, jwtFilePath string, cfg config.A
 
 	observability.AppendAWSMiddlewares(awsConfig)
 
-	chain := []libbeatidaws.AWSRoleChainingStep{
+	chain := []identityfederation.AWSRoleChainingStep{
 		// Chain Step 1 - Elastic Super Role Global via Web Identity
-		&libbeatidaws.WebIdentityRoleStep{
+		&identityfederation.AWSWebIdentityRoleStep{
 			RoleARN:              cfg.CloudConnectorsConfig.GlobalRoleARN,
 			WebIdentityTokenFile: jwtFilePath,
 			Options: func(o *stscreds.WebIdentityRoleOptions) {
@@ -147,17 +147,17 @@ func NewAWSConfigOIDCChain(ctx context.Context, jwtFilePath string, cfg config.A
 			},
 		},
 		// Chain Step 2 - Remote Role
-		&libbeatidaws.AssumeRoleStep{
+		&identityfederation.AWSAssumeRoleStep{
 			RoleARN: cfg.Cred.RoleArn,
 			Options: func(aro *stscreds.AssumeRoleOptions) {
 				aro.RoleSessionName = "cloudbeat-remote-role"
 				aro.Duration = cfg.Cred.AssumeRoleDuration
-				aro.ExternalID = aws.String(libbeatidaws.FormatExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
+				aro.ExternalID = aws.String(identityfederation.AWSFormatExternalID(cfg.CloudConnectorsConfig.ResourceID, cfg.Cred.ExternalID))
 			},
 		},
 	}
 
-	retConf := libbeatidaws.AWSConfigRoleChaining(*awsConfig, chain)
+	retConf := identityfederation.AWSConfigRoleChaining(*awsConfig, chain)
 	retConf.Retryer = awsConfigRetrier
 
 	return retConf, nil

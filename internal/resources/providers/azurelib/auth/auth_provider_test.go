@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	libbeatazure "github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation/azure"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 
 	"github.com/elastic/cloudbeat/internal/config"
 )
@@ -137,7 +137,7 @@ func TestReadJWTFromFile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			jwtFile := tt.setupFile()
 
-			jwt, err := libbeatazure.ReadJWT(jwtFile)
+			jwt, err := identityfederation.AzureReadJWT(jwtFile)
 
 			if tt.expectError {
 				require.Error(t, err)
