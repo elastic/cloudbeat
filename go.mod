@@ -168,7 +168,7 @@ require (
 	github.com/go-git/go-git/v5 v5.19.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
-	github.com/go-json-experiment/json v0.0.0-20250223041408-d3c622f1b874 // indirect
+	github.com/go-json-experiment/json v0.0.0-20260520185125-572e7c383686 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.13 // indirect
 	github.com/go-openapi/runtime/server-middleware v0.31.0 // indirect
 	github.com/go-openapi/swag/cmdutils v0.26.0 // indirect
