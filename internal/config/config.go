@@ -31,6 +31,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -265,10 +266,9 @@ func isSupportedBenchmark(benchmark string) bool {
 
 const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
-	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
-	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
-	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
-	CloudConnectorsAWSTokenEnvVar   = "AWS_WEB_IDENTITY_TOKEN_FILE"
+	CloudConnectorsGlobalRoleEnvVar = identityfederation.AWSGlobalRoleARNEnvVar
+	CloudResourceIDEnvVar           = identityfederation.AWSCloudResourceIDEnvVar
+	CloudConnectorsJWTPathEnvVar    = identityfederation.AWSIDTokenFileEnvVar
 )
 
 type CloudConnectorsConfig struct {
