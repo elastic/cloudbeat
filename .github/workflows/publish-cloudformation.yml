@@ -27,6 +27,8 @@ jobs:
           aws-region: us-east-2
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: false
 
       # - name: Upload to S3 if elastic-agent CloudFormation template has changed
       #   run: scripts/publish_cft.sh
