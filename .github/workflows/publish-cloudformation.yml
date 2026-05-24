@@ -25,6 +25,8 @@ jobs:
           aws-access-key-id: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
-      - name: Upload to S3 if elastic-agent CloudFormation template has changed
-        run: scripts/publish_cft.sh
+      # - name: Upload to S3 if elastic-agent CloudFormation template has changed
+      #   run: scripts/publish_cft.sh
