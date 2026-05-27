@@ -450,8 +450,8 @@ github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 h1:Oy0F4A
 github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3/go.mod h1:YvSRo5mw33fLEx1+DlK6L2VV43tJt5Eyel9n9XBcR+0=
 github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/ebitengine/purego v0.10.0 h1:QIw4xfpWT6GWTzaW5XEKy3HXoqrJGx1ijYHzTF0/ISU=
-github.com/ebitengine/purego v0.10.0/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
+github.com/ebitengine/purego v0.10.1 h1:dewVBCBT2GaMu1SrNTYxQhgQBethzfhiwvZiLGP/qyY=
+github.com/ebitengine/purego v0.10.1/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260331215106-39bdcbe67899 h1:ThQ+Mm/Lb2kZZhfhcnFcugKcnDbYtUuIqRCkh3MzV4I=
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260331215106-39bdcbe67899/go.mod h1:C9cAczAhdoYNfS17mAFW+kZH7T2zUpEOHWhYhJTfXJw=
 github.com/elastic/e2e-testing v1.2.3 h1:XKF91O+Y6RcrTuNc7kMM4/HE9pvkvjASIYhEWS5XkT0=
