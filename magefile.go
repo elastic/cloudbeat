@@ -80,6 +80,7 @@ func Build() error {
 
 	args := devtools.DefaultBuildArgs()
 	args.CGO = false
+	args.Env["GOEXPERIMENT"] = "jsonv2" // required by trivy v0.69.3+ (encoding/json/v2)
 	return devtools.Build(args)
 }
 
@@ -95,6 +96,7 @@ func Clean() error {
 func GolangCrossBuild() error {
 	args := devtools.DefaultGolangCrossBuildArgs()
 	args.CGO = false
+	args.Env["GOEXPERIMENT"] = "jsonv2" // required by trivy v0.69.3+ (encoding/json/v2)
 	return devtools.GolangCrossBuild(args)
 }
 
