@@ -313,8 +313,8 @@ github.com/brianvoe/gofakeit v3.18.0+incompatible h1:wDOmHc9DLG4nRjUVVaxA+CEglKO
 github.com/brianvoe/gofakeit v3.18.0+incompatible/go.mod h1:kfwdRA90vvNhPutZWfH7WPaDzUjz+CZFqG+rPkOjGOc=
 github.com/bshuster-repo/logrus-logstash-hook v1.0.0 h1:e+C0SB5R1pu//O4MQ3f9cFuPGoOVeF2fE4Og9otCc70=
 github.com/bshuster-repo/logrus-logstash-hook v1.0.0/go.mod h1:zsTqEiSzDgAa/8GZR7E1qaXrhYNDKBYy5/dWPTIflbk=
-github.com/bytecodealliance/wasmtime-go/v43 v43.0.2 h1:EZJlEpDanv6j/Y5Mcl2ndMjgK5Tw2QVDTJCzmLWNozg=
-github.com/bytecodealliance/wasmtime-go/v43 v43.0.2/go.mod h1:EhGDFKNmDpLc6l4Cq+U2y8zu3NM6Uiek+He4yebZFHs=
+github.com/bytecodealliance/wasmtime-go/v44 v44.0.0 h1:WRZXnLPIer/TWs5aYPaMlmVcOlzmR6Ur6wjLRIQOhTQ=
+github.com/bytecodealliance/wasmtime-go/v44 v44.0.0/go.mod h1:GP93piU+39CoFVCQ5xfHrPOUtL0APlMnkbblJ2d3YY0=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/cenkalti/backoff/v5 v5.0.3 h1:ZN+IMa753KfX5hd8vVaMixjnqRZ3y8CuJKRKj1xcsSM=
@@ -1069,8 +1069,8 @@ github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAl
 github.com/onsi/gomega v1.19.0/go.mod h1:LY+I3pBVzYsTBU1AnDwOSxaYi9WoWiqgwooUqq9yPro=
 github.com/onsi/gomega v1.41.0 h1:OwKp4pXNgVxf6sCplzYo794OFNuoL2q2SBMU5NSWOjA=
 github.com/onsi/gomega v1.41.0/go.mod h1:M/Uqpu/8qTjtzCLUA2zJHX9Iilrau25x1PdoSRbWh5A=
-github.com/open-policy-agent/opa v1.16.2 h1:5gzbXeioG9TCguGOI9EKigeBP/1ZoD8VH/ca50ihGxI=
-github.com/open-policy-agent/opa v1.16.2/go.mod h1:21uy+TcBM9muN9DvE9B6lcnovwTIBcE2Y9DRscar/uM=
+github.com/open-policy-agent/opa v1.17.0 h1:TMm6bCyb3CEL4wjXsXn1d/kBSBbjF+5sEIyzQvbJiEw=
+github.com/open-policy-agent/opa v1.17.0/go.mod h1:lcuZYSlqQpXFzsA6EJCELmfR5+nNOpZYX+eo7xaIIlk=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=
