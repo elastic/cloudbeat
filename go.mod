@@ -69,7 +69,7 @@ require (
 	github.com/mikefarah/yq/v4 v4.53.2
 	github.com/mitchellh/gox v1.0.1
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c
-	github.com/open-policy-agent/opa v1.16.2
+	github.com/open-policy-agent/opa v1.17.0
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
 	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
@@ -136,7 +136,6 @@ require (
 	github.com/bitnami/go-version v0.0.0-20260527075203-290ffa1dcee7 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
-	github.com/bytecodealliance/wasmtime-go/v43 v43.0.2 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
@@ -597,7 +596,10 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-require al.essio.dev/pkg/shellescape v1.6.0 // indirect
+require (
+	al.essio.dev/pkg/shellescape v1.6.0 // indirect
+	github.com/bytecodealliance/wasmtime-go/v44 v44.0.0 // indirect
+)
 
 replace (
 	github.com/Shopify/sarama => github.com/elastic/sarama v1.19.1-0.20220310193331-ebc2b0d8eef3
