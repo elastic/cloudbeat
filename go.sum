@@ -948,8 +948,8 @@ github.com/masahiro331/go-vmdk-parser v0.0.0-20260425175348-040a3994f0b4 h1:BE5b
 github.com/masahiro331/go-vmdk-parser v0.0.0-20260425175348-040a3994f0b4/go.mod h1:5f7mCJGW9cJb8SDn3z8qodGxpMCOo8d/2nls/tiwRrw=
 github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb h1:2c5hvZu2o6ccumpPVlyGiRT3aXvc6Yxj1Kqh+usy1iM=
 github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb/go.mod h1:QKBZqdn6teT0LK3QhAf3K6xakItd1LonOShOEC44idQ=
-github.com/mattn/go-colorable v0.1.14 h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE=
-github.com/mattn/go-colorable v0.1.14/go.mod h1:6LmQG8QLFO4G5z1gPvYEzlUgJ2wF+stgPZH1UqBm1s8=
+github.com/mattn/go-colorable v0.1.15 h1:+u9SLTRGnXv73cEsnsmoZBom+dMU88B2M0aDcWy0/jY=
+github.com/mattn/go-colorable v0.1.15/go.mod h1:6LmQG8QLFO4G5z1gPvYEzlUgJ2wF+stgPZH1UqBm1s8=
 github.com/mattn/go-isatty v0.0.22 h1:j8l17JJ9i6VGPUFUYoTUKPSgKe/83EYU2zBC7YNKMw4=
 github.com/mattn/go-isatty v0.0.22/go.mod h1:ZXfXG4SQHsB/w3ZeOYbR0PrPwLy+n6xiMrJlRFqopa4=
 github.com/mattn/go-runewidth v0.0.24 h1:cpokDiIn0MGnhdHwuWnJBITySJ20QyNGnY2kR/ay2DU=
