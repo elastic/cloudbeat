@@ -1079,8 +1079,8 @@ github.com/opencontainers/runtime-spec v1.3.0 h1:YZupQUdctfhpZy3TM39nN9Ika5CBWT5
 github.com/opencontainers/runtime-spec v1.3.0/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
 github.com/opencontainers/selinux v1.15.0 h1:4Gs40e/R2FvM8PC1HPaPncLLaDor8Y2WDfk5gjU9o5M=
 github.com/opencontainers/selinux v1.15.0/go.mod h1:LenyElirjUHszfxrjuFqC85HIeXZKumHcKMQtnaDlQQ=
-github.com/openvex/discovery v0.1.1-0.20260522124436-525832c5d979 h1:mcbquR/fUEyvdCaUXhifAKJOx6jM/Nbf1+tzQhOwHB8=
-github.com/openvex/discovery v0.1.1-0.20260522124436-525832c5d979/go.mod h1:xgG2B4o5OIYTGuL4aa9eTQkDXKA3/Uh9uhAShFcqz1A=
+github.com/openvex/discovery v0.1.1-0.20260602102858-b82210fcaf70 h1:/xOKywBFnDx/+HAKdF7EyU7K8v6tOm82jqqFU0xfSXc=
+github.com/openvex/discovery v0.1.1-0.20260602102858-b82210fcaf70/go.mod h1:xgG2B4o5OIYTGuL4aa9eTQkDXKA3/Uh9uhAShFcqz1A=
 github.com/openvex/go-vex v0.2.7 h1:/pN3bqvS4QOc6WkkL0hbKzJuAtsUD9vmvk9IZkzD3Zc=
 github.com/openvex/go-vex v0.2.7/go.mod h1:ZyQC3NXl9jjS53JOpBG3LAUXySkW8IlJ/GIhsnf5D54=
 github.com/owenrumney/go-sarif v1.1.1/go.mod h1:dNDiPlF04ESR/6fHlPyq7gHKmrM0sHUvAGjsoh8ZH0U=
