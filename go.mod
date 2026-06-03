@@ -177,7 +177,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/extism/go-sdk v1.7.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/fluxcd/cli-utils v1.2.0 // indirect
+	github.com/fluxcd/cli-utils v1.2.1 // indirect
 	github.com/fvbommel/sortorder v1.1.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.2 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20260416181348-e7dc79048676 // indirect
@@ -322,7 +322,7 @@ require (
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.78 // indirect
 	modernc.org/libc v1.72.5 // indirect
 	mvdan.cc/sh/v3 v3.13.1 // indirect
-	sigs.k8s.io/controller-runtime v0.24.0 // indirect
+	sigs.k8s.io/controller-runtime v0.24.1 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.0 // indirect
 )
