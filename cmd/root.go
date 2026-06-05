@@ -28,7 +28,6 @@ import (
 	_ "github.com/elastic/beats/v7/x-pack/libbeat/autodiscover/providers/aws/ec2"
 	_ "github.com/elastic/beats/v7/x-pack/libbeat/autodiscover/providers/aws/elb"
 	"github.com/elastic/beats/v7/x-pack/libbeat/management"
-	_ "github.com/elastic/beats/v7/x-pack/libbeat/outputs/otelconsumer"
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
 	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
 
