@@ -48,7 +48,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [ beats, golang, hermit, mods ]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [ golang, hermit, mods ]
         git-branch: [ main, 8.x ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -81,7 +82,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [ golang, beats ]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [ golang ]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Init Hermit
