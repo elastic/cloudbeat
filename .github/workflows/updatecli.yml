@@ -48,7 +48,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [beats, golang, hermit, mods]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [golang, hermit, mods]
         git-branch: [main]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -85,7 +86,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [golang, beats]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [golang]
         git-branch: ${{ fromJSON(needs.active-branches.outputs.matrix) }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
