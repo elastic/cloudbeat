@@ -73,7 +73,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BEATS_BOT_PAT }}
           commit-message: "[${{ matrix.branch }}][Automation] Update elastic/beats to ${{ env.BEATS_NEW_VERSION }}"
           title: "[${{ matrix.branch }}][Automation] Update elastic/beats to ${{ env.BEATS_NEW_VERSION }}"
           body: |
