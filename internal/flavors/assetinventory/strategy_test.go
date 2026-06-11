@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -141,8 +142,8 @@ func TestStrategyPicks(t *testing.T) {
 				},
 			},
 			env: map[string]string{
-				"AWS_WEB_IDENTITY_TOKEN_FILE": "/tmp/fake-token-file",
-				"AWS_ROLE_ARN":                "arn:aws:iam::123456789012:role/test-local-role",
+				identityfederation.AWSIRSATokenFileEnvVar: "/tmp/fake-token-file",
+				"AWS_ROLE_ARN":                            "arn:aws:iam::123456789012:role/test-local-role",
 			},
 			expectedErr: "STS: GetCallerIdentity",
 		},
