@@ -70,7 +70,7 @@ require (
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.53.3
 	github.com/mitchellh/gox v1.0.1
-	github.com/open-policy-agent/opa v1.17.0
+	github.com/open-policy-agent/opa v1.17.1
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
 	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
