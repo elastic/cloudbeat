@@ -36,8 +36,8 @@
     {
       "description": "Update .go-version file",
       "customType": "regex",
-      "fileMatch": [
-        "^\\.go-version$"
+      "managerFilePatterns": [
+        "/^\\.go-version$/"
       ],
       "matchStrings": [
         "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
