@@ -68,7 +68,7 @@ require (
 	github.com/microsoft/kiota-abstractions-go v1.9.4
 	github.com/microsoftgraph/msgraph-sdk-go v1.99.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
-	github.com/mikefarah/yq/v4 v4.53.2
+	github.com/mikefarah/yq/v4 v4.53.3
 	github.com/mitchellh/gox v1.0.1
 	github.com/open-policy-agent/opa v1.17.0
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
