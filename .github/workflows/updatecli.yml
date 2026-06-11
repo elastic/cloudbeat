@@ -48,7 +48,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [ beats, golang, hermit, mods ]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [ golang, hermit, mods ]
         git-branch: [ main ]
     steps:
       # Disk cleanup
@@ -93,7 +94,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [ golang, beats ]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [ golang ]
         git-branch: ${{ fromJSON(needs.active-branches.outputs.matrix) }}
     steps:
       # Disk cleanup
