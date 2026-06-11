@@ -22,6 +22,9 @@ env:
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
+permissions:
+  contents: read
+
 jobs:
   Deploy-CloudFormation:
     name: "Deploy CloudFormation"
