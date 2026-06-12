@@ -96,14 +96,14 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.68.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.68.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.68.0 // indirect
-	go.opentelemetry.io/otel v1.43.0
+	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.43.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.43.0
-	go.opentelemetry.io/otel/metric v1.43.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.43.0
-	go.opentelemetry.io/otel/sdk/metric v1.43.0
-	go.opentelemetry.io/otel/trace v1.43.0
+	go.opentelemetry.io/otel/metric v1.44.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.44.0
+	go.opentelemetry.io/otel/sdk/metric v1.44.0
+	go.opentelemetry.io/otel/trace v1.44.0
 	go.opentelemetry.io/proto/otlp v1.10.0
 	go.uber.org/goleak v1.3.0
 	go.uber.org/zap v1.28.0
@@ -186,18 +186,18 @@ require (
 	github.com/go-git/go-git/v5 v5.19.1 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.13 // indirect
-	github.com/go-openapi/runtime/server-middleware v0.32.2 // indirect
-	github.com/go-openapi/swag/cmdutils v0.26.0 // indirect
-	github.com/go-openapi/swag/conv v0.26.0 // indirect
-	github.com/go-openapi/swag/fileutils v0.26.0 // indirect
-	github.com/go-openapi/swag/jsonname v0.26.0 // indirect
-	github.com/go-openapi/swag/jsonutils v0.26.0 // indirect
-	github.com/go-openapi/swag/loading v0.26.0 // indirect
-	github.com/go-openapi/swag/mangling v0.26.0 // indirect
-	github.com/go-openapi/swag/netutils v0.26.0 // indirect
-	github.com/go-openapi/swag/stringutils v0.26.0 // indirect
-	github.com/go-openapi/swag/typeutils v0.26.0 // indirect
-	github.com/go-openapi/swag/yamlutils v0.26.0 // indirect
+	github.com/go-openapi/runtime/server-middleware v0.32.3 // indirect
+	github.com/go-openapi/swag/cmdutils v0.26.1 // indirect
+	github.com/go-openapi/swag/conv v0.26.1 // indirect
+	github.com/go-openapi/swag/fileutils v0.26.1 // indirect
+	github.com/go-openapi/swag/jsonname v0.26.1 // indirect
+	github.com/go-openapi/swag/jsonutils v0.26.1 // indirect
+	github.com/go-openapi/swag/loading v0.26.1 // indirect
+	github.com/go-openapi/swag/mangling v0.26.1 // indirect
+	github.com/go-openapi/swag/netutils v0.26.1 // indirect
+	github.com/go-openapi/swag/stringutils v0.26.1 // indirect
+	github.com/go-openapi/swag/typeutils v0.26.1 // indirect
+	github.com/go-openapi/swag/yamlutils v0.26.1 // indirect
 	github.com/gocsaf/csaf/v3 v3.5.1 // indirect
 	github.com/gofrs/uuid/v5 v5.4.0 // indirect
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
@@ -427,16 +427,16 @@ require (
 	github.com/go-logr/logr v1.4.3
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/go-openapi/analysis v0.25.1 // indirect
+	github.com/go-openapi/analysis v0.25.2 // indirect
 	github.com/go-openapi/errors v0.22.8 // indirect
 	github.com/go-openapi/jsonpointer v0.23.1 // indirect
 	github.com/go-openapi/jsonreference v0.21.6 // indirect
-	github.com/go-openapi/loads v0.23.3 // indirect
-	github.com/go-openapi/runtime v0.32.2 // indirect
+	github.com/go-openapi/loads v0.24.0 // indirect
+	github.com/go-openapi/runtime v0.32.3 // indirect
 	github.com/go-openapi/spec v0.22.5 // indirect
 	github.com/go-openapi/strfmt v0.26.3 // indirect
-	github.com/go-openapi/swag v0.26.0 // indirect
-	github.com/go-openapi/validate v0.25.3 // indirect
+	github.com/go-openapi/swag v0.26.1 // indirect
+	github.com/go-openapi/validate v0.26.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
