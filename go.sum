@@ -968,8 +968,8 @@ github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1 h1:k3YIaJm57ufoEX0KdsEY4l1X
 github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1/go.mod h1:yNqPNhXee2w9cZzkJW5mL1utVMSInsQSo/TyEB5sup8=
 github.com/miekg/dns v1.1.72 h1:vhmr+TF2A3tuoGNkLDFK9zi36F2LS+hKTRW0Uf8kbzI=
 github.com/miekg/dns v1.1.72/go.mod h1:+EuEPhdHOsfk6Wk5TT2CzssZdqkmFhf8r+aVyDEToIs=
-github.com/mikefarah/yq/v4 v4.53.2 h1:ZPIUjpgh4ACOKW98PXvr4o4dlaRjSOLLa6gS1t7FrAo=
-github.com/mikefarah/yq/v4 v4.53.2/go.mod h1:dKgedwimDBsgJO6zq8tQkiGoGmkRH9JWrl3G3na2z7M=
+github.com/mikefarah/yq/v4 v4.53.3 h1:S0kwPkINdOjgPskW5CfYTGo/Vt7c3gUnUkKSp7CNqD0=
+github.com/mikefarah/yq/v4 v4.53.3/go.mod h1:4mvgujMtSAB3lA27+lwg8eIud/4QUQw2/1rLbxgiauw=
 github.com/mileusna/useragent v1.3.4 h1:MiuRRuvGjEie1+yZHO88UBYg8YBC/ddF6T7F56i3PCk=
 github.com/mileusna/useragent v1.3.4/go.mod h1:3d8TOmwL/5I8pJjyVDteHtgDGcefrFUX4ccGOMKNYYc=
 github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
