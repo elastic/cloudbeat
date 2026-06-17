@@ -116,10 +116,10 @@ github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.1.32 h1:osnkVtr2sms/p
 github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.1.32/go.mod h1:uX2CoogLFWSxfoPl17CT9rMoHlv3RTYudvfNn/d/aOo=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.32.0 h1:rIkQfkCOVKc1OiRCNcSDD8ml5RJlZbH/Xsq7lbpynwc=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.32.0/go.mod h1:RD2SsorTmYhF6HkTmDw7KmPYQk8OBYwTkuasChwv7R4=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.56.0 h1:O2sXMyJh8b7devAGdE+163xtRurt0RVpB6DIzX5vGfg=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.56.0/go.mod h1:hEpiGU18xf70qb3jbTcIggWAiEfX/cOIVc2OTe4OegA=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.56.0 h1:ZIT85vKP7LBS84XJ0WdJ3dPOX3iz4j3c0+lpajGQMyo=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.56.0/go.mod h1:rqP9UEhOXv9WhQ7Gjz+G5y/pf8+BJZW5/Ts0AhE0PwE=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.57.0 h1:jLdiS1vO+XJFyDSWRHBx56r4s/NNtcl5J6KyCcWUX/w=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.57.0/go.mod h1:8lmpHY+1VRoteiOwyrQMDt1YGXOrFKCz+1wJW7n3ODY=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.57.0 h1:cSjUzZ7KU8hicTgzaSv9NmSyM9fTVK3y5lsBUl3wOis=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.57.0/go.mod h1:dzcEjy1WJ0Q4u9twNR3LcLhNoYMRCrMCMafpxa0TjPQ=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.57.0 h1:RoO5+d7uCmDqovLrHCr2/BuViUXvdcrNxyNM1pN9dDQ=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.57.0/go.mod h1:YqwkQPrWSC7+byyc1VlKbWLBF5JsW5IoL6xUkemYSXk=
 github.com/Intevation/gval v1.3.0 h1:+Ze5sft5MmGbZrHj06NVUbcxCb67l9RaPTLMNr37mjw=
