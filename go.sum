@@ -141,8 +141,8 @@ github.com/Masterminds/squirrel v1.5.4/go.mod h1:NNaOrjSoIDfDA40n7sr2tPNZRfjzjA4
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
 github.com/Microsoft/go-winio v0.6.3-0.20260107145400-75610162e7da h1:8ozZKftQ98rltuZgYeEjlKXRRA5fr/fmxf4IOQinE84=
 github.com/Microsoft/go-winio v0.6.3-0.20260107145400-75610162e7da/go.mod h1:ZWa7ssZJT30CCDGJ7fk/2SBTq9BIQrrVjrcss0UW2s0=
-github.com/Microsoft/hcsshim v0.15.0-rc.1 h1:FbbwtQmiD+BVHynGkx5S65JkLyhkEiiTP8nrpmg2SZw=
-github.com/Microsoft/hcsshim v0.15.0-rc.1/go.mod h1:HWvvUPIy9HF6LotILj1G4VyS065rcLQ6tqj6tMUdOfI=
+github.com/Microsoft/hcsshim v0.15.0-rc.2 h1:/3Izdm/kGtHjqC0wdwepupLaz+U+xIjA1i03RM3v/SA=
+github.com/Microsoft/hcsshim v0.15.0-rc.2/go.mod h1:HICB5JfsB/rThwBKw9LiTd40H79lXbp/hzRgLGNLJLs=
 github.com/ProtonMail/go-crypto v1.4.1 h1:9RfcZHqEQUvP8RzecWEUafnZVtEvrBVL9BiF67IQOfM=
 github.com/ProtonMail/go-crypto v1.4.1/go.mod h1:e1OaTyu5SYVrO9gKOEhTc+5UcXtTUa+P3uLudwcgPqo=
 github.com/VividCortex/ewma v1.2.0 h1:f58SaIzcDXrSy3kWaHNvuJgJ3Nmz59Zji6XoJR/q1ow=
