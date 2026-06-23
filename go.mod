@@ -31,9 +31,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.72.1
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.56.4
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.59.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.77.0
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.78.0
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.64.1
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.307.1
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.308.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.58.4
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.34.6
 	github.com/aws/aws-sdk-go-v2/service/iam v1.54.5
