@@ -314,7 +314,7 @@ require (
 	golang.org/x/tools v0.46.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.2 // indirect
-	helm.sh/helm/v4 v4.2.1 // indirect
+	helm.sh/helm/v4 v4.2.2 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.78 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.78 // indirect
 	mvdan.cc/sh/v3 v3.13.1 // indirect
