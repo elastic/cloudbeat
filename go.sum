@@ -941,8 +941,8 @@ github.com/lestrrat-go/option/v2 v2.0.0 h1:XxrcaJESE1fokHy3FpaQ/cXW8ZsIdWcdFzzLO
 github.com/lestrrat-go/option/v2 v2.0.0/go.mod h1:oSySsmzMoR0iRzCDCaUfsCzxQHUEuhOViQObyy7S6Vg=
 github.com/lestrrat-go/strftime v1.1.1 h1:zgf8QCsgj27GlKBy3SU9/8MMgegZ8UCzlCyHYrUF0QU=
 github.com/lestrrat-go/strftime v1.1.1/go.mod h1:YDrzHJAODYQ+xxvrn5SG01uFIQAeDTzpxNVppCz7Nmw=
-github.com/letsencrypt/boulder v0.20260615.0 h1:igTtZ75fvIoaYje6TJBav7LemvtZImNJhApq2gSCZ00=
-github.com/letsencrypt/boulder v0.20260615.0/go.mod h1:SCtxgc9za2EpV67oillMAaAQKdlZBXTRasJLgi9+GBM=
+github.com/letsencrypt/boulder v0.20260623.0 h1:rD3KN7sShxgRzYjf5x1ACF1DuoMZ6dQaM2Hxs6sTh0A=
+github.com/letsencrypt/boulder v0.20260623.0/go.mod h1:iI3Sx0wisa96DyIwvSUNSd53NHg+cNLYUzFEUx/7iQQ=
 github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
 github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
