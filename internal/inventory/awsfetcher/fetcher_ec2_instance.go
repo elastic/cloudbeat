@@ -97,12 +97,26 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 				Name:         pointers.Deref(i.PrivateDnsName),
 				Architecture: string(i.Architecture),
 				Type:         string(i.InstanceType),
-				IP:           pointers.Deref(i.PublicIpAddress),
+				IP:           buildIPs(i.PublicIpAddress, i.PrivateIpAddress),
 				MacAddress:   i.GetResourceMacAddresses(),
 			}),
+			inventory.WithCreatedAt(i.LaunchTime),
 			iamFetcher,
 		)
 	}
+}
+
+// buildIPs collects non-empty IP address strings into a slice, returning nil when none exist.
+// Using a nil (not empty) slice is important so that the json:"ip,omitempty" tag suppresses
+// the field consistently and struct comparison in tests works without nil/empty mismatches.
+func buildIPs(addrs ...*string) []string {
+	var ips []string
+	for _, addr := range addrs {
+		if v := pointers.Deref(addr); v != "" {
+			ips = append(ips, v)
+		}
+	}
+	return ips
 }
 
 func (e *ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]string {

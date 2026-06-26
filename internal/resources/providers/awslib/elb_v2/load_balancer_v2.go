@@ -18,6 +18,8 @@
 package elb_v2
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
@@ -44,4 +46,16 @@ func (v ElasticLoadBalancerInfo) GetResourceType() string {
 
 func (v ElasticLoadBalancerInfo) GetRegion() string {
 	return v.region
+}
+
+func (v ElasticLoadBalancerInfo) GetDNSName() string {
+	return pointers.Deref(v.LoadBalancer.DNSName)
+}
+
+func (v ElasticLoadBalancerInfo) IsPubliclyAccessible() bool {
+	return v.LoadBalancer.Scheme == types.LoadBalancerSchemeEnumInternetFacing
+}
+
+func (v ElasticLoadBalancerInfo) GetCreatedAt() *time.Time {
+	return v.LoadBalancer.CreatedTime
 }
