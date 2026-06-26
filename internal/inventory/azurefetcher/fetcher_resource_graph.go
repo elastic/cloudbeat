@@ -159,6 +159,8 @@ func extractAzureCreatedAt(properties map[string]any) *time.Time {
 			if parsed, err := time.Parse(time.RFC3339, t); err == nil {
 				return &parsed
 			}
+		default:
+			_ = t
 		}
 	}
 	return nil

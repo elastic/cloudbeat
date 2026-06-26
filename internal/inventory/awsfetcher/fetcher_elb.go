@@ -94,7 +94,7 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 		var createdAt *time.Time
 		if r, ok := item.(elbInventoryResource); ok {
 			attrs = map[string]any{
-				"DNSName":           r.GetDNSName(),
+				"DNSName":            r.GetDNSName(),
 				"PubliclyAccessible": r.IsPubliclyAccessible(),
 			}
 			createdAt = r.GetCreatedAt()

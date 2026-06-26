@@ -146,7 +146,6 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 			}),
 			inventory.WithCreatedAt(item.GetCreatedDateTime()),
 		)
-
 	}
 }
 
