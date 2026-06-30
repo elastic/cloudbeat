@@ -11,7 +11,7 @@ jobs:
     name: Run ECH on main
     uses: ./.github/workflows/test-e2e-flow.yml
     with:
-      branch: htfix
+      branch: ghfix
       region: production-cft
       serverless: false
       run-ui-sanity-tests: true
@@ -26,7 +26,7 @@ jobs:
     uses: ./.github/workflows/test-e2e-flow.yml
     if: always()
     with:
-      branch: htfix
+      branch: ghfix
       region: production-cft
       serverless: true
       run-ui-sanity-tests: true
