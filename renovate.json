@@ -3,7 +3,7 @@
   "extends": [
     "local>elastic/renovate-config"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main",
     "9.4",
     "9.3",
@@ -36,8 +36,8 @@
     {
       "description": "Update .go-version file",
       "customType": "regex",
-      "fileMatch": [
-        "^\\.go-version$"
+      "managerFilePatterns": [
+        "/^\\.go-version$/"
       ],
       "matchStrings": [
         "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
