@@ -586,7 +586,6 @@ require (
 	k8s.io/kube-openapi v0.0.0-20260624041617-8f3fa4921821 // indirect
 	k8s.io/kubectl v0.34.0 // indirect
 	k8s.io/utils v0.0.0-20260210185600-b8788abfbbc2 // indirect
-	modernc.org/libc v1.73.5 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 	oras.land/oras-go/v2 v2.6.1 // indirect
@@ -600,6 +599,7 @@ require (
 	al.essio.dev/pkg/shellescape v1.6.0 // indirect
 	github.com/bytecodealliance/wasmtime-go/v44 v44.0.0 // indirect
 	github.com/cenkalti/backoff/v6 v6.0.1 // indirect
+	modernc.org/libc v1.73.4 // indirect
 )
 
 replace (
