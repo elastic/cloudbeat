@@ -51,11 +51,19 @@ func newPage(items []models.ServicePrincipalable, nextLink *string) *models.Serv
 
 func ptr(s string) *string { return &s }
 
+// noopAdapter satisfies NewPageIterator's non-nil reqAdapter requirement for tests with no next
+// link; Send is never expected to be called in that case.
+func noopAdapter() *stubAdapter {
+	return &stubAdapter{sendFn: func() (absser.Parsable, error) {
+		panic("adapter should not be called when there is no next link")
+	}}
+}
+
 func TestPageIterator_EmptyResponse(t *testing.T) {
 	// nil value and an empty slice are both valid; both should yield zero items.
 	for _, items := range [][]models.ServicePrincipalable{nil, {}} {
 		pi, err := graphcore.NewPageIterator[models.ServicePrincipalable](
-			newPage(items, nil), nil,
+			newPage(items, nil), noopAdapter(),
 			models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue,
 		)
 		require.NoError(t, err)
@@ -72,7 +80,7 @@ func TestPageIterator_EmptyResponse(t *testing.T) {
 func TestPageIterator_RegularPrincipalOnly(t *testing.T) {
 	sp := models.NewServicePrincipal()
 	pi, err := graphcore.NewPageIterator[models.ServicePrincipalable](
-		newPage([]models.ServicePrincipalable{sp}, nil), nil,
+		newPage([]models.ServicePrincipalable{sp}, nil), noopAdapter(),
 		models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue,
 	)
 	require.NoError(t, err)
@@ -95,7 +103,7 @@ func TestPageIterator_RegularPrincipalOnly(t *testing.T) {
 func TestPageIterator_NoPanicWithSubtype(t *testing.T) {
 	agent := models.NewAgentIdentityBlueprintPrincipal()
 	pi, err := graphcore.NewPageIterator[models.ServicePrincipalable](
-		newPage([]models.ServicePrincipalable{agent}, nil), nil,
+		newPage([]models.ServicePrincipalable{agent}, nil), noopAdapter(),
 		models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue,
 	)
 	require.NoError(t, err)
@@ -115,7 +123,7 @@ func TestPageIterator_MixedTypes(t *testing.T) {
 	agent := models.NewAgentIdentityBlueprintPrincipal()
 	regular := models.NewServicePrincipal()
 	pi, err := graphcore.NewPageIterator[models.ServicePrincipalable](
-		newPage([]models.ServicePrincipalable{agent, regular}, nil), nil,
+		newPage([]models.ServicePrincipalable{agent, regular}, nil), noopAdapter(),
 		models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue,
 	)
 	require.NoError(t, err)
