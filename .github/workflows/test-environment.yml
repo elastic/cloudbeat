@@ -37,8 +37,8 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
-      kibana_security_solution_experimental:
-        description: "ESS only: Apply Entity Store v2 and Entity Analytics Feature flags (new home, watchlist, etc)"
+      kibana_enable_entity_analytics_settings:
+        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents feature flag, Agent Builder experimental UI)"
         type: boolean
         required: false
         default: true
@@ -89,8 +89,8 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
-      kibana_security_solution_experimental:
-        description: "ESS only: Apply Entity Store v2 and Entity Analytics Feature flags (new home, watchlist, etc)"
+      kibana_enable_entity_analytics_settings:
+        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents feature flag, Agent Builder experimental UI)"
         type: boolean
         required: false
         default: true
@@ -410,7 +410,7 @@ jobs:
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
           ec-url: ${{ env.EC_URL }}
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
-          kibana-security-solution-experimental: ${{ inputs.kibana_security_solution_experimental }}
+          kibana-enable-entity-analytics-settings: ${{ inputs.kibana_enable_entity_analytics_settings }}
           kibana-instance-size: "4g"
           env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
           tag-project: ${{ github.actor }}
