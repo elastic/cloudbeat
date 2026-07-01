@@ -7,6 +7,9 @@ on:
   #     - 'update-version-next-*'
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+
 jobs:
   synchronize-versions:
     runs-on: ubuntu-latest
