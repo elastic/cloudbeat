@@ -205,6 +205,64 @@ func TestActiveDirectoryFetcher_Fetch_AgentIdentityBlueprintPrincipal(t *testing
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
 
+func TestActiveDirectoryFetcher_Fetch_MixedPrincipalTypes(t *testing.T) {
+	appOwnerOrganizationId, _ := uuid.NewUUID()
+	values := map[string]any{
+		"id":                     pointers.Ref("some-id"),
+		"displayName":            pointers.Ref("some-name"),
+		"appOwnerOrganizationId": &appOwnerOrganizationId,
+	}
+	bs := store.NewInMemoryBackingStore()
+	for k, v := range values {
+		_ = bs.Set(k, v)
+	}
+
+	// Both principals share the same backing store so each produces an identical event;
+	// the test verifies that both items are emitted regardless of their concrete type.
+	regularPrincipal := &models.ServicePrincipal{}
+	regularPrincipal.SetBackingStore(bs)
+	agentPrincipal := models.NewAgentIdentityBlueprintPrincipal()
+	agentPrincipal.SetBackingStore(bs)
+
+	expectedEvent := inventory.NewAssetEvent(
+		inventory.AssetClassificationAzureServicePrincipal,
+		"some-id",
+		"some-name",
+		inventory.WithRawAsset(values),
+		inventory.WithCloud(inventory.Cloud{
+			Provider:    inventory.AzureCloudProvider,
+			AccountID:   appOwnerOrganizationId.String(),
+			ServiceName: "Azure Entra",
+		}),
+	)
+
+	logger := testhelper.NewLogger(t)
+	provider := newMockActivedirectoryProvider(t)
+	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
+		[]models.ServicePrincipalable{regularPrincipal, agentPrincipal}, nil,
+	)
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(nil, nil)
+	provider.EXPECT().ListGroups(mock.Anything).Maybe().Return(nil, nil)
+	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(nil, nil)
+
+	fetcher := newActiveDirectoryFetcher(logger, "tenant-id", provider)
+	testutil.CollectResourcesAndMatch(t, fetcher, []inventory.AssetEvent{expectedEvent, expectedEvent})
+}
+
+func TestActiveDirectoryFetcher_Fetch_EmptyServicePrincipalList(t *testing.T) {
+	logger := testhelper.NewLogger(t)
+	provider := newMockActivedirectoryProvider(t)
+	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
+		[]models.ServicePrincipalable{}, nil,
+	)
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(nil, nil)
+	provider.EXPECT().ListGroups(mock.Anything).Maybe().Return(nil, nil)
+	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(nil, nil)
+
+	fetcher := newActiveDirectoryFetcher(logger, "tenant-id", provider)
+	testutil.CollectResourcesAndMatch(t, fetcher, []inventory.AssetEvent{})
+}
+
 func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 	// set up log capture
 	logCaptureBuf := &bytes.Buffer{}
