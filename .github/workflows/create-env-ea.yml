@@ -154,7 +154,6 @@ jobs:
           ess-region: ${{ env.ESS_REGION }}
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
           ec-url: ${{ env.EC_URL }}
-          kibana-security-solution-experimental: false
           kibana-enable-entity-analytics-settings: true
           kibana-instance-size: ${{ inputs.kibana_instance_size }}
           elasticsearch-ml-enabled: true

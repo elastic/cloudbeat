@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
 # Ensure Entity Store v2 is installed (public API), poll until running, init
-# maintainers, then POST risk-score maintainer run (internal API).
+# maintainers (idempotent), then POST risk-score maintainer sync run (internal API).
 #
 # Required: KIBANA_URL, ES_USER, ES_PASSWORD
 # Optional: ENTITY_STORE_STATUS_TIMEOUT_SEC (default 180), ENTITY_STORE_POLL_INTERVAL_SEC (default 5)
 #           RISK_SCORE_MAINTAINERS_MAX_ATTEMPTS (default 10), RISK_SCORE_MAINTAINERS_SLEEP_SEC (default 10)
+#           RISK_SCORE_MAINTAINER_SYNC_TIMEOUT_SEC (default 600) — curl max-time for sync run
 #
 # Requires: jq
 
@@ -24,10 +25,12 @@ readonly BASE="${KIBANA_URL%/}"
 readonly STATUS_URL="${BASE}/api/security/entity_store/status?apiVersion=2023-10-31"
 readonly INSTALL_URL="${BASE}/api/security/entity_store/install?apiVersion=2023-10-31"
 readonly INIT_URL="${BASE}/internal/security/entity_store/entity_maintainers/init?apiVersion=2"
-readonly RUN_URL="${BASE}/internal/security/entity_store/entity_maintainers/run/risk-score?apiVersion=2"
+readonly RUN_URL="${BASE}/internal/security/entity_store/entity_maintainers/run/risk-score?apiVersion=2&sync=true"
 
 readonly STATUS_FILE="${TMPDIR:-/tmp}/install_entity_risk_status.json"
 readonly CURL_COMMON=(--connect-timeout 10 --max-time 120 -sS)
+readonly SYNC_RUN_TIMEOUT_SEC="${RISK_SCORE_MAINTAINER_SYNC_TIMEOUT_SEC:-600}"
+readonly CURL_SYNC_RUN=(--connect-timeout 10 --max-time "${SYNC_RUN_TIMEOUT_SEC}" -sS)
 readonly POLL_TIMEOUT="${ENTITY_STORE_STATUS_TIMEOUT_SEC:-180}"
 readonly POLL_INTERVAL="${ENTITY_STORE_POLL_INTERVAL_SEC:-5}"
 
@@ -163,15 +166,17 @@ run_risk_score_maintainer() {
     local sleep_sec="${RISK_SCORE_MAINTAINERS_SLEEP_SEC:-10}"
     local attempt=1 http_code body_preview
 
+    # Sync run executes scoring inline (avoids Task Manager runSoon race after install).
+    # HTTP 500 is fail-fast: indicates a server/scoring error, not a transient TM conflict.
     while [[ "${attempt}" -le "${max_attempts}" ]]; do
-        echo "Risk-score maintainer run: attempt ${attempt}/${max_attempts} POST ${RUN_URL}"
+        echo "Risk-score maintainer sync run: attempt ${attempt}/${max_attempts} POST ${RUN_URL} (timeout ${SYNC_RUN_TIMEOUT_SEC}s)"
         http_code="$(
-            curl_auth -X POST "${INTERNAL_HEADERS[@]}" -d '{}' \
+            curl "${CURL_SYNC_RUN[@]}" -u "${ES_USER}:${ES_PASSWORD}" -X POST "${INTERNAL_HEADERS[@]}" -d '{}' \
                 -o "${run_out}" -w "%{http_code}" "${RUN_URL}" || echo "000"
         )"
 
         if [[ "${http_code}" == "200" || "${http_code}" == "201" || "${http_code}" == "204" ]]; then
-            echo "Risk-score maintainer run succeeded (HTTP ${http_code})"
+            echo "Risk-score maintainer sync run succeeded (HTTP ${http_code})"
             head -c 2000 "${run_out}" 2>/dev/null || true
             echo
             return 0
@@ -181,17 +186,17 @@ run_risk_score_maintainer() {
         echo "HTTP ${http_code} response preview: ${body_preview}"
 
         if [[ "${http_code}" == "502" || "${http_code}" == "503" || "${http_code}" == "504" || "${http_code}" == "000" ]]; then
-            echo "Transient error; sleeping ${sleep_sec}s before retry"
+            echo "Transient gateway/connection error; sleeping ${sleep_sec}s before retry"
             sleep "${sleep_sec}"
             attempt=$((attempt + 1))
             continue
         fi
 
-        echo "Risk-score maintainer run failed (non-retryable HTTP ${http_code})" >&2
+        echo "Risk-score maintainer sync run failed (non-retryable HTTP ${http_code})" >&2
         exit 1
     done
 
-    echo "Risk-score maintainer run failed after ${max_attempts} attempts" >&2
+    echo "Risk-score maintainer sync run failed after ${max_attempts} attempts" >&2
     exit 1
 }
 
