@@ -25,6 +25,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/internal/config"
@@ -72,7 +73,7 @@ func TestAWS_Initialize(t *testing.T) {
 		{
 			name: "cloud connectors irsa",
 			envsVars: map[string]string{
-				config.CloudConnectorsAWSTokenEnvVar: "/abc",
+				identityfederation.AWSIRSATokenFileEnvVar: "/abc",
 				"AWS_REGION":                         "eu-west-1",
 				"AWS_ROLE_ARN":                       "arn:aws:iam::111111111111:role/localrole",
 			},
@@ -121,7 +122,7 @@ func TestAWS_Initialize(t *testing.T) {
 		},
 		{
 			name:     "cloud connectors id token",
-			envsVars: map[string]string{config.CloudConnectorsJWTPathEnvVar: "/abc"},
+			envsVars: map[string]string{identityfederation.AWSIDTokenFileEnvVar: "/abc"},
 			cfg: config.Config{
 				Benchmark: "cis_aws",
 				CloudConfig: config.CloudConfig{
