@@ -1,72 +1,56 @@
 ---
 name: Update Elastic Beats go.mod Version
-pipelineid: 'updatecli-beats-{{ requiredEnv "GIT_BRANCH" }}'
+pipelineid: 'updatecli-beats-{{ requiredEnv "BRANCH_NAME" }}'
 
-scms:
-  default:
-    kind: github
-    spec:
-      user: '{{ requiredEnv "GIT_USER" }}'
-      owner: "{{ .github.owner }}"
-      repository: "{{ .github.repository }}"
-      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
-      username: '{{ requiredEnv "GIT_USER" }}'
-      branch: '{{ requiredEnv "GIT_BRANCH" }}'
-      email: 'cloudsecmachine@elastic.co'
-
-actions:
-  default:
-    title: '[updatecli] {{ requiredEnv "GIT_BRANCH" }} - Update to elastic/beats@{{ source "beats" }}'
-    kind: github/pullrequest
-    scmid: default
-    spec:
-      automerge: false
-      labels:
-        - automation
-        - backport-skip
-        - dependency
-        - go
-      description: |-
-        ### What
-        `elastic/beats` automatic sync
-
-        *Changeset*
-        * https://github.com/elastic/beats/commit/{{ source "beats" }}
-
-        Generated automatically with {{ requiredEnv "JOB_URL" }}
+# Note: This pipeline only edits files on disk. It is run with `--commit=false`
+# and the resulting Pull Request is created by the `bump-beats-version.yml`
+# workflow via peter-evans/create-pull-request, mirroring how elastic-agent does
+# it. updatecli does NOT push commits or open the PR itself.
 
 sources:
   beats:
     kind: json
     spec:
-      file: 'https://api.github.com/repos/elastic/beats/commits?sha={{ requiredEnv "GIT_BRANCH" }}&per_page=1'
+      file: 'https://api.github.com/repos/elastic/beats/commits?sha={{ requiredEnv "BRANCH_NAME" }}&per_page=1'
       key: '.[0].sha'
     transformers:
-      # substring 12 chars so it works for the condition
+      # substring 12 chars so it matches the go.mod pseudo-version suffix
       - findsubmatch:
           pattern: ^(.{12}).*
           captureindex: 1
+  gomod:
+    kind: golang/gomod
+    spec:
+      module: github.com/elastic/beats/v7
+    transformers:
+      # the commit hash is the last 12 chars of the pseudo-version
+      - findsubmatch:
+          pattern: .*(.{12})$
+          captureindex: 1
 
 conditions:
-  is:
+  is-already-updated:
     name: Is version 'github.com/elastic/beats@{{ source "beats" }}' not updated in 'go.mod'?
-    kind: file
+    kind: shell
     disablesourceinput: true
-    scmid: default
     spec:
-      file: go.mod
-      matchpattern: 'github\.com/elastic/beats.*-{{ source "beats" }}'
-    failwhen: true
+      command: '[ {{ source "beats" }} != {{ source "gomod" }} ]'
+    failwhen: false
 
 targets:
   beats:
     name: 'Update to elastic/beats@{{ source "beats" }}'
     sourceid: beats
-    scmid: default
     kind: shell
     spec:
       command: .ci/updatecli/scripts/update-beats.sh
       environments:
         - name: PATH
-        - name: GOPATH
         - name: HOME
+  export-versions:
+    name: "Export the previous and new beats version to /tmp/.beats-previous-version and /tmp/.beats-new-version files"
+    disablesourceinput: true
+    kind: shell
+    spec:
+      command: |
+        echo "{{ source "gomod" }}" > /tmp/.beats-previous-version && echo "{{ source "beats" }}" > /tmp/.beats-new-version
