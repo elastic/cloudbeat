@@ -19,6 +19,7 @@ package awsfetcher
 
 import (
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/stretchr/testify/mock"
@@ -33,6 +34,8 @@ import (
 )
 
 func TestEC2InstanceFetcher_Fetch(t *testing.T) {
+	launchTime := time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)
+
 	instance1 := &ec2beat.Ec2Instance{
 		Instance: types.Instance{
 			IamInstanceProfile: &types.IamInstanceProfile{
@@ -60,6 +63,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			Ipv6Address:      pointers.Ref("ipv6"),
 			PublicIpAddress:  pointers.Ref("public-ip-addr"),
 			PrivateIpAddress: pointers.Ref("private-ip-addre"),
+			LaunchTime:       &launchTime,
 			PublicDnsName:    pointers.Ref("public-dns"),
 			PrivateDnsName:   pointers.Ref("private-dns"),
 			Placement: &types.Placement{
@@ -108,9 +112,10 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				Name:         "private-dns",
 				Architecture: string(types.ArchitectureValuesX8664),
 				Type:         "instance-type",
-				IP:           "public-ip-addr",
+				IP:           []string{"public-ip-addr", "private-ip-addre"},
 				MacAddress:   []string{"mac1", "mac2"},
 			}),
+			inventory.WithCreatedAt(&launchTime),
 			inventory.WithUser(inventory.User{
 				ID: "123123:123123:123123",
 			}),

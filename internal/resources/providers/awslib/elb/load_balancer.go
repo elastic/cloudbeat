@@ -19,6 +19,7 @@ package elb
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 
@@ -50,4 +51,16 @@ func (v ElasticLoadBalancerInfo) GetResourceType() string {
 
 func (v ElasticLoadBalancerInfo) GetRegion() string {
 	return v.region
+}
+
+func (v ElasticLoadBalancerInfo) GetDNSName() string {
+	return pointers.Deref(v.LoadBalancer.DNSName)
+}
+
+func (v ElasticLoadBalancerInfo) IsPubliclyAccessible() bool {
+	return pointers.Deref(v.LoadBalancer.Scheme) == "internet-facing"
+}
+
+func (v ElasticLoadBalancerInfo) GetCreatedAt() *time.Time {
+	return v.LoadBalancer.CreatedTime
 }

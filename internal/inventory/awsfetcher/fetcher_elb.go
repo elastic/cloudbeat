@@ -19,6 +19,7 @@ package awsfetcher
 
 import (
 	"context"
+	"time"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -26,6 +27,14 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/statushandler"
 )
+
+// elbInventoryResource is satisfied by both the v1 and v2 ELB wrapper types,
+// giving the fetcher access to fields that are not part of the awslib.AwsResource interface.
+type elbInventoryResource interface {
+	GetDNSName() string
+	IsPubliclyAccessible() bool
+	GetCreatedAt() *time.Time
+}
 
 type elbFetcher struct {
 	logger        *clog.Logger
@@ -81,6 +90,16 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 	}
 
 	for _, item := range awsResources {
+		var attrs map[string]any
+		var createdAt *time.Time
+		if r, ok := item.(elbInventoryResource); ok {
+			attrs = map[string]any{
+				"DNSName":            r.GetDNSName(),
+				"PubliclyAccessible": r.IsPubliclyAccessible(),
+			}
+			createdAt = r.GetCreatedAt()
+		}
+
 		assetChannel <- inventory.NewAssetEvent(
 			classification,
 			item.GetResourceArn(),
@@ -93,6 +112,8 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 				AccountName: f.AccountName,
 				ServiceName: "AWS Networking",
 			}),
+			inventory.WithEntityAttributes(attrs),
+			inventory.WithCreatedAt(createdAt),
 		)
 	}
 }
