@@ -184,7 +184,7 @@ func TestPageIterator_Pagination_AdapterError(t *testing.T) {
 		collected = append(collected, item)
 		return true
 	})
-	assert.ErrorContains(t, err, "network error fetching page 2")
+	require.ErrorContains(t, err, "network error fetching page 2")
 	assert.Len(t, collected, 1, "items from page 1 should have been collected before the error")
 }
 
