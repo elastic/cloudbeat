@@ -232,8 +232,8 @@ func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Run(run func(c
 	return _c
 }
 
-func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Return(servicePrincipals []models.ServicePrincipalable, err error) *mockActivedirectoryProvider_ListServicePrincipals_Call {
-	_c.Call.Return(servicePrincipals, err)
+func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Return(servicePrincipalables []models.ServicePrincipalable, err error) *mockActivedirectoryProvider_ListServicePrincipals_Call {
+	_c.Call.Return(servicePrincipalables, err)
 	return _c
 }
 
