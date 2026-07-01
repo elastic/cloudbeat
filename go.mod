@@ -342,7 +342,7 @@ require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/anchore/go-struct-converter v0.1.0 // indirect
+	github.com/anchore/go-struct-converter v0.2.1 // indirect
 	github.com/apparentlymart/go-cidr v1.1.1 // indirect
 	github.com/aquasecurity/go-gem-version v0.0.0-20201115065557-8eed6fe000ce // indirect
 	github.com/aquasecurity/go-npm-version v0.0.2 // indirect
