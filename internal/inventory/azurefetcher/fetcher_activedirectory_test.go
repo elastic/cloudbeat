@@ -141,7 +141,7 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 	provider := newMockActivedirectoryProvider(t)
 
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Maybe().Return(
-		[]*models.ServicePrincipal{servicePrincipal}, nil,
+		[]models.ServicePrincipalable{servicePrincipal}, nil,
 	)
 	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
 		[]*models.DirectoryRole{role}, nil,
@@ -155,6 +155,53 @@ func TestActiveDirectoryFetcher_Fetch(t *testing.T) {
 
 	fetcher := newActiveDirectoryFetcher(logger, "id", provider)
 	// test & compare
+	testutil.CollectResourcesAndMatch(t, fetcher, expected)
+}
+
+// TestActiveDirectoryFetcher_Fetch_AgentIdentityBlueprintPrincipal verifies that the fetcher
+// correctly processes AgentIdentityBlueprintPrincipal objects (a ServicePrincipal subtype
+// provisioned automatically by Microsoft 365 Copilot/Agents) without panicking or dropping
+// the asset event.
+func TestActiveDirectoryFetcher_Fetch_AgentIdentityBlueprintPrincipal(t *testing.T) {
+	agentPrincipalID := "agent-principal-id"
+	appOwnerOrganizationId, _ := uuid.NewUUID()
+	values := map[string]any{
+		"id":                     &agentPrincipalID,
+		"displayName":            pointers.Ref("Copilot Agent"),
+		"appOwnerOrganizationId": &appOwnerOrganizationId,
+	}
+	bs := store.NewInMemoryBackingStore()
+	for k, v := range values {
+		_ = bs.Set(k, v)
+	}
+
+	agentPrincipal := models.NewAgentIdentityBlueprintPrincipal()
+	agentPrincipal.SetBackingStore(bs)
+
+	expected := []inventory.AssetEvent{
+		inventory.NewAssetEvent(
+			inventory.AssetClassificationAzureServicePrincipal,
+			agentPrincipalID,
+			"Copilot Agent",
+			inventory.WithRawAsset(values),
+			inventory.WithCloud(inventory.Cloud{
+				Provider:    inventory.AzureCloudProvider,
+				AccountID:   appOwnerOrganizationId.String(),
+				ServiceName: "Azure Entra",
+			}),
+		),
+	}
+
+	logger := testhelper.NewLogger(t)
+	provider := newMockActivedirectoryProvider(t)
+	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
+		[]models.ServicePrincipalable{agentPrincipal}, nil,
+	)
+	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(nil, nil)
+	provider.EXPECT().ListGroups(mock.Anything).Maybe().Return(nil, nil)
+	provider.EXPECT().ListUsers(mock.Anything).Maybe().Return(nil, nil)
+
+	fetcher := newActiveDirectoryFetcher(logger, "tenant-id", provider)
 	testutil.CollectResourcesAndMatch(t, fetcher, expected)
 }
 
@@ -172,7 +219,7 @@ func TestActiveDirectoryFetcher_FetchError(t *testing.T) {
 
 	provider := newMockActivedirectoryProvider(t)
 	provider.EXPECT().ListServicePrincipals(mock.Anything).Return(
-		[]*models.ServicePrincipal{}, errors.New("! error listing service principals"),
+		[]models.ServicePrincipalable{}, errors.New("! error listing service principals"),
 	)
 	provider.EXPECT().ListDirectoryRoles(mock.Anything).Maybe().Return(
 		[]*models.DirectoryRole{}, nil,

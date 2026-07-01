@@ -181,23 +181,23 @@ func (_c *MockProviderAPI_ListGroups_Call) RunAndReturn(run func(context1 contex
 }
 
 // ListServicePrincipals provides a mock function for the type MockProviderAPI
-func (_mock *MockProviderAPI) ListServicePrincipals(context1 context.Context) ([]*models.ServicePrincipal, error) {
+func (_mock *MockProviderAPI) ListServicePrincipals(context1 context.Context) ([]models.ServicePrincipalable, error) {
 	ret := _mock.Called(context1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListServicePrincipals")
 	}
 
-	var r0 []*models.ServicePrincipal
+	var r0 []models.ServicePrincipalable
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]*models.ServicePrincipal, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]models.ServicePrincipalable, error)); ok {
 		return returnFunc(context1)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []*models.ServicePrincipal); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []models.ServicePrincipalable); ok {
 		r0 = returnFunc(context1)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.ServicePrincipal)
+			r0 = ret.Get(0).([]models.ServicePrincipalable)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -232,12 +232,12 @@ func (_c *MockProviderAPI_ListServicePrincipals_Call) Run(run func(context1 cont
 	return _c
 }
 
-func (_c *MockProviderAPI_ListServicePrincipals_Call) Return(servicePrincipals []*models.ServicePrincipal, err error) *MockProviderAPI_ListServicePrincipals_Call {
+func (_c *MockProviderAPI_ListServicePrincipals_Call) Return(servicePrincipals []models.ServicePrincipalable, err error) *MockProviderAPI_ListServicePrincipals_Call {
 	_c.Call.Return(servicePrincipals, err)
 	return _c
 }
 
-func (_c *MockProviderAPI_ListServicePrincipals_Call) RunAndReturn(run func(context1 context.Context) ([]*models.ServicePrincipal, error)) *MockProviderAPI_ListServicePrincipals_Call {
+func (_c *MockProviderAPI_ListServicePrincipals_Call) RunAndReturn(run func(context1 context.Context) ([]models.ServicePrincipalable, error)) *MockProviderAPI_ListServicePrincipals_Call {
 	_c.Call.Return(run)
 	return _c
 }
