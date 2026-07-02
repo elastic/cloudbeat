@@ -29,7 +29,13 @@ readonly RUN_URL="${BASE}/internal/security/entity_store/entity_maintainers/run/
 
 readonly STATUS_FILE="${TMPDIR:-/tmp}/install_entity_risk_status.json"
 readonly CURL_COMMON=(--connect-timeout 10 --max-time 120 -sS)
-readonly SYNC_RUN_TIMEOUT_SEC="${RISK_SCORE_MAINTAINER_SYNC_TIMEOUT_SEC:-600}"
+
+_sync_timeout_raw="${RISK_SCORE_MAINTAINER_SYNC_TIMEOUT_SEC:-600}"
+if [[ ! "${_sync_timeout_raw}" =~ ^[1-9][0-9]*$ ]]; then
+    echo "install_entity_risk.sh: RISK_SCORE_MAINTAINER_SYNC_TIMEOUT_SEC must be a positive integer (got '${_sync_timeout_raw}')" >&2
+    exit 1
+fi
+readonly SYNC_RUN_TIMEOUT_SEC="${_sync_timeout_raw}"
 readonly CURL_SYNC_RUN=(--connect-timeout 10 --max-time "${SYNC_RUN_TIMEOUT_SEC}" -sS)
 readonly POLL_TIMEOUT="${ENTITY_STORE_STATUS_TIMEOUT_SEC:-180}"
 readonly POLL_INTERVAL="${ENTITY_STORE_POLL_INTERVAL_SEC:-5}"
