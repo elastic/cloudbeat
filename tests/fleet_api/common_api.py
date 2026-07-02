@@ -224,7 +224,7 @@ def get_build_info(version: str) -> str:
             f"Could not resolve build info for '{version}' "
             f"(status {api_ex.status_code} from {url}). "
             f"The version is likely not published on Elastic's artifact servers — "
-            f"check CLOUDBEAT_VERSION/ELK_VERSION in bin/hermit.hcl.{hint}"
+            f"check CLOUDBEAT_VERSION/ELK_VERSION in bin/hermit.hcl.{hint}",
         ) from api_ex
 
 
@@ -573,6 +573,7 @@ def get_telemetry(cfg: Munch) -> dict:
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         raise
+
 
 def get_available_versions() -> list:
     """Return the versions currently published on the Elastic artifacts API."""
