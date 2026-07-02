@@ -23,4 +23,4 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: elastic/oblt-actions/github/backport-active@0c7802664ae184a6ebcfde1057fc0a13ede3ebab # v1
+      - uses: elastic/oblt-actions/github/backport-active@170c90b8e7bdff76058253039667bdda928a6614 # v1
