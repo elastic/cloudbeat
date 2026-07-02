@@ -33,8 +33,8 @@ on:
         description: "Number of days until environment expiration"
         required: false
         default: "5"
-      kibana_security_solution_experimental:
-        description: "ESS only: Apply Entity Store v2 and Entity Analytics Feature flags (new home, watchlist, etc)"
+      kibana_enable_entity_analytics_settings:
+        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents feature flag, Agent Builder experimental UI)"
         type: boolean
         required: false
         default: true
@@ -75,5 +75,5 @@ jobs:
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       infra-type: ${{ needs.init.outputs.infra-type }}
       expiration_days: ${{ inputs.expiration-days }}
-      kibana_security_solution_experimental: ${{ inputs.kibana_security_solution_experimental }}
+      kibana_enable_entity_analytics_settings: ${{ inputs.kibana_enable_entity_analytics_settings }}
       enable-entity-store-v2: ${{ fromJSON(inputs.enable-entity-store-v2) }}
