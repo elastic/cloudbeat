@@ -52,6 +52,16 @@ update_arm_templates() {
     fi
 }
 
+# next_minor_version <version>
+# Given "X.Y.Z", returns the next minor version "X.(Y+1).0".
+next_minor_version() {
+    local version="$1"
+    local major minor
+    major=$(echo "${version}" | cut -d. -f1)
+    minor=$(echo "${version}" | cut -d. -f2)
+    echo "${major}.$((minor + 1)).0"
+}
+
 # render_template <path>
 # Expands ${VAR} references in a template file using the caller's environment.
 render_template() {
