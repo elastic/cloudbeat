@@ -181,23 +181,23 @@ func (_c *mockActivedirectoryProvider_ListGroups_Call) RunAndReturn(run func(con
 }
 
 // ListServicePrincipals provides a mock function for the type mockActivedirectoryProvider
-func (_mock *mockActivedirectoryProvider) ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error) {
+func (_mock *mockActivedirectoryProvider) ListServicePrincipals(ctx context.Context) ([]models.ServicePrincipalable, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListServicePrincipals")
 	}
 
-	var r0 []*models.ServicePrincipal
+	var r0 []models.ServicePrincipalable
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]*models.ServicePrincipal, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]models.ServicePrincipalable, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []*models.ServicePrincipal); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []models.ServicePrincipalable); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.ServicePrincipal)
+			r0 = ret.Get(0).([]models.ServicePrincipalable)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -232,12 +232,12 @@ func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Run(run func(c
 	return _c
 }
 
-func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Return(servicePrincipals []*models.ServicePrincipal, err error) *mockActivedirectoryProvider_ListServicePrincipals_Call {
-	_c.Call.Return(servicePrincipals, err)
+func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Return(servicePrincipalables []models.ServicePrincipalable, err error) *mockActivedirectoryProvider_ListServicePrincipals_Call {
+	_c.Call.Return(servicePrincipalables, err)
 	return _c
 }
 
-func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) RunAndReturn(run func(ctx context.Context) ([]*models.ServicePrincipal, error)) *mockActivedirectoryProvider_ListServicePrincipals_Call {
+func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) RunAndReturn(run func(ctx context.Context) ([]models.ServicePrincipalable, error)) *mockActivedirectoryProvider_ListServicePrincipals_Call {
 	_c.Call.Return(run)
 	return _c
 }

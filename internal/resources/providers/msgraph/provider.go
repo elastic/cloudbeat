@@ -34,7 +34,7 @@ import (
 )
 
 type ProviderAPI interface {
-	ListServicePrincipals(context.Context) ([]*models.ServicePrincipal, error)
+	ListServicePrincipals(context.Context) ([]models.ServicePrincipalable, error)
 	ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
 	ListGroups(context.Context) ([]*models.Group, error)
 	ListUsers(context.Context) ([]*models.User, error)
@@ -71,7 +71,7 @@ func NewProvider(log *clog.Logger, azureConfig auth.AzureFactoryConfig) (Provide
 // - https://github.com/microsoftgraph/msgraph-sdk-go
 // - https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list?view=graph-rest-beta&tabs=go
 // - https://learn.microsoft.com/en-us/graph/sdks/paging?tabs=go
-func (p *provider) ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error) {
+func (p *provider) ListServicePrincipals(ctx context.Context) ([]models.ServicePrincipalable, error) {
 	requestConfig := &serviceprincipals.ServicePrincipalsRequestBuilderGetRequestConfiguration{}
 
 	response, err := p.client.ServicePrincipals().Get(ctx, requestConfig)
@@ -79,7 +79,7 @@ func (p *provider) ListServicePrincipals(ctx context.Context) ([]*models.Service
 		return nil, fmt.Errorf("error listing Azure Service Principals: %w", err)
 	}
 
-	pageIterator, err := graphcore.NewPageIterator[*models.ServicePrincipal](
+	pageIterator, err := graphcore.NewPageIterator[models.ServicePrincipalable](
 		response,
 		p.client.ServicePrincipals().RequestAdapter,
 		models.CreateServicePrincipalCollectionResponseFromDiscriminatorValue,
@@ -88,8 +88,8 @@ func (p *provider) ListServicePrincipals(ctx context.Context) ([]*models.Service
 		return nil, fmt.Errorf("error paging Azure Service Principals: %w", err)
 	}
 
-	items := []*models.ServicePrincipal{}
-	err = pageIterator.Iterate(ctx, func(pageItem *models.ServicePrincipal) bool {
+	items := []models.ServicePrincipalable{}
+	err = pageIterator.Iterate(ctx, func(pageItem models.ServicePrincipalable) bool {
 		items = append(items, pageItem)
 		return true // to continue the iteration
 	})
