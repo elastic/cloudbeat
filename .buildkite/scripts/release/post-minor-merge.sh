@@ -25,7 +25,7 @@ GH_REPO="elastic/${REPO}"
 DRY_RUN="${DRY_RUN:-false}"
 HERMIT_BRANCH="sync-cloudbeat-version-$(date +%s)"
 NEXT_MAIN_VERSION=$(next_minor_version "${NEW_VERSION}")
-BUMP_MAIN_BRANCH="bump-to-${NEXT_MAIN_VERSION}"
+BUMP_BRANCH="bump-to-${NEXT_MAIN_VERSION}"
 
 git fetch origin main
 git checkout main
@@ -60,15 +60,9 @@ branch_out() {
 bump_main_to_next_minor() {
     echo "--- Bumping main to next minor version ${NEXT_MAIN_VERSION}"
 
-    local existing_pr
-    existing_pr=$(gh pr list --repo "${GH_REPO}" --head "${BUMP_MAIN_BRANCH}" --state open \
-        --json number --jq '.[0].number' 2>/dev/null || echo "")
-    if [[ -n "${existing_pr}" ]]; then
-        echo "PR #${existing_pr} already open for ${BUMP_MAIN_BRANCH} — skipping."
-        return
-    fi
+    pr_exists && return
 
-    git checkout -b "${BUMP_MAIN_BRANCH}" origin/main
+    git checkout -b "${BUMP_BRANCH}" origin/main
 
     NEXT_CLOUDBEAT_VERSION="${NEXT_MAIN_VERSION}"
     echo "  NEXT_CLOUDBEAT_VERSION: ${NEXT_CLOUDBEAT_VERSION}"
@@ -88,7 +82,7 @@ bump_main_to_next_minor() {
         echo "--- Dry run: skipping push and PR creation"
         gh pr create \
             --repo "${GH_REPO}" \
-            --head "${BUMP_MAIN_BRANCH}" \
+            --head "${BUMP_BRANCH}" \
             --base main \
             --title "Bump cloudbeat version to ${NEXT_MAIN_VERSION}" \
             --body "${body}" \
@@ -98,10 +92,10 @@ bump_main_to_next_minor() {
         return
     fi
 
-    git push origin "${BUMP_MAIN_BRANCH}"
+    git push origin "${BUMP_BRANCH}"
     gh pr create \
         --repo "${GH_REPO}" \
-        --head "${BUMP_MAIN_BRANCH}" \
+        --head "${BUMP_BRANCH}" \
         --base main \
         --title "Bump cloudbeat version to ${NEXT_MAIN_VERSION}" \
         --body "${body}" \
