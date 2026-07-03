@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/lambda"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/route53"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
 	"github.com/elastic/cloudbeat/internal/statushandler"
@@ -44,6 +45,7 @@ func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg
 	iamProvider := iam.NewIAMProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	lambdaProvider := lambda.NewLambdaProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[lambda.Client]{})
 	rdsProvider := rds.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
+	route53Provider := route53.NewProvider(logger, cfg)
 	s3Provider := s3.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 	snsProvider := sns.NewSNSProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[sns.Client]{})
 
@@ -56,6 +58,7 @@ func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg
 		newLambdaFetcher(logger, identity, lambdaProvider, statusHandler),
 		newNetworkingFetcher(logger, identity, ec2Provider, statusHandler),
 		newRDSFetcher(logger, identity, rdsProvider, statusHandler),
+		newRoute53Fetcher(logger, identity, route53Provider, statusHandler),
 		newS3BucketFetcher(logger, identity, s3Provider, statusHandler),
 		newSNSFetcher(logger, identity, snsProvider, statusHandler),
 	}

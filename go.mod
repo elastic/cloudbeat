@@ -122,6 +122,8 @@ require (
 
 require gopkg.in/yaml.v2 v2.4.0 // indirect
 
+require github.com/aws/aws-sdk-go-v2/service/route53 v1.57.2
+
 require (
 	cel.dev/expr v0.24.0 // indirect
 	cloud.google.com/go/auth v0.18.0 // indirect

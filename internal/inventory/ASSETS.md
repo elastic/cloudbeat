@@ -1,6 +1,6 @@
 ## AWS Resources
 
-**Progress: 24% (21/85)**
+**Progress: 25% (22/85)**
 Access Management: 50% (1/2)
 Database: 100% (1/1)
 FaaS: 100% (3/3)
@@ -8,7 +8,7 @@ Firewall: 100% (1/1)
 Gateway: 100% (4/4)
 Host: 100% (1/1)
 Identity: 11% (1/9)
-Infrastructure: 0% (0/55)
+Infrastructure: 1% (1/55)
 Load Balancer: 100% (2/2)
 Messaging Service: 100% (1/1)
 Networking: 100% (4/4)
@@ -44,6 +44,7 @@ Storage Bucket: 100% (1/1)
 | Infrastructure | API Gateway REST API |  | No ❌ |
 | Infrastructure | API Gateway Stage |  | No ❌ |
 | Infrastructure | Auto Scaling Group |  | No ❌ |
+| Infrastructure | Route53 DNS Record | AWS Route53 DNS Record | Yes ✅ |
 | Infrastructure | Cloud Service Provider Account |  | No ❌ |
 | Infrastructure | Config Configuration Recorder |  | No ❌ |
 | Infrastructure | Config Delivery Channel |  | No ❌ |
@@ -85,7 +86,6 @@ Storage Bucket: 100% (1/1)
 | Infrastructure | RDS Cluster |  | No ❌ |
 | Infrastructure | RDS Snapshot |  | No ❌ |
 | Infrastructure | Redshift Cluster |  | No ❌ |
-| Infrastructure | Route53 DNS Record |  | No ❌ |
 | Infrastructure | Route53 DNS Zone |  | No ❌ |
 | Infrastructure | Secrets Manager Secret |  | No ❌ |
 | Infrastructure | Security Hub |  | No ❌ |
