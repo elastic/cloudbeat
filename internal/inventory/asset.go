@@ -95,6 +95,7 @@ var (
 	AssetClassificationAwsVpcPeeringConnection     = AssetClassification{CategoryNetworking, "AWS VPC Peering Connection"}
 	AssetClassificationAwsVpc                      = AssetClassification{CategoryNetworking, "AWS VPC"}
 	AssetClassificationAwsRds                      = AssetClassification{CategoryDatabase, "AWS RDS Instance"}
+	AssetClassificationAwsRoute53Record            = AssetClassification{CategoryInfrastructure, "AWS Route53 DNS Record"}
 	AssetClassificationAwsS3Bucket                 = AssetClassification{CategoryStorageBucket, "AWS S3 Bucket"}
 	AssetClassificationAwsSnsTopic                 = AssetClassification{CategoryMessagingService, "AWS SNS Topic"}
 

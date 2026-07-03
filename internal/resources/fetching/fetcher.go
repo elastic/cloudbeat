@@ -56,6 +56,7 @@ const (
 	PolicyType                   = "aws-policy"
 	PwdPolicyType                = "aws-password-policy"
 	RdsType                      = "aws-rds"
+	Route53Type                  = "aws-route53"
 	S3Type                       = "aws-s3"
 	SNSTopicType                 = "aws-sns"
 	SecurityGroupType            = "aws-security-group"
