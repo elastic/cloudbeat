@@ -191,6 +191,7 @@ def get_arm_template(url: str, template_path: str):
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
 
+
 def get_build_info(version: str) -> str:
     """
     Retrieve the build ID for a specific version of Elastic.
