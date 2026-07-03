@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/eks"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb"
 	elbv2 "github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb_v2"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
@@ -40,6 +41,7 @@ import (
 
 func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg aws.Config, statusHandler statushandler.StatusHandlerAPI) []inventory.AssetFetcher {
 	ec2Provider := ec2.NewEC2Provider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
+	eksProvider := eks.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[eks.Client]{})
 	elbProvider := elb.NewElbProvider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[elb.Client]{})
 	elbv2Provider := elbv2.NewElbV2Provider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[elbv2.Client]{})
 	iamProvider := iam.NewIAMProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
@@ -51,6 +53,7 @@ func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg
 
 	return []inventory.AssetFetcher{
 		newEc2InstancesFetcher(logger, identity, ec2Provider, statusHandler),
+		newEKSFetcher(logger, identity, eksProvider, statusHandler),
 		newElbFetcher(logger, identity, elbProvider, elbv2Provider, statusHandler),
 		newIamPolicyFetcher(logger, identity, iamProvider, statusHandler),
 		newIamRoleFetcher(logger, identity, iamProvider, statusHandler),

@@ -1,6 +1,6 @@
 ## AWS Resources
 
-**Progress: 25% (22/85)**
+**Progress: 27% (23/85)**
 Access Management: 50% (1/2)
 Database: 100% (1/1)
 FaaS: 100% (3/3)
@@ -8,10 +8,11 @@ Firewall: 100% (1/1)
 Gateway: 100% (4/4)
 Host: 100% (1/1)
 Identity: 11% (1/9)
-Infrastructure: 1% (1/55)
+Infrastructure: 1% (1/54)
 Load Balancer: 100% (2/2)
 Messaging Service: 100% (1/1)
 Networking: 100% (4/4)
+Orchestrator: 100% (1/1)
 Service Account: 100% (1/1)
 Storage Bucket: 100% (1/1)
 
@@ -66,7 +67,6 @@ Storage Bucket: 100% (1/1)
 | Infrastructure | ECS Service |  | No ❌ |
 | Infrastructure | ECS Task |  | No ❌ |
 | Infrastructure | ECS Task Definition |  | No ❌ |
-| Infrastructure | EKS Cluster |  | No ❌ |
 | Infrastructure | ELBv2 Listener |  | No ❌ |
 | Infrastructure | Elastic IP |  | No ❌ |
 | Infrastructure | Elasticsearch Domain |  | No ❌ |
@@ -102,6 +102,7 @@ Storage Bucket: 100% (1/1)
 | Networking | EC2 Subnet | AWS EC2 Subnet | Yes ✅ |
 | Networking | VPC | AWS VPC | Yes ✅ |
 | Networking | VPC Peering Connection | AWS VPC Peering Connection | Yes ✅ |
+| Orchestrator | EKS Cluster | AWS EKS Cluster | Yes ✅ |
 | Service Account | IAM Role | AWS IAM Role | Yes ✅ |
 | Storage Bucket | S3 Bucket | AWS S3 Bucket | Yes ✅ |
 
