@@ -38,6 +38,7 @@ const (
 	EBSType                      = "aws-ebs"
 	EC2NetworkingType            = "aws-ec2-network"
 	EC2Type                      = "aws-ec2"
+	EKSType                      = "aws-eks"
 	EcrType                      = "aws-ecr"
 	ElbType                      = "aws-elb"
 	IAMServerCertificateType     = "aws-iam-server-certificate"

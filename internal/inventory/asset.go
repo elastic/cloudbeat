@@ -76,6 +76,7 @@ type AssetClassification struct {
 var (
 	// AWS
 	AssetClassificationAwsEc2Instance              = AssetClassification{CategoryHost, "AWS EC2 Instance"}
+	AssetClassificationAwsEksCluster               = AssetClassification{CategoryOrchestrator, "AWS EKS Cluster"}
 	AssetClassificationAwsElbV1                    = AssetClassification{CategoryLoadBalancer, "AWS Elastic Load Balancer"}
 	AssetClassificationAwsElbV2                    = AssetClassification{CategoryLoadBalancer, "AWS Elastic Load Balancer v2"}
 	AssetClassificationAwsIamPolicy                = AssetClassification{CategoryAccessManagement, "AWS IAM Policy"}
