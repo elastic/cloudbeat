@@ -2,9 +2,10 @@
 set -euo pipefail
 
 # Runs after the minor version bump PR is merged into main.
-# Performs two operations:
+# Performs three operations:
 #   1. Branch-out: create and push the new X.Y release branch from main
-#   2. Hermit PR: sync CLOUDBEAT_VERSION in bin/hermit.hcl to match version.go
+#   2. Main bump: advance main's version to the next minor (e.g. 9.5.0 -> 9.6.0)
+#   3. Hermit PR: sync CLOUDBEAT_VERSION in bin/hermit.hcl to match version.go
 #
 # Required env vars:
 #   BRANCH      — new minor branch name (e.g. 9.3)
@@ -23,15 +24,18 @@ source "${SCRIPT_DIR}/common.sh"
 GH_REPO="elastic/${REPO}"
 DRY_RUN="${DRY_RUN:-false}"
 HERMIT_BRANCH="sync-cloudbeat-version-$(date +%s)"
+NEXT_MAIN_VERSION=$(next_minor_version "${NEW_VERSION}")
+BUMP_MAIN_BRANCH="bump-to-${NEXT_MAIN_VERSION}"
 
 git fetch origin main
 git checkout main
 
 echo "--- Post-minor-merge parameters"
-echo "  REPO:        ${REPO}"
-echo "  BRANCH:      ${BRANCH}"
-echo "  NEW_VERSION: ${NEW_VERSION}"
-echo "  DRY_RUN:     ${DRY_RUN}"
+echo "  REPO:              ${REPO}"
+echo "  BRANCH:            ${BRANCH}"
+echo "  NEW_VERSION:       ${NEW_VERSION}"
+echo "  NEXT_MAIN_VERSION: ${NEXT_MAIN_VERSION}"
+echo "  DRY_RUN:           ${DRY_RUN}"
 
 setup_git_identity
 
@@ -50,6 +54,58 @@ branch_out() {
 
     git checkout -b "${BRANCH}"
     git push origin "${BRANCH}"
+    git checkout main
+}
+
+bump_main_to_next_minor() {
+    echo "--- Bumping main to next minor version ${NEXT_MAIN_VERSION}"
+
+    local existing_pr
+    existing_pr=$(gh pr list --repo "${GH_REPO}" --head "${BUMP_MAIN_BRANCH}" --state open \
+        --json number --jq '.[0].number' 2>/dev/null || echo "")
+    if [[ -n "${existing_pr}" ]]; then
+        echo "PR #${existing_pr} already open for ${BUMP_MAIN_BRANCH} — skipping."
+        return
+    fi
+
+    git checkout -b "${BUMP_MAIN_BRANCH}" origin/main
+
+    NEXT_CLOUDBEAT_VERSION="${NEXT_MAIN_VERSION}"
+    echo "  NEXT_CLOUDBEAT_VERSION: ${NEXT_CLOUDBEAT_VERSION}"
+    update_version_beat
+    update_arm_templates "${NEXT_MAIN_VERSION}"
+
+    if git diff --quiet origin/main HEAD; then
+        echo "main is already at ${NEXT_MAIN_VERSION} — skipping."
+        git checkout main
+        return
+    fi
+
+    local body
+    body=$(render_template "${SCRIPT_DIR}/templates/pr-body-bump-main.md")
+
+    if [[ "${DRY_RUN}" == "true" ]]; then
+        echo "--- Dry run: skipping push and PR creation"
+        gh pr create \
+            --repo "${GH_REPO}" \
+            --head "${BUMP_MAIN_BRANCH}" \
+            --base main \
+            --title "Bump cloudbeat version to ${NEXT_MAIN_VERSION}" \
+            --body "${body}" \
+            --label "backport-skip" \
+            --dry-run
+        git checkout main
+        return
+    fi
+
+    git push origin "${BUMP_MAIN_BRANCH}"
+    gh pr create \
+        --repo "${GH_REPO}" \
+        --head "${BUMP_MAIN_BRANCH}" \
+        --base main \
+        --title "Bump cloudbeat version to ${NEXT_MAIN_VERSION}" \
+        --body "${body}" \
+        --label "backport-skip"
     git checkout main
 }
 
@@ -93,4 +149,5 @@ hermit_pr() {
 }
 
 branch_out
+bump_main_to_next_minor
 hermit_pr
