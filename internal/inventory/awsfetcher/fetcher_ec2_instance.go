@@ -19,6 +19,7 @@ package awsfetcher
 
 import (
 	"context"
+	"strings"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -73,6 +74,8 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			})
 		}
 
+		tags := e.getTags(i)
+
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
 			i.GetResourceArn(),
@@ -80,7 +83,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 
 			inventory.WithRelatedAssetIds([]string{pointers.Deref(i.InstanceId)}),
 			inventory.WithRawAsset(i),
-			inventory.WithLabels(e.getTags(i)),
+			inventory.WithLabels(tags),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           i.Region,
@@ -100,10 +103,60 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 				IP:           buildIPs(i.PublicIpAddress, i.PrivateIpAddress),
 				MacAddress:   i.GetResourceMacAddresses(),
 			}),
+			inventory.WithEntityAttributes(e.buildAttributes(i, tags)),
 			inventory.WithCreatedAt(i.LaunchTime),
 			iamFetcher,
 		)
 	}
+}
+
+// buildAttributes collects non-ECS, resource-specific EC2 fields into entity.attributes,
+// using UpperCamelCase keys. Empty values are omitted so events stay clean and struct
+// comparison in tests is stable.
+func (e *ec2InstanceFetcher) buildAttributes(i *ec2.Ec2Instance, tags map[string]string) map[string]any {
+	attrs := map[string]any{}
+	if v := pointers.Deref(i.ImageId); v != "" {
+		attrs["ImageId"] = v
+	}
+	if v := string(i.Platform); v != "" {
+		attrs["Platform"] = v
+	}
+	if v := pointers.Deref(i.VpcId); v != "" {
+		attrs["VpcId"] = v
+	}
+	if v := pointers.Deref(i.SubnetId); v != "" {
+		attrs["SubnetId"] = v
+	}
+	if i.State != nil {
+		if v := string(i.State.Name); v != "" {
+			attrs["State"] = v
+		}
+	}
+	if i.IamInstanceProfile != nil {
+		if v := pointers.Deref(i.IamInstanceProfile.Arn); v != "" {
+			attrs["RoleArn"] = v
+		}
+	}
+	if v := lookupTag(tags, "owner"); v != "" {
+		attrs["Owner"] = v
+	}
+	if v := lookupTag(tags, "costcenter", "cost-center", "cost_center"); v != "" {
+		attrs["CostCenter"] = v
+	}
+	return attrs
+}
+
+// lookupTag returns the first tag value whose key matches one of the candidates,
+// case-insensitively. Tag keys are customer-defined, so we accept common variants.
+func lookupTag(tags map[string]string, candidates ...string) string {
+	for k, v := range tags {
+		for _, c := range candidates {
+			if strings.EqualFold(k, c) {
+				return v
+			}
+		}
+	}
+	return ""
 }
 
 // buildIPs collects non-empty IP address strings into a slice, returning nil when none exist.

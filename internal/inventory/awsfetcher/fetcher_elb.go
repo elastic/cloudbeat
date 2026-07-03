@@ -34,6 +34,10 @@ type elbInventoryResource interface {
 	GetDNSName() string
 	IsPubliclyAccessible() bool
 	GetCreatedAt() *time.Time
+	GetLoadBalancerType() string
+	GetState() string
+	GetIPAddresses() []string
+	GetOwnerTag() string
 }
 
 type elbFetcher struct {
@@ -96,6 +100,21 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 			attrs = map[string]any{
 				"DNSName":            r.GetDNSName(),
 				"PubliclyAccessible": r.IsPubliclyAccessible(),
+			}
+			if f.AccountId != "" {
+				attrs["AccountID"] = f.AccountId
+			}
+			if v := r.GetLoadBalancerType(); v != "" {
+				attrs["LoadBalancerType"] = v
+			}
+			if v := r.GetState(); v != "" {
+				attrs["State"] = v
+			}
+			if v := r.GetIPAddresses(); len(v) > 0 {
+				attrs["IPAddresses"] = v
+			}
+			if v := r.GetOwnerTag(); v != "" {
+				attrs["OwnerTag"] = v
 			}
 			createdAt = r.GetCreatedAt()
 		}

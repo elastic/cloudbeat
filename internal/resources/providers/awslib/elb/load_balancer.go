@@ -19,6 +19,7 @@ package elb
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
@@ -31,6 +32,17 @@ type ElasticLoadBalancerInfo struct {
 	LoadBalancer types.LoadBalancerDescription `json:"load_balancer"`
 	awsAccount   string
 	region       string
+	tags         map[string]string
+}
+
+// lookupOwnerTag returns the value of the "Owner" tag (case-insensitive), if present.
+func lookupOwnerTag(tags map[string]string) string {
+	for k, v := range tags {
+		if strings.EqualFold(k, "owner") {
+			return v
+		}
+	}
+	return ""
 }
 
 func (v ElasticLoadBalancerInfo) GetResourceArn() string {
@@ -63,4 +75,25 @@ func (v ElasticLoadBalancerInfo) IsPubliclyAccessible() bool {
 
 func (v ElasticLoadBalancerInfo) GetCreatedAt() *time.Time {
 	return v.LoadBalancer.CreatedTime
+}
+
+// GetLoadBalancerType reports the load balancer type. Classic load balancers have no
+// type field in the SDK, so we report a stable "classic" value.
+func (v ElasticLoadBalancerInfo) GetLoadBalancerType() string {
+	return "classic"
+}
+
+// GetState is not exposed for classic load balancers by the AWS SDK.
+func (v ElasticLoadBalancerInfo) GetState() string {
+	return ""
+}
+
+// GetIPAddresses is not exposed for classic load balancers (they are DNS-only).
+func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
+	return nil
+}
+
+// GetOwnerTag returns the value of the "Owner" tag (case-insensitive), if present.
+func (v ElasticLoadBalancerInfo) GetOwnerTag() string {
+	return lookupOwnerTag(v.tags)
 }

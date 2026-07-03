@@ -147,6 +147,184 @@ func (_c *mockElbInventoryResource_GetDNSName_Call) RunAndReturn(run func() stri
 	return _c
 }
 
+// GetIPAddresses provides a mock function for the type mockElbInventoryResource
+func (_mock *mockElbInventoryResource) GetIPAddresses() []string {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetIPAddresses")
+	}
+
+	var r0 []string
+	if returnFunc, ok := ret.Get(0).(func() []string); ok {
+		r0 = returnFunc()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+	return r0
+}
+
+// mockElbInventoryResource_GetIPAddresses_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetIPAddresses'
+type mockElbInventoryResource_GetIPAddresses_Call struct {
+	*mock.Call
+}
+
+// GetIPAddresses is a helper method to define mock.On call
+func (_e *mockElbInventoryResource_Expecter) GetIPAddresses() *mockElbInventoryResource_GetIPAddresses_Call {
+	return &mockElbInventoryResource_GetIPAddresses_Call{Call: _e.mock.On("GetIPAddresses")}
+}
+
+func (_c *mockElbInventoryResource_GetIPAddresses_Call) Run(run func()) *mockElbInventoryResource_GetIPAddresses_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetIPAddresses_Call) Return(strings []string) *mockElbInventoryResource_GetIPAddresses_Call {
+	_c.Call.Return(strings)
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetIPAddresses_Call) RunAndReturn(run func() []string) *mockElbInventoryResource_GetIPAddresses_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetLoadBalancerType provides a mock function for the type mockElbInventoryResource
+func (_mock *mockElbInventoryResource) GetLoadBalancerType() string {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLoadBalancerType")
+	}
+
+	var r0 string
+	if returnFunc, ok := ret.Get(0).(func() string); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	return r0
+}
+
+// mockElbInventoryResource_GetLoadBalancerType_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLoadBalancerType'
+type mockElbInventoryResource_GetLoadBalancerType_Call struct {
+	*mock.Call
+}
+
+// GetLoadBalancerType is a helper method to define mock.On call
+func (_e *mockElbInventoryResource_Expecter) GetLoadBalancerType() *mockElbInventoryResource_GetLoadBalancerType_Call {
+	return &mockElbInventoryResource_GetLoadBalancerType_Call{Call: _e.mock.On("GetLoadBalancerType")}
+}
+
+func (_c *mockElbInventoryResource_GetLoadBalancerType_Call) Run(run func()) *mockElbInventoryResource_GetLoadBalancerType_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetLoadBalancerType_Call) Return(s string) *mockElbInventoryResource_GetLoadBalancerType_Call {
+	_c.Call.Return(s)
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetLoadBalancerType_Call) RunAndReturn(run func() string) *mockElbInventoryResource_GetLoadBalancerType_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetOwnerTag provides a mock function for the type mockElbInventoryResource
+func (_mock *mockElbInventoryResource) GetOwnerTag() string {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOwnerTag")
+	}
+
+	var r0 string
+	if returnFunc, ok := ret.Get(0).(func() string); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	return r0
+}
+
+// mockElbInventoryResource_GetOwnerTag_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetOwnerTag'
+type mockElbInventoryResource_GetOwnerTag_Call struct {
+	*mock.Call
+}
+
+// GetOwnerTag is a helper method to define mock.On call
+func (_e *mockElbInventoryResource_Expecter) GetOwnerTag() *mockElbInventoryResource_GetOwnerTag_Call {
+	return &mockElbInventoryResource_GetOwnerTag_Call{Call: _e.mock.On("GetOwnerTag")}
+}
+
+func (_c *mockElbInventoryResource_GetOwnerTag_Call) Run(run func()) *mockElbInventoryResource_GetOwnerTag_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetOwnerTag_Call) Return(s string) *mockElbInventoryResource_GetOwnerTag_Call {
+	_c.Call.Return(s)
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetOwnerTag_Call) RunAndReturn(run func() string) *mockElbInventoryResource_GetOwnerTag_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetState provides a mock function for the type mockElbInventoryResource
+func (_mock *mockElbInventoryResource) GetState() string {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetState")
+	}
+
+	var r0 string
+	if returnFunc, ok := ret.Get(0).(func() string); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	return r0
+}
+
+// mockElbInventoryResource_GetState_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetState'
+type mockElbInventoryResource_GetState_Call struct {
+	*mock.Call
+}
+
+// GetState is a helper method to define mock.On call
+func (_e *mockElbInventoryResource_Expecter) GetState() *mockElbInventoryResource_GetState_Call {
+	return &mockElbInventoryResource_GetState_Call{Call: _e.mock.On("GetState")}
+}
+
+func (_c *mockElbInventoryResource_GetState_Call) Run(run func()) *mockElbInventoryResource_GetState_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetState_Call) Return(s string) *mockElbInventoryResource_GetState_Call {
+	_c.Call.Return(s)
+	return _c
+}
+
+func (_c *mockElbInventoryResource_GetState_Call) RunAndReturn(run func() string) *mockElbInventoryResource_GetState_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsPubliclyAccessible provides a mock function for the type mockElbInventoryResource
 func (_mock *mockElbInventoryResource) IsPubliclyAccessible() bool {
 	ret := _mock.Called()

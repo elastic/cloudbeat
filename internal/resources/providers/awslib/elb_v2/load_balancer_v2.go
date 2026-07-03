@@ -18,6 +18,7 @@
 package elb_v2
 
 import (
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
@@ -30,6 +31,17 @@ type ElasticLoadBalancerInfo struct {
 	LoadBalancer types.LoadBalancer `json:"load_balancer"`
 	Listeners    []types.Listener   `json:"listeners"`
 	region       string
+	tags         map[string]string
+}
+
+// lookupOwnerTag returns the value of the "Owner" tag (case-insensitive), if present.
+func lookupOwnerTag(tags map[string]string) string {
+	for k, v := range tags {
+		if strings.EqualFold(k, "owner") {
+			return v
+		}
+	}
+	return ""
 }
 
 func (v ElasticLoadBalancerInfo) GetResourceArn() string {
@@ -58,4 +70,36 @@ func (v ElasticLoadBalancerInfo) IsPubliclyAccessible() bool {
 
 func (v ElasticLoadBalancerInfo) GetCreatedAt() *time.Time {
 	return v.LoadBalancer.CreatedTime
+}
+
+// GetLoadBalancerType reports the load balancer type (application, network, gateway).
+func (v ElasticLoadBalancerInfo) GetLoadBalancerType() string {
+	return string(v.LoadBalancer.Type)
+}
+
+// GetState reports the load balancer state code (e.g. active, provisioning).
+func (v ElasticLoadBalancerInfo) GetState() string {
+	if v.LoadBalancer.State == nil {
+		return ""
+	}
+	return string(v.LoadBalancer.State.Code)
+}
+
+// GetIPAddresses returns the static IP addresses of the load balancer. Only Network Load
+// Balancers expose static IPs (via per-AZ addresses); ALB/Gateway return nil.
+func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
+	var ips []string
+	for _, az := range v.LoadBalancer.AvailabilityZones {
+		for _, addr := range az.LoadBalancerAddresses {
+			if ip := pointers.Deref(addr.IpAddress); ip != "" {
+				ips = append(ips, ip)
+			}
+		}
+	}
+	return ips
+}
+
+// GetOwnerTag returns the value of the "Owner" tag (case-insensitive), if present.
+func (v ElasticLoadBalancerInfo) GetOwnerTag() string {
+	return lookupOwnerTag(v.tags)
 }
