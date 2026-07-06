@@ -19,6 +19,7 @@ package iam
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
@@ -86,6 +87,7 @@ type User struct {
 	LastAccess          string                 `json:"last_access,omitempty"`
 	Arn                 string                 `json:"arn,omitempty"`
 	PasswordLastChanged string                 `json:"password_last_changed,omitempty"`
+	CreateDate          *time.Time             `json:"create_date,omitempty"`
 	MfaActive           bool                   `json:"mfa_active"`
 	PasswordEnabled     bool                   `json:"password_enabled"`
 	UserId              string                 `json:"user_id"`

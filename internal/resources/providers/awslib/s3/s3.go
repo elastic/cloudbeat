@@ -19,6 +19,7 @@ package s3
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -36,6 +37,7 @@ type BucketDescription struct {
 	BucketVersioning                      *BucketVersioning                              `json:"bucket_versioning,omitempty"`
 	PublicAccessBlockConfiguration        *types.PublicAccessBlockConfiguration          `json:"public_access_block_configuration"`
 	AccountPublicAccessBlockConfiguration *s3ContorlTypes.PublicAccessBlockConfiguration `json:"account_public_access_block_configuration"`
+	CreationDate                          *time.Time                                     `json:"creation_date,omitempty"`
 	Region                                string
 }
 

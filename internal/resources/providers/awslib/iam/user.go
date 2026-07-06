@@ -108,6 +108,7 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 			LastAccess:          userAccount.PasswordLastUsed,
 			Arn:                 arn,
 			PasswordLastChanged: userAccount.PasswordLastChanged,
+			CreateDate:          apiUser.CreateDate,
 			PasswordEnabled:     pwdEnabled,
 			MfaActive:           userAccount.MfaActive,
 			UserId:              pointers.Deref(apiUser.UserId),

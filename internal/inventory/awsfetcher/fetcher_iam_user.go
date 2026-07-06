@@ -92,6 +92,7 @@ func (i *iamUserFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 				ID:   user.GetResourceArn(),
 				Name: user.GetResourceName(),
 			}),
+			inventory.WithCreatedAt(user.CreateDate),
 		)
 	}
 }
