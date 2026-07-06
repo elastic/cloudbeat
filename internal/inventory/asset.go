@@ -78,6 +78,7 @@ type AssetClassification struct {
 var (
 	// AWS
 	AssetClassificationAwsEc2Instance              = AssetClassification{CategoryHost, "AWS EC2 Instance"}
+	AssetClassificationAwsEksCluster               = AssetClassification{CategoryOrchestrator, "AWS EKS Cluster"}
 	AssetClassificationAwsElbV1                    = AssetClassification{CategoryLoadBalancer, "AWS Elastic Load Balancer"}
 	AssetClassificationAwsElbV2                    = AssetClassification{CategoryLoadBalancer, "AWS Elastic Load Balancer v2"}
 	AssetClassificationAwsIamPolicy                = AssetClassification{CategoryAccessManagement, "AWS IAM Policy"}
@@ -97,6 +98,7 @@ var (
 	AssetClassificationAwsVpcPeeringConnection     = AssetClassification{CategoryNetworking, "AWS VPC Peering Connection"}
 	AssetClassificationAwsVpc                      = AssetClassification{CategoryNetworking, "AWS VPC"}
 	AssetClassificationAwsRds                      = AssetClassification{CategoryDatabase, "AWS RDS Instance"}
+	AssetClassificationAwsRoute53Record            = AssetClassification{CategoryInfrastructure, "AWS Route53 DNS Record"}
 	AssetClassificationAwsS3Bucket                 = AssetClassification{CategoryStorageBucket, "AWS S3 Bucket"}
 	AssetClassificationAwsSnsTopic                 = AssetClassification{CategoryMessagingService, "AWS SNS Topic"}
 
