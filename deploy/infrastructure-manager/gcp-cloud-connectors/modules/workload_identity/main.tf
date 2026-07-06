@@ -23,9 +23,9 @@ resource "google_iam_workload_identity_pool_provider" "aws" {
     "attribute.session_name" = "assertion.arn.extract('assumed-role/${var.aws_role_name}/{session}/')"
   }
 
-  # Validate: AWS role ARN + session name must match the elastic_resource_id
+  # Validate: AWS role session name must be elastic_resource_id-cloud_connector_id (use this as session name when assuming the role)
   # ARN format: arn:aws:sts::ACCOUNT_ID:assumed-role/ROLE_NAME/SESSION_NAME
-  attribute_condition = "assertion.arn == 'arn:aws:sts::${var.aws_account_id}:assumed-role/${var.aws_role_name}/${var.elastic_resource_id}'"
+  attribute_condition = "assertion.arn == 'arn:aws:sts::${var.aws_account_id}:assumed-role/${var.aws_role_name}/${var.elastic_resource_id}-${var.cloud_connector_id}'"
 
   aws {
     account_id = var.aws_account_id

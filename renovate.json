@@ -5,33 +5,46 @@
   ],
   "baseBranches": [
     "main",
-    "9.7",
-    "9.6",
-    "9.5",
     "9.4",
     "9.3",
-    "9.2",
-    "9.1",
     "8.19"
   ],
   "schedule": [
-    "after 1am on monday"
+    "* 1 * * 1-5"
+  ],
+  "automergeSchedule": [
+    "at any time"
   ],
   "labels": [
     "renovate",
     "dependencies",
-    "Team:Cloud-Security-Posture",
+    "Team:Security-Cloud Services",
     "backport-skip"
   ],
   "postUpdateOptions": [
     "gomodTidy"
   ],
   "separateMajorMinor": true,
-  "prConcurrentLimit": 20,
+  "prConcurrentLimit": 50,
+  "prHourlyLimit": 10,
   "automergeStrategy": "squash",
   "automergeType": "pr",
   "ignorePaths": [
     "**/vendor/**"
+  ],
+  "customManagers": [
+    {
+      "description": "Update .go-version file",
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.go-version$"
+      ],
+      "matchStrings": [
+        "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
+      ],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    }
   ],
   "packageRules": [
     {
@@ -171,18 +184,18 @@
       "enabled": true
     },
     {
-      "description": "Auto-merge minor and patch updates for Elastic packages",
+      "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
-        "patch"
-      ],
-      "matchPackageNames": [
-        "github.com/elastic/**"
+        "patch",
+        "digest",
+        "pin"
       ],
       "addLabels": [
         "renovate-auto-approve"
       ],
-      "automerge": true
+      "automerge": true,
+      "minimumReleaseAge": "2 days"
     },
     {
       "description": "Manual review for major updates",
@@ -204,9 +217,42 @@
         "digest"
       ],
       "enabled": false
+    },
+    {
+      "description": "Allow minor Go version updates in go.mod",
+      "matchDepNames": [
+        "go"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "versioning": "semver"
+    },
+    {
+      "description": "Group Go toolchain and golangci-lint version updates together",
+      "groupName": "go-version",
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
+      ]
+    },
+    {
+      "description": "Disable CI/infrastructure/test-environment updates on release branches",
+      "matchBaseBranches": [
+        "9.4",
+        "9.3",
+        "8.19"
+      ],
+      "matchFileNames": [
+        ".github/workflows/**",
+        ".buildkite/**",
+        "**/pyproject.toml",
+        "deploy/test-environments/**"
+      ],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
-    "enabled": true
+    "enabled": false
   }
 }

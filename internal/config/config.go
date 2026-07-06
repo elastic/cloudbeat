@@ -103,6 +103,8 @@ type GcpClientOpt struct {
 	// Audience is the Workload Identity Federation audience URL
 	// Format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
 	Audience string `config:"audience"`
+	// CloudConnectorID is the deployment-specific connector ID (Terraform output cloud_connector_id). Used with ResourceID as AWS session name: ResourceID-CloudConnectorID.
+	CloudConnectorID string `config:"cloud_connector_id"`
 }
 
 type GcpCallOpt struct {

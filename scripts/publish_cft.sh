@@ -57,3 +57,6 @@ upload_file deploy/asset-inventory-cloudformation/cloud-connectors-remote-role.y
 upload_file deploy/asset-inventory-cloudformation/cloud-connectors-remote-role-organization.yml \
     "cloudformation-asset-inventory-cloud-connectors-organization-account" \
     "${version}"
+upload_file deploy/cloudformation/cloud-connectors-guardduty.yml \
+    "cloudformation-cloud-connectors-guardduty" \
+    "${version}"

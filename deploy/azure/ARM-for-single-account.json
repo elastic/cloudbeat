@@ -14,7 +14,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "9.4.0"
+            "defaultValue": "9.5.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -43,7 +43,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('roleAssignmentDeployment')]",
             "subscriptionId": "[subscription().subscriptionId]",
             "location": "[parameters('ResourceGroupLocation')]",
@@ -78,7 +78,7 @@
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'securityaudit')]",
                             "properties": {
                                 "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
-                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
+                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2024-11-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
                         },
@@ -88,7 +88,7 @@
                             "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name, 'additional-role')]",
                             "properties": {
                                 "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', parameters('AdditionalRoleGUID'))]",
-                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2023-09-01', 'Full').identity.principalId]",
+                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2024-11-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
                         }
@@ -101,7 +101,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "cloudbeat-vm-deployment",
             "properties": {
                 "expressionEvaluationOptions": {
@@ -148,7 +148,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Compute/virtualMachines",
-                            "apiVersion": "2023-09-01",
+                            "apiVersion": "2024-11-01",
                             "name": "cloudbeatVM",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "dependsOn": [
@@ -202,7 +202,7 @@
                         },
                         {
                             "type": "Microsoft.Network/virtualNetworks",
-                            "apiVersion": "2023-06-01",
+                            "apiVersion": "2024-10-01",
                             "name": "cloudbeatVNet",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "properties": {
@@ -223,7 +223,7 @@
                         },
                         {
                             "type": "Microsoft.Network/networkInterfaces",
-                            "apiVersion": "2023-06-01",
+                            "apiVersion": "2024-10-01",
                             "name": "cloudbeatNic",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "dependsOn": [
@@ -285,7 +285,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "elastic-agent-deployment",
             "properties": {
                 "expressionEvaluationOptions": {
@@ -332,7 +332,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Compute/virtualMachines/extensions",
-                            "apiVersion": "2023-09-01",
+                            "apiVersion": "2024-11-01",
                             "name": "cloudbeatVM/customScriptExtension",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "properties": {

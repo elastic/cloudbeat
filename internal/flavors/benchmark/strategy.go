@@ -72,7 +72,7 @@ func GetStrategy(cfg *config.Config, log *clog.Logger, statusHandler statushandl
 		}, nil
 	case config.CIS_GCP:
 		return &GCP{
-			CfgProvider:          &gcp_auth.ConfigProvider{AuthProvider: &gcp_auth.GoogleAuthProvider{}},
+			CfgProvider:          gcp_auth.NewConfigProvider(),
 			inventoryInitializer: &gcp_inventory.ProviderInitializer{},
 		}, nil
 	case config.CIS_AZURE:

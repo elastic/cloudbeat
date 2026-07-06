@@ -30,7 +30,7 @@ type AssetsEnricher interface {
 }
 
 func initEnrichers(provider azurelib.ProviderAPI) []AssetsEnricher {
-	var enrichers []AssetsEnricher
+	enrichers := make([]AssetsEnricher, 0, 7)
 
 	enrichers = append(enrichers, storageAccountEnricher{provider: provider})
 	enrichers = append(enrichers, vmNetworkSecurityGroupEnricher{})

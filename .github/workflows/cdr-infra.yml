@@ -17,8 +17,8 @@ on:
         default: false
       elk-stack-version:
         required: true
-        description: "The version of the ELK stack: For BC use version without hash 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.16.0"
+        description: "Stack version: For released version use 8.x.y, for BC use version with hash 8.x.y-hash, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        default: "9.4.0-SNAPSHOT"
         type: string
       cis-infra:
         required: false
@@ -33,6 +33,16 @@ on:
         description: "Number of days until environment expiration"
         required: false
         default: "5"
+      kibana_enable_entity_analytics_settings:
+        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents feature flag, Agent Builder experimental UI)"
+        type: boolean
+        required: false
+        default: true
+      enable-entity-store-v2:
+        description: "CDR: when true run Entity Store v2; when false run Entity Store v1 only"
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   init:
@@ -65,3 +75,5 @@ jobs:
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       infra-type: ${{ needs.init.outputs.infra-type }}
       expiration_days: ${{ inputs.expiration-days }}
+      kibana_enable_entity_analytics_settings: ${{ inputs.kibana_enable_entity_analytics_settings }}
+      enable-entity-store-v2: ${{ fromJSON(inputs.enable-entity-store-v2) }}

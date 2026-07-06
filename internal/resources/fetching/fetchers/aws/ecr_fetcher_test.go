@@ -203,7 +203,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 	}
 	for _, test := range tests {
 		// Need to add services
-		kubeclient := k8sfake.NewSimpleClientset()
+		kubeclient := k8sfake.NewClientset()
 
 		pods := &v1.Pod{
 			TypeMeta: metav1.TypeMeta{
@@ -299,7 +299,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 	}
 	for _, test := range tests {
 		// Need to add services
-		kubeclient := k8sfake.NewSimpleClientset()
+		kubeclient := k8sfake.NewClientset()
 
 		pods := &v1.Pod{
 			TypeMeta: metav1.TypeMeta{

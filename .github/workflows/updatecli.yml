@@ -48,7 +48,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [beats, golang, hermit, mods]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [golang, hermit, mods]
         git-branch: [main]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -58,7 +59,7 @@ jobs:
           init-tools: "true"
           free-disk: "true"
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
+        uses: updatecli/updatecli-action@2c3221bc5f4499a99fec2c87d9de4a83cb30e990 # v3.1.3
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
@@ -75,7 +76,7 @@ jobs:
       - name: Fetch active branches
         id: mk
         run: |
-          MATRIX_JSON="$(curl -s https://artifacts.elastic.co/releases/TfEVhiaBGqR64ie0g0r0uUwNAbEQMu1Z/future-releases/stack.json | jq -Mc '[ .releases[] | select(.active_release == true) | .branch | select(. != "main" and . != "7.17") ]')"
+          MATRIX_JSON="$(curl -s https://elastic-release-api.s3.us-west-2.amazonaws.com/public/future-releases.json | jq -Mc '[ .releases[] | select(.active_release == true) | .branch | select(. != "main" and . != "7.17") ]')"
           echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
 
   updatecli-backport:
@@ -85,7 +86,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [golang, beats]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [golang]
         git-branch: ${{ fromJSON(needs.active-branches.outputs.matrix) }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -95,7 +97,7 @@ jobs:
           init-tools: "true"
           free-disk: "true"
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
+        uses: updatecli/updatecli-action@2c3221bc5f4499a99fec2c87d9de4a83cb30e990 # v3.1.3
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:

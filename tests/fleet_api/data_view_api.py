@@ -29,10 +29,13 @@ def create_security_default_data_view(cfg: Munch, name: str, namespace: str = "d
     """
     data_view_id = f"{name}-{namespace}"
 
-    # Check if data view already exists
-    if data_view_exists(cfg, name, namespace):
+    try:
+        existing = get_data_view(cfg, name, namespace)
         logger.info(f"Data view '{data_view_id}' already exists.")
-        return get_data_view(cfg, name, namespace)
+        return existing
+    except APICallException as exc:
+        if exc.status_code != 404:
+            raise
 
     # Data view doesn't exist, create it
     logger.info(f"Data view '{data_view_id}' not found. Creating new data view.")
@@ -55,12 +58,17 @@ def create_security_default_data_view(cfg: Munch, name: str, namespace: str = "d
             url=create_url,
             auth=cfg.auth,
             params={"json": payload},
+            ok_statuses=(200, 201),
         )
         logger.info(f"Data view '{data_view_id}' created successfully.")
         return response
-    except APICallException as e:
-        logger.error(f"Failed to create data view '{data_view_id}': {e}")
-        raise
+    except APICallException as exc:
+        # If the data view already exists (race / previous attempt), just fetch it.
+        if exc.status_code == 409:
+            logger.info(f"Data view '{data_view_id}' already exists (409). Fetching.")
+            return get_data_view(cfg, name, namespace)
+        logger.error(f"Failed to create data view '{data_view_id}': {exc}")
+        raise exc
 
 
 def get_data_view(cfg: Munch, name: str, namespace: str = "default") -> dict:
@@ -88,9 +96,12 @@ def get_data_view(cfg: Munch, name: str, namespace: str = "default") -> dict:
         )
         logger.info(f"Retrieved data view '{data_view_id}' successfully.")
         return response
-    except APICallException as e:
-        logger.error(f"Failed to get data view '{data_view_id}': {e}")
-        raise
+    except APICallException as exc:
+        if exc.status_code == 404:
+            logger.info(f"Data view '{data_view_id}' not found (404).")
+        else:
+            logger.error(f"Failed to get data view '{data_view_id}': {exc}")
+        raise exc
 
 
 def data_view_exists(cfg: Munch, name: str, namespace: str = "default") -> bool:

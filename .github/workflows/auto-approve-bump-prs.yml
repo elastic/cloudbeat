@@ -1,0 +1,32 @@
+# This workflow automatically approves version bump PRs created by the vault GitHub plugin bot,
+# for PRs which have the 'version-bump-auto-approve' label.
+name: Auto-approve version bump PRs
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "9.*"
+      - "8.*"
+    types: [opened, synchronize, labeled]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  auto-approve:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.user.login == 'elastic-vault-github-plugin-prod[bot]' &&
+      contains(github.event.pull_request.labels.*.name, 'version-bump-auto-approve')
+    steps:
+      - name: Approve version bump PR using GitHub Actions Bot
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            const result = await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: "APPROVE"
+            })

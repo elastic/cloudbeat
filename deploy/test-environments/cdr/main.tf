@@ -80,4 +80,26 @@ module "aws_ec2_for_asset_inventory" {
   deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
   specific_tags   = merge(local.common_tags, { "ec2_type" : "asset_inventory" })
 }
+
+module "aws_ec2_elastic_defend_linux" {
+  count           = var.deploy_aws_elastic_defend_linux ? 1 : 0
+  source          = "../modules/aws/ec2"
+  providers       = { aws : aws }
+  aws_ami         = var.ami_map[var.region]
+  deploy_k8s      = false
+  deploy_agent    = false
+  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
+  specific_tags   = merge(local.common_tags, { "ec2_type" : "elastic_defend_linux" })
+}
+
+module "aws_ec2_elastic_defend_windows" {
+  count                 = var.deploy_aws_elastic_defend_windows ? 1 : 0
+  source                = "../modules/aws/ec2-windows"
+  providers             = { aws : aws }
+  deployment_name       = "${var.deployment_name}-${random_string.suffix.result}"
+  specific_tags         = merge(local.common_tags, { "ec2_type" : "elastic_defend_windows" })
+  windows_ami_id        = var.windows_elastic_defend_ami_id
+  aws_ec2_instance_type = var.windows_elastic_defend_instance_type
+  winrm_ingress_cidr    = var.windows_elastic_defend_winrm_ingress_cidr
+}
 # ===== End Of CDR Infrastructure Resources =====

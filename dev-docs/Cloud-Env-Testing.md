@@ -149,6 +149,37 @@ The [`Create Environment with Cloud Logs`](https://github.com/elastic/cloudbeat/
 
 The workflow requires a subset of input parameters. All required inputs are described [here](#how-to-run-the-workflow).
 
+### How to run the workflow (manual)
+
+1. Go to `Actions → Create Environment with Cloud Logs (CDR)` and click **Run workflow**.
+2. Fill the inputs:
+   - **`deployment-name`** (**required**): lowercase, starts with a letter, max 20 chars. Example: `cdr-<yourname>-001`.
+   - **`elk-stack-version`** (**required**): stack version string. Examples:
+     - released: `8.16.0`
+     - snapshot: `8.16.0-SNAPSHOT`
+   - **`serverless_mode`**: if `true`, deploys a Serverless project instead of ESS. Default is `false`.
+   - **`docker-image-override`**: optional docker image override for agent installs (mostly for BC/SNAPSHOT testing).
+   - **`expiration-days`**: how long the environment should be kept before cleanup. Default is `5`.
+   - **`cis-infra`**: optional. When `true`, also deploy CIS infrastructure (`infra_type=all`). When `false`, CDR only (`infra_type=cdr`).
+   - **`kibana_enable_entity_analytics_settings`** (ESS only): when `true`, applies Kibana `user_settings_yaml` with Entity Analytics settings (AI agents feature flag, Agent Builder experimental UI). Default is `true`. Entity Store install is separate — see **`enable-entity-store-v2`** (CDR) or the EA workflow's entity store script.
+   - **`enable-entity-store-v2`**: when `true`, the workflow installs **Entity Store v2** (v2 installer script). When `false`, it installs **Entity Store v1 only**. Default is `true`.
+
+3. Click **Run workflow** and wait for completion.
+
+#### What gets installed
+
+- **Infrastructure**: CDR VMs (AWS CloudTrail EC2, Azure activity logs VM, GCP audit logs VM, Wiz EC2, Asset Inventory EC2, Elastic Defend Linux + Windows, depending on the `deploy_*` Terraform vars defaults).
+- **Integrations / agents**: CloudTrail, Azure Activity Logs, GCP Audit Logs, Wiz, Okta (optional), Elastic Defend (Fleet), Asset Inventory (gated by stack version), and Entity Store (v1 or v2 based on the checkbox).
+
+## Create Environment (Entity Analytics)
+
+The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft**, applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (AI agents feature flag and Agent Builder experimental UI), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It also installs Entity Store v2 and runs the risk-score maintainer via `install_entity_risk.sh`. It does not install CIS or CDR cloud infrastructure.
+
+### Inputs (summary)
+
+- **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**. ESS region mapping is fixed to **production-cft**.
+
+
 ## Install Integrations Worfklow
 
 The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workflows/install-integrations.yml) GitHub workflow is used when the Elastic Stack is already installed, and the user wants to add `CIS` and/or `CDR` integrations.
@@ -163,7 +194,9 @@ The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workfl
   - **`all`** - Installs both `CIS` and `CDR` integrations.
   - **`cis`** - Installs `CSPM`, `KSPM`, and `CNVM` integrations.
   - **`cdr`** - Installs `Audit Logs`, `Asset Inventory`, and `Wiz` integrations.
-- **`docker-image-override`** - For build candidate versions, specifies a custom Docker image path for agent installations.
+- **`docker-image-override`** - For build candidate versions, specifies a custom docker image path for agent installations.
+
+When **`infra-type`** is **`all`**, GCP CSPM and GCP Asset Inventory each get their own Deployment Manager stacks and service accounts (see **GCP naming (CDR vs CIS)** above).
 
 ## Cleanup Procedure
 

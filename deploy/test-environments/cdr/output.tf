@@ -77,3 +77,28 @@ output "ec2_wiz_key" {
   value     = var.deploy_aws_ec2_wiz ? module.aws_ec2_for_wiz[0].ec2_ssh_key : null
   sensitive = true
 }
+
+output "ec2_elastic_defend_linux_public_ip" {
+  value     = var.deploy_aws_elastic_defend_linux ? module.aws_ec2_elastic_defend_linux[0].aws_instance_cloudbeat_public_ip : null
+  sensitive = true
+}
+
+output "ec2_elastic_defend_linux_key" {
+  value     = var.deploy_aws_elastic_defend_linux ? module.aws_ec2_elastic_defend_linux[0].ec2_ssh_key : null
+  sensitive = true
+}
+
+output "ec2_elastic_defend_windows_public_ip" {
+  value     = var.deploy_aws_elastic_defend_windows ? module.aws_ec2_elastic_defend_windows[0].aws_instance_public_ip : null
+  sensitive = true
+}
+
+output "ec2_elastic_defend_windows_key" {
+  value     = var.deploy_aws_elastic_defend_windows ? module.aws_ec2_elastic_defend_windows[0].ec2_ssh_key : null
+  sensitive = true
+}
+
+output "ec2_elastic_defend_windows_instance_id" {
+  value     = var.deploy_aws_elastic_defend_windows ? module.aws_ec2_elastic_defend_windows[0].instance_id : null
+  sensitive = true
+}

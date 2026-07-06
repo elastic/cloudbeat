@@ -81,6 +81,7 @@ func Build() error {
 	args := devtools.DefaultBuildArgs()
 	args.CGO = false
 	args.ExtraFlags = append(args.ExtraFlags, "-tags=grpcnotrace,release")
+	args.Env["GOEXPERIMENT"] = "jsonv2" // required by trivy v0.69.3+ (encoding/json/v2)
 	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
 		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
 	}
@@ -100,6 +101,7 @@ func GolangCrossBuild() error {
 	args := devtools.DefaultGolangCrossBuildArgs()
 	args.CGO = false
 	args.ExtraFlags = append(args.ExtraFlags, "-tags=grpcnotrace,release")
+	args.Env["GOEXPERIMENT"] = "jsonv2" // required by trivy v0.69.3+ (encoding/json/v2)
 	if versionQualifier, versionQualified := os.LookupEnv("VERSION_QUALIFIER"); versionQualified {
 		args.Vars[cloudbeatModulePath+"/version.qualifier"] = versionQualifier
 	}

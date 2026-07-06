@@ -35,7 +35,7 @@ type activedirectoryFetcher struct {
 
 type (
 	activedirectoryProvider interface {
-		ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error)
+		ListServicePrincipals(ctx context.Context) ([]models.ServicePrincipalable, error)
 		ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
 		ListGroups(context.Context) ([]*models.Group, error)
 		ListUsers(context.Context) ([]*models.User, error)

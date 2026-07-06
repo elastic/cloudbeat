@@ -52,18 +52,25 @@ runs:
       with:
         node-version-file: ${{ steps.globals.outputs.KIBANA_DIR }}/package.json
 
+    - name: Setup Chrome
+      id: chrome
+      uses: browser-actions/setup-chrome@4f8e94349a351df0f048634f25fec36c3c91eded # v2.1.1
+      with:
+        chrome-version: 149
+
     - name: Bootstrap Kibana
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       env:
         ES_VERSION: ${{ inputs.es_version }}
+        MOON_CONCURRENCY: "1"
       run: |
         if [[ $ES_VERSION == 8.19* ]]; then
           echo "Bootstrapping Kibana..."
           yarn kbn bootstrap --force-install --no-validation || echo "⚠️ yarn kbn bootstrap failed, continuing..."
           yarn kbn clean && yarn kbn reset || echo "⚠️ yarn kbn reset failed, continuing..."
         fi
-        yarn kbn bootstrap
+        "${GITHUB_WORKSPACE}/.ci/scripts/retry.sh" 3 60 "rm -rf ~/.moon && yarn kbn bootstrap"
 
     - name: Set test configuration
       shell: bash
@@ -103,6 +110,7 @@ runs:
         TEST_BROWSER_HEADLESS: "1"
         TEST_CLOUD_HOST_NAME: "cloud.elastic.co"
         TEST_CONFIG: ${{ env.TEST_CONFIG }}
+        TEST_BROWSER_BINARY_PATH: ${{ steps.chrome.outputs.chrome-path }}
       run: |
         node scripts/functional_test_runner --config "$TEST_CONFIG" --es-version "$ES_VERSION"
 

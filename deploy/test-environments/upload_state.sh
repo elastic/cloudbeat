@@ -16,12 +16,32 @@ upload_cis() {
 # Function to upload additional keys for CDR
 upload_cdr() {
     aws s3 cp "./terraform.tfstate" "${S3_BUCKET}/cdr-terraform.tfstate"
-    aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cloudtrail.pem"
-    aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
-    aws s3 cp "${AUDIT_LOGS_KEY}" "${S3_BUCKET}/gcp_audit_logs.pem"
-    aws s3 cp "${EC2_ASSET_INV_KEY}" "${S3_BUCKET}/asset_inv.pem"
-    aws s3 cp "${EC2_WIZ_KEY}" "${S3_BUCKET}/wiz.pem"
+    if [ -n "${CLOUDTRAIL_KEY:-}" ] && [ -f "${CLOUDTRAIL_KEY}" ]; then
+        aws s3 cp "${CLOUDTRAIL_KEY}" "${S3_BUCKET}/cloudtrail.pem"
+    fi
+    if [ -n "${ACTIVITY_LOGS_KEY:-}" ] && [ -f "${ACTIVITY_LOGS_KEY}" ]; then
+        aws s3 cp "${ACTIVITY_LOGS_KEY}" "${S3_BUCKET}/az_activity_logs.pem"
+    fi
+    if [ -n "${AUDIT_LOGS_KEY:-}" ] && [ -f "${AUDIT_LOGS_KEY}" ]; then
+        aws s3 cp "${AUDIT_LOGS_KEY}" "${S3_BUCKET}/gcp_audit_logs.pem"
+    fi
+    if [ -n "${EC2_ASSET_INV_KEY:-}" ] && [ -f "${EC2_ASSET_INV_KEY}" ]; then
+        aws s3 cp "${EC2_ASSET_INV_KEY}" "${S3_BUCKET}/asset_inv.pem"
+    fi
+    if [ -n "${EC2_WIZ_KEY:-}" ] && [ -f "${EC2_WIZ_KEY}" ]; then
+        aws s3 cp "${EC2_WIZ_KEY}" "${S3_BUCKET}/wiz.pem"
+    fi
     aws s3 cp "${INTEGRATIONS_SETUP_DIR}/state_data.json" "$S3_BUCKET/state_data.json"
+
+    if [ -n "${ELASTIC_DEFEND_LINUX_KEY:-}" ] && [ -f "${ELASTIC_DEFEND_LINUX_KEY}" ]; then
+        aws s3 cp "${ELASTIC_DEFEND_LINUX_KEY}" "${S3_BUCKET}/elastic_defend_linux.pem"
+    fi
+    if [ -n "${ELASTIC_DEFEND_WINDOWS_KEY:-}" ] && [ -f "${ELASTIC_DEFEND_WINDOWS_KEY}" ]; then
+        aws s3 cp "${ELASTIC_DEFEND_WINDOWS_KEY}" "${S3_BUCKET}/elastic_defend_windows.pem"
+    fi
+    if [ -n "${WINDOWS_DEFEND_CREDENTIALS_FILE:-}" ] && [ -f "${WINDOWS_DEFEND_CREDENTIALS_FILE}" ]; then
+        aws s3 cp "${WINDOWS_DEFEND_CREDENTIALS_FILE}" "${S3_BUCKET}/windows-defend-connection.json"
+    fi
 }
 
 # Check for valid input

@@ -33,7 +33,11 @@ test-logs/*.log
 tests/allure/results/*
 tests/allure/reports/*
 tests/integrations_setup/state_data.json
+tests/integrations_setup/cdr_wiz_agent_policy.json
 tests/integrations_setup/*.sh
+tests/integrations_setup/*.ps1
+tests/integrations_setup/elastic_defend_hosts.json
+tests/integrations_setup/.windows-defend-connection.json
 
 # vscode
 .vscode*

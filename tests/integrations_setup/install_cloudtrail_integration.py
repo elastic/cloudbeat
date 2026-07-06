@@ -49,8 +49,10 @@ if __name__ == "__main__":
     package_data["package"]["version"] = package_version
     package_data["vars"]["access_key_id"] = cnfg.aws_config.access_key_id
     package_data["vars"]["secret_access_key"] = cnfg.aws_config.secret_access_key
+    package_data["vars"]["default_region"] = cnfg.aws_config.region
 
     update_key_value(package_data, "bucket_arn", cnfg.aws_config.cloudtrail_s3)
+    update_key_value(package_data, "aws_region", cnfg.aws_config.region)
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)

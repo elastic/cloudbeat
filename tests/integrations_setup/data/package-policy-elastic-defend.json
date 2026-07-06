@@ -1,0 +1,28 @@
+{
+    "policy_id": "",
+    "name": "pkg-plcy-elastic-defend",
+    "description": "Elastic Defend for CDR test hosts",
+    "namespace": "default",
+    "enabled": true,
+    "package": {
+        "name": "endpoint",
+        "version": "0.0.0"
+    },
+    "inputs": [
+        {
+            "enabled": true,
+            "streams": [],
+            "type": "ENDPOINT_INTEGRATION_CONFIG",
+            "config": {
+                "_config": {
+                    "value": {
+                        "type": "endpoint",
+                        "endpointConfig": {
+                            "preset": "EDRComplete"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

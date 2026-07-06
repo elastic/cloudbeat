@@ -1,0 +1,131 @@
+notify:
+  - slack:
+      channels:
+        - "#security-cloud-services-team"
+      message: "<!subteam^S08EWPU86KW|security-cloud-services> Version bump to ${NEW_VERSION} — ${BUILDKITE_BUILD_URL}"
+    if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+$/) && (build.state == 'passed' || build.state == 'failed')
+  - slack:
+      channels:
+        - "#security-cloud-services-team"
+      message: |
+        <!subteam^S08EWPU86KW|security-cloud-services>
+        🚦 Pipeline waiting for approval 🚦
+        Repo: `${REPO}`
+
+        New version: `${NEW_VERSION}`
+        Branch: `${BRANCH}`
+        Workflow: `${WORKFLOW}`
+        ${BUILDKITE_BUILD_URL}
+    if: build.state == "blocked"
+
+steps:
+
+  - group: ":arrow_up: Bump version"
+    key: bump-version
+    steps:
+      - label: "Patch"
+        key: bump-version-patch
+        if: build.env("WORKFLOW") == "patch"
+        agents:
+          image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+          cpu: 250m
+          memory: 512Mi
+          ephemeralStorage: 1Gi
+        plugins:
+          - elastic/vault-github-token#v0.2.0: ~
+        command:
+          - .buildkite/scripts/release/bump-patch.sh
+        timeout_in_minutes: 15
+
+      - label: "Minor"
+        key: bump-version-minor
+        if: build.env("WORKFLOW") == "minor"
+        agents:
+          image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+          cpu: 250m
+          memory: 512Mi
+          ephemeralStorage: 1Gi
+        plugins:
+          - elastic/vault-github-token#v0.2.0: ~
+        command:
+          - .buildkite/scripts/release/bump-minor.sh
+        timeout_in_minutes: 15
+
+  - block: "Wait for PR merge"
+    prompt: "Continue after the bump PR is merged and all checks have passed."
+    key: wait-for-merge
+    if: build.env("WORKFLOW") == "minor"
+    depends_on: bump-version-minor
+    blocked_state: running
+
+  - label: ":twisted_rightwards_arrows: Branch out + hermit PR"
+    key: post-minor-merge
+    if: build.env("WORKFLOW") == "minor"
+    depends_on: wait-for-merge
+    agents:
+      image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+      cpu: 250m
+      memory: 512Mi
+      ephemeralStorage: 1Gi
+    plugins:
+      - elastic/vault-github-token#v0.2.0: ~
+    command:
+      - .buildkite/scripts/release/post-minor-merge.sh
+    timeout_in_minutes: 15
+
+  - block: "Ready to poll for DRA artifacts?"
+    depends_on: post-minor-merge
+    prompt: |
+      Unblock when your team is ready to proceed.
+
+      Trigger parameters:
+      - NEW_VERSION: ${NEW_VERSION}
+      - BRANCH: ${BRANCH}
+      - WORKFLOW: ${WORKFLOW}
+    key: block-get-dra-artifacts
+    blocked_state: running
+
+  - label: "Fetch DRA Artifacts"
+    key: fetch-dra-artifacts
+    depends_on: block-get-dra-artifacts
+    agents:
+      image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+      cpu: 250m
+      memory: 512Mi
+      ephemeralStorage: 1Gi
+    command:
+      - echo "Starting DRA artifacts retrieval..."
+    timeout_in_minutes: 240
+    retry:
+      automatic:
+        - exit_status: "*"
+          limit: 2
+      manual:
+        permit_on_passed: true
+
+    plugins:
+      - elastic/json-watcher#v1.0.0:
+          url: "https://artifacts-staging.elastic.co/cloudbeat/latest/${BRANCH}.json"
+          field: ".version"
+          expected_value: "${NEW_VERSION}"
+          polling_interval: "30"
+      - elastic/json-watcher#v1.0.0:
+          url: "https://storage.googleapis.com/elastic-artifacts-snapshot/cloudbeat/latest/${BRANCH}.json"
+          field: ".version"
+          expected_value: "${NEW_VERSION}-SNAPSHOT"
+          polling_interval: "30"
+
+  # TODO(task-7): wire AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY and SNYK_* via
+  # vault, then un-comment the step below.
+  # - label: "Post-bump"
+  #   key: post-bump
+  #   if: build.env("WORKFLOW") == "minor"
+  #   depends_on: fetch-dra-artifacts
+  #   agents:
+  #     image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+  #     cpu: 250m
+  #     memory: 512Mi
+  #     ephemeralStorage: 1Gi
+  #   command:
+  #     - .buildkite/scripts/release/post-bump.sh
+  #   timeout_in_minutes: 15

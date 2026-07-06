@@ -106,7 +106,7 @@ runs:
     - name: Log cached paths
       shell: bash
       run: |
-        ls -lah ~/.cache/hermit/pkg
-        ls -lah ./.hermit
-        ls -lah ~/.cache/pypoetry
-        ls -lah ~/.cache/pre-commit
+        ls -lah ~/.cache/hermit/pkg || true
+        ls -lah ./.hermit || true
+        ls -lah ~/.cache/pypoetry || true
+        ls -lah ~/.cache/pre-commit || true

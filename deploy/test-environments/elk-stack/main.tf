@@ -55,6 +55,7 @@ module "ec_deployment" {
   elasticsearch_autoscale  = true
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
+  elasticsearch_ml_enabled = var.elasticsearch_ml_enabled
 
   docker_image_tag_override = var.pin_version != "" ? {
     "elasticsearch" = "${var.pin_version}",
@@ -65,6 +66,9 @@ module "ec_deployment" {
     "kibana"        = "",
     "apm"           = ""
   }
+
+  kibana_enable_entity_analytics_settings = var.kibana_enable_entity_analytics_settings
+  kibana_instance_size                    = var.kibana_instance_size
 }
 
 module "ec_project" {

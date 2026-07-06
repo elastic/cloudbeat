@@ -1,0 +1,92 @@
+---
+name: update-beats
+
+# Bumps the github.com/elastic/beats/v7 go.mod dependency to the latest commit
+# on each active branch and opens a Pull Request per branch.
+#
+# Modeled on elastic/elastic-agent's bump-beats-version.yml: updatecli only edits
+# files (`--commit=false`) and the PR is opened by peter-evans/create-pull-request.
+# This avoids letting updatecli push/authenticate to GitHub itself.
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run every weekday at 00:00 UTC.
+    - cron: "0 0 * * 1-5"
+
+permissions:
+  contents: read
+
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.generator.outputs.matrix }}
+    permissions:
+      contents: read
+    steps:
+      - id: generator
+        uses: elastic/oblt-actions/elastic/active-branches@v1
+        with:
+          filter-branches: true
+
+  update-beats:
+    permissions:
+      contents: write
+      pull-requests: write
+    needs:
+      - filter
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.filter.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: "true"
+          free-disk: "true"
+
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@2c3221bc5f4499a99fec2c87d9de4a83cb30e990 # v3.1.3
+
+      # We can't let updatecli create the PR because it pushes/authenticates to
+      # GitHub itself; we run it in apply mode without committing and let
+      # create-pull-request handle the git side.
+      - name: Run Updatecli in Apply mode
+        run: updatecli apply --config .ci/updatecli/updatecli.d/update-beats.yml --commit=false
+        env:
+          BRANCH_NAME: ${{ matrix.branch }}
+
+      - name: Export beats versions to environment variables
+        run: |
+          if [[ -f /tmp/.beats-new-version ]]; then
+            echo "BEATS_PREVIOUS_VERSION=$(cat /tmp/.beats-previous-version)" >> "$GITHUB_ENV"
+            echo "BEATS_NEW_VERSION=$(cat /tmp/.beats-new-version)" >> "$GITHUB_ENV"
+          fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "[${{ matrix.branch }}][Automation] Update elastic/beats to ${{ env.BEATS_NEW_VERSION }}"
+          title: "[${{ matrix.branch }}][Automation] Update elastic/beats to ${{ env.BEATS_NEW_VERSION }}"
+          body: |
+            ### What
+            Update `elastic/beats` to the latest version on branch `${{ matrix.branch }}`.
+
+            *Changeset*
+            * https://github.com/elastic/beats/compare/${{ env.BEATS_PREVIOUS_VERSION }}...${{ env.BEATS_NEW_VERSION }}
+          branch: update-beats-${{ matrix.branch }}
+          base: ${{ matrix.branch }}
+          delete-branch: true
+          labels: |
+            automation
+            backport-skip
+            dependency
+            go
