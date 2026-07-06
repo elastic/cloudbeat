@@ -183,16 +183,10 @@ type Entity struct {
 	Source     *string        `json:"source"`
 	Raw        *any           `json:"raw"`
 	Attributes map[string]any `json:"attributes,omitempty"`
-	Lifecycle  *Lifecycle     `json:"lifecycle,omitempty"`
 	AssetClassification
 
 	// non exported fields
 	relatedEntityId []string
-}
-
-// Lifecycle holds non-ECS lifecycle timestamps for an asset (non-ECS fields use UpperCamelCase).
-type Lifecycle struct {
-	CreatedAt *time.Time `json:"CreatedAt,omitempty"`
 }
 
 type Event struct {
@@ -409,13 +403,16 @@ func WithEntityAttributes(attrs map[string]any) AssetEnricher {
 	}
 }
 
-// WithCreatedAt sets the resource creation timestamp on the entity lifecycle.
+// WithCreatedAt sets the resource creation timestamp in entity.attributes["CreatedAt"].
 // A nil time is a no-op.
 func WithCreatedAt(t *time.Time) AssetEnricher {
 	return func(a *AssetEvent) {
 		if t == nil {
 			return
 		}
-		a.Entity.Lifecycle = &Lifecycle{CreatedAt: t}
+		if a.Entity.Attributes == nil {
+			a.Entity.Attributes = make(map[string]any)
+		}
+		a.Entity.Attributes["CreatedAt"] = t
 	}
 }
