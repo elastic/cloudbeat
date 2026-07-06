@@ -52,6 +52,15 @@ update_arm_templates() {
     fi
 }
 
+# no_new_commits <base_ref>
+# Returns 0 (true) if HEAD has no changes relative to <base_ref>, i.e. the
+# preceding update_* calls found nothing to bump. Callers should skip
+# push/PR creation in that case — a branch identical to its base has no
+# commits for `gh pr create` to open a PR with.
+no_new_commits() {
+    git diff --quiet "$1" HEAD
+}
+
 # render_template <path>
 # Expands ${VAR} references in a template file using the caller's environment.
 render_template() {
