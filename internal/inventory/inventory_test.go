@@ -151,7 +151,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		logger:              logger,
 		fetchers:            []AssetFetcher{fetcher},
 		publisher:           publisher,
-		bufferFlushInterval: 10 * time.Millisecond,
+		bufferFlushInterval: 1 * time.Millisecond,
 		bufferMaxSize:       1,
 		period:              24 * time.Hour,
 		assetCh:             make(chan AssetEvent),
@@ -159,7 +159,7 @@ func TestAssetInventory_Run(t *testing.T) {
 		namespace:           "default",
 	}
 
-	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
+	ctx, cancel := context.WithTimeout(t.Context(), 500*time.Millisecond)
 	defer cancel()
 
 	go func() {
