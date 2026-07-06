@@ -795,6 +795,89 @@ func (_c *MockClient_GetCredentialReport_Call) RunAndReturn(run func(ctx context
 	return _c
 }
 
+// GetInstanceProfile provides a mock function for the type MockClient
+func (_mock *MockClient) GetInstanceProfile(ctx context.Context, params *iam.GetInstanceProfileInput, optFns ...func(*iam.Options)) (*iam.GetInstanceProfileOutput, error) {
+	var tmpRet mock.Arguments
+	if len(optFns) > 0 {
+		tmpRet = _mock.Called(ctx, params, optFns)
+	} else {
+		tmpRet = _mock.Called(ctx, params)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInstanceProfile")
+	}
+
+	var r0 *iam.GetInstanceProfileOutput
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *iam.GetInstanceProfileInput, ...func(*iam.Options)) (*iam.GetInstanceProfileOutput, error)); ok {
+		return returnFunc(ctx, params, optFns...)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *iam.GetInstanceProfileInput, ...func(*iam.Options)) *iam.GetInstanceProfileOutput); ok {
+		r0 = returnFunc(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.GetInstanceProfileOutput)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *iam.GetInstanceProfileInput, ...func(*iam.Options)) error); ok {
+		r1 = returnFunc(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_GetInstanceProfile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetInstanceProfile'
+type MockClient_GetInstanceProfile_Call struct {
+	*mock.Call
+}
+
+// GetInstanceProfile is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *iam.GetInstanceProfileInput
+//   - optFns ...func(*iam.Options)
+func (_e *MockClient_Expecter) GetInstanceProfile(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetInstanceProfile_Call {
+	return &MockClient_GetInstanceProfile_Call{Call: _e.mock.On("GetInstanceProfile",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_GetInstanceProfile_Call) Run(run func(ctx context.Context, params *iam.GetInstanceProfileInput, optFns ...func(*iam.Options))) *MockClient_GetInstanceProfile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *iam.GetInstanceProfileInput
+		if args[1] != nil {
+			arg1 = args[1].(*iam.GetInstanceProfileInput)
+		}
+		var arg2 []func(*iam.Options)
+		var variadicArgs []func(*iam.Options)
+		if len(args) > 2 {
+			variadicArgs = args[2].([]func(*iam.Options))
+		}
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_GetInstanceProfile_Call) Return(getInstanceProfileOutput *iam.GetInstanceProfileOutput, err error) *MockClient_GetInstanceProfile_Call {
+	_c.Call.Return(getInstanceProfileOutput, err)
+	return _c
+}
+
+func (_c *MockClient_GetInstanceProfile_Call) RunAndReturn(run func(ctx context.Context, params *iam.GetInstanceProfileInput, optFns ...func(*iam.Options)) (*iam.GetInstanceProfileOutput, error)) *MockClient_GetInstanceProfile_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetPolicy provides a mock function for the type MockClient
 func (_mock *MockClient) GetPolicy(ctx context.Context, params *iam.GetPolicyInput, optFns ...func(*iam.Options)) (*iam.GetPolicyOutput, error) {
 	var tmpRet mock.Arguments

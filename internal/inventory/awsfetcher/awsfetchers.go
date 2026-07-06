@@ -48,7 +48,7 @@ func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg
 	snsProvider := sns.NewSNSProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[sns.Client]{})
 
 	return []inventory.AssetFetcher{
-		newEc2InstancesFetcher(logger, identity, ec2Provider, statusHandler),
+		newEc2InstancesFetcher(logger, identity, ec2Provider, iamProvider, statusHandler),
 		newElbFetcher(logger, identity, elbProvider, elbv2Provider, statusHandler),
 		newIamPolicyFetcher(logger, identity, iamProvider, statusHandler),
 		newIamRoleFetcher(logger, identity, iamProvider, statusHandler),

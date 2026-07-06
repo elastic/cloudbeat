@@ -72,6 +72,9 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 				StorageEncrypted:        aws.ToBool(dbInstance.StorageEncrypted),
 				AutoMinorVersionUpgrade: aws.ToBool(dbInstance.AutoMinorVersionUpgrade),
 				PubliclyAccessible:      aws.ToBool(dbInstance.PubliclyAccessible),
+				Engine:                  aws.ToString(dbInstance.Engine),
+				EngineVersion:           aws.ToString(dbInstance.EngineVersion),
+				CreatedAt:               dbInstance.InstanceCreateTime,
 				Subnets:                 subnets,
 				region:                  region,
 			})

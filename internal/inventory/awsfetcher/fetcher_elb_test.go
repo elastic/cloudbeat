@@ -79,6 +79,13 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS Networking",
 			}),
+			inventory.WithEntityAttributes(map[string]any{
+				"DNSName":            "internal-my-elb-v1.us-east-1.elb.amazonaws.com",
+				"PubliclyAccessible": false, // scheme is "internal"
+				"AccountID":          "123",
+				"LoadBalancerType":   "classic",
+			}),
+			inventory.WithCreatedAt(asset.GetCreatedAt()),
 		),
 	}
 
@@ -127,6 +134,13 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS Networking",
 			}),
+			inventory.WithEntityAttributes(map[string]any{
+				"DNSName":            "internal-my-elb-v2.us-east-1.elb.amazonaws.com",
+				"PubliclyAccessible": false, // scheme is internal
+				"AccountID":          "123",
+				"LoadBalancerType":   "application",
+			}),
+			inventory.WithCreatedAt(asset.GetCreatedAt()),
 		),
 	}
 

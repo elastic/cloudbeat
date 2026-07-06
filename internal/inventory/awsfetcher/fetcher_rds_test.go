@@ -19,6 +19,7 @@ package awsfetcher
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/mock"
 
@@ -33,12 +34,17 @@ import (
 )
 
 func TestRDSInstanceFetcher_Fetch(t *testing.T) {
+	createdAt := time.Date(2024, 3, 10, 8, 0, 0, 0, time.UTC)
+
 	instance1 := rds.DBInstance{
 		Identifier:              "db1",
 		Arn:                     "arn:aws:rds:eu-west-1:123:db:db1",
 		StorageEncrypted:        true,
 		AutoMinorVersionUpgrade: true,
 		PubliclyAccessible:      false,
+		Engine:                  "postgres",
+		EngineVersion:           "15.4",
+		CreatedAt:               &createdAt,
 		Subnets: []rds.Subnet{
 			{
 				ID: "subnet-aabbccdd",
@@ -60,6 +66,8 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 		StorageEncrypted:        true,
 		AutoMinorVersionUpgrade: true,
 		PubliclyAccessible:      true,
+		Engine:                  "mysql",
+		EngineVersion:           "8.0.35",
 		Subnets: []rds.Subnet{
 			{
 				ID: "subnet-aabbccdd",
@@ -95,6 +103,12 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS RDS",
 			}),
+			inventory.WithEntityAttributes(map[string]any{
+				"PubliclyAccessible": false,
+				"Engine":             "postgres",
+				"EngineVersion":      "15.4",
+			}),
+			inventory.WithCreatedAt(&createdAt),
 		),
 		inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
@@ -107,6 +121,11 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 				AccountID:   "123",
 				AccountName: "alias",
 				ServiceName: "AWS RDS",
+			}),
+			inventory.WithEntityAttributes(map[string]any{
+				"PubliclyAccessible": true,
+				"Engine":             "mysql",
+				"EngineVersion":      "8.0.35",
 			}),
 		),
 	}
