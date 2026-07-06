@@ -60,6 +60,7 @@ type Client interface {
 	GetPolicyVersion(ctx context.Context, params *iamsdk.GetPolicyVersionInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyVersionOutput, error)
 	ListEntitiesForPolicy(ctx context.Context, params *iamsdk.ListEntitiesForPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListEntitiesForPolicyOutput, error)
 	ListServerCertificates(ctx context.Context, params *iamsdk.ListServerCertificatesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListServerCertificatesOutput, error)
+	GetInstanceProfile(ctx context.Context, params *iamsdk.GetInstanceProfileInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetInstanceProfileOutput, error)
 }
 
 type AccessAnalyzerClient interface {

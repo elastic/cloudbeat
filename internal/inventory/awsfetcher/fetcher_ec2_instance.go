@@ -19,6 +19,9 @@ package awsfetcher
 
 import (
 	"context"
+	"strings"
+
+	iamtypes "github.com/aws/aws-sdk-go-v2/service/iam/types"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -32,6 +35,7 @@ import (
 type ec2InstanceFetcher struct {
 	logger        *clog.Logger
 	provider      ec2InstancesProvider
+	iamResolver   instanceProfileResolver
 	AccountId     string
 	AccountName   string
 	statusHandler statushandler.StatusHandlerAPI
@@ -41,10 +45,17 @@ type ec2InstancesProvider interface {
 	DescribeInstances(ctx context.Context) ([]*ec2.Ec2Instance, error)
 }
 
-func newEc2InstancesFetcher(logger *clog.Logger, identity *cloud.Identity, provider ec2InstancesProvider, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
+// instanceProfileResolver resolves an IAM instance profile by name, returning
+// the profile object (which contains the list of associated roles).
+type instanceProfileResolver interface {
+	GetInstanceProfile(ctx context.Context, instanceProfileName string) (*iamtypes.InstanceProfile, error)
+}
+
+func newEc2InstancesFetcher(logger *clog.Logger, identity *cloud.Identity, provider ec2InstancesProvider, iamResolver instanceProfileResolver, statusHandler statushandler.StatusHandlerAPI) inventory.AssetFetcher {
 	return &ec2InstanceFetcher{
 		logger:        logger,
 		provider:      provider,
+		iamResolver:   iamResolver,
 		AccountId:     identity.Account,
 		AccountName:   identity.AccountAlias,
 		statusHandler: statusHandler,
@@ -61,19 +72,34 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 		awslib.ReportMissingPermission(e.statusHandler, err)
 	}
 
+	// Cache resolved role ARNs per profile ARN to avoid duplicate IAM calls.
+	roleArnCache := make(map[string]string)
+
 	for _, i := range instances {
 		if i == nil {
 			continue
 		}
 
+		tags := e.getTags(i)
+
+		// Resolve the IAM role ARN from the instance profile.
+		// IamInstanceProfile.Arn is the *instance-profile* ARN, not the role ARN.
+		// We emit InstanceProfileArn (accurate, free) and RoleArn (resolved via GetInstanceProfile).
 		iamFetcher := inventory.EmptyEnricher()
 		if i.IamInstanceProfile != nil {
-			iamFetcher = inventory.WithUser(inventory.User{
-				ID: pointers.Deref(i.IamInstanceProfile.Arn),
-			})
+			profileArn := pointers.Deref(i.IamInstanceProfile.Arn)
+			if profileArn != "" {
+				roleArn := e.resolveRoleArn(ctx, profileArn, roleArnCache)
+				// WithUser links this instance to the IAM Role asset (or falls back to the profile ARN).
+				userID := roleArn
+				if userID == "" {
+					userID = profileArn
+				}
+				iamFetcher = inventory.WithUser(inventory.User{
+					ID: userID,
+				})
+			}
 		}
-
-		tags := e.getTags(i)
 
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsEc2Instance,
@@ -102,17 +128,59 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 				IP:           buildIPs(i.PublicIpAddress, i.PrivateIpAddress),
 				MacAddress:   i.GetResourceMacAddresses(),
 			}),
-			inventory.WithEntityAttributes(e.buildAttributes(i, tags)),
+			inventory.WithEntityAttributes(e.buildAttributes(i, tags, roleArnCache)),
 			inventory.WithCreatedAt(i.LaunchTime),
 			iamFetcher,
 		)
 	}
 }
 
+// resolveRoleArn attempts to resolve the IAM role ARN for the given instance-profile ARN.
+// Results are cached in roleArnCache (keyed by profile ARN) so instances sharing a profile
+// trigger only one IAM call. Returns "" if the profile has no roles or the call fails.
+func (e *ec2InstanceFetcher) resolveRoleArn(ctx context.Context, profileArn string, roleArnCache map[string]string) string {
+	if cached, ok := roleArnCache[profileArn]; ok {
+		return cached
+	}
+
+	profileName := profileNameFromArn(profileArn)
+	if profileName == "" {
+		roleArnCache[profileArn] = ""
+		return ""
+	}
+
+	profile, err := e.iamResolver.GetInstanceProfile(ctx, profileName)
+	if err != nil {
+		e.logger.Warnf("Could not resolve IAM role for instance profile %s: %v", profileArn, err)
+		roleArnCache[profileArn] = ""
+		return ""
+	}
+
+	roleArn := ""
+	if len(profile.Roles) > 0 {
+		roleArn = pointers.Deref(profile.Roles[0].Arn)
+	}
+
+	roleArnCache[profileArn] = roleArn
+	return roleArn
+}
+
+// profileNameFromArn extracts the instance-profile name from its ARN.
+// Example: "arn:aws:iam::123:instance-profile/MyProfile" → "MyProfile"
+// Also handles path-qualified names: ".../instance-profile/division/MyProfile" → "division/MyProfile".
+func profileNameFromArn(arn string) string {
+	const marker = "instance-profile/"
+	idx := strings.Index(arn, marker)
+	if idx == -1 {
+		return ""
+	}
+	return arn[idx+len(marker):]
+}
+
 // buildAttributes collects non-ECS, resource-specific EC2 fields into entity.attributes,
 // using UpperCamelCase keys. Empty values are omitted so events stay clean and struct
 // comparison in tests is stable.
-func (e *ec2InstanceFetcher) buildAttributes(i *ec2.Ec2Instance, tags map[string]string) map[string]any {
+func (e *ec2InstanceFetcher) buildAttributes(i *ec2.Ec2Instance, tags map[string]string, roleArnCache map[string]string) map[string]any {
 	attrs := map[string]any{}
 	if v := pointers.Deref(i.ImageId); v != "" {
 		attrs["ImageId"] = v
@@ -132,8 +200,11 @@ func (e *ec2InstanceFetcher) buildAttributes(i *ec2.Ec2Instance, tags map[string
 		}
 	}
 	if i.IamInstanceProfile != nil {
-		if v := pointers.Deref(i.IamInstanceProfile.Arn); v != "" {
-			attrs["RoleArn"] = v
+		if profileArn := pointers.Deref(i.IamInstanceProfile.Arn); profileArn != "" {
+			attrs["InstanceProfileArn"] = profileArn
+			if roleArn, ok := roleArnCache[profileArn]; ok && roleArn != "" {
+				attrs["RoleArn"] = roleArn
+			}
 		}
 	}
 	if v := awslib.LookupTag(tags, "owner"); v != "" {
