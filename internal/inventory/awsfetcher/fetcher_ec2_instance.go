@@ -19,7 +19,6 @@ package awsfetcher
 
 import (
 	"context"
-	"strings"
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -137,26 +136,13 @@ func (e *ec2InstanceFetcher) buildAttributes(i *ec2.Ec2Instance, tags map[string
 			attrs["RoleArn"] = v
 		}
 	}
-	if v := lookupTag(tags, "owner"); v != "" {
+	if v := awslib.LookupTag(tags, "owner"); v != "" {
 		attrs["Owner"] = v
 	}
-	if v := lookupTag(tags, "costcenter", "cost-center", "cost_center"); v != "" {
+	if v := awslib.LookupTag(tags, "costcenter", "cost-center", "cost_center"); v != "" {
 		attrs["CostCenter"] = v
 	}
 	return attrs
-}
-
-// lookupTag returns the first tag value whose key matches one of the candidates,
-// case-insensitively. Tag keys are customer-defined, so we accept common variants.
-func lookupTag(tags map[string]string, candidates ...string) string {
-	for k, v := range tags {
-		for _, c := range candidates {
-			if strings.EqualFold(k, c) {
-				return v
-			}
-		}
-	}
-	return ""
 }
 
 // buildIPs collects non-empty IP address strings into a slice, returning nil when none exist.

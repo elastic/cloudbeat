@@ -18,12 +18,12 @@
 package elb_v2
 
 import (
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -32,16 +32,6 @@ type ElasticLoadBalancerInfo struct {
 	Listeners    []types.Listener   `json:"listeners"`
 	region       string
 	tags         map[string]string
-}
-
-// lookupOwnerTag returns the value of the "Owner" tag (case-insensitive), if present.
-func lookupOwnerTag(tags map[string]string) string {
-	for k, v := range tags {
-		if strings.EqualFold(k, "owner") {
-			return v
-		}
-	}
-	return ""
 }
 
 func (v ElasticLoadBalancerInfo) GetResourceArn() string {
@@ -101,5 +91,5 @@ func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
 
 // GetOwnerTag returns the value of the "Owner" tag (case-insensitive), if present.
 func (v ElasticLoadBalancerInfo) GetOwnerTag() string {
-	return lookupOwnerTag(v.tags)
+	return awslib.LookupTag(v.tags, "owner")
 }
