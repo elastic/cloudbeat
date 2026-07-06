@@ -43,6 +43,11 @@ run_patch_bump() {
 
     update_version_beat
 
+    if no_new_commits "origin/${BASE_BRANCH}"; then
+        echo "${BASE_BRANCH} is already at ${NEXT_CLOUDBEAT_VERSION} — nothing to bump."
+        return
+    fi
+
     local body
     body=$(render_template "${SCRIPT_DIR}/templates/pr-body-patch.md")
 

@@ -71,6 +71,11 @@ run_minor_bump() {
     update_arm_templates "${NEXT_CLOUDBEAT_VERSION}"
     update_mergify
 
+    if no_new_commits origin/main; then
+        echo "main is already at ${NEXT_CLOUDBEAT_VERSION} and mergify rule for ${BRANCH} already exists — nothing to bump."
+        return
+    fi
+
     local body
     body=$(render_template "${SCRIPT_DIR}/templates/pr-body-minor.md")
 
