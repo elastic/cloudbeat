@@ -19,6 +19,16 @@ set_hermit_cloudbeat_version() {
     sed -E -i "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE
 }
 
+sync_pr_already_open() {
+    # A previous run may have opened a sync PR for this version that hasn't merged
+    # yet; main still shows the drift, so avoid opening a duplicate every run.
+    local existing
+    existing=$(gh pr list \
+        --search "Sync CLOUDBEAT_VERSION in hermit.hcl to $CLOUDBEAT_VERSION in:title" \
+        --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
+    [[ -n "$existing" ]]
+}
+
 is_snapshot_published() {
     # ELK_VERSION resolves to "${CLOUDBEAT_VERSION}-SNAPSHOT"; only bump once that
     # snapshot actually exists on the Elastic artifacts API, otherwise the test-runner
@@ -41,6 +51,19 @@ is_snapshot_published() {
 handle_version_changes() {
     if git diff --quiet --exit-code $HERMIT_FILE; then
         echo "No changes to $HERMIT_FILE; I'm done"
+        return
+    fi
+
+    if git diff --quiet --exit-code $HERMIT_FILE; then
+        echo "No changes to $HERMIT_FILE; I'm done"
+        return
+    fi
+
+    # A sync PR for this version may already be open from a previous run
+    # (main stays on the old version until it merges) — don't open a duplicate.
+    if sync_pr_already_open; then
+        echo "An open sync PR for $CLOUDBEAT_VERSION already exists; skipping."
+        git checkout -- "$HERMIT_FILE"
         return
     fi
 
