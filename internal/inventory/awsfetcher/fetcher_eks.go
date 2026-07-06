@@ -31,8 +31,8 @@ import (
 type eksFetcher struct {
 	logger        *clog.Logger
 	provider      eksProvider
-	AccountId     string
-	AccountName   string
+	accountId     string
+	accountName   string
 	statusHandler statushandler.StatusHandlerAPI
 }
 
@@ -44,8 +44,8 @@ func newEKSFetcher(logger *clog.Logger, identity *cloud.Identity, provider eksPr
 	return &eksFetcher{
 		logger:        logger,
 		provider:      provider,
-		AccountId:     identity.Account,
-		AccountName:   identity.AccountAlias,
+		accountId:     identity.Account,
+		accountName:   identity.AccountAlias,
 		statusHandler: statusHandler,
 	}
 }
@@ -74,8 +74,8 @@ func (f *eksFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      item.GetRegion(),
-				AccountID:   f.AccountId,
-				AccountName: f.AccountName,
+				AccountID:   f.accountId,
+				AccountName: f.accountName,
 				ServiceName: "AWS EKS",
 			}),
 			inventory.WithEntityAttributes(buildEKSAttributes(cluster)),

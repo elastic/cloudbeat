@@ -31,8 +31,8 @@ import (
 type route53Fetcher struct {
 	logger        *clog.Logger
 	provider      route53Provider
-	AccountId     string
-	AccountName   string
+	accountId     string
+	accountName   string
 	statusHandler statushandler.StatusHandlerAPI
 }
 
@@ -44,8 +44,8 @@ func newRoute53Fetcher(logger *clog.Logger, identity *cloud.Identity, provider r
 	return &route53Fetcher{
 		logger:        logger,
 		provider:      provider,
-		AccountId:     identity.Account,
-		AccountName:   identity.AccountAlias,
+		accountId:     identity.Account,
+		accountName:   identity.AccountAlias,
 		statusHandler: statusHandler,
 	}
 }
@@ -74,8 +74,8 @@ func (f *route53Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.AwsCloudProvider,
 				Region:      item.GetRegion(),
-				AccountID:   f.AccountId,
-				AccountName: f.AccountName,
+				AccountID:   f.accountId,
+				AccountName: f.accountName,
 				ServiceName: "AWS Route 53",
 			}),
 			inventory.WithEntityAttributes(buildRoute53Attributes(record)),
