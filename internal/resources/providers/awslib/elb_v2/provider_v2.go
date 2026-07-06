@@ -46,7 +46,8 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 			input.Marker = output.NextMarker
 		}
 
-		var result []awslib.AwsResource
+		lbs := make([]*ElasticLoadBalancerInfo, 0, len(all))
+		arns := make([]string, 0, len(all))
 		for _, item := range all {
 			loadBalancer := &ElasticLoadBalancerInfo{
 				LoadBalancer: item,
@@ -58,7 +59,18 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 			} else {
 				loadBalancer.Listeners = listeners
 			}
-			result = append(result, loadBalancer)
+			lbs = append(lbs, loadBalancer)
+			if arn := loadBalancer.GetResourceArn(); arn != "" {
+				arns = append(arns, arn)
+			}
+		}
+
+		tagsByArn := p.describeTags(ctx, c, arns)
+
+		result := make([]awslib.AwsResource, 0, len(lbs))
+		for _, lb := range lbs {
+			lb.tags = tagsByArn[lb.GetResourceArn()]
+			result = append(result, lb)
 		}
 		return result, nil
 	})
@@ -67,6 +79,34 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 		p.log.Debugf("Fetched %d Elastic Load Balancers", len(result))
 	}
 	return result, err
+}
+
+// describeTags fetches tags for the given load balancer ARNs (chunked to the AWS 20-ARN
+// limit) and returns a map of load balancer ARN to its tag key/value pairs.
+func (p *Provider) describeTags(ctx context.Context, c Client, arns []string) map[string]map[string]string {
+	out := map[string]map[string]string{}
+	for _, chunk := range lo.Chunk(arns, 20) {
+		if len(chunk) == 0 {
+			continue
+		}
+		resp, err := c.DescribeTags(ctx, &elbv2.DescribeTagsInput{ResourceArns: chunk})
+		if err != nil {
+			p.log.Errorf("Could not fetch tags for load balancers: %v", err)
+			continue
+		}
+		for _, td := range resp.TagDescriptions {
+			arn := pointers.Deref(td.ResourceArn)
+			if arn == "" {
+				continue
+			}
+			tags := make(map[string]string, len(td.Tags))
+			for _, t := range td.Tags {
+				tags[pointers.Deref(t.Key)] = pointers.Deref(t.Value)
+			}
+			out[arn] = tags
+		}
+	}
+	return out
 }
 
 // describeListeners queries and returns all Listeners filtered by ELB ARN and region.
