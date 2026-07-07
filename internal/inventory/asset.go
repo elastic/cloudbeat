@@ -18,6 +18,8 @@
 package inventory
 
 import (
+	"time"
+
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/samber/lo"
 )
@@ -76,6 +78,7 @@ type AssetClassification struct {
 var (
 	// AWS
 	AssetClassificationAwsEc2Instance              = AssetClassification{CategoryHost, "AWS EC2 Instance"}
+	AssetClassificationAwsEksCluster               = AssetClassification{CategoryOrchestrator, "AWS EKS Cluster"}
 	AssetClassificationAwsElbV1                    = AssetClassification{CategoryLoadBalancer, "AWS Elastic Load Balancer"}
 	AssetClassificationAwsElbV2                    = AssetClassification{CategoryLoadBalancer, "AWS Elastic Load Balancer v2"}
 	AssetClassificationAwsIamPolicy                = AssetClassification{CategoryAccessManagement, "AWS IAM Policy"}
@@ -95,6 +98,7 @@ var (
 	AssetClassificationAwsVpcPeeringConnection     = AssetClassification{CategoryNetworking, "AWS VPC Peering Connection"}
 	AssetClassificationAwsVpc                      = AssetClassification{CategoryNetworking, "AWS VPC"}
 	AssetClassificationAwsRds                      = AssetClassification{CategoryDatabase, "AWS RDS Instance"}
+	AssetClassificationAwsRoute53Record            = AssetClassification{CategoryInfrastructure, "AWS Route53 DNS Record"}
 	AssetClassificationAwsS3Bucket                 = AssetClassification{CategoryStorageBucket, "AWS S3 Bucket"}
 	AssetClassificationAwsSnsTopic                 = AssetClassification{CategoryMessagingService, "AWS SNS Topic"}
 
@@ -178,10 +182,11 @@ type URL struct {
 
 // Entity contains the identifiers of the asset
 type Entity struct {
-	Id     string  `json:"id"`
-	Name   string  `json:"name"`
-	Source *string `json:"source"`
-	Raw    *any    `json:"raw"`
+	Id         string         `json:"id"`
+	Name       string         `json:"name"`
+	Source     *string        `json:"source"`
+	Raw        *any           `json:"raw"`
+	Attributes map[string]any `json:"attributes,omitempty"`
 	AssetClassification
 
 	// non exported fields
@@ -226,7 +231,7 @@ type Host struct {
 	Name         string   `json:"name,omitempty"`
 	Architecture string   `json:"architecture,omitempty"`
 	Type         string   `json:"type,omitempty"`
-	IP           string   `json:"ip,omitempty"`
+	IP           []string `json:"ip,omitempty"`
 	MacAddress   []string `json:"mac,omitempty"`
 	Entity       *Entity  `json:"entity,omitempty"`
 }
@@ -443,5 +448,31 @@ func WithOrchestrator(orchestrator Orchestrator) AssetEnricher {
 func WithContainer(container Container) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Container = &container
+	}
+}
+
+// WithEntityAttributes sets non-ECS resource-specific attributes on the entity.
+// Keys should use UpperCamelCase per the non-ECS field naming convention.
+// A nil or empty map is a no-op.
+func WithEntityAttributes(attrs map[string]any) AssetEnricher {
+	return func(a *AssetEvent) {
+		if len(attrs) == 0 {
+			return
+		}
+		a.Entity.Attributes = attrs
+	}
+}
+
+// WithCreatedAt sets the resource creation timestamp in entity.attributes["CreatedAt"].
+// A nil time is a no-op.
+func WithCreatedAt(t *time.Time) AssetEnricher {
+	return func(a *AssetEvent) {
+		if t == nil {
+			return
+		}
+		if a.Entity.Attributes == nil {
+			a.Entity.Attributes = make(map[string]any)
+		}
+		a.Entity.Attributes["CreatedAt"] = t
 	}
 }

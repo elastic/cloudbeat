@@ -30,6 +30,7 @@ import (
 
 type Client interface {
 	elb.DescribeLoadBalancersAPIClient
+	DescribeTags(ctx context.Context, params *elb.DescribeTagsInput, optFns ...func(*elb.Options)) (*elb.DescribeTagsOutput, error)
 }
 
 type LoadBalancerDescriber interface {

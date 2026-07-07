@@ -58,7 +58,7 @@ steps:
     depends_on: bump-version-minor
     blocked_state: running
 
-  - label: ":twisted_rightwards_arrows: Branch out + hermit PR"
+  - label: ":twisted_rightwards_arrows: Branch out + bump main"
     key: post-minor-merge
     if: build.env("WORKFLOW") == "minor"
     depends_on: wait-for-merge
