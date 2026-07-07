@@ -61,27 +61,40 @@ no_new_commits() {
     git diff --quiet "$1" HEAD
 }
 
-# delete_stale_remote_branch <branch>
-# Deletes <branch> from origin if it still exists there. Only call this after
-# pr_exists has confirmed there's no open PR for <branch> — a branch left
-# over from an old, closed-but-unmerged PR is otherwise treated by GitHub as
-# already having required checks, and blocks a fresh push with the same
-# branch name ("4 of N required status checks are expected"), even though
-# nothing is actually using it anymore.
-delete_stale_remote_branch() {
+# fail_if_stale_remote_branch <branch>
+# Exits with an actionable error if <branch> exists on origin from a
+# closed-but-unmerged PR (or no PR at all). Only call this after pr_exists
+# has confirmed there's no *open* PR for <branch> — a leftover branch like
+# that is treated by GitHub as already having required checks, and blocks a
+# fresh push with the same branch name ("4 of N required status checks are
+# expected"), even though nothing is actually using it anymore.
+#
+# A branch whose PR was *merged* is not stale — it's evidence this exact
+# bump already shipped, and no_new_commits() further down will correctly
+# detect there's nothing left to do. Only flag the unmerged case here.
+#
+# We don't delete it automatically — that needs a human to confirm it's
+# safe first — so this just fails clearly instead of letting the push fail
+# further down with a more confusing error.
+fail_if_stale_remote_branch() {
     local branch="$1"
 
     if ! git ls-remote --exit-code --heads origin "${branch}" >/dev/null 2>&1; then
         return
     fi
 
-    if [[ "${DRY_RUN:-false}" == "true" ]]; then
-        echo "Dry run: would delete stale branch ${branch} from origin"
+    local merged_pr
+    merged_pr=$(gh pr list --repo "${GH_REPO}" --head "${branch}" --state merged \
+        --json number --jq '.[0].number' 2>/dev/null || echo "")
+    if [[ -n "${merged_pr}" ]]; then
         return
     fi
 
-    echo "Branch ${branch} already exists on origin from a previous, closed run — deleting before push."
-    git push origin --delete "${branch}"
+    echo "ERROR: ${branch} already exists on origin from a previous, closed (unmerged) run."
+    echo "GitHub treats it as a stale protected branch and will reject a fresh push to it."
+    echo "Delete it manually, then re-run this pipeline, e.g.:"
+    echo "  gh api -X DELETE repos/${GH_REPO}/git/refs/heads/${branch}"
+    exit 1
 }
 
 # next_minor_version <version>

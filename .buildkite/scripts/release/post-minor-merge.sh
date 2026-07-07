@@ -65,7 +65,7 @@ bump_main_to_next_minor() {
 
     pr_exists && return
 
-    delete_stale_remote_branch "${BUMP_BRANCH}"
+    fail_if_stale_remote_branch "${BUMP_BRANCH}"
 
     git checkout -b "${BUMP_BRANCH}" origin/main
 
