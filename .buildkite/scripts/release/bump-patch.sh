@@ -39,6 +39,8 @@ setup_git_identity
 run_patch_bump() {
     pr_exists && return
 
+    fail_if_stale_remote_branch "${BUMP_BRANCH}"
+
     git checkout -b "${BUMP_BRANCH}" "origin/${BASE_BRANCH}"
 
     update_version_beat
