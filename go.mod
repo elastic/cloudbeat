@@ -1,6 +1,6 @@
 module github.com/elastic/cloudbeat
 
-go 1.26.3
+go 1.26.4
 
 require (
 	cloud.google.com/go/asset v1.27.0
@@ -232,7 +232,7 @@ require (
 	github.com/openvex/discovery v0.1.1-0.20260629103619-4287cf7d3781 // indirect
 	github.com/pandatix/go-cvss v0.6.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/planetscale/vtprotobuf v0.6.1-0.20250313105119-ba97887b0a25 // indirect
+	github.com/planetscale/vtprotobuf v0.6.1-0.20260702190614-8ae5a48058df // indirect
 	github.com/redis/go-redis/extra/redisotel/v9 v9.21.0 // indirect
 	github.com/redis/go-redis/v9 v9.21.0 // indirect
 	github.com/rust-secure-code/go-rustaudit v0.0.0-20250226111315-e20ec32e963c // indirect
