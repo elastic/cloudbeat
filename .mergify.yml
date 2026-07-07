@@ -185,3 +185,16 @@ pull_request_rules:
     actions:
       merge:
         method: squash
+  - name: backport patches to 9.5 branch
+    conditions:
+      - merged
+      - label=backport-v9.5.0
+    actions:
+      backport:
+        assignees:
+          - "{{ author }}"
+        branches:
+          - "9.5"
+        labels:
+          - "backport"
+        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
