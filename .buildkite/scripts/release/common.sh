@@ -61,6 +61,29 @@ no_new_commits() {
     git diff --quiet "$1" HEAD
 }
 
+# delete_stale_remote_branch <branch>
+# Deletes <branch> from origin if it still exists there. Only call this after
+# pr_exists has confirmed there's no open PR for <branch> — a branch left
+# over from an old, closed-but-unmerged PR is otherwise treated by GitHub as
+# already having required checks, and blocks a fresh push with the same
+# branch name ("4 of N required status checks are expected"), even though
+# nothing is actually using it anymore.
+delete_stale_remote_branch() {
+    local branch="$1"
+
+    if ! git ls-remote --exit-code --heads origin "${branch}" >/dev/null 2>&1; then
+        return
+    fi
+
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        echo "Dry run: would delete stale branch ${branch} from origin"
+        return
+    fi
+
+    echo "Branch ${branch} already exists on origin from a previous, closed run — deleting before push."
+    git push origin --delete "${branch}"
+}
+
 # next_minor_version <version>
 # Given "X.Y.Z", returns the next minor version "X.(Y+1).0".
 next_minor_version() {
