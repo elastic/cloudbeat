@@ -266,7 +266,7 @@ require (
 	github.com/sigstore/sigstore-go v1.1.4 // indirect
 	github.com/sigstore/timestamp-authority/v2 v2.1.2 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.8.1 // indirect
-	github.com/std-uritemplate/std-uritemplate/go/v2 v2.0.10 // indirect
+	github.com/std-uritemplate/std-uritemplate/go/v2 v2.0.11 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tetratelabs/wabin v0.0.0-20230304001439-f6f874872834 // indirect
 	github.com/theupdateframework/go-tuf v0.7.0 // indirect
