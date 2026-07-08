@@ -38,7 +38,7 @@ on:
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
       kibana_enable_entity_analytics_settings:
-        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents feature flag, Agent Builder experimental UI)"
+        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
         type: boolean
         required: false
         default: true
@@ -90,7 +90,7 @@ on:
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
         type: string
       kibana_enable_entity_analytics_settings:
-        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents feature flag, Agent Builder experimental UI)"
+        description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
         type: boolean
         required: false
         default: true

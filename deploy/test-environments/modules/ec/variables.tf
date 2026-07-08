@@ -94,7 +94,7 @@ variable "docker_image" {
 variable "kibana_enable_entity_analytics_settings" {
   type        = bool
   default     = true
-  description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (AI agents feature flag, Agent Builder experimental UI)"
+  description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
 }
 
 variable "kibana_instance_size" {
