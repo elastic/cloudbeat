@@ -10,13 +10,20 @@ locals {
   apm_docker_image                 = lookup(var.docker_image, "apm", "")
   apm_docker_image_tag_override    = lookup(var.docker_image_tag_override, "apm", "")
 
-  # Entity Analytics: AI agents and Agent Builder experimental UI (ESS user_settings_yaml).
+  # Entity Analytics Kibana user_settings_yaml (ESS only).
   entity_analytics_yaml = <<-EOT
 feature_flags.overrides:
   aiAssistant.aiAgents.enabled: true
 
 uiSettings.overrides:
   "agentBuilder:experimentalFeatures": true
+
+xpack.securitySolution.enableExperimental:
+  - riskScoreHistoryEnabled
+  - entityAttachmentsEnabled
+  - entityAnalyticsAnomalyDetails
+
+xpack.cases.attachments.enabled: true
 EOT
 
   kibana_docker_config = local.kibana_docker_image_tag_override != "" ? {

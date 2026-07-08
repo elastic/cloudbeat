@@ -30,7 +30,7 @@ inputs:
     type: string
     required: false
   kibana-enable-entity-analytics-settings:
-    description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents feature flag, Agent Builder experimental UI)"
+    description: "ESS only: Apply Entity Analytics Kibana user_settings_yaml (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
     type: boolean
     default: true
     required: false

@@ -36,7 +36,7 @@ variable "serverless_mode" {
 
 variable "kibana_enable_entity_analytics_settings" {
   default     = true
-  description = "When true (ESS only), apply Kibana user_settings_yaml for Entity Analytics (AI agents feature flag, Agent Builder experimental UI)"
+  description = "When true (ESS only), apply Kibana user_settings_yaml for Entity Analytics (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
   type        = bool
 }
 
