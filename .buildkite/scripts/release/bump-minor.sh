@@ -65,6 +65,8 @@ EOF
 run_minor_bump() {
     pr_exists && return
 
+    fail_if_stale_remote_branch "${BUMP_BRANCH}"
+
     git checkout -b "${BUMP_BRANCH}" origin/main
 
     update_version_beat
