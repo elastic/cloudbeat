@@ -69,7 +69,7 @@ require (
 	github.com/mikefarah/yq/v4 v4.53.3
 	github.com/mitchellh/gox v1.0.1
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c
-	github.com/open-policy-agent/opa v1.18.1
+	github.com/open-policy-agent/opa v1.18.2
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
 	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
