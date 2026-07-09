@@ -21,9 +21,32 @@ setup_git_identity() {
     git config --global user.name "Cloud Security Machine"
 }
 
+# is_downgrade <current> <target>
+# Returns 0 (true) if <target> is strictly older than <current>, using semver
+# ordering (via `sort -V`, which correctly handles multi-digit components).
+# Returns 1 (false) if target == current or target > current.
+is_downgrade() {
+    local current="$1"
+    local target="$2"
+    if [[ "${current}" == "${target}" ]]; then
+        return 1
+    fi
+    local highest
+    highest=$(printf '%s\n%s\n' "${current}" "${target}" | sort -V | tail -1)
+    [[ "${highest}" == "${current}" ]]
+}
+
 # update_version_beat
 # Updates defaultBeatVersion in version/version.go to NEXT_CLOUDBEAT_VERSION and stages the file.
+# Refuses to regress: if the current value is already >= NEXT_CLOUDBEAT_VERSION,
+# leaves the file untouched. Prevents a stale retrigger from opening a downgrade PR.
 update_version_beat() {
+    local current
+    current=$(grep defaultBeatVersion version/version.go | cut -f2 -d '"')
+    if is_downgrade "${current}" "${NEXT_CLOUDBEAT_VERSION}"; then
+        echo "Refusing to regress version/version.go: ${current} -> ${NEXT_CLOUDBEAT_VERSION} would be a downgrade."
+        return
+    fi
     sed -i'' -E "s/const defaultBeatVersion = .*/const defaultBeatVersion = \"${NEXT_CLOUDBEAT_VERSION}\"/g" version/version.go
     git add version/version.go
     if ! git diff --cached --quiet; then
@@ -33,8 +56,16 @@ update_version_beat() {
 
 # update_arm_templates <version>
 # Updates ElasticAgentVersion in both Azure ARM templates and regenerates dev variants.
+# Refuses to regress: if the current default is already >= <version>, leaves the
+# templates untouched.
 update_arm_templates() {
     local version="$1"
+    local current
+    current=$(jq -r '.parameters.ElasticAgentVersion.defaultValue' deploy/azure/ARM-for-single-account.json)
+    if is_downgrade "${current}" "${version}"; then
+        echo "Refusing to regress Azure ARM templates: ${current} -> ${version} would be a downgrade."
+        return
+    fi
     echo "--- Update ARM templates to ${version}"
     jq --indent 4 ".parameters.ElasticAgentVersion.defaultValue = \"${version}\"" \
         deploy/azure/ARM-for-single-account.json >tmp.json && mv tmp.json deploy/azure/ARM-for-single-account.json
