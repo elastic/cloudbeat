@@ -50,6 +50,22 @@ branch_out() {
         return
     fi
 
+    # Sanity check: main should still be at NEW_VERSION when we cut the release
+    # branch. If it has already been advanced (e.g. main == NEXT_MAIN_VERSION
+    # because a previous bump_main_to_next_minor merged but branch_out never
+    # ran), cutting the branch from current main would silently point ${BRANCH}
+    # at the wrong code. Refuse and require manual intervention rather than
+    # produce a wrong-content release branch.
+    local main_version
+    main_version=$(grep defaultBeatVersion version/version.go | cut -f2 -d '"')
+    if [[ "${main_version}" != "${NEW_VERSION}" ]]; then
+        echo "ERROR: main is at ${main_version}, expected ${NEW_VERSION}."
+        echo "Refusing to cut ${BRANCH} — the resulting branch would not represent ${NEW_VERSION}'s code."
+        echo "This means main advanced without ${BRANCH} being cut."
+        echo "To recover: create ${BRANCH} manually from the commit where main was at ${NEW_VERSION}, then re-run this pipeline."
+        exit 1
+    fi
+
     if [[ "${DRY_RUN}" == "true" ]]; then
         echo "Dry run: would create and push branch ${BRANCH}"
         return
