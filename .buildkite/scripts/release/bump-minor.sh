@@ -25,14 +25,24 @@ git fetch origin main
 git checkout main
 
 CURRENT_CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d '"')
+POST_BUMP_MAIN_VERSION=$(next_minor_version "${NEW_VERSION}")
 
 echo "--- Minor bump parameters"
-echo "  REPO:            ${REPO}"
-echo "  BRANCH:          ${BRANCH}"
-echo "  CURRENT:         ${CURRENT_CLOUDBEAT_VERSION}"
-echo "  NEXT:            ${NEXT_CLOUDBEAT_VERSION}"
-echo "  BACKPORT_LABEL:  ${BACKPORT_LABEL}"
-echo "  DRY_RUN:         ${DRY_RUN}"
+echo "  REPO:                    ${REPO}"
+echo "  BRANCH:                  ${BRANCH}"
+echo "  CURRENT:                 ${CURRENT_CLOUDBEAT_VERSION}"
+echo "  NEXT:                    ${NEXT_CLOUDBEAT_VERSION}"
+echo "  POST_BUMP_MAIN_VERSION:  ${POST_BUMP_MAIN_VERSION}"
+echo "  BACKPORT_LABEL:          ${BACKPORT_LABEL}"
+echo "  DRY_RUN:                 ${DRY_RUN}"
+
+# Idempotent no-op: if main has already been advanced to the post-bump minor,
+# a previous run (or its post-minor-merge step) has completed this bump.
+# Re-running would regress version.go/ARM templates and open a downgrade PR.
+if [[ "${CURRENT_CLOUDBEAT_VERSION}" == "${POST_BUMP_MAIN_VERSION}" ]]; then
+    echo "main is already at ${POST_BUMP_MAIN_VERSION} — minor bump for ${NEW_VERSION} has already completed. Idempotent no-op."
+    exit 0
+fi
 
 setup_git_identity
 
@@ -65,11 +75,18 @@ EOF
 run_minor_bump() {
     pr_exists && return
 
+    fail_if_stale_remote_branch "${BUMP_BRANCH}"
+
     git checkout -b "${BUMP_BRANCH}" origin/main
 
     update_version_beat
     update_arm_templates "${NEXT_CLOUDBEAT_VERSION}"
     update_mergify
+
+    if no_new_commits origin/main; then
+        echo "main is already at ${NEXT_CLOUDBEAT_VERSION} and mergify rule for ${BRANCH} already exists — nothing to bump."
+        return
+    fi
 
     local body
     body=$(render_template "${SCRIPT_DIR}/templates/pr-body-minor.md")

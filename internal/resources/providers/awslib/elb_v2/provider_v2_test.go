@@ -69,6 +69,7 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 						},
 					},
 				}, nil)
+				m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).Return(&elb.DescribeTagsOutput{}, nil)
 				return m
 			},
 			regions:         onlyDefaultRegion,
@@ -85,7 +86,13 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 					Return(&elb.DescribeLoadBalancersOutput{
 						LoadBalancers: []types.LoadBalancer{
 							{
-								AvailabilityZones:     []types.AvailabilityZone{},
+								AvailabilityZones: []types.AvailabilityZone{
+									{
+										LoadBalancerAddresses: []types.LoadBalancerAddress{
+											{IpAddress: pointers.Ref("203.0.113.10")},
+										},
+									},
+								},
 								CanonicalHostedZoneId: pointers.Ref("HZ-ID"),
 								CreatedTime:           pointers.Ref(time.Now()),
 								CustomerOwnedIpv4Pool: pointers.Ref("10.0.0.0/24"),
@@ -95,8 +102,20 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 								LoadBalancerName: pointers.Ref("my-elb-v2"),
 								Scheme:           types.LoadBalancerSchemeEnumInternal,
 								SecurityGroups:   []string{},
-								Type:             types.LoadBalancerTypeEnumApplication,
+								State:            &types.LoadBalancerState{Code: types.LoadBalancerStateEnumActive},
+								Type:             types.LoadBalancerTypeEnumNetwork,
 								VpcId:            pointers.Ref(""),
+							},
+						},
+					}, nil)
+				m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).
+					Return(&elb.DescribeTagsOutput{
+						TagDescriptions: []types.TagDescription{
+							{
+								ResourceArn: pointers.Ref("arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2"),
+								Tags: []types.Tag{
+									{Key: pointers.Ref("Owner"), Value: pointers.Ref("team-infra")},
+								},
 							},
 						},
 					}, nil)
@@ -136,6 +155,7 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 							},
 						},
 					}, nil)
+				m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).Return(&elb.DescribeTagsOutput{}, nil)
 				return m
 			},
 			regions:         onlyDefaultRegion,
@@ -160,6 +180,14 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Len(t, got, tt.expectedResults)
+			if tt.name == "with resources" {
+				lb, ok := got[0].(*ElasticLoadBalancerInfo)
+				require.True(t, ok)
+				assert.Equal(t, "team-infra", lb.GetOwnerTag())
+				assert.Equal(t, "network", lb.GetLoadBalancerType())
+				assert.Equal(t, "active", lb.GetState())
+				assert.Equal(t, []string{"203.0.113.10"}, lb.GetIPAddresses())
+			}
 		})
 	}
 }

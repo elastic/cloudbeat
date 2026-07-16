@@ -19,6 +19,7 @@ package iam
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
@@ -59,6 +60,7 @@ type Client interface {
 	GetPolicyVersion(ctx context.Context, params *iamsdk.GetPolicyVersionInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyVersionOutput, error)
 	ListEntitiesForPolicy(ctx context.Context, params *iamsdk.ListEntitiesForPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListEntitiesForPolicyOutput, error)
 	ListServerCertificates(ctx context.Context, params *iamsdk.ListServerCertificatesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListServerCertificatesOutput, error)
+	GetInstanceProfile(ctx context.Context, params *iamsdk.GetInstanceProfileInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetInstanceProfileOutput, error)
 }
 
 type AccessAnalyzerClient interface {
@@ -86,6 +88,7 @@ type User struct {
 	LastAccess          string                 `json:"last_access,omitempty"`
 	Arn                 string                 `json:"arn,omitempty"`
 	PasswordLastChanged string                 `json:"password_last_changed,omitempty"`
+	CreateDate          *time.Time             `json:"create_date,omitempty"`
 	MfaActive           bool                   `json:"mfa_active"`
 	PasswordEnabled     bool                   `json:"password_enabled"`
 	UserId              string                 `json:"user_id"`

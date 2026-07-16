@@ -1,10 +1,11 @@
 name: Sync Cloudbeat Versions on release
 # Makes sure all cloudbeat versions are updated with release branches
 on:
-  # push:
-  #   branches:
-  #     # matches branches pushed by elasticmachine, e.g. "update-version-next-8.15.3"
-  #     - 'update-version-next-*'
+  # Runs daily: the script only opens a hermit.hcl sync PR once the target
+  # ${version}-SNAPSHOT is actually published, so it self-heals drift without
+  # ever pinning an unavailable build.
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch: {}
 
 jobs:

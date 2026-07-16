@@ -2,11 +2,13 @@ notify:
   - slack:
       channels:
         - "#security-cloud-services-team"
+      message: "<!subteam^S08EWPU86KW|security-cloud-services> Version bump to ${NEW_VERSION} — ${BUILDKITE_BUILD_URL}"
     if: (build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+$/) && (build.state == 'passed' || build.state == 'failed')
   - slack:
       channels:
         - "#security-cloud-services-team"
       message: |
+        <!subteam^S08EWPU86KW|security-cloud-services>
         🚦 Pipeline waiting for approval 🚦
         Repo: `${REPO}`
 
@@ -56,7 +58,7 @@ steps:
     depends_on: bump-version-minor
     blocked_state: running
 
-  - label: ":twisted_rightwards_arrows: Branch out + hermit PR"
+  - label: ":twisted_rightwards_arrows: Branch out + bump main"
     key: post-minor-merge
     if: build.env("WORKFLOW") == "minor"
     depends_on: wait-for-merge
