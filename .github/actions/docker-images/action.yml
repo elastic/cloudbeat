@@ -53,8 +53,6 @@ runs:
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Build cloudbeat binary
       shell: bash
-      env:
-        GOEXPERIMENT: jsonv2 # required by trivy v0.69.3+ (encoding/json/v2)
       run: |
         mage -v build
 
