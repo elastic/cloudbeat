@@ -143,7 +143,7 @@ func TestStrategyPicks(t *testing.T) {
 			},
 			env: map[string]string{
 				identityfederation.AWSIRSATokenFileEnvVar: "/tmp/fake-token-file",
-				"AWS_ROLE_ARN":                            "arn:aws:iam::123456789012:role/test-local-role",
+				"AWS_ROLE_ARN": "arn:aws:iam::123456789012:role/test-local-role",
 			},
 			expectedErr: "STS: GetCallerIdentity",
 		},

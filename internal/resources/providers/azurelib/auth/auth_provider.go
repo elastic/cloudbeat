@@ -22,7 +22,6 @@ import (
 	"os"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 
 	"github.com/elastic/cloudbeat/internal/config"

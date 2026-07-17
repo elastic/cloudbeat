@@ -22,10 +22,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 
 	"github.com/elastic/cloudbeat/internal/config"
 )

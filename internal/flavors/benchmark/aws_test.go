@@ -74,8 +74,8 @@ func TestAWS_Initialize(t *testing.T) {
 			name: "cloud connectors irsa",
 			envsVars: map[string]string{
 				identityfederation.AWSIRSATokenFileEnvVar: "/abc",
-				"AWS_REGION":                         "eu-west-1",
-				"AWS_ROLE_ARN":                       "arn:aws:iam::111111111111:role/localrole",
+				"AWS_REGION":   "eu-west-1",
+				"AWS_ROLE_ARN": "arn:aws:iam::111111111111:role/localrole",
 			},
 			cfg: config.Config{
 				Benchmark: "cis_aws",

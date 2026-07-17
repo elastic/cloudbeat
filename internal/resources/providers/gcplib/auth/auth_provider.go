@@ -22,18 +22,17 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
-
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 
 	"github.com/elastic/cloudbeat/internal/config"
 )
 
 // GCPIdentityFederationParams holds GCP-specific parameters for the Identity Federation auth flow.
 type GCPIdentityFederationParams struct {
-	Audience            string // Workload Identity Federation audience URL
-	ServiceAccountEmail string // Target service account to impersonate
+	Audience             string // Workload Identity Federation audience URL
+	ServiceAccountEmail  string // Target service account to impersonate
 	IdentityFederationID string // Deployment connector ID (Terraform output cloud_connector_id); session name = ResourceID-IdentityFederationID
 }
 
