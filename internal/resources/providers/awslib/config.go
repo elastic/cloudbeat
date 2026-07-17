@@ -39,7 +39,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/observability"
 )
 
-
 func RetryableCodesOption(o *retry.StandardOptions) {
 	o.Retryables = append(o.Retryables, retry.RetryableHTTPStatusCode{
 		Codes: map[int]struct{}{
