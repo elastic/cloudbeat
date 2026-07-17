@@ -101,7 +101,7 @@ runs:
       run: pre-commit || true
     - name: Download go dependencies
       shell: bash
-      run: ./bin/go mod download && ./bin/go mod tidy
+      run: go mod download && go mod tidy
 
     - name: Log cached paths
       shell: bash

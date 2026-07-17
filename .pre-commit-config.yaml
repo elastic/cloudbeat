@@ -183,16 +183,12 @@ repos:
         # TODO: Apply makrdownlint in other files
         files: security-policies/.*\.(md|markdown)$
 
-  - repo: local
+  - repo: https://github.com/StyraInc/regal
+    rev: v0.36.1
     hooks:
       - id: regal-lint
-        name: Regal lint
-        description: Lint Rego with regal (hermit-managed binary)
-        entry: regal lint
         args: [security-policies/bundle]
         pass_filenames: false
-        language: system
-        files: (\.rego)$
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
     rev: 42.32.2
