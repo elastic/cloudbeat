@@ -160,6 +160,68 @@ func (_m *MockGoogleAuthProviderAPI) EXPECT() *MockGoogleAuthProviderAPI_Expecte
 	return &MockGoogleAuthProviderAPI_Expecter{mock: &_m.Mock}
 }
 
+// FindDefaultCredentials provides a mock function for the type MockGoogleAuthProviderAPI
+func (_mock *MockGoogleAuthProviderAPI) FindDefaultCredentials(ctx context.Context) (*google.Credentials, error) {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindDefaultCredentials")
+	}
+
+	var r0 *google.Credentials
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*google.Credentials, error)); ok {
+		return returnFunc(ctx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *google.Credentials); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*google.Credentials)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGoogleAuthProviderAPI_FindDefaultCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindDefaultCredentials'
+type MockGoogleAuthProviderAPI_FindDefaultCredentials_Call struct {
+	*mock.Call
+}
+
+// FindDefaultCredentials is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockGoogleAuthProviderAPI_Expecter) FindDefaultCredentials(ctx interface{}) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
+	return &MockGoogleAuthProviderAPI_FindDefaultCredentials_Call{Call: _e.mock.On("FindDefaultCredentials", ctx)}
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) Run(run func(ctx context.Context)) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) Return(credentials *google.Credentials, err error) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
+	_c.Call.Return(credentials, err)
+	return _c
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) RunAndReturn(run func(ctx context.Context) (*google.Credentials, error)) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FindIdentityFederationCredentials provides a mock function for the type MockGoogleAuthProviderAPI
 func (_mock *MockGoogleAuthProviderAPI) FindIdentityFederationCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPIdentityFederationParams) ([]option.ClientOption, error) {
 	ret := _mock.Called(ctx, ccConfig, params)
@@ -230,68 +292,6 @@ func (_c *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call) Retu
 }
 
 func (_c *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call) RunAndReturn(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPIdentityFederationParams) ([]option.ClientOption, error)) *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// FindDefaultCredentials provides a mock function for the type MockGoogleAuthProviderAPI
-func (_mock *MockGoogleAuthProviderAPI) FindDefaultCredentials(ctx context.Context) (*google.Credentials, error) {
-	ret := _mock.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for FindDefaultCredentials")
-	}
-
-	var r0 *google.Credentials
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*google.Credentials, error)); ok {
-		return returnFunc(ctx)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *google.Credentials); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*google.Credentials)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockGoogleAuthProviderAPI_FindDefaultCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindDefaultCredentials'
-type MockGoogleAuthProviderAPI_FindDefaultCredentials_Call struct {
-	*mock.Call
-}
-
-// FindDefaultCredentials is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockGoogleAuthProviderAPI_Expecter) FindDefaultCredentials(ctx interface{}) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
-	return &MockGoogleAuthProviderAPI_FindDefaultCredentials_Call{Call: _e.mock.On("FindDefaultCredentials", ctx)}
-}
-
-func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) Run(run func(ctx context.Context)) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) Return(credentials *google.Credentials, err error) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
-	_c.Call.Return(credentials, err)
-	return _c
-}
-
-func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) RunAndReturn(run func(ctx context.Context) (*google.Credentials, error)) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
 	_c.Call.Return(run)
 	return _c
 }
