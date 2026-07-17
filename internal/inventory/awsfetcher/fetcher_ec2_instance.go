@@ -213,6 +213,9 @@ func (e *ec2InstanceFetcher) buildDetails(i *ec2.Ec2Instance, tags map[string]st
 	if v := awslib.LookupTag(tags, "costcenter", "cost-center", "cost_center"); v != "" {
 		details["CostCenter"] = v
 	}
+	if v := awslib.LookupTag(tags, "role"); v != "" {
+		details["Role"] = v
+	}
 	return details
 }
 

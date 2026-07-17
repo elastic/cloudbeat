@@ -84,6 +84,7 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 				"PubliclyAccessible": false, // scheme is "internal"
 				"AccountID":          "123",
 				"LoadBalancerType":   "classic",
+				"State":              "active",
 			}),
 			inventory.WithCreatedAt(asset.GetCreatedAt()),
 		),

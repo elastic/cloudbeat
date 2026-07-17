@@ -20,6 +20,7 @@ package elb
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
@@ -78,12 +79,21 @@ func (p *Provider) DescribeAllLoadBalancers(ctx context.Context) ([]awslib.AwsRe
 
 		var result []awslib.AwsResource
 		for _, item := range all {
-			result = append(result, &ElasticLoadBalancerInfo{
+			info := &ElasticLoadBalancerInfo{
 				LoadBalancer: item,
 				awsAccount:   p.awsAccountID,
 				region:       region,
 				tags:         tagsByName[pointers.Deref(item.LoadBalancerName)],
-			})
+			}
+			if dnsName := pointers.Deref(item.DNSName); dnsName != "" {
+				if ips, err := p.resolver.LookupHost(ctx, dnsName); err != nil {
+					p.log.Debugf("Could not resolve IPs for classic ELB %q: %v", dnsName, err)
+				} else {
+					sort.Strings(ips)
+					info.ipAddresses = ips
+				}
+			}
+			result = append(result, info)
 		}
 		return result, nil
 	})
