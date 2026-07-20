@@ -201,12 +201,12 @@ github.com/aquasecurity/testdocker v0.0.0-20260423080828-99e7cbfdbe56 h1:VUjEtNq
 github.com/aquasecurity/testdocker v0.0.0-20260423080828-99e7cbfdbe56/go.mod h1:4ahMSJAwow5T1YsPOvyUpCz6faBXlD7p/fdKmA9baEQ=
 github.com/aquasecurity/tml v0.6.1 h1:y2ZlGSfrhnn7t4ZJ/0rotuH+v5Jgv6BDDO5jB6A9gwo=
 github.com/aquasecurity/tml v0.6.1/go.mod h1:OnYMWY5lvI9ejU7yH9LCberWaaTBW7hBFsITiIMY2yY=
-github.com/aquasecurity/trivy v0.71.0 h1:mXskgiicbR/z5dzTjD9UjwNfwaFJORAs81M/gTwHv94=
-github.com/aquasecurity/trivy v0.71.0/go.mod h1:GRZTF7odD36IsTb8FD+SD79sIxv+G6fo1K+e9nWhW84=
+github.com/aquasecurity/trivy v0.72.0 h1:W3v+NE94olOzk3nSwwha59DTBsbcgLRXa4QNSJpRQQM=
+github.com/aquasecurity/trivy v0.72.0/go.mod h1:rVj0hnz2/VgP1Lo7JrYNyq1zMc7psySlTGHOwCkysXM=
 github.com/aquasecurity/trivy-checks v1.12.2-0.20251219190323-79d27547baf5 h1:8HnXyjgCiJwVX1mTKeqdyizd7ZBmXMPL+BMQ5UZd0Nk=
 github.com/aquasecurity/trivy-checks v1.12.2-0.20251219190323-79d27547baf5/go.mod h1:hBSA3ziBFwGENK6/PYNIKm6N24SFg0wsv1VXeqPG/3M=
-github.com/aquasecurity/trivy-db v0.0.0-20260528104838-11b0c9f9e5e4 h1:xjGYWLpVWWpSFr6oyKB6jKnpdJ10J/PokzPacDV2dVA=
-github.com/aquasecurity/trivy-db v0.0.0-20260528104838-11b0c9f9e5e4/go.mod h1:iIEV2oGuZScvfyX2SMIn78iVMNnepgo0QuJJh/srgVI=
+github.com/aquasecurity/trivy-db v0.0.0-20260713131703-4be526083c54 h1:4CZNoDkNfcuACevZeDraACGmP1+L0nKkRY52+jV8k1M=
+github.com/aquasecurity/trivy-db v0.0.0-20260713131703-4be526083c54/go.mod h1:iIEV2oGuZScvfyX2SMIn78iVMNnepgo0QuJJh/srgVI=
 github.com/aquasecurity/trivy-java-db v0.0.0-20260513130532-ec095357db14 h1:7f3Xg1z6gHtsIQnPY2M3EBcmMkOT1aWVmDBwZrlnngE=
 github.com/aquasecurity/trivy-java-db v0.0.0-20260513130532-ec095357db14/go.mod h1:zG7O2GGl9Y4F7Wpr1J+Ic7Y+bgZJW8iToWpPxOg07zs=
 github.com/arbovm/levenshtein v0.0.0-20160628152529-48b4e1c0c4d0 h1:jfIu9sQUG6Ig+0+Ap1h4unLjW6YQJpKZVmUzxsD4E/Q=
@@ -335,6 +335,8 @@ github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK3
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/cenkalti/backoff/v5 v5.0.3 h1:ZN+IMa753KfX5hd8vVaMixjnqRZ3y8CuJKRKj1xcsSM=
 github.com/cenkalti/backoff/v5 v5.0.3/go.mod h1:rkhZdG3JZukswDf7f0cwqPNk4K0sa+F97BxZthm/crw=
+github.com/cenkalti/backoff/v6 v6.0.1 h1:sjqUu1q4wY0FfFEkBmM3bVIHfr1QGq4nATg9M5VWj1U=
+github.com/cenkalti/backoff/v6 v6.0.1/go.mod h1:5WCmPelT2zwAaNETjGJVKHDnZvjQdPsGeHHwm5lIPPI=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
@@ -1571,8 +1573,8 @@ golang.org/x/crypto v0.6.0/go.mod h1:OFC/31mSvZgRz0V1QTNCzfAI1aIRzbiufJtkMIlEp58
 golang.org/x/crypto v0.54.0 h1:YLIA59K4fiNzHzjnZt2tUJQjQtUWfWbeHBqKtk3eScw=
 golang.org/x/crypto v0.54.0/go.mod h1:KWL8ny2AZdGR2cWmzeHrp2azQPGogOv+HeQaVEXC2dk=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
-golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f h1:W3F4c+6OLc6H2lb//N1q4WpJkhzJCK5J6kUi1NTVXfM=
-golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f/go.mod h1:J1xhfL/vlindoeF/aINzNzt2Bket5bjo9sdOYzOsU80=
+golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a h1:+3jdDGGB8NGb1Zktc737jlt3/A5f6UlwSzmvqUuufxw=
+golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a/go.mod h1:d2fgXJLVs4dYDHUk5lwMIfzRzSrWCfGZb0ZqeLa/Vcw=
 golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3/go.mod h1:UVdnD1Gm6xHRNCYTkRU2/jEulfH38KcIWyp/GAMgvoE=
 golang.org/x/lint v0.0.0-20190227174305-5b3e6a55c961/go.mod h1:wehouNa3lNwaWXcvxsM5YxQ5yQlVC4a0KAMCusXpPoU=
 golang.org/x/lint v0.0.0-20190313153728-d0100b6bd8b3/go.mod h1:6SW0HCj/g11FgYtHlgUYUwCkIfeOF89ocIRzGO/8vkc=
