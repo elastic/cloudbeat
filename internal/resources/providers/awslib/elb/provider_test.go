@@ -18,7 +18,6 @@
 package elb
 
 import (
-	"context"
 	"errors"
 	"testing"
 	"time"
@@ -33,16 +32,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
-
-// fakeResolver is a test double for hostResolver that never touches the network.
-type fakeResolver struct {
-	ips []string
-	err error
-}
-
-func (r *fakeResolver) LookupHost(_ context.Context, _ string) ([]string, error) {
-	return r.ips, r.err
-}
 
 var onlyDefaultRegion = []string{awslib.DefaultRegion}
 
@@ -182,7 +171,7 @@ func TestProvider_DescribeAllLoadBalancers(t *testing.T) {
 	tests := []struct {
 		name            string
 		client          func() Client
-		resolver        hostResolver
+		resolver        func(t *testing.T) hostResolver
 		expectedResults int
 		wantErr         bool
 		regions         []string
@@ -195,14 +184,24 @@ func TestProvider_DescribeAllLoadBalancers(t *testing.T) {
 				m.On("DescribeLoadBalancers", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
 				return m
 			},
-			resolver: &fakeResolver{},
-			wantErr:  true,
-			regions:  onlyDefaultRegion,
+			resolver: func(t *testing.T) hostResolver {
+				t.Helper()
+				// LookupHost is never reached: DescribeLoadBalancers fails first.
+				return newMockHostResolver(t)
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
 		},
 		{
-			name:            "with resources and DNS IPs",
-			client:          elbV1ClientWithResources,
-			resolver:        &fakeResolver{ips: []string{"10.0.0.2", "10.0.0.1"}}, // unsorted: expect sorted output
+			name:   "with resources and DNS IPs",
+			client: elbV1ClientWithResources,
+			resolver: func(t *testing.T) hostResolver {
+				t.Helper()
+				m := newMockHostResolver(t)
+				// unsorted on purpose: the provider is expected to sort the IPs
+				m.EXPECT().LookupHost(mock.Anything, mock.Anything).Return([]string{"10.0.0.2", "10.0.0.1"}, nil)
+				return m
+			},
 			regions:         onlyDefaultRegion,
 			expectedResults: 1,
 			checkResult: func(t *testing.T, got []awslib.AwsResource) {
@@ -214,9 +213,14 @@ func TestProvider_DescribeAllLoadBalancers(t *testing.T) {
 			},
 		},
 		{
-			name:            "with resolver error (soft-fail)",
-			client:          elbV1ClientWithResources,
-			resolver:        &fakeResolver{err: errors.New("dns timeout")},
+			name:   "with resolver error (soft-fail)",
+			client: elbV1ClientWithResources,
+			resolver: func(t *testing.T) hostResolver {
+				t.Helper()
+				m := newMockHostResolver(t)
+				m.EXPECT().LookupHost(mock.Anything, mock.Anything).Return(nil, errors.New("dns timeout"))
+				return m
+			},
 			regions:         onlyDefaultRegion,
 			expectedResults: 1,
 			checkResult: func(t *testing.T, got []awslib.AwsResource) {
@@ -240,7 +244,7 @@ func TestProvider_DescribeAllLoadBalancers(t *testing.T) {
 				log:      testhelper.NewLogger(t),
 				clients:  clients,
 				client:   client,
-				resolver: tt.resolver,
+				resolver: tt.resolver(t),
 			}
 			got, err := p.DescribeAllLoadBalancers(t.Context())
 			if tt.wantErr {

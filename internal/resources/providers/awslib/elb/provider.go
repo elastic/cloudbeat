@@ -79,21 +79,22 @@ func (p *Provider) DescribeAllLoadBalancers(ctx context.Context) ([]awslib.AwsRe
 
 		var result []awslib.AwsResource
 		for _, item := range all {
-			info := &ElasticLoadBalancerInfo{
-				LoadBalancer: item,
-				awsAccount:   p.awsAccountID,
-				region:       region,
-				tags:         tagsByName[pointers.Deref(item.LoadBalancerName)],
-			}
+			var ipAddresses []string
 			if dnsName := pointers.Deref(item.DNSName); dnsName != "" {
 				if ips, err := p.resolver.LookupHost(ctx, dnsName); err != nil {
 					p.log.Debugf("Could not resolve IPs for classic ELB %q: %v", dnsName, err)
 				} else {
 					sort.Strings(ips)
-					info.ipAddresses = ips
+					ipAddresses = ips
 				}
 			}
-			result = append(result, info)
+			result = append(result, NewElasticLoadBalancerInfo(
+				item,
+				p.awsAccountID,
+				region,
+				tagsByName[pointers.Deref(item.LoadBalancerName)],
+				ipAddresses,
+			))
 		}
 		return result, nil
 	})

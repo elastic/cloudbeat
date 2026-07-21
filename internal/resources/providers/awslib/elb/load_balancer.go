@@ -36,6 +36,18 @@ type ElasticLoadBalancerInfo struct {
 	ipAddresses  []string
 }
 
+// NewElasticLoadBalancerInfo constructs a classic load balancer wrapper. ipAddresses are the
+// addresses resolved from the load balancer's DNS name (classic ELBs expose no IPs via the API).
+func NewElasticLoadBalancerInfo(lb types.LoadBalancerDescription, awsAccount, region string, tags map[string]string, ipAddresses []string) *ElasticLoadBalancerInfo {
+	return &ElasticLoadBalancerInfo{
+		LoadBalancer: lb,
+		awsAccount:   awsAccount,
+		region:       region,
+		tags:         tags,
+		ipAddresses:  ipAddresses,
+	}
+}
+
 func (v ElasticLoadBalancerInfo) GetResourceArn() string {
 	id := pointers.Deref(v.LoadBalancer.LoadBalancerName)
 	if id == "" {

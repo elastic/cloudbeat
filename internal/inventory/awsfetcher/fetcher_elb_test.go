@@ -37,8 +37,8 @@ import (
 )
 
 func TestELBv1Fetcher_Fetch(t *testing.T) {
-	asset := elb.ElasticLoadBalancerInfo{
-		LoadBalancer: types.LoadBalancerDescription{
+	asset := elb.NewElasticLoadBalancerInfo(
+		types.LoadBalancerDescription{
 			AvailabilityZones:         []string{"us-east-1a"},
 			CanonicalHostedZoneName:   pointers.Ref("HZ-NAME"),
 			CanonicalHostedZoneNameID: pointers.Ref("HZ-ID"),
@@ -64,7 +64,11 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 			Subnets: []string{"subnet-123"},
 			VPCId:   pointers.Ref("vpc-id"),
 		},
-	}
+		"", // awsAccount
+		"", // region
+		nil,
+		[]string{"203.0.113.1", "203.0.113.2"}, // DNS-resolved by the provider in real code
+	)
 	in := []awslib.AwsResource{asset}
 
 	expected := []inventory.AssetEvent{
@@ -85,6 +89,7 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 				"AccountID":          "123",
 				"LoadBalancerType":   "classic",
 				"State":              "active",
+				"IPAddresses":        []string{"203.0.113.1", "203.0.113.2"},
 			}),
 			inventory.WithCreatedAt(asset.GetCreatedAt()),
 		),
