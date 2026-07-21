@@ -31,6 +31,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -103,8 +104,8 @@ type GcpClientOpt struct {
 	// Audience is the Workload Identity Federation audience URL
 	// Format: //iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
 	Audience string `config:"audience"`
-	// CloudConnectorID is the deployment-specific connector ID (Terraform output cloud_connector_id). Used with ResourceID as AWS session name: ResourceID-CloudConnectorID.
-	CloudConnectorID string `config:"cloud_connector_id"`
+	// IdentityFederationID is the deployment-specific connector ID (Terraform output cloud_connector_id). Used with ResourceID as AWS session name: ResourceID-IdentityFederationID.
+	IdentityFederationID string `config:"cloud_connector_id"`
 }
 
 type GcpCallOpt struct {
@@ -265,10 +266,9 @@ func isSupportedBenchmark(benchmark string) bool {
 
 const (
 	CloudConnectorsLocalRoleEnvVar  = "CLOUD_CONNECTORS_LOCAL_ROLE"
-	CloudConnectorsGlobalRoleEnvVar = "CLOUD_CONNECTORS_GLOBAL_ROLE"
-	CloudResourceIDEnvVar           = "CLOUD_RESOURCE_ID"
-	CloudConnectorsJWTPathEnvVar    = "CLOUD_CONNECTORS_ID_TOKEN_FILE"
-	CloudConnectorsAWSTokenEnvVar   = "AWS_WEB_IDENTITY_TOKEN_FILE"
+	CloudConnectorsGlobalRoleEnvVar = identityfederation.AWSGlobalRoleARNEnvVar
+	CloudResourceIDEnvVar           = identityfederation.AWSCloudResourceIDEnvVar
+	CloudConnectorsJWTPathEnvVar    = identityfederation.AWSIDTokenFileEnvVar
 )
 
 type CloudConnectorsConfig struct {
