@@ -8,11 +8,9 @@ The following steps are performed:
 """
 
 import json
-import os
 
 import configuration_fleet as cnfg
-from fleet_api.agent_policy_api import create_agent_policy
-from fleet_api.package_policy_api import create_cspm_integration
+from fleet_api.managed_integration_api import create_managed_integration
 from loguru import logger
 from package_policy import generate_policy_template, generate_random_name, load_data
 from state_file_manager import HostType, PolicyState, state_manager
@@ -82,7 +80,6 @@ if __name__ == "__main__":
         generate_azure_integration_data(),
         generate_gcp_integration_data(),
     ]
-    serverless_mode = os.getenv("SERVERLESS_MODE", "false").lower() == "true"
 
     cspm_template = generate_policy_template(
         cfg=cnfg.elk_config,
@@ -90,35 +87,22 @@ if __name__ == "__main__":
     )
     for integration_data in integrations:
         INTEGRATION_NAME = integration_data["name"]
-        AGENTLESS_INPUT = {
-            "name": f"Agentless policy for {INTEGRATION_NAME}",
-            "supports_agentless": True,
-            "fleet_server_host_id": "default-fleet-server" if serverless_mode else "fleet-default-fleet-server-host",
-        }
 
         logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")
-        agent_data, package_data = load_data(
+        _, package_data = load_data(
             cfg=cnfg.elk_config,
-            agent_input=AGENTLESS_INPUT,
+            agent_input={"name": INTEGRATION_NAME},
             package_input=integration_data,
             stream_name="cloud_security_posture.findings",
         )
 
-        logger.info("Create agentless-agent policy")
-        agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
-
-        logger.info(f"Create agentless-agent {INTEGRATION_NAME} integration")
-        package_policy_id = create_cspm_integration(
-            cfg=cnfg.elk_config,
-            pkg_policy=package_data,
-            agent_policy_id=agent_policy_id,
-            cspm_data={},
-        )
+        logger.info(f"Create managed integration for {INTEGRATION_NAME}")
+        managed_id = create_managed_integration(cfg=cnfg.elk_config, json_policy=package_data)
 
         state_manager.add_policy(
             PolicyState(
-                agent_policy_id,
-                package_policy_id,
+                managed_id,
+                managed_id,
                 1,
                 [],
                 HostType.KUBERNETES.value,
