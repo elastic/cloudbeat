@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Creates an IAM Role for Elastic Federated Identity (Cloud Connectors). Enable only the integrations you need — permissions are granted conditionally. To add integrations later, update this stack with new parameters set to 'true'.
+Description: Creates an IAM Role for Elastic Federated Identity (Cloud Connectors). Grants read-only permissions for all Elastic AWS integrations that support Federated Identity.
 
 Parameters:
   ElasticResourceId:
@@ -11,361 +11,6 @@ Parameters:
     Description: Elastic's super-role ARN. Change only for test environments.
     Type: String
     Default: arn:aws:iam::254766567737:role/cloud_connectors
-
-  # ─── Security integrations ──────────────────────────────────────────────────
-  EnableGuardDuty:
-    Description: Grant permissions for Amazon GuardDuty findings.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableSecurityHub:
-    Description: Grant permissions for AWS Security Hub findings and insights.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableInspector:
-    Description: Grant permissions for Amazon Inspector vulnerability findings.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableConfig:
-    Description: Grant permissions for AWS Config resource inventory.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  # ─── Logging integrations ───────────────────────────────────────────────────
-  EnableCloudTrail:
-    Description: Grant permissions for AWS CloudTrail audit logs (S3/SQS + CloudWatch).
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableVpcFlow:
-    Description: Grant permissions for Amazon VPC Flow Logs (S3/SQS + CloudWatch).
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableWAF:
-    Description: Grant permissions for AWS WAF logs (S3/SQS + CloudWatch).
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableNetworkFirewall:
-    Description: Grant permissions for AWS Network Firewall logs and metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableRoute53:
-    Description: Grant permissions for Amazon Route 53 resolver/public logs.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableCloudFront:
-    Description: Grant permissions for Amazon CloudFront access logs.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  # ─── Compute & infrastructure ───────────────────────────────────────────────
-  EnableEC2:
-    Description: Grant permissions for Amazon EC2 logs and metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableECS:
-    Description: Grant permissions for Amazon ECS metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableLambda:
-    Description: Grant permissions for AWS Lambda metrics and logs.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableELB:
-    Description: Grant permissions for Elastic Load Balancing logs and metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  # ─── Storage & databases ────────────────────────────────────────────────────
-  EnableS3:
-    Description: Grant permissions for Amazon S3 access logs and storage metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableEBS:
-    Description: Grant permissions for Amazon EBS metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableRDS:
-    Description: Grant permissions for Amazon RDS metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableDynamoDB:
-    Description: Grant permissions for Amazon DynamoDB metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  # ─── Messaging ──────────────────────────────────────────────────────────────
-  EnableSNS:
-    Description: Grant permissions for Amazon SNS metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableSQS:
-    Description: Grant permissions for Amazon SQS metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  # ─── Networking ─────────────────────────────────────────────────────────────
-  EnableTransitGateway:
-    Description: Grant permissions for AWS Transit Gateway metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  # ─── Cost & monitoring ──────────────────────────────────────────────────────
-  EnableBilling:
-    Description: Grant permissions for AWS Billing/Cost Explorer metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableHealth:
-    Description: Grant permissions for AWS Health event metrics.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-  EnableCloudWatch:
-    Description: Grant permissions for generic CloudWatch logs and metrics collection.
-    Type: String
-    AllowedValues:
-      - "true"
-      - "false"
-    Default: "false"
-
-Conditions:
-
-  # Security
-  GuardDutyEnabled: !Equals
-    - !Ref EnableGuardDuty
-    - "true"
-
-  SecurityHubEnabled: !Equals
-    - !Ref EnableSecurityHub
-    - "true"
-
-  InspectorEnabled: !Equals
-    - !Ref EnableInspector
-    - "true"
-
-  ConfigEnabled: !Equals
-    - !Ref EnableConfig
-    - "true"
-
-  # Logging (S3/CloudWatch transport)
-  CloudTrailEnabled: !Equals
-    - !Ref EnableCloudTrail
-    - "true"
-
-  VpcFlowEnabled: !Equals
-    - !Ref EnableVpcFlow
-    - "true"
-
-  WAFEnabled: !Equals
-    - !Ref EnableWAF
-    - "true"
-
-  FirewallEnabled: !Equals
-    - !Ref EnableNetworkFirewall
-    - "true"
-
-  Route53Enabled: !Equals
-    - !Ref EnableRoute53
-    - "true"
-
-  CloudFrontEnabled: !Equals
-    - !Ref EnableCloudFront
-    - "true"
-
-  # Compute
-  EC2Enabled: !Equals
-    - !Ref EnableEC2
-    - "true"
-
-  ECSEnabled: !Equals
-    - !Ref EnableECS
-    - "true"
-
-  LambdaEnabled: !Equals
-    - !Ref EnableLambda
-    - "true"
-
-  ELBEnabled: !Equals
-    - !Ref EnableELB
-    - "true"
-
-  # Storage & databases
-  S3Enabled: !Equals
-    - !Ref EnableS3
-    - "true"
-
-  EBSEnabled: !Equals
-    - !Ref EnableEBS
-    - "true"
-
-  RDSEnabled: !Equals
-    - !Ref EnableRDS
-    - "true"
-
-  DynamoDBEnabled: !Equals
-    - !Ref EnableDynamoDB
-    - "true"
-
-  # Messaging
-  SNSEnabled: !Equals
-    - !Ref EnableSNS
-    - "true"
-
-  SQSEnabled: !Equals
-    - !Ref EnableSQS
-    - "true"
-
-  # Networking
-  TransitGatewayEnabled: !Equals
-    - !Ref EnableTransitGateway
-    - "true"
-
-  # Cost & monitoring
-  BillingEnabled: !Equals
-    - !Ref EnableBilling
-    - "true"
-
-  HealthEnabled: !Equals
-    - !Ref EnableHealth
-    - "true"
-
-  CloudWatchEnabled: !Equals
-    - !Ref EnableCloudWatch
-    - "true"
-
-  # Derived: does any integration need S3/SQS transport?
-  NeedsS3Transport: !Or
-    - !Condition CloudTrailEnabled
-    - !Condition VpcFlowEnabled
-    - !Condition WAFEnabled
-    - !Condition FirewallEnabled
-    - !Condition Route53Enabled
-    - !Condition CloudFrontEnabled
-    - !Condition EC2Enabled
-    - !Condition ELBEnabled
-    - !Condition S3Enabled
-    - !Condition GuardDutyEnabled
-
-  # Derived: does any integration need CloudWatch Logs transport?
-  NeedsCloudWatchLogs: !Or
-    - !Condition CloudTrailEnabled
-    - !Condition VpcFlowEnabled
-    - !Condition WAFEnabled
-    - !Condition FirewallEnabled
-    - !Condition Route53Enabled
-    - !Condition EC2Enabled
-    - !Condition ELBEnabled
-    - !Condition LambdaEnabled
-    - !Condition CloudWatchEnabled
-
-  # Derived: does any integration need CloudWatch Metrics base?
-  NeedsMetricsBase: !Or
-    - !Condition EC2Enabled
-    - !Condition ECSEnabled
-    - !Condition LambdaEnabled
-    - !Condition ELBEnabled
-    - !Condition S3Enabled
-    - !Condition EBSEnabled
-    - !Condition RDSEnabled
-    - !Condition DynamoDBEnabled
-    - !Condition SNSEnabled
-    - !Condition SQSEnabled
-
-    # !Or max 10 — second group below
-  NeedsMetricsBaseExtended: !Or
-    - !Condition TransitGatewayEnabled
-    - !Condition BillingEnabled
-    - !Condition HealthEnabled
-    - !Condition CloudWatchEnabled
-    - !Condition FirewallEnabled
-    - !Condition NeedsMetricsBase
-
-  NeedsMetrics: !Or
-    - !Condition NeedsMetricsBase
-    - !Condition NeedsMetricsBaseExtended
 
 Resources:
   ElasticFederatedIdentityRole:
@@ -391,18 +36,15 @@ Resources:
                         - !Ref AWS::StackId
       Path: /
       ManagedPolicyArns:
-        - !If
-          - GuardDutyEnabled
-          - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
-          - !Ref AWS::NoValue
+        - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Transport layer policies (shared across many integrations)
-  # ═══════════════════════════════════════════════════════════════════════════
-  S3TransportPolicy:
+  # Log transport: S3-delivered logs (CloudTrail, VPC Flow, WAF, Route 53,
+  # CloudFront, ELB, Network Firewall, ...) plus SQS queue consumption and
+  # CloudWatch Logs reads.
+  TransportPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticS3Transport
+      PolicyName: ElasticTransport
       Roles:
         - !Ref ElasticFederatedIdentityRole
       PolicyDocument:
@@ -423,17 +65,6 @@ Resources:
               - sqs:ChangeMessageVisibility
               - sqs:GetQueueAttributes
             Resource: '*'
-    Condition: NeedsS3Transport
-
-  CloudWatchLogsPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticCloudWatchLogs
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticCWLogsRead
             Effect: Allow
             Action:
@@ -442,12 +73,13 @@ Resources:
               - logs:FilterLogEvents
               - logs:GetLogEvents
             Resource: '*'
-    Condition: NeedsCloudWatchLogs
 
-  MetricsBasePolicy:
+  # CloudWatch metrics collection and account metadata shared by all metrics
+  # integrations.
+  MetricsPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticMetricsBase
+      PolicyName: ElasticMetrics
       Roles:
         - !Ref ElasticFederatedIdentityRole
       PolicyDocument:
@@ -463,15 +95,12 @@ Resources:
               - iam:ListAccountAliases
               - sts:GetCallerIdentity
             Resource: '*'
-    Condition: NeedsMetrics
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Service-specific policies
-  # ═══════════════════════════════════════════════════════════════════════════
-  SecurityHubPolicy:
+  # Security findings and audit: Security Hub, Inspector, Config, CloudTrail.
+  SecurityFindingsPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticSecurityHub
+      PolicyName: ElasticSecurityFindings
       Roles:
         - !Ref ElasticFederatedIdentityRole
       PolicyDocument:
@@ -487,34 +116,12 @@ Resources:
               - securityhub:GetSecurityControlDefinition
               - securityhub:GetInsights
             Resource: '*'
-    Condition: SecurityHubEnabled
-
-  InspectorPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticInspector
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticInspector
             Effect: Allow
             Action:
               - inspector2:ListFindings
               - inspector2:ListCoverage
             Resource: '*'
-    Condition: InspectorEnabled
-
-  ConfigPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticConfig
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticConfig
             Effect: Allow
             Action:
@@ -524,17 +131,6 @@ Resources:
               - config:DescribeConfigurationRecorders
               - config:DescribeConfigurationRecorderStatus
             Resource: '*'
-    Condition: ConfigEnabled
-
-  CloudTrailPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticCloudTrail
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticCloudTrail
             Effect: Allow
             Action:
@@ -542,29 +138,14 @@ Resources:
               - cloudtrail:DescribeTrails
               - cloudtrail:GetTrailStatus
             Resource: '*'
-    Condition: CloudTrailEnabled
 
-  FirewallPolicy:
+  # Per-service resource inventory reads for metrics enrichment: EC2, ECS,
+  # Lambda, ELB, S3, EBS, RDS, DynamoDB, SNS, SQS, Transit Gateway,
+  # Network Firewall, Billing (Cost Explorer), and Health.
+  ServiceInventoryPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticNetworkFirewall
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: ElasticFirewall
-            Effect: Allow
-            Action:
-              - network-firewall:DescribeFirewall
-              - network-firewall:ListFirewalls
-            Resource: '*'
-    Condition: FirewallEnabled
-
-  EC2Policy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticEC2
+      PolicyName: ElasticServiceInventory
       Roles:
         - !Ref ElasticFederatedIdentityRole
       PolicyDocument:
@@ -574,18 +155,10 @@ Resources:
             Effect: Allow
             Action:
               - ec2:DescribeInstances
+              - ec2:DescribeVolumes
+              - ec2:DescribeTransitGateways
+              - ec2:DescribeTransitGatewayAttachments
             Resource: '*'
-    Condition: EC2Enabled
-
-  ECSPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticECS
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticECS
             Effect: Allow
             Action:
@@ -595,34 +168,12 @@ Resources:
               - ecs:ListTasks
               - ecs:DescribeTasks
             Resource: '*'
-    Condition: ECSEnabled
-
-  LambdaPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticLambda
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticLambda
             Effect: Allow
             Action:
               - lambda:ListFunctions
               - lambda:ListTags
             Resource: '*'
-    Condition: LambdaEnabled
-
-  ELBPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticELB
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticELB
             Effect: Allow
             Action:
@@ -630,67 +181,18 @@ Resources:
               - elasticloadbalancing:DescribeTargetGroups
               - elasticloadbalancing:DescribeTags
             Resource: '*'
-    Condition: ELBEnabled
-
-  S3ServicePolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticS3Service
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticS3Inventory
             Effect: Allow
             Action:
               - s3:GetBucketTagging
               - s3:ListAllMyBuckets
             Resource: '*'
-    Condition: S3Enabled
-
-  EBSPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticEBS
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: ElasticEBS
-            Effect: Allow
-            Action:
-              - ec2:DescribeVolumes
-            Resource: '*'
-    Condition: EBSEnabled
-
-  RDSPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticRDS
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticRDS
             Effect: Allow
             Action:
               - rds:DescribeDBInstances
               - rds:ListTagsForResource
             Resource: '*'
-    Condition: RDSEnabled
-
-  DynamoDBPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticDynamoDB
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticDynamoDB
             Effect: Allow
             Action:
@@ -698,68 +200,23 @@ Resources:
               - dynamodb:ListTables
               - dynamodb:DescribeTimeToLive
             Resource: '*'
-    Condition: DynamoDBEnabled
-
-  SNSPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticSNS
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticSNS
             Effect: Allow
             Action:
               - sns:ListTopics
               - sns:GetTopicAttributes
             Resource: '*'
-    Condition: SNSEnabled
-
-  SQSPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticSQS
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: ElasticSQS
+          - Sid: ElasticSQSInventory
             Effect: Allow
             Action:
               - sqs:ListQueues
-              - sqs:GetQueueAttributes
             Resource: '*'
-    Condition: SQSEnabled
-
-  TransitGatewayPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticTransitGateway
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: ElasticTransitGateway
+          - Sid: ElasticFirewall
             Effect: Allow
             Action:
-              - ec2:DescribeTransitGateways
-              - ec2:DescribeTransitGatewayAttachments
+              - network-firewall:DescribeFirewall
+              - network-firewall:ListFirewalls
             Resource: '*'
-    Condition: TransitGatewayEnabled
-
-  BillingPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticBilling
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticBilling
             Effect: Allow
             Action:
@@ -767,17 +224,6 @@ Resources:
               - ce:GetDimensionValues
               - ce:GetTags
             Resource: '*'
-    Condition: BillingEnabled
-
-  HealthPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: ElasticHealth
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
           - Sid: ElasticHealth
             Effect: Allow
             Action:
@@ -785,7 +231,6 @@ Resources:
               - health:DescribeEventDetails
               - health:DescribeEventsForOrganization
             Resource: '*'
-    Condition: HealthEnabled
 
 Outputs:
   RoleArn:
