@@ -78,41 +78,41 @@ func (f *route53Fetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 				AccountName: f.accountName,
 				ServiceName: "AWS Route 53",
 			}),
-			inventory.WithEntityAttributes(buildRoute53Attributes(record)),
+			inventory.WithEntityDetails(buildRoute53Details(record)),
 		)
 	}
 }
 
-// buildRoute53Attributes maps a record's non-ECS fields into entity.attributes using
+// buildRoute53Details maps a record's non-ECS fields into entity.Details using
 // UpperCamelCase keys. Empty values are omitted.
-func buildRoute53Attributes(record route53.Record) map[string]any {
-	attrs := map[string]any{}
+func buildRoute53Details(record route53.Record) map[string]any {
+	details := map[string]any{}
 	if record.Type != "" {
-		attrs["Type"] = record.Type
+		details["Type"] = record.Type
 	}
 	if len(record.Records) > 0 {
-		attrs["ResourceRecords"] = record.Records
+		details["ResourceRecords"] = record.Records
 	}
 	if record.Weight != nil {
-		attrs["Weight"] = *record.Weight
+		details["Weight"] = *record.Weight
 	}
 	if record.RoutingRegion != "" {
-		attrs["Region"] = record.RoutingRegion
+		details["Region"] = record.RoutingRegion
 	}
 	if record.ZoneID != "" {
-		attrs["ZoneID"] = record.ZoneID
+		details["ZoneID"] = record.ZoneID
 	}
 	if record.ZoneName != "" {
-		attrs["ZoneName"] = record.ZoneName
+		details["ZoneName"] = record.ZoneName
 	}
 	if record.AliasTargetDNS != "" {
-		attrs["AliasTargetDNS"] = record.AliasTargetDNS
+		details["AliasTargetDNS"] = record.AliasTargetDNS
 	}
 	if record.AliasTargetZoneID != "" {
-		attrs["AliasTargetZoneId"] = record.AliasTargetZoneID
+		details["AliasTargetZoneId"] = record.AliasTargetZoneID
 	}
 	if record.HealthCheckID != "" {
-		attrs["HealthCheckId"] = record.HealthCheckID
+		details["HealthCheckId"] = record.HealthCheckID
 	}
-	return attrs
+	return details
 }
