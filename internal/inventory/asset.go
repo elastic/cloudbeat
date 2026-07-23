@@ -186,7 +186,7 @@ type Entity struct {
 	Name       string         `json:"name"`
 	Source     *string        `json:"source"`
 	Raw        *any           `json:"raw"`
-	Attributes map[string]any `json:"attributes,omitempty"`
+	Details    map[string]any `json:"Details,omitempty"`
 	AssetClassification
 
 	// non exported fields
@@ -451,28 +451,28 @@ func WithContainer(container Container) AssetEnricher {
 	}
 }
 
-// WithEntityAttributes sets non-ECS resource-specific attributes on the entity.
+// WithEntityDetails sets non-ECS resource-specific attributes on the entity (entity.Details).
 // Keys should use UpperCamelCase per the non-ECS field naming convention.
 // A nil or empty map is a no-op.
-func WithEntityAttributes(attrs map[string]any) AssetEnricher {
+func WithEntityDetails(details map[string]any) AssetEnricher {
 	return func(a *AssetEvent) {
-		if len(attrs) == 0 {
+		if len(details) == 0 {
 			return
 		}
-		a.Entity.Attributes = attrs
+		a.Entity.Details = details
 	}
 }
 
-// WithCreatedAt sets the resource creation timestamp in entity.attributes["CreatedAt"].
+// WithCreatedAt sets the resource creation timestamp in entity.Details["CreatedAt"].
 // A nil time is a no-op.
 func WithCreatedAt(t *time.Time) AssetEnricher {
 	return func(a *AssetEvent) {
 		if t == nil {
 			return
 		}
-		if a.Entity.Attributes == nil {
-			a.Entity.Attributes = make(map[string]any)
+		if a.Entity.Details == nil {
+			a.Entity.Details = make(map[string]any)
 		}
-		a.Entity.Attributes["CreatedAt"] = t
+		a.Entity.Details["CreatedAt"] = t
 	}
 }
