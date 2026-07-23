@@ -10,6 +10,9 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
 
+permissions:
+  contents: read
+
 jobs:
   Sync-Templates:
     name: Sync CIS Rule Templates
