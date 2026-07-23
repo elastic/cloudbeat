@@ -611,6 +611,6 @@ replace (
 	github.com/elazarl/goproxy => github.com/elazarl/goproxy v0.0.0-20230731152917-f99041a5c027
 	github.com/golang/glog => github.com/golang/glog v1.2.4 // indirect
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
-	github.com/lestrrat-go/jwx => github.com/lestrrat-go/jwx v1.2.31
+	github.com/lestrrat-go/jwx/v4 => github.com/lestrrat-go/jwx v4.1.0
 	k8s.io/kubernetes => k8s.io/kubernetes v1.36.2
 )
