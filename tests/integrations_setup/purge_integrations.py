@@ -20,6 +20,7 @@ from fleet_api.agent_policy_api import (
     get_agents,
     unenroll_agents_from_policy,
 )
+from fleet_api.managed_integration_api import delete_managed_integration
 from fleet_api.package_policy_api import delete_package_policy
 from loguru import logger
 from state_file_manager import state_manager
@@ -29,12 +30,18 @@ def purge_integrations():
     """
     Purge integrations and policies based on stored IDs in the state_data.json file.
     """
-    # Check if the state_data.json file exists
-
     agents = get_agents(cfg=cnfg.elk_config)
     # Delete policies based on the stored IDs
     for policy in state_manager.get_policies():
         logger.info("Deleting policy", policy.pkg_policy_id, policy.agnt_policy_id)
+
+        # When agnt_policy_id == pkg_policy_id the entry was created via the managed_integrations
+        # API (a single combined resource). Deleting the managed integration cleans up both the
+        # agent policy and package policy automatically.
+        if policy.agnt_policy_id == policy.pkg_policy_id:
+            delete_managed_integration(cfg=cnfg.elk_config, policy_id=policy.agnt_policy_id)
+            continue
+
         delete_package_policy(cfg=cnfg.elk_config, policy_ids=[policy.pkg_policy_id])
 
         agents_list = [item.agent.id for item in agents if item.policy_id == policy.agnt_policy_id]
