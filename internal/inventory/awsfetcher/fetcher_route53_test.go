@@ -68,7 +68,7 @@ func TestRoute53Fetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS Route 53",
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"Type":              "A",
 				"ResourceRecords":   []string{"203.0.113.10"},
 				"Weight":            int64(10),
@@ -92,7 +92,7 @@ func TestRoute53Fetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS Route 53",
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"Type":     "NS",
 				"ZoneID":   "Z123",
 				"ZoneName": "example.com.",

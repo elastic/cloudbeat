@@ -124,7 +124,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				IP:           []string{"public-ip-addr", "private-ip-addre"},
 				MacAddress:   []string{"mac1", "mac2"},
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"ImageId":            "image-id",
 				"Platform":           "linux",
 				"VpcId":              "vpc-id",
@@ -213,7 +213,7 @@ func TestEC2InstanceFetcher_Fetch_ResolverError(t *testing.T) {
 				IP:           []string{"public-ip-addr", "private-ip-addre"},
 				MacAddress:   []string{"mac1", "mac2"},
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"ImageId":            "image-id",
 				"Platform":           "linux",
 				"VpcId":              "vpc-id",
