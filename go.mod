@@ -288,7 +288,6 @@ require (
 	go.yaml.in/yaml/v4 v4.0.0-rc.6 // indirect
 	golang.org/x/exp v0.0.0-20260603202125-055de637280b // indirect
 	golang.org/x/tools v0.48.0 // indirect
-	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.78 // indirect
@@ -601,6 +600,7 @@ require (
 	github.com/bytecodealliance/wasmtime-go/v44 v44.0.0 // indirect
 	github.com/cenkalti/backoff/v7 v7.0.0 // indirect
 	github.com/go-openapi/swag/pools v0.27.1 // indirect
+	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 )
 
 replace (
