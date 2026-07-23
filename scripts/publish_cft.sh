@@ -60,3 +60,6 @@ upload_file deploy/asset-inventory-cloudformation/cloud-connectors-remote-role-o
 upload_file deploy/cloudformation/cloud-connectors-guardduty.yml \
     "cloudformation-cloud-connectors-guardduty" \
     "${version}"
+upload_file deploy/cloudformation/federated-identity-aws.yml \
+    "cloudformation-federated-identity-aws" \
+    "${version}"

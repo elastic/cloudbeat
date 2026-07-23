@@ -1,0 +1,320 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates an IAM Role for Elastic Federated Identity (Cloud Connectors). Grants read-only permissions for all Elastic AWS integrations that support Federated Identity.
+
+Parameters:
+  ElasticResourceId:
+    Description: The Elastic resource ID (deployment component ID or serverless project ID) that the role will trust.
+    Type: String
+
+  ElasticRoleARN:
+    Description: Elastic's super-role ARN. Change only for test environments.
+    Type: String
+    Default: arn:aws:iam::254766567737:role/cloud_connectors
+
+Resources:
+  ElasticFederatedIdentityRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ElasticFederatedIdentity-${AWS::StackName}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Ref ElasticRoleARN
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Join
+                  - '-'
+                  - - !Ref ElasticResourceId
+                    - !Select
+                      - 2
+                      - !Split
+                        - /
+                        - !Ref AWS::StackId
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
+        - arn:aws:iam::aws:policy/SecurityAudit
+
+  # Log transport: S3-delivered logs (CloudTrail, VPC Flow, WAF, Route 53,
+  # CloudFront, ELB, Network Firewall, ...) plus SQS queue consumption and
+  # CloudWatch Logs reads.
+  TransportPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticTransport
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticS3Read
+            Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource: '*'
+          - Sid: ElasticSQSConsume
+            Effect: Allow
+            Action:
+              - sqs:ReceiveMessage
+              - sqs:DeleteMessage
+              - sqs:ChangeMessageVisibility
+              - sqs:GetQueueAttributes
+            Resource: '*'
+          - Sid: ElasticCWLogsRead
+            Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:FilterLogEvents
+              - logs:GetLogEvents
+            Resource: '*'
+
+  # CloudWatch metrics collection and account metadata shared by all metrics
+  # integrations.
+  MetricsPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticMetrics
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticMetricsRead
+            Effect: Allow
+            Action:
+              - cloudwatch:GetMetricData
+              - cloudwatch:ListMetrics
+              - tag:GetResources
+              - ec2:DescribeRegions
+              - iam:ListAccountAliases
+              - sts:GetCallerIdentity
+            Resource: '*'
+
+  # Security findings and audit: Security Hub, Inspector, Config, CloudTrail.
+  SecurityFindingsPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticSecurityFindings
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticSecurityHub
+            Effect: Allow
+            Action:
+              - securityhub:GetFindings
+              - securityhub:BatchGetSecurityControls
+              - securityhub:DescribeHub
+              - securityhub:GetEnabledStandards
+              - securityhub:ListSecurityControlDefinitions
+              - securityhub:GetSecurityControlDefinition
+              - securityhub:GetInsights
+              - securityhub:GetInsightResults
+            Resource: '*'
+          - Sid: ElasticInspector
+            Effect: Allow
+            Action:
+              - inspector2:ListFindings
+              - inspector2:ListCoverage
+            Resource: '*'
+
+          # The aws.config data stream polls Config rule compliance via the
+          # Config API; resource-inventory Config reads live in the
+          # SecurityPosturePolicy below.
+          - Sid: ElasticConfig
+            Effect: Allow
+            Action:
+              - config:DescribeConfigRules
+              - config:DescribeComplianceByConfigRule
+              - config:GetComplianceDetailsByConfigRule
+            Resource: '*'
+          - Sid: ElasticCloudTrail
+            Effect: Allow
+            Action:
+              - cloudtrail:LookupEvents
+              - cloudtrail:DescribeTrails
+              - cloudtrail:GetTrailStatus
+            Resource: '*'
+
+  # Per-service resource inventory reads for metrics enrichment: EC2, ECS,
+  # Lambda, ELB, S3, EBS, RDS, DynamoDB, SNS, SQS, Transit Gateway,
+  # Network Firewall, Billing (Cost Explorer), and Health.
+  ServiceInventoryPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticServiceInventory
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticEC2
+            Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
+              - ec2:DescribeVolumes
+              - ec2:DescribeTransitGateways
+              - ec2:DescribeTransitGatewayAttachments
+            Resource: '*'
+          - Sid: ElasticECS
+            Effect: Allow
+            Action:
+              - ecs:ListClusters
+              - ecs:DescribeClusters
+              - ecs:ListServices
+              - ecs:DescribeServices
+              - ecs:ListTasks
+              - ecs:DescribeTasks
+            Resource: '*'
+          - Sid: ElasticLambda
+            Effect: Allow
+            Action:
+              - lambda:ListFunctions
+              - lambda:GetFunction
+              - lambda:ListTags
+            Resource: '*'
+          - Sid: ElasticELB
+            Effect: Allow
+            Action:
+              - elasticloadbalancing:DescribeLoadBalancers
+              - elasticloadbalancing:DescribeTargetGroups
+              - elasticloadbalancing:DescribeTargetHealth
+              - elasticloadbalancing:DescribeTags
+            Resource: '*'
+          - Sid: ElasticS3Inventory
+            Effect: Allow
+            Action:
+              - s3:GetBucketTagging
+              - s3:ListAllMyBuckets
+            Resource: '*'
+          - Sid: ElasticRDS
+            Effect: Allow
+            Action:
+              - rds:DescribeDBInstances
+              - rds:DescribeDBClusters
+              - rds:ListTagsForResource
+            Resource: '*'
+          - Sid: ElasticDynamoDB
+            Effect: Allow
+            Action:
+              - dynamodb:DescribeTable
+              - dynamodb:ListTables
+              - dynamodb:DescribeTimeToLive
+            Resource: '*'
+          - Sid: ElasticSNS
+            Effect: Allow
+            Action:
+              - sns:ListTopics
+              - sns:GetTopicAttributes
+            Resource: '*'
+          - Sid: ElasticSQSInventory
+            Effect: Allow
+            Action:
+              - sqs:ListQueues
+            Resource: '*'
+          - Sid: ElasticFirewall
+            Effect: Allow
+            Action:
+              - network-firewall:DescribeFirewall
+              - network-firewall:ListFirewalls
+            Resource: '*'
+          - Sid: ElasticBilling
+            Effect: Allow
+            Action:
+              - ce:GetCostAndUsage
+              - ce:GetDimensionValues
+              - ce:GetTags
+            Resource: '*'
+          - Sid: ElasticHealth
+            Effect: Allow
+            Action:
+              - health:DescribeEvents
+              - health:DescribeEventDetails
+              - health:DescribeAffectedEntities
+              - health:DescribeEventsForOrganization
+            Resource: '*'
+
+  # Security posture packages (CSPM, Cloud Asset Inventory, KSPM-EKS):
+  # supplemental read permissions beyond the SecurityAudit managed policy.
+  # Sourced from the per-package IaC patches in elastic/integrations#20240.
+  # CNVM is intentionally excluded — its snapshot/instance scan operations
+  # require write permissions and keep their own dedicated template.
+  SecurityPosturePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticSecurityPosture
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticPostureConfig
+            Effect: Allow
+            Action:
+              - config:ListDiscoveredResources
+              - config:SelectResourceConfig
+              - config:SelectAggregateResourceConfig
+              - config:DescribeConfigurationRecorders
+              - config:DescribeAggregationAuthorizations
+              - config:DescribeConfigurationAggregators
+            Resource: '*'
+          - Sid: ElasticPostureOrganizations
+            Effect: Allow
+            Action:
+              - organizations:DescribeOrganization
+              - organizations:ListAccounts
+              - organizations:ListAccountsForParent
+              - organizations:ListOrganizationalUnitsForParent
+              - organizations:ListRoots
+              - organizations:ListDelegatedAdministrators
+            Resource: '*'
+          - Sid: ElasticPostureSupplemental
+            Effect: Allow
+            Action:
+              - access-analyzer:ListAnalyzers
+              - account:GetAlternateContact
+            Resource: '*'
+          - Sid: ElasticPostureCrossAccountAssumeRole
+            Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Resource: '*'
+          - Sid: ElasticPostureEKS
+            Effect: Allow
+            Action:
+              - eks:DescribeCluster
+              - eks:ListClusters
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeSubnets
+              - iam:GetRole
+              - iam:ListAttachedRolePolicies
+            Resource: '*'
+
+Outputs:
+  RoleArn:
+    Description: The ARN of the IAM Role. Paste this into Kibana.
+    Value: !GetAtt ElasticFederatedIdentityRole.Arn
+
+  ExternalId:
+    Description: The External ID used in the trust policy. Paste this into Kibana.
+    Value: !Join
+      - '-'
+      - - !Ref ElasticResourceId
+        - !Select
+          - 2
+          - !Split
+            - /
+            - !Ref AWS::StackId
+
+  StackId:
+    Description: Store this in Kibana to construct stack-update URLs later.
+    Value: !Ref AWS::StackId
