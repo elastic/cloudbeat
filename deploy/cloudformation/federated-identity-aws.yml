@@ -37,6 +37,7 @@ Resources:
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
+        - arn:aws:iam::aws:policy/SecurityAudit
 
   # Log transport: S3-delivered logs (CloudTrail, VPC Flow, WAF, Route 53,
   # CloudFront, ELB, Network Firewall, ...) plus SQS queue consumption and
@@ -230,6 +231,62 @@ Resources:
               - health:DescribeEvents
               - health:DescribeEventDetails
               - health:DescribeEventsForOrganization
+            Resource: '*'
+
+  # Security posture packages (CSPM, Cloud Asset Inventory, KSPM-EKS):
+  # supplemental read permissions beyond the SecurityAudit managed policy.
+  # Sourced from the per-package IaC patches in elastic/integrations#20240.
+  # CNVM is intentionally excluded — its snapshot/instance scan operations
+  # require write permissions and keep their own dedicated template.
+  SecurityPosturePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticSecurityPosture
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticPostureConfig
+            Effect: Allow
+            Action:
+              - config:ListDiscoveredResources
+              - config:SelectResourceConfig
+              - config:SelectAggregateResourceConfig
+              - config:DescribeConfigurationRecorders
+              - config:DescribeAggregationAuthorizations
+              - config:DescribeConfigurationAggregators
+            Resource: '*'
+          - Sid: ElasticPostureOrganizations
+            Effect: Allow
+            Action:
+              - organizations:DescribeOrganization
+              - organizations:ListAccounts
+              - organizations:ListAccountsForParent
+              - organizations:ListOrganizationalUnitsForParent
+              - organizations:ListRoots
+              - organizations:ListDelegatedAdministrators
+            Resource: '*'
+          - Sid: ElasticPostureSupplemental
+            Effect: Allow
+            Action:
+              - access-analyzer:ListAnalyzers
+              - account:GetAlternateContact
+            Resource: '*'
+          - Sid: ElasticPostureCrossAccountAssumeRole
+            Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Resource: '*'
+          - Sid: ElasticPostureEKS
+            Effect: Allow
+            Action:
+              - eks:DescribeCluster
+              - eks:ListClusters
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeSubnets
+              - iam:GetRole
+              - iam:ListAttachedRolePolicies
             Resource: '*'
 
 Outputs:
