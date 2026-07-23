@@ -111,11 +111,13 @@ Resources:
             Effect: Allow
             Action:
               - securityhub:GetFindings
+              - securityhub:BatchGetSecurityControls
               - securityhub:DescribeHub
               - securityhub:GetEnabledStandards
               - securityhub:ListSecurityControlDefinitions
               - securityhub:GetSecurityControlDefinition
               - securityhub:GetInsights
+              - securityhub:GetInsightResults
             Resource: '*'
           - Sid: ElasticInspector
             Effect: Allow
@@ -123,14 +125,16 @@ Resources:
               - inspector2:ListFindings
               - inspector2:ListCoverage
             Resource: '*'
+
+          # The aws.config data stream polls Config rule compliance via the
+          # Config API; resource-inventory Config reads live in the
+          # SecurityPosturePolicy below.
           - Sid: ElasticConfig
             Effect: Allow
             Action:
-              - config:SelectResourceConfig
-              - config:GetResourceConfigHistory
-              - config:ListDiscoveredResources
-              - config:DescribeConfigurationRecorders
-              - config:DescribeConfigurationRecorderStatus
+              - config:DescribeConfigRules
+              - config:DescribeComplianceByConfigRule
+              - config:GetComplianceDetailsByConfigRule
             Resource: '*'
           - Sid: ElasticCloudTrail
             Effect: Allow
@@ -156,6 +160,7 @@ Resources:
             Effect: Allow
             Action:
               - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
               - ec2:DescribeVolumes
               - ec2:DescribeTransitGateways
               - ec2:DescribeTransitGatewayAttachments
@@ -164,6 +169,7 @@ Resources:
             Effect: Allow
             Action:
               - ecs:ListClusters
+              - ecs:DescribeClusters
               - ecs:ListServices
               - ecs:DescribeServices
               - ecs:ListTasks
@@ -173,6 +179,7 @@ Resources:
             Effect: Allow
             Action:
               - lambda:ListFunctions
+              - lambda:GetFunction
               - lambda:ListTags
             Resource: '*'
           - Sid: ElasticELB
@@ -180,6 +187,7 @@ Resources:
             Action:
               - elasticloadbalancing:DescribeLoadBalancers
               - elasticloadbalancing:DescribeTargetGroups
+              - elasticloadbalancing:DescribeTargetHealth
               - elasticloadbalancing:DescribeTags
             Resource: '*'
           - Sid: ElasticS3Inventory
@@ -192,6 +200,7 @@ Resources:
             Effect: Allow
             Action:
               - rds:DescribeDBInstances
+              - rds:DescribeDBClusters
               - rds:ListTagsForResource
             Resource: '*'
           - Sid: ElasticDynamoDB
@@ -230,6 +239,7 @@ Resources:
             Action:
               - health:DescribeEvents
               - health:DescribeEventDetails
+              - health:DescribeAffectedEntities
               - health:DescribeEventsForOrganization
             Resource: '*'
 
