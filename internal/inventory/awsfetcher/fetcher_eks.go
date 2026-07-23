@@ -78,37 +78,37 @@ func (f *eksFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 				AccountName: f.accountName,
 				ServiceName: "AWS EKS",
 			}),
-			inventory.WithEntityAttributes(buildEKSAttributes(cluster)),
+			inventory.WithEntityDetails(buildEKSDetails(cluster)),
 			inventory.WithCreatedAt(cluster.CreatedAt),
 		)
 	}
 }
 
-// buildEKSAttributes maps a cluster's non-ECS fields into entity.attributes using
+// buildEKSDetails maps a cluster's non-ECS fields into entity.Details using
 // UpperCamelCase keys. The endpoint-access booleans are always included as they are
 // meaningful even when false; other empty values are omitted.
-func buildEKSAttributes(cluster eks.Cluster) map[string]any {
-	attrs := map[string]any{
+func buildEKSDetails(cluster eks.Cluster) map[string]any {
+	details := map[string]any{
 		"EndpointPublicAccess":  cluster.EndpointPublicAccess,
 		"EndpointPrivateAccess": cluster.EndpointPrivateAccess,
 	}
 	if cluster.Status != "" {
-		attrs["Status"] = cluster.Status
+		details["Status"] = cluster.Status
 	}
 	if cluster.Version != "" {
-		attrs["Version"] = cluster.Version
+		details["Version"] = cluster.Version
 	}
 	if cluster.Endpoint != "" {
-		attrs["Endpoint"] = cluster.Endpoint
+		details["Endpoint"] = cluster.Endpoint
 	}
 	if cluster.RoleArn != "" {
-		attrs["RoleArn"] = cluster.RoleArn
+		details["RoleArn"] = cluster.RoleArn
 	}
 	if cluster.PlatformVersion != "" {
-		attrs["PlatformVersion"] = cluster.PlatformVersion
+		details["PlatformVersion"] = cluster.PlatformVersion
 	}
 	if v := cluster.GetOwnerTag(); v != "" {
-		attrs["OwnerTag"] = v
+		details["OwnerTag"] = v
 	}
-	return attrs
+	return details
 }
