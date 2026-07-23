@@ -106,7 +106,7 @@ require (
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
 	golang.org/x/oauth2 v0.36.0
 	google.golang.org/api v0.287.0
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/gotestsum v1.13.0
 	k8s.io/api v0.36.2
 	k8s.io/apimachinery v0.36.2
@@ -115,7 +115,7 @@ require (
 	modernc.org/sqlite v1.54.0
 )
 
-require gopkg.in/yaml.v2 v2.4.0
+require gopkg.in/yaml.v2 v2.4.0 // indirect
 
 require (
 	cel.dev/expr v0.25.2 // indirect
