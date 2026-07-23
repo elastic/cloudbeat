@@ -130,6 +130,7 @@ require (
 	github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.1.32 // indirect
 	github.com/Intevation/gval v1.3.0 // indirect
 	github.com/Intevation/jsonpath v0.2.1 // indirect
+	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/alexbrainman/sspi v0.0.0-20250919150558-7d374ff0d59e // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
@@ -330,7 +331,6 @@ require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/CycloneDX/cyclonedx-go v0.11.0 // indirect
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
-	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
