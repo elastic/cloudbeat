@@ -182,11 +182,11 @@ type URL struct {
 
 // Entity contains the identifiers of the asset
 type Entity struct {
-	Id         string         `json:"id"`
-	Name       string         `json:"name"`
-	Source     *string        `json:"source"`
-	Raw        *any           `json:"raw"`
-	Details    map[string]any `json:"Details,omitempty"`
+	Id      string         `json:"id"`
+	Name    string         `json:"name"`
+	Source  *string        `json:"source"`
+	Raw     *any           `json:"raw"`
+	Details map[string]any `json:"Details,omitempty"`
 	AssetClassification
 
 	// non exported fields
