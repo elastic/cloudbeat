@@ -205,7 +205,6 @@ require (
 	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc/v3 v3.0.6 // indirect
-	github.com/lestrrat-go/jwx/v3 v3.1.1 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/letsencrypt/boulder v0.20260713.0 // indirect
 	github.com/mattn/go-shellwords v1.0.14 // indirect
@@ -601,6 +600,7 @@ require (
 	github.com/bytecodealliance/wasmtime-go/v44 v44.0.0 // indirect
 	github.com/cenkalti/backoff/v7 v7.0.0 // indirect
 	github.com/go-openapi/swag/pools v0.27.1 // indirect
+	github.com/lestrrat-go/jwx/v3 v3.1.1 // indirect
 )
 
 replace (
