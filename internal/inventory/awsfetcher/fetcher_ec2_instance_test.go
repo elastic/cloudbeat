@@ -52,6 +52,7 @@ func makeTestInstance(launchTime *time.Time) *ec2beat.Ec2Instance {
 				{Key: pointers.Ref("key"), Value: pointers.Ref("value")},
 				{Key: pointers.Ref("Owner"), Value: pointers.Ref("team-infra")},
 				{Key: pointers.Ref("CostCenter"), Value: pointers.Ref("cc-1234")},
+				{Key: pointers.Ref("Role"), Value: pointers.Ref("sre")},
 			},
 			InstanceId:       pointers.Ref("234567890"),
 			Architecture:     ec2types.ArchitectureValuesX8664,
@@ -104,7 +105,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 			"private-dns",
 			inventory.WithRelatedAssetIds([]string{"234567890"}),
 			inventory.WithRawAsset(instance1),
-			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value", "Owner": "team-infra", "CostCenter": "cc-1234"}),
+			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value", "Owner": "team-infra", "CostCenter": "cc-1234", "Role": "sre"}),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
@@ -134,6 +135,7 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				"RoleArn":            testRoleArn,
 				"Owner":              "team-infra",
 				"CostCenter":         "cc-1234",
+				"Role":               "sre",
 			}),
 			inventory.WithCreatedAt(&launchTime),
 			inventory.WithUser(inventory.User{
@@ -193,7 +195,7 @@ func TestEC2InstanceFetcher_Fetch_ResolverError(t *testing.T) {
 			"private-dns",
 			inventory.WithRelatedAssetIds([]string{"234567890"}),
 			inventory.WithRawAsset(instance),
-			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value", "Owner": "team-infra", "CostCenter": "cc-1234"}),
+			inventory.WithLabels(map[string]string{"Name": "test-server", "key": "value", "Owner": "team-infra", "CostCenter": "cc-1234", "Role": "sre"}),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:         inventory.AwsCloudProvider,
 				Region:           "us-east",
@@ -223,6 +225,7 @@ func TestEC2InstanceFetcher_Fetch_ResolverError(t *testing.T) {
 				// RoleArn is absent because the resolver failed.
 				"Owner":      "team-infra",
 				"CostCenter": "cc-1234",
+				"Role":       "sre",
 			}),
 			inventory.WithCreatedAt(&launchTime),
 			// WithUser falls back to the profile ARN when role resolution fails.
