@@ -128,7 +128,7 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 				IP:           buildIPs(i.PublicIpAddress, i.PrivateIpAddress),
 				MacAddress:   i.GetResourceMacAddresses(),
 			}),
-			inventory.WithEntityAttributes(e.buildAttributes(i, tags, roleArnCache)),
+			inventory.WithEntityDetails(e.buildDetails(i, tags, roleArnCache)),
 			inventory.WithCreatedAt(i.LaunchTime),
 			iamFetcher,
 		)
@@ -177,43 +177,43 @@ func profileNameFromArn(arn string) string {
 	return arn[idx+len(marker):]
 }
 
-// buildAttributes collects non-ECS, resource-specific EC2 fields into entity.attributes,
+// buildDetails collects non-ECS, resource-specific EC2 fields into entity.Details,
 // using UpperCamelCase keys. Empty values are omitted so events stay clean and struct
 // comparison in tests is stable.
-func (e *ec2InstanceFetcher) buildAttributes(i *ec2.Ec2Instance, tags map[string]string, roleArnCache map[string]string) map[string]any {
-	attrs := map[string]any{}
+func (e *ec2InstanceFetcher) buildDetails(i *ec2.Ec2Instance, tags map[string]string, roleArnCache map[string]string) map[string]any {
+	details := map[string]any{}
 	if v := pointers.Deref(i.ImageId); v != "" {
-		attrs["ImageId"] = v
+		details["ImageId"] = v
 	}
 	if v := string(i.Platform); v != "" {
-		attrs["Platform"] = v
+		details["Platform"] = v
 	}
 	if v := pointers.Deref(i.VpcId); v != "" {
-		attrs["VpcId"] = v
+		details["VpcId"] = v
 	}
 	if v := pointers.Deref(i.SubnetId); v != "" {
-		attrs["SubnetId"] = v
+		details["SubnetId"] = v
 	}
 	if i.State != nil {
 		if v := string(i.State.Name); v != "" {
-			attrs["State"] = v
+			details["State"] = v
 		}
 	}
 	if i.IamInstanceProfile != nil {
 		if profileArn := pointers.Deref(i.IamInstanceProfile.Arn); profileArn != "" {
-			attrs["InstanceProfileArn"] = profileArn
+			details["InstanceProfileArn"] = profileArn
 			if roleArn, ok := roleArnCache[profileArn]; ok && roleArn != "" {
-				attrs["RoleArn"] = roleArn
+				details["RoleArn"] = roleArn
 			}
 		}
 	}
 	if v := awslib.LookupTag(tags, "owner"); v != "" {
-		attrs["Owner"] = v
+		details["Owner"] = v
 	}
 	if v := awslib.LookupTag(tags, "costcenter", "cost-center", "cost_center"); v != "" {
-		attrs["CostCenter"] = v
+		details["CostCenter"] = v
 	}
-	return attrs
+	return details
 }
 
 // buildIPs collects non-empty IP address strings into a slice, returning nil when none exist.

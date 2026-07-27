@@ -94,27 +94,27 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 	}
 
 	for _, item := range awsResources {
-		var attrs map[string]any
+		var details map[string]any
 		var createdAt *time.Time
 		if r, ok := item.(elbInventoryResource); ok {
-			attrs = map[string]any{
+			details = map[string]any{
 				"DNSName":            r.GetDNSName(),
 				"PubliclyAccessible": r.IsPubliclyAccessible(),
 			}
 			if f.AccountId != "" {
-				attrs["AccountID"] = f.AccountId
+				details["AccountID"] = f.AccountId
 			}
 			if v := r.GetLoadBalancerType(); v != "" {
-				attrs["LoadBalancerType"] = v
+				details["LoadBalancerType"] = v
 			}
 			if v := r.GetState(); v != "" {
-				attrs["State"] = v
+				details["State"] = v
 			}
 			if v := r.GetIPAddresses(); len(v) > 0 {
-				attrs["IPAddresses"] = v
+				details["IPAddresses"] = v
 			}
 			if v := r.GetOwnerTag(); v != "" {
-				attrs["OwnerTag"] = v
+				details["OwnerTag"] = v
 			}
 			createdAt = r.GetCreatedAt()
 		}
@@ -131,7 +131,7 @@ func (f *elbFetcher) fetch(ctx context.Context, resourceName string, function el
 				AccountName: f.AccountName,
 				ServiceName: "AWS Networking",
 			}),
-			inventory.WithEntityAttributes(attrs),
+			inventory.WithEntityDetails(details),
 			inventory.WithCreatedAt(createdAt),
 		)
 	}

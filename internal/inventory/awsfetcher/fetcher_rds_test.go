@@ -103,7 +103,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS RDS",
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"PubliclyAccessible": false,
 				"Engine":             "postgres",
 				"EngineVersion":      "15.4",
@@ -122,7 +122,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS RDS",
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"PubliclyAccessible": true,
 				"Engine":             "mysql",
 				"EngineVersion":      "8.0.35",

@@ -68,7 +68,7 @@ func TestEKSFetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS EKS",
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"EndpointPublicAccess":  true,
 				"EndpointPrivateAccess": false,
 				"Status":                "ACTIVE",
@@ -91,7 +91,7 @@ func TestEKSFetcher_Fetch(t *testing.T) {
 				AccountName: "alias",
 				ServiceName: "AWS EKS",
 			}),
-			inventory.WithEntityAttributes(map[string]any{
+			inventory.WithEntityDetails(map[string]any{
 				"EndpointPublicAccess":  false,
 				"EndpointPrivateAccess": false,
 			}),
