@@ -10,10 +10,11 @@ The following steps are performed:
 import json
 
 import configuration_fleet as cnfg
-from fleet_api.managed_integration_api import create_managed_integration
 from loguru import logger
 from package_policy import generate_policy_template, generate_random_name, load_data
 from state_file_manager import HostType, PolicyState, state_manager
+
+from fleet_api.managed_integration_api import create_managed_integration
 
 
 def generate_aws_integration_data():
@@ -107,6 +108,7 @@ if __name__ == "__main__":
                 [],
                 HostType.KUBERNETES.value,
                 integration_data["name"],
+                is_managed=True,
             ),
         )
 

@@ -15,6 +15,9 @@ Usage:
 
 """
 import configuration_fleet as cnfg
+from loguru import logger
+from state_file_manager import state_manager
+
 from fleet_api.agent_policy_api import (
     delete_agent_policy,
     get_agents,
@@ -22,8 +25,6 @@ from fleet_api.agent_policy_api import (
 )
 from fleet_api.managed_integration_api import delete_managed_integration
 from fleet_api.package_policy_api import delete_package_policy
-from loguru import logger
-from state_file_manager import state_manager
 
 
 def purge_integrations():
@@ -35,10 +36,7 @@ def purge_integrations():
     for policy in state_manager.get_policies():
         logger.info("Deleting policy", policy.pkg_policy_id, policy.agnt_policy_id)
 
-        # When agnt_policy_id == pkg_policy_id the entry was created via the managed_integrations
-        # API (a single combined resource). Deleting the managed integration cleans up both the
-        # agent policy and package policy automatically.
-        if policy.agnt_policy_id == policy.pkg_policy_id:
+        if policy.is_managed:
             delete_managed_integration(cfg=cnfg.elk_config, policy_id=policy.agnt_policy_id)
             continue
 
