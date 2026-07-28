@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# isort: skip_file
 """
 Purge Integrations and Policies
 

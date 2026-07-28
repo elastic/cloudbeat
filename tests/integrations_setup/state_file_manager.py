@@ -3,6 +3,8 @@ Define a class to manage the policies state using a file.
 Exports state_manager object as a singleton.
 """
 
+# isort: skip_file
+
 import json
 from enum import Enum
 from pathlib import Path

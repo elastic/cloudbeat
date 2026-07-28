@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# isort: skip_file
 """
 This script installs CSPM integrations for Agentless agents.
 The following steps are performed:

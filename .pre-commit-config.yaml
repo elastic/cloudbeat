@@ -53,11 +53,11 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/pycqa/isort
-    rev: 6.1.0
+    rev: 6.0.1
     hooks:
       - id: isort
         name: isort (python)
-        args: ["--profile", "black", "-p", "configuration_fleet", "-p", "fleet_api", "-p", "package_policy", "-p", "state_file_manager"]
+        args: ["--profile", "black"]
 
   - repo: https://github.com/psf/black
     rev: 25.1.0

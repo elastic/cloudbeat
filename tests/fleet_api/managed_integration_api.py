@@ -3,6 +3,8 @@ This module contains API calls related to the managed integrations API.
 (/api/fleet/managed_integrations — replaces the deprecated agentless_policies endpoint)
 """
 
+# isort: skip_file
+
 from loguru import logger
 from munch import Munch, munchify
 
