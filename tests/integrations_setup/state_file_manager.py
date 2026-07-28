@@ -3,12 +3,15 @@ Define a class to manage the policies state using a file.
 Exports state_manager object as a singleton.
 """
 
+# isort: skip_file
+
 import json
 from enum import Enum
 from pathlib import Path
 
-from fleet_api.utils import delete_file
 from loguru import logger
+
+from fleet_api.utils import delete_file
 
 __state_file = Path(__file__).parent / "state_data.json"
 
@@ -54,6 +57,7 @@ class PolicyState:
         expected_tags: list[str],
         host_type: HostType,
         integration_name: str,
+        is_managed: bool = False,
     ):
         """
         Args:
@@ -63,6 +67,7 @@ class PolicyState:
             expected_tags: (list(int)): List of expected tags count.
             host_type (HostType): Deployment host type
             integration_name (str): Name of installed integration
+            is_managed (bool): True when created via the managed_integrations API.
         """
         self.agnt_policy_id = agnt_policy_id
         self.pkg_policy_id = pkg_policy_id
@@ -70,6 +75,7 @@ class PolicyState:
         self.expected_tags = expected_tags
         self.host_type = host_type
         self.integration_name = integration_name
+        self.is_managed = is_managed
 
 
 class StateFileManager:
