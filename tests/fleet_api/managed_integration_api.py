@@ -3,9 +3,10 @@ This module contains API calls related to the managed integrations API.
 (/api/fleet/managed_integrations — replaces the deprecated agentless_policies endpoint)
 """
 
-from fleet_api.base_call_api import APICallException, perform_api_call
 from loguru import logger
 from munch import Munch, munchify
+
+from fleet_api.base_call_api import APICallException, perform_api_call
 
 _FIELDS_NOT_ACCEPTED = frozenset({"policy_id", "policy_ids", "supports_agentless", "output_id"})
 

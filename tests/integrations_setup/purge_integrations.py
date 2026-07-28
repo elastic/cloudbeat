@@ -14,10 +14,9 @@ Usage:
     python purge_integrations.py
 
 """
-import configuration_fleet as cnfg
 from loguru import logger
-from state_file_manager import state_manager
 
+import configuration_fleet as cnfg
 from fleet_api.agent_policy_api import (
     delete_agent_policy,
     get_agents,
@@ -25,6 +24,7 @@ from fleet_api.agent_policy_api import (
 )
 from fleet_api.managed_integration_api import delete_managed_integration
 from fleet_api.package_policy_api import delete_package_policy
+from state_file_manager import state_manager
 
 
 def purge_integrations():
