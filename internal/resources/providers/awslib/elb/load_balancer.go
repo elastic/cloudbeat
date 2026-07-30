@@ -33,6 +33,19 @@ type ElasticLoadBalancerInfo struct {
 	awsAccount   string
 	region       string
 	tags         map[string]string
+	ipAddresses  []string
+}
+
+// NewElasticLoadBalancerInfo constructs a classic load balancer wrapper. ipAddresses are the
+// addresses resolved from the load balancer's DNS name (classic ELBs expose no IPs via the API).
+func NewElasticLoadBalancerInfo(lb types.LoadBalancerDescription, awsAccount, region string, tags map[string]string, ipAddresses []string) *ElasticLoadBalancerInfo {
+	return &ElasticLoadBalancerInfo{
+		LoadBalancer: lb,
+		awsAccount:   awsAccount,
+		region:       region,
+		tags:         tags,
+		ipAddresses:  ipAddresses,
+	}
 }
 
 func (v ElasticLoadBalancerInfo) GetResourceArn() string {
@@ -73,14 +86,17 @@ func (v ElasticLoadBalancerInfo) GetLoadBalancerType() string {
 	return "classic"
 }
 
-// GetState is not exposed for classic load balancers by the AWS SDK.
+// GetState returns "active" for classic load balancers. The classic ELB API does not expose
+// a state field, but any LB returned by DescribeLoadBalancers is live.
 func (v ElasticLoadBalancerInfo) GetState() string {
-	return ""
+	return "active"
 }
 
-// GetIPAddresses is not exposed for classic load balancers (they are DNS-only).
+// GetIPAddresses returns the IP addresses resolved from the load balancer's DNS name.
+// Classic ELBs do not expose IPs directly via the AWS API; the addresses are resolved at
+// fetch time (see Provider.DescribeAllLoadBalancers) and stored here.
 func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
-	return nil
+	return v.ipAddresses
 }
 
 // GetOwnerTag returns the value of the "Owner" tag (case-insensitive), if present.

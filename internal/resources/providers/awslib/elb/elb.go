@@ -19,6 +19,7 @@ package elb
 
 import (
 	"context"
+	"net"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
@@ -27,6 +28,12 @@ import (
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
+
+// hostResolver abstracts DNS resolution so that tests can inject a fake without hitting the
+// real network. *net.Resolver satisfies this interface.
+type hostResolver interface {
+	LookupHost(ctx context.Context, host string) ([]string, error)
+}
 
 type Client interface {
 	elb.DescribeLoadBalancersAPIClient
@@ -43,6 +50,7 @@ type Provider struct {
 	client       Client
 	clients      map[string]Client
 	awsAccountID string
+	resolver     hostResolver
 }
 
 func NewElbProvider(ctx context.Context, log *clog.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
@@ -55,5 +63,6 @@ func NewElbProvider(ctx context.Context, log *clog.Logger, awsAccountID string, 
 		client:       elb.NewFromConfig(cfg),
 		clients:      m.GetMultiRegionsClientMap(),
 		awsAccountID: awsAccountID,
+		resolver:     net.DefaultResolver,
 	}
 }

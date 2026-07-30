@@ -75,13 +75,20 @@ func (v ElasticLoadBalancerInfo) GetState() string {
 	return string(v.LoadBalancer.State.Code)
 }
 
-// GetIPAddresses returns the static IP addresses of the load balancer. Only Network Load
-// Balancers expose static IPs (via per-AZ addresses); ALB/Gateway return nil.
+// GetIPAddresses returns the IP addresses of the load balancer. Network Load Balancers with
+// an Elastic IP expose them via IpAddress; internal NLBs use PrivateIPv4Address; IPv6 NLBs
+// use IPv6Address. All three are collected so that no NLB address type is missed.
 func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
 	var ips []string
 	for _, az := range v.LoadBalancer.AvailabilityZones {
 		for _, addr := range az.LoadBalancerAddresses {
 			if ip := pointers.Deref(addr.IpAddress); ip != "" {
+				ips = append(ips, ip)
+			}
+			if ip := pointers.Deref(addr.PrivateIPv4Address); ip != "" {
+				ips = append(ips, ip)
+			}
+			if ip := pointers.Deref(addr.IPv6Address); ip != "" {
 				ips = append(ips, ip)
 			}
 		}
