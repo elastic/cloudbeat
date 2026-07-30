@@ -90,6 +90,7 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 									{
 										LoadBalancerAddresses: []types.LoadBalancerAddress{
 											{IpAddress: pointers.Ref("203.0.113.10")},
+											{PrivateIPv4Address: pointers.Ref("10.0.1.5")},
 										},
 									},
 								},
@@ -186,7 +187,7 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 				assert.Equal(t, "team-infra", lb.GetOwnerTag())
 				assert.Equal(t, "network", lb.GetLoadBalancerType())
 				assert.Equal(t, "active", lb.GetState())
-				assert.Equal(t, []string{"203.0.113.10"}, lb.GetIPAddresses())
+				assert.Equal(t, []string{"203.0.113.10", "10.0.1.5"}, lb.GetIPAddresses())
 			}
 		})
 	}
