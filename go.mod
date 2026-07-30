@@ -118,7 +118,7 @@ require github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armapps
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/eks v1.90.0
-	github.com/aws/aws-sdk-go-v2/service/route53 v1.65.1
+	github.com/aws/aws-sdk-go-v2/service/route53 v1.65.2
 )
 
 require (
@@ -141,7 +141,7 @@ require (
 	github.com/aquasecurity/iamgo v0.0.10 // indirect
 	github.com/aquasecurity/jfather v0.0.8 // indirect
 	github.com/aquasecurity/trivy-checks v1.12.2-0.20251219190323-79d27547baf5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.61.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.62.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.5.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.46.0 // indirect
