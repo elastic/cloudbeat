@@ -48,6 +48,24 @@ Resources:
         # from the shipped cloud-connectors-guardduty template.
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
 
+  # aws_securityhub: read access to Security Hub findings via the
+  # GetFindingsV2 API, which authorizes as securityhub:GetFindings.
+  # Mirrors the provider_permissions declared in elastic/integrations#20436.
+  ElasticAwsSecurityHub:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsSecurityHub
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticAwsSecurityHubRead
+            Effect: Allow
+            Action:
+              - securityhub:GetFindings
+            Resource: '*'
+
 Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
