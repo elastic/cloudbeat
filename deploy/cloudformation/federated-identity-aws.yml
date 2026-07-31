@@ -48,6 +48,26 @@ Resources:
         # from the shipped cloud-connectors-guardduty template.
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
 
+  # aws/inspector: finding reads for the Amazon Inspector data stream.
+  # The stream calls exactly one operation (POST /findings/list =
+  # inspector2:ListFindings); inspector2:ListCoverage from the
+  # elastic/integrations#20240 patch sets is never called and is omitted
+  # (see elastic/integrations#20439).
+  ElasticAwsInspector:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsInspector
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticAwsInspectorRead
+            Effect: Allow
+            Action:
+              - inspector2:ListFindings
+            Resource: '*'
+
 Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
