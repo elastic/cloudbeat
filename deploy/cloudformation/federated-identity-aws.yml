@@ -48,6 +48,26 @@ Resources:
         # from the shipped cloud-connectors-guardduty template.
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
 
+  # aws/config: rule listing and per-rule compliance reads for the AWS
+  # Config data stream. Mirrors the permission set from the patch files in
+  # elastic/integrations#20240, minus config:DescribeComplianceByConfigRule,
+  # which the CEL program never calls (see elastic/integrations#20437).
+  ElasticAwsConfig:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsConfig
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ElasticAwsConfigRead
+            Effect: Allow
+            Action:
+              - config:DescribeConfigRules
+              - config:GetComplianceDetailsByConfigRule
+            Resource: '*'
+
 Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
