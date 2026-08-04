@@ -48,6 +48,271 @@ Resources:
         # from the shipped cloud-connectors-guardduty template.
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
 
+  # aws/inspector: inspector2 data stream
+  ElasticAwsInspector:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsInspector-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - inspector2:ListFindings
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/securityhub: securityhub_findings, securityhub_findings_full_posture, securityhub_insights
+  ElasticAwsSecurityHub:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsSecurityHub-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+
+              # securityhub_findings + securityhub_findings_full_posture call /findings
+              # securityhub_insights calls /insights/get
+              # Both /findings and GetFindingsV2 authorize as securityhub:GetFindings
+              - securityhub:GetFindings
+              - securityhub:GetInsights
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/cloudwatch: cloudwatch_logs (aws-cloudwatch) and cloudwatch_metrics (aws/metrics)
+  # Also covers ec2_logs, elb_logs, lambda_logs via the shared aws-cloudwatch input
+  ElasticAwsCloudwatchLogs:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsCloudwatchLogs-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:FilterLogEvents
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # Shared base for all aws/metrics metricsets (cloudwatch, ec2, elb, lambda, rds, etc.)
+  ElasticAwsMetrics:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsMetrics-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeRegions
+              - cloudwatch:ListMetrics
+              - cloudwatch:GetMetricData
+              - tag:GetResources
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/awshealth: health events data stream
+  ElasticAwsHealth:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsHealth-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - health:DescribeEvents
+              - health:DescribeEventDetails
+              - health:DescribeAffectedEntities
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/billing: billing metrics data stream
+  ElasticAwsBilling:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsBilling-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ce:GetCostAndUsage
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/dynamodb: dynamodb metrics data stream
+  ElasticAwsDynamoDB:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsDynamoDB-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:ListTables
+              - dynamodb:DescribeTable
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/ebs: ebs metrics data stream
+  ElasticAwsEBS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsEBS-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeVolumes
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/ec2: ec2_metrics data stream
+  ElasticAwsEC2:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsEC2-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/ecs: ecs_metrics data stream
+  ElasticAwsECS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsECS-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ecs:ListClusters
+              - ecs:DescribeClusters
+              - ecs:ListServices
+              - ecs:DescribeServices
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/elb: elb_metrics data stream
+  ElasticAwsELB:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsELB-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - elasticloadbalancing:DescribeLoadBalancers
+              - elasticloadbalancing:DescribeTargetGroups
+              - elasticloadbalancing:DescribeTargetHealth
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/lambda: lambda metrics data stream
+  ElasticAwsLambda:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsLambda-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - lambda:ListFunctions
+              - lambda:GetFunction
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/rds: rds metrics data stream
+  ElasticAwsRDS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsRDS-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - rds:DescribeDBInstances
+              - rds:DescribeDBClusters
+              - rds:ListTagsForResource
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/sns: sns metrics data stream
+  ElasticAwsSNS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsSNS-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sns:ListTopics
+              - sns:GetTopicAttributes
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/sqs: sqs metrics data stream
+  ElasticAwsSQS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsSQS-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:ListQueues
+              - sqs:GetQueueAttributes
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  # aws/transitgateway: transitgateway metrics data stream
+  ElasticAwsTransitGateway:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsTransitGateway-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeTransitGateways
+              - ec2:DescribeTransitGatewayAttachments
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
 Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
