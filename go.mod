@@ -194,7 +194,7 @@ require (
 	github.com/go-openapi/swag/stringutils v0.27.1 // indirect
 	github.com/go-openapi/swag/typeutils v0.27.1 // indirect
 	github.com/go-openapi/swag/yamlutils v0.27.1 // indirect
-	github.com/gocsaf/csaf/v3 v3.5.1 // indirect
+	github.com/gocsaf/csaf/v3 v3.6.0 // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/gofrs/uuid/v5 v5.4.0 // indirect
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
