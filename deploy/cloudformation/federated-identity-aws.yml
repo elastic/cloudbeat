@@ -63,26 +63,6 @@ Resources:
       Roles:
         - !Ref ElasticFederatedIdentityRole
 
-  # aws/securityhub: securityhub_findings, securityhub_findings_full_posture, securityhub_insights
-  ElasticAwsSecurityHub:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub ElasticAwsSecurityHub-${AWS::StackName}
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-
-              # securityhub_findings + securityhub_findings_full_posture call /findings
-              # securityhub_insights calls /insights/get
-              # Both /findings and GetFindingsV2 authorize as securityhub:GetFindings
-              - securityhub:GetFindings
-              - securityhub:GetInsights
-            Resource: '*'
-      Roles:
-        - !Ref ElasticFederatedIdentityRole
-
   # aws/cloudwatch: cloudwatch_logs (aws-cloudwatch) and cloudwatch_metrics (aws/metrics)
   # Also covers ec2_logs, elb_logs, lambda_logs via the shared aws-cloudwatch input
   ElasticAwsCloudwatchLogs:
