@@ -135,6 +135,22 @@ Resources:
       Roles:
         - !Ref ElasticFederatedIdentityRole
 
+  # aws/config: rule listing and per-rule compliance reads for the AWS Config data stream
+  ElasticAwsConfig:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsConfig-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - config:DescribeConfigRules
+              - config:GetComplianceDetailsByConfigRule
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
   # aws/billing: billing metrics data stream
   ElasticAwsBilling:
     Type: AWS::IAM::Policy
