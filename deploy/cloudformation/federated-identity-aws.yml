@@ -48,6 +48,28 @@ Resources:
         # from the shipped cloud-connectors-guardduty template.
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
 
+  # aws/cloudwatch: cloudwatch_logs (aws-cloudwatch input) and cloudwatch_metrics (aws/metrics input)
+  ElasticAwsCloudwatch:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsCloudwatch-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+
+              # cloudwatch_logs — aws-cloudwatch input calls DescribeLogGroups and FilterLogEvents
+              - logs:DescribeLogGroups
+              - logs:FilterLogEvents
+
+              # cloudwatch_metrics — aws/metrics cloudwatch metricset calls ListMetrics and GetMetricData
+              - cloudwatch:ListMetrics
+              - cloudwatch:GetMetricData
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
 Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
