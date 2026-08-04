@@ -41,7 +41,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.101.1
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.53.3
 	github.com/aws/aws-sdk-go-v2/service/rds v1.124.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.106.3
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.106.4
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.73.3
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.75.3
 	github.com/aws/aws-sdk-go-v2/service/sns v1.42.3
