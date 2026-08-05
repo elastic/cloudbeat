@@ -291,9 +291,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 					AccountType: config.SingleAccount,
 					ProjectId:   testProjectId,
 					GcpClientOpt: config.GcpClientOpt{
-						ServiceAccountEmail: testServiceAccountEmail,
-						Audience:            testAudience,
-						CloudConnectorID:    "test-connector-uuid",
+						ServiceAccountEmail:  testServiceAccountEmail,
+						Audience:             testAudience,
+						IdentityFederationID: "test-connector-uuid",
 					},
 				},
 			},
@@ -313,9 +313,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 					AccountType:    config.OrganizationAccount,
 					OrganizationId: testOrgId,
 					GcpClientOpt: config.GcpClientOpt{
-						ServiceAccountEmail: testServiceAccountEmail,
-						Audience:            testAudience,
-						CloudConnectorID:    "test-connector-uuid",
+						ServiceAccountEmail:  testServiceAccountEmail,
+						Audience:             testAudience,
+						IdentityFederationID: "test-connector-uuid",
 					},
 				},
 			},
@@ -335,9 +335,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 					AccountType: config.SingleAccount,
 					ProjectId:   testProjectId,
 					GcpClientOpt: config.GcpClientOpt{
-						ServiceAccountEmail: testServiceAccountEmail,
-						Audience:            testAudience,
-						CloudConnectorID:    "test-connector-uuid",
+						ServiceAccountEmail:  testServiceAccountEmail,
+						Audience:             testAudience,
+						IdentityFederationID: "test-connector-uuid",
 					},
 				},
 			},
@@ -400,7 +400,7 @@ func mockGoogleAuthProvider(err error) *MockGoogleAuthProviderAPI {
 
 func mockGoogleAuthProviderWithCloudConnectors(err error) *MockGoogleAuthProviderAPI {
 	googleProviderAPI := &MockGoogleAuthProviderAPI{}
-	on := googleProviderAPI.EXPECT().FindCloudConnectorsCredentials(mock.Anything, mock.Anything, mock.Anything)
+	on := googleProviderAPI.EXPECT().FindIdentityFederationCredentials(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
 			[]option.ClientOption{option.WithTokenSource(nil)},
