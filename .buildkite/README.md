@@ -30,7 +30,7 @@ After a successful build, the pipeline publishes the generated artifacts to the 
 - **Manual run**: start a new build of [cloudbeat-dra-scheduler](https://buildkite.com/elastic/cloudbeat-dra-scheduler) on `main`.
 - **Verify**: confirm child cloudbeat builds pass Snapshot publish, then check [dra-info](https://artifacts-staging.elastic.co/dra-info/index.html) and `https://storage.googleapis.com/elastic-artifacts-snapshot/cloudbeat/latest/<branch>.json`.
 
-Optional env vars for the scheduler script (`.buildkite/scripts/dra-scheduler.sh`): `EXCLUDE_BRANCHES` (CSV), `SKIP_UPLOAD=true` (dry-run), `SKIP_REMOTE_CHECK=true`.
+Optional env vars for the scheduler script (`.buildkite/scripts/dra-scheduler.sh`): `EXCLUDE_BRANCHES` (CSV), `SKIP_UPLOAD=true` (dry-run), `SKIP_REMOTE_CHECK=true`, `YQ_VERSION` (pinned mikefarah/yq tag).
 
 ## Pipeline Configuration
 

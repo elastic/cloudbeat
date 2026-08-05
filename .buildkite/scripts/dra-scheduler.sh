@@ -8,6 +8,7 @@
 #   SKIP_REMOTE_CHECK — if "true", do not verify branches exist on origin
 #   MERGIFY_FILE     — path to Mergify config (default: .mergify.yml)
 #   PIPELINE_TO_TRIGGER — Buildkite pipeline slug (default: cloudbeat)
+#   YQ_VERSION       — mikefarah/yq release tag (default: v4.45.1)
 
 set -euo pipefail
 
@@ -16,28 +17,27 @@ PIPELINE_TO_TRIGGER="${PIPELINE_TO_TRIGGER:-cloudbeat}"
 SKIP_UPLOAD="${SKIP_UPLOAD:-false}"
 SKIP_REMOTE_CHECK="${SKIP_REMOTE_CHECK:-false}"
 EXCLUDE_BRANCHES="${EXCLUDE_BRANCHES:-}"
+YQ_VERSION="${YQ_VERSION:-v4.45.1}"
 
 install_yq() {
-    if command -v yq >/dev/null 2>&1 && yq --version 2>/dev/null | grep -q mikefarah; then
-        return
-    fi
-    echo "--- Downloading yq"
-    local yq_bin="/usr/local/bin/yq"
-    if [[ ! -w "$(dirname "${yq_bin}")" ]]; then
-        yq_bin="${TMPDIR:-/tmp}/yq"
-    fi
+    echo "--- Installing yq ${YQ_VERSION}"
+    local yq_dir yq_bin yq_asset
+    yq_dir="$(mktemp -d)"
+    yq_bin="${yq_dir}/yq"
+
     # Prefer the host arch when downloading outside Linux CI.
-    local yq_asset="yq_linux_amd64"
+    yq_asset="yq_linux_amd64"
     case "$(uname -s)-$(uname -m)" in
     Darwin-arm64) yq_asset="yq_darwin_arm64" ;;
     Darwin-x86_64) yq_asset="yq_darwin_amd64" ;;
     Linux-aarch64 | Linux-arm64) yq_asset="yq_linux_arm64" ;;
     esac
+
     curl -fsSL --retry-max-time 60 --retry 3 --retry-delay 5 \
         -o "${yq_bin}" \
-        "https://github.com/mikefarah/yq/releases/latest/download/${yq_asset}"
+        "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${yq_asset}"
     chmod a+x "${yq_bin}"
-    PATH="$(dirname "${yq_bin}"):${PATH}"
+    PATH="${yq_dir}:${PATH}"
     export PATH
 }
 
@@ -97,17 +97,19 @@ BRANCHES=()
 add_branch "main"
 
 # Collect unique X.Y destinations under actions.backport.branches (not "main").
+# Tolerate missing pull_request_rules and an empty X.Y set (main-only is valid).
 while IFS= read -r branch; do
     [[ -z "${branch}" ]] && continue
     add_branch "${branch}"
 done < <(
     yq -r '
-    .pull_request_rules[]
-    | select(.actions.backport.branches != null)
-    | .actions.backport.branches[]
-  ' "${MERGIFY_FILE}" |
+      (.pull_request_rules // [])[]
+      | select(.actions.backport.branches != null)
+      | .actions.backport.branches[]
+    ' "${MERGIFY_FILE}" |
         grep -E '^[0-9]+\.[0-9]+$' |
-        sort -Vu
+        sort -t. -k1,1n -k2,2n ||
+        true
 )
 
 TARGET_BRANCHES=()
@@ -139,7 +141,7 @@ trap 'rm -f "${STEPS_FILE}"' EXIT
     echo "steps:"
     for branch in "${TARGET_BRANCHES[@]}"; do
         cat <<EOF
-  - trigger: ${PIPELINE_TO_TRIGGER}
+  - trigger: "${PIPELINE_TO_TRIGGER}"
     label: ":rocket: DRA refresh / ${branch}"
     async: true
     build:
