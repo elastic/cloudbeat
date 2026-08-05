@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Creates an IAM Role for Elastic Federated Identity (Cloud Connectors). Grants read-only permissions for the Elastic AWS integrations that support Federated Identity, accumulated per integration from each package's declared provider_permissions.
+Description: 'Creates an IAM Role for Elastic Federated Identity (Cloud Connectors). Grants read-only permissions for all Elastic AWS integrations that support Federated Identity: the aws package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services), Cloud Security Posture Management (cloud_security_posture), and Cloud Asset Inventory (cloud_asset_inventory).'
 
 Parameters:
   ElasticResourceId:
@@ -47,6 +47,13 @@ Resources:
         # aws/guardduty: pre-dates provider_permissions; grant carried over
         # from the shipped cloud-connectors-guardduty template.
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
+
+        # cloud_security_posture (CSPM) and cloud_asset_inventory (CAI):
+        # both require SecurityAudit for broad read-only access to AWS config
+        # and resource metadata. Consolidates the grants previously split across
+        # deploy/cloudformation/cloud-connectors-remote-role.yml (CSPM) and
+        # deploy/asset-inventory-cloudformation/cloud-connectors-remote-role.yml (CAI).
+        - arn:aws:iam::aws:policy/SecurityAudit
 
   # aws/inspector: inspector2 data stream
   ElasticAwsInspector:
