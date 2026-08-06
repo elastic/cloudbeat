@@ -3,12 +3,14 @@
 # then upload Buildkite trigger steps for the cloudbeat DRA pipeline.
 #
 # Optional env:
-#   EXCLUDE_BRANCHES — comma-separated branches to skip (e.g. "9.3")
+#   EXCLUDE_BRANCHES — comma-separated branches to skip (e.g. "9.3" or "9.3, 9.4")
 #   SKIP_UPLOAD      — if "true", print generated steps and exit (local dry-run)
 #   SKIP_REMOTE_CHECK — if "true", do not verify branches exist on origin
 #   MERGIFY_FILE     — path to Mergify config (default: .mergify.yml)
 #   PIPELINE_TO_TRIGGER — Buildkite pipeline slug (default: cloudbeat)
 #   YQ_VERSION       — mikefarah/yq release tag (default: v4.45.1)
+#   YQ_SHA256        — optional expected SHA-256 of the yq binary; when unset,
+#                      verify against the release checksums file for YQ_VERSION
 
 set -euo pipefail
 
@@ -18,12 +20,78 @@ SKIP_UPLOAD="${SKIP_UPLOAD:-false}"
 SKIP_REMOTE_CHECK="${SKIP_REMOTE_CHECK:-false}"
 EXCLUDE_BRANCHES="${EXCLUDE_BRANCHES:-}"
 YQ_VERSION="${YQ_VERSION:-v4.45.1}"
+YQ_SHA256="${YQ_SHA256:-}"
+YQ_DIR=""
+STEPS_FILE=""
+
+cleanup() {
+    if [[ -n "${STEPS_FILE}" ]]; then
+        rm -f "${STEPS_FILE}"
+    fi
+    if [[ -n "${YQ_DIR}" ]]; then
+        rm -rf "${YQ_DIR}"
+    fi
+}
+trap cleanup EXIT
+
+sha256_file() {
+    local path="$1"
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "${path}" | awk '{ print $1 }'
+    else
+        shasum -a 256 "${path}" | awk '{ print $1 }'
+    fi
+}
+
+verify_yq_sha256() {
+    local yq_bin="$1"
+    local yq_asset="$2"
+    local expected actual
+
+    if [[ -n "${YQ_SHA256}" ]]; then
+        expected="${YQ_SHA256}"
+    else
+        echo "--- Fetching yq ${YQ_VERSION} checksums"
+        curl -fsSL --retry-max-time 60 --retry 3 --retry-delay 5 \
+            -o "${YQ_DIR}/checksums" \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/checksums"
+        curl -fsSL --retry-max-time 60 --retry 3 --retry-delay 5 \
+            -o "${YQ_DIR}/checksums_hashes_order" \
+            "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/checksums_hashes_order"
+
+        local sha_idx
+        sha_idx=$(awk '$0 == "SHA-256" { print NR; exit }' "${YQ_DIR}/checksums_hashes_order")
+        if [[ -z "${sha_idx}" ]]; then
+            echo "^^^ +++"
+            echo "ERROR: SHA-256 not found in checksums_hashes_order for yq ${YQ_VERSION}"
+            exit 1
+        fi
+        expected=$(awk -v file="${yq_asset}" -v idx="${sha_idx}" '
+            $1 == file { print $(idx + 1); exit }
+        ' "${YQ_DIR}/checksums")
+        if [[ -z "${expected}" ]]; then
+            echo "^^^ +++"
+            echo "ERROR: no SHA-256 entry for ${yq_asset} in yq ${YQ_VERSION} checksums"
+            exit 1
+        fi
+    fi
+
+    actual=$(sha256_file "${yq_bin}")
+    if [[ "${actual}" != "${expected}" ]]; then
+        echo "^^^ +++"
+        echo "ERROR: yq SHA-256 mismatch for ${yq_asset}"
+        echo "  expected: ${expected}"
+        echo "  actual:   ${actual}"
+        exit 1
+    fi
+    echo "yq SHA-256 verified (${actual})"
+}
 
 install_yq() {
     echo "--- Installing yq ${YQ_VERSION}"
-    local yq_dir yq_bin yq_asset
-    yq_dir="$(mktemp -d)"
-    yq_bin="${yq_dir}/yq"
+    local yq_bin yq_asset
+    YQ_DIR="$(mktemp -d)"
+    yq_bin="${YQ_DIR}/yq"
 
     # Prefer the host arch when downloading outside Linux CI.
     yq_asset="yq_linux_amd64"
@@ -37,7 +105,8 @@ install_yq() {
         -o "${yq_bin}" \
         "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${yq_asset}"
     chmod a+x "${yq_bin}"
-    PATH="${yq_dir}:${PATH}"
+    verify_yq_sha256 "${yq_bin}" "${yq_asset}"
+    PATH="${YQ_DIR}:${PATH}"
     export PATH
 }
 
@@ -48,6 +117,9 @@ is_excluded() {
     local IFS=','
     # shellcheck disable=SC2086
     for excl in ${EXCLUDE_BRANCHES}; do
+        # Trim leading/trailing whitespace so "9.3, 9.4" works.
+        excl="${excl#"${excl%%[![:space:]]*}"}"
+        excl="${excl%"${excl##*[![:space:]]}"}"
         if [[ "${branch}" == "${excl}" ]]; then
             return 0
         fi
@@ -134,7 +206,6 @@ fi
 echo "Target branches: ${TARGET_BRANCHES[*]}"
 
 STEPS_FILE="$(mktemp)"
-trap 'rm -f "${STEPS_FILE}"' EXIT
 
 {
     echo "# yaml-language-server: \$schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json"
