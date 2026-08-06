@@ -29,6 +29,7 @@ After a successful build, the pipeline publishes the generated artifacts to the 
 - **EOL**: remove the Mergify backport rule for that branch; the scheduler stops triggering it.
 - **Manual run**: start a new build of [cloudbeat-dra-scheduler](https://buildkite.com/elastic/cloudbeat-dra-scheduler) on `main`.
 - **Verify**: confirm child cloudbeat builds pass Snapshot publish, then check [dra-info](https://artifacts-staging.elastic.co/dra-info/index.html) and `https://storage.googleapis.com/elastic-artifacts-snapshot/cloudbeat/latest/<branch>.json`.
+- **Failures**: the scheduler notifies `#cloud-sec-ci` when the scheduler build itself fails. Child `cloudbeat` DRA builds keep their existing failure notifications.
 
 Optional env vars for the scheduler script (`.buildkite/scripts/dra-scheduler.sh`): `EXCLUDE_BRANCHES` (CSV, whitespace around values is ignored), `SKIP_UPLOAD=true` (dry-run), `SKIP_REMOTE_CHECK=true`, `YQ_VERSION` (pinned mikefarah/yq tag), `YQ_SHA256` (optional expected binary hash; when unset, verified against the release checksums file).
 

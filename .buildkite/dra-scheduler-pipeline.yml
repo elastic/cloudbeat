@@ -3,6 +3,13 @@
 # Weekly scheduler that fans out DRA refresh builds to all team-maintained
 # cloudbeat branches (main + Mergify backport destinations).
 
+notify:
+  - slack:
+      channels:
+        - "#cloud-sec-ci"
+      message: "cloudbeat-dra-scheduler failed — ${BUILDKITE_BUILD_URL}"
+    if: build.state == "failed"
+
 steps:
   - label: ":pipeline: Generate cloudbeat DRA triggers for maintained branches"
     command: .buildkite/scripts/dra-scheduler.sh
