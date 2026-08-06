@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: 'Creates an IAM Role for Elastic Federated Identity (Cloud Connectors). Grants read-only permissions for all Elastic AWS integrations that support Federated Identity: the aws package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services), Cloud Security Posture Management (cloud_security_posture), and Cloud Asset Inventory (cloud_asset_inventory).'
+Description: 'Creates an IAM Role for Elastic Identity Federation. Grants read-only permissions for all Elastic AWS integrations that support Identity Federation: the AWS package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services)'
 
 Parameters:
   ElasticResourceId:
