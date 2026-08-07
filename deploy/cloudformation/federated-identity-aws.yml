@@ -322,15 +322,16 @@ Outputs:
     Value: !GetAtt ElasticFederatedIdentityRole.Arn
 
   ExternalId:
-    Description: The External ID used in the trust policy. Paste this into Kibana.
-    Value: !Join
-      - '-'
-      - - !Ref ElasticResourceId
-        - !Select
-          - 2
-          - !Split
-            - /
-            - !Ref AWS::StackId
+
+    # The agent composes the full external id as <resource id>-<this value>
+    # (cloudConnectorsExternalID in beats x-pack/libbeat/common/aws), so this
+    # output must be the UUID part only, matching the trust condition above.
+    Description: The External ID part string used in the trust policy. Paste this into Kibana.
+    Value: !Select
+      - 2
+      - !Split
+        - /
+        - !Ref AWS::StackId
 
   StackId:
     Description: Store this in Kibana to construct stack-update URLs later.
