@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 	"github.com/elastic/cloudbeat/internal/resources/utils/strings"
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
@@ -174,6 +175,85 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 			Identity:       map[string]any{"test": "test"},
 		}, r)
 	})
+}
+
+// TestListAllAssetTypesByName_ContinuesAcrossAllPagesRegardlessOfResultTruncated is a
+// regression test for the pagination bug where most Azure subscriptions
+// returned only subscription-level findings with zero resource-level findings.
+//
+// Real Azure Resource Graph responses set ResultTruncated=false on every ordinary
+// paginated page - ResultTruncated only communicates that paging itself is unavailable
+// (e.g. because the query uses a `limit`/`take` operator), not whether more pages exist.
+// The authoritative "more data available" signal, per Microsoft's own reference
+// implementations (which loop "while SkipToken is not nil"), is solely the presence of
+// SkipToken. Before the fix, ListAllAssetTypesByName stopped fetching as soon as it saw
+// ResultTruncated == false, which meant it always stopped after the very first page and
+// silently dropped every subsequent page of resources - even though SkipToken indicated
+// more pages were available. This test fails against the pre-fix implementation (it
+// returns only the first page's single asset) and passes once pagination is driven
+// exclusively by SkipToken.
+func (s *ProviderTestSuite) TestListAllAssetTypesByName_ContinuesAcrossAllPagesRegardlessOfResultTruncated() {
+	pages := []armresourcegraph.QueryResponse{
+		{
+			Count:           to.Ptr(int64(1)),
+			Data:            []any{rawAsset("1")},
+			ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedFalse),
+			SkipToken:       to.Ptr("page-2-token"),
+		},
+		{
+			Count:           to.Ptr(int64(1)),
+			Data:            []any{rawAsset("2")},
+			ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedFalse),
+			SkipToken:       to.Ptr("page-3-token"),
+		},
+		{
+			Count:           to.Ptr(int64(1)),
+			Data:            []any{rawAsset("3")},
+			ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedFalse),
+			SkipToken:       nil,
+		},
+	}
+	expectedIncomingSkipTokens := []string{"", "page-2-token", "page-3-token"}
+
+	callCount := 0
+	client := &ResourceGraphAzureClientWrapper{
+		AssetQuery: func(_ context.Context, query armresourcegraph.QueryRequest, _ *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
+			s.Require().Lessf(callCount, len(pages), "provider requested a %dth page, but the mock server only has %d pages", callCount+1, len(pages))
+			s.Equal(expectedIncomingSkipTokens[callCount], pointers.Deref(query.Options.SkipToken), "unexpected SkipToken sent for call #%d", callCount)
+
+			response := armresourcegraph.ClientResourcesResponse{QueryResponse: pages[callCount]}
+			callCount++
+			return response, nil
+		},
+	}
+
+	provider := &ResourceGraphProvider{
+		log:    testhelper.NewLogger(s.T()),
+		client: client,
+	}
+
+	values, err := provider.ListAllAssetTypesByName(s.T().Context(), "test", []string{"test"})
+	s.Require().NoError(err)
+	s.Equal(len(pages), callCount, "expected the provider to fetch every page")
+	s.Len(values, len(pages), "expected assets from all pages to be aggregated, not just the first page")
+
+	ids := lo.Map(values, func(a AzureAsset, _ int) string { return a.Id })
+	s.ElementsMatch([]string{"1", "2", "3"}, ids)
+}
+
+func rawAsset(id string) map[string]any {
+	return map[string]any{
+		"id":             id,
+		"name":           id,
+		"location":       id,
+		"properties":     map[string]any{"test": "test"},
+		"resourceGroup":  id,
+		"subscriptionId": id,
+		"tenantId":       id,
+		"type":           id,
+		"sku":            map[string]any{"test": "test"},
+		"identity":       map[string]any{"test": "test"},
+	}
 }
 
 func Test_generateQuery(t *testing.T) {
