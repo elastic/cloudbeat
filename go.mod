@@ -365,7 +365,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
-	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/docker/cli v29.7.1+incompatible // indirect
 	github.com/docker/docker v28.5.2+incompatible // indirect
@@ -596,6 +595,7 @@ require (
 	al.essio.dev/pkg/shellescape v1.6.0 // indirect
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
 	github.com/cenkalti/backoff/v7 v7.0.0 // indirect
+	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/go-openapi/swag/pools v0.28.0 // indirect
 )
 
