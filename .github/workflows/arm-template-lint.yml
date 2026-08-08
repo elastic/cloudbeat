@@ -11,6 +11,9 @@ on:
     paths:
       - "deploy/azure/*.json"
 
+permissions:
+  contents: read
+
 jobs:
   lint-arm-ttk:
     name: Lint

@@ -22,6 +22,9 @@ env:
   SNYK_API_KEY: ${{ secrets.SNYK_API_KEY }}
   SNYK_INTEGRATION_ID: ${{ secrets.SNYK_INTEGRATION_ID }}
 
+permissions:
+  contents: read
+
 jobs:
   bump_version:
     runs-on: ubuntu-latest
