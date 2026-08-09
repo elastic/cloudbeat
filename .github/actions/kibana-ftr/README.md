@@ -54,8 +54,8 @@ This action performs the following steps:
 3. **Setup Node**:
    - Uses the `actions/setup-node@v4` action to set up the Node.js environment based on the `package.json`.
 
-4. **Setup Chrome**:
-   - Installs Chrome 145 via `browser-actions/setup-chrome` so FTR runs with a Chrome version that matches Kibana's ChromeDriver (the GitHub runner image may ship an older Chrome). The installed binary path is passed to FTR via `TEST_BROWSER_BINARY_PATH`.
+4. **Resolve Chrome version / Setup Chrome**:
+   - Reads the Chrome major from the checked-out Kibana `devDependencies.chromedriver` (e.g. `151.0.3` → `151`), then installs that Chrome via `browser-actions/setup-chrome` so FTR matches Kibana's ChromeDriver. The installed binary path is passed to FTR via `TEST_BROWSER_BINARY_PATH`.
 
 5. **Bootstrap Kibana**:
    - Runs the `yarn kbn bootstrap` command in the `kibana` directory to bootstrap the Kibana environment.

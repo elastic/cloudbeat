@@ -52,11 +52,30 @@ runs:
       with:
         node-version-file: ${{ steps.globals.outputs.KIBANA_DIR }}/package.json
 
+    - name: Resolve Chrome version from Kibana ChromeDriver
+      id: chrome-version
+      shell: bash
+      working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      run: |
+        set -euo pipefail
+        ver="$(jq -r '.devDependencies.chromedriver // empty' package.json)"
+        if [[ -z "$ver" || "$ver" == "null" ]]; then
+          echo "::error::chromedriver missing from kibana/package.json devDependencies"
+          exit 1
+        fi
+        major="${ver%%.*}"
+        if [[ ! "$major" =~ ^[0-9]+$ ]]; then
+          echo "::error::unexpected chromedriver version: $ver"
+          exit 1
+        fi
+        echo "Resolved Chrome $major from Kibana chromedriver@$ver"
+        echo "major=$major" >> "$GITHUB_OUTPUT"
+
     - name: Setup Chrome
       id: chrome
       uses: browser-actions/setup-chrome@4f8e94349a351df0f048634f25fec36c3c91eded # v2.1.1
       with:
-        chrome-version: 151
+        chrome-version: ${{ steps.chrome-version.outputs.major }}
 
     - name: Bootstrap Kibana
       shell: bash
