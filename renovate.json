@@ -5,6 +5,7 @@
   ],
   "baseBranches": [
     "main",
+    "9.5",
     "9.4",
     "9.3",
     "8.19"
@@ -239,6 +240,7 @@
     {
       "description": "Disable CI/infrastructure/test-environment updates on release branches",
       "matchBaseBranches": [
+        "9.5",
         "9.4",
         "9.3",
         "8.19"
