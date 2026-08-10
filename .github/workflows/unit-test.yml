@@ -29,7 +29,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Get diff k8s manifests
         uses: technote-space/get-diff-action@f27caffdd0fb9b13f4fc191c016bb4e0632844af # v6
