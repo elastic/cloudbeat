@@ -223,6 +223,14 @@ jobs:
             exit 1
           fi
 
+      # Resolve S3 prefix before auth so always() uploads never write to DEPLOYMENT_NAME_/
+      - name: Set S3 state folder
+        run: |
+          TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')
+          S3_BUCKET_PATH="${S3_BASE_BUCKET}/${DEPLOYMENT_NAME}_${TF_STATE_FOLDER}"
+          echo "TF_STATE_FOLDER=$TF_STATE_FOLDER" >> "$GITHUB_ENV"
+          echo "S3_BUCKET_PATH=$S3_BUCKET_PATH" >> "$GITHUB_ENV"
+
       - name: Mask Sensitive Data
         if: inputs.ec-api-key != ''
         run: |
@@ -396,7 +404,6 @@ jobs:
       - name: Update Vars
         run: |
           echo "TF_VAR_gcp_project_id=$GCP_PROJECT" >> $GITHUB_ENV
-          echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
       - name: Deploy ELK Cloud Stack
         id: elk-stack
@@ -412,15 +419,15 @@ jobs:
           docker-image-version-override: ${{ env.TF_VAR_pin_version }}
           kibana-enable-entity-analytics-settings: ${{ inputs.kibana_enable_entity_analytics_settings }}
           kibana-instance-size: "4g"
-          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          env-s3-bucket: ${{ env.S3_BUCKET_PATH }}
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
       - name: Upload environment info
         id: upload-state
-        if: always()
+        if: always() && env.S3_BUCKET_PATH != ''
         env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          S3_BUCKET: ${{ env.S3_BUCKET_PATH }}
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
           ESS_REGION: ${{ inputs.ess-region || 'production-cft' }}
           ESS_REGION_MAPPED: ${{ env.ESS_REGION }}
@@ -499,7 +506,7 @@ jobs:
           okta-logs-url: ${{ secrets.OKTA_LOGS_URL }}
           okta-api-key: ${{ secrets.OKTA_API_KEY }}
           okta-entity-analytics-domain: ${{ secrets.OKTA_ENTITY_ANALYTICS_DOMAIN }}
-          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          env-s3-bucket: ${{ env.S3_BUCKET_PATH }}
           es-user: ${{ env.ES_USER }}
           es-password: ${{ env.ES_PASSWORD }}
           kibana-url: ${{ env.KIBANA_URL }}
@@ -534,7 +541,7 @@ jobs:
           cspm-azure-creds: ${{ secrets.AZURE_CREDENTIALS }}
           cspm-azure-tags: ${{ env.AZURE_DEFAULT_TAGS }}
           stack-enrollment-token: ${{ env.ENROLLMENT_TOKEN }}
-          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          env-s3-bucket: ${{ env.S3_BUCKET_PATH }}
           es-user: ${{ env.ES_USER }}
           es-password: ${{ env.ES_PASSWORD }}
           kibana-url: ${{ env.KIBANA_URL }}
