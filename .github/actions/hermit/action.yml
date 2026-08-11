@@ -94,7 +94,10 @@ runs:
     - if: ${{ inputs.init-tools == 'true' }}
       name: Install security-policies poetry dependencies
       shell: bash
-      run: cd ./security-policies && poetry install --no-root
+      run: |
+        cd ./security-policies
+        poetry env use python3.11
+        poetry install --no-root
     - if: ${{ inputs.init-tools == 'true' }}
       name: Install pre-commit repos
       shell: bash
