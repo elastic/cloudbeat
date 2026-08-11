@@ -1,4 +1,4 @@
-FROM debian@sha256:35b8ff74ead4880f22090b617372daff0ccae742eb5674455d542bef71ef1999
+FROM debian@sha256:34cd9e9fd437c0a095ec39cb2e73422c9f30821b0d0848ed74fd0d43bae4d958
 RUN set -x && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
