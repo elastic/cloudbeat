@@ -148,19 +148,6 @@ pull_request_rules:
       backport:
         branches:
           - "8.19"
-  - name: backport patches to 9.3 branch
-    conditions:
-      - merged
-      - label=backport-v9.3.0
-    actions:
-      backport:
-        assignees:
-          - "{{ author }}"
-        branches:
-          - "9.3"
-        labels:
-          - "backport"
-        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
   - name: backport patches to 9.4 branch
     conditions:
       - merged
