@@ -110,7 +110,7 @@ jobs:
 
       - id: azure-auth
         name: Azure login
-        uses: azure/login@7184910d9eb2b1c5e48f7073824a90609bb9b6d6 # v2
+        uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
