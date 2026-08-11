@@ -3,10 +3,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: 'Creates an IAM Role for Elastic Identity Federation. Grants read-only permissions for all Elastic AWS integrations that support Identity Federation: the AWS package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services)'
 
 Parameters:
-  ElasticResourceId:
-    Description: The Elastic resource ID (deployment component ID or serverless project ID) that the role will trust.
-    Type: String
-
   ElasticRoleARN:
     Description: Elastic's super-role ARN. Change only for test environments.
     Type: String
@@ -20,6 +16,10 @@ Resources:
   # permissions get one AWS::IAM::Policy resource per federated integration.
   # Add grants only when an integration gains Federated Identity support —
   # never ahead of a declaration.
+  #
+  # No sts:ExternalId trust condition: the aws package's Identity Federation
+  # path does not use an external ID (ingest-dev#9116). CSPM and Cloud Asset
+  # Inventory keep the external ID on their own cloud-connectors templates.
   ElasticFederatedIdentityRole:
     Type: AWS::IAM::Role
     Properties:
@@ -31,16 +31,6 @@ Resources:
             Principal:
               AWS: !Ref ElasticRoleARN
             Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Join
-                  - '-'
-                  - - !Ref ElasticResourceId
-                    - !Select
-                      - 2
-                      - !Split
-                        - /
-                        - !Ref AWS::StackId
       Path: /
       ManagedPolicyArns:
 
@@ -320,18 +310,6 @@ Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
     Value: !GetAtt ElasticFederatedIdentityRole.Arn
-
-  ExternalId:
-
-    # The agent composes the full external id as <resource id>-<this value>
-    # (cloudConnectorsExternalID in beats x-pack/libbeat/common/aws), so this
-    # output must be the UUID part only, matching the trust condition above.
-    Description: The External ID part string used in the trust policy. Paste this into Kibana.
-    Value: !Select
-      - 2
-      - !Split
-        - /
-        - !Ref AWS::StackId
 
   StackId:
     Description: Store this in Kibana to construct stack-update URLs later.
