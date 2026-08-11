@@ -32,7 +32,7 @@ steps:
           memory: 512Mi
           ephemeralStorage: 1Gi
         plugins:
-          - elastic/vault-github-token#v0.2.0: ~
+          - elastic/vault-github-token#v0.2.1: ~
         command:
           - .buildkite/scripts/release/bump-patch.sh
         timeout_in_minutes: 15
@@ -46,7 +46,7 @@ steps:
           memory: 512Mi
           ephemeralStorage: 1Gi
         plugins:
-          - elastic/vault-github-token#v0.2.0: ~
+          - elastic/vault-github-token#v0.2.1: ~
         command:
           - .buildkite/scripts/release/bump-minor.sh
         timeout_in_minutes: 15
@@ -68,7 +68,7 @@ steps:
       memory: 512Mi
       ephemeralStorage: 1Gi
     plugins:
-      - elastic/vault-github-token#v0.2.0: ~
+      - elastic/vault-github-token#v0.2.1: ~
     command:
       - .buildkite/scripts/release/post-minor-merge.sh
     timeout_in_minutes: 15
