@@ -39,7 +39,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/iam v1.58.2
 	github.com/aws/aws-sdk-go-v2/service/kms v1.55.5
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.101.3
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.53.6
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.53.7
 	github.com/aws/aws-sdk-go-v2/service/rds v1.124.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.1
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.73.5
@@ -117,7 +117,7 @@ require (
 require github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v6 v6.0.0
 
 require (
-	github.com/aws/aws-sdk-go-v2/service/eks v1.90.5
+	github.com/aws/aws-sdk-go-v2/service/eks v1.91.0
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.65.7
 )
 
