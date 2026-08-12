@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           pip3 install poetry
-          (cd security-policies && poetry install --no-root)
+          (cd security-policies && poetry env use python3.11 && poetry install --no-root)
 
       - name: Pre-commit Hooks
         env:
