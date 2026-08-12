@@ -16,10 +16,6 @@ Resources:
   # permissions get one AWS::IAM::Policy resource per federated integration.
   # Add grants only when an integration gains Federated Identity support —
   # never ahead of a declaration.
-  #
-  # No sts:ExternalId trust condition: the aws package's Identity Federation
-  # path does not use an external ID (ingest-dev#9116). CSPM and Cloud Asset
-  # Inventory keep the external ID on their own cloud-connectors templates.
   ElasticFederatedIdentityRole:
     Type: AWS::IAM::Role
     Properties:
@@ -37,13 +33,6 @@ Resources:
         # aws/guardduty: pre-dates provider_permissions; grant carried over
         # from the shipped cloud-connectors-guardduty template.
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
-
-        # cloud_security_posture (CSPM) and cloud_asset_inventory (CAI):
-        # both require SecurityAudit for broad read-only access to AWS config
-        # and resource metadata. Consolidates the grants previously split across
-        # deploy/cloudformation/cloud-connectors-remote-role.yml (CSPM) and
-        # deploy/asset-inventory-cloudformation/cloud-connectors-remote-role.yml (CAI).
-        - arn:aws:iam::aws:policy/SecurityAudit
 
   # aws/inspector: inspector2 data stream
   ElasticAwsInspector:
