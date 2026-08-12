@@ -774,8 +774,8 @@ github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-cleanhttp v0.5.2 h1:035FKYIWjmULyFRBKPs8TBQoi0x6d9G4xc9neXJWAZQ=
 github.com/hashicorp/go-cleanhttp v0.5.2/go.mod h1:kO/YDlP8L1346E6Sodw+PrpBSV4/SoxCXGY6BqNFT48=
-github.com/hashicorp/go-getter v1.8.6 h1:9sQboWULaydVphxc4S64oAI4YqpuCk7nPmvbk131ebY=
-github.com/hashicorp/go-getter v1.8.6/go.mod h1:nVH12eOV2P58dIiL3rsU6Fh3wLeJEKBOJzhMmzlSWoo=
+github.com/hashicorp/go-getter v1.8.7 h1:R9kNJMbUBriosEPn+jueWrTz20HGhbCRpmete04Rm6s=
+github.com/hashicorp/go-getter v1.8.7/go.mod h1:fqFlibKpwfns/s4oljLB3upJspyfFLQhS7031PlfUDc=
 github.com/hashicorp/go-hclog v1.6.3 h1:Qr2kF+eVWjTiYmU7Y31tYlP1h0q/X3Nl3tPGdaB11/k=
 github.com/hashicorp/go-hclog v1.6.3/go.mod h1:W4Qnvbt70Wk/zYJryRzDRU/4r0kIg0PVHBcfoyhpF5M=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
@@ -1606,8 +1606,8 @@ golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da h1:noIWHXmPHxILtqtCOPIhS
 golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da/go.mod h1:NDW/Ps6MPRej6fsCIbMTohpP40sJ/P/vI1MoTEGwX90=
 gonum.org/v1/gonum v0.17.0 h1:VbpOemQlsSMrYmn7T2OUvQ4dqxQXU+ouZFQsZOx50z4=
 gonum.org/v1/gonum v0.17.0/go.mod h1:El3tOrEuMpv2UdMrbNlKEh9vd86bmQ6vqIcDwxEOc1E=
-google.golang.org/api v0.291.0 h1:wfPbbY+mr9c7wZLqqzrHJLft/q8iFKREd6IgTBUene0=
-google.golang.org/api v0.291.0/go.mod h1:at7kwWbuonglBFEBoeMDAV1bguHqL3qf0BHFsv3coa0=
+google.golang.org/api v0.292.0 h1:Ewiwo/GTtiaPZSNAZQUcWLh8AYDEoPmIXyJfeoTSMHU=
+google.golang.org/api v0.292.0/go.mod h1:07kjmMnFGm2RQuCza2EZM/5N68G/fVvFb1xKjWqoFA0=
 google.golang.org/appengine v1.1.0/go.mod h1:EbEs0AVv82hx2wNQdGPgUI5lhzA/G0D9YwlJXL52JkM=
 google.golang.org/appengine v1.4.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
 google.golang.org/appengine v1.6.5/go.mod h1:8WjMMxjGQR8xUklV/ARdw2HLXBOI7O7uCIDZVag1xfc=
