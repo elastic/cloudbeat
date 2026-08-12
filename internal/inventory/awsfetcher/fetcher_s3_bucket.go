@@ -83,6 +83,7 @@ func (s *s3BucketFetcher) Fetch(ctx context.Context, assetChannel chan<- invento
 				AccountName: s.AccountName,
 				ServiceName: "AWS S3",
 			}),
+			inventory.WithCreatedAt(bucket.CreationDate),
 		)
 	}
 }

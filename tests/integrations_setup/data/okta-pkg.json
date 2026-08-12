@@ -9,6 +9,9 @@
   "name": "",
   "description": "",
   "namespace": "default",
+  "var_group_selections": {
+    "auth_method": "api_key"
+  },
   "inputs": {
     "okta-httpjson": {
       "enabled": true,
@@ -17,23 +20,17 @@
         "initial_interval": "24h",
         "url": "",
         "api_key": "",
-        "okta_scopes": [
-          "okta.logs.read"
+        "enable_request_tracer": false,
+        "tags": [
+          "forwarded",
+          "okta-system"
         ],
-        "enable_request_tracer": false
+        "preserve_original_event": false,
+        "disable_keep_alive": false
       },
       "streams": {
         "okta.system": {
-          "enabled": true,
-          "vars": {
-            "tags": [
-              "forwarded",
-              "okta-system"
-            ],
-            "preserve_original_event": false,
-            "disable_keep_alive": false,
-            "limit": 1000
-          }
+          "enabled": true
         }
       }
     }

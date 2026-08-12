@@ -53,6 +53,12 @@ variable "elasticsearch_autoscale" {
   description = "Optional autoscale the Elasticsearch cluster"
 }
 
+variable "elasticsearch_ml_enabled" {
+  default     = false
+  type        = bool
+  description = "When true, provision an Elasticsearch ML topology tier (ESS only)"
+}
+
 variable "max_size" {
   default     = "128g"
   type        = string
@@ -85,8 +91,14 @@ variable "docker_image" {
   description = "Optional docker image overrides. The full map needs to be specified"
 }
 
-variable "kibana_enable_security_solution_experimental" {
+variable "kibana_enable_entity_analytics_settings" {
   type        = bool
   default     = true
-  description = "When true, set Kibana user_settings_yaml with Security Solution experimental feature flags (ESS only)"
+  description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
+}
+
+variable "kibana_instance_size" {
+  type        = string
+  default     = "4g"
+  description = "ESS Kibana topology memory size (e.g. 4g, 8g)"
 }

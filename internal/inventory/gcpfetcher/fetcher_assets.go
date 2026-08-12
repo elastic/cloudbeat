@@ -20,6 +20,7 @@ package gcpfetcher
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/samber/lo"
@@ -107,9 +108,15 @@ func getAssetEvent(classification inventory.AssetClassification, item *gcpinvent
 		}),
 	}
 
-	// Asset type specific enrichers
+	// Asset type specific enrichers and common resource-level fields
 	if hasResourceData(item) {
 		fields := item.GetResource().GetData().GetFields()
+		// Best-effort creation timestamp: try the common field names used across GCP resource types.
+		// Compute resources use "creationTimestamp"; GKE/Functions/CloudRun use "createTime";
+		// Storage buckets use "timeCreated".
+		enrichers = append(enrichers, inventory.WithCreatedAt(
+			getFirstTimeValue(fields, "createTime", "creationTimestamp", "timeCreated"),
+		))
 		if enricher, ok := assetEnrichers[item.AssetType]; ok {
 			enrichers = append(enrichers, enricher(item, fields)...)
 		}
@@ -370,4 +377,19 @@ func getStringValue(key string, f map[string]*structpb.Value) string {
 		return value.GetStringValue()
 	}
 	return ""
+}
+
+// getFirstTimeValue tries each key in turn and returns a parsed *time.Time from the first
+// key whose value is a non-empty RFC3339 string. Returns nil when none are found.
+func getFirstTimeValue(f map[string]*structpb.Value, keys ...string) *time.Time {
+	for _, key := range keys {
+		raw := getStringValue(key, f)
+		if raw == "" {
+			continue
+		}
+		if t, err := time.Parse(time.RFC3339, raw); err == nil {
+			return &t
+		}
+	}
+	return nil
 }

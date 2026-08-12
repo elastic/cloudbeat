@@ -87,6 +87,7 @@ func (i *iamRoleFetcher) Fetch(ctx context.Context, assetChannel chan<- inventor
 				ID:   pointers.Deref(role.Arn),
 				Name: pointers.Deref(role.RoleName),
 			}),
+			inventory.WithCreatedAt(role.CreateDate),
 		)
 	}
 }

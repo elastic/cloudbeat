@@ -161,7 +161,7 @@ The workflow requires a subset of input parameters. All required inputs are desc
    - **`docker-image-override`**: optional docker image override for agent installs (mostly for BC/SNAPSHOT testing).
    - **`expiration-days`**: how long the environment should be kept before cleanup. Default is `5`.
    - **`cis-infra`**: optional. When `true`, also deploy CIS infrastructure (`infra_type=all`). When `false`, CDR only (`infra_type=cdr`).
-   - **`kibana_security_solution_experimental`** (ESS only): when `true`, applies Kibana advanced setting YAML to enable Security Solution experimental UI flags (Entity Analytics home + watchlist). Default is `true`.
+   - **`kibana_enable_entity_analytics_settings`** (ESS only): when `true`, applies Kibana `user_settings_yaml` with Entity Analytics settings (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments). Default is `true`. Entity Store install is separate — see **`enable-entity-store-v2`** (CDR) or the EA workflow's entity store script.
    - **`enable-entity-store-v2`**: when `true`, the workflow installs **Entity Store v2** (v2 installer script). When `false`, it installs **Entity Store v1 only**. Default is `true`.
 
 3. Click **Run workflow** and wait for completion.
@@ -170,6 +170,14 @@ The workflow requires a subset of input parameters. All required inputs are desc
 
 - **Infrastructure**: CDR VMs (AWS CloudTrail EC2, Azure activity logs VM, GCP audit logs VM, Wiz EC2, Asset Inventory EC2, Elastic Defend Linux + Windows, depending on the `deploy_*` Terraform vars defaults).
 - **Integrations / agents**: CloudTrail, Azure Activity Logs, GCP Audit Logs, Wiz, Okta (optional), Elastic Defend (Fleet), Asset Inventory (gated by stack version), and Entity Store (v1 or v2 based on the checkbox).
+
+## Create Environment (Entity Analytics)
+
+The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft**, applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It also installs Entity Store v2 and runs the risk-score maintainer via `install_entity_risk.sh`. It does not install CIS or CDR cloud infrastructure.
+
+### Inputs (summary)
+
+- **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**. ESS region mapping is fixed to **production-cft**.
 
 
 ## Install Integrations Worfklow
@@ -186,7 +194,9 @@ The [`Install Integrations`](https://github.com/elastic/cloudbeat/actions/workfl
   - **`all`** - Installs both `CIS` and `CDR` integrations.
   - **`cis`** - Installs `CSPM`, `KSPM`, and `CNVM` integrations.
   - **`cdr`** - Installs `Audit Logs`, `Asset Inventory`, and `Wiz` integrations.
-- **`docker-image-override`** - For build candidate versions, specifies a custom Docker image path for agent installations.
+- **`docker-image-override`** - For build candidate versions, specifies a custom docker image path for agent installations.
+
+When **`infra-type`** is **`all`**, GCP CSPM and GCP Asset Inventory each get their own Deployment Manager stacks and service accounts (see **GCP naming (CDR vs CIS)** above).
 
 ## Cleanup Procedure
 

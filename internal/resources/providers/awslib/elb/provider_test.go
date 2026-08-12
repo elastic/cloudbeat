@@ -172,6 +172,17 @@ func TestProvider_DescribeAllLoadBalancers(t *testing.T) {
 							},
 						},
 					}, nil)
+				m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).
+					Return(&elasticloadbalancing.DescribeTagsOutput{
+						TagDescriptions: []types.TagDescription{
+							{
+								LoadBalancerName: pointers.Ref("my-elb-v1"),
+								Tags: []types.Tag{
+									{Key: pointers.Ref("Owner"), Value: pointers.Ref("team-infra")},
+								},
+							},
+						},
+					}, nil)
 				return m
 			},
 			regions:         onlyDefaultRegion,
@@ -199,6 +210,11 @@ func TestProvider_DescribeAllLoadBalancers(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Len(t, got, tt.expectedResults)
+			if len(got) > 0 {
+				lb, ok := got[0].(*ElasticLoadBalancerInfo)
+				require.True(t, ok)
+				assert.Equal(t, "team-infra", lb.GetOwnerTag())
+			}
 		})
 	}
 }

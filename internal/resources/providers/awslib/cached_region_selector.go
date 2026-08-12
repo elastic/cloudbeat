@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/dgraph-io/ristretto"
+	"github.com/dgraph-io/ristretto/v2"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 )

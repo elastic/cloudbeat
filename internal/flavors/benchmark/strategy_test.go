@@ -147,7 +147,7 @@ func mockKubeClient(err error) k8s.ClientGetterAPI {
 	on := kube.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
-			k8sfake.NewSimpleClientset(
+			k8sfake.NewClientset(
 				&core_v1.Node{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "node-name",

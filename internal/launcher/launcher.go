@@ -89,9 +89,13 @@ func (l *launcher) Run(b *beat.Beat) error {
 	// Configure the beats Manager to start after all the reloadable hooks are initialized
 	// and shutdown when the function returns.
 	l.beat = b
-	if err := b.Manager.Start(); err != nil {
+	// Manager.Start is deprecated; it is equivalent to PreInit followed by PostInit.
+	// PreInit starts the manager's check-in loop, PostInit enables starting/stopping
+	// inputs/output now that the reloadable hooks are registered.
+	if err := b.Manager.PreInit(); err != nil {
 		return err
 	}
+	b.Manager.PostInit()
 
 	// Wait for Fleet-side reconfiguration only if beater is running in Agent-managed mode.
 	if b.Manager.Enabled() {

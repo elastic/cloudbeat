@@ -19,6 +19,7 @@ package rds
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 
@@ -28,12 +29,15 @@ import (
 )
 
 type DBInstance struct {
-	Identifier              string   `json:"identifier"`
-	Arn                     string   `json:"arn"`
-	StorageEncrypted        bool     `json:"storage_encrypted"`
-	AutoMinorVersionUpgrade bool     `json:"auto_minor_version_upgrade"`
-	PubliclyAccessible      bool     `json:"publicly_accessible"`
-	Subnets                 []Subnet `json:"subnets"`
+	Identifier              string     `json:"identifier"`
+	Arn                     string     `json:"arn"`
+	StorageEncrypted        bool       `json:"storage_encrypted"`
+	AutoMinorVersionUpgrade bool       `json:"auto_minor_version_upgrade"`
+	PubliclyAccessible      bool       `json:"publicly_accessible"`
+	Engine                  string     `json:"engine,omitempty"`
+	EngineVersion           string     `json:"engine_version,omitempty"`
+	CreatedAt               *time.Time `json:"created_at,omitempty"`
+	Subnets                 []Subnet   `json:"subnets"`
 	region                  string
 }
 

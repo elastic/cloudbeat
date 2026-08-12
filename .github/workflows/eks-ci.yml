@@ -24,8 +24,9 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.14.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "9.3.2"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
+  GOEXPERIMENT: jsonv2 # required by trivy v0.69.3+ (encoding/json/v2)
 
 # run only a single job at a time
 concurrency: EKS-Functional-Tests
@@ -58,7 +59,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out the repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -82,7 +83,7 @@ jobs:
 
       - name: Build elastic-agent
         env:
-          BASE_IMAGE: docker.elastic.co/beats/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+          BASE_IMAGE: docker.elastic.co/elastic-agent/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
           GOOS: linux
           GOARCH: amd64
         run: ./scripts/packaging/docker/elastic-agent/build.sh -t ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }}:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
@@ -105,7 +106,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896 # v2
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2
 
       - name: Load images cloudbeat and cloudbeat-test to ECR
         id: load-to-ecr
@@ -136,7 +137,7 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Check out the repo
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
 
       # Setup all required tools
       - name: Init Hermit
@@ -173,7 +174,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: allure_results-${{ matrix.k8s_context}}
           path: ${{ env.REPORTS_DIR }}
@@ -191,7 +192,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: allure_results-*
           path: artifacts

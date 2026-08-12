@@ -70,6 +70,16 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 	})
 
 	for _, item := range rdsInstances {
+		details := map[string]any{
+			"PubliclyAccessible": item.PubliclyAccessible,
+		}
+		if item.Engine != "" {
+			details["Engine"] = item.Engine
+		}
+		if item.EngineVersion != "" {
+			details["EngineVersion"] = item.EngineVersion
+		}
+
 		assetChannel <- inventory.NewAssetEvent(
 			inventory.AssetClassificationAwsRds,
 			item.GetResourceArn(),
@@ -83,6 +93,8 @@ func (s *rdsFetcher) Fetch(ctx context.Context, assetChannel chan<- inventory.As
 				AccountName: s.AccountName,
 				ServiceName: "AWS RDS",
 			}),
+			inventory.WithEntityDetails(details),
+			inventory.WithCreatedAt(item.CreatedAt),
 		)
 	}
 }

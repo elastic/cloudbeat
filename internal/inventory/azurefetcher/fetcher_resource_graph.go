@@ -19,6 +19,7 @@ package azurefetcher
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-viper/mapstructure/v2"
 
@@ -97,6 +98,7 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, serviceN
 				ServiceName: serviceName,
 			}),
 			inventory.WithLabelsFromAny(item.Tags),
+			inventory.WithCreatedAt(extractAzureCreatedAt(item.Properties)),
 		)
 
 		if resourceType == azurelib.VirtualMachineAssetType {
@@ -137,4 +139,29 @@ func tryUnpackingVMProperties(m map[string]any) *vmProperties {
 		return nil
 	}
 	return o
+}
+
+// extractAzureCreatedAt tries common ARM property keys that carry a resource creation
+// timestamp. Values may arrive as time.Time (from typed SDK providers) or as RFC3339 strings
+// (from the Resource Graph JSON response). Returns nil when no creation time is found.
+func extractAzureCreatedAt(properties map[string]any) *time.Time {
+	for _, key := range []string{"createdTime", "timeCreated", "creationTime", "creationDate"} {
+		v, ok := properties[key]
+		if !ok {
+			continue
+		}
+		switch t := v.(type) {
+		case time.Time:
+			return &t
+		case *time.Time:
+			return t
+		case string:
+			if parsed, err := time.Parse(time.RFC3339, t); err == nil {
+				return &parsed
+			}
+		default:
+			_ = t
+		}
+	}
+	return nil
 }

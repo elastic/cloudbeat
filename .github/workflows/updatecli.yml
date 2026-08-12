@@ -48,17 +48,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [beats, golang, hermit, mods]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [golang, hermit, mods]
         git-branch: [main]
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
           init-tools: "true"
           free-disk: "true"
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
+        uses: updatecli/updatecli-action@d422ba543720d01a96d4c3e3ab8544cc188cd711 # v3.5.0
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:
@@ -85,17 +86,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [golang, beats]
+        # beats is handled by the dedicated bump-beats-version.yml workflow.
+        pipeline-name: [golang]
         git-branch: ${{ fromJSON(needs.active-branches.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Hermit Environment
         uses: ./.github/actions/hermit
         with:
           init-tools: "true"
           free-disk: "true"
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@a327da0e796f543b8fa4706e5ed63014852ead0e # v2.91.0
+        uses: updatecli/updatecli-action@d422ba543720d01a96d4c3e3ab8544cc188cd711 # v3.5.0
       - name: Run Updatecli in Apply mode
         run: updatecli apply --config .ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml --values .ci/updatecli/values.yml
         env:

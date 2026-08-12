@@ -50,7 +50,7 @@
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('resourceGroupDeployment')]",
             "location": "[parameters('DeploymentLocation')]",
             "subscriptionId": "[parameters('SubscriptionId')]",
@@ -81,7 +81,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.Resources/resourceGroups",
-                            "apiVersion": "2023-07-01",
+                            "apiVersion": "2024-11-01",
                             "name": "[parameters('ResourceGroupName')]",
                             "location": "[parameters('DeploymentLocation')]"
                         }
@@ -91,7 +91,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('cloudConnectorDeployment')]",
             "resourceGroup": "[parameters('ResourceGroupName')]",
             "subscriptionId": "[parameters('SubscriptionId')]",
@@ -176,7 +176,7 @@
                     "resources": [
                         {
                             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-                            "apiVersion": "2023-01-31",
+                            "apiVersion": "2024-11-30",
                             "name": "[parameters('userAssignedIdentityName')]",
                             "location": "[parameters('location')]",
                             "tags": {
@@ -186,7 +186,7 @@
                             "resources": [
                                 {
                                     "type": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials",
-                                    "apiVersion": "2023-01-31",
+                                    "apiVersion": "2024-11-30",
                                     "name": "[parameters('federatedIdentityCredentialsName')]",
                                     "dependsOn": [
                                         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName'))]"
@@ -229,11 +229,11 @@
                     "outputs": {
                         "PrincipalId": {
                             "type": "string",
-                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').principalId]"
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2024-11-30').principalId]"
                         },
                         "ClientId": {
                             "type": "string",
-                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2023-01-31').clientId]"
+                            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('userAssignedIdentityName')), '2024-11-30').clientId]"
                         }
                     }
                 }
@@ -244,7 +244,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2023-07-01",
+            "apiVersion": "2024-11-01",
             "name": "[variables('roleAssignmentDeployment')]",
             "location": "[parameters('DeploymentLocation')]",
             "properties": {

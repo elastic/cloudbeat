@@ -16,13 +16,13 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Run script and set matrix
         id: set-matrix
         # This script will generate the matrix of agents and packages
-        # starting from the version 8.17 and up to the latest version.
-        run: python ./.ci/scripts/get_versions.py --after 8.16
+        # starting from the version 8.19 and up to the latest version.
+        run: python ./.ci/scripts/get_versions.py --after 8.19
 
   test-agents:
     name: Agent Compatibility Test
@@ -37,7 +37,7 @@ jobs:
       id-token: "write"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit

@@ -135,6 +135,40 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 				},
 			},
 		},
+		{
+			// Regression test for https://github.com/elastic/seceng/issues/14066:
+			// AWS can return DB instances with a nil DBSubnetGroup (e.g. EC2-Classic
+			// instances or instances in certain transitional states), which used to
+			// cause a nil pointer dereference panic in getDBInstanceSubnets.
+			name: "Should not panic when a DB instance has no DBSubnetGroup",
+			rdsClientMockReturnVals: rdsClientMockReturnVals{
+				"DescribeDBInstances": {
+					awslib.DefaultRegion: {&rdsClient.DescribeDBInstancesOutput{
+						DBInstances: []types.DBInstance{
+							{
+								DBInstanceIdentifier:    &identifier,
+								DBInstanceArn:           &arn,
+								StorageEncrypted:        aws.Bool(false),
+								AutoMinorVersionUpgrade: aws.Bool(false),
+								PubliclyAccessible:      aws.Bool(false),
+								DBSubnetGroup:           nil,
+							},
+						},
+					}, nil},
+				},
+			},
+			expected: []awslib.AwsResource{
+				DBInstance{
+					Identifier:              identifier,
+					Arn:                     arn,
+					StorageEncrypted:        false,
+					AutoMinorVersionUpgrade: false,
+					PubliclyAccessible:      false,
+					Subnets:                 []Subnet{},
+					region:                  awslib.DefaultRegion,
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {

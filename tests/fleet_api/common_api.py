@@ -5,7 +5,7 @@ This module contains API calls related to Fleet settings
 import codecs
 import json
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from fleet_api.base_call_api import (
     APICallException,
@@ -19,6 +19,7 @@ from munch import Munch, munchify
 AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 AGENT_ARTIFACT_SUFFIX_SHORT = "/downloads/"
 
+ARTIFACTS_API_VERSIONS_URL = "https://artifacts-api.elastic.co/v1/versions"
 STAGING_ARTIFACTORY_URL = "https://staging.elastic.co/"
 SNAPSHOT_ARTIFACTORY_URL = "https://snapshots.elastic.co/"
 
@@ -218,10 +219,14 @@ def get_build_info(version: str) -> str:
         return response_obj.build_id
 
     except APICallException as api_ex:
-        logger.error(
-            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
-        )
-        return ""
+        available = get_available_versions()
+        hint = f" Available versions: {available}" if available else ""
+        raise RuntimeError(
+            f"Could not resolve build info for '{version}' "
+            f"(status {api_ex.status_code} from {url}). "
+            f"The version is likely not published on Elastic's artifact servers — "
+            f"check CLOUDBEAT_VERSION/ELK_VERSION in bin/hermit.hcl.{hint}",
+        ) from api_ex
 
 
 def get_artifact_server(version: str, is_short_url: bool = False) -> str:
@@ -294,7 +299,7 @@ def get_package_version(
     cfg: Munch,
     package_name: str = "cloud_security_posture",
     prerelease: bool = True,
-) -> str:
+) -> Optional[str]:
     """
     Retrieve the version of a specified package.
 
@@ -306,7 +311,11 @@ def get_package_version(
                                      Default is True.
 
     Returns:
-        str: The version of the specified package, or None if the API call fails or the package is not found.
+        Optional[str]: The package version string when found in the Fleet EPM list; ``None`` when
+            the package is not listed (not an API error).
+
+    Raises:
+        APICallException: When the Fleet EPM API request fails after retries (including transport errors).
     """
     url = f"{cfg.kibana_url}/api/fleet/epm/packages"
 
@@ -336,7 +345,7 @@ def get_package_version(
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return None
+        raise
 
 
 def get_package(
@@ -565,3 +574,13 @@ def get_telemetry(cfg: Munch) -> dict:
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         raise
+
+
+def get_available_versions() -> list:
+    """Return the versions currently published on the Elastic artifacts API."""
+    try:
+        response = perform_api_call(method="GET", url=ARTIFACTS_API_VERSIONS_URL)
+        return munchify(response).get("versions", [])
+    except APICallException as api_ex:
+        logger.warning(f"Could not fetch available versions list (status {api_ex.status_code}).")
+        return []

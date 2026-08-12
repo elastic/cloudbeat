@@ -34,10 +34,16 @@ variable "serverless_mode" {
   type        = bool
 }
 
-variable "kibana_security_solution_experimental" {
+variable "kibana_enable_entity_analytics_settings" {
   default     = true
-  description = "When true (ESS only), apply Kibana user_settings_yaml for Security Solution experimental flags"
+  description = "When true (ESS only), apply Kibana user_settings_yaml for Entity Analytics (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
   type        = bool
+}
+
+variable "kibana_instance_size" {
+  default     = "4g"
+  type        = string
+  description = "ESS Kibana topology memory size (e.g. 4g, 8g)"
 }
 
 variable "deployment_template" {
@@ -61,6 +67,12 @@ variable "elasticsearch_zone_count" {
   default     = 2
   type        = number
   description = "Optional Elasticsearch zone count"
+}
+
+variable "elasticsearch_ml_enabled" {
+  default     = false
+  type        = bool
+  description = "When true (ESS only), provision an Elasticsearch ML topology tier on the deployment"
 }
 
 variable "max_size" {

@@ -26,6 +26,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
 // DescribeLoadBalancers returns LoadBalancerDescriptions which contain information about the load balancers.
@@ -67,12 +68,21 @@ func (p *Provider) DescribeAllLoadBalancers(ctx context.Context) ([]awslib.AwsRe
 			input.Marker = output.NextMarker
 		}
 
+		names := make([]string, 0, len(all))
+		for _, item := range all {
+			if n := pointers.Deref(item.LoadBalancerName); n != "" {
+				names = append(names, n)
+			}
+		}
+		tagsByName := p.describeTags(ctx, c, names)
+
 		var result []awslib.AwsResource
 		for _, item := range all {
 			result = append(result, &ElasticLoadBalancerInfo{
 				LoadBalancer: item,
 				awsAccount:   p.awsAccountID,
 				region:       region,
+				tags:         tagsByName[pointers.Deref(item.LoadBalancerName)],
 			})
 		}
 		return result, nil
@@ -82,4 +92,32 @@ func (p *Provider) DescribeAllLoadBalancers(ctx context.Context) ([]awslib.AwsRe
 		p.log.Debugf("Fetched %d Classic Elastic Load Balancers", len(result))
 	}
 	return lo.Flatten(elbs), err
+}
+
+// describeTags fetches tags for the given classic load balancer names (chunked to the AWS
+// 20-name limit) and returns a map of load balancer name to its tag key/value pairs.
+func (p *Provider) describeTags(ctx context.Context, c Client, names []string) map[string]map[string]string {
+	out := map[string]map[string]string{}
+	for _, chunk := range lo.Chunk(names, 20) {
+		if len(chunk) == 0 {
+			continue
+		}
+		resp, err := c.DescribeTags(ctx, &elb.DescribeTagsInput{LoadBalancerNames: chunk})
+		if err != nil {
+			p.log.Errorf("Could not fetch tags for classic load balancers: %v", err)
+			continue
+		}
+		for _, td := range resp.TagDescriptions {
+			name := pointers.Deref(td.LoadBalancerName)
+			if name == "" {
+				continue
+			}
+			tags := make(map[string]string, len(td.Tags))
+			for _, t := range td.Tags {
+				tags[pointers.Deref(t.Key)] = pointers.Deref(t.Value)
+			}
+			out[name] = tags
+		}
+	}
+	return out
 }

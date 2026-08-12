@@ -141,6 +141,89 @@ func (_c *MockClient_DescribeLoadBalancers_Call) RunAndReturn(run func(context1 
 	return _c
 }
 
+// DescribeTags provides a mock function for the type MockClient
+func (_mock *MockClient) DescribeTags(ctx context.Context, params *elasticloadbalancing.DescribeTagsInput, optFns ...func(*elasticloadbalancing.Options)) (*elasticloadbalancing.DescribeTagsOutput, error) {
+	var tmpRet mock.Arguments
+	if len(optFns) > 0 {
+		tmpRet = _mock.Called(ctx, params, optFns)
+	} else {
+		tmpRet = _mock.Called(ctx, params)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for DescribeTags")
+	}
+
+	var r0 *elasticloadbalancing.DescribeTagsOutput
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *elasticloadbalancing.DescribeTagsInput, ...func(*elasticloadbalancing.Options)) (*elasticloadbalancing.DescribeTagsOutput, error)); ok {
+		return returnFunc(ctx, params, optFns...)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *elasticloadbalancing.DescribeTagsInput, ...func(*elasticloadbalancing.Options)) *elasticloadbalancing.DescribeTagsOutput); ok {
+		r0 = returnFunc(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*elasticloadbalancing.DescribeTagsOutput)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *elasticloadbalancing.DescribeTagsInput, ...func(*elasticloadbalancing.Options)) error); ok {
+		r1 = returnFunc(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_DescribeTags_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeTags'
+type MockClient_DescribeTags_Call struct {
+	*mock.Call
+}
+
+// DescribeTags is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *elasticloadbalancing.DescribeTagsInput
+//   - optFns ...func(*elasticloadbalancing.Options)
+func (_e *MockClient_Expecter) DescribeTags(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeTags_Call {
+	return &MockClient_DescribeTags_Call{Call: _e.mock.On("DescribeTags",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_DescribeTags_Call) Run(run func(ctx context.Context, params *elasticloadbalancing.DescribeTagsInput, optFns ...func(*elasticloadbalancing.Options))) *MockClient_DescribeTags_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *elasticloadbalancing.DescribeTagsInput
+		if args[1] != nil {
+			arg1 = args[1].(*elasticloadbalancing.DescribeTagsInput)
+		}
+		var arg2 []func(*elasticloadbalancing.Options)
+		var variadicArgs []func(*elasticloadbalancing.Options)
+		if len(args) > 2 {
+			variadicArgs = args[2].([]func(*elasticloadbalancing.Options))
+		}
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeTags_Call) Return(describeTagsOutput *elasticloadbalancing.DescribeTagsOutput, err error) *MockClient_DescribeTags_Call {
+	_c.Call.Return(describeTagsOutput, err)
+	return _c
+}
+
+func (_c *MockClient_DescribeTags_Call) RunAndReturn(run func(ctx context.Context, params *elasticloadbalancing.DescribeTagsInput, optFns ...func(*elasticloadbalancing.Options)) (*elasticloadbalancing.DescribeTagsOutput, error)) *MockClient_DescribeTags_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockLoadBalancerDescriber creates a new instance of MockLoadBalancerDescriber. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockLoadBalancerDescriber(t interface {

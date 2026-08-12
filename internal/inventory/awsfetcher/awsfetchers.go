@@ -27,11 +27,13 @@ import (
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/ec2"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/eks"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb"
 	elbv2 "github.com/elastic/cloudbeat/internal/resources/providers/awslib/elb_v2"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/lambda"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/rds"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/route53"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib/sns"
 	"github.com/elastic/cloudbeat/internal/statushandler"
@@ -39,16 +41,19 @@ import (
 
 func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg aws.Config, statusHandler statushandler.StatusHandlerAPI) []inventory.AssetFetcher {
 	ec2Provider := ec2.NewEC2Provider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
+	eksProvider := eks.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[eks.Client]{})
 	elbProvider := elb.NewElbProvider(ctx, logger, identity.Account, cfg, &awslib.MultiRegionClientFactory[elb.Client]{})
 	elbv2Provider := elbv2.NewElbV2Provider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[elbv2.Client]{})
 	iamProvider := iam.NewIAMProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	lambdaProvider := lambda.NewLambdaProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[lambda.Client]{})
 	rdsProvider := rds.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
+	route53Provider := route53.NewProvider(logger, cfg)
 	s3Provider := s3.NewProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 	snsProvider := sns.NewSNSProvider(ctx, logger, cfg, &awslib.MultiRegionClientFactory[sns.Client]{})
 
 	return []inventory.AssetFetcher{
-		newEc2InstancesFetcher(logger, identity, ec2Provider, statusHandler),
+		newEc2InstancesFetcher(logger, identity, ec2Provider, iamProvider, statusHandler),
+		newEKSFetcher(logger, identity, eksProvider, statusHandler),
 		newElbFetcher(logger, identity, elbProvider, elbv2Provider, statusHandler),
 		newIamPolicyFetcher(logger, identity, iamProvider, statusHandler),
 		newIamRoleFetcher(logger, identity, iamProvider, statusHandler),
@@ -56,6 +61,7 @@ func New(ctx context.Context, logger *clog.Logger, identity *cloud.Identity, cfg
 		newLambdaFetcher(logger, identity, lambdaProvider, statusHandler),
 		newNetworkingFetcher(logger, identity, ec2Provider, statusHandler),
 		newRDSFetcher(logger, identity, rdsProvider, statusHandler),
+		newRoute53Fetcher(logger, identity, route53Provider, statusHandler),
 		newS3BucketFetcher(logger, identity, s3Provider, statusHandler),
 		newSNSFetcher(logger, identity, snsProvider, statusHandler),
 	}

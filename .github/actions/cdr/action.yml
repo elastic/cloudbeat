@@ -120,6 +120,11 @@ inputs:
     default: true
     required: false
     type: boolean
+  serverless-mode:
+    description: "When true, skip the Fleet status check (serverless deployments manage Fleet internally)"
+    default: false
+    required: false
+    type: boolean
 
 runs:
   using: composite
@@ -159,13 +164,25 @@ runs:
       working-directory: "deploy/test-environments/cdr"
       run: ./export_terraform_outputs.sh
 
+    - name: Wait for Kibana and Fleet to be ready
+      id: wait-for-kibana
+      if: success()
+      shell: bash
+      env:
+        ES_USER: ${{ inputs.es-user }}
+        ES_PASSWORD: ${{ inputs.es-password }}
+        KIBANA_URL: ${{ inputs.kibana-url }}
+        SERVERLESS_MODE: ${{ inputs.serverless-mode }}
+      run: "${{ github.workspace }}/.ci/scripts/wait_for_kibana_and_fleet.sh"
+
     - name: Install AWS Cloudtrail integration
       id: cloudtrail-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
         CLOUDTRAIL_S3: ${{ inputs.aws-cloudtrail-s3-bucket }}
+        AWS_REGION: ${{ inputs.aws-region }}
         ES_USER: ${{ inputs.es-user }}
         ES_PASSWORD: ${{ inputs.es-password }}
         KIBANA_URL: ${{ inputs.kibana-url }}
@@ -187,7 +204,7 @@ runs:
 
     - name: Install Azure Activity Logs integration
       id: az-activity-logs-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -216,7 +233,7 @@ runs:
 
     - name: Install GCP Audit Logs integration
       id: gcp-audit-logs-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -243,7 +260,7 @@ runs:
 
     - name: Install WIZ integration
       id: wiz-integration
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -304,7 +321,7 @@ runs:
 
     - name: Install Elastic Defend (Fleet)
       id: elastic-defend-fleet
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       working-directory: tests/integrations_setup
       shell: bash
       env:
@@ -416,7 +433,7 @@ runs:
 
     - name: Check Asset Inventory supported version
       id: asset-inventory-version-check
-      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome  == 'success' }}
+      if: ${{ !cancelled() && steps.deploy-cdr-infra.outcome == 'success' && steps.wait-for-kibana.outcome == 'success' }}
       shell: bash
       env:
         STACK_VERSION: ${{ inputs.elk-stack-version }}
@@ -466,7 +483,7 @@ runs:
     - name: Deploy Azure Asset Inventory agent
       id: azure-asset-inventory-agent
       working-directory: deploy/azure
-      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' }}
+      if: ${{ !cancelled() && steps.asset-inventory-version-check.outputs.asset_inventory_supported == 'true' && steps.azure-asset-inventory-integration.outcome == 'success' }}
       shell: bash
       env:
         AZURE_TAGS: ${{ inputs.azure-tags }}
@@ -505,8 +522,8 @@ runs:
       shell: bash
       working-directory: deploy/deployment-manager
       env:
-        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
-        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-acc"
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-cdr-sa"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-cdr-acc"
       run: |
           # Deploys a GCP Service Account
           ./deploy_service_account.sh
@@ -524,6 +541,7 @@ runs:
         STACK_VERSION: ${{ inputs.elk-stack-version }}
         AGENT_VERSION: ${{ inputs.elk-stack-version }}
         SERVICE_ACCOUNT_JSON_PATH: "KEY_FILE.json"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-cdr"
       run: |
         poetry run python ./install_gcp_asset_inventory_integration.py
 
@@ -534,9 +552,9 @@ runs:
       working-directory: deploy/deployment-manager
       env:
         ACTOR: ${{ github.actor }}
-        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}"
+        DEPLOYMENT_NAME: "${{ inputs.deployment-name }}-cdr"
         GCP_ZONE: "${{ inputs.gcp-zone }}"
-        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-sa"
+        SERVICE_ACCOUNT_NAME: "${{ inputs.deployment-name }}-cdr-sa"
       run: |
         # GCP labeling rules:
         # Only hyphens (-), underscores (_), lowercase characters, and numbers are allowed. International characters are allowed.
