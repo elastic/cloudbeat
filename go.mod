@@ -223,7 +223,6 @@ require (
 	github.com/nozzle/throttler v0.0.0-20180817012639-2ea982251481 // indirect
 	github.com/oklog/ulid/v2 v2.1.2 // indirect
 	github.com/onsi/ginkgo/v2 v2.32.0 // indirect
-	github.com/onsi/gomega v1.42.1 // indirect
 	github.com/openvex/discovery v0.1.1-0.20260629103619-4287cf7d3781 // indirect
 	github.com/pandatix/go-cvss v0.6.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -567,7 +566,7 @@ require (
 	k8s.io/component-base v0.36.3 // indirect
 	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
 	k8s.io/kubectl v0.36.3 // indirect
-	k8s.io/utils v0.0.0-20260319190234-28399d86e0b5 // indirect
+	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	modernc.org/libc v1.74.4 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
@@ -585,14 +584,14 @@ require (
 	github.com/dylibso/observe-sdk/go v0.0.0-20240819160327-2d926c5d788a // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/extism/go-sdk v1.7.1 // indirect
-	github.com/fluxcd/cli-utils v1.2.0 // indirect
+	github.com/fluxcd/cli-utils v1.2.2 // indirect
 	github.com/go-openapi/swag/pools v0.28.0 // indirect
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20240805132620-81f5be970eca // indirect
 	github.com/tetratelabs/wabin v0.0.0-20230304001439-f6f874872834 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	helm.sh/helm/v4 v4.2.0 // indirect
-	sigs.k8s.io/controller-runtime v0.24.0 // indirect
+	sigs.k8s.io/controller-runtime v0.24.1 // indirect
 )
 
 replace (
