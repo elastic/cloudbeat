@@ -20,6 +20,7 @@ package awsfetcher
 import (
 	"context"
 	"strings"
+	"time"
 
 	iamtypes "github.com/aws/aws-sdk-go-v2/service/iam/types"
 
@@ -149,7 +150,9 @@ func (e *ec2InstanceFetcher) resolveRoleArn(ctx context.Context, profileArn stri
 		return ""
 	}
 
-	profile, err := e.iamResolver.GetInstanceProfile(ctx, profileName)
+	callCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	profile, err := e.iamResolver.GetInstanceProfile(callCtx, profileName)
+	cancel()
 	if err != nil {
 		e.logger.Warnf("Could not resolve IAM role for instance profile %s: %v", profileArn, err)
 		roleArnCache[profileArn] = ""
