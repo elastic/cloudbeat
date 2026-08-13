@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	cloud.google.com/go/asset v1.28.0
-	cloud.google.com/go/iam v1.12.0
+	cloud.google.com/go/iam v1.13.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2 v2.3.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.5.0
