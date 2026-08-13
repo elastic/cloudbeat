@@ -25,7 +25,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.35
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.36
 	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.51.5
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.71.1
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.72.0
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.76.2
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.58.5
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.66.4
@@ -34,7 +34,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.321.1
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.60.5
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.36.5
-	github.com/aws/aws-sdk-go-v2/service/iam v1.58.2
+	github.com/aws/aws-sdk-go-v2/service/iam v1.59.0
 	github.com/aws/aws-sdk-go-v2/service/kms v1.55.5
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.101.3
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.53.7
