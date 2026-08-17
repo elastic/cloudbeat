@@ -251,7 +251,7 @@ require (
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
 	github.com/pandatix/go-cvss v0.6.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/planetscale/vtprotobuf v0.6.1-0.20250313105119-ba97887b0a25 // indirect
+	github.com/planetscale/vtprotobuf v0.6.1-0.20260702190614-8ae5a48058df // indirect
 	github.com/redis/go-redis/extra/redisotel/v9 v9.5.3 // indirect
 	github.com/redis/go-redis/v9 v9.22.0 // indirect
 	github.com/rust-secure-code/go-rustaudit v0.0.0-20250226111315-e20ec32e963c // indirect
