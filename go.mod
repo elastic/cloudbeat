@@ -49,11 +49,11 @@ require (
 	github.com/aws/smithy-go v1.27.7
 	github.com/dgraph-io/ristretto/v2 v2.4.2
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260604204725-a6d4c42eeb5a
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260817183752-1988845e4be0
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-autodiscover v0.10.3-0.20260423154939-e990715f9426
 	github.com/elastic/elastic-agent-client/v7 v7.18.1
-	github.com/elastic/elastic-agent-libs v0.43.1
+	github.com/elastic/elastic-agent-libs v0.46.3
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.9.1
 	github.com/go-logr/zapr v1.3.0
@@ -303,7 +303,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.6 // indirect
-	golang.org/x/exp v0.0.0-20260603202125-055de637280b // indirect
+	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
 	golang.org/x/tools v0.48.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.3 // indirect
@@ -399,7 +399,7 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/elastic-agent-system-metrics v0.14.4 // indirect
 	github.com/elastic/go-concert v0.3.1 // indirect
-	github.com/elastic/go-lumber v0.1.2-0.20240913080619-93ccc4a69e6a // indirect
+	github.com/elastic/go-lumber v0.2.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
 	github.com/elastic/go-structform v0.0.12 // indirect
 	github.com/elastic/go-sysinfo v1.15.4 // indirect
