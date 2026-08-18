@@ -39,7 +39,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/iam v1.59.1
 	github.com/aws/aws-sdk-go-v2/service/kms v1.55.6
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.101.4
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.53.8
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.54.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.124.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.2
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.73.6
