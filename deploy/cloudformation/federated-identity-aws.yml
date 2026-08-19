@@ -295,6 +295,21 @@ Resources:
       Roles:
         - !Ref ElasticFederatedIdentityRole
 
+  ElasticAwsSecurityHub:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsSecurityHub-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - securityhub:GetFindings
+              - securityhub:GetInsights
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
 Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
