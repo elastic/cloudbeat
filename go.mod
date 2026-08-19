@@ -33,7 +33,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.66.5
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.82.2
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.68.6
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.321.2
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.321.3
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.60.6
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/iam v1.59.1
