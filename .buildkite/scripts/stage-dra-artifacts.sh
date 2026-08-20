@@ -20,14 +20,14 @@ echo "--- Preparing ${WORKFLOW} artifacts"
 mkdir -p artifacts
 
 if [[ "${WORKFLOW}" == "snapshot" ]]; then
-  find build/distributions -type f -name "*SNAPSHOT*" -exec cp {} artifacts/ \;
+    find build/distributions -type f -name "*SNAPSHOT*" -exec cp {} artifacts/ \;
 else
-  find build/distributions -type f ! -name "*SNAPSHOT*" -exec cp {} artifacts/ \;
+    find build/distributions -type f ! -name "*SNAPSHOT*" -exec cp {} artifacts/ \;
 fi
 
 if ! ls artifacts/* >/dev/null 2>&1; then
-  echo "ERROR: no ${WORKFLOW} artifacts found in artifacts/" >&2
-  exit 1
+    echo "ERROR: no ${WORKFLOW} artifacts found in artifacts/" >&2
+    exit 1
 fi
 
 echo "Staged artifacts:"

@@ -22,11 +22,11 @@ STACK_VERSION="${VERSION}"
 # plugin publishes under e.g. 9.6.0-alpha1. Snapshot never carries a qualifier.
 # The plugin auto-appends -SNAPSHOT for snapshot workflow.
 if [[ "${WORKFLOW}" == "staging" ]]; then
-  # shellcheck disable=SC1091
-  source .buildkite/scripts/qualifier.sh
-  if [[ -n "${VERSION_QUALIFIER:-}" ]]; then
-    STACK_VERSION="${VERSION}-${VERSION_QUALIFIER}"
-  fi
+    # shellcheck disable=SC1091
+    source .buildkite/scripts/qualifier.sh
+    if [[ -n "${VERSION_QUALIFIER:-}" ]]; then
+        STACK_VERSION="${VERSION}-${VERSION_QUALIFIER}"
+    fi
 fi
 
 # DRY_RUN env-var contract: when set to "true" from the Buildkite UI, the
@@ -34,7 +34,7 @@ fi
 # (summary URL would 404) and the processing trigger.
 DRA_UPLOAD=true
 if [[ "${DRY_RUN:-}" == "true" ]]; then
-  DRA_UPLOAD=false
+    DRA_UPLOAD=false
 fi
 
 echo "--- :arrow_right: DRA context"
@@ -47,7 +47,8 @@ echo "DRA_UPLOAD=${DRA_UPLOAD}"
 trigger_step=""
 annotate_step=""
 if [[ "${DRA_UPLOAD}" == "true" ]]; then
-  trigger_step=$(cat <<TRIG
+    trigger_step=$(
+        cat <<TRIG
 
   - label: ":pipeline: Trigger DRA processing (${WORKFLOW})"
     trigger: "unified-release-dra-processing"
@@ -58,8 +59,9 @@ if [[ "${DRA_UPLOAD}" == "true" ]]; then
         DRA_STACK_VERSION: "${STACK_VERSION}"
         DRA_WORKFLOW: "${WORKFLOW}"
 TRIG
-)
-  annotate_step=$(cat <<ANN
+    )
+    annotate_step=$(
+        cat <<ANN
 
   - label: ":memo: Annotate DRA summary (${WORKFLOW})"
     key: "dra-annotate-${WORKFLOW}"
@@ -71,7 +73,7 @@ TRIG
       machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
     timeout_in_minutes: 5
 ANN
-)
+    )
 fi
 
 echo "--- Generating DRA sub-pipeline for ${WORKFLOW} (upload=${DRA_UPLOAD})"
