@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Check out PR
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -41,7 +41,7 @@ jobs:
           mv cloudbeat /tmp/cloudbeat-pr
 
       - name: Check out target branch
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.base_ref }}
           clean: true
@@ -54,7 +54,7 @@ jobs:
 
       # Checkout PR branch to get latest script
       - name: Check out PR (again)
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Get binary sizes and compare
         id: size-check
