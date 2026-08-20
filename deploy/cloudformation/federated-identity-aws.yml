@@ -61,7 +61,10 @@ Resources:
           - Effect: Allow
             Action:
               - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
               - logs:FilterLogEvents
+              - logs:GetLogEvents
+              - logs:GetLogGroupFields
             Resource: '*'
       Roles:
         - !Ref ElasticFederatedIdentityRole
