@@ -93,7 +93,7 @@ steps:
     artifact_paths:
       - "artifacts/dra/cloudbeat/*/manifest-*.json"
     plugins:
-      - elastic/dra-prep#v0.1.5:
+      - elastic/dra-prep#v0.1.6:
           product_id: "cloudbeat"
           stack_version: "${STACK_VERSION}"
           workflow: "${WORKFLOW}"
