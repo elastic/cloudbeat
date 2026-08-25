@@ -543,7 +543,7 @@ require (
 	k8s.io/apiserver v0.36.4 // indirect
 	k8s.io/cli-runtime v0.36.4 // indirect
 	k8s.io/component-base v0.36.4 // indirect
-	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
+	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
 	k8s.io/kubectl v0.36.4 // indirect
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	modernc.org/libc v1.75.4 // indirect
