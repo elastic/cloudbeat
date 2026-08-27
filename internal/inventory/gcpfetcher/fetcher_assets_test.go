@@ -58,10 +58,10 @@ func TestAccountFetcher_Fetch_Assets(t *testing.T) {
 			inventory.WithRelatedAssetIds([]string{}),
 			inventory.WithCloud(inventory.Cloud{
 				Provider:    inventory.GcpCloudProvider,
-				AccountID:   "<project UUID>",
-				AccountName: "<project name>",
-				ProjectID:   "<org UUID>",
-				ProjectName: "<org name>",
+				AccountID:   "<org UUID>",
+				AccountName: "<org name>",
+				ProjectID:   "<project UUID>",
+				ProjectName: "<project name>",
 				ServiceName: r.assetType,
 			}),
 			inventory.WithLabels(map[string]string{}),
@@ -120,6 +120,7 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 			},
 			enrichments: inventory.AssetEvent{
 				Organization: &inventory.Organization{
+					ID:   "<org UUID>",
 					Name: "org",
 				},
 			},
@@ -273,19 +274,17 @@ func TestAccountFetcher_EnrichAsset(t *testing.T) {
 			expected.User.Entity = &expected.Entity
 		}
 
-		// Cloud is the only field where we have both common and enriched fields
+		// Every asset carries the common cloud fields. Assert them as literals so that a
+		// wrong mapping (e.g. org in project.id) causes a real test failure.
 		if expected.Cloud == nil {
-			// Use the actual cloud fields when there are no cloud enrichments
-			expected.Cloud = actual.Cloud
-		} else {
-			// Use common cloud fields when there are cloud enrichments
-			expected.Cloud.Provider = actual.Cloud.Provider
-			expected.Cloud.AccountID = actual.Cloud.AccountID
-			expected.Cloud.AccountName = actual.Cloud.AccountName
-			expected.Cloud.ProjectID = actual.Cloud.ProjectID
-			expected.Cloud.ProjectName = actual.Cloud.ProjectName
-			expected.Cloud.ServiceName = actual.Cloud.ServiceName
+			expected.Cloud = &inventory.Cloud{}
 		}
+		expected.Cloud.Provider = inventory.GcpCloudProvider
+		expected.Cloud.AccountID = "<org UUID>"
+		expected.Cloud.AccountName = "<org name>"
+		expected.Cloud.ProjectID = "<project UUID>"
+		expected.Cloud.ProjectName = "<project name>"
+		expected.Cloud.ServiceName = r.assetType
 
 		assert.Equalf(t, expected, actual, "%v failed", "EnrichAsset")
 	}
