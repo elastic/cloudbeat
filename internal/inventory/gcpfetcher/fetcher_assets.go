@@ -98,14 +98,7 @@ func getAssetEvent(classification inventory.AssetClassification, item *gcpinvent
 			findRelatedAssetIds(classification.Type, item),
 		),
 		// Any asset type enrichers also setting Cloud fields will need to re-add these fields below
-		inventory.WithCloud(inventory.Cloud{
-			Provider:    inventory.GcpCloudProvider,
-			AccountID:   item.CloudAccount.AccountId,
-			AccountName: item.CloudAccount.AccountName,
-			ProjectID:   item.CloudAccount.OrganisationId,
-			ProjectName: item.CloudAccount.OrganizationName,
-			ServiceName: item.AssetType,
-		}),
+		inventory.WithCloud(commonCloud(item)),
 	}
 
 	// Asset type specific enrichers and common resource-level fields
@@ -269,29 +262,38 @@ var assetEnrichers = map[string]func(item *gcpinventory.ExtendedGcpAsset, fields
 	gcpinventory.ComputeNetworkAssetType:        enrichNetwork,
 }
 
-func enrichOrganization(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+// commonCloud returns the Cloud fields shared by every GCP asset.
+// Callers that call inventory.WithCloud to add asset-type-specific cloud fields MUST start from
+// this value; WithCloud replaces the whole struct, so omitting any field silently drops it.
+// ECS semantics: cloud.account.id = GCP organisation id, cloud.project.id = GCP project id.
+func commonCloud(item *gcpinventory.ExtendedGcpAsset) inventory.Cloud {
+	return inventory.Cloud{
+		Provider:    inventory.GcpCloudProvider,
+		AccountID:   item.CloudAccount.OrganisationId,
+		AccountName: item.CloudAccount.OrganizationName,
+		ProjectID:   item.CloudAccount.AccountId,
+		ProjectName: item.CloudAccount.AccountName,
+		ServiceName: item.AssetType,
+	}
+}
+
+func enrichOrganization(item *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
 	return []inventory.AssetEnricher{
 		inventory.WithOrganization(inventory.Organization{
+			ID:   item.CloudAccount.OrganisationId,
 			Name: getStringValue("displayName", fields),
 		}),
 	}
 }
 
 func enrichComputeInstance(item *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+	cloud := commonCloud(item)
+	cloud.InstanceID = getStringValue("id", fields)
+	cloud.InstanceName = getStringValue("name", fields)
+	cloud.MachineType = getStringValue("machineType", fields)
+	cloud.AvailabilityZone = getStringValue("zone", fields)
 	return []inventory.AssetEnricher{
-		inventory.WithCloud(inventory.Cloud{
-			// This will override the default Cloud fields, so we re-add the common ones
-			Provider:         inventory.GcpCloudProvider,
-			AccountID:        item.CloudAccount.AccountId,
-			AccountName:      item.CloudAccount.AccountName,
-			ProjectID:        item.CloudAccount.OrganisationId,
-			ProjectName:      item.CloudAccount.OrganizationName,
-			ServiceName:      item.AssetType,
-			InstanceID:       getStringValue("id", fields),
-			InstanceName:     getStringValue("name", fields),
-			MachineType:      getStringValue("machineType", fields),
-			AvailabilityZone: getStringValue("zone", fields),
-		}),
+		inventory.WithCloud(cloud),
 		inventory.WithHost(inventory.Host{
 			ID: getStringValue("id", fields),
 		}),
@@ -335,11 +337,11 @@ func enrichGkeCluster(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*struc
 	}
 }
 
-func enrichForwardingRule(_ *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+func enrichForwardingRule(item *gcpinventory.ExtendedGcpAsset, fields map[string]*structpb.Value) []inventory.AssetEnricher {
+	cloud := commonCloud(item)
+	cloud.Region = getStringValue("region", fields)
 	return []inventory.AssetEnricher{
-		inventory.WithCloud(inventory.Cloud{
-			Region: getStringValue("region", fields),
-		}),
+		inventory.WithCloud(cloud),
 	}
 }
 
