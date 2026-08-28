@@ -873,8 +873,8 @@ github.com/mattn/go-shellwords v1.0.14/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lL
 github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
 github.com/mattn/go-sqlite3 v1.14.32 h1:JD12Ag3oLy1zQA+BNn74xRgaBbdhbNIDYvQUEuuErjs=
 github.com/mattn/go-sqlite3 v1.14.32/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
-github.com/microsoft/kiota-abstractions-go v1.9.4 h1:VI3UVzSCQHHhRswe3jyaAQHUQWIFhUMp0z5mtZbTbcs=
-github.com/microsoft/kiota-abstractions-go v1.9.4/go.mod h1:f06pl3qSyvUHEfVNkiRpXPkafx7khZqQEb71hN/pmuU=
+github.com/microsoft/kiota-abstractions-go v1.10.0 h1:4z+q3OyncTAI2Q4dbc7S5TMI9HkQWcjTJDWcYEPf2KI=
+github.com/microsoft/kiota-abstractions-go v1.10.0/go.mod h1:kSLXbAikqjRQdpOYrCq3T91/4CkzmHPr41xu7oj6yzU=
 github.com/microsoft/kiota-authentication-azure-go v1.3.1 h1:AGta92S6IL1E6ZMDb8YYB7NVNTIFUakbtLKUdY5RTuw=
 github.com/microsoft/kiota-authentication-azure-go v1.3.1/go.mod h1:26zylt2/KfKwEWZSnwHaMxaArpbyN/CuzkbotdYXF0g=
 github.com/microsoft/kiota-http-go v1.5.6 h1:KBdk7sxWYXZnRRExLjIcNt4I7LoOfh/XQJWWid4zBKE=
