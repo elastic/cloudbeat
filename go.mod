@@ -173,7 +173,7 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.29.1 // indirect
 	github.com/gocsaf/csaf/v3 v3.6.0 // indirect
 	github.com/gofrs/uuid/v5 v5.5.1 // indirect
-	github.com/gohugoio/hashstructure v0.6.0 // indirect
+	github.com/gohugoio/hashstructure v1.1.0 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-github/v62 v62.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
