@@ -32,6 +32,18 @@ type ElasticLoadBalancerInfo struct {
 	Listeners    []types.Listener   `json:"listeners"`
 	region       string
 	tags         map[string]string
+	dnsResolvedIPs []string
+}
+
+// NewElasticLoadBalancerInfo constructs an ELBv2 wrapper. dnsResolvedIPs are the addresses
+// resolved from the load balancer's DNS name when the AWS API returns none (see Provider).
+func NewElasticLoadBalancerInfo(lb types.LoadBalancer, region string, tags map[string]string, dnsResolvedIPs []string) *ElasticLoadBalancerInfo {
+	return &ElasticLoadBalancerInfo{
+		LoadBalancer:   lb,
+		region:         region,
+		tags:           tags,
+		dnsResolvedIPs: dnsResolvedIPs,
+	}
 }
 
 func (v ElasticLoadBalancerInfo) GetResourceArn() string {
@@ -75,9 +87,10 @@ func (v ElasticLoadBalancerInfo) GetState() string {
 	return string(v.LoadBalancer.State.Code)
 }
 
-// GetIPAddresses returns the IP addresses of the load balancer. Network Load Balancers with
-// an Elastic IP expose them via IpAddress; internal NLBs use PrivateIPv4Address; IPv6 NLBs
-// use IPv6Address. All three are collected so that no NLB address type is missed.
+// GetIPAddresses returns the IP addresses of the load balancer. NLBs with Elastic IPs
+// expose them via the AWS API (IpAddress, PrivateIPv4Address, IPv6Address). When the API
+// returns nothing — which is the common case for internet-facing ALBs and most NLBs — the
+// provider resolves the DNSName at fetch time and stores the result in dnsResolvedIPs.
 func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
 	var ips []string
 	for _, az := range v.LoadBalancer.AvailabilityZones {
@@ -92,6 +105,9 @@ func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
 				ips = append(ips, ip)
 			}
 		}
+	}
+	if len(ips) == 0 {
+		return v.dnsResolvedIPs
 	}
 	return ips
 }
