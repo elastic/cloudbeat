@@ -20,6 +20,7 @@ package elb_v2
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	elbv2 "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
@@ -58,6 +59,16 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 				p.log.Errorf("Error fetching listeners for %s: %v", loadBalancer.GetResourceArn(), err)
 			} else {
 				loadBalancer.Listeners = listeners
+			}
+			if len(loadBalancer.GetIPAddresses()) == 0 {
+				if dnsName := pointers.Deref(item.DNSName); dnsName != "" {
+					if ips, err := p.resolver.LookupHost(ctx, dnsName); err != nil {
+						p.log.Debugf("Could not resolve IPs for ELBv2 %q: %v", dnsName, err)
+					} else {
+						sort.Strings(ips)
+						loadBalancer.dnsResolvedIPs = ips
+					}
+				}
 			}
 			lbs = append(lbs, loadBalancer)
 			if arn := loadBalancer.GetResourceArn(); arn != "" {
