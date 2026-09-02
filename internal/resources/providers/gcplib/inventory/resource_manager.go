@@ -60,7 +60,7 @@ func NewResourceManagerWrapper(ctx context.Context, log *clog.Logger, gcpConfig 
 		log:                  log,
 		config:               gcpConfig,
 		accountMetadataCache: sync.Map{},
-		projectsRateLimiter:  rate.NewLimiter(rate.Every(time.Minute/600), 1),
+		projectsRateLimiter:  rate.NewLimiter(rate.Every(time.Minute/300), 1),
 	}
 	wrapper.getProjectDisplayName = func(ctx context.Context, parent string) string {
 		if err := wrapper.projectsRateLimiter.Wait(ctx); err != nil {
