@@ -101,8 +101,8 @@ github.com/Flaque/filet v0.0.0-20201012163910-45f684403088 h1:PnnQln5IGbhLeJOi6h
 github.com/Flaque/filet v0.0.0-20201012163910-45f684403088/go.mod h1:TK+jB3mBs+8ZMWhU5BqZKnZWJ1MrLo8etNVg51ueTBo=
 github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.2.1 h1:hlWYvaYrCCH1nTnUf39MdE+FOEmf2GYUYNF4ED9S3S0=
 github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.2.1/go.mod h1:tkzPxS3e4iTgbA4PWtc84B3iwgLH+Shjtjgn134AHd4=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.36.0 h1:3SdxXLkgAfiHRWcGTq6fneq9jgoJzneiY0yPQnjoT2E=
-github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.36.0/go.mod h1:1iIdl0k+ppn9wT0wzR9H7HkSvIui/4qgtnKW10cQtds=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.37.0 h1:edOuLWehuDlQ68roBF900Y09jvBoJP5W5d/wusz9nWY=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.37.0/go.mod h1:iIyrdhveU5Ow84ipRlxtjCOQnIM0DiqSMxuxm50xwZY=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.61.0 h1:BeC1Bub7Ttk33TF8v3ZeQ2L8acvz4ZLqtQuLyJAZquc=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.61.0/go.mod h1:UgG/Xn9+NXb1/ueSczIFxyuya3hs3srFDiZG2JrpJwY=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.61.0 h1:eSgSuKdcpY7RTN1oXSzC6S39rPBImn03ubLMsWK4RRg=
