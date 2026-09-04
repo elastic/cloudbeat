@@ -16,6 +16,9 @@ on:
       - "[0-9]+.[0-9]+"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   GOEXPERIMENT: jsonv2 # required by trivy v0.69.3+ (encoding/json/v2)
 
