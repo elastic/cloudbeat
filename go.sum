@@ -238,8 +238,8 @@ github.com/aws/aws-sdk-go-v2/service/configservice v1.72.0 h1:B0lIlVQoUY2OuhLjOd
 github.com/aws/aws-sdk-go-v2/service/configservice v1.72.0/go.mod h1:lsA0mDG/e5EZ/wKapeWEll7Ceb8kQEu4UGRr/2rlbAY=
 github.com/aws/aws-sdk-go-v2/service/ebs v1.39.0 h1:fIxpMAaEanJPiSC6wAf+Q5JC2C39P2sNRi6JV6hzAB4=
 github.com/aws/aws-sdk-go-v2/service/ebs v1.39.0/go.mod h1:XSUsMia7UPwLZdviZm4kG7xhJWHYT94LBd2gnU8nTC4=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.326.0 h1:Ss1S5gY5ElwOreWCTvOZxgNf4iQCkoX6lQqNLP/Mh0k=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.326.0/go.mod h1:M8AJ/M7737nKBNqZvXUNrADGBy+d3PNggJGmAStCWxI=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.328.0 h1:83ydTd4o/PyZB5XRhzwHwTCWjXlgtejbKf9W/eqU5LY=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.328.0/go.mod h1:M8AJ/M7737nKBNqZvXUNrADGBy+d3PNggJGmAStCWxI=
 github.com/aws/aws-sdk-go-v2/service/ecr v1.63.0 h1:VuxqZe6/5y5c26XZYNAs/iZ9HDnn9Te9T1ahA1rz188=
 github.com/aws/aws-sdk-go-v2/service/ecr v1.63.0/go.mod h1:BITpKEMb6U6dnjcbrlonpiStseuI9I0GZ21p61iqeFA=
 github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.39.0 h1:2Y2r9Bw7aNnz5qRbaP3Rplel6qYxLRx4drFfAd1tTG0=
@@ -258,8 +258,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.1 h1:ZMbtPZZQRca+3+
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.1/go.mod h1:YAGWQdCYlVCoqrzvfv3RLxO6zKwti7gsAULOGWPLYv4=
 github.com/aws/aws-sdk-go-v2/service/kms v1.58.0 h1:GZ3wgDnjZcp4S8QhUAjis4VUKy+f4QonFKyNpihJGKU=
 github.com/aws/aws-sdk-go-v2/service/kms v1.58.0/go.mod h1:EzyGQwPscu9Pwk4XJx5PrG0g8Wxtc2sv8ullQP1NIJA=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.105.0 h1:r8DNdTvtXb/NbTo43ZBcm4WQQvOfKMpwTRlzj4lF4EA=
-github.com/aws/aws-sdk-go-v2/service/lambda v1.105.0/go.mod h1:xFO5LMHsvX9T3B9lLauhTYYyYSCoCn46gxiqpVfK+Sw=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.106.0 h1:6XlUwcy8dID09A4y3PUilZDPEGZQo7wJFChPN2zhrHc=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.106.0/go.mod h1:xFO5LMHsvX9T3B9lLauhTYYyYSCoCn46gxiqpVfK+Sw=
 github.com/aws/aws-sdk-go-v2/service/organizations v1.58.0 h1:3h6IMGQTd5DqUGoDX6GZZasQRE6KpYx8+z+9Tb5Ezwc=
 github.com/aws/aws-sdk-go-v2/service/organizations v1.58.0/go.mod h1:gDvnnHT8O9vj1zHOa1ApHdmGhOTKTC9mvZP03f0m6y8=
 github.com/aws/aws-sdk-go-v2/service/rds v1.127.0 h1:2gvvl35gt7EteixPgFptH17SdoMck/aJWpBSeiOZwLI=
