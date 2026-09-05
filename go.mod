@@ -178,17 +178,17 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.14 // indirect
 	github.com/go-openapi/runtime/server-middleware v0.33.2 // indirect
-	github.com/go-openapi/swag/cmdutils v0.29.1 // indirect
-	github.com/go-openapi/swag/conv v0.29.1 // indirect
-	github.com/go-openapi/swag/fileutils v0.29.1 // indirect
-	github.com/go-openapi/swag/jsonutils v0.29.1 // indirect
-	github.com/go-openapi/swag/loading v0.29.1 // indirect
-	github.com/go-openapi/swag/mangling v0.29.1 // indirect
-	github.com/go-openapi/swag/netutils v0.29.1 // indirect
-	github.com/go-openapi/swag/pools v0.29.1 // indirect
-	github.com/go-openapi/swag/stringutils v0.29.1 // indirect
-	github.com/go-openapi/swag/typeutils v0.29.1 // indirect
-	github.com/go-openapi/swag/yamlutils v0.29.1 // indirect
+	github.com/go-openapi/swag/cmdutils v0.29.2 // indirect
+	github.com/go-openapi/swag/conv v0.29.2 // indirect
+	github.com/go-openapi/swag/fileutils v0.29.2 // indirect
+	github.com/go-openapi/swag/jsonutils v0.29.2 // indirect
+	github.com/go-openapi/swag/loading v0.29.2 // indirect
+	github.com/go-openapi/swag/mangling v0.29.2 // indirect
+	github.com/go-openapi/swag/netutils v0.29.2 // indirect
+	github.com/go-openapi/swag/pools v0.29.2 // indirect
+	github.com/go-openapi/swag/stringutils v0.29.2 // indirect
+	github.com/go-openapi/swag/typeutils v0.29.2 // indirect
+	github.com/go-openapi/swag/yamlutils v0.29.2 // indirect
 	github.com/gocsaf/csaf/v3 v3.6.0 // indirect
 	github.com/gofrs/uuid/v5 v5.5.1 // indirect
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
@@ -402,7 +402,7 @@ require (
 	github.com/go-openapi/runtime v0.33.2 // indirect
 	github.com/go-openapi/spec v1.0.1 // indirect
 	github.com/go-openapi/strfmt v0.27.2 // indirect
-	github.com/go-openapi/swag v0.29.1 // indirect
+	github.com/go-openapi/swag v0.29.2 // indirect
 	github.com/go-openapi/validate v1.0.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
