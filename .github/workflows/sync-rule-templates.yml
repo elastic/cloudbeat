@@ -41,11 +41,16 @@ jobs:
           token: ${{ steps.fetch-token.outputs.token }}
           path: cloudbeat
 
-      - name: Hermit Environment
-        uses: ./cloudbeat/.github/actions/hermit
-        with:
-          init-tools: 'true'
-          free-disk: 'true'
+      - name: Install tools
+        run: |
+          pip3 install poetry poetry-plugin-export
+          sudo snap install yq
+
+      - name: Install security-policies Python dependencies
+        working-directory: cloudbeat/security-policies
+        run: |
+          poetry env use python3.11
+          poetry install --no-root
 
       - name: Sync CIS Rules with integrations repo
         working-directory: cloudbeat
