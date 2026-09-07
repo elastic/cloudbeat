@@ -25,9 +25,9 @@ metadata:
     ```
     chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml
     ```
-  impact: None..
+  impact: None
   default_value: |
-    By default, the `kube-apiserver.yaml` file has permissions of `640`.
+    By default, the `kube-apiserver.yaml` file has permissions of `640` on most deployments.
   references: 1. https://kubernetes.io/docs/admin/kube-apiserver/
   section: Control Plane Node Configuration Files
   version: '1.0'
