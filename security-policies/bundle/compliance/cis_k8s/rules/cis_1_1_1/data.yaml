@@ -27,7 +27,7 @@ metadata:
     ```
   impact: None
   default_value: |
-    By default, the `kube-apiserver.yaml` file has permissions of `640` on most deployments.
+    By default, the `kube-apiserver.yaml` file has permissions of `640`.
   references: 1. https://kubernetes.io/docs/admin/kube-apiserver/
   section: Control Plane Node Configuration Files
   version: '1.0'
