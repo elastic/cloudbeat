@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/sync-rule-templates-ephemeral-token
     paths:
       - "security-policies/bundle/compliance/**/rules/**/data.yaml"
 

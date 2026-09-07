@@ -25,7 +25,7 @@ metadata:
     ```
     chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml
     ```
-  impact: None
+  impact: None.
   default_value: |
     By default, the `kube-apiserver.yaml` file has permissions of `640`.
   references: 1. https://kubernetes.io/docs/admin/kube-apiserver/
