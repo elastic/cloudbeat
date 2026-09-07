@@ -41,16 +41,19 @@ jobs:
           token: ${{ steps.fetch-token.outputs.token }}
           path: cloudbeat
 
-      - name: Install tools
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
         run: |
-          pip3 install poetry poetry-plugin-export
-          sudo snap install yq
+          pipx install poetry
+          pipx inject poetry poetry-plugin-export
 
       - name: Install security-policies Python dependencies
         working-directory: cloudbeat/security-policies
-        run: |
-          poetry env use python3.11
-          poetry install --no-root
+        run: poetry install --no-root
 
       - name: Sync CIS Rules with integrations repo
         working-directory: cloudbeat
