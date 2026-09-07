@@ -115,13 +115,20 @@ bump_integration_version() {
     else
         next_version="$(bump_minor_version "$version")-preview01"
         export next_version
-        # add new version + changes entry
+
+        # Save comment header and compute version map entry BEFORE yq strips comments
+        changelog_comments="$(sed -n '/^-/q;p' "$changelog_path")"
+        latest_entry="$(echo "$changelog_comments" | grep -m1 '^# [0-9]')"
+        next_entry=$(get_new_integration_version_map_entry "$latest_entry")
+
+        # add new version + changes entry (yq strips comment lines)
         yq -i '. = [{"version": env(next_version), "changes": [{"description": env(changelog_description), "type": "enhancement", "link": env(pr_url) }]}] + .' "$changelog_path"
 
-        # add new version map for integration - kibana
-        latest_entry="$(sed -n '3p' "$changelog_path")"
-        next_entry=$(get_new_integration_version_map_entry "$latest_entry")
-        sed -i '' -e '3i\'$'\n'"$next_entry" "$changelog_path"
+        # Restore comment header with new version map entry prepended before the previous one
+        {
+            echo "$changelog_comments" | awk -v new="$next_entry" -v old="$latest_entry" '$0 == old { print new } { print }'
+            cat "$changelog_path"
+        } > "${changelog_path}.tmp" && mv "${changelog_path}.tmp" "$changelog_path"
 
         # update manifest with new kibana version
         IFS='-' read -r _ next_kibana_version <<<"$next_entry"
