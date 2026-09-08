@@ -32,6 +32,18 @@
   "ignorePaths": [
     "**/vendor/**"
   ],
+  "enabledManagers": [
+    "buildkite",
+    "dockerfile",
+    "github-actions",
+    "gomod",
+    "helm-values",
+    "hermit",
+    "kustomize",
+    "poetry",
+    "pre-commit",
+    "terraform"
+  ],
   "pre-commit": {
     "enabled": true
   },
