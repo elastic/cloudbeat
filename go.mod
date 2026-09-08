@@ -570,7 +570,7 @@ require (
 	github.com/tetratelabs/wabin v0.0.0-20230304001439-f6f874872834 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	helm.sh/helm/v4 v4.2.4 // indirect
-	sigs.k8s.io/controller-runtime v0.24.1 // indirect
+	sigs.k8s.io/controller-runtime v0.25.0 // indirect
 )
 
 replace (
