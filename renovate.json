@@ -92,7 +92,7 @@
       "automerge": true,
       "postUpgradeTasks": {
         "commands": ["make generate"],
-        "fileFilters": ["go.mod", "go.sum"],
+        "fileFilters": ["go.mod", "go.sum", "cloudbeat*.yml"],
         "executionMode": "branch"
       }
     },
