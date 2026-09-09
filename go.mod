@@ -156,10 +156,10 @@ require (
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
 	github.com/containerd/cgroups/v3 v3.1.3 // indirect
 	github.com/containerd/containerd/api v1.11.1 // indirect
-	github.com/containerd/containerd/v2 v2.3.4 // indirect
+	github.com/containerd/containerd/v2 v2.3.5 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
-	github.com/containerd/log v0.1.0 // indirect
+	github.com/containerd/log v0.2.0 // indirect
 	github.com/containerd/platforms v1.0.0-rc.5 // indirect
 	github.com/containerd/plugin v1.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
@@ -174,7 +174,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/extism/go-sdk v1.7.1 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
-	github.com/fluxcd/cli-utils v1.2.3 // indirect
+	github.com/fluxcd/cli-utils v1.3.0 // indirect
 	github.com/fvbommel/sortorder v1.2.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.3 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8 // indirect
@@ -220,7 +220,7 @@ require (
 	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc/v3 v3.0.6 // indirect
-	github.com/lestrrat-go/jwx/v3 v3.2.0 // indirect
+	github.com/lestrrat-go/jwx/v3 v3.3.0 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/mattn/go-shellwords v1.0.14 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.3.1 // indirect
@@ -306,7 +306,7 @@ require (
 	cloud.google.com/go/longrunning v1.2.0 // indirect
 	cloud.google.com/go/orgpolicy v1.20.0 // indirect
 	cloud.google.com/go/osconfig v1.22.0 // indirect
-	cloud.google.com/go/storage v1.67.0 // indirect
+	cloud.google.com/go/storage v1.67.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
@@ -372,7 +372,7 @@ require (
 	github.com/docker/docker-credential-helpers v0.9.8 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dop251/goja v0.0.0-20260903201622-f87b40ad7341 // indirect
+	github.com/dop251/goja v0.0.0-20260906210903-70ad66ec7ce4 // indirect
 	github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
@@ -567,7 +567,7 @@ require (
 	k8s.io/component-base v0.37.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
 	k8s.io/kubectl v0.37.0 // indirect
-	k8s.io/utils v0.0.0-20260626114624-be93311217bd // indirect
+	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
 	oras.land/oras-go/v2 v2.6.2 // indirect
