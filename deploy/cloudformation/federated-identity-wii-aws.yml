@@ -6,7 +6,7 @@ Parameters:
   ElasticOrganizationId:
     Description: Elastic Cloud organization ID.
     Type: String
-    AllowedPattern: '^[0-9]+$'
+    AllowedPattern: ^[0-9]+$
     ConstraintDescription: must be numeric.
 
   ElasticResourceType:
@@ -19,7 +19,7 @@ Parameters:
   ElasticResourceId:
     Description: Kibana component ID of the deployment, or the Serverless project ID.
     Type: String
-    AllowedPattern: '^[A-Za-z0-9]+$'
+    AllowedPattern: ^[A-Za-z0-9]+$
     ConstraintDescription: must contain only letters and digits.
 
   ElasticCloudProvider:
@@ -33,7 +33,7 @@ Parameters:
   ElasticCloudRegion:
     Description: Region the Elastic deployment or project runs in (for example eu-west-1, us-central1, eastus2).
     Type: String
-    AllowedPattern: '^[a-z0-9-]+$'
+    AllowedPattern: ^[a-z0-9-]+$
     ConstraintDescription: must be a lowercase region name.
 
   ElasticCloudEnvironment:
@@ -47,10 +47,10 @@ Parameters:
   CreateOidcProvider:
     Description: Set to false if this account already has a stack for the same organization and region, so the existing OIDC provider is reused.
     Type: String
-    Default: "true"
     AllowedValues:
       - "true"
       - "false"
+    Default: "true"
 
 Mappings:
   EnvironmentDomain:
@@ -69,13 +69,13 @@ Resources:
   # No ThumbprintList: IAM ignores it for publicly trusted CAs.
   WiiOidcProvider:
     Type: AWS::IAM::OIDCProvider
-    Condition: ShouldCreateOidcProvider
     Properties:
       Url: !Sub
         - https://workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
         - Domain: !FindInMap [EnvironmentDomain, !Ref ElasticCloudEnvironment, Domain]
       ClientIdList:
         - sts.amazonaws.com
+    Condition: ShouldCreateOidcProvider
 
   ElasticWorkloadIdentityRole:
     Type: AWS::IAM::Role
