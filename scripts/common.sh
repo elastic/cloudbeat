@@ -76,6 +76,13 @@ bump_minor_version() {
     echo "$major.$minor.0"
 }
 
+bump_patch_version() {
+    local version="${1:?Missing version}"
+    IFS='.' read -r major minor patch <<<"$version"
+    ((patch++))
+    echo "$major.$minor.$patch"
+}
+
 get_integration_version() {
     local changelog_path="${1:?Missing changelog.yml path}"
     current_version=$(yq '.[0].version' "$changelog_path" | tr -d '"')
@@ -95,7 +102,8 @@ get_new_integration_version_map_entry() {
 }
 
 # bumps existing preview version: 1.0.0-preview01 -> 1.0.0-preview02, or
-# creates a new preview version: 1.0.0 -> 1.1.0-preview01, and
+# patch-bumps within the current minor series: 1.0.1 -> 1.0.2-preview01, or
+# minor-bumps when starting a new series: 1.0.1 -> 1.1.0-preview01, and
 # updates the manifest and changelog files
 bump_integration_version() {
     changelog_path="${1:?Missing changelog.yml path}"
@@ -113,19 +121,43 @@ bump_integration_version() {
         yq -i ".[0].version = \"$next_version\"" "$changelog_path"
         yq -i '.[0].changes += [{"description": env(changelog_description), "type": "enhancement", "link": env(pr_url) }]' "$changelog_path"
     else
-        next_version="$(bump_minor_version "$version")-preview01"
+        # Save comment header BEFORE yq strips it, then decide patch vs minor bump
+        changelog_comments="$(sed -n '/^-/q;p' "$changelog_path")"
+        latest_entry="$(echo "$changelog_comments" | grep -m1 '^# [0-9]')"
+
+        # Compare current version's minor against the version map's integration minor
+        # Same minor (e.g. 3.5.1 with map entry "# 3.5.x - 9.6.x") → patch bump, reuse kibana version
+        # Different minor → minor bump, add new version map entry
+        IFS='-' read -r int_map_part _ <<<"$latest_entry"
+        IFS='.' read -r _ map_int_minor _ <<<"$int_map_part"
+        IFS='.' read -r _ cur_minor _ <<<"$version"
+        if [[ -n "$latest_entry" && "$cur_minor" == "$map_int_minor" ]]; then
+            next_version="$(bump_patch_version "$version")-preview01"
+            kibana_entry="$latest_entry"
+        else
+            next_version="$(bump_minor_version "$version")-preview01"
+            kibana_entry="$(get_new_integration_version_map_entry "$latest_entry")"
+        fi
         export next_version
-        # add new version + changes entry
+
+        # add new version + changes entry (yq strips comment lines)
         yq -i '. = [{"version": env(next_version), "changes": [{"description": env(changelog_description), "type": "enhancement", "link": env(pr_url) }]}] + .' "$changelog_path"
 
-        # add new version map for integration - kibana
-        latest_entry="$(sed -n '3p' "$changelog_path")"
-        next_entry=$(get_new_integration_version_map_entry "$latest_entry")
-        sed -i '' -e '3i\'$'\n'"$next_entry" "$changelog_path"
+        # Strip any comments yq preserved mid-file, then restore the original header
+        grep -v '^#' "$changelog_path" >"${changelog_path}.tmp" && mv "${changelog_path}.tmp" "$changelog_path"
+        {
+            if [[ "$kibana_entry" != "$latest_entry" ]]; then
+                # minor bump: insert new version map entry before the previous one
+                echo "$changelog_comments" | awk -v new="$kibana_entry" -v old="$latest_entry" '$0 == old { print new } { print }'
+            else
+                echo "$changelog_comments"
+            fi
+            cat "$changelog_path"
+        } >"${changelog_path}.tmp" && mv "${changelog_path}.tmp" "$changelog_path"
 
         # update manifest with new kibana version
-        IFS='-' read -r _ next_kibana_version <<<"$next_entry"
-        IFS='.' read -r major minor _ _ <<<"$(echo "$next_kibana_version" | xargs)"
+        IFS='-' read -r _ kibana_ver_range <<<"$kibana_entry"
+        IFS='.' read -r major minor _ <<<"$(echo "$kibana_ver_range" | xargs)"
         yq -i ".conditions.kibana.version = \"^$major.$minor.0\"" "$manifest_path"
     fi
     yq -i ".version = \"$next_version\"" "$manifest_path"
