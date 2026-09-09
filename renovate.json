@@ -44,6 +44,27 @@
       ],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version"
+    },
+    {
+      "description": "Update :go-version: in docs/version.asciidoc",
+      "customType": "regex",
+      "fileMatch": [
+        "^docs/version\\.asciidoc$"
+      ],
+      "matchStrings": [
+        ":go-version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "customType": "regex",
+      "description": "Track elastic/beats branch HEAD",
+      "managerFilePatterns": ["^go\\.mod$"],
+      "matchStrings": ["// renovate: beats-branch=(?<currentValue>[\\w.]+) beats-sha=(?<currentDigest>[0-9a-f]{40})"],
+      "depNameTemplate": "https://github.com/elastic/beats",
+      "datasourceTemplate": "git-refs",
+      "autoReplaceStringTemplate": "// renovate: beats-branch={{{currentValue}}} beats-sha={{{newDigest}}}"
     }
   ],
   "packageRules": [
@@ -63,6 +84,17 @@
         "/^github\\.com/elastic/sarama$/"
       ],
       "enabled": false
+    },
+    {
+      "description": "Track elastic/beats branch HEAD and regenerate go.mod pseudo-version via make generate",
+      "matchDepNames": ["https://github.com/elastic/beats"],
+      "addLabels": ["renovate-auto-approve"],
+      "automerge": true,
+      "postUpgradeTasks": {
+        "commands": ["make generate"],
+        "fileFilters": ["go.mod", "go.sum"],
+        "executionMode": "branch"
+      }
     },
     {
       "description": "Group AWS SDK packages together",
