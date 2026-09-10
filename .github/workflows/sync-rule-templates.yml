@@ -7,34 +7,55 @@ on:
     paths:
       - "security-policies/bundle/compliance/**/rules/**/data.yaml"
 
-env:
-  GITHUB_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+permissions:
+  contents: read
 
 jobs:
   Sync-Templates:
     name: Sync CIS Rule Templates
     runs-on: ubuntu-22.04
     timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
     steps:
+      # TokenPolicy: token-policy-cloudbeat-sync-rule-templates
+      # https://github.com/elastic/catalog-info/tree/main/resources/github-token-policies
+      - name: Fetch ephemeral GitHub token
+        id: fetch-token
+        uses: elastic/ci-gh-actions/fetch-github-token@2feb1c6f5086cf8e06f61ef35e275abed3456f7b # v1.5.3
+        with:
+          vault-instance: ci-prod
+
       - name: Checkout Integrations repo
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+          token: ${{ steps.fetch-token.outputs.token }}
           repository: elastic/integrations
           path: integrations
 
       - name: Checkout Cloudbeat repo
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+          token: ${{ steps.fetch-token.outputs.token }}
           path: cloudbeat
 
-      - name: Hermit Environment
-        uses: ./.github/actions/hermit
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          init-tools: 'true'
-          free-disk: 'true'
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+          pipx inject poetry poetry-plugin-export
+
+      - name: Install security-policies Python dependencies
+        working-directory: cloudbeat/security-policies
+        run: poetry install --no-root
 
       - name: Sync CIS Rules with integrations repo
         working-directory: cloudbeat
+        env:
+          GH_TOKEN: ${{ steps.fetch-token.outputs.token }}
         run: scripts/sync_rule_templates.sh
