@@ -61,10 +61,10 @@
       "customType": "regex",
       "description": "Track elastic/beats branch HEAD",
       "managerFilePatterns": ["^go\\.mod$"],
-      "matchStrings": ["// renovate: beats-branch=(?<currentValue>[\\w.]+) beats-sha=(?<currentDigest>[0-9a-f]{40})"],
+      "matchStrings": ["// renovate: beats-branch=(?<currentValue>[\\w.]+)\\n\\tgithub\\.com/elastic/beats/v7 v7\\.0\\.0-alpha2\\.0\\.(?<timestamp>\\d+)-(?<currentDigest>[0-9a-f]{12})"],
       "depNameTemplate": "https://github.com/elastic/beats",
       "datasourceTemplate": "git-refs",
-      "autoReplaceStringTemplate": "// renovate: beats-branch={{{currentValue}}} beats-sha={{{newDigest}}}"
+      "autoReplaceStringTemplate": "// renovate: beats-branch={{{currentValue}}}\\n\\tgithub.com/elastic/beats/v7 v7.0.0-alpha2.0.{{{timestamp}}}-{{{newDigest}}}"
     }
   ],
   "packageRules": [
