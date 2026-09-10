@@ -59,12 +59,13 @@
     },
     {
       "customType": "regex",
-      "description": "Track elastic/beats branch HEAD",
+      "description": "Track elastic/beats branch HEAD — currentValue is derived from baseBranch at runtime",
       "managerFilePatterns": ["^go\\.mod$"],
-      "matchStrings": ["// renovate: beats-branch=(?<currentValue>[\\w.]+)\\n\\tgithub\\.com/elastic/beats/v7 v7\\.0\\.0-alpha2\\.0\\.(?<timestamp>\\d+)-(?<currentDigest>[0-9a-f]{12})"],
+      "matchStrings": ["github\\.com/elastic/beats/v7 v7\\.0\\.0-alpha2\\.0\\.(?<timestamp>\\d+)-(?<currentDigest>[0-9a-f]{12})"],
       "depNameTemplate": "https://github.com/elastic/beats",
       "datasourceTemplate": "git-refs",
-      "autoReplaceStringTemplate": "// renovate: beats-branch={{{currentValue}}}\\n\\tgithub.com/elastic/beats/v7 v7.0.0-alpha2.0.{{{timestamp}}}-{{{newDigest}}}"
+      "currentValueTemplate": "{{baseBranch}}",
+      "autoReplaceStringTemplate": "github.com/elastic/beats/v7 v7.0.0-alpha2.0.{{{timestamp}}}-{{{newDigest}}}"
     }
   ],
   "packageRules": [
