@@ -213,7 +213,7 @@ require (
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/nikolalohinski/gonja/v2 v2.9.0 // indirect
 	github.com/oklog/ulid/v2 v2.1.2 // indirect
-	github.com/onsi/ginkgo/v2 v2.32.1 // indirect
+	github.com/onsi/ginkgo/v2 v2.32.2 // indirect
 	github.com/pandatix/go-cvss v0.6.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20260702190614-8ae5a48058df // indirect
