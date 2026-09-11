@@ -28,10 +28,10 @@ import (
 )
 
 type ElasticLoadBalancerInfo struct {
-	LoadBalancer types.LoadBalancer `json:"load_balancer"`
-	Listeners    []types.Listener   `json:"listeners"`
-	region       string
-	tags         map[string]string
+	LoadBalancer   types.LoadBalancer `json:"load_balancer"`
+	Listeners      []types.Listener   `json:"listeners"`
+	region         string
+	tags           map[string]string
 	dnsResolvedIPs []string
 }
 

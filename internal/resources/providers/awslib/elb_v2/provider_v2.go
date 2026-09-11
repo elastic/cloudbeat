@@ -60,16 +60,7 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 			} else {
 				loadBalancer.Listeners = listeners
 			}
-			if len(loadBalancer.GetIPAddresses()) == 0 {
-				if dnsName := pointers.Deref(item.DNSName); dnsName != "" {
-					if ips, err := p.resolver.LookupHost(ctx, dnsName); err != nil {
-						p.log.Debugf("Could not resolve IPs for ELBv2 %q: %v", dnsName, err)
-					} else {
-						sort.Strings(ips)
-						loadBalancer.dnsResolvedIPs = ips
-					}
-				}
-			}
+			loadBalancer.dnsResolvedIPs = p.resolveIPsFromDNS(ctx, loadBalancer)
 			lbs = append(lbs, loadBalancer)
 			if arn := loadBalancer.GetResourceArn(); arn != "" {
 				arns = append(arns, arn)
@@ -90,6 +81,27 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 		p.log.Debugf("Fetched %d Elastic Load Balancers", len(result))
 	}
 	return result, err
+}
+
+// resolveIPsFromDNS resolves the load balancer's DNS name to IP addresses. The AWS API only
+// populates LoadBalancerAddresses[].IpAddress for NLBs with assigned Elastic IPs, so this is
+// the fallback for every other case. Returns nil when the API already gave us addresses, when
+// there is no DNS name, or when resolution fails — a DNS outage must not fail the fetch cycle.
+func (p *Provider) resolveIPsFromDNS(ctx context.Context, lb *ElasticLoadBalancerInfo) []string {
+	if len(lb.GetIPAddresses()) > 0 {
+		return nil
+	}
+	dnsName := pointers.Deref(lb.LoadBalancer.DNSName)
+	if dnsName == "" {
+		return nil
+	}
+	ips, err := p.resolver.LookupHost(ctx, dnsName)
+	if err != nil {
+		p.log.Debugf("Could not resolve IPs for ELBv2 %q: %v", dnsName, err)
+		return nil
+	}
+	sort.Strings(ips)
+	return ips
 }
 
 // describeTags fetches tags for the given load balancer ARNs (chunked to the AWS 20-ARN
