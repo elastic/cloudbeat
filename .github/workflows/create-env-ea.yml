@@ -217,7 +217,7 @@ jobs:
 
       - name: Setup Node for security-documents-generator
         if: success()
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           # Paths are relative to repository root (do not prefix github.workspace — setup-node joins it and duplicates the path).
           node-version-file: security-documents-generator/.nvmrc
