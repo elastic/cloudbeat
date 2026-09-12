@@ -77,6 +77,12 @@ runs:
       with:
         chrome-version: ${{ steps.chrome-version.outputs.major }}
 
+    - name: Enable pnpm via corepack
+      shell: bash
+      working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      run: |
+        corepack enable pnpm
+
     - name: Bootstrap Kibana
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
