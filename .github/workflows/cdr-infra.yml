@@ -74,6 +74,7 @@ jobs:
       elk-stack-version: ${{ inputs.elk-stack-version }}
       serverless_mode: ${{ fromJSON(inputs.serverless_mode) }}
       infra-type: ${{ needs.init.outputs.infra-type }}
+      ess-region: 'qa-gcp'
       expiration_days: ${{ inputs.expiration-days }}
       kibana_enable_entity_analytics_settings: ${{ inputs.kibana_enable_entity_analytics_settings }}
       enable-entity-store-v2: ${{ fromJSON(inputs.enable-entity-store-v2) }}
