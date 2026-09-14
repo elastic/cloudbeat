@@ -29,6 +29,10 @@ poetry run -C security-policies python dev/generate_rule_templates.py
 # commit and push the changes
 cd ../integrations
 git add "$templates_path"
+if git diff --cached --quiet; then
+    echo "No template changes detected, nothing to sync."
+    exit 0
+fi
 git commit -m "Sync CIS rule templates"
 git push origin "$branch_name" -f
 
