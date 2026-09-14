@@ -81,7 +81,9 @@ runs:
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
       run: |
-        corepack enable pnpm
+        PNPM_VERSION=$(node -p "require('./package.json').packageManager.replace('pnpm@', '')")
+        corepack enable
+        corepack prepare "pnpm@${PNPM_VERSION}" --activate
 
     - name: Bootstrap Kibana
       shell: bash
