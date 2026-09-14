@@ -6,8 +6,8 @@ Parameters:
   ElasticOrganizationId:
     Description: Elastic Cloud organization ID.
     Type: String
-    AllowedPattern: ^[0-9]+$
-    ConstraintDescription: must be numeric.
+    AllowedPattern: ^[A-Za-z0-9]{1,32}$
+    ConstraintDescription: must be 1–32 letters or digits.
 
   ElasticResourceType:
     Description: deployment for Elastic Cloud Hosted, project for Elastic Cloud Serverless.
@@ -17,7 +17,7 @@ Parameters:
       - project
 
   ElasticResourceId:
-    Description: Kibana component ID of the deployment, or the Serverless project ID.
+    Description: Elastic deployment ID of the deployment, or the Serverless project ID.
     Type: String
     AllowedPattern: ^[A-Za-z0-9]+$
     ConstraintDescription: must contain only letters and digits.
@@ -67,8 +67,12 @@ Conditions:
 Resources:
 
   # No ThumbprintList: IAM ignores it for publicly trusted CAs.
+  # Retain so that deleting the first stack does not orphan stacks that reuse
+  # this provider via CreateOidcProvider=false.
   WiiOidcProvider:
     Type: AWS::IAM::OIDCProvider
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Url: !Sub
         - https://workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
@@ -80,7 +84,9 @@ Resources:
   ElasticWorkloadIdentityRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ElasticWorkloadIdentity-${AWS::StackName}
+      RoleName: !Sub
+        - "ElasticWorkloadIdentity-${Suffix}"
+        - Suffix: !Select [4, !Split ["-", !Ref AWS::StackId]]
       AssumeRolePolicyDocument: !Sub
         - |
           {
