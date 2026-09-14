@@ -62,7 +62,9 @@ Mappings:
       Domain: svc.qa.elastic.cloud
 
 Conditions:
-  ShouldCreateOidcProvider: !Equals [!Ref CreateOidcProvider, "true"]
+  ShouldCreateOidcProvider: !Equals
+    - !Ref CreateOidcProvider
+    - "true"
 
 Resources:
 
@@ -70,13 +72,16 @@ Resources:
   # Retain so that deleting the first stack does not orphan stacks that reuse
   # this provider via CreateOidcProvider=false.
   WiiOidcProvider:
-    Type: AWS::IAM::OIDCProvider
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
+    Type: AWS::IAM::OIDCProvider
     Properties:
       Url: !Sub
         - https://workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
-        - Domain: !FindInMap [EnvironmentDomain, !Ref ElasticCloudEnvironment, Domain]
+        - Domain: !FindInMap
+            - EnvironmentDomain
+            - !Ref ElasticCloudEnvironment
+            - Domain
       ClientIdList:
         - sts.amazonaws.com
     Condition: ShouldCreateOidcProvider
@@ -85,8 +90,12 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub
-        - "ElasticWorkloadIdentity-${Suffix}"
-        - Suffix: !Select [4, !Split ["-", !Ref AWS::StackId]]
+        - ElasticWorkloadIdentity-${Suffix}
+        - Suffix: !Select
+            - 4
+            - !Split
+              - '-'
+              - !Ref AWS::StackId
       AssumeRolePolicyDocument: !Sub
         - |
           {
@@ -107,13 +116,19 @@ Resources:
               }
             ]
           }
-        - Domain: !FindInMap [EnvironmentDomain, !Ref ElasticCloudEnvironment, Domain]
+        - Domain: !FindInMap
+            - EnvironmentDomain
+            - !Ref ElasticCloudEnvironment
+            - Domain
           ProviderArn: !If
             - ShouldCreateOidcProvider
             - !GetAtt WiiOidcProvider.Arn
             - !Sub
               - arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
-              - Domain: !FindInMap [EnvironmentDomain, !Ref ElasticCloudEnvironment, Domain]
+              - Domain: !FindInMap
+                  - EnvironmentDomain
+                  - !Ref ElasticCloudEnvironment
+                  - Domain
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
