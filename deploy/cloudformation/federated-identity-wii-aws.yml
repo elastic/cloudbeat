@@ -45,15 +45,19 @@ Resources:
         - sts.amazonaws.com
     Condition: ShouldCreateOidcProvider
 
+  # Suffix is the stack UUID, the last "/" segment of the stack ARN. Splitting
+  # the whole ARN on "-" also splits the region and stack name, so the same
+  # index came out identical for every stack. 24 + 36 chars stays under the
+  # 64-char IAM role name limit.
   ElasticWorkloadIdentityRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub
-        - ElasticWorkloadIdentity-${Suffix}
-        - Suffix: !Select
-            - 4
+        - ElasticWorkloadIdentity-${StackUuid}
+        - StackUuid: !Select
+            - 2
             - !Split
-              - '-'
+              - /
               - !Ref AWS::StackId
       AssumeRolePolicyDocument: !Sub
         - |
