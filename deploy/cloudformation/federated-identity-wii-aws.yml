@@ -3,63 +3,25 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: 'Creates an IAM Role for Elastic Workload Identity Federation. The role can be assumed only by the given Elastic deployment or project and grants read-only permissions for all Elastic AWS integrations that support Identity Federation: the AWS package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services)'
 
 Parameters:
-  ElasticOrganizationId:
-    Description: Elastic Cloud organization ID.
+  ElasticIssuer:
+    Description: Issuer of the Elastic Workload Identity tokens, as pre-filled by Kibana. This is the JWT iss claim without the https:// scheme, for example workload-identity-issuer.eu-west-1.aws.svc.elastic.cloud/orgs/1234567890.
     Type: String
-    AllowedPattern: ^[A-Za-z0-9]{1,32}$
-    ConstraintDescription: must be 1–32 letters or digits.
+    AllowedPattern: ^workload-identity-issuer\.[a-z0-9-]+\.(aws|azure|gcp)\.svc(\.(qa|staging))?\.elastic\.cloud/orgs/[A-Za-z0-9]{1,32}$
+    ConstraintDescription: must be workload-identity-issuer.<region>.<aws|azure|gcp>.svc[.qa|.staging].elastic.cloud/orgs/<organization id>.
 
-  ElasticResourceType:
-    Description: deployment for Elastic Cloud Hosted, project for Elastic Cloud Serverless.
+  ElasticSubject:
+    Description: Elastic resource allowed to assume the role, as pre-filled by Kibana. This is the JWT sub claim, deployment:<Kibana component ID> for Elastic Cloud Hosted or project:<project ID> for Elastic Cloud Serverless.
     Type: String
-    AllowedValues:
-      - deployment
-      - project
-
-  ElasticResourceId:
-    Description: Elastic deployment ID of the deployment, or the Serverless project ID.
-    Type: String
-    AllowedPattern: ^[A-Za-z0-9]+$
-    ConstraintDescription: must contain only letters and digits.
-
-  ElasticCloudProvider:
-    Description: Cloud provider the Elastic deployment or project runs on.
-    Type: String
-    AllowedValues:
-      - aws
-      - azure
-      - gcp
-
-  ElasticCloudRegion:
-    Description: Region the Elastic deployment or project runs in (for example eu-west-1, us-central1, eastus2).
-    Type: String
-    AllowedPattern: ^[a-z0-9-]+$
-    ConstraintDescription: must be a lowercase region name.
-
-  ElasticCloudEnvironment:
-    Description: Elastic Cloud environment. Use production unless testing against an Elastic test environment.
-    Type: String
-    AllowedValues:
-      - production
-      - staging
-      - qa
+    AllowedPattern: ^(deployment|project):[A-Za-z0-9]+$
+    ConstraintDescription: must be deployment:<id> or project:<id>, letters and digits only.
 
   CreateOidcProvider:
-    Description: Set to false if this account already has a stack for the same organization and region, so the existing OIDC provider is reused.
+    Description: IAM allows one OIDC provider per issuer per account. Keep true for the first stack. Set to false if a provider for this issuer already exists, either from another stack for the same organization and region or left behind by a deleted one.
     Type: String
     AllowedValues:
       - "true"
       - "false"
     Default: "true"
-
-Mappings:
-  EnvironmentDomain:
-    production:
-      Domain: svc.elastic.cloud
-    staging:
-      Domain: svc.staging.elastic.cloud
-    qa:
-      Domain: svc.qa.elastic.cloud
 
 Conditions:
   ShouldCreateOidcProvider: !Equals
@@ -69,19 +31,16 @@ Conditions:
 Resources:
 
   # No ThumbprintList: IAM ignores it for publicly trusted CAs.
-  # Retain so that deleting the first stack does not orphan stacks that reuse
-  # this provider via CreateOidcProvider=false.
+  # Other stacks may reference this provider via CreateOidcProvider=false, so
+  # it outlives the stack. RetainExceptOnCreate still removes it when the
+  # creating stack rolls back, so a failed first attempt does not block a
+  # retry with the default parameters.
   WiiOidcProvider:
-    DeletionPolicy: Retain
+    DeletionPolicy: RetainExceptOnCreate
     UpdateReplacePolicy: Retain
     Type: AWS::IAM::OIDCProvider
     Properties:
-      Url: !Sub
-        - https://workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
-        - Domain: !FindInMap
-            - EnvironmentDomain
-            - !Ref ElasticCloudEnvironment
-            - Domain
+      Url: !Sub https://${ElasticIssuer}
       ClientIdList:
         - sts.amazonaws.com
     Condition: ShouldCreateOidcProvider
@@ -109,26 +68,17 @@ Resources:
                 "Action": "sts:AssumeRoleWithWebIdentity",
                 "Condition": {
                   "StringEquals": {
-                    "workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}:aud": "sts.amazonaws.com",
-                    "workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}:sub": "${ElasticResourceType}:${ElasticResourceId}"
+                    "${ElasticIssuer}:aud": "sts.amazonaws.com",
+                    "${ElasticIssuer}:sub": "${ElasticSubject}"
                   }
                 }
               }
             ]
           }
-        - Domain: !FindInMap
-            - EnvironmentDomain
-            - !Ref ElasticCloudEnvironment
-            - Domain
-          ProviderArn: !If
+        - ProviderArn: !If
             - ShouldCreateOidcProvider
             - !GetAtt WiiOidcProvider.Arn
-            - !Sub
-              - arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
-              - Domain: !FindInMap
-                  - EnvironmentDomain
-                  - !Ref ElasticCloudEnvironment
-                  - Domain
+            - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/${ElasticIssuer}
       Path: /
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
@@ -399,6 +349,13 @@ Outputs:
   RoleArn:
     Description: The ARN of the IAM Role. Paste this into Kibana.
     Value: !GetAtt ElasticWorkloadIdentityRole.Arn
+
+  OidcProviderArn:
+    Description: The IAM OIDC provider this role trusts. Shared by every stack for the same issuer in this account; delete it manually once the last such stack is gone.
+    Value: !If
+      - ShouldCreateOidcProvider
+      - !GetAtt WiiOidcProvider.Arn
+      - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/${ElasticIssuer}
 
   StackId:
     Description: Store this in Kibana to construct stack-update URLs later.
