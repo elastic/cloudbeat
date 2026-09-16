@@ -32,6 +32,21 @@
   "ignorePaths": [
     "**/vendor/**"
   ],
+  "enabledManagers": [
+    "buildkite",
+    "dockerfile",
+    "github-actions",
+    "gomod",
+    "helm-values",
+    "hermit",
+    "kustomize",
+    "poetry",
+    "pre-commit",
+    "terraform"
+  ],
+  "pre-commit": {
+    "enabled": true
+  },
   "customManagers": [
     {
       "description": "Update .go-version file",
@@ -41,6 +56,18 @@
       ],
       "matchStrings": [
         "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
+      ],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "description": "Update :go-version: in docs/version.asciidoc",
+      "customType": "regex",
+      "fileMatch": [
+        "^docs/version\\.asciidoc$"
+      ],
+      "matchStrings": [
+        ":go-version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version"
@@ -247,6 +274,13 @@
       ]
     },
     {
+      "description": "Group pre-commit hook rev updates into one PR",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "groupName": "pre-commit"
+    },
+    {
       "description": "Disable CI/infrastructure/test-environment updates on release branches",
       "matchBaseBranches": [
         "9.5",
@@ -257,7 +291,8 @@
         ".github/workflows/**",
         ".buildkite/**",
         "**/pyproject.toml",
-        "deploy/test-environments/**"
+        "deploy/test-environments/**",
+        ".pre-commit-config.yaml"
       ],
       "enabled": false
     }
