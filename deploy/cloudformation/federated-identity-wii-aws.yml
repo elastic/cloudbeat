@@ -62,8 +62,14 @@ Resources:
 
           # EntityAlreadyExists: another stack created the provider between our read
           # and create. AccessDenied: the function role's policy may still be
-          # propagating right after stack creation.
-          RETRYABLE = {"EntityAlreadyExists", "AccessDenied", "ConcurrentModification"}
+          # propagating right after stack creation. The rest are transient.
+          RETRYABLE = {
+              "EntityAlreadyExists",
+              "AccessDenied",
+              "ConcurrentModification",
+              "Throttling",
+              "ServiceFailure",
+          }
 
 
           def handler(event, context):
@@ -110,23 +116,24 @@ Resources:
                   return None
 
 
-          def respond(event, status, physical_id, reason="", data=None):
-              body = json.dumps(
-                  {
-                      "Status": status,
-                      "Reason": reason,
-                      "PhysicalResourceId": physical_id,
-                      "StackId": event["StackId"],
-                      "RequestId": event["RequestId"],
-                      "LogicalResourceId": event["LogicalResourceId"],
-                      "Data": data or {},
-                  }
-              ).encode()
+          def respond(event, status, physical_id, reason=None, data=None):
+              body = {
+                  "Status": status,
+                  "PhysicalResourceId": physical_id,
+                  "StackId": event["StackId"],
+                  "RequestId": event["RequestId"],
+                  "LogicalResourceId": event["LogicalResourceId"],
+              }
+              if reason:
+                  body["Reason"] = reason
+              if data:
+                  body["Data"] = data
+              payload = json.dumps(body).encode()
               request = urllib.request.Request(
                   event["ResponseURL"],
-                  data=body,
+                  data=payload,
                   method="PUT",
-                  headers={"Content-Type": "", "Content-Length": str(len(body))},
+                  headers={"Content-Type": "", "Content-Length": str(len(payload))},
               )
               urllib.request.urlopen(request)
 
@@ -134,6 +141,7 @@ Resources:
     Type: Custom::WiiOidcProvider
     Properties:
       ServiceToken: !GetAtt WiiOidcProviderFunction.Arn
+      ServiceTimeout: "300"
       Url: !Sub https://${ElasticIssuer}
       ClientId: sts.amazonaws.com
 
@@ -172,13 +180,12 @@ Resources:
         - ProviderArn: !GetAtt WiiOidcProvider.Arn
       Path: /
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
 
   ElasticAwsInspector:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsInspector-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsInspector      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -191,8 +198,7 @@ Resources:
   ElasticAwsCloudwatchLogs:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsCloudwatchLogs-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsCloudwatchLogs      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -209,8 +215,7 @@ Resources:
   ElasticAwsMetrics:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsMetrics-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsMetrics      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -226,8 +231,7 @@ Resources:
   ElasticAwsHealth:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsHealth-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsHealth      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -242,8 +246,7 @@ Resources:
   ElasticAwsConfig:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsConfig-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsConfig      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -257,8 +260,7 @@ Resources:
   ElasticAwsBilling:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsBilling-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsBilling      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -271,8 +273,7 @@ Resources:
   ElasticAwsDynamoDB:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsDynamoDB-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsDynamoDB      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -286,8 +287,7 @@ Resources:
   ElasticAwsEBS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsEBS-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsEBS      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -300,8 +300,7 @@ Resources:
   ElasticAwsEC2:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsEC2-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsEC2      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -315,8 +314,7 @@ Resources:
   ElasticAwsECS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsECS-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsECS      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -332,8 +330,7 @@ Resources:
   ElasticAwsELB:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsELB-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsELB      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -348,8 +345,7 @@ Resources:
   ElasticAwsLambda:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsLambda-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsLambda      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -363,8 +359,7 @@ Resources:
   ElasticAwsRDS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsRDS-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsRDS      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -379,8 +374,7 @@ Resources:
   ElasticAwsSNS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsSNS-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsSNS      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -394,8 +388,7 @@ Resources:
   ElasticAwsSQS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsSQS-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsSQS      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -409,8 +402,7 @@ Resources:
   ElasticAwsTransitGateway:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsTransitGateway-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsTransitGateway      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -424,8 +416,7 @@ Resources:
   ElasticAwsSecurityHub:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub ElasticAwsSecurityHub-${AWS::StackName}
-      PolicyDocument:
+      PolicyName: ElasticAwsSecurityHub      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
