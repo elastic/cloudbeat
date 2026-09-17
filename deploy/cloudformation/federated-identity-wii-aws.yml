@@ -48,7 +48,7 @@ Resources:
       Runtime: python3.13
       Handler: index.handler
       Role: !GetAtt WiiOidcProviderFunctionRole.Arn
-      Timeout: 60
+      Timeout: 120
       Code:
         ZipFile: |
           import json
@@ -62,10 +62,12 @@ Resources:
 
           # EntityAlreadyExists: another stack created the provider between our read
           # and create. AccessDenied: the function role's policy may still be
-          # propagating right after stack creation. The rest are transient.
+          # propagating right after stack creation. OpenIdIdpCommunicationError:
+          # IAM contacts the issuer during create. The rest are transient.
           RETRYABLE = {
               "EntityAlreadyExists",
               "AccessDenied",
+              "OpenIdIdpCommunicationError",
               "ConcurrentModification",
               "Throttling",
               "ServiceFailure",
@@ -81,8 +83,9 @@ Resources:
               try:
                   ensure_provider(arn, props["Url"], props["ClientId"])
               except Exception as e:
-                  # Any unreported failure leaves the stack waiting for an hour.
-                  respond(event, "FAILED", arn, reason=f"{type(e).__name__}: {e}")
+                  # Report every failure; an unanswered request only fails after ServiceTimeout.
+                  physical_id = event.get("PhysicalResourceId", arn)
+                  respond(event, "FAILED", physical_id, reason=f"{type(e).__name__}: {e}")
                   return
               respond(event, "SUCCESS", arn, data={"Arn": arn})
 
@@ -106,12 +109,13 @@ Resources:
                   except ClientError as e:
                       if e.response["Error"]["Code"] not in RETRYABLE or attempt == 4:
                           raise
-                      time.sleep(2)
+                      time.sleep(2**attempt)
 
 
           def existing_client_ids(arn):
               try:
-                  return iam.get_open_id_connect_provider(OpenIDConnectProviderArn=arn)["ClientIDList"]
+                  provider = iam.get_open_id_connect_provider(OpenIDConnectProviderArn=arn)
+                  return provider.get("ClientIDList", [])
               except iam.exceptions.NoSuchEntityException:
                   return None
 
@@ -135,13 +139,13 @@ Resources:
                   method="PUT",
                   headers={"Content-Type": "", "Content-Length": str(len(payload))},
               )
-              urllib.request.urlopen(request)
+              urllib.request.urlopen(request, timeout=10)
 
   WiiOidcProvider:
     Type: Custom::WiiOidcProvider
     Properties:
       ServiceToken: !GetAtt WiiOidcProviderFunction.Arn
-      ServiceTimeout: "300"
+      ServiceTimeout: "600"
       Url: !Sub https://${ElasticIssuer}
       ClientId: sts.amazonaws.com
 
@@ -185,7 +189,8 @@ Resources:
   ElasticAwsInspector:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsInspector      PolicyDocument:
+      PolicyName: ElasticAwsInspector
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -198,7 +203,8 @@ Resources:
   ElasticAwsCloudwatchLogs:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsCloudwatchLogs      PolicyDocument:
+      PolicyName: ElasticAwsCloudwatchLogs
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -215,7 +221,8 @@ Resources:
   ElasticAwsMetrics:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsMetrics      PolicyDocument:
+      PolicyName: ElasticAwsMetrics
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -231,7 +238,8 @@ Resources:
   ElasticAwsHealth:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsHealth      PolicyDocument:
+      PolicyName: ElasticAwsHealth
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -246,7 +254,8 @@ Resources:
   ElasticAwsConfig:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsConfig      PolicyDocument:
+      PolicyName: ElasticAwsConfig
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -260,7 +269,8 @@ Resources:
   ElasticAwsBilling:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsBilling      PolicyDocument:
+      PolicyName: ElasticAwsBilling
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -273,7 +283,8 @@ Resources:
   ElasticAwsDynamoDB:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsDynamoDB      PolicyDocument:
+      PolicyName: ElasticAwsDynamoDB
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -287,7 +298,8 @@ Resources:
   ElasticAwsEBS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsEBS      PolicyDocument:
+      PolicyName: ElasticAwsEBS
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -300,7 +312,8 @@ Resources:
   ElasticAwsEC2:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsEC2      PolicyDocument:
+      PolicyName: ElasticAwsEC2
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -314,7 +327,8 @@ Resources:
   ElasticAwsECS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsECS      PolicyDocument:
+      PolicyName: ElasticAwsECS
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -330,7 +344,8 @@ Resources:
   ElasticAwsELB:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsELB      PolicyDocument:
+      PolicyName: ElasticAwsELB
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -345,7 +360,8 @@ Resources:
   ElasticAwsLambda:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsLambda      PolicyDocument:
+      PolicyName: ElasticAwsLambda
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -359,7 +375,8 @@ Resources:
   ElasticAwsRDS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsRDS      PolicyDocument:
+      PolicyName: ElasticAwsRDS
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -374,7 +391,8 @@ Resources:
   ElasticAwsSNS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsSNS      PolicyDocument:
+      PolicyName: ElasticAwsSNS
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -388,7 +406,8 @@ Resources:
   ElasticAwsSQS:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsSQS      PolicyDocument:
+      PolicyName: ElasticAwsSQS
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -402,7 +421,8 @@ Resources:
   ElasticAwsTransitGateway:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsTransitGateway      PolicyDocument:
+      PolicyName: ElasticAwsTransitGateway
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -416,7 +436,8 @@ Resources:
   ElasticAwsSecurityHub:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: ElasticAwsSecurityHub      PolicyDocument:
+      PolicyName: ElasticAwsSecurityHub
+      PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
