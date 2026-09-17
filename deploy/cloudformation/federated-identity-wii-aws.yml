@@ -89,7 +89,6 @@ Resources:
                       - EnvironmentDomain
                       - !Ref ElasticCloudEnvironment
                       - Domain
-
   WiiOidcProviderFunction:
     Type: AWS::Lambda::Function
     Properties:
