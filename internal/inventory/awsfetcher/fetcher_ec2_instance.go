@@ -19,6 +19,13 @@ package awsfetcher
 
 import (
 	"context"
+<<<<<<< HEAD
+=======
+	"strings"
+	"time"
+
+	iamtypes "github.com/aws/aws-sdk-go-v2/service/iam/types"
+>>>>>>> e1ea204a ([Asset Inventory][EC2] Add timeout handler to IAM resolver (#7919))
 
 	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -105,6 +112,105 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 	}
 }
 
+<<<<<<< HEAD
+=======
+// resolveRoleArn attempts to resolve the IAM role ARN for the given instance-profile ARN.
+// Results are cached in roleArnCache (keyed by profile ARN) so instances sharing a profile
+// trigger only one IAM call. Returns "" if the profile has no roles or the call fails.
+func (e *ec2InstanceFetcher) resolveRoleArn(ctx context.Context, profileArn string, roleArnCache map[string]string) string {
+	if cached, ok := roleArnCache[profileArn]; ok {
+		return cached
+	}
+
+	profileName := profileNameFromArn(profileArn)
+	if profileName == "" {
+		roleArnCache[profileArn] = ""
+		return ""
+	}
+
+	callCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	profile, err := e.iamResolver.GetInstanceProfile(callCtx, profileName)
+	cancel()
+	if err != nil {
+		e.logger.Warnf("Could not resolve IAM role for instance profile %s: %v", profileArn, err)
+		roleArnCache[profileArn] = ""
+		return ""
+	}
+
+	roleArn := ""
+	if len(profile.Roles) > 0 {
+		roleArn = pointers.Deref(profile.Roles[0].Arn)
+	}
+
+	roleArnCache[profileArn] = roleArn
+	return roleArn
+}
+
+// profileNameFromArn extracts the instance-profile name from its ARN.
+// Example: "arn:aws:iam::123:instance-profile/MyProfile" → "MyProfile"
+// Also handles path-qualified names: ".../instance-profile/division/MyProfile" → "division/MyProfile".
+func profileNameFromArn(arn string) string {
+	const marker = "instance-profile/"
+	idx := strings.Index(arn, marker)
+	if idx == -1 {
+		return ""
+	}
+	return arn[idx+len(marker):]
+}
+
+// buildDetails collects non-ECS, resource-specific EC2 fields into entity.Details,
+// using UpperCamelCase keys. Empty values are omitted so events stay clean and struct
+// comparison in tests is stable.
+func (e *ec2InstanceFetcher) buildDetails(i *ec2.Ec2Instance, tags map[string]string, roleArnCache map[string]string) map[string]any {
+	details := map[string]any{}
+	if v := pointers.Deref(i.ImageId); v != "" {
+		details["ImageId"] = v
+	}
+	if v := string(i.Platform); v != "" {
+		details["Platform"] = v
+	}
+	if v := pointers.Deref(i.VpcId); v != "" {
+		details["VpcId"] = v
+	}
+	if v := pointers.Deref(i.SubnetId); v != "" {
+		details["SubnetId"] = v
+	}
+	if i.State != nil {
+		if v := string(i.State.Name); v != "" {
+			details["State"] = v
+		}
+	}
+	if i.IamInstanceProfile != nil {
+		if profileArn := pointers.Deref(i.IamInstanceProfile.Arn); profileArn != "" {
+			details["InstanceProfileArn"] = profileArn
+			if roleArn, ok := roleArnCache[profileArn]; ok && roleArn != "" {
+				details["RoleArn"] = roleArn
+			}
+		}
+	}
+	if v := awslib.LookupTag(tags, "owner"); v != "" {
+		details["Owner"] = v
+	}
+	if v := awslib.LookupTag(tags, "costcenter", "cost-center", "cost_center"); v != "" {
+		details["CostCenter"] = v
+	}
+	return details
+}
+
+// buildIPs collects non-empty IP address strings into a slice, returning nil when none exist.
+// Using a nil (not empty) slice is important so that the json:"ip,omitempty" tag suppresses
+// the field consistently and struct comparison in tests works without nil/empty mismatches.
+func buildIPs(addrs ...*string) []string {
+	var ips []string
+	for _, addr := range addrs {
+		if v := pointers.Deref(addr); v != "" {
+			ips = append(ips, v)
+		}
+	}
+	return ips
+}
+
+>>>>>>> e1ea204a ([Asset Inventory][EC2] Add timeout handler to IAM resolver (#7919))
 func (e *ec2InstanceFetcher) getTags(instance *ec2.Ec2Instance) map[string]string {
 	tags := make(map[string]string, len(instance.Tags))
 	for _, t := range instance.Tags {
