@@ -568,7 +568,7 @@ require (
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20260724033716-83e58baca724 // indirect
 	github.com/tetratelabs/wabin v0.0.0-20230304001439-f6f874872834 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/atomic v1.12.0 // indirect
 	helm.sh/helm/v4 v4.3.0 // indirect
 	sigs.k8s.io/controller-runtime v0.25.1 // indirect
 )
