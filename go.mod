@@ -50,11 +50,14 @@ require (
 	github.com/aws/smithy-go v1.28.1
 	github.com/dgraph-io/ristretto/v2 v2.4.2
 	github.com/djherbis/times v1.6.0
+<<<<<<< HEAD
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260605135314-ff15b23a2798
+=======
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260722133641-cf032f423c84
+>>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 	github.com/elastic/e2e-testing v1.2.3
-	github.com/elastic/elastic-agent-autodiscover v0.10.3-0.20260423154939-e990715f9426
 	github.com/elastic/elastic-agent-client/v7 v7.18.1
-	github.com/elastic/elastic-agent-libs v0.43.1
+	github.com/elastic/elastic-agent-libs v0.46.1
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.9.1
 	github.com/go-logr/zapr v1.3.0
@@ -377,7 +380,11 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/elastic-agent-system-metrics v0.14.4 // indirect
 	github.com/elastic/go-concert v0.3.1 // indirect
+<<<<<<< HEAD
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
+=======
+	github.com/elastic/go-lumber v0.2.0 // indirect
+>>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
 	github.com/elastic/go-structform v0.0.12 // indirect
 	github.com/elastic/go-sysinfo v1.15.4 // indirect
