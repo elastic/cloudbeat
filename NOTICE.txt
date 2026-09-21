@@ -6793,6 +6793,7 @@ License Version 2.0.
 
 
 --------------------------------------------------------------------------------
+<<<<<<< HEAD
 Dependency : github.com/elastic/elastic-agent-autodiscover
 Version: v0.9.0
 Licence type (autodetected): Apache-2.0
@@ -7004,6 +7005,8 @@ Contents of probable licence file $GOMODCACHE/github.com/elastic/elastic-agent-a
 
 
 --------------------------------------------------------------------------------
+=======
+>>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 Dependency : github.com/elastic/elastic-agent-client/v7
 Version: v7.16.0
 Licence type (autodetected): Elastic
