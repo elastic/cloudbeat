@@ -422,20 +422,6 @@ github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
 github.com/ebitengine/purego v0.11.0 h1:jhp/D+Nyv7UUW8HAcmcjt2N2rYrYi9m3SL21k0Ua/NI=
 github.com/ebitengine/purego v0.11.0/go.mod h1:DCHPP08djqhNSoTfImcnHYQRZmd0qhakvrozqaEYhGQ=
-<<<<<<< HEAD
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260430233829-c76f348ee34f h1:j6gIUxcCBFJmYtwS0RYW2bnlHg2UXq91FPm/y8PgLog=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260430233829-c76f348ee34f/go.mod h1:YseH/fA+O+J5AXdhmHjJYzNIpaprVkJvSX3/0LZNZEI=
-github.com/elastic/e2e-testing v1.2.3 h1:XKF91O+Y6RcrTuNc7kMM4/HE9pvkvjASIYhEWS5XkT0=
-github.com/elastic/e2e-testing v1.2.3/go.mod h1:TqP9TlnqFqKqd61etWkYgb8T+RulH7vmhg7lxQw/Yag=
-github.com/elastic/elastic-agent-autodiscover v0.10.2 h1:fzi+CIcK7FKUQlQHfKP+3Ixg1wbuEYacaChunmMAP38=
-github.com/elastic/elastic-agent-autodiscover v0.10.2/go.mod h1:qBoYxp3lX3qFRYjEgsOaROC+xL4ItG63GSvOg1SjjsQ=
-github.com/elastic/elastic-agent-client/v7 v7.18.1 h1:WnM53JjaukeysrAuiTyrhDPmFxJG07ZAByc2TrkcKcs=
-github.com/elastic/elastic-agent-client/v7 v7.18.1/go.mod h1:uDpSGZ+YCKgqgtkwCA0qjwX0gU/wmixDsVbPjY3GkPs=
-github.com/elastic/elastic-agent-libs v0.33.3 h1:Gsq5FA29sUbbZVJbeLCKPyRkAxCrOhv3VtXvuG9Uu6k=
-github.com/elastic/elastic-agent-libs v0.33.3/go.mod h1:0xUg7alsNE/WhY9DZRIdTYW75nqSHC1octIAg//j/PQ=
-github.com/elastic/elastic-agent-system-metrics v0.14.3 h1:v867kcgCVguOX3AYIHEVn2RNracdH40FqqXiZq71pDU=
-github.com/elastic/elastic-agent-system-metrics v0.14.3/go.mod h1:JNfnZrC0viAjlJRUzQKKuMpDlXgjXBn4WdWEXQF7jcA=
-=======
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260722133641-cf032f423c84 h1:MN3USi74REzq/4EmXw/DQdsl5ZPATRyruO2I/jZcifU=
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260722133641-cf032f423c84/go.mod h1:eHoxPcnnwCXDyBqOKgSdiWJ8bMNUm5AbDnmONkCW9dk=
 github.com/elastic/e2e-testing v1.2.3 h1:XKF91O+Y6RcrTuNc7kMM4/HE9pvkvjASIYhEWS5XkT0=
@@ -446,7 +432,6 @@ github.com/elastic/elastic-agent-libs v0.46.1 h1:1dVRKOaGWBxqDQPb/NCtoJHI8Nx3QbJ
 github.com/elastic/elastic-agent-libs v0.46.1/go.mod h1:axkpqDCCzAky6G4D/cklgtZQa3jTNGAMVHVkU0u6YbU=
 github.com/elastic/elastic-agent-system-metrics v0.14.4 h1:XGGepNVOxhtfJmanQsgqCAZESIJtyDIFOKErOaVzFEw=
 github.com/elastic/elastic-agent-system-metrics v0.14.4/go.mod h1:NyNMrdqMfznb/Zy8EmIAHlJpX6HuRlNW+bBL9UN7WQY=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 github.com/elastic/elastic-transport-go/v8 v8.8.0 h1:7k1Ua+qluFr6p1jfJjGDl97ssJS/P7cHNInzfxgBQAo=
 github.com/elastic/elastic-transport-go/v8 v8.8.0/go.mod h1:YLHer5cj0csTzNFXoNQ8qhtGY1GTvSqPnKWKaqQE3Hk=
 github.com/elastic/go-concert v0.3.0 h1:Y66JFn3ENndpHErOhTASu8/Fz1SSsLZicPufCmvQD60=
@@ -455,17 +440,10 @@ github.com/elastic/go-elasticsearch/v8 v8.19.0 h1:VmfBLNRORY7RZL+9hTxBD97ehl9H8N
 github.com/elastic/go-elasticsearch/v8 v8.19.0/go.mod h1:F3j9e+BubmKvzvLjNui/1++nJuJxbkhHefbaT0kFKGY=
 github.com/elastic/go-licenser v0.4.2 h1:bPbGm8bUd8rxzSswFOqvQh1dAkKGkgAmrPxbUi+Y9+A=
 github.com/elastic/go-licenser v0.4.2/go.mod h1:W8eH6FaZDR8fQGm+7FnVa7MxI1b/6dAqxz+zPB8nm5c=
-<<<<<<< HEAD
-github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f h1:TsPpU5EAwlt7YZoupKlxZ093qTZYdGou3EhfTF1U0B4=
-github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f/go.mod h1:HHaWnZamYKWsR9/eZNHqRHob8iQDKnchHmmskT/SKko=
-github.com/elastic/go-seccomp-bpf v1.5.0 h1:gJV+U1iP+YC70ySyGUUNk2YLJW5/IkEw4FZBJfW8ZZY=
-github.com/elastic/go-seccomp-bpf v1.5.0/go.mod h1:umdhQ/3aybliBF2jjiZwS492I/TOKz+ZRvsLT3hVe1o=
-=======
 github.com/elastic/go-lumber v0.2.0 h1:BVGh+jq6tmp5ajAQ4QaPLcwC8vYqQ0yzt0tmWfuz79I=
 github.com/elastic/go-lumber v0.2.0/go.mod h1:HHaWnZamYKWsR9/eZNHqRHob8iQDKnchHmmskT/SKko=
 github.com/elastic/go-seccomp-bpf v1.6.0 h1:NYduiYxRJ0ZkIyQVwlSskcqPPSg6ynu5pK0/d7SQATs=
 github.com/elastic/go-seccomp-bpf v1.6.0/go.mod h1:5tFsTvH4NtWGfpjsOQD53H8HdVQ+zSZFRUDSGevC0Kc=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 github.com/elastic/go-structform v0.0.12 h1:HXpzlAKyej8T7LobqKDThUw7BMhwV6Db24VwxNtgxCs=
 github.com/elastic/go-structform v0.0.12/go.mod h1:CZWf9aIRYY5SuKSmOhtXScE5uQiLZNqAFnwKR4OrIM4=
 github.com/elastic/go-sysinfo v1.15.3 h1:W+RnmhKFkqPTCRoFq2VCTmsT4p/fwpo+3gKNQsn1XU0=
@@ -839,149 +817,12 @@ github.com/lestrrat-go/jwx/v3 v3.3.0 h1:OXcYvQOQ7cxWzeZ/Q9sYk8ABe/kCSI371WmuACiC
 github.com/lestrrat-go/jwx/v3 v3.3.0/go.mod h1:eIJhDcKHBwcgxqv8RiIylV67TVl1wJp/265IAHY1Db8=
 github.com/lestrrat-go/option/v2 v2.0.0 h1:XxrcaJESE1fokHy3FpaQ/cXW8ZsIdWcdFzzLOcID3Ss=
 github.com/lestrrat-go/option/v2 v2.0.0/go.mod h1:oSySsmzMoR0iRzCDCaUfsCzxQHUEuhOViQObyy7S6Vg=
-<<<<<<< HEAD
-=======
-github.com/lestrrat-go/strftime v1.2.0 h1:8fAUYOeaJKCuLzNvUWBAo8t6I6hkFfodDTndEzJIun0=
-github.com/lestrrat-go/strftime v1.2.0/go.mod h1:GtsIA/7ddIGJjEdfadUafEb1sbutvlvpMdPCMglykYo=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
-github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
-github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
-github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
-github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de h1:9TO3cAIGXtEhnIaL+V+BEER86oLrvS+kWobKpbJuye0=
-github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de/go.mod h1:zAbeS9B/r2mtpb6U+EI2rYA5OAXxsYw6wTamcNW+zcE=
-github.com/lufia/plan9stats v0.0.0-20260802145828-341c2f0c90b5 h1:eveIIGn4BGM3qknO74omf6HYr30/exH+eVUTuAgwjZ0=
-github.com/lufia/plan9stats v0.0.0-20260802145828-341c2f0c90b5/go.mod h1:autxFIvghDt3jPTLoqZ9OZ7s9qTGNAWmYCjVFWPX/zg=
-github.com/lunixbochs/struc v0.0.0-20241101090106-8d528fa2c543 h1:GxMuVb9tJajC1QpbQwYNY1ZAo1EIE8I+UclBjOfjz/M=
-github.com/lunixbochs/struc v0.0.0-20241101090106-8d528fa2c543/go.mod h1:vy1vK6wD6j7xX6O6hXe621WabdtNkou2h7uRtTfRMyg=
-github.com/magefile/mage v1.17.2 h1:fyXVu1eadI8Ap1HCCNgEhJ5McIWiYhLR8uol64ZZc40=
-github.com/magefile/mage v1.17.2/go.mod h1:Yj51kqllmsgFpvvSzgrZPK9WtluG3kUhFaBUVLo4feA=
-github.com/magiconair/properties v1.18.12 h1:sT9zQpvTB3B4gzrX0tmZNTEaGyg8Zw55MFYRE32Mr9I=
-github.com/magiconair/properties v1.18.12/go.mod h1:Dhd985XPs7jluiymwWYZ0G4Z61jb3vdS329zhj2hYo0=
-github.com/masahiro331/go-disk v0.0.0-20260423015231-f7a470ebd472 h1:QAY4If99Ee10TUP4mdcB6Qlm036ayfYruTLjvlaczbs=
-github.com/masahiro331/go-disk v0.0.0-20260423015231-f7a470ebd472/go.mod h1:rojbW5tVhH1cuVYFKZS+QX+VGXK45JVsRO+jW92kkKM=
-github.com/masahiro331/go-ebs-file v0.0.0-20260422020928-9d24e29aac27 h1:IrxbYTVKTDTckgMf7DZz2LZ+izZZpidH2mDP4D7GUt4=
-github.com/masahiro331/go-ebs-file v0.0.0-20260422020928-9d24e29aac27/go.mod h1:XFWPTlAcEL733RUjbr0QBybdt6oK2DH7LZk8id2qtd4=
-github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b h1:IAYuiQq6BVizPeXTKBoY3Jcin3gGn8No7h31lvH0aKo=
-github.com/masahiro331/go-ext4-filesystem v0.0.0-20260423010602-fe51f5b5e52b/go.mod h1:3XMMY1M486mWGTD13WPItg6FsgflQR72ZMAkd+gsyoQ=
-github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1 h1:XC9v1PB6rMOCTnQIInoFvgSA+vhTCt0wQ7B+Tjpombk=
-github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1/go.mod h1:jZ3F25l7DbD7l7DcA8aj7eo1EZ84nbzcQHBB4lCSrI8=
-github.com/masahiro331/go-vmdk-parser v0.0.0-20260425175348-040a3994f0b4 h1:BE5b10JnIaa2QcZmJnMdJTMNPyM4xenp4SAyu4q2c0U=
-github.com/masahiro331/go-vmdk-parser v0.0.0-20260425175348-040a3994f0b4/go.mod h1:5f7mCJGW9cJb8SDn3z8qodGxpMCOo8d/2nls/tiwRrw=
-github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb h1:2c5hvZu2o6ccumpPVlyGiRT3aXvc6Yxj1Kqh+usy1iM=
-github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb/go.mod h1:QKBZqdn6teT0LK3QhAf3K6xakItd1LonOShOEC44idQ=
-github.com/mattn/go-colorable v0.1.15 h1:+u9SLTRGnXv73cEsnsmoZBom+dMU88B2M0aDcWy0/jY=
-github.com/mattn/go-colorable v0.1.15/go.mod h1:6LmQG8QLFO4G5z1gPvYEzlUgJ2wF+stgPZH1UqBm1s8=
-github.com/mattn/go-isatty v0.0.24 h1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsReI=
-github.com/mattn/go-isatty v0.0.24/go.mod h1:nMCL3Zebbrt45jsMDgnfIwz6ydEQApk5oEI3HqDio6A=
-github.com/mattn/go-runewidth v0.0.29 h1:3oGF3R/S2N9DQ3ptftzVIvg2eicmojCzlwBEmqEPDfQ=
-github.com/mattn/go-runewidth v0.0.29/go.mod h1:3qAiGCV4Koz/yuveO58qUefmUTRm8r0IGEXZ9jeHp/8=
-github.com/mattn/go-shellwords v1.0.15 h1:rx0n8+ZdM9JWZMlr2BMPAjtLU0rfluLNtwMC2FJOTtY=
-github.com/mattn/go-shellwords v1.0.15/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lLtQsUlTZDWQ8Y=
-github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
-github.com/mattn/go-sqlite3 v1.14.24 h1:tpSp2G2KyMnnQu99ngJ47EIkWVmliIizyZBfPrBWDRM=
-github.com/mattn/go-sqlite3 v1.14.24/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
-github.com/microsoft/kiota-abstractions-go v1.11.0 h1:Ve2JNkxMjQtpmk7DXwCVot1l0agXDHrI27Tq3G/k16Y=
-github.com/microsoft/kiota-abstractions-go v1.11.0/go.mod h1:7nEsc2TloY7CQxwFFQ4Ok2IusFa81dntapxUNahfeI0=
-github.com/microsoft/kiota-authentication-azure-go v1.3.1 h1:AGta92S6IL1E6ZMDb8YYB7NVNTIFUakbtLKUdY5RTuw=
-github.com/microsoft/kiota-authentication-azure-go v1.3.1/go.mod h1:26zylt2/KfKwEWZSnwHaMxaArpbyN/CuzkbotdYXF0g=
-github.com/microsoft/kiota-http-go v1.5.6 h1:KBdk7sxWYXZnRRExLjIcNt4I7LoOfh/XQJWWid4zBKE=
-github.com/microsoft/kiota-http-go v1.5.6/go.mod h1:bpJkXfBAcnmiXRg03GXdnb/vF3Sqk3+EgLvXXjmzzQM=
-github.com/microsoft/kiota-serialization-form-go v1.1.3 h1:eUY8eHXPFe4ma8cAdx0ya3g4NPlZgbPT+GlFC3xcgGY=
-github.com/microsoft/kiota-serialization-form-go v1.1.3/go.mod h1:RMO99zyik+NvZjdVcIeyu6ikyfuKhQtzq2RK0fWJJio=
-github.com/microsoft/kiota-serialization-json-go v1.1.4 h1:XAhsBjxiunPgsPLLHEbuvAe81Q3wD1pNOE22Dq2CD3k=
-github.com/microsoft/kiota-serialization-json-go v1.1.4/go.mod h1:HUTiYs9llTGLjh9+O+yOkBbNEaZ1kxh3sBPU5tPhmeI=
-github.com/microsoft/kiota-serialization-multipart-go v1.1.2 h1:1pUyA1QgIeKslQwbk7/ox1TehjlCUUT3r1f8cNlkvn4=
-github.com/microsoft/kiota-serialization-multipart-go v1.1.2/go.mod h1:j2K7ZyYErloDu7Kuuk993DsvfoP7LPWvAo7rfDpdPio=
-github.com/microsoft/kiota-serialization-text-go v1.1.3 h1:8z7Cebn0YAAr++xswVgfdxZjnAZ4GOB9O7XP4+r5r/M=
-github.com/microsoft/kiota-serialization-text-go v1.1.3/go.mod h1:NDSvz4A3QalGMjNboKKQI9wR+8k+ih8UuagNmzIRgTQ=
-github.com/microsoftgraph/msgraph-sdk-go v1.103.0 h1:XaVRd3FxdG/tLJhYYaHRqCjdKpJilH4xKQHnJL4UxBk=
-github.com/microsoftgraph/msgraph-sdk-go v1.103.0/go.mod h1:qxzY5SaoPigY6/Dpyfg4uigQjNDvL+sZl6fzD6EpWeQ=
-github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1 h1:k3YIaJm57ufoEX0KdsEY4l1X9BAMxEqrwr4a7WMRDzY=
-github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1/go.mod h1:yNqPNhXee2w9cZzkJW5mL1utVMSInsQSo/TyEB5sup8=
-github.com/miekg/dns v1.1.73 h1:uhT8nJxmTrPJYClxVxTCX+CVn6qnzSiybRk72Z6DgrE=
-github.com/miekg/dns v1.1.73/go.mod h1:RW2Obtfd5NZHvOFe3zYG0W8koWOQtAzyHaLo8vASBuQ=
-github.com/mikefarah/yq/v4 v4.53.6 h1:5vB15LTZRvrF6z/metQF31bmF63SjDzCKKX8o8UemQQ=
-github.com/mikefarah/yq/v4 v4.53.6/go.mod h1:3tmDcCSTOTUFa5Z1X8R4j0H1kauIwNo2wjKq9sLyAh4=
-github.com/mileusna/useragent v1.3.4 h1:MiuRRuvGjEie1+yZHO88UBYg8YBC/ddF6T7F56i3PCk=
-github.com/mileusna/useragent v1.3.4/go.mod h1:3d8TOmwL/5I8pJjyVDteHtgDGcefrFUX4ccGOMKNYYc=
-github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
-github.com/mitchellh/copystructure v1.2.0/go.mod h1:qLl+cE2AmVv+CoeAwDPye/v+N2HKCj9FbZEVFJRxO9s=
-github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
-github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
-github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=
-github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
-github.com/mitchellh/gox v1.0.1 h1:x0jD3dcHk9a9xPSDN6YEL4xL6Qz0dvNYm8yZqui5chI=
-github.com/mitchellh/gox v1.0.1/go.mod h1:ED6BioOGXMswlXa2zxfh/xdd5QhwYliBFn9V18Ap4z4=
-github.com/mitchellh/hashstructure/v2 v2.0.2 h1:vGKWl0YJqUNxE8d+h8f6NJLcCJrgbhC4NcD46KavDd4=
-github.com/mitchellh/hashstructure/v2 v2.0.2/go.mod h1:MG3aRVU/N29oo/V/IhBX8GR/zz4kQkprJgF2EVszyDE=
-github.com/mitchellh/iochan v1.0.0 h1:C+X3KsSTLFVBr/tK1eYN/vs4rJcvsiLU338UhYPJWeY=
-github.com/mitchellh/iochan v1.0.0/go.mod h1:JwYml1nuB7xOzsp52dPpHFffvOCDupsG0QubkSMEySY=
-github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c h1:cqn374mizHuIWj+OSJCajGr/phAmuMug9qIX3l9CflE=
-github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
-github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zxSIeXaQ=
-github.com/mitchellh/reflectwalk v1.0.2/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
-github.com/moby/buildkit v0.33.0 h1:zBbt1FiMcTB/oFg1iCNcKa83k5Rn8MGcVjXFIcfYhuQ=
-github.com/moby/buildkit v0.33.0/go.mod h1:uNKSZnfMk1aSa18JiCR5BT68M/3jIDGo6XuAByUK3ek=
-github.com/moby/docker-image-spec v1.3.1 h1:jMKff3w6PgbfSa69GfNg+zN/XLhfXJGnEx3Nl2EsFP0=
-github.com/moby/docker-image-spec v1.3.1/go.mod h1:eKmb5VW8vQEh/BAr2yvVNvuiJuY6UIocYsFu/DxxRpo=
-github.com/moby/go-archive v0.2.1 h1:fAa0wUS/ikZKyx7o/1fhUYmhZ7RgpthdeoDhJvunTLc=
-github.com/moby/go-archive v0.2.1/go.mod h1:Npdv43fFqlhZW7Xo8fbm3ZMYFvAGNviUPqX21VERbcE=
-github.com/moby/locker v1.0.1 h1:fOXqR41zeveg4fFODix+1Ch4mj/gT0NE1XJbp/epuBg=
-github.com/moby/locker v1.0.1/go.mod h1:S7SDdo5zpBK84bzzVlKr2V0hz+7x9hWbYC/kq7oQppc=
-github.com/moby/moby/api v1.56.0 h1:GQzua3NA599ASSIICx0iFgiJeO9YkdDARvQsm23ZZuQ=
-github.com/moby/moby/api v1.56.0/go.mod h1:sZ+THbVWkjOmBPPfbnzdD/G1LuIexWhqlSHHPTDQ1Uk=
-github.com/moby/moby/client v0.6.0 h1:AJjEB21QPbXSXjDsZorFBoDZPhMrfbpaPLgSMAW9Bgs=
-github.com/moby/moby/client v0.6.0/go.mod h1:OCo00wNRyA3m4lmJ228W3JbyCN4ZNNYjpOXiJydBdcQ=
-github.com/moby/patternmatcher v0.6.1 h1:qlhtafmr6kgMIJjKJMDmMWq7WLkKIo23hsrpR3x084U=
-github.com/moby/patternmatcher v0.6.1/go.mod h1:hDPoyOpDY7OrrMDLaYoY3hf52gNCR/YOUYxkhApJIxc=
-github.com/moby/sys/atomicwriter v0.1.0 h1:kw5D/EqkBwsBFi0ss9v1VG3wIkVhzGvLklJ+w3A14Sw=
-github.com/moby/sys/atomicwriter v0.1.0/go.mod h1:Ul8oqv2ZMNHOceF643P6FKPXeCmYtlQMvpizfsSoaWs=
-github.com/moby/sys/mountinfo v0.7.2 h1:1shs6aH5s4o5H2zQLn796ADW1wMrIwHsyJ2v9KouLrg=
-github.com/moby/sys/mountinfo v0.7.2/go.mod h1:1YOa8w8Ih7uW0wALDUgT1dTTSBrZ+HiBLGws92L2RU4=
-github.com/moby/sys/sequential v0.7.0 h1:ASQNGNROJSuOO6LL6bPHbKvuZu6NU8P4ldPWk31zj/8=
-github.com/moby/sys/sequential v0.7.0/go.mod h1:NfSTAp6V3fw4tmkD62PEcOKeZKquXT8VKCkf7aVR79o=
-github.com/moby/sys/signal v0.7.1 h1:PrQxdvxcGijdo6UXXo/lU/TvHUWyPhj7UOpSo8tuvk0=
-github.com/moby/sys/signal v0.7.1/go.mod h1:Se1VGehYokAkrSQwL4tDzHvETwUZlnY7S5XtQ50mQp8=
-github.com/moby/sys/user v0.4.1 h1:RgjRlaDKi/Xmyrz4t8lyzXT6v2ooFeO/7xtchmhVWE0=
-github.com/moby/sys/user v0.4.1/go.mod h1:E9QsW5WRe1kUAf7kW8hXKwu1uhsZEAdPLYHYSDudF4Y=
-github.com/moby/sys/userns v0.2.1 h1:4OvdM7BcPkASbuouHsbW3aeMJSFlYDldBRnXVZhaRk8=
-github.com/moby/sys/userns v0.2.1/go.mod h1:IHUYgu/kao6N8YZlp9Cf444ySSvCmDlmzUcYfDHOl28=
-github.com/moby/term v0.5.2 h1:6qk3FJAFDs6i/q3W/pQ97SX192qKfZgGjCQqfCJkgzQ=
-github.com/moby/term v0.5.2/go.mod h1:d3djjFCrjnB+fl8NJux+EJzu0msscUP+f8it8hPkFLc=
-github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
-github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
-github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
-github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
-github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee h1:W5t00kpgFdJifH4BDsTlE89Zl93FEloxaWZfGcifgq8=
-github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
-github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 h1:n6/2gBQ3RWajuToeY6ZtZTIKv2v7ThUy5KKusIT0yc0=
-github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00/go.mod h1:Pm3mSP3c5uWn86xMLZ5Sa7JB9GsEZySvHYXCTK4E9q4=
-github.com/morikuni/aec v1.1.0 h1:vBBl0pUnvi/Je71dsRrhMBtreIqNMYErSAbEeb8jrXQ=
-github.com/morikuni/aec v1.1.0/go.mod h1:xDRgiq/iw5l+zkao76YTKzKttOp2cwPEne25HDkJnBw=
-github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
-github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/ncruces/go-strftime v1.0.0 h1:HMFp8mLCTPp341M/ZnA4qaf7ZlsbTc+miZjCLOFAw7w=
-github.com/ncruces/go-strftime v1.0.0/go.mod h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=
-github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
-github.com/nikolalohinski/gonja/v2 v2.9.0 h1:QICtNWj0siM3PF5xUjVod/l+C9XnGfI+wrfSIBGKQ6o=
-github.com/nikolalohinski/gonja/v2 v2.9.0/go.mod h1:UIzXPVuOsr5h7dZ5DUbqk3/Z7oFA/NLGQGMjqT4L2aU=
-github.com/oklog/ulid/v2 v2.1.2 h1:IEclFb9JNvzYA6MW2SCxbLzcHTVsfqm3PrqGQJH5zec=
-github.com/oklog/ulid/v2 v2.1.2/go.mod h1:rcEKHmBBKfef9DhnvX7y1HZBYxjXb0cP5ExxNsTT1QQ=
-github.com/onsi/ginkgo/v2 v2.33.0 h1:C8gBA6Uc2ZEubiV+SXiu5tZnMTwEmXHgkJwGozKtZf8=
-github.com/onsi/ginkgo/v2 v2.33.0/go.mod h1:+aXOY+vzZ5mu2iI2HpTZUPmM//oQfsNFX6gU9kNcA44=
-github.com/onsi/gomega v1.42.1 h1:iN1rCUX+44NZ1Dc97MPoeFYbFR0vh8zxoxMFwKdyZ6I=
-github.com/onsi/gomega v1.42.1/go.mod h1:REff/hsDsodHoKlWsP2mAPhu1+5/6hVYNf9rIEBpeSg=
-github.com/open-policy-agent/opa v1.19.1 h1:aB1nOncChnTbQurjRQVJnjTJxditt8VqszlbaM3GGKU=
-github.com/open-policy-agent/opa v1.19.1/go.mod h1:pb6Y6klyf7X7X8uXNDflruA9dQC2gMqWROXI5w/kvv0=
-<<<<<<< HEAD
-=======
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.156.0 h1:1mpxABiBB3cHGbhpaQGeyVSkgIKAtE2endqfqXUZ8sY=
 github.com/open-telemetry/opentelemetry-collector-contrib/exporter/elasticsearchexporter v0.156.0/go.mod h1:0qy0VrXGmkTGUuERJEgiBdgK+ZT+KIcMfpZi4fntMSo=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.156.0 h1:NbW0V2xBmQ7WWzlVsJw61/nLxQM5kSKhkwQClLPo3TA=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/common v0.156.0/go.mod h1:552gyph19MYV0RWg+j5zXTOVrXfmSJa3hinSvVJMj24=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.156.0 h1:wca5xIy5I/8CAylZYgOYzj5P5JAAicBA8uNtiRNh2Zo=
 github.com/open-telemetry/opentelemetry-collector-contrib/internal/coreinternal v0.156.0/go.mod h1:CaT/YS8vvoNgsLewbtwDpS0mAgsHXNXceSPzlP+TeJI=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=
@@ -1224,10 +1065,6 @@ go.opentelemetry.io/collector/client v1.67.0 h1:aPLXXTa0CxWAYLrY4NrMjEEgEN7SFCtF
 go.opentelemetry.io/collector/client v1.67.0/go.mod h1:CjwTxf7peH1CP326g7PUXmqJ3zj8Dk/fO3bUj6320v0=
 go.opentelemetry.io/collector/component v1.67.0 h1:7uDSaiCeLbHmHLGYfhtZOYn7srjpBmN8i32f1U5CvOE=
 go.opentelemetry.io/collector/component v1.67.0/go.mod h1:OGSci/+Zb2RI56ZKK0yYUO6E7jVM9+KLdZFzTUkpwY4=
-<<<<<<< HEAD
-go.opentelemetry.io/collector/component/componenttest v0.161.0 h1:+1u2r7Cu3Pzj1FGW3PwYKC6OcRhdgNxY6H5O4sdp/6s=
-go.opentelemetry.io/collector/component/componenttest v0.161.0/go.mod h1:1LhuprXIS9DIq3HVXqKWUZZT5xtkAzgImpfd8wZN3z4=
-=======
 go.opentelemetry.io/collector/component/componentstatus v0.156.0 h1:XAqx489rm25nOv6Ka7iAKaqDY+CiyT3lX8fu/D4I7iA=
 go.opentelemetry.io/collector/component/componentstatus v0.156.0/go.mod h1:FosqjSx4VhpsroJxLuISVZKqqEVITqY6AWfmt3Wpp3Y=
 go.opentelemetry.io/collector/component/componenttest v0.161.0 h1:+1u2r7Cu3Pzj1FGW3PwYKC6OcRhdgNxY6H5O4sdp/6s=
@@ -1244,27 +1081,12 @@ go.opentelemetry.io/collector/config/confignet v1.62.0 h1:tFK4VJMaYUAhLQOzBmOteq
 go.opentelemetry.io/collector/config/confignet v1.62.0/go.mod h1:Op+r1B/DtzXgIuKEL7/JkTqtJdL9veu2uEXvSxH3lks=
 go.opentelemetry.io/collector/config/configopaque v1.62.0 h1:E64BPiumLcJO501g6XETf/vX6r+AK1ytqBc5UEcmkmI=
 go.opentelemetry.io/collector/config/configopaque v1.62.0/go.mod h1:z4FPFfKiO83yJz/DqzjlGofUYF9u1A5U/s9NLaa6L1w=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 go.opentelemetry.io/collector/config/configoptional v1.67.0 h1:Mj+rHDgoyjKs8tioBSN62jBs/BIoZoKRyK2WbDymzr8=
 go.opentelemetry.io/collector/config/configoptional v1.67.0/go.mod h1:+gCUfsgFBrWMWOk2cgk5etMpuoLGXrNNO/yg/LZXcNg=
 go.opentelemetry.io/collector/config/configretry v1.67.0 h1:4Zx3/EAS0GClegNRNRKk68fZVXV3JgQ74u7Sj/NxjCA=
 go.opentelemetry.io/collector/config/configretry v1.67.0/go.mod h1:Y2Kdgd0HFBXYbGqUUUWGDLYviRHgl9aJVSyDfFYY7U8=
-<<<<<<< HEAD
-=======
-go.opentelemetry.io/collector/config/configtls v1.62.0 h1:C4WywYuIhIHMkAcWmK19gHxub9KjHdxUREv281bKrvU=
-go.opentelemetry.io/collector/config/configtls v1.62.0/go.mod h1:2r+Hlr7RXBs9u03HSd4eYJCLi6hukRQv7o36WrgzNkY=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
-go.opentelemetry.io/collector/confmap v1.67.0 h1:f2qgoU113hzNjk34jSPDhUA2dFR9l9laljFfQEhy6KQ=
-go.opentelemetry.io/collector/confmap v1.67.0/go.mod h1:X5ZkaG+Eht/4nuQJXmf0MybW4IVApLjGUIP9+/hyDQ0=
-go.opentelemetry.io/collector/consumer v1.67.0 h1:5r9MIxNZFh2rhrX4q0X+z9zzGlgZN92f9VSeJQNdKC8=
-go.opentelemetry.io/collector/consumer v1.67.0/go.mod h1:bRw9/qppXuhjNyiuWpkLdEIGnrHHjn4Onlum7UB4QU8=
-go.opentelemetry.io/collector/consumer/consumererror v0.161.0 h1:f3g6QbNcrHGT/+BwGB4E8NQKE9QeeQDcVUOy4onXsyI=
-go.opentelemetry.io/collector/consumer/consumererror v0.161.0/go.mod h1:hjR/XGODby8IjHAYenaDtoMjg9FkF4zX4L21i0WhimI=
-<<<<<<< HEAD
-=======
 go.opentelemetry.io/collector/consumer/consumererror/xconsumererror v0.156.0 h1:cEEaOEz0YnugQmsTHAgDL0k/umtuaXtDW/v9g4RcXf8=
 go.opentelemetry.io/collector/consumer/consumererror/xconsumererror v0.156.0/go.mod h1:ePhcOLsTOmbJ8Vb3Z3fk9fxhI+idp+SyVhaEpiU+fWI=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 go.opentelemetry.io/collector/consumer/consumertest v0.161.0 h1:gS/WpsmuRzBX8mx7O93R+Q9dqBpCbEruTaoBkDEheS8=
 go.opentelemetry.io/collector/consumer/consumertest v0.161.0/go.mod h1:dgXhjwr/mWj2ZAwy9wPEVspRfBHT0ysHlGNVxsfjibI=
 go.opentelemetry.io/collector/consumer/xconsumer v0.161.0 h1:3MTyvy467jzIhfEvdo38uyGmK7toYF2opOpD9gFM2GA=
@@ -1273,24 +1095,10 @@ go.opentelemetry.io/collector/exporter v1.67.0 h1:0v01bICvse+UIREZL/K3kuRd6L8h2U
 go.opentelemetry.io/collector/exporter v1.67.0/go.mod h1:0KRyP00V0C9Zbk1pksXARBZs8NHwLyx6/HeRNOD/W+Q=
 go.opentelemetry.io/collector/exporter/exporterhelper v0.161.0 h1:4wY3musUTSy4SocPUAhncmz8ykC8bUJBtSXB88S0bwk=
 go.opentelemetry.io/collector/exporter/exporterhelper v0.161.0/go.mod h1:zNrE1BsAfbWi7R/3UD2Nwrdx4xvOldJmhNJ8vIynOPM=
-<<<<<<< HEAD
-=======
-go.opentelemetry.io/collector/exporter/exporterhelper/xexporterhelper v0.156.0 h1:VM7mg+k+NK3i99c5dhjoJu8Jz2pQuBL4fQaxTnPmh/I=
-go.opentelemetry.io/collector/exporter/exporterhelper/xexporterhelper v0.156.0/go.mod h1:OU2JlvzpxRZ9MysZt478ZEtbKMG9kERtmKESVu4+To8=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
-go.opentelemetry.io/collector/exporter/exportertest v0.161.0 h1:w0G6hKRtgRv6AhALSbcDJ4ifeo4xHHlt3Hzw+Jk4lmc=
-go.opentelemetry.io/collector/exporter/exportertest v0.161.0/go.mod h1:xTkMw+EXMavdIlm6YPo8Gvlu6wtm4/h7VsCO9jKALo8=
-go.opentelemetry.io/collector/exporter/xexporter v0.161.0 h1:TXMkCJiQrfrgMuYSmwKWCCCFFltvTFdvApKyoltwxw0=
-go.opentelemetry.io/collector/exporter/xexporter v0.161.0/go.mod h1:UNaO/WP0en4huxIzIBQmIxsBd+d+S1yYfNYxPiGG86Y=
-go.opentelemetry.io/collector/extension v1.67.0 h1:dXBCFDfGdCjdKEuQxKSlA3cFYErYPknE7A6N9HjDi5U=
-go.opentelemetry.io/collector/extension v1.67.0/go.mod h1:O/8h2GtJruD8oMz5nquOliHnZnnmEHNhCz7fS8O7pcc=
-<<<<<<< HEAD
-=======
 go.opentelemetry.io/collector/extension/extensionauth v1.62.0 h1:2yhRG9OFxUSCrc+0GqgON+WKVciV65s+rrnOoWLR4V4=
 go.opentelemetry.io/collector/extension/extensionauth v1.62.0/go.mod h1:bJV7oxY/JWRDXrZDbjuv9DjU0NNNs6r+YQcYkWVzf7o=
 go.opentelemetry.io/collector/extension/extensionmiddleware v0.156.0 h1:cS4SVO/OJA+YeFblSNnjDl3ZzZyo0B2qQP3NQ56UsSY=
 go.opentelemetry.io/collector/extension/extensionmiddleware v0.156.0/go.mod h1:wucOUbf33iZEtOSLtUi7UsULqmlIeMsCp0kIRtlevdw=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 go.opentelemetry.io/collector/extension/extensiontest v0.161.0 h1:FMwVH97I6AnOn/xS4/2w/1VEzXBMGgrRdiJ7+zRTixI=
 go.opentelemetry.io/collector/extension/extensiontest v0.161.0/go.mod h1:QmeNQO9VRVWc/Mz47EY+4SqLFxUnDWtD7Vlq2o8d++o=
 go.opentelemetry.io/collector/extension/xextension v0.161.0 h1:5I3kj3nk09zSPiuU+PyI+w9V5KEgygRLWvqhLbtl9BU=
@@ -1329,14 +1137,6 @@ go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.7
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0/go.mod h1:dylvB+ZiiwMvsDij9O84Uy7SijLgHMX4mbkncds+4Sw=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 h1:3g7B90UzBltIDKq1/5mrTGxTnOFDV0ICOhLoxiZ8jlg=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0/go.mod h1:Ef8SuTh59BT7+ofpDxN9z+yOlc4t2GjLmKDgYNJL/NU=
-<<<<<<< HEAD
-go.opentelemetry.io/otel v1.46.0 h1:FHt5/CDyVxi/8IM1CH7VE/rRgq3kLHa2mSTVMO8AWyc=
-go.opentelemetry.io/otel v1.46.0/go.mod h1:Gj3SEScelsNC45tp4nSxRYlS+f5iez7W8XPMCt905kE=
-go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.18.0 h1:deI9UQMoGFgrg5iLPgzueqFPHevDl+28YKfSpPTI6rY=
-go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.18.0/go.mod h1:PFx9NgpNUKXdf7J4Q3agRxMs3Y07QhTCVipKmLsMKnU=
-go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.19.0 h1:HIBTQ3VO5aupLKjC90JgMqpezVXwFuq6Ryjn0/izoag=
-go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.19.0/go.mod h1:ji9vId85hMxqfvICA0Jt8JqEdrXaAkcpkI9HPXya0ro=
-=======
 go.opentelemetry.io/ebpf-profiler v0.0.202623 h1:L85ki6PQiJyczuzM6+tU5g5Y4RLI23KVny4VWU0jS4w=
 go.opentelemetry.io/ebpf-profiler v0.0.202623/go.mod h1:DqHEtu1S8fTmyvvrSSum1lssLKwYM7aExPNZ/+vWZ6U=
 go.opentelemetry.io/otel v1.46.0 h1:FHt5/CDyVxi/8IM1CH7VE/rRgq3kLHa2mSTVMO8AWyc=
@@ -1345,7 +1145,6 @@ go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.20.0 h1:rydZ9sxbc
 go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.20.0/go.mod h1:earQ25dooT0Hhspq59DZ8YCC50jWfOlFEeWoxy/P444=
 go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.20.0 h1:owlhcJ3QO3X0YTDTCcDZ4V+6aVDkWbNmBoQ5NUp7Oww=
 go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.20.0/go.mod h1:MP4eemTiI9zC8fgg+DYynhYDYf3ba72S376TvP+Ye0Q=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.42.0 h1:ZtfnDL+tUrs1F0Pzfwbg2d59Gru9NCH3bgSHBM6LDwU=
 go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.46.0 h1:qkDYCAFiZXLcs1L4aY+tP2wguQ4kURANqHOQMA2et2s=
 go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.46.0/go.mod h1:tkipS4DRzmpAmvg+Gw4++O1IdDq6TVDnvnYU6cmbQVs=
@@ -1359,13 +1158,8 @@ go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.46.0 h1:KrC1Y
 go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.46.0/go.mod h1:zDSEzoEqsOrgBeGvH66KRgxh90VonFyJqBHA0Pk3+rM=
 go.opentelemetry.io/otel/exporters/prometheus v0.67.0 h1:7IefDa35e6V3NoiqIeLDMDxMFyZDk5qcoC0Ax4cC16E=
 go.opentelemetry.io/otel/exporters/prometheus v0.67.0/go.mod h1:nsPI1awTg5Vmg1YrommL2mVarVGlqc4yXOoKAkPRD0c=
-<<<<<<< HEAD
-go.opentelemetry.io/otel/exporters/stdout/stdoutlog v0.18.0 h1:KJVjPD3rcPb98rIs3HznyJlrfx9ge5oJvxxlGR+P/7s=
-go.opentelemetry.io/otel/exporters/stdout/stdoutlog v0.18.0/go.mod h1:K3kRa2ckmHWQaTWQdPRHc7qGXASuVuoEQXzrvlA98Ws=
-=======
 go.opentelemetry.io/otel/exporters/stdout/stdoutlog v0.20.0 h1:aZfdmtI6QU/DAPD4b7YZ5zuJgewxO1EW9miOZklqleU=
 go.opentelemetry.io/otel/exporters/stdout/stdoutlog v0.20.0/go.mod h1:isNl10/Om5CBWu9jj8WOb2+tJLbCVXDgqwzCaJMnJ6w=
->>>>>>> 4e57a07 (refactor: update autodiscover dependency (#8447))
 go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.44.0 h1:hqxVTu/GtBF+vJ8d1fzW7fRxZFvgoDjWcxwwCaFDYpU=
 go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.44.0/go.mod h1:z5fVEF4X5v0ESvlJqBrrFlBVoj5EQuefZpzsu7R+x5Q=
 go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.45.0 h1:lsA/S1bxgdbyFGkTj+3meEdJ6ADVU7QoFstV6MXgE68=
