@@ -60,7 +60,7 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20260908110832-9ab82d65b1cc
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.24.1
-	github.com/hashicorp/go-uuid v1.0.3
+	github.com/hashicorp/go-uuid v1.0.4
 	github.com/huandu/xstrings v1.6.1
 	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb
