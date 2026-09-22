@@ -238,8 +238,8 @@ github.com/aws/aws-sdk-go-v2/service/dynamodb v1.69.0 h1:JapCBy1C76JRQRw++NmoQVP
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.69.0/go.mod h1:d7bRXj2c3K52qdd62I1c0o+ua/44QScJFj6EP0ufZeI=
 github.com/aws/aws-sdk-go-v2/service/ebs v1.41.0 h1:In28kNdR/lPtmDIVuX0NuUErWzNytIOWyJY9jFrHYjA=
 github.com/aws/aws-sdk-go-v2/service/ebs v1.41.0/go.mod h1:LGbpNQpQjXh4DzsHwyoFzAkI8vBPl2dTyH+YK+IHCNg=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.333.0 h1:49vpQN9B16CetUbZ4TA5MN2rO44Um6JyswDD4J2U2mw=
-github.com/aws/aws-sdk-go-v2/service/ec2 v1.333.0/go.mod h1:2o5yJcnWuaBOsnNqlO1reYs1OQffFkqf2xJ2mmMWNH4=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.335.0 h1:F4FgmFpQEuf1cb74G5nZvcjt4Y8lOUrTjpY8ZGaQzq4=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.335.0/go.mod h1:2o5yJcnWuaBOsnNqlO1reYs1OQffFkqf2xJ2mmMWNH4=
 github.com/aws/aws-sdk-go-v2/service/ecr v1.66.0 h1:9i19IigAYxnAxTUQcsxkiIXeeytHllTOetWBhr1DTQs=
 github.com/aws/aws-sdk-go-v2/service/ecr v1.66.0/go.mod h1:iSlv4VibruxMhWfiKrNbn97Yjhe2855EFrgUitSESfM=
 github.com/aws/aws-sdk-go-v2/service/eks v1.99.0 h1:DJhHBuKLyXU5krDg94uUwAbU4828vmurQd0O/VBanVk=
@@ -278,8 +278,8 @@ github.com/aws/aws-sdk-go-v2/service/securityhub v1.82.0 h1:sccblHjf5Swf5xjlBTAU
 github.com/aws/aws-sdk-go-v2/service/securityhub v1.82.0/go.mod h1:39oJ1/fl7d10t0e9rtp/a+50tRLyDPSaccCZF3xXrcc=
 github.com/aws/aws-sdk-go-v2/service/signin v1.10.0 h1:ZD5qFpWcaOKdTuhBi431pIDkCgrMkMlMT6jlpSPoIRI=
 github.com/aws/aws-sdk-go-v2/service/signin v1.10.0/go.mod h1:8Nuuf+tR346PjJ3MvZPh9pekbLiLQFWJhzMXfwy7alA=
-github.com/aws/aws-sdk-go-v2/service/sns v1.47.0 h1:LG0eB968S17nXOj6wfXasPvRXhlcN0xq26m4kaNbGL4=
-github.com/aws/aws-sdk-go-v2/service/sns v1.47.0/go.mod h1:s/NR14+UXkT4NCUvC/GemXuNhd+lhAc2QbnZyTVqxlk=
+github.com/aws/aws-sdk-go-v2/service/sns v1.47.1 h1:jTNa1/JsNYXcLw5VbwqeTh9/NErSLOY7NCk/SIB0VLI=
+github.com/aws/aws-sdk-go-v2/service/sns v1.47.1/go.mod h1:s/NR14+UXkT4NCUvC/GemXuNhd+lhAc2QbnZyTVqxlk=
 github.com/aws/aws-sdk-go-v2/service/sqs v1.52.0 h1:39EpbrAPFSOPYc9FVr2ki84cLB/9C5nC03aL7ope2rU=
 github.com/aws/aws-sdk-go-v2/service/sqs v1.52.0/go.mod h1:yErwLsJkArgQLSGWtLjjwlpvlLK4+c9h0jDZZVN02hw=
 github.com/aws/aws-sdk-go-v2/service/sso v1.38.0 h1:JGeeBcMlhg1xtOXYpeCaTQBZObtXMPQCUqBcmr65NRA=
