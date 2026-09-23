@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/goleak"
