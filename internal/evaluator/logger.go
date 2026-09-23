@@ -18,7 +18,6 @@
 package evaluator
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/open-policy-agent/opa/v1/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -85,15 +84,15 @@ func mapToArray(m map[string]any) []any {
 }
 
 func newLogger() logging.Logger {
-	lvl := zap.NewAtomicLevelAt(logp.GetLevel())
-	log := clog.NewLogger("opa").WithOptions(
-		zap.IncreaseLevel(lvl),
-		zap.AddCallerSkip(1),
-	)
+	return newLoggerFromBase(clog.NewLogger(""))
+}
 
+// newLoggerFromBase creates an OPA logger from a base clog.Logger.
+// This avoids using the global logger system and reuses the passed logger.
+func newLoggerFromBase(baseLog *clog.Logger) logging.Logger {
 	return &logger{
-		log: log,
-		lvl: lvl,
+		log: baseLog.Named("opa").WithOptions(zap.AddCallerSkip(1)),
+		lvl: zap.NewAtomicLevelAt(zapcore.LevelOf(baseLog.Core())),
 	}
 }
 
