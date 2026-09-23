@@ -17,7 +17,7 @@ Resources:
               - /
               - !Ref AWS::StackId
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/SecurityAudit
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/SecurityAudit'
       Path: /
 
   ElasticCSPMAccessKey:
