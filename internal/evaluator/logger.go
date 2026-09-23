@@ -83,12 +83,6 @@ func mapToArray(m map[string]any) []any {
 	return ret
 }
 
-func newLogger() logging.Logger {
-	return newLoggerFromBase(clog.NewLogger(""))
-}
-
-// newLoggerFromBase creates an OPA logger from a base clog.Logger.
-// This avoids using the global logger system and reuses the passed logger.
 func newLoggerFromBase(baseLog *clog.Logger) logging.Logger {
 	return &logger{
 		log: baseLog.Named("opa").WithOptions(zap.AddCallerSkip(1)),
