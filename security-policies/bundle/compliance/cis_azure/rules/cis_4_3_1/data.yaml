@@ -1,7 +1,6 @@
 metadata:
   id: aa06a6a1-9cc3-5064-86bd-0f6dd7f80a11
-  name: Ensure 'Enforce SSL connection' is set to 'ENABLED' for PostgreSQL Database
-    Server
+  name: Ensure 'Enforce SSL connection' is set to 'ENABLED' for PostgreSQL Database Server
   profile_applicability: '* Level 1'
   description: Enable `SSL connection` on `PostgreSQL` Servers.
   rationale: |-

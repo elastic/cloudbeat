@@ -2,8 +2,7 @@ metadata:
   id: 3fb6051e-31f8-5fb5-bd45-4f140fa4442e
   name: Ensure that the scheduler pod specification file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the scheduler pod specification file ownership is set to
-    `root:root`.
+  description: Ensure that the scheduler pod specification file ownership is set to `root:root`.
   rationale: |-
     The scheduler pod specification file controls various parameters that set the behavior of the `kube-scheduler` service in the master node.
     You should set its file ownership to maintain the integrity of the file.

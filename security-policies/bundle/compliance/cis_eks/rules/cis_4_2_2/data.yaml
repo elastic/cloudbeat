@@ -1,10 +1,8 @@
 metadata:
   id: d117cea4-376b-5cb7-ad81-58a2f4efb47e
-  name: Minimize the admission of containers wishing to share the host process ID
-    namespace
+  name: Minimize the admission of containers wishing to share the host process ID namespace
   profile_applicability: '* Level 1'
-  description: Do not generally permit containers to be run with the `hostPID` flag
-    set to true.
+  description: Do not generally permit containers to be run with the `hostPID` flag set to true.
   rationale: |-
     A container running in the host's PID namespace can inspect processes running outside the container.
     If the container also has access to ptrace capabilities this can be used to escalate privileges outside of the container.

@@ -1,10 +1,8 @@
 metadata:
   id: f62488d2-4b52-57d4-8ecd-d8f47dcb3dda
-  name: Ensure That the ‘Local_infile’ Database Flag for a Cloud SQL MySQL Instance
-    Is Set to ‘Off’
+  name: Ensure That the ‘Local_infile’ Database Flag for a Cloud SQL MySQL Instance Is Set to ‘Off’
   profile_applicability: '* Level 1'
-  description: It is recommended to set the `local_infile` database flag for a Cloud
-    SQL MySQL instance to `off`.
+  description: It is recommended to set the `local_infile` database flag for a Cloud SQL MySQL instance to `off`.
   rationale: |-
     The `local_infile` flag controls the server-side LOCAL capability for LOAD DATA statements.
     Depending on the `local_infile` setting, the server refuses or permits local data loading by clients that have LOCAL enabled on the client side.

@@ -2,8 +2,7 @@ metadata:
   id: 9b3242a1-51a5-5b5e-8d29-70b9dd7ae7eb
   name: Ensure that the controller-manager.conf file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the `controller-manager.conf` file ownership is set to
-    `root:root`.
+  description: Ensure that the `controller-manager.conf` file ownership is set to `root:root`.
   rationale: |-
     The `controller-manager.conf` file is the kubeconfig file for the Controller Manager.
     You should set its file ownership to maintain the integrity of the file.
