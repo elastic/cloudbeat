@@ -45,24 +45,33 @@ var zapToOpaLevelsMap = map[zapcore.Level]logging.Level{
 }
 
 func (l *logger) Debug(fmt string, a ...any) {
-	l.log.Debugf(fmt, a...)
+	if l.lvl.Enabled(zapcore.DebugLevel) {
+		l.log.Debugf(fmt, a...)
+	}
 }
 
 func (l *logger) Info(fmt string, a ...any) {
-	l.log.Infof(fmt, a...)
+	if l.lvl.Enabled(zapcore.InfoLevel) {
+		l.log.Infof(fmt, a...)
+	}
 }
 
 func (l *logger) Error(fmt string, a ...any) {
-	l.log.Errorf(fmt, a...)
+	if l.lvl.Enabled(zapcore.ErrorLevel) {
+		l.log.Errorf(fmt, a...)
+	}
 }
 
 func (l *logger) Warn(fmt string, a ...any) {
-	l.log.Warnf(fmt, a...)
+	if l.lvl.Enabled(zapcore.WarnLevel) {
+		l.log.Warnf(fmt, a...)
+	}
 }
 
 func (l *logger) WithFields(m map[string]any) logging.Logger {
 	return &logger{
 		log: l.log.With(mapToArray(m)...),
+		lvl: l.lvl,
 	}
 }
 
