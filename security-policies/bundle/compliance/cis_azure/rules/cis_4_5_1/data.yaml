@@ -1,10 +1,8 @@
 metadata:
   id: 449bf7bf-8070-580f-a3aa-66bc7f94a721
-  name: Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead
-    of All Networks
+  name: Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead of All Networks
   profile_applicability: '* Level 2'
-  description: Limiting your Cosmos DB to only communicate on whitelisted networks
-    lowers its attack footprint.
+  description: Limiting your Cosmos DB to only communicate on whitelisted networks lowers its attack footprint.
   rationale: |-
     Selecting certain networks for your Cosmos DB to communicate restricts the number of networks including the internet that can interact with what is stored within the database.
   audit: |-

@@ -1,7 +1,6 @@
 metadata:
   id: 3bfcca47-de6a-57d4-961f-3c7f5b5f699c
-  name: Ensure ‘Log_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is
-    Set Appropriately
+  name: Ensure ‘Log_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set Appropriately
   profile_applicability: '* Level 2'
   description: |-
     The value of `log_statement` flag determined the SQL statements that are logged.
