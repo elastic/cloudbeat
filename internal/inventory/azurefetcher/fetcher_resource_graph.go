@@ -120,16 +120,21 @@ func (f *resourceGraphFetcher) fetch(ctx context.Context, resourceName, serviceN
 	}
 }
 
-//nolint:revive
+type vmInstanceView struct {
+	ComputerName string
+}
+
+type vmExtended struct {
+	InstanceView vmInstanceView
+}
+
+type vmHardwareProfile struct {
+	VmSize string
+}
+
 type vmProperties struct {
-	Extended struct {
-		InstanceView struct {
-			ComputerName string
-		}
-	}
-	HardwareProfile struct {
-		VmSize string
-	}
+	Extended        vmExtended
+	HardwareProfile vmHardwareProfile
 }
 
 func tryUnpackingVMProperties(m map[string]any) *vmProperties {

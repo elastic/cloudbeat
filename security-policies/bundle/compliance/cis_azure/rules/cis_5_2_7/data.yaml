@@ -1,10 +1,8 @@
 metadata:
   id: dfc17731-aa8f-5ecc-878b-113d1db009ca
-  name: Ensure that Activity Log Alert exists for Create or Update SQL Server Firewall
-    Rule
+  name: Ensure that Activity Log Alert exists for Create or Update SQL Server Firewall Rule
   profile_applicability: '* Level 1'
-  description: Create an activity log alert for the Create or Update SQL Server Firewall
-    Rule event.
+  description: Create an activity log alert for the Create or Update SQL Server Firewall Rule event.
   rationale: |-
     Monitoring for Create or Update SQL Server Firewall Rule events gives insight into network access changes and may reduce the time it takes to detect suspicious activity.
   audit: |-

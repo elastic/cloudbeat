@@ -1,7 +1,6 @@
 metadata:
   id: 87952b8d-f537-5f8a-b57b-63a31b031170
-  name: Ensure 'Additional email addresses' is Configured with a Security Contact
-    Email
+  name: Ensure 'Additional email addresses' is Configured with a Security Contact Email
   profile_applicability: '* Level 1'
   description: |-
     Microsoft Defender for Cloud emails the subscription owners whenever a high-severity alert is triggered for their subscription.

@@ -1,10 +1,8 @@
 metadata:
   id: 1f9c62f6-5c4a-59e6-9a12-0260b7e04a37
-  name: Ensure that Activity Log Alert exists for Create or Update Network Security
-    Group
+  name: Ensure that Activity Log Alert exists for Create or Update Network Security Group
   profile_applicability: '* Level 1'
-  description: Create an Activity Log Alert for the Create or Update Network Security
-    Group event.
+  description: Create an Activity Log Alert for the Create or Update Network Security Group event.
   rationale: |-
     Monitoring for Create or Update Network Security Group events gives insight into network access changes and may reduce the time it takes to detect suspicious activity.
   audit: |-

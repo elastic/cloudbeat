@@ -1,7 +1,6 @@
 metadata:
   id: f1322e13-3fb3-5c9c-be8e-29d4ae293d22
-  name: Ensure that 'Public access level' is disabled for storage accounts with blob
-    containers
+  name: Ensure that 'Public access level' is disabled for storage accounts with blob containers
   profile_applicability: '* Level 1'
   description: |-
     Disallowing public access for a storage account overrides the public access settings for individual containers in that storage account.
@@ -57,8 +56,7 @@ metadata:
     ```
     Set-AzStorageAccount -ResourceGroupName <resource group name> -Name <storage account name> -PublicNetworkAccess Disabled
     ```
-  impact: Access will have to be managed using shared access signatures or via Azure
-    AD RBAC.
+  impact: Access will have to be managed using shared access signatures or via Azure AD RBAC.
   default_value: ''
   references: |-
     1. https://docs.microsoft.com/en-us/azure/storage/blobs/storage-manage-access-to-resources

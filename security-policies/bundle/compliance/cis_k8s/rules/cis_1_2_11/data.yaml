@@ -18,8 +18,7 @@ metadata:
     Verify that if the `--enable-admission-plugins` argument is set, its value does not include `AlwaysAdmit`.
   remediation: |-
     Edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` on the Control Plane node and either remove the `--enable-admission-plugins` parameter, or set it to a value that does not include `AlwaysAdmit`.
-  impact: Only requests explicitly allowed by the admissions control plugins would
-    be served.
+  impact: Only requests explicitly allowed by the admissions control plugins would be served.
   default_value: |
     `AlwaysAdmit` is not in the list of default admission plugins.
   references: |-

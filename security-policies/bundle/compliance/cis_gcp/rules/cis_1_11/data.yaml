@@ -1,7 +1,6 @@
 metadata:
   id: 933268ec-44e8-5fba-9ed7-535804521cc7
-  name: Ensure That Separation of Duties Is Enforced While Assigning KMS Related Roles
-    to Users
+  name: Ensure That Separation of Duties Is Enforced While Assigning KMS Related Roles to Users
   profile_applicability: '* Level 2'
   description: |-
     It is recommended that the principle of 'Separation of Duties' is enforced while assigning KMS related roles to users.

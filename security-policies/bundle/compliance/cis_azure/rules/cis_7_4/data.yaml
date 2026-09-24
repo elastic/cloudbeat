@@ -2,8 +2,7 @@ metadata:
   id: 02ca1a3a-559e-53d7-afcd-8e3774c4efb9
   name: Ensure that 'Unattached disks' are encrypted with 'Customer Managed Key' (CMK)
   profile_applicability: '* Level 2'
-  description: Ensure that unattached disks in a subscription are encrypted with a
-    Customer Managed Key (CMK).
+  description: Ensure that unattached disks in a subscription are encrypted with a Customer Managed Key (CMK).
   rationale: |-
     Managed disks are encrypted by default with Platform-managed keys.
     Using Customer-managed keys may provide an additional level of security or meet an organization's regulatory requirements.

@@ -2,8 +2,7 @@ metadata:
   id: 8a985fda-fc4c-5435-b7f0-c4d40bb1307a
   name: Ensure That the Default Network Does Not Exist in a Project
   profile_applicability: '* Level 2'
-  description: To prevent use of `default` network, a project should not have a `default`
-    network.
+  description: To prevent use of `default` network, a project should not have a `default` network.
   rationale: |-
     The `default` network has a preconfigured network configuration and automatically generates the following insecure firewall rules: 
 
