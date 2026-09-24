@@ -11,7 +11,7 @@ on:
 jobs:
   generate-matrix:
     name: Generate Agent Matrix
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -26,7 +26,7 @@ jobs:
 
   test-agents:
     name: Agent Compatibility Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     needs: ["generate-matrix"]
     strategy:
