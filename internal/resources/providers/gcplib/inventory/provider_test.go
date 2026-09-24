@@ -25,7 +25,6 @@ import (
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"cloud.google.com/go/iam/apiv1/iampb"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
@@ -42,7 +41,6 @@ import (
 
 type ProviderTestSuite struct {
 	suite.Suite
-	logger          *clog.Logger
 	mockedInventory *AssetsInventoryWrapper
 	mockedCrm       *ResourceManagerWrapper
 }
@@ -73,7 +71,6 @@ func NewMockInventoryContentIterators() (inventory *AssetsInventoryWrapper, reso
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.logger = testhelper.NewObserverLogger(s.T())
 	s.mockedCrm = &ResourceManagerWrapper{
 		getProjectDisplayName: func(_ context.Context, _ string) string {
 			return "ProjectName"
@@ -84,9 +81,9 @@ func (s *ProviderTestSuite) SetupTest() {
 	}
 }
 
-func (s *ProviderTestSuite) NewMockProvider() *Provider {
+func (s *ProviderTestSuite) NewMockProvider(log *clog.Logger) *Provider {
 	return &Provider{
-		log:       s.logger,
+		log:       log,
 		inventory: s.mockedInventory,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
@@ -103,16 +100,17 @@ func (s *ProviderTestSuite) TestProviderInit() {
 		ClientOpts: []option.ClientOption{},
 	}
 
-	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
+	logger := testhelper.NewLogger(s.T())
+	initMock.EXPECT().Init(mock.Anything, logger, gcpConfig).Return(&Provider{}, nil).Once()
 	t := s.T()
-	provider, err := initMock.Init(t.Context(), s.logger, gcpConfig)
+	provider, err := initMock.Init(t.Context(), logger, gcpConfig)
 	s.Require().NoError(err)
 	s.NotNil(provider)
 }
 
 func (s *ProviderTestSuite) TestListAssetTypes_IteratorsError() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
 
@@ -129,7 +127,8 @@ func (s *ProviderTestSuite) TestListAssetTypes_IteratorsError() {
 
 func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	log, observedLogs := testhelper.NewObserverLogger(s.T())
+	provider := s.NewMockProvider(log)
 
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
@@ -141,7 +140,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 	go provider.ListAssetTypes(t.Context(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "IAM_POLICY", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
+	logs := observedLogs.FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "IAM_POLICY", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 
@@ -156,7 +155,8 @@ func (s *ProviderTestSuite) TestListAssetTypes_PolicyIteratorError() {
 
 func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	log, observedLogs := testhelper.NewObserverLogger(s.T())
+	provider := s.NewMockProvider(log)
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
 
@@ -167,7 +167,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 	go provider.ListAssetTypes(t.Context(), []string{"someAssetType"}, outCh)
 	results := testhelper.CollectResourcesBlocking(outCh)
 
-	logs := logp.ObserverLogs().FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "RESOURCE", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
+	logs := observedLogs.FilterMessageSnippet(fmt.Sprintf("Error fetching GCP %v of types: %v for %v: %v\n", "RESOURCE", []string{"someAssetType"}, provider.config.Parent, "test")).TakeAll()
 	s.Len(logs, 1)
 	s.Equal(zapcore.ErrorLevel, logs[0].Level)
 
@@ -182,7 +182,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_ResourceIteratorError() {
 
 func (s *ProviderTestSuite) TestListAssetTypes_Success() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
 	provider.crm.config.Parent = "projects/1"
 	inventory, mockedResourceIterator, mockedPoliciesIterator := NewMockInventoryContentIterators()
 	provider.inventory = inventory
@@ -209,7 +209,7 @@ func (s *ProviderTestSuite) TestListAssetTypes_Success() {
 }
 
 func (s *ProviderTestSuite) TestListMonitoringAssets_Success() {
-	provider := s.NewMockProvider()
+	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
 	logMetricsIterator := new(MockIterator)
 	alertPoliciesIterator := new(MockIterator)
 	projectIterator := new(MockIterator)
@@ -266,7 +266,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets_Success() {
 
 func (s *ProviderTestSuite) TestListProjectAssets() {
 	outCh := make(chan *ProjectAssets)
-	provider := s.NewMockProvider()
+	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
 	mockedProjectIterator := new(MockIterator)
 	mockedResourceIterator := new(MockIterator)
 	provider.inventory = &AssetsInventoryWrapper{
@@ -304,7 +304,7 @@ func (s *ProviderTestSuite) TestListProjectAssets() {
 }
 func (s *ProviderTestSuite) TestListNetworkAssets() {
 	outCh := make(chan *ExtendedGcpAsset)
-	provider := s.NewMockProvider()
+	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
 
 	mockedDnsIterator := new(MockIterator)
 	mockedNetworkIterator := new(MockIterator)
@@ -361,7 +361,7 @@ func (s *ProviderTestSuite) TestListNetworkAssets() {
 
 func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	outCh := make(chan *ProjectPoliciesAsset)
-	provider := s.NewMockProvider()
+	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
 
 	prjIterator := new(MockIterator)
 	orgIterator := new(MockIterator)
