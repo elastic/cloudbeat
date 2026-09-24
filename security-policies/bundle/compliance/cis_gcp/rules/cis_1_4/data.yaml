@@ -1,7 +1,6 @@
 metadata:
   id: 05480064-f899-53e8-b8ad-34172b09b400
-  name: Ensure That There Are Only GCP-Managed Service Account Keys for Each Service
-    Account
+  name: Ensure That There Are Only GCP-Managed Service Account Keys for Each Service Account
   profile_applicability: '* Level 1'
   description: User managed service accounts should not have user-managed keys.
   rationale: |-

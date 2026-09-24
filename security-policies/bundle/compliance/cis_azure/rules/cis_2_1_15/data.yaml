@@ -1,10 +1,8 @@
 metadata:
   id: 69ffe7f6-bc09-5019-ba77-a2f81169e9de
-  name: Ensure that Auto provisioning of 'Log Analytics agent for Azure VMs' is Set
-    to 'On'
+  name: Ensure that Auto provisioning of 'Log Analytics agent for Azure VMs' is Set to 'On'
   profile_applicability: '* Level 1'
-  description: Enable automatic provisioning of the monitoring agent to collect security
-    data.
+  description: Enable automatic provisioning of the monitoring agent to collect security data.
   rationale: |-
     When `Log Analytics agent for Azure VMs` is turned on, Microsoft Defender for Cloud provisions the Microsoft Monitoring Agent on all existing supported Azure virtual machines and any new ones that are created.
     The Microsoft Monitoring Agent scans for various security-related configurations and events such as system updates, OS vulnerabilities, endpoint protection, and provides alerts.

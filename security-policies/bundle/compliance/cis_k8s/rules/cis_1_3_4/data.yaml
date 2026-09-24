@@ -2,8 +2,7 @@ metadata:
   id: 6de73498-23d7-537f-83f3-08c660217e7e
   name: Ensure that the --service-account-private-key-file  argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
-  description: Explicitly set a service account private key file for service accounts
-    on the controller manager.
+  description: Explicitly set a service account private key file for service accounts on the controller manager.
   rationale: |-
     To ensure that keys for service account tokens can be rotated as needed, a separate public/private key pair should be used for signing service account tokens.
     The private key should be specified to the controller manager with `--service-account-private-key-file` as appropriate.

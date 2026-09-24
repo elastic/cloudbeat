@@ -82,8 +82,7 @@ metadata:
     ```
     or in this documentation
     https://cloud.google.com/sdk/gcloud/reference/alpha/services/api-keys/update
-  impact: Setting `API restrictions` may break existing application functioning, if
-    not done carefully.
+  impact: Setting `API restrictions` may break existing application functioning, if not done carefully.
   default_value: ''
   references: |-
     1. https://cloud.google.com/docs/authentication/api-keys
