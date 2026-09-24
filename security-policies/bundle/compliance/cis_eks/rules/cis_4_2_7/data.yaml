@@ -2,8 +2,7 @@ metadata:
   id: 95e17dc2-ef2f-50d0-b1a8-84d2ae523c4b
   name: Minimize the admission of containers with the NET_RAW capability
   profile_applicability: '* Level 1'
-  description: Do not generally permit containers with the potentially dangerous NET_RAW
-    capability.
+  description: Do not generally permit containers with the potentially dangerous NET_RAW capability.
   rationale: |-
     Containers run with a default set of capabilities as assigned by the Container Runtime.
     By default this can include potentially dangerous capabilities.

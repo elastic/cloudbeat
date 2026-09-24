@@ -63,3 +63,6 @@ upload_file deploy/cloudformation/cloud-connectors-guardduty.yml \
 upload_file deploy/cloudformation/federated-identity-aws.yml \
     "cloudformation-federated-identity-aws" \
     "${version}"
+upload_file deploy/cloudformation/federated-identity-wii-aws.yml \
+    "cloudformation-federated-identity-wii-aws" \
+    "${version}"

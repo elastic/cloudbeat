@@ -65,7 +65,7 @@ jobs:
       - name: Get Elastic Cloud API Keys from Vault
         id: get-ec-credentials
         if: inputs.ec-api-key == ''
-        uses: hashicorp/vault-action@9c2d817b85b9fff56bcab21cb74b485aee9e9d73 # v2.8.1
+        uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
         continue-on-error: true
         with:
           url: ${{ secrets.VAULT_ADDR }}

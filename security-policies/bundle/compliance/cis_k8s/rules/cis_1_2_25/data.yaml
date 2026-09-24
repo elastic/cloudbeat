@@ -2,8 +2,7 @@ metadata:
   id: c8a8f827-fba6-58ee-80b8-e64a605a4902
   name: Ensure that the --service-account-key-file argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
-  description: Explicitly set a service account public key file for service accounts
-    on the apiserver.
+  description: Explicitly set a service account public key file for service accounts on the apiserver.
   rationale: |-
     By default, if no `--service-account-key-file` is specified to the apiserver, it uses the private key from the TLS serving certificate to verify service account tokens.
     To ensure that the keys for service account tokens could be rotated as needed, a separate public/private key pair should be used for signing service account tokens.

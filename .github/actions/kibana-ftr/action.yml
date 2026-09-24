@@ -77,6 +77,14 @@ runs:
       with:
         chrome-version: ${{ steps.chrome-version.outputs.major }}
 
+    - name: Enable pnpm via corepack
+      shell: bash
+      working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
+      run: |
+        PNPM_VERSION=$(jq -r '.engines.pnpm | ltrimstr("~") | ltrimstr("^")' package.json)
+        corepack enable
+        corepack prepare "pnpm@${PNPM_VERSION}" --activate
+
     - name: Bootstrap Kibana
       shell: bash
       working-directory: ${{ steps.globals.outputs.KIBANA_DIR }}
@@ -84,12 +92,7 @@ runs:
         ES_VERSION: ${{ inputs.es_version }}
         MOON_CONCURRENCY: "1"
       run: |
-        if [[ $ES_VERSION == 8.19* ]]; then
-          echo "Bootstrapping Kibana..."
-          yarn kbn bootstrap --force-install --no-validation || echo "⚠️ yarn kbn bootstrap failed, continuing..."
-          yarn kbn clean && yarn kbn reset || echo "⚠️ yarn kbn reset failed, continuing..."
-        fi
-        "${GITHUB_WORKSPACE}/.ci/scripts/retry.sh" 3 60 "rm -rf ~/.moon && yarn kbn bootstrap"
+        "${GITHUB_WORKSPACE}/.ci/scripts/retry.sh" 3 60 "pnpm kbn bootstrap"
 
     - name: Set test configuration
       shell: bash

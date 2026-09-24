@@ -1,7 +1,6 @@
 metadata:
   id: f9dfc7e7-d067-5be5-8fc1-5d9043a4cd06
-  name: Ensure no security groups allow ingress from ::/0 to remote server administration
-    ports
+  name: Ensure no security groups allow ingress from ::/0 to remote server administration ports
   profile_applicability: '* Level 1'
   description: |-
     Security groups provide stateful filtering of ingress and egress network traffic to AWS resources.

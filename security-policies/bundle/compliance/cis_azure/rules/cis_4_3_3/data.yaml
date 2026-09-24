@@ -1,7 +1,6 @@
 metadata:
   id: ede1488a-e8cd-5d5f-a25d-96c136695594
-  name: Ensure server parameter 'log_connections' is set to 'ON' for PostgreSQL Database
-    Server
+  name: Ensure server parameter 'log_connections' is set to 'ON' for PostgreSQL Database Server
   profile_applicability: '* Level 1'
   description: Enable `log_connections` on `PostgreSQL Servers`.
   rationale: |-
