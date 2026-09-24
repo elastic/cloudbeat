@@ -2,7 +2,6 @@
 This module contains API calls related to Fleet settings
 """
 
-import codecs
 import json
 import time
 from typing import Any, Dict, List, Optional
@@ -120,7 +119,7 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
             )
         if hasattr(params, "capabilities") and params.capabilities:
             manifest_yaml = add_capabilities(yaml_content=manifest_yaml)
-        with codecs.open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
+        with open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
             k8s_yaml.write(manifest_yaml)
         logger.info(f"KSPM manifest is available at: '{params.yaml_path}'")
     except APICallException as api_ex:
@@ -153,7 +152,7 @@ def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
         )
         template_yaml = add_tags(tags=cnvm_tags, yaml_content=template_yaml)
 
-        with codecs.open(template_path, "w", encoding="utf-8") as cnvm_yaml:
+        with open(template_path, "w", encoding="utf-8") as cnvm_yaml:
             cnvm_yaml.write(template_yaml)
         logger.info(f"CNVM template is available at: '{template_path}'")
     except APICallException as api_ex:
