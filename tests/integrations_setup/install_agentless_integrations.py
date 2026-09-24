@@ -88,17 +88,17 @@ if __name__ == "__main__":
         stream_prefix="cloud_security_posture",
     )
     for integration_data in integrations:
-        INTEGRATION_NAME = integration_data["name"]
+        integration_name = integration_data["name"]
 
-        logger.info(f"Starting installation of agentless-agent {INTEGRATION_NAME} integration.")
+        logger.info(f"Starting installation of agentless-agent {integration_name} integration.")
         _, package_data = load_data(
             cfg=cnfg.elk_config,
-            agent_input={"name": INTEGRATION_NAME},
+            agent_input={"name": integration_name},
             package_input=integration_data,
             stream_name="cloud_security_posture.findings",
         )
 
-        logger.info(f"Create managed integration for {INTEGRATION_NAME}")
+        logger.info(f"Create managed integration for {integration_name}")
         managed_id = create_managed_integration(cfg=cnfg.elk_config, json_policy=package_data)
 
         state_manager.add_policy(
@@ -113,4 +113,4 @@ if __name__ == "__main__":
             ),
         )
 
-        logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
+        logger.info(f"Installation of {integration_name} integration is done")
