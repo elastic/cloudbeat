@@ -61,7 +61,10 @@ Resources:
           - Effect: Allow
             Action:
               - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
               - logs:FilterLogEvents
+              - logs:GetLogEvents
+              - logs:GetLogGroupFields
             Resource: '*'
       Roles:
         - !Ref ElasticFederatedIdentityRole
@@ -291,6 +294,21 @@ Resources:
             Action:
               - ec2:DescribeTransitGateways
               - ec2:DescribeTransitGatewayAttachments
+            Resource: '*'
+      Roles:
+        - !Ref ElasticFederatedIdentityRole
+
+  ElasticAwsSecurityHub:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ElasticAwsSecurityHub-${AWS::StackName}
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - securityhub:GetFindings
+              - securityhub:GetInsights
             Resource: '*'
       Roles:
         - !Ref ElasticFederatedIdentityRole

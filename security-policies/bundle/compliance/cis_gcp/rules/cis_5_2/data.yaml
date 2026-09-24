@@ -2,8 +2,7 @@ metadata:
   id: 33a612ed-8dee-554d-9dd7-857bfc31a33a
   name: Ensure That Cloud Storage Buckets Have Uniform Bucket-Level Access Enabled
   profile_applicability: '* Level 2'
-  description: It is recommended that uniform bucket-level access is enabled on Cloud
-    Storage buckets.
+  description: It is recommended that uniform bucket-level access is enabled on Cloud Storage buckets.
   rationale: |-
     It is recommended to use uniform bucket-level access to unify and simplify how you grant access to your Cloud Storage resources.
 

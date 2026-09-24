@@ -1,7 +1,6 @@
 metadata:
   id: 8233dcc7-c6af-5110-b7d4-239a70d7bed5
-  name: Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database
-    Server
+  name: Ensure 'Enforce SSL connection' is set to 'Enabled' for Standard MySQL Database Server
   profile_applicability: '* Level 1'
   description: Enable `SSL connection` on `MYSQL` Servers.
   rationale: |-

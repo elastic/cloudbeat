@@ -1,7 +1,6 @@
 metadata:
   id: 67909c46-649c-52c1-a464-b3e81615d938
-  name: Ensure that Dataproc Cluster is encrypted using Customer-Managed Encryption
-    Key
+  name: Ensure that Dataproc Cluster is encrypted using Customer-Managed Encryption Key
   profile_applicability: '* Level 2'
   description: |-
     When you use Dataproc, cluster and job data is stored on Persistent Disks (PDs) associated with the Compute Engine VMs in your cluster and in a Cloud Storage staging bucket.
@@ -83,8 +82,7 @@ metadata:
     ```
     gcloud config set project <project_ID>"
     ```
-  impact: Using Customer Managed Keys involves additional overhead in maintenance
-    by administrators.
+  impact: Using Customer Managed Keys involves additional overhead in maintenance by administrators.
   default_value: ''
   references: 1. https://cloud.google.com/docs/security/encryption/default-encryption
   section: Identity and Access Management

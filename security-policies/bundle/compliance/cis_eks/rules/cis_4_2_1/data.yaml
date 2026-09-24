@@ -32,8 +32,7 @@ metadata:
     `kubectl get psp <name> -o=jsonpath='{.spec.privileged}'`
   remediation: |-
     Create a PSP as described in the Kubernetes documentation, ensuring that the `.spec.privileged` field is omitted or set to `false`.
-  impact: 'Pods defined with `spec.containers[].securityContext.privileged: true`
-    will not be permitted.'
+  impact: 'Pods defined with `spec.containers[].securityContext.privileged: true` will not be permitted.'
   default_value: |
     By default, when you provision an EKS cluster, a pod security policy called
     eks.privileged is automatically created. The manifest for that policy appears below:
