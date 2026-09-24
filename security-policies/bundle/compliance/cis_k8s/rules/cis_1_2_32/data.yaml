@@ -2,8 +2,7 @@ metadata:
   id: c67fb159-cec6-5114-bbfe-f9a1e57fdcd4
   name: Ensure that the API Server only makes use of Strong Cryptographic Ciphers
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the API server is configured to only use strong cryptographic
-    ciphers.
+  description: Ensure that the API server is configured to only use strong cryptographic ciphers.
   rationale: |-
     TLS ciphers have had a number of known vulnerabilities and weaknesses, which can reduce the protection provided by them.
     By default Kubernetes supports a number of TLS ciphersuites including some that have security concerns, weakening the protection provided.

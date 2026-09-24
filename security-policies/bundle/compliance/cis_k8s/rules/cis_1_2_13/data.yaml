@@ -1,7 +1,6 @@
 metadata:
   id: 1b89acc6-978c-57c3-b319-680e5251d6f6
-  name: Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy
-    is not used
+  name: Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy is not used
   profile_applicability: '* Level 1 - Master Node'
   description: |-
     The SecurityContextDeny admission controller can be used to deny pods which make use of some SecurityContext fields which could allow for privilege escalation in the cluster.

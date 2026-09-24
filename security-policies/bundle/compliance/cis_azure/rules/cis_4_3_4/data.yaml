@@ -1,7 +1,6 @@
 metadata:
   id: 9272d2b5-4e25-5658-8a6c-d917f60134ec
-  name: Ensure server parameter 'log_disconnections' is set to 'ON' for PostgreSQL
-    Database Server
+  name: Ensure server parameter 'log_disconnections' is set to 'ON' for PostgreSQL Database Server
   profile_applicability: '* Level 1'
   description: Enable `log_disconnections` on `PostgreSQL Servers`.
   rationale: |-

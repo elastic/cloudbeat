@@ -8,17 +8,32 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+
 jobs:
   synchronize-versions:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
+      # TokenPolicy: token-policy-cloudbeat-sync-internal-version
+      # https://github.com/elastic/catalog-info/tree/main/resources/github-token-policies
+      - name: Fetch ephemeral GitHub token
+        id: fetch-token
+        uses: elastic/ci-gh-actions/fetch-github-token@2feb1c6f5086cf8e06f61ef35e275abed3456f7b # v1.5.3
+        with:
+          vault-instance: ci-prod
+
       - name: Check out the branch
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.ref }}
-          token: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+          token: ${{ steps.fetch-token.outputs.token }}
+
       - name: Synchronize versions using a script
         env:
-          GH_TOKEN: ${{ secrets.CLOUDSEC_MACHINE_TOKEN }}
+          GH_TOKEN: ${{ steps.fetch-token.outputs.token }}
         run: |
           ./scripts/sync_internal_cloudbeat_version.sh

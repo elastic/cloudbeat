@@ -1,7 +1,6 @@
 metadata:
   id: 421191d6-a13c-5c78-8c5b-102e1229655f
-  name: Ensure That Separation of Duties Is Enforced While Assigning Service Account
-    Related Roles to Users
+  name: Ensure That Separation of Duties Is Enforced While Assigning Service Account Related Roles to Users
   profile_applicability: '* Level 2'
   description: |-
     It is recommended that the principle of 'Separation of Duties' is enforced while assigning service-account related roles to users.
@@ -55,8 +54,7 @@ metadata:
 
     2. For any member having both `Service Account Admin` and `Service account User` roles granted/assigned, click the `Delete Bin` icon to remove either role from the member.
     Removal of a role should be done based on the business requirements.
-  impact: The removed role should be assigned to a different user based on business
-    needs.
+  impact: The removed role should be assigned to a different user based on business needs.
   default_value: ''
   references: |-
     1. https://cloud.google.com/iam/docs/service-accounts

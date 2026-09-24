@@ -2,8 +2,7 @@ metadata:
   id: 76be4dd2-a77a-5981-a893-db6770b35911
   name: Ensure all S3 buckets employ encryption-at-rest
   profile_applicability: '* Level 2'
-  description: Amazon S3 provides a variety of no, or low, cost encryption options
-    to protect data at rest.
+  description: Amazon S3 provides a variety of no, or low, cost encryption options to protect data at rest.
   rationale: |-
     Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.
   audit: |-
