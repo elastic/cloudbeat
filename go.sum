@@ -290,8 +290,8 @@ github.com/bitfield/gotestdox v0.2.3 h1:H8Wy07kYacr3YSF5aJON/m9ASE+PGKOSufXkTjqQ
 github.com/bitfield/gotestdox v0.2.3/go.mod h1:bq/HemlNNqEvjOzy7brevVhzZD8WTGFDGq59DOIsHqI=
 github.com/bitnami/go-version v0.0.0-20260728133343-2aa268af0217 h1:nF+AjKjJXxD5f3v5peVWQQG0cDQxD5i1ATzSel+bA6E=
 github.com/bitnami/go-version v0.0.0-20260728133343-2aa268af0217/go.mod h1:9iglf1GG4oNRJ39bZ5AZrjgAFD2RwQbXw6Qf7Cs47wo=
-github.com/blakesmith/ar v0.0.0-20150311145944-8bd4349a67f2 h1:oMCHnXa6CCCafdPDbMh/lWRhRByN0VFLvv+g+ayx1SI=
-github.com/blakesmith/ar v0.0.0-20150311145944-8bd4349a67f2/go.mod h1:PkYb9DJNAwrSvRx5DYA+gUcOIgTGVMNkfSCbZM8cWpI=
+github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb h1:m935MPodAbYS46DG4pJSv7WO+VECIWUQ7OJYSoTrMh4=
+github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb/go.mod h1:PkYb9DJNAwrSvRx5DYA+gUcOIgTGVMNkfSCbZM8cWpI=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/bmatcuk/doublestar/v4 v4.10.2 h1:eF7W7HWKg3z9NrWV9pTLnNeoXaqq3Tq9DNKXVMfoCnw=
