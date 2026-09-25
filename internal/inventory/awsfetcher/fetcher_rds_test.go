@@ -44,6 +44,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 		PubliclyAccessible:      false,
 		Engine:                  "postgres",
 		EngineVersion:           "15.4",
+		Status:                  "available",
 		CreatedAt:               &createdAt,
 		Subnets: []rds.Subnet{
 			{
@@ -68,6 +69,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 		PubliclyAccessible:      true,
 		Engine:                  "mysql",
 		EngineVersion:           "8.0.35",
+		Status:                  "available",
 		Subnets: []rds.Subnet{
 			{
 				ID: "subnet-aabbccdd",
@@ -107,6 +109,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 				"PubliclyAccessible": false,
 				"Engine":             "postgres",
 				"EngineVersion":      "15.4",
+				"DBInstanceStatus":   "available",
 			}),
 			inventory.WithCreatedAt(&createdAt),
 		),
@@ -126,6 +129,7 @@ func TestRDSInstanceFetcher_Fetch(t *testing.T) {
 				"PubliclyAccessible": true,
 				"Engine":             "mysql",
 				"EngineVersion":      "8.0.35",
+				"DBInstanceStatus":   "available",
 			}),
 		),
 	}

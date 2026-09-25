@@ -36,6 +36,7 @@ type DBInstance struct {
 	PubliclyAccessible      bool       `json:"publicly_accessible"`
 	Engine                  string     `json:"engine,omitempty"`
 	EngineVersion           string     `json:"engine_version,omitempty"`
+	Status                  string     `json:"status,omitempty"`
 	CreatedAt               *time.Time `json:"created_at,omitempty"`
 	Subnets                 []Subnet   `json:"subnets"`
 	region                  string
