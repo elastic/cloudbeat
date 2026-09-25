@@ -11,6 +11,9 @@ on:
       - main
       - "[0-9]+.[0-9]+"
 
+permissions:
+  contents: read
+
 env:
   DEV: true
   SNAPSHOT: true
