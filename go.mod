@@ -69,7 +69,7 @@ require (
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.53.6
 	github.com/mitchellh/gox v1.0.1
-	github.com/open-policy-agent/opa v1.19.1
+	github.com/open-policy-agent/opa v1.21.0
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
 	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
@@ -410,7 +410,7 @@ require (
 	github.com/go-openapi/swag v0.29.2 // indirect
 	github.com/go-openapi/validate v1.0.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gobwas/glob v1.0.0 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/gofrs/flock v0.13.1 // indirect
