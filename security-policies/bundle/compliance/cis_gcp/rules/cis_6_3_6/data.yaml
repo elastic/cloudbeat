@@ -1,7 +1,6 @@
 metadata:
   id: 5de29f7b-ba03-5c77-81d9-7ea65ebd6a0f
-  name: Ensure '3625 (trace flag)' database flag for all Cloud SQL Server instances
-    is set to 'on'
+  name: Ensure '3625 (trace flag)' database flag for all Cloud SQL Server instances is set to 'on'
   profile_applicability: '* Level 1'
   description: |-
     It is recommended to set `3625 (trace flag)` database flag for Cloud SQL SQL Server instance to `on`.

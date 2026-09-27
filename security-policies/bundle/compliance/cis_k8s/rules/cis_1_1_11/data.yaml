@@ -2,8 +2,7 @@ metadata:
   id: 4f7354df-2e3b-5acf-9ba7-d6b5cfd12e35
   name: Ensure that the etcd data directory permissions are set to 700 or more restrictive
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the etcd data directory has permissions of `700` or more
-    restrictive.
+  description: Ensure that the etcd data directory has permissions of `700` or more restrictive.
   rationale: |-
     etcd is a highly-available key-value store used by Kubernetes deployments for persistent storage of all of its REST API objects.
     This data directory should be protected from any unauthorized reads or writes.

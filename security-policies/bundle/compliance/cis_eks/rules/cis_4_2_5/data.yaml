@@ -2,8 +2,7 @@ metadata:
   id: 882ffc80-73e9-56aa-ae72-73b39af6702f
   name: Minimize the admission of containers with allowPrivilegeEscalation
   profile_applicability: '* Level 1'
-  description: Do not generally permit containers to be run with the `allowPrivilegeEscalation`
-    flag set to true.
+  description: Do not generally permit containers to be run with the `allowPrivilegeEscalation` flag set to true.
   rationale: |-
     A container running with the `allowPrivilegeEscalation` flag set to `true` may have processes that can gain more privileges than their parent.
 

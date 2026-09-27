@@ -1,10 +1,8 @@
 metadata:
   id: 68f9d23f-882f-55d1-86c6-711413c31129
-  name: Ensure 'remote access' database flag for Cloud SQL SQL Server instance is
-    set to 'off'
+  name: Ensure 'remote access' database flag for Cloud SQL SQL Server instance is set to 'off'
   profile_applicability: '* Level 1'
-  description: It is recommended to set `remote access` database flag for Cloud SQL
-    SQL Server instance to `off`.
+  description: It is recommended to set `remote access` database flag for Cloud SQL SQL Server instance to `off`.
   rationale: |-
     The `remote access` option controls the execution of stored procedures from local or remote servers on which instances of SQL Server are running.
     This default value for this option is 1.

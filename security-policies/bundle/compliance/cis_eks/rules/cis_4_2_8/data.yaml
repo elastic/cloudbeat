@@ -2,8 +2,7 @@ metadata:
   id: 551d3a0b-36f6-51c6-ba8b-0a83926b1864
   name: Minimize the admission of containers with added capabilities
   profile_applicability: '* Level 1'
-  description: Do not generally permit containers with capabilities assigned beyond
-    the default set.
+  description: Do not generally permit containers with capabilities assigned beyond the default set.
   rationale: |-
     Containers run with a default set of capabilities as assigned by the Container Runtime.
     Capabilities outside this set can be added to containers which could expose them to risks of container breakout attacks.
@@ -21,8 +20,7 @@ metadata:
     Verify that there are no PSPs present which have `allowedCapabilities` set to anything other than an empty array.
   remediation: |-
     Ensure that `allowedCapabilities` is not present in PSPs for the cluster unless it is set to an empty array.
-  impact: Pods with containers which require capabilities outwith the default set
-    will not be permitted.
+  impact: Pods with containers which require capabilities outwith the default set will not be permitted.
   default_value: |
     By default, PodSecurityPolicies are not defined.
   references: |-

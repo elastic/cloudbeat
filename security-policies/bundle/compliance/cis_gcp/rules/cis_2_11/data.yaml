@@ -1,7 +1,6 @@
 metadata:
   id: 84862c2c-4aba-5458-9c5f-12855091617b
-  name: Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration
-    Changes
+  name: Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration Changes
   profile_applicability: '* Level 2'
   description: |-
     It is recommended that a metric filter and alarm be established for SQL instance configuration changes.

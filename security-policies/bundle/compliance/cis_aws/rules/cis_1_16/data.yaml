@@ -1,7 +1,6 @@
 metadata:
   id: bc6bb3c5-8c9b-5e76-9a58-8a55f42dce0e
-  name: Ensure IAM policies that allow full "*:*" administrative privileges are not
-    attached
+  name: Ensure IAM policies that allow full "*:*" administrative privileges are not attached
   profile_applicability: '* Level 1'
   description: |-
     IAM policies are the means by which privileges are granted to users, groups, or roles.

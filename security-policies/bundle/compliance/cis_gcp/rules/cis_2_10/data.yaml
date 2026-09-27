@@ -1,7 +1,6 @@
 metadata:
   id: a7c6b368-29db-53e6-8b86-dfaddf719f59
-  name: Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM Permission
-    Changes
+  name: Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM Permission Changes
   profile_applicability: '* Level 2'
   description: |-
     It is recommended that a metric filter and alarm be established for Cloud Storage Bucket IAM changes.

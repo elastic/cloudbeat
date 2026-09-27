@@ -2,8 +2,7 @@ metadata:
   id: 9ef34b4f-b9e1-566b-8a2b-69f8933fa852
   name: Ensure that the --audit-log-path argument is set
   profile_applicability: '* Level 1 - Master Node'
-  description: Enable auditing on the Kubernetes API Server and set the desired audit
-    log path.
+  description: Enable auditing on the Kubernetes API Server and set the desired audit log path.
   rationale: |-
     Auditing the Kubernetes API Server provides a security-relevant chronological set of records documenting the sequence of activities that have affected system by individual users, administrators or other components of the system.
     Even though currently, Kubernetes provides only basic audit capabilities, it should be enabled.

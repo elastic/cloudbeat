@@ -1,7 +1,6 @@
 metadata:
   id: 37fc1edc-a59d-5e63-a530-d3d088195865
-  name: Ensure the web app has 'Client Certificates (Incoming client certificates)'
-    set to 'On'
+  name: Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On'
   profile_applicability: '* Level 2'
   description: |-
     Client certificates allow for the app to request a certificate for incoming requests.

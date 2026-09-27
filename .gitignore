@@ -80,3 +80,6 @@ terraform.rc
 db/
 fanal/
 java-db/
+
+# Local planning docs
+docs/superpowers/

@@ -2,8 +2,7 @@ metadata:
   id: 27896f4b-0405-5388-bacd-182e77556711
   name: Ensure that 'Auditing' Retention is 'greater than 90 days'
   profile_applicability: '* Level 1'
-  description: SQL Server Audit Retention should be configured to be greater than
-    90 days.
+  description: SQL Server Audit Retention should be configured to be greater than 90 days.
   rationale: |-
     Audit Logs can be used to check for anomalies and give insight into suspected breaches or misuse of information and access.
   audit: |-

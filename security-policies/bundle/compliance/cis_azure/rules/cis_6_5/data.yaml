@@ -1,7 +1,6 @@
 metadata:
   id: f8c6e5cf-cfce-5c11-b303-a20c7c1cd694
-  name: Ensure that Network Security Group Flow Log retention period is 'greater than
-    90 days'
+  name: Ensure that Network Security Group Flow Log retention period is 'greater than 90 days'
   profile_applicability: '* Level 2'
   description: |-
     Network Security Group Flow Logs should be enabled and the retention period set to greater than or equal to 90 days.

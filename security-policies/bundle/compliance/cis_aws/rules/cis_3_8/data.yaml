@@ -52,8 +52,7 @@ metadata:
     ```
      aws kms enable-key-rotation --key-id <kms_key_id>
     ```
-  impact: Creation, management, and storage of CMKs may require additional time from
-    and administrator.
+  impact: Creation, management, and storage of CMKs may require additional time from and administrator.
   default_value: ''
   references: |-
     1. https://aws.amazon.com/kms/pricing/
