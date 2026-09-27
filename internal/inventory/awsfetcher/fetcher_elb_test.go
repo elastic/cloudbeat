@@ -110,8 +110,8 @@ func TestELBv1Fetcher_Fetch(t *testing.T) {
 }
 
 func TestELBv2Fetcher_Fetch(t *testing.T) {
-	asset := elbv2.ElasticLoadBalancerInfo{
-		LoadBalancer: typesv2.LoadBalancer{
+	asset := elbv2.NewElasticLoadBalancerInfo(
+		typesv2.LoadBalancer{
 			AvailabilityZones:     []typesv2.AvailabilityZone{},
 			CanonicalHostedZoneId: pointers.Ref("HZ-ID"),
 			CreatedTime:           pointers.Ref(time.Now()),
@@ -125,7 +125,10 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 			Type:             typesv2.LoadBalancerTypeEnumApplication,
 			VpcId:            pointers.Ref(""),
 		},
-	}
+		"",
+		nil,
+		[]string{"203.0.113.1", "203.0.113.2"}, // DNS-resolved by the provider in real code
+	)
 	in := []awslib.AwsResource{asset}
 
 	expected := []inventory.AssetEvent{
@@ -145,6 +148,7 @@ func TestELBv2Fetcher_Fetch(t *testing.T) {
 				"PubliclyAccessible": false, // scheme is internal
 				"AccountID":          "123",
 				"LoadBalancerType":   "application",
+				"IPAddresses":        []string{"203.0.113.1", "203.0.113.2"},
 			}),
 			inventory.WithCreatedAt(asset.GetCreatedAt()),
 		),
