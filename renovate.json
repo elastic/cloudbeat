@@ -299,5 +299,6 @@
   ],
   "vulnerabilityAlerts": {
     "enabled": false
-  }
+  },
+  "dependencyDashboardReportAbandonment": false
 }
