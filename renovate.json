@@ -82,16 +82,6 @@
       "enabled": false
     },
     {
-      "description": "Disable sarama updates - requires manual handling",
-      "matchManagers": [
-        "gomod"
-      ],
-      "matchPackageNames": [
-        "/^github\\.com/elastic/sarama$/"
-      ],
-      "enabled": false
-    },
-    {
       "description": "Group AWS SDK packages together",
       "groupName": "aws-sdk",
       "matchPackageNames": [
@@ -219,6 +209,16 @@
         "indirect"
       ],
       "enabled": true
+    },
+    {
+      "description": "Disable sarama updates - requires manual handling",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "/^github\\.com/elastic/sarama$/"
+      ],
+      "enabled": false
     },
     {
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
