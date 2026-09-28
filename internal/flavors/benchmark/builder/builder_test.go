@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/dataprovider"
@@ -59,7 +60,7 @@ func TestBase_Build_Success(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			log := testhelper.NewLogger(t)
+			log, obs := testhelper.NewObserverLogger(t)
 			path, err := filepath.Abs("../../../../bundle.tar.gz")
 			require.NoError(t, err)
 
@@ -74,9 +75,10 @@ func TestBase_Build_Success(t *testing.T) {
 
 			reg.EXPECT().Keys().Return([]string{}).Twice()
 			reg.EXPECT().Update().Return().Once()
+			reg.EXPECT().Stop().Return().Once()
 			_, err = benchmark.Run(t.Context())
-			time.Sleep(100 * time.Millisecond)
 			require.NoError(t, err)
+			runAndStop(t, benchmark, obs)
 		})
 	}
 }
@@ -106,7 +108,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			log := testhelper.NewLogger(t)
+			log, obs := testhelper.NewObserverLogger(t)
 			path, err := filepath.Abs("../../../../bundle.tar.gz")
 			require.NoError(t, err)
 
@@ -122,10 +124,30 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 
 			reg.EXPECT().Keys().Return([]string{}).Twice()
 			reg.EXPECT().Update().Return().Once()
+			reg.EXPECT().Stop().Return().Once()
 			le.EXPECT().Run(mock.Anything).Return(nil).Once()
+			le.EXPECT().Stop().Once()
 			_, err = benchmark.Run(t.Context())
-			time.Sleep(100 * time.Millisecond)
 			require.NoError(t, err)
+			runAndStop(t, benchmark, obs)
 		})
 	}
+}
+
+func runAndStop(t *testing.T, benchmark Benchmark, obs *observer.ObservedLogs) {
+	t.Helper()
+	const (
+		duration = 1 * time.Second
+		tick     = 10 * time.Millisecond
+	)
+
+	// Wait for the manager cycle to complete before stopping.
+	assert.EventuallyWithT(t, func(c *assert.CollectT) {
+		assert.GreaterOrEqual(c, obs.FilterMessageSnippet("resource fetching has ended").Len(), 1)
+	}, duration, tick)
+
+	benchmark.Stop()
+	assert.EventuallyWithT(t, func(c *assert.CollectT) {
+		assert.GreaterOrEqual(c, obs.FilterMessage("Fetchers manager canceled").Len(), 1)
+	}, duration, tick)
 }

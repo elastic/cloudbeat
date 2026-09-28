@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/beats/v7/pkg/autodiscover/kubernetes"
 	"github.com/gofrs/uuid"
 	v1 "k8s.io/api/core/v1" // revive:disable-line
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

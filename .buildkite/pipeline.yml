@@ -39,16 +39,16 @@ steps:
           imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
           instanceType: "${AWS_ARM_INSTANCE_TYPE}"
 
-  - label: ":rocket: Publishing Snapshot DRA artifacts"
+  - label: ":pipeline: Generate DRA steps (snapshot)"
     if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
+    key: "dra-generate-snapshot"
     depends_on: "package-snapshot"
     agents:
       provider: gcp
       image: "${GCP_IMAGE_UBUNTU_X86_64}"
       machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
-    command: "./.buildkite/scripts/publish.sh"
-    env:
-      WORKFLOW: "snapshot"
+    command: "./.buildkite/scripts/dra-generate.sh snapshot"
+    timeout_in_minutes: 10
 
   - group: "Package Staging"
     if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
@@ -76,16 +76,16 @@ steps:
           imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
           instanceType: "${AWS_ARM_INSTANCE_TYPE}"
 
-  - label: ":rocket: Publishing Staging DRA artifacts"
+  - label: ":pipeline: Generate DRA steps (staging)"
     if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    key: "dra-generate-staging"
     depends_on: "package-staging"
     agents:
       provider: gcp
       image: "${GCP_IMAGE_UBUNTU_X86_64}"
       machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
-    command: "./.buildkite/scripts/publish.sh"
-    env:
-      WORKFLOW: "staging"
+    command: "./.buildkite/scripts/dra-generate.sh staging"
+    timeout_in_minutes: 10
 
   - wait: ~
     continue_on_failure: true
