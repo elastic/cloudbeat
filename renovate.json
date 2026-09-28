@@ -63,8 +63,8 @@
     {
       "description": "Update :go-version: in docs/version.asciidoc",
       "customType": "regex",
-      "fileMatch": [
-        "^docs/version\\.asciidoc$"
+      "managerFilePatterns": [
+        "/^docs/version\\.asciidoc$/"
       ],
       "matchStrings": [
         ":go-version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
