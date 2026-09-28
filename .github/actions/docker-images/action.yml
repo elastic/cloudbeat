@@ -64,7 +64,7 @@ runs:
 
     - if: ${{ inputs.build-docker-images == 'true' }}
       name: Cache docker build cache
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+      uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
       with:
         path: ${{ inputs.docker-build-cache-folder }}
         key: ci-buildx-${{ runner.os }}-${{ runner.arch }}-${{ github.workflow }}
