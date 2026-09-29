@@ -405,16 +405,16 @@ func singlePsqlConfigAsset(id, name, value string) AzureAsset {
 	}
 }
 
-func wrapFlexPsqlConfigResponse(results ...armpostgresqlflexibleservers.ConfigurationListResult) []armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse {
-	return lo.Map(results, func(r armpostgresqlflexibleservers.ConfigurationListResult, _ int) armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse {
+func wrapFlexPsqlConfigResponse(results ...armpostgresqlflexibleservers.ConfigurationList) []armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresqlflexibleservers.ConfigurationList, _ int) armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse {
 		return armpostgresqlflexibleservers.ConfigurationsClientListByServerResponse{
-			ConfigurationListResult: r,
+			ConfigurationList: r,
 		}
 	})
 }
 
-func wrapFlexPsqlConfigResult(configs ...*armpostgresqlflexibleservers.Configuration) armpostgresqlflexibleservers.ConfigurationListResult {
-	return armpostgresqlflexibleservers.ConfigurationListResult{
+func wrapFlexPsqlConfigResult(configs ...*armpostgresqlflexibleservers.Configuration) armpostgresqlflexibleservers.ConfigurationList {
+	return armpostgresqlflexibleservers.ConfigurationList{
 		Value: configs,
 	}
 }
@@ -503,16 +503,16 @@ func singlePsqlFirewallConfigAsset(id, startIpAddr, endIpAddr string) AzureAsset
 	}
 }
 
-func wrapFlexPsqlFirewallRulesResponse(results ...armpostgresqlflexibleservers.FirewallRuleListResult) []armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
-	return lo.Map(results, func(r armpostgresqlflexibleservers.FirewallRuleListResult, _ int) armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
+func wrapFlexPsqlFirewallRulesResponse(results ...armpostgresqlflexibleservers.FirewallRuleList) []armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
+	return lo.Map(results, func(r armpostgresqlflexibleservers.FirewallRuleList, _ int) armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse {
 		return armpostgresqlflexibleservers.FirewallRulesClientListByServerResponse{
-			FirewallRuleListResult: r,
+			FirewallRuleList: r,
 		}
 	})
 }
 
-func wrapFlexPsqlFirewallRulesResult(rules ...*armpostgresqlflexibleservers.FirewallRule) armpostgresqlflexibleservers.FirewallRuleListResult {
-	return armpostgresqlflexibleservers.FirewallRuleListResult{
+func wrapFlexPsqlFirewallRulesResult(rules ...*armpostgresqlflexibleservers.FirewallRule) armpostgresqlflexibleservers.FirewallRuleList {
+	return armpostgresqlflexibleservers.FirewallRuleList{
 		Value: rules,
 	}
 }
