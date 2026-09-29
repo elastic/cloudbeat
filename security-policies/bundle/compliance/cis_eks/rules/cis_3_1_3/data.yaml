@@ -1,7 +1,6 @@
 metadata:
   id: c8f24be5-fd7d-510f-ab93-2440bb826750
-  name: Ensure that the kubelet configuration file has permissions set to 644 or more
-    restrictive
+  name: Ensure that the kubelet configuration file has permissions set to 644 or more restrictive
   profile_applicability: '* Level 1'
   description: |-
     Ensure that if the kubelet refers to a configuration file with the `--config` argument, that file has permissions of 644 or more restrictive.

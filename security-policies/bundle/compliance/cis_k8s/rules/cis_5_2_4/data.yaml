@@ -2,8 +2,7 @@ metadata:
   id: 429ada1f-ad8f-5c2d-97fd-31485ace8a0c
   name: Minimize the admission of containers wishing to share the host IPC namespace
   profile_applicability: '* Level 1 - Master Node'
-  description: Do not generally permit containers to be run with the `hostIPC` flag
-    set to true.
+  description: Do not generally permit containers to be run with the `hostIPC` flag set to true.
   rationale: |-
     A container running in the host's IPC namespace can use IPC to interact with processes outside the container.
 

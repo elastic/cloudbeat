@@ -28,10 +28,22 @@ import (
 )
 
 type ElasticLoadBalancerInfo struct {
-	LoadBalancer types.LoadBalancer `json:"load_balancer"`
-	Listeners    []types.Listener   `json:"listeners"`
-	region       string
-	tags         map[string]string
+	LoadBalancer   types.LoadBalancer `json:"load_balancer"`
+	Listeners      []types.Listener   `json:"listeners"`
+	region         string
+	tags           map[string]string
+	dnsResolvedIPs []string
+}
+
+// NewElasticLoadBalancerInfo constructs an ELBv2 wrapper. dnsResolvedIPs are the addresses
+// resolved from the load balancer's DNS name when the AWS API returns none (see Provider).
+func NewElasticLoadBalancerInfo(lb types.LoadBalancer, region string, tags map[string]string, dnsResolvedIPs []string) *ElasticLoadBalancerInfo {
+	return &ElasticLoadBalancerInfo{
+		LoadBalancer:   lb,
+		region:         region,
+		tags:           tags,
+		dnsResolvedIPs: dnsResolvedIPs,
+	}
 }
 
 func (v ElasticLoadBalancerInfo) GetResourceArn() string {
@@ -75,8 +87,10 @@ func (v ElasticLoadBalancerInfo) GetState() string {
 	return string(v.LoadBalancer.State.Code)
 }
 
-// GetIPAddresses returns the static IP addresses of the load balancer. Only Network Load
-// Balancers expose static IPs (via per-AZ addresses); ALB/Gateway return nil.
+// GetIPAddresses returns the IP addresses of the load balancer. NLBs with Elastic IPs
+// expose them via the AWS API (IpAddress, PrivateIPv4Address, IPv6Address). When the API
+// returns nothing — which is the common case for internet-facing ALBs and most NLBs — the
+// provider resolves the DNSName at fetch time and stores the result in dnsResolvedIPs.
 func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
 	var ips []string
 	for _, az := range v.LoadBalancer.AvailabilityZones {
@@ -84,7 +98,16 @@ func (v ElasticLoadBalancerInfo) GetIPAddresses() []string {
 			if ip := pointers.Deref(addr.IpAddress); ip != "" {
 				ips = append(ips, ip)
 			}
+			if ip := pointers.Deref(addr.PrivateIPv4Address); ip != "" {
+				ips = append(ips, ip)
+			}
+			if ip := pointers.Deref(addr.IPv6Address); ip != "" {
+				ips = append(ips, ip)
+			}
 		}
+	}
+	if len(ips) == 0 {
+		return v.dnsResolvedIPs
 	}
 	return ips
 }

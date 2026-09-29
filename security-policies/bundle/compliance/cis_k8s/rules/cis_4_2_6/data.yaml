@@ -2,8 +2,7 @@ metadata:
   id: c2b36f84-34b5-57fd-b9b0-f225be981497
   name: Ensure that the --protect-kernel-defaults argument is set to true
   profile_applicability: '* Level 1 - Worker Node'
-  description: Protect tuned kernel parameters from overriding kubelet default kernel
-    parameter values.
+  description: Protect tuned kernel parameters from overriding kubelet default kernel parameter values.
   rationale: |-
     Kernel parameters are usually tuned and hardened by the system administrators before putting the systems into production.
     These parameters protect the kernel and the system.

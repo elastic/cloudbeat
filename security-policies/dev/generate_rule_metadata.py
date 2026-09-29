@@ -8,6 +8,7 @@ import pandas as pd
 from ruamel.yaml import YAML
 
 yml = YAML()
+yml.width = 4096  # prevent line wrapping introduced in ruamel.yaml 0.18+
 
 KSPM_POSTURE_TYPE = "kspm"
 CSPM_POSTURE_TYPE = "cspm"

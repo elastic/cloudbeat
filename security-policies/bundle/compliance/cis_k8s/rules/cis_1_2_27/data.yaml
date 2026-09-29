@@ -1,7 +1,6 @@
 metadata:
   id: ef3852ff-b0f9-51d5-af6d-b1b1fed72005
-  name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
-    as appropriate
+  name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: Setup TLS connection on the API server.
   rationale: |-
@@ -23,8 +22,7 @@ metadata:
     --tls-cert-file=<path/to/tls-certificate-file> 
     --tls-private-key-file=<path/to/tls-key-file>
     ```
-  impact: TLS and client certificate authentication must be configured for your Kubernetes
-    cluster deployment.
+  impact: TLS and client certificate authentication must be configured for your Kubernetes cluster deployment.
   default_value: >
     By default, `--tls-cert-file` and `--tls-private-key-file` arguments are not
     set.

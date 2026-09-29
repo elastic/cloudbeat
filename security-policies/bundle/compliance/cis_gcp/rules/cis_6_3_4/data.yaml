@@ -1,7 +1,6 @@
 metadata:
   id: dbd6a799-b6c3-5768-ab68-9bd6f63bbd48
-  name: Ensure 'user options' database flag for Cloud SQL SQL Server instance is not
-    configured
+  name: Ensure 'user options' database flag for Cloud SQL SQL Server instance is not configured
   profile_applicability: '* Level 1'
   description: |-
     It is recommended that, `user options` database flag for Cloud SQL SQL Server instance should not be configured.

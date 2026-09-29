@@ -2,8 +2,7 @@ metadata:
   id: f44d0940-2e62-5993-9028-d3e63ae23960
   name: Ensure Logging is enabled for HTTP(S) Load Balancer
   profile_applicability: '* Level 2'
-  description: Logging enabled on a HTTPS Load Balancer will show all network traffic
-    and its destination.
+  description: Logging enabled on a HTTPS Load Balancer will show all network traffic and its destination.
   rationale: Logging will allow you to view HTTPS network traffic to your web applications.
   audit: |-
     **From Google Cloud Console**

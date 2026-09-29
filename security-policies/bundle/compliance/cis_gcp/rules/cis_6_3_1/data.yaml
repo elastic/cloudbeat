@@ -1,7 +1,6 @@
 metadata:
   id: 33299b3d-68da-5604-8c62-62690fd40c49
-  name: Ensure 'external scripts enabled' database flag for Cloud SQL SQL Server instance
-    is set to 'off'
+  name: Ensure 'external scripts enabled' database flag for Cloud SQL SQL Server instance is set to 'off'
   profile_applicability: '* Level 1'
   description: |-
     It is recommended to set `external scripts enabled` database flag for Cloud SQL SQL Server instance to `off`

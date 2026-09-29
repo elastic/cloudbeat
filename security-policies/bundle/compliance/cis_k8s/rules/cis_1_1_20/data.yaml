@@ -1,10 +1,8 @@
 metadata:
   id: 93808f1f-f05e-5e48-b130-5527795e6158
-  name: Ensure that the Kubernetes PKI certificate file permissions are set to 644
-    or more restrictive
+  name: Ensure that the Kubernetes PKI certificate file permissions are set to 644 or more restrictive
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that Kubernetes PKI certificate files have permissions of `644`
-    or more restrictive.
+  description: Ensure that Kubernetes PKI certificate files have permissions of `644` or more restrictive.
   rationale: |-
     Kubernetes makes use of a number of certificate files as part of the operation of its components.
     The permissions on these files should be set to `644` or more restrictive to protect their integrity.

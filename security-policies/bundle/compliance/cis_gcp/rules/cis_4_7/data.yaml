@@ -1,7 +1,6 @@
 metadata:
   id: ff3a8287-e4ac-5a3c-b0d7-4f349e0ab077
-  name: Ensure VM Disks for Critical VMs Are Encrypted With Customer-Supplied Encryption
-    Keys (CSEK)
+  name: Ensure VM Disks for Critical VMs Are Encrypted With Customer-Supplied Encryption Keys (CSEK)
   profile_applicability: '* Level 2'
   description: |-
     Customer-Supplied Encryption Keys (CSEK) are a feature in Google Cloud Storage and Google Compute Engine.

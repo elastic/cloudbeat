@@ -1,7 +1,6 @@
 metadata:
   id: be1197db-90d0-58db-b780-f0a939264bd0
-  name: Ensure That the ‘Log_connections’ Database Flag for Cloud SQL PostgreSQL Instance
-    Is Set to ‘On’
+  name: Ensure That the ‘Log_connections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’
   profile_applicability: '* Level 1'
   description: |-
     Enabling the `log_connections` setting causes each attempted connection to the server to be logged, along with successful completion of client authentication.

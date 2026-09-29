@@ -2,8 +2,7 @@ metadata:
   id: d98f24a9-e788-55d2-8b70-e9fe88311f9c
   name: Ensure that the Kubernetes PKI directory and file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the Kubernetes PKI directory and file ownership is set
-    to `root:root`.
+  description: Ensure that the Kubernetes PKI directory and file ownership is set to `root:root`.
   rationale: |-
     Kubernetes makes use of a number of certificates as part of its operation.
     You should set the ownership of the directory containing the PKI information and all files in that directory to maintain their integrity.
