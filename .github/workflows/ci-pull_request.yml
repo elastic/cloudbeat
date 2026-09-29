@@ -73,7 +73,53 @@ jobs:
 
   unit-test:
     name: Unit Test
+<<<<<<< HEAD
     runs-on: ubuntu-24.04
+=======
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Hermit Environment
+        uses: ./.github/actions/hermit
+        with:
+          init-tools: "true"
+          free-disk: "true"
+
+      - name: Build opa bundle
+        shell: bash
+        run: mage buildOpaBundle
+
+      - name: Unit-Test
+        shell: bash
+        run: |
+          go install gotest.tools/gotestsum
+          GOOS=linux TEST_DIRECTORY=./... gotestsum --format pkgname -- -short -race -coverpkg=./... -coverprofile=cover.out.tmp
+          grep -v "mock.go" cover.out.tmp | grep -v mock_old.go | grep -v "elastic/cloudbeat/deploy" | grep -v "internal/inventory/asset.go" > cover.out # remove mock files and deploy dir
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-file
+          path: cover.out
+          overwrite: true
+
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          go install github.com/mattn/goveralls@latest
+          goveralls -coverprofile=cover.out -service=github
+
+  unit-test-full:
+    name: Unit Test (Full)
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+>>>>>>> 5f320a7 (fix(ci): skip long tests on PRs to avoid ECR rate limits (#8648))
     timeout-minutes: 60
     steps:
       - name: Check out the repo
