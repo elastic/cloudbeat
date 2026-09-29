@@ -1,7 +1,6 @@
 metadata:
   id: cb57543f-5435-55b5-97cf-bda29ec9094a
-  name: Ensure multi-factor authentication (MFA) is enabled for all IAM users that
-    have a console password
+  name: Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password
   profile_applicability: '* Level 1'
   description: |-
     Multi-Factor Authentication (MFA) adds an extra layer of authentication assurance beyond traditional credentials.

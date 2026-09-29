@@ -1,7 +1,6 @@
 metadata:
   id: 737dc646-1c66-5fb6-8fcd-1aac6402532d
-  name: Ensure Storage Logging is Enabled for Queue Service for 'Read', 'Write', and
-    'Delete' requests
+  name: Ensure Storage Logging is Enabled for Queue Service for 'Read', 'Write', and 'Delete' requests
   profile_applicability: '* Level 2'
   description: |-
     The Storage Queue service stores messages that may be read by any client who has access to the storage account.

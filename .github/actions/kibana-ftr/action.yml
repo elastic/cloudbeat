@@ -48,7 +48,7 @@ runs:
         path: ${{ steps.globals.outputs.KIBANA_DIR }}
 
     - name: Setup Node
-      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
       with:
         node-version-file: ${{ steps.globals.outputs.KIBANA_DIR }}/package.json
 
@@ -92,12 +92,7 @@ runs:
         ES_VERSION: ${{ inputs.es_version }}
         MOON_CONCURRENCY: "1"
       run: |
-        if [[ $ES_VERSION == 8.19* ]]; then
-          echo "Bootstrapping Kibana..."
-          yarn kbn bootstrap --force-install --no-validation || echo "⚠️ yarn kbn bootstrap failed, continuing..."
-          yarn kbn clean && yarn kbn reset || echo "⚠️ yarn kbn reset failed, continuing..."
-        fi
-        "${GITHUB_WORKSPACE}/.ci/scripts/retry.sh" 3 60 "rm -rf ~/.moon && yarn kbn bootstrap"
+        "${GITHUB_WORKSPACE}/.ci/scripts/retry.sh" 3 60 "pnpm kbn bootstrap"
 
     - name: Set test configuration
       shell: bash

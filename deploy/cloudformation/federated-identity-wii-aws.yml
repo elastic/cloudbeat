@@ -1,0 +1,515 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: 'Creates the IAM OIDC identity provider for Elastic Workload Identity if this account does not have one yet, and an IAM Role that only the given Elastic deployment or project can assume. The role grants read-only permissions for all Elastic AWS integrations that support Identity Federation: the AWS package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services)'
+
+Parameters:
+  ElasticOrganizationId:
+    Description: Elastic Cloud organization ID, pre-filled by Kibana.
+    Type: String
+    AllowedPattern: ^[A-Za-z0-9]{1,32}$
+    ConstraintDescription: must be 1-32 letters or digits.
+
+  ElasticCloudProvider:
+    Description: Cloud provider the Elastic deployment or project runs on, pre-filled by Kibana.
+    Type: String
+    AllowedValues:
+      - aws
+      - azure
+      - gcp
+
+  ElasticCloudRegion:
+    Description: Region the Elastic deployment or project runs in (for example eu-west-1, us-central1, eastus2), pre-filled by Kibana.
+    Type: String
+    AllowedPattern: ^[a-z0-9-]+$
+    ConstraintDescription: must be a lowercase region name.
+
+  ElasticCloudEnvironment:
+    Description: Elastic Cloud environment, pre-filled by Kibana. Use production unless testing against an Elastic test environment.
+    Type: String
+    AllowedValues:
+      - production
+      - staging
+      - qa
+
+  ElasticResourceType:
+    Description: deployment for Elastic Cloud Hosted, project for Elastic Cloud Serverless. Pre-filled by Kibana.
+    Type: String
+    AllowedValues:
+      - deployment
+      - project
+
+  ElasticResourceId:
+    Description: Kibana component ID of the deployment, or the Serverless project ID. Pre-filled by Kibana.
+    Type: String
+    AllowedPattern: ^[A-Za-z0-9]+$
+    ConstraintDescription: must contain only letters and digits.
+
+Mappings:
+  EnvironmentDomain:
+    production:
+      Domain: svc.elastic.cloud
+    staging:
+      Domain: svc.staging.elastic.cloud
+    qa:
+      Domain: svc.qa.elastic.cloud
+
+Resources:
+
+  # The trust is built from the two claims of the Elastic Workload Identity JWT:
+  #   iss = https://workload-identity-issuer.<region>.<provider>.<domain>/orgs/<org>
+  #   sub = <deployment|project>:<id>
+  # IAM allows one OIDC provider per issuer per account and every stack for
+  # this issuer shares it, so a custom resource creates it only when missing
+  # and never deletes it. The function can only touch this one provider.
+  WiiOidcProviderFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ElasticWorkloadIdentityOidcProvider
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:GetOpenIDConnectProvider
+                  - iam:CreateOpenIDConnectProvider
+                  - iam:AddClientIDToOpenIDConnectProvider
+                Resource: !Sub
+                  - arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
+                  - Domain: !FindInMap
+                      - EnvironmentDomain
+                      - !Ref ElasticCloudEnvironment
+                      - Domain
+  WiiOidcProviderFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.13
+      Handler: index.handler
+      Role: !GetAtt WiiOidcProviderFunctionRole.Arn
+      Timeout: 120
+      Code:
+        ZipFile: |
+          import json
+          import time
+          import urllib.request
+
+          import boto3
+          from botocore.exceptions import ClientError
+
+          iam = boto3.client("iam")
+
+          # EntityAlreadyExists: another stack created the provider between our read
+          # and create. AccessDenied: the function role's policy may still be
+          # propagating right after stack creation. OpenIdIdpCommunicationError:
+          # IAM contacts the issuer during create. The rest are transient.
+          RETRYABLE = {
+              "EntityAlreadyExists",
+              "AccessDenied",
+              "OpenIdIdpCommunicationError",
+              "ConcurrentModification",
+              "Throttling",
+              "ServiceFailure",
+          }
+
+
+          def handler(event, context):
+              if event["RequestType"] == "Delete":
+                  respond(event, "SUCCESS", event["PhysicalResourceId"])
+                  return
+              props = event["ResourceProperties"]
+              arn = provider_arn(context.invoked_function_arn, props["Url"])
+              try:
+                  ensure_provider(arn, props["Url"], "sts.amazonaws.com")
+              except Exception as e:
+                  # Report every failure; an unanswered request only fails after ServiceTimeout.
+                  physical_id = event.get("PhysicalResourceId", arn)
+                  respond(event, "FAILED", physical_id, reason=f"{type(e).__name__}: {e}")
+                  return
+              issuer = props["Url"].removeprefix("https://")
+              respond(event, "SUCCESS", arn, data={"Arn": arn, "Issuer": issuer})
+
+
+          def provider_arn(function_arn, url):
+              _, partition, _, _, account, _ = function_arn.split(":", 5)
+              return f"arn:{partition}:iam::{account}:oidc-provider/{url.removeprefix('https://')}"
+
+
+          def ensure_provider(arn, url, client_id):
+              for attempt in range(5):
+                  try:
+                      client_ids = existing_client_ids(arn)
+                      if client_ids is None:
+                          iam.create_open_id_connect_provider(Url=url, ClientIDList=[client_id])
+                      elif client_id not in client_ids:
+                          iam.add_client_id_to_open_id_connect_provider(
+                              OpenIDConnectProviderArn=arn, ClientId=client_id
+                          )
+                      return
+                  except ClientError as e:
+                      if e.response["Error"]["Code"] not in RETRYABLE or attempt == 4:
+                          raise
+                      time.sleep(2 ** (attempt + 1))
+
+
+          def existing_client_ids(arn):
+              try:
+                  provider = iam.get_open_id_connect_provider(OpenIDConnectProviderArn=arn)
+                  return provider.get("ClientIDList", [])
+              except iam.exceptions.NoSuchEntityException:
+                  return None
+
+
+          def respond(event, status, physical_id, reason=None, data=None):
+              body = {
+                  "Status": status,
+                  "PhysicalResourceId": physical_id,
+                  "StackId": event["StackId"],
+                  "RequestId": event["RequestId"],
+                  "LogicalResourceId": event["LogicalResourceId"],
+              }
+              if reason:
+                  body["Reason"] = reason
+              if data:
+                  body["Data"] = data
+              payload = json.dumps(body).encode()
+              request = urllib.request.Request(
+                  event["ResponseURL"],
+                  data=payload,
+                  method="PUT",
+                  headers={"Content-Type": "", "Content-Length": str(len(payload))},
+              )
+              urllib.request.urlopen(request, timeout=10)
+
+  WiiOidcProvider:
+    Type: Custom::WiiOidcProvider
+    Properties:
+      ServiceToken: !GetAtt WiiOidcProviderFunction.Arn
+      ServiceTimeout: "600"
+      Url: !Sub
+        - https://workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
+        - Domain: !FindInMap
+            - EnvironmentDomain
+            - !Ref ElasticCloudEnvironment
+            - Domain
+
+  # The stack UUID (last "/" segment of the stack ARN) keeps the role name
+  # unique across stacks; 24 + 36 chars stays under the 64-char limit.
+  ElasticWorkloadIdentityRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub
+        - ElasticWorkloadIdentity-${StackUuid}
+        - StackUuid: !Select
+            - 2
+            - !Split
+              - /
+              - !Ref AWS::StackId
+      AssumeRolePolicyDocument: !Sub
+        - |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Federated": "${ProviderArn}"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                  "StringEquals": {
+                    "${Issuer}:aud": "sts.amazonaws.com",
+                    "${Issuer}:sub": "${ElasticResourceType}:${ElasticResourceId}"
+                  }
+                }
+              }
+            ]
+          }
+        - ProviderArn: !GetAtt WiiOidcProvider.Arn
+          Issuer: !GetAtt WiiOidcProvider.Issuer
+      Path: /
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonGuardDutyReadOnlyAccess
+
+  ElasticAwsInspector:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsInspector
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - inspector2:ListFindings
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsCloudwatchLogs:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsCloudwatchLogs
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:FilterLogEvents
+              - logs:GetLogEvents
+              - logs:GetLogGroupFields
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsMetrics:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsMetrics
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeRegions
+              - cloudwatch:ListMetrics
+              - cloudwatch:GetMetricData
+              - tag:GetResources
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsHealth:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsHealth
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - health:DescribeEvents
+              - health:DescribeEventDetails
+              - health:DescribeAffectedEntities
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsConfig:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsConfig
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - config:DescribeConfigRules
+              - config:GetComplianceDetailsByConfigRule
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsBilling:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsBilling
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ce:GetCostAndUsage
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsDynamoDB:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsDynamoDB
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:ListTables
+              - dynamodb:DescribeTable
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsEBS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsEBS
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeVolumes
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsEC2:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsEC2
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeInstances
+              - ec2:DescribeInstanceStatus
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsECS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsECS
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ecs:ListClusters
+              - ecs:DescribeClusters
+              - ecs:ListServices
+              - ecs:DescribeServices
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsELB:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsELB
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - elasticloadbalancing:DescribeLoadBalancers
+              - elasticloadbalancing:DescribeTargetGroups
+              - elasticloadbalancing:DescribeTargetHealth
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsLambda:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsLambda
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - lambda:ListFunctions
+              - lambda:GetFunction
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsRDS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsRDS
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - rds:DescribeDBInstances
+              - rds:DescribeDBClusters
+              - rds:ListTagsForResource
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsSNS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsSNS
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sns:ListTopics
+              - sns:GetTopicAttributes
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsSQS:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsSQS
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:ListQueues
+              - sqs:GetQueueAttributes
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsTransitGateway:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsTransitGateway
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - ec2:DescribeTransitGateways
+              - ec2:DescribeTransitGatewayAttachments
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  ElasticAwsSecurityHub:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsSecurityHub
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - securityhub:GetFindings
+              - securityhub:GetInsights
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+Outputs:
+  RoleArn:
+    Description: The ARN of the IAM Role. Paste this into Kibana.
+    Value: !GetAtt ElasticWorkloadIdentityRole.Arn
+
+  OidcProviderArn:
+    Description: The IAM OIDC provider this role trusts. Shared by every stack for the same issuer in this account; delete it manually once the last such stack is gone.
+    Value: !GetAtt WiiOidcProvider.Arn
+
+  StackId:
+    Description: Store this in Kibana to construct stack-update URLs later.
+    Value: !Ref AWS::StackId

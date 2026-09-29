@@ -1,10 +1,8 @@
 metadata:
   id: 151312c8-7e97-5420-ac05-5a916b3c1feb
-  name: Ensure that the controller manager pod specification file ownership is set
-    to root:root
+  name: Ensure that the controller manager pod specification file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the controller manager pod specification file ownership
-    is set to `root:root`.
+  description: Ensure that the controller manager pod specification file ownership is set to `root:root`.
   rationale: |-
     The controller manager pod specification file controls various parameters that set the behavior of various components of the master node.
     You should set its file ownership to maintain the integrity of the file.

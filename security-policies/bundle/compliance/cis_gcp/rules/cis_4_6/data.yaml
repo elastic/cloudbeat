@@ -54,8 +54,7 @@ metadata:
     ```
     gcloud compute instances create
     ```
-  impact: Deleting instance(s) acting as routers/packet forwarders may break the network
-    connectivity.
+  impact: Deleting instance(s) acting as routers/packet forwarders may break the network connectivity.
   default_value: ''
   references: 1. https://cloud.google.com/vpc/docs/using-routes#canipforward
   section: Virtual Machines

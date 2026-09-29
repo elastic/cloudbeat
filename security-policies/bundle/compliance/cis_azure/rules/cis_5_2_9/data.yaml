@@ -1,10 +1,8 @@
 metadata:
   id: ad4de26d-02a8-5202-b718-48147bf0fd03
-  name: Ensure that Activity Log Alert exists for Create or Update Public IP Address
-    rule
+  name: Ensure that Activity Log Alert exists for Create or Update Public IP Address rule
   profile_applicability: '* Level 1'
-  description: Create an activity log alert for the Create or Update Public IP Addresses
-    rule.
+  description: Create an activity log alert for the Create or Update Public IP Addresses rule.
   rationale: |-
     Monitoring for Create or Update Public IP Address events gives insight into network access changes and may reduce the time it takes to detect suspicious activity.
   audit: |-

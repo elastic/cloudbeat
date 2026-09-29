@@ -1,7 +1,6 @@
 metadata:
   id: f00c266c-0e28-5c49-b2b0-cd97603341ec
-  name: Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption
-    Key (CMEK)
+  name: Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption Key (CMEK)
   profile_applicability: '* Level 2'
   description: |-
     BigQuery by default encrypts the data as rest by employing `Envelope Encryption` using Google managed cryptographic keys.

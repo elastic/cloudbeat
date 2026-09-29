@@ -63,8 +63,8 @@
     {
       "description": "Update :go-version: in docs/version.asciidoc",
       "customType": "regex",
-      "fileMatch": [
-        "^docs/version\\.asciidoc$"
+      "managerFilePatterns": [
+        "/^docs/version\\.asciidoc$/"
       ],
       "matchStrings": [
         ":go-version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -78,16 +78,6 @@
       "description": "Ignore elastic/beats v7 - requires manual update",
       "matchPackageNames": [
         "github.com/elastic/beats/v7"
-      ],
-      "enabled": false
-    },
-    {
-      "description": "Disable sarama updates - requires manual handling",
-      "matchManagers": [
-        "gomod"
-      ],
-      "matchPackageNames": [
-        "/^github\\.com/elastic/sarama$/"
       ],
       "enabled": false
     },
@@ -221,6 +211,16 @@
       "enabled": true
     },
     {
+      "description": "Disable sarama updates - requires manual handling",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "/^github\\.com/elastic/sarama$/"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
@@ -299,5 +299,6 @@
   ],
   "vulnerabilityAlerts": {
     "enabled": false
-  }
+  },
+  "dependencyDashboardReportAbandonment": false
 }

@@ -2,8 +2,7 @@ metadata:
   id: 94fb43f8-90da-5089-b503-66a04faa2630
   name: Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers
   profile_applicability: '* Level 1 - Worker Node'
-  description: Ensure that the Kubelet is configured to only use strong cryptographic
-    ciphers.
+  description: Ensure that the Kubelet is configured to only use strong cryptographic ciphers.
   rationale: |-
     TLS ciphers have had a number of known vulnerabilities and weaknesses, which can reduce the protection provided by them.
     By default Kubernetes supports a number of TLS ciphersuites including some that have security concerns, weakening the protection provided.

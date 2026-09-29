@@ -1,7 +1,6 @@
 metadata:
   id: 090923c7-e599-572b-bad3-703f768c262a
-  name: Ensure Storage Logging is Enabled for Table Service for 'Read', 'Write', and
-    'Delete' Requests
+  name: Ensure Storage Logging is Enabled for Table Service for 'Read', 'Write', and 'Delete' Requests
   profile_applicability: '* Level 2'
   description: |-
     Azure Table storage is a service that stores structured NoSQL data in the cloud, providing a key/attribute store with a schema-less design.

@@ -1,7 +1,6 @@
 metadata:
   id: eb9e71ae-113b-5631-9e5c-b7fdc0b0666e
-  name: Ensure 'Allow access to Azure services' for PostgreSQL Database Server is
-    disabled
+  name: Ensure 'Allow access to Azure services' for PostgreSQL Database Server is disabled
   profile_applicability: '* Level 1'
   description: Disable access from Azure services to PostgreSQL Database Server.
   rationale: |-

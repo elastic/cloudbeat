@@ -138,8 +138,7 @@ metadata:
     Create prescribed Alert Policy 
     - Use the command: gcloud alpha monitoring policies create
     - Reference for Command Usage: https://cloud.google.com/sdk/gcloud/reference/alpha/monitoring/policies/create
-  impact: Enabling of logging may result in your project being charged for the additional
-    logs usage.
+  impact: Enabling of logging may result in your project being charged for the additional logs usage.
   default_value: ''
   references: |-
     1. https://cloud.google.com/logging/docs/logs-based-metrics/

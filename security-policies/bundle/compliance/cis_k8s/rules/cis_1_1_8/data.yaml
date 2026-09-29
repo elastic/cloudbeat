@@ -2,8 +2,7 @@ metadata:
   id: 129b07b7-4470-5224-8246-6ae975d6304b
   name: Ensure that the etcd pod specification file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the `/etc/kubernetes/manifests/etcd.yaml` file ownership
-    is set to `root:root`.
+  description: Ensure that the `/etc/kubernetes/manifests/etcd.yaml` file ownership is set to `root:root`.
   rationale: |-
     The etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml` controls various parameters that set the behavior of the `etcd` service in the master node.
     etcd is a highly-available key-value store which Kubernetes uses for persistent storage of all of its REST API object.

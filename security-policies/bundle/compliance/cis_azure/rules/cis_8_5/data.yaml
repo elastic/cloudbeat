@@ -89,8 +89,7 @@ metadata:
     ```
     Update-AzKeyVault -VaultName <vaultName -ResourceGroupName <resourceGroupName -EnablePurgeProtection
     ```
-  impact: Once purge-protection and soft-delete are enabled for a Key Vault, the action
-    is irreversible.
+  impact: Once purge-protection and soft-delete are enabled for a Key Vault, the action is irreversible.
   default_value: ''
   references: |-
     1. https://docs.microsoft.com/en-us/azure/key-vault/key-vault-soft-delete-cli
