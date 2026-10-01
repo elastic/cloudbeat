@@ -232,7 +232,7 @@ require (
 	github.com/moby/sys/userns v0.2.1 // indirect
 	github.com/morikuni/aec v1.1.0 // indirect
 	github.com/ncruces/go-strftime v1.1.0 // indirect
-	github.com/nikolalohinski/gonja/v2 v2.9.0 // indirect
+	github.com/nikolalohinski/gonja/v2 v2.9.1 // indirect
 	github.com/oklog/ulid/v2 v2.1.2 // indirect
 	github.com/onsi/ginkgo/v2 v2.33.0 // indirect
 	github.com/owenrumney/go-sarif/v2 v2.3.3 // indirect
