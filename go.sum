@@ -44,8 +44,8 @@ github.com/Azure/azure-sdk-for-go/sdk/azidentity/cache v0.4.0 h1:xFaZZ+IubdftrDH
 github.com/Azure/azure-sdk-for-go/sdk/azidentity/cache v0.4.0/go.mod h1:mCBhUhlMjLLJKr5aqw2TNS/VqJOie8MzWq3DAMJeKso=
 github.com/Azure/azure-sdk-for-go/sdk/containers/azcontainerregistry v0.2.3 h1:ldKsKtEIblsgsr6mPwrd9yRntoX6uLz/K89wsldwx/k=
 github.com/Azure/azure-sdk-for-go/sdk/containers/azcontainerregistry v0.2.3/go.mod h1:MAm7bk0oDLmD8yIkvfbxPW04fxzphPyL+7GzwHxOp6Y=
-github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 h1:fhqpLE3UEXi9lPaBRpQ6XuRW0nU7hgg4zlmZZa+a9q4=
-github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0/go.mod h1:7dCRMLwisfRH3dBupKeNCioWYUZ4SS09Z14H+7i8ZoY=
+github.com/Azure/azure-sdk-for-go/sdk/internal v1.13.0 h1:Terj1CMW4+NY5CpWjSRkqLoxh2DkYDdv/FH2z0897Uc=
+github.com/Azure/azure-sdk-for-go/sdk/internal v1.13.0/go.mod h1:7Ut2Qw9vcwpLW5Q4MBy43uSxXS7tK2yjs94OJ6j5thE=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v6 v6.0.0 h1:vhXsRicy0J6KLMsd7sAL6ll2CMEag2V2tIpuVI2CZP0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v6 v6.0.0/go.mod h1:8bqI53aVbpaMreTHLfgG5VcqQKmfBc99UZtPozthauQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4 v4.8.0 h1:0nGmzwBv5ougvzfGPCO2ljFRHvun57KpNrVCMrlk0ns=
