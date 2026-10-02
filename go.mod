@@ -31,14 +31,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.73.0
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.88.1
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.74.1
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.337.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.338.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.66.1
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.41.1
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.1
 	github.com/aws/aws-sdk-go-v2/service/kms v1.61.1
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.110.0
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.60.1
-	github.com/aws/aws-sdk-go-v2/service/rds v1.129.1
+	github.com/aws/aws-sdk-go-v2/service/rds v1.130.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.113.4
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.79.1
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.82.1
