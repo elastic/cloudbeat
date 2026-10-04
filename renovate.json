@@ -184,6 +184,16 @@
       "enabled": true
     },
     {
+      "description": "Disable sarama updates - requires manual handling",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "/^github\\.com/elastic/sarama$/"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Disable go.mod replace directive updates - pins must match beats go.mod; renovate writes invalid bare commit hashes",
       "matchManagers": [
         "gomod"
