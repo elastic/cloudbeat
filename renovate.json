@@ -184,6 +184,50 @@
       "enabled": true
     },
     {
+<<<<<<< HEAD
+=======
+      "description": "Disable sarama updates - requires manual handling",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "/^github\\.com/elastic/sarama$/"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable go.mod replace directive updates - pins must match beats go.mod; renovate writes invalid bare commit hashes",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "replace"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable goja updates - replaced by elastic/goja, version is driven by beats",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/dop251/goja",
+        "github.com/dop251/goja_nodejs"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable e2e-testing updates - v1.99.x tags are not real releases (latest is v1.2.3)",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/elastic/e2e-testing"
+      ],
+      "enabled": false
+    },
+    {
+>>>>>>> c01755a (fix(renovate): disable goja/gopacket replace pins and e2e-testing updates (#8701))
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
