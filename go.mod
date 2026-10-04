@@ -32,19 +32,19 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.81.1
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.1
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.73.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.88.1
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.89.0
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.74.1
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.338.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.338.1
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.66.1
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.41.1
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.1
 	github.com/aws/aws-sdk-go-v2/service/kms v1.61.1
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.110.0
-	github.com/aws/aws-sdk-go-v2/service/organizations v1.60.1
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.61.0
 	github.com/aws/aws-sdk-go-v2/service/rds v1.130.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.113.4
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.0
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.79.1
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.82.1
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.83.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.47.2
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.1
 	github.com/aws/smithy-go v1.28.2
@@ -134,7 +134,7 @@ require (
 	github.com/aquasecurity/iamgo v0.0.10 // indirect
 	github.com/aquasecurity/jfather v0.0.8 // indirect
 	github.com/aquasecurity/trivy-checks v1.12.2-0.20251219190323-79d27547baf5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.69.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.70.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.13.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.10.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.1 // indirect
