@@ -15,6 +15,28 @@ rules_dir = os.path.join(
 
 CODE_BLOCK_SIZE = 100
 
+# pandas' default NA strings, minus "None" (pandas >= 2.0 added it, which turns the literal text "None" into NaN)
+EXCEL_NA_VALUES = [
+    "",
+    "#N/A",
+    "#N/A N/A",
+    "#NA",
+    "-1.#IND",
+    "-1.#QNAN",
+    "-NaN",
+    "-nan",
+    "1.#IND",
+    "1.#QNAN",
+    "<NA>",
+    "N/A",
+    "NA",
+    "NULL",
+    "NaN",
+    "n/a",
+    "nan",
+    "null",
+]
+
 negative_emoji = ":x:"  # ❌
 positive_emoji = ":white_check_mark:"  # ✅
 
@@ -102,7 +124,12 @@ def parse_rules_data_from_excel(
     sections_df = pd.DataFrame()
     for sheet_name in sheets:
         print(f"Processing sheet '{sheet_name}'")
-        excel_file = pd.read_excel(input_path, sheet_name=sheet_name)
+        excel_file = pd.read_excel(
+            input_path,
+            sheet_name=sheet_name,
+            keep_default_na=False,
+            na_values=EXCEL_NA_VALUES,
+        )
 
         # Select only the columns you want to include in the Markdown table
         data = excel_file[selected_columns[benchmark_id].keys()]

@@ -174,9 +174,10 @@ def generate_rule_benchmark_metadata(benchmark_id: str, rule_number: str):
 
 def replace_nan_with_empty_string(data: pd.DataFrame):
     """
-    Replace NaN values with empty strings (they are represented as `nan` in the Excel for some reason)
+    Replace NaN values with empty strings (they are represented as `nan` in the Excel for some reason).
+    pandas < 3 stringifies missing values to "nan" on `astype(str)`, while pandas >= 3 keeps them as real NaN.
     """
-    return data.replace("nan", "")
+    return data.replace("nan", "").fillna("")
 
 
 def rule_is_implemented(rule_number: str, benchmark_id: str):
