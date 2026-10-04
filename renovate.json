@@ -182,9 +182,6 @@
       "enabled": true
     },
     {
-<<<<<<< HEAD
-      "description": "Auto-merge minor and patch updates for Elastic packages",
-=======
       "description": "Disable sarama updates - requires manual handling",
       "matchManagers": [
         "gomod"
@@ -226,8 +223,7 @@
       "enabled": false
     },
     {
-      "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
->>>>>>> c01755a (fix(renovate): disable goja/gopacket replace pins and e2e-testing updates (#8701))
+      "description": "Auto-merge minor and patch updates for Elastic packages",
       "matchUpdateTypes": [
         "minor",
         "patch"
