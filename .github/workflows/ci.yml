@@ -205,7 +205,7 @@ jobs:
     timeout-minutes: 75
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+        uses: jlumbroso/free-disk-space@3f13feab2962a87273d379ebc36ea159527e6cc9  # v1.3.2
         with:
           tool-cache: false
           android: true
@@ -239,7 +239,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+        uses: jlumbroso/free-disk-space@3f13feab2962a87273d379ebc36ea159527e6cc9  # v1.3.2
         with:
           tool-cache: false
           android: true
@@ -289,7 +289,7 @@ jobs:
             values-file: tests/test_environments/values/ci-test-k8s-proc-conf2.yml
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  # v1.3.1
+        uses: jlumbroso/free-disk-space@3f13feab2962a87273d379ebc36ea159527e6cc9  # v1.3.2
         with:
           tool-cache: false
           android: true
