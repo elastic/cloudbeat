@@ -35,10 +35,19 @@ func NewMockCloudwatch(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCloudwatch {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCloudwatch{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockCloudwatch_DescribeAlarms_Call struct {
 //   - ctx context.Context
 //   - region *string
 //   - filters []string
-func (_e *MockCloudwatch_Expecter) DescribeAlarms(ctx interface{}, region interface{}, filters interface{}) *MockCloudwatch_DescribeAlarms_Call {
+func (_e *MockCloudwatch_Expecter) DescribeAlarms(ctx any, region any, filters any) *MockCloudwatch_DescribeAlarms_Call {
 	return &MockCloudwatch_DescribeAlarms_Call{Call: _e.mock.On("DescribeAlarms", ctx, region, filters)}
 }
 

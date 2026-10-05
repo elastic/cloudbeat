@@ -35,10 +35,19 @@ func newMockIamUserProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockIamUserProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockIamUserProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockIamUserProvider_GetUsers_Call struct {
 
 // GetUsers is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockIamUserProvider_Expecter) GetUsers(ctx interface{}) *mockIamUserProvider_GetUsers_Call {
+func (_e *mockIamUserProvider_Expecter) GetUsers(ctx any) *mockIamUserProvider_GetUsers_Call {
 	return &mockIamUserProvider_GetUsers_Call{Call: _e.mock.On("GetUsers", ctx)}
 }
 

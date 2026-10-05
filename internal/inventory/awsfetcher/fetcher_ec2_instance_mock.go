@@ -36,10 +36,19 @@ func newMockEc2InstancesProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockEc2InstancesProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockEc2InstancesProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type mockEc2InstancesProvider_DescribeInstances_Call struct {
 
 // DescribeInstances is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockEc2InstancesProvider_Expecter) DescribeInstances(ctx interface{}) *mockEc2InstancesProvider_DescribeInstances_Call {
+func (_e *mockEc2InstancesProvider_Expecter) DescribeInstances(ctx any) *mockEc2InstancesProvider_DescribeInstances_Call {
 	return &mockEc2InstancesProvider_DescribeInstances_Call{Call: _e.mock.On("DescribeInstances", ctx)}
 }
 
@@ -125,10 +134,19 @@ func newMockInstanceProfileResolver(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockInstanceProfileResolver {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockInstanceProfileResolver{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -182,7 +200,7 @@ type mockInstanceProfileResolver_GetInstanceProfile_Call struct {
 // GetInstanceProfile is a helper method to define mock.On call
 //   - ctx context.Context
 //   - instanceProfileName string
-func (_e *mockInstanceProfileResolver_Expecter) GetInstanceProfile(ctx interface{}, instanceProfileName interface{}) *mockInstanceProfileResolver_GetInstanceProfile_Call {
+func (_e *mockInstanceProfileResolver_Expecter) GetInstanceProfile(ctx any, instanceProfileName any) *mockInstanceProfileResolver_GetInstanceProfile_Call {
 	return &mockInstanceProfileResolver_GetInstanceProfile_Call{Call: _e.mock.On("GetInstanceProfile", ctx, instanceProfileName)}
 }
 

@@ -36,10 +36,19 @@ func NewMockRegionsSelector(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockRegionsSelector {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockRegionsSelector{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockRegionsSelector_Regions_Call struct {
 // Regions is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cfg aws.Config
-func (_e *MockRegionsSelector_Expecter) Regions(ctx interface{}, cfg interface{}) *MockRegionsSelector_Regions_Call {
+func (_e *MockRegionsSelector_Expecter) Regions(ctx any, cfg any) *MockRegionsSelector_Regions_Call {
 	return &MockRegionsSelector_Regions_Call{Call: _e.mock.On("Regions", ctx, cfg)}
 }
 
@@ -131,10 +140,19 @@ func NewMockCrossRegionFetcher[T any](t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCrossRegionFetcher[T] {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCrossRegionFetcher[T]{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -204,10 +222,19 @@ func NewMockCrossRegionFactory[T any](t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCrossRegionFactory[T] {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCrossRegionFactory[T]{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -255,7 +282,7 @@ type MockCrossRegionFactory_NewMultiRegionClients_Call[T any] struct {
 //   - cfg aws.Config
 //   - factory func(cfg aws.Config) T
 //   - log *clog.Logger
-func (_e *MockCrossRegionFactory_Expecter[T]) NewMultiRegionClients(ctx interface{}, selector interface{}, cfg interface{}, factory interface{}, log interface{}) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
+func (_e *MockCrossRegionFactory_Expecter[T]) NewMultiRegionClients(ctx any, selector any, cfg any, factory any, log any) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
 	return &MockCrossRegionFactory_NewMultiRegionClients_Call[T]{Call: _e.mock.On("NewMultiRegionClients", ctx, selector, cfg, factory, log)}
 }
 

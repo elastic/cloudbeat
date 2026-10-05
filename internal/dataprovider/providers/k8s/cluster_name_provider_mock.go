@@ -35,10 +35,19 @@ func NewMockClusterNameProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClusterNameProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClusterNameProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -90,7 +99,7 @@ type MockClusterNameProviderAPI_GetClusterName_Call struct {
 // GetClusterName is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cfg *config.Config
-func (_e *MockClusterNameProviderAPI_Expecter) GetClusterName(ctx interface{}, cfg interface{}) *MockClusterNameProviderAPI_GetClusterName_Call {
+func (_e *MockClusterNameProviderAPI_Expecter) GetClusterName(ctx any, cfg any) *MockClusterNameProviderAPI_GetClusterName_Call {
 	return &MockClusterNameProviderAPI_GetClusterName_Call{Call: _e.mock.On("GetClusterName", ctx, cfg)}
 }
 

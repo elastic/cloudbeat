@@ -35,10 +35,19 @@ func newMockInventoryProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockInventoryProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockInventoryProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -71,7 +80,7 @@ type mockInventoryProvider_ListAssetTypes_Call struct {
 //   - ctx context.Context
 //   - assets []string
 //   - assetsCh chan<- *inventory.ExtendedGcpAsset
-func (_e *mockInventoryProvider_Expecter) ListAssetTypes(ctx interface{}, assets interface{}, assetsCh interface{}) *mockInventoryProvider_ListAssetTypes_Call {
+func (_e *mockInventoryProvider_Expecter) ListAssetTypes(ctx any, assets any, assetsCh any) *mockInventoryProvider_ListAssetTypes_Call {
 	return &mockInventoryProvider_ListAssetTypes_Call{Call: _e.mock.On("ListAssetTypes", ctx, assets, assetsCh)}
 }
 

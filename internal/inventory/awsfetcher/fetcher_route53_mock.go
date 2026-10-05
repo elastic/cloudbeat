@@ -35,10 +35,19 @@ func newMockRoute53Provider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockRoute53Provider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockRoute53Provider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockRoute53Provider_ListRecords_Call struct {
 
 // ListRecords is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockRoute53Provider_Expecter) ListRecords(ctx interface{}) *mockRoute53Provider_ListRecords_Call {
+func (_e *mockRoute53Provider_Expecter) ListRecords(ctx any) *mockRoute53Provider_ListRecords_Call {
 	return &mockRoute53Provider_ListRecords_Call{Call: _e.mock.On("ListRecords", ctx)}
 }
 

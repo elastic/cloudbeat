@@ -35,10 +35,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockClient_DescribeTrails_Call struct {
 
 // DescribeTrails is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockClient_Expecter) DescribeTrails(ctx interface{}) *MockClient_DescribeTrails_Call {
+func (_e *MockClient_Expecter) DescribeTrails(ctx any) *MockClient_DescribeTrails_Call {
 	return &MockClient_DescribeTrails_Call{Call: _e.mock.On("DescribeTrails", ctx)}
 }
 

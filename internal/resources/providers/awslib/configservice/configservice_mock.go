@@ -36,10 +36,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -100,9 +109,9 @@ type MockClient_DescribeConfigurationRecorderStatus_Call struct {
 //   - ctx context.Context
 //   - params *configservice.DescribeConfigurationRecorderStatusInput
 //   - optFns ...func(*configservice.Options)
-func (_e *MockClient_Expecter) DescribeConfigurationRecorderStatus(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeConfigurationRecorderStatus_Call {
+func (_e *MockClient_Expecter) DescribeConfigurationRecorderStatus(ctx any, params any, optFns ...any) *MockClient_DescribeConfigurationRecorderStatus_Call {
 	return &MockClient_DescribeConfigurationRecorderStatus_Call{Call: _e.mock.On("DescribeConfigurationRecorderStatus",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeConfigurationRecorderStatus_Call) Run(run func(ctx context.Context, params *configservice.DescribeConfigurationRecorderStatusInput, optFns ...func(*configservice.Options))) *MockClient_DescribeConfigurationRecorderStatus_Call {
@@ -183,9 +192,9 @@ type MockClient_DescribeConfigurationRecorders_Call struct {
 //   - ctx context.Context
 //   - params *configservice.DescribeConfigurationRecordersInput
 //   - optFns ...func(*configservice.Options)
-func (_e *MockClient_Expecter) DescribeConfigurationRecorders(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeConfigurationRecorders_Call {
+func (_e *MockClient_Expecter) DescribeConfigurationRecorders(ctx any, params any, optFns ...any) *MockClient_DescribeConfigurationRecorders_Call {
 	return &MockClient_DescribeConfigurationRecorders_Call{Call: _e.mock.On("DescribeConfigurationRecorders",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeConfigurationRecorders_Call) Run(run func(ctx context.Context, params *configservice.DescribeConfigurationRecordersInput, optFns ...func(*configservice.Options))) *MockClient_DescribeConfigurationRecorders_Call {
@@ -229,10 +238,19 @@ func NewMockConfigService(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockConfigService {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockConfigService{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -285,7 +303,7 @@ type MockConfigService_DescribeConfigRecorders_Call struct {
 
 // DescribeConfigRecorders is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockConfigService_Expecter) DescribeConfigRecorders(ctx interface{}) *MockConfigService_DescribeConfigRecorders_Call {
+func (_e *MockConfigService_Expecter) DescribeConfigRecorders(ctx any) *MockConfigService_DescribeConfigRecorders_Call {
 	return &MockConfigService_DescribeConfigRecorders_Call{Call: _e.mock.On("DescribeConfigRecorders", ctx)}
 }
 

@@ -34,10 +34,19 @@ func NewMockMysqlProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMysqlProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMysqlProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockMysqlProviderAPI_GetFlexibleTLSVersionConfiguration_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockMysqlProviderAPI_Expecter) GetFlexibleTLSVersionConfiguration(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockMysqlProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+func (_e *MockMysqlProviderAPI_Expecter) GetFlexibleTLSVersionConfiguration(ctx any, subID any, resourceGroup any, serverName any) *MockMysqlProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
 	return &MockMysqlProviderAPI_GetFlexibleTLSVersionConfiguration_Call{Call: _e.mock.On("GetFlexibleTLSVersionConfiguration", ctx, subID, resourceGroup, serverName)}
 }
 

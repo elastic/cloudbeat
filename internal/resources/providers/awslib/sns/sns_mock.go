@@ -36,10 +36,19 @@ func NewMockSNS(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockSNS {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockSNS{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -94,7 +103,7 @@ type MockSNS_ListSubscriptionsByTopic_Call struct {
 //   - ctx context.Context
 //   - region string
 //   - topic string
-func (_e *MockSNS_Expecter) ListSubscriptionsByTopic(ctx interface{}, region interface{}, topic interface{}) *MockSNS_ListSubscriptionsByTopic_Call {
+func (_e *MockSNS_Expecter) ListSubscriptionsByTopic(ctx any, region any, topic any) *MockSNS_ListSubscriptionsByTopic_Call {
 	return &MockSNS_ListSubscriptionsByTopic_Call{Call: _e.mock.On("ListSubscriptionsByTopic", ctx, region, topic)}
 }
 
@@ -166,7 +175,7 @@ type MockSNS_ListTopics_Call struct {
 
 // ListTopics is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockSNS_Expecter) ListTopics(ctx interface{}) *MockSNS_ListTopics_Call {
+func (_e *MockSNS_Expecter) ListTopics(ctx any) *MockSNS_ListTopics_Call {
 	return &MockSNS_ListTopics_Call{Call: _e.mock.On("ListTopics", ctx)}
 }
 
@@ -228,7 +237,7 @@ type MockSNS_ListTopicsWithSubscriptions_Call struct {
 
 // ListTopicsWithSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockSNS_Expecter) ListTopicsWithSubscriptions(ctx interface{}) *MockSNS_ListTopicsWithSubscriptions_Call {
+func (_e *MockSNS_Expecter) ListTopicsWithSubscriptions(ctx any) *MockSNS_ListTopicsWithSubscriptions_Call {
 	return &MockSNS_ListTopicsWithSubscriptions_Call{Call: _e.mock.On("ListTopicsWithSubscriptions", ctx)}
 }
 
