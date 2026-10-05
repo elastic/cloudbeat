@@ -36,10 +36,19 @@ func NewMockElasticCompute(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockElasticCompute {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockElasticCompute{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockElasticCompute_DescribeNetworkAcl_Call struct {
 
 // DescribeNetworkAcl is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockElasticCompute_Expecter) DescribeNetworkAcl(ctx interface{}) *MockElasticCompute_DescribeNetworkAcl_Call {
+func (_e *MockElasticCompute_Expecter) DescribeNetworkAcl(ctx any) *MockElasticCompute_DescribeNetworkAcl_Call {
 	return &MockElasticCompute_DescribeNetworkAcl_Call{Call: _e.mock.On("DescribeNetworkAcl", ctx)}
 }
 
@@ -154,7 +163,7 @@ type MockElasticCompute_DescribeSecurityGroups_Call struct {
 
 // DescribeSecurityGroups is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockElasticCompute_Expecter) DescribeSecurityGroups(ctx interface{}) *MockElasticCompute_DescribeSecurityGroups_Call {
+func (_e *MockElasticCompute_Expecter) DescribeSecurityGroups(ctx any) *MockElasticCompute_DescribeSecurityGroups_Call {
 	return &MockElasticCompute_DescribeSecurityGroups_Call{Call: _e.mock.On("DescribeSecurityGroups", ctx)}
 }
 
@@ -216,7 +225,7 @@ type MockElasticCompute_DescribeVpcs_Call struct {
 
 // DescribeVpcs is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockElasticCompute_Expecter) DescribeVpcs(ctx interface{}) *MockElasticCompute_DescribeVpcs_Call {
+func (_e *MockElasticCompute_Expecter) DescribeVpcs(ctx any) *MockElasticCompute_DescribeVpcs_Call {
 	return &MockElasticCompute_DescribeVpcs_Call{Call: _e.mock.On("DescribeVpcs", ctx)}
 }
 
@@ -278,7 +287,7 @@ type MockElasticCompute_GetEbsEncryptionByDefault_Call struct {
 
 // GetEbsEncryptionByDefault is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockElasticCompute_Expecter) GetEbsEncryptionByDefault(ctx interface{}) *MockElasticCompute_GetEbsEncryptionByDefault_Call {
+func (_e *MockElasticCompute_Expecter) GetEbsEncryptionByDefault(ctx any) *MockElasticCompute_GetEbsEncryptionByDefault_Call {
 	return &MockElasticCompute_GetEbsEncryptionByDefault_Call{Call: _e.mock.On("GetEbsEncryptionByDefault", ctx)}
 }
 
@@ -341,7 +350,7 @@ type MockElasticCompute_GetRouteTableForSubnet_Call struct {
 //   - region string
 //   - subnetId string
 //   - vpcId string
-func (_e *MockElasticCompute_Expecter) GetRouteTableForSubnet(ctx interface{}, region interface{}, subnetId interface{}, vpcId interface{}) *MockElasticCompute_GetRouteTableForSubnet_Call {
+func (_e *MockElasticCompute_Expecter) GetRouteTableForSubnet(ctx any, region any, subnetId any, vpcId any) *MockElasticCompute_GetRouteTableForSubnet_Call {
 	return &MockElasticCompute_GetRouteTableForSubnet_Call{Call: _e.mock.On("GetRouteTableForSubnet", ctx, region, subnetId, vpcId)}
 }
 

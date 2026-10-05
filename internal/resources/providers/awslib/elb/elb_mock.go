@@ -37,10 +37,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -101,9 +110,9 @@ type MockClient_DescribeLoadBalancers_Call struct {
 //   - context1 context.Context
 //   - describeLoadBalancersInput *elasticloadbalancing.DescribeLoadBalancersInput
 //   - fns ...func(*elasticloadbalancing.Options)
-func (_e *MockClient_Expecter) DescribeLoadBalancers(context1 interface{}, describeLoadBalancersInput interface{}, fns ...interface{}) *MockClient_DescribeLoadBalancers_Call {
+func (_e *MockClient_Expecter) DescribeLoadBalancers(context1 any, describeLoadBalancersInput any, fns ...any) *MockClient_DescribeLoadBalancers_Call {
 	return &MockClient_DescribeLoadBalancers_Call{Call: _e.mock.On("DescribeLoadBalancers",
-		append([]interface{}{context1, describeLoadBalancersInput}, fns...)...)}
+		append([]any{context1, describeLoadBalancersInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeLoadBalancers_Call) Run(run func(context1 context.Context, describeLoadBalancersInput *elasticloadbalancing.DescribeLoadBalancersInput, fns ...func(*elasticloadbalancing.Options))) *MockClient_DescribeLoadBalancers_Call {
@@ -147,10 +156,19 @@ func NewMockLoadBalancerDescriber(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockLoadBalancerDescriber {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockLoadBalancerDescriber{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -203,7 +221,7 @@ type MockLoadBalancerDescriber_DescribeAllLoadBalancers_Call struct {
 
 // DescribeAllLoadBalancers is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockLoadBalancerDescriber_Expecter) DescribeAllLoadBalancers(context1 interface{}) *MockLoadBalancerDescriber_DescribeAllLoadBalancers_Call {
+func (_e *MockLoadBalancerDescriber_Expecter) DescribeAllLoadBalancers(context1 any) *MockLoadBalancerDescriber_DescribeAllLoadBalancers_Call {
 	return &MockLoadBalancerDescriber_DescribeAllLoadBalancers_Call{Call: _e.mock.On("DescribeAllLoadBalancers", context1)}
 }
 
@@ -266,7 +284,7 @@ type MockLoadBalancerDescriber_DescribeLoadBalancers_Call struct {
 // DescribeLoadBalancers is a helper method to define mock.On call
 //   - ctx context.Context
 //   - balancersNames []string
-func (_e *MockLoadBalancerDescriber_Expecter) DescribeLoadBalancers(ctx interface{}, balancersNames interface{}) *MockLoadBalancerDescriber_DescribeLoadBalancers_Call {
+func (_e *MockLoadBalancerDescriber_Expecter) DescribeLoadBalancers(ctx any, balancersNames any) *MockLoadBalancerDescriber_DescribeLoadBalancers_Call {
 	return &MockLoadBalancerDescriber_DescribeLoadBalancers_Call{Call: _e.mock.On("DescribeLoadBalancers", ctx, balancersNames)}
 }
 

@@ -33,10 +33,19 @@ func NewMockConfigProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockConfigProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockConfigProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -89,7 +98,7 @@ type MockConfigProviderAPI_GetAzureClientConfig_Call struct {
 
 // GetAzureClientConfig is a helper method to define mock.On call
 //   - cfg config.AzureConfig
-func (_e *MockConfigProviderAPI_Expecter) GetAzureClientConfig(cfg interface{}) *MockConfigProviderAPI_GetAzureClientConfig_Call {
+func (_e *MockConfigProviderAPI_Expecter) GetAzureClientConfig(cfg any) *MockConfigProviderAPI_GetAzureClientConfig_Call {
 	return &MockConfigProviderAPI_GetAzureClientConfig_Call{Call: _e.mock.On("GetAzureClientConfig", cfg)}
 }
 

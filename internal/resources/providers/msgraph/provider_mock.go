@@ -35,10 +35,19 @@ func NewMockProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockProviderAPI_ListDirectoryRoles_Call struct {
 
 // ListDirectoryRoles is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockProviderAPI_Expecter) ListDirectoryRoles(context1 interface{}) *MockProviderAPI_ListDirectoryRoles_Call {
+func (_e *MockProviderAPI_Expecter) ListDirectoryRoles(context1 any) *MockProviderAPI_ListDirectoryRoles_Call {
 	return &MockProviderAPI_ListDirectoryRoles_Call{Call: _e.mock.On("ListDirectoryRoles", context1)}
 }
 
@@ -153,7 +162,7 @@ type MockProviderAPI_ListGroups_Call struct {
 
 // ListGroups is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockProviderAPI_Expecter) ListGroups(context1 interface{}) *MockProviderAPI_ListGroups_Call {
+func (_e *MockProviderAPI_Expecter) ListGroups(context1 any) *MockProviderAPI_ListGroups_Call {
 	return &MockProviderAPI_ListGroups_Call{Call: _e.mock.On("ListGroups", context1)}
 }
 
@@ -215,7 +224,7 @@ type MockProviderAPI_ListServicePrincipals_Call struct {
 
 // ListServicePrincipals is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockProviderAPI_Expecter) ListServicePrincipals(context1 interface{}) *MockProviderAPI_ListServicePrincipals_Call {
+func (_e *MockProviderAPI_Expecter) ListServicePrincipals(context1 any) *MockProviderAPI_ListServicePrincipals_Call {
 	return &MockProviderAPI_ListServicePrincipals_Call{Call: _e.mock.On("ListServicePrincipals", context1)}
 }
 
@@ -277,7 +286,7 @@ type MockProviderAPI_ListUsers_Call struct {
 
 // ListUsers is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockProviderAPI_Expecter) ListUsers(context1 interface{}) *MockProviderAPI_ListUsers_Call {
+func (_e *MockProviderAPI_Expecter) ListUsers(context1 any) *MockProviderAPI_ListUsers_Call {
 	return &MockProviderAPI_ListUsers_Call{Call: _e.mock.On("ListUsers", context1)}
 }
 

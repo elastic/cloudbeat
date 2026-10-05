@@ -34,10 +34,19 @@ func NewMockAppServiceProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAppServiceProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAppServiceProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockAppServiceProviderAPI_GetAppServiceAuthSettings_Call struct {
 // GetAppServiceAuthSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - webApp AzureAsset
-func (_e *MockAppServiceProviderAPI_Expecter) GetAppServiceAuthSettings(ctx interface{}, webApp interface{}) *MockAppServiceProviderAPI_GetAppServiceAuthSettings_Call {
+func (_e *MockAppServiceProviderAPI_Expecter) GetAppServiceAuthSettings(ctx any, webApp any) *MockAppServiceProviderAPI_GetAppServiceAuthSettings_Call {
 	return &MockAppServiceProviderAPI_GetAppServiceAuthSettings_Call{Call: _e.mock.On("GetAppServiceAuthSettings", ctx, webApp)}
 }
 
@@ -159,7 +168,7 @@ type MockAppServiceProviderAPI_GetAppServiceSiteConfig_Call struct {
 // GetAppServiceSiteConfig is a helper method to define mock.On call
 //   - ctx context.Context
 //   - webApp AzureAsset
-func (_e *MockAppServiceProviderAPI_Expecter) GetAppServiceSiteConfig(ctx interface{}, webApp interface{}) *MockAppServiceProviderAPI_GetAppServiceSiteConfig_Call {
+func (_e *MockAppServiceProviderAPI_Expecter) GetAppServiceSiteConfig(ctx any, webApp any) *MockAppServiceProviderAPI_GetAppServiceSiteConfig_Call {
 	return &MockAppServiceProviderAPI_GetAppServiceSiteConfig_Call{Call: _e.mock.On("GetAppServiceSiteConfig", ctx, webApp)}
 }
 

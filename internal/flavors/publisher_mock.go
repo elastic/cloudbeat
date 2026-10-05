@@ -33,10 +33,19 @@ func newMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -67,7 +76,7 @@ type mockClient_PublishAll_Call struct {
 
 // PublishAll is a helper method to define mock.On call
 //   - events []beat.Event
-func (_e *mockClient_Expecter) PublishAll(events interface{}) *mockClient_PublishAll_Call {
+func (_e *mockClient_Expecter) PublishAll(events any) *mockClient_PublishAll_Call {
 	return &mockClient_PublishAll_Call{Call: _e.mock.On("PublishAll", events)}
 }
 

@@ -35,10 +35,19 @@ func newMockSnsProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockSnsProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockSnsProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockSnsProvider_ListTopicsWithSubscriptions_Call struct {
 
 // ListTopicsWithSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockSnsProvider_Expecter) ListTopicsWithSubscriptions(ctx interface{}) *mockSnsProvider_ListTopicsWithSubscriptions_Call {
+func (_e *mockSnsProvider_Expecter) ListTopicsWithSubscriptions(ctx any) *mockSnsProvider_ListTopicsWithSubscriptions_Call {
 	return &mockSnsProvider_ListTopicsWithSubscriptions_Call{Call: _e.mock.On("ListTopicsWithSubscriptions", ctx)}
 }
 

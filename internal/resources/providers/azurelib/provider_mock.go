@@ -39,10 +39,19 @@ func NewMockProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -96,7 +105,7 @@ type MockProviderAPI_GetAppServiceAuthSettings_Call struct {
 // GetAppServiceAuthSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - webApp inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) GetAppServiceAuthSettings(ctx interface{}, webApp interface{}) *MockProviderAPI_GetAppServiceAuthSettings_Call {
+func (_e *MockProviderAPI_Expecter) GetAppServiceAuthSettings(ctx any, webApp any) *MockProviderAPI_GetAppServiceAuthSettings_Call {
 	return &MockProviderAPI_GetAppServiceAuthSettings_Call{Call: _e.mock.On("GetAppServiceAuthSettings", ctx, webApp)}
 }
 
@@ -164,7 +173,7 @@ type MockProviderAPI_GetAppServiceSiteConfig_Call struct {
 // GetAppServiceSiteConfig is a helper method to define mock.On call
 //   - ctx context.Context
 //   - webApp inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) GetAppServiceSiteConfig(ctx interface{}, webApp interface{}) *MockProviderAPI_GetAppServiceSiteConfig_Call {
+func (_e *MockProviderAPI_Expecter) GetAppServiceSiteConfig(ctx any, webApp any) *MockProviderAPI_GetAppServiceSiteConfig_Call {
 	return &MockProviderAPI_GetAppServiceSiteConfig_Call{Call: _e.mock.On("GetAppServiceSiteConfig", ctx, webApp)}
 }
 
@@ -234,7 +243,7 @@ type MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) GetFlexibleTLSVersionConfiguration(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
+func (_e *MockProviderAPI_Expecter) GetFlexibleTLSVersionConfiguration(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call {
 	return &MockProviderAPI_GetFlexibleTLSVersionConfiguration_Call{Call: _e.mock.On("GetFlexibleTLSVersionConfiguration", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -314,7 +323,7 @@ type MockProviderAPI_GetSQLBlobAuditingPolicies_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) GetSQLBlobAuditingPolicies(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_GetSQLBlobAuditingPolicies_Call {
+func (_e *MockProviderAPI_Expecter) GetSQLBlobAuditingPolicies(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_GetSQLBlobAuditingPolicies_Call {
 	return &MockProviderAPI_GetSQLBlobAuditingPolicies_Call{Call: _e.mock.On("GetSQLBlobAuditingPolicies", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -392,7 +401,7 @@ type MockProviderAPI_GetSubscriptions_Call struct {
 // GetSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cycleMetadata cycle.Metadata
-func (_e *MockProviderAPI_Expecter) GetSubscriptions(ctx interface{}, cycleMetadata interface{}) *MockProviderAPI_GetSubscriptions_Call {
+func (_e *MockProviderAPI_Expecter) GetSubscriptions(ctx any, cycleMetadata any) *MockProviderAPI_GetSubscriptions_Call {
 	return &MockProviderAPI_GetSubscriptions_Call{Call: _e.mock.On("GetSubscriptions", ctx, cycleMetadata)}
 }
 
@@ -461,7 +470,7 @@ type MockProviderAPI_ListAllAssetTypesByName_Call struct {
 //   - ctx context.Context
 //   - assetsGroup string
 //   - assets []string
-func (_e *MockProviderAPI_Expecter) ListAllAssetTypesByName(ctx interface{}, assetsGroup interface{}, assets interface{}) *MockProviderAPI_ListAllAssetTypesByName_Call {
+func (_e *MockProviderAPI_Expecter) ListAllAssetTypesByName(ctx any, assetsGroup any, assets any) *MockProviderAPI_ListAllAssetTypesByName_Call {
 	return &MockProviderAPI_ListAllAssetTypesByName_Call{Call: _e.mock.On("ListAllAssetTypesByName", ctx, assetsGroup, assets)}
 }
 
@@ -534,7 +543,7 @@ type MockProviderAPI_ListAutoProvisioningSettings_Call struct {
 // ListAutoProvisioningSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subscriptionID string
-func (_e *MockProviderAPI_Expecter) ListAutoProvisioningSettings(ctx interface{}, subscriptionID interface{}) *MockProviderAPI_ListAutoProvisioningSettings_Call {
+func (_e *MockProviderAPI_Expecter) ListAutoProvisioningSettings(ctx any, subscriptionID any) *MockProviderAPI_ListAutoProvisioningSettings_Call {
 	return &MockProviderAPI_ListAutoProvisioningSettings_Call{Call: _e.mock.On("ListAutoProvisioningSettings", ctx, subscriptionID)}
 }
 
@@ -603,7 +612,7 @@ type MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call struct {
 //   - ctx context.Context
 //   - cycleMetadata cycle.Metadata
 //   - subscriptionIDs []string
-func (_e *MockProviderAPI_Expecter) ListDiagnosticSettingsAssetTypes(ctx interface{}, cycleMetadata interface{}, subscriptionIDs interface{}) *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call {
+func (_e *MockProviderAPI_Expecter) ListDiagnosticSettingsAssetTypes(ctx any, cycleMetadata any, subscriptionIDs any) *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call {
 	return &MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call{Call: _e.mock.On("ListDiagnosticSettingsAssetTypes", ctx, cycleMetadata, subscriptionIDs)}
 }
 
@@ -678,7 +687,7 @@ type MockProviderAPI_ListFlexiblePostgresConfigurations_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListFlexiblePostgresConfigurations(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListFlexiblePostgresConfigurations_Call {
+func (_e *MockProviderAPI_Expecter) ListFlexiblePostgresConfigurations(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListFlexiblePostgresConfigurations_Call {
 	return &MockProviderAPI_ListFlexiblePostgresConfigurations_Call{Call: _e.mock.On("ListFlexiblePostgresConfigurations", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -758,7 +767,7 @@ type MockProviderAPI_ListFlexiblePostgresFirewallRules_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListFlexiblePostgresFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListFlexiblePostgresFirewallRules_Call {
+func (_e *MockProviderAPI_Expecter) ListFlexiblePostgresFirewallRules(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListFlexiblePostgresFirewallRules_Call {
 	return &MockProviderAPI_ListFlexiblePostgresFirewallRules_Call{Call: _e.mock.On("ListFlexiblePostgresFirewallRules", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -836,7 +845,7 @@ type MockProviderAPI_ListKeyVaultDiagnosticSettings_Call struct {
 // ListKeyVaultDiagnosticSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - vault inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListKeyVaultDiagnosticSettings(ctx interface{}, vault interface{}) *MockProviderAPI_ListKeyVaultDiagnosticSettings_Call {
+func (_e *MockProviderAPI_Expecter) ListKeyVaultDiagnosticSettings(ctx any, vault any) *MockProviderAPI_ListKeyVaultDiagnosticSettings_Call {
 	return &MockProviderAPI_ListKeyVaultDiagnosticSettings_Call{Call: _e.mock.On("ListKeyVaultDiagnosticSettings", ctx, vault)}
 }
 
@@ -904,7 +913,7 @@ type MockProviderAPI_ListKeyVaultKeys_Call struct {
 // ListKeyVaultKeys is a helper method to define mock.On call
 //   - ctx context.Context
 //   - vault inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListKeyVaultKeys(ctx interface{}, vault interface{}) *MockProviderAPI_ListKeyVaultKeys_Call {
+func (_e *MockProviderAPI_Expecter) ListKeyVaultKeys(ctx any, vault any) *MockProviderAPI_ListKeyVaultKeys_Call {
 	return &MockProviderAPI_ListKeyVaultKeys_Call{Call: _e.mock.On("ListKeyVaultKeys", ctx, vault)}
 }
 
@@ -972,7 +981,7 @@ type MockProviderAPI_ListKeyVaultSecrets_Call struct {
 // ListKeyVaultSecrets is a helper method to define mock.On call
 //   - ctx context.Context
 //   - vault inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListKeyVaultSecrets(ctx interface{}, vault interface{}) *MockProviderAPI_ListKeyVaultSecrets_Call {
+func (_e *MockProviderAPI_Expecter) ListKeyVaultSecrets(ctx any, vault any) *MockProviderAPI_ListKeyVaultSecrets_Call {
 	return &MockProviderAPI_ListKeyVaultSecrets_Call{Call: _e.mock.On("ListKeyVaultSecrets", ctx, vault)}
 }
 
@@ -1040,7 +1049,7 @@ type MockProviderAPI_ListLocations_Call struct {
 // ListLocations is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subID string
-func (_e *MockProviderAPI_Expecter) ListLocations(ctx interface{}, subID interface{}) *MockProviderAPI_ListLocations_Call {
+func (_e *MockProviderAPI_Expecter) ListLocations(ctx any, subID any) *MockProviderAPI_ListLocations_Call {
 	return &MockProviderAPI_ListLocations_Call{Call: _e.mock.On("ListLocations", ctx, subID)}
 }
 
@@ -1110,7 +1119,7 @@ type MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListSQLAdvancedThreatProtectionSettings(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
+func (_e *MockProviderAPI_Expecter) ListSQLAdvancedThreatProtectionSettings(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
 	return &MockProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call{Call: _e.mock.On("ListSQLAdvancedThreatProtectionSettings", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -1190,7 +1199,7 @@ type MockProviderAPI_ListSQLEncryptionProtector_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListSQLEncryptionProtector(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSQLEncryptionProtector_Call {
+func (_e *MockProviderAPI_Expecter) ListSQLEncryptionProtector(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListSQLEncryptionProtector_Call {
 	return &MockProviderAPI_ListSQLEncryptionProtector_Call{Call: _e.mock.On("ListSQLEncryptionProtector", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -1270,7 +1279,7 @@ type MockProviderAPI_ListSQLFirewallRules_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListSQLFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSQLFirewallRules_Call {
+func (_e *MockProviderAPI_Expecter) ListSQLFirewallRules(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListSQLFirewallRules_Call {
 	return &MockProviderAPI_ListSQLFirewallRules_Call{Call: _e.mock.On("ListSQLFirewallRules", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -1350,7 +1359,7 @@ type MockProviderAPI_ListSQLTransparentDataEncryptions_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListSQLTransparentDataEncryptions(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
+func (_e *MockProviderAPI_Expecter) ListSQLTransparentDataEncryptions(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListSQLTransparentDataEncryptions_Call {
 	return &MockProviderAPI_ListSQLTransparentDataEncryptions_Call{Call: _e.mock.On("ListSQLTransparentDataEncryptions", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -1428,7 +1437,7 @@ type MockProviderAPI_ListSecurityContacts_Call struct {
 // ListSecurityContacts is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subscriptionID string
-func (_e *MockProviderAPI_Expecter) ListSecurityContacts(ctx interface{}, subscriptionID interface{}) *MockProviderAPI_ListSecurityContacts_Call {
+func (_e *MockProviderAPI_Expecter) ListSecurityContacts(ctx any, subscriptionID any) *MockProviderAPI_ListSecurityContacts_Call {
 	return &MockProviderAPI_ListSecurityContacts_Call{Call: _e.mock.On("ListSecurityContacts", ctx, subscriptionID)}
 }
 
@@ -1498,7 +1507,7 @@ type MockProviderAPI_ListSinglePostgresConfigurations_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListSinglePostgresConfigurations(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSinglePostgresConfigurations_Call {
+func (_e *MockProviderAPI_Expecter) ListSinglePostgresConfigurations(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListSinglePostgresConfigurations_Call {
 	return &MockProviderAPI_ListSinglePostgresConfigurations_Call{Call: _e.mock.On("ListSinglePostgresConfigurations", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -1578,7 +1587,7 @@ type MockProviderAPI_ListSinglePostgresFirewallRules_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockProviderAPI_Expecter) ListSinglePostgresFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockProviderAPI_ListSinglePostgresFirewallRules_Call {
+func (_e *MockProviderAPI_Expecter) ListSinglePostgresFirewallRules(ctx any, subID any, resourceGroup any, serverName any) *MockProviderAPI_ListSinglePostgresFirewallRules_Call {
 	return &MockProviderAPI_ListSinglePostgresFirewallRules_Call{Call: _e.mock.On("ListSinglePostgresFirewallRules", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -1656,7 +1665,7 @@ type MockProviderAPI_ListStorageAccountBlobContainers_Call struct {
 // ListStorageAccountBlobContainers is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountBlobContainers(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountBlobContainers_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountBlobContainers(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountBlobContainers_Call {
 	return &MockProviderAPI_ListStorageAccountBlobContainers_Call{Call: _e.mock.On("ListStorageAccountBlobContainers", ctx, storageAccounts)}
 }
 
@@ -1724,7 +1733,7 @@ type MockProviderAPI_ListStorageAccountBlobServices_Call struct {
 // ListStorageAccountBlobServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountBlobServices(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountBlobServices_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountBlobServices(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountBlobServices_Call {
 	return &MockProviderAPI_ListStorageAccountBlobServices_Call{Call: _e.mock.On("ListStorageAccountBlobServices", ctx, storageAccounts)}
 }
 
@@ -1792,7 +1801,7 @@ type MockProviderAPI_ListStorageAccountFileServices_Call struct {
 // ListStorageAccountFileServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountFileServices(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountFileServices_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountFileServices(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountFileServices_Call {
 	return &MockProviderAPI_ListStorageAccountFileServices_Call{Call: _e.mock.On("ListStorageAccountFileServices", ctx, storageAccounts)}
 }
 
@@ -1860,7 +1869,7 @@ type MockProviderAPI_ListStorageAccountFileShares_Call struct {
 // ListStorageAccountFileShares is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountFileShares(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountFileShares_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountFileShares(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountFileShares_Call {
 	return &MockProviderAPI_ListStorageAccountFileShares_Call{Call: _e.mock.On("ListStorageAccountFileShares", ctx, storageAccounts)}
 }
 
@@ -1928,7 +1937,7 @@ type MockProviderAPI_ListStorageAccountQueueServices_Call struct {
 // ListStorageAccountQueueServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountQueueServices(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountQueueServices_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountQueueServices(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountQueueServices_Call {
 	return &MockProviderAPI_ListStorageAccountQueueServices_Call{Call: _e.mock.On("ListStorageAccountQueueServices", ctx, storageAccounts)}
 }
 
@@ -1996,7 +2005,7 @@ type MockProviderAPI_ListStorageAccountQueues_Call struct {
 // ListStorageAccountQueues is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountQueues(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountQueues_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountQueues(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountQueues_Call {
 	return &MockProviderAPI_ListStorageAccountQueues_Call{Call: _e.mock.On("ListStorageAccountQueues", ctx, storageAccounts)}
 }
 
@@ -2064,7 +2073,7 @@ type MockProviderAPI_ListStorageAccountTableServices_Call struct {
 // ListStorageAccountTableServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountTableServices(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountTableServices_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountTableServices(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountTableServices_Call {
 	return &MockProviderAPI_ListStorageAccountTableServices_Call{Call: _e.mock.On("ListStorageAccountTableServices", ctx, storageAccounts)}
 }
 
@@ -2132,7 +2141,7 @@ type MockProviderAPI_ListStorageAccountTables_Call struct {
 // ListStorageAccountTables is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountTables(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountTables_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountTables(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountTables_Call {
 	return &MockProviderAPI_ListStorageAccountTables_Call{Call: _e.mock.On("ListStorageAccountTables", ctx, storageAccounts)}
 }
 
@@ -2200,7 +2209,7 @@ type MockProviderAPI_ListStorageAccounts_Call struct {
 // ListStorageAccounts is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccountsSubscriptionsIds []string
-func (_e *MockProviderAPI_Expecter) ListStorageAccounts(ctx interface{}, storageAccountsSubscriptionsIds interface{}) *MockProviderAPI_ListStorageAccounts_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccounts(ctx any, storageAccountsSubscriptionsIds any) *MockProviderAPI_ListStorageAccounts_Call {
 	return &MockProviderAPI_ListStorageAccounts_Call{Call: _e.mock.On("ListStorageAccounts", ctx, storageAccountsSubscriptionsIds)}
 }
 
@@ -2268,7 +2277,7 @@ type MockProviderAPI_ListStorageAccountsBlobDiagnosticSettings_Call struct {
 // ListStorageAccountsBlobDiagnosticSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountsBlobDiagnosticSettings(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountsBlobDiagnosticSettings_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountsBlobDiagnosticSettings(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountsBlobDiagnosticSettings_Call {
 	return &MockProviderAPI_ListStorageAccountsBlobDiagnosticSettings_Call{Call: _e.mock.On("ListStorageAccountsBlobDiagnosticSettings", ctx, storageAccounts)}
 }
 
@@ -2336,7 +2345,7 @@ type MockProviderAPI_ListStorageAccountsQueueDiagnosticSettings_Call struct {
 // ListStorageAccountsQueueDiagnosticSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountsQueueDiagnosticSettings(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountsQueueDiagnosticSettings_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountsQueueDiagnosticSettings(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountsQueueDiagnosticSettings_Call {
 	return &MockProviderAPI_ListStorageAccountsQueueDiagnosticSettings_Call{Call: _e.mock.On("ListStorageAccountsQueueDiagnosticSettings", ctx, storageAccounts)}
 }
 
@@ -2404,7 +2413,7 @@ type MockProviderAPI_ListStorageAccountsTableDiagnosticSettings_Call struct {
 // ListStorageAccountsTableDiagnosticSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *MockProviderAPI_Expecter) ListStorageAccountsTableDiagnosticSettings(ctx interface{}, storageAccounts interface{}) *MockProviderAPI_ListStorageAccountsTableDiagnosticSettings_Call {
+func (_e *MockProviderAPI_Expecter) ListStorageAccountsTableDiagnosticSettings(ctx any, storageAccounts any) *MockProviderAPI_ListStorageAccountsTableDiagnosticSettings_Call {
 	return &MockProviderAPI_ListStorageAccountsTableDiagnosticSettings_Call{Call: _e.mock.On("ListStorageAccountsTableDiagnosticSettings", ctx, storageAccounts)}
 }
 
@@ -2471,7 +2480,7 @@ type MockProviderAPI_ListSubscriptions_Call struct {
 
 // ListSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockProviderAPI_Expecter) ListSubscriptions(ctx interface{}) *MockProviderAPI_ListSubscriptions_Call {
+func (_e *MockProviderAPI_Expecter) ListSubscriptions(ctx any) *MockProviderAPI_ListSubscriptions_Call {
 	return &MockProviderAPI_ListSubscriptions_Call{Call: _e.mock.On("ListSubscriptions", ctx)}
 }
 
@@ -2533,7 +2542,7 @@ type MockProviderAPI_ListTenants_Call struct {
 
 // ListTenants is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockProviderAPI_Expecter) ListTenants(ctx interface{}) *MockProviderAPI_ListTenants_Call {
+func (_e *MockProviderAPI_Expecter) ListTenants(ctx any) *MockProviderAPI_ListTenants_Call {
 	return &MockProviderAPI_ListTenants_Call{Call: _e.mock.On("ListTenants", ctx)}
 }
 
@@ -2566,10 +2575,19 @@ func NewMockProviderInitializerAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockProviderInitializerAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockProviderInitializerAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -2623,7 +2641,7 @@ type MockProviderInitializerAPI_Init_Call struct {
 // Init is a helper method to define mock.On call
 //   - log *clog.Logger
 //   - azureConfig auth.AzureFactoryConfig
-func (_e *MockProviderInitializerAPI_Expecter) Init(log interface{}, azureConfig interface{}) *MockProviderInitializerAPI_Init_Call {
+func (_e *MockProviderInitializerAPI_Expecter) Init(log any, azureConfig any) *MockProviderInitializerAPI_Init_Call {
 	return &MockProviderInitializerAPI_Init_Call{Call: _e.mock.On("Init", log, azureConfig)}
 }
 

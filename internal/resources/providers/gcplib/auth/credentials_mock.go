@@ -37,10 +37,19 @@ func NewMockConfigProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockConfigProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockConfigProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -95,7 +104,7 @@ type MockConfigProviderAPI_GetGcpClientConfig_Call struct {
 //   - ctx context.Context
 //   - cfg config.GcpConfig
 //   - log *clog.Logger
-func (_e *MockConfigProviderAPI_Expecter) GetGcpClientConfig(ctx interface{}, cfg interface{}, log interface{}) *MockConfigProviderAPI_GetGcpClientConfig_Call {
+func (_e *MockConfigProviderAPI_Expecter) GetGcpClientConfig(ctx any, cfg any, log any) *MockConfigProviderAPI_GetGcpClientConfig_Call {
 	return &MockConfigProviderAPI_GetGcpClientConfig_Call{Call: _e.mock.On("GetGcpClientConfig", ctx, cfg, log)}
 }
 
@@ -138,10 +147,19 @@ func NewMockGoogleAuthProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockGoogleAuthProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockGoogleAuthProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -194,7 +212,7 @@ type MockGoogleAuthProviderAPI_FindDefaultCredentials_Call struct {
 
 // FindDefaultCredentials is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockGoogleAuthProviderAPI_Expecter) FindDefaultCredentials(ctx interface{}) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
+func (_e *MockGoogleAuthProviderAPI_Expecter) FindDefaultCredentials(ctx any) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
 	return &MockGoogleAuthProviderAPI_FindDefaultCredentials_Call{Call: _e.mock.On("FindDefaultCredentials", ctx)}
 }
 
