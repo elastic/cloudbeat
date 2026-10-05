@@ -35,10 +35,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -99,9 +108,9 @@ type MockClient_ListAliases_Call struct {
 //   - context1 context.Context
 //   - listAliasesInput *lambda.ListAliasesInput
 //   - fns ...func(*lambda.Options)
-func (_e *MockClient_Expecter) ListAliases(context1 interface{}, listAliasesInput interface{}, fns ...interface{}) *MockClient_ListAliases_Call {
+func (_e *MockClient_Expecter) ListAliases(context1 any, listAliasesInput any, fns ...any) *MockClient_ListAliases_Call {
 	return &MockClient_ListAliases_Call{Call: _e.mock.On("ListAliases",
-		append([]interface{}{context1, listAliasesInput}, fns...)...)}
+		append([]any{context1, listAliasesInput}, fns...)...)}
 }
 
 func (_c *MockClient_ListAliases_Call) Run(run func(context1 context.Context, listAliasesInput *lambda.ListAliasesInput, fns ...func(*lambda.Options))) *MockClient_ListAliases_Call {
@@ -182,9 +191,9 @@ type MockClient_ListEventSourceMappings_Call struct {
 //   - context1 context.Context
 //   - listEventSourceMappingsInput *lambda.ListEventSourceMappingsInput
 //   - fns ...func(*lambda.Options)
-func (_e *MockClient_Expecter) ListEventSourceMappings(context1 interface{}, listEventSourceMappingsInput interface{}, fns ...interface{}) *MockClient_ListEventSourceMappings_Call {
+func (_e *MockClient_Expecter) ListEventSourceMappings(context1 any, listEventSourceMappingsInput any, fns ...any) *MockClient_ListEventSourceMappings_Call {
 	return &MockClient_ListEventSourceMappings_Call{Call: _e.mock.On("ListEventSourceMappings",
-		append([]interface{}{context1, listEventSourceMappingsInput}, fns...)...)}
+		append([]any{context1, listEventSourceMappingsInput}, fns...)...)}
 }
 
 func (_c *MockClient_ListEventSourceMappings_Call) Run(run func(context1 context.Context, listEventSourceMappingsInput *lambda.ListEventSourceMappingsInput, fns ...func(*lambda.Options))) *MockClient_ListEventSourceMappings_Call {
@@ -265,9 +274,9 @@ type MockClient_ListFunctions_Call struct {
 //   - context1 context.Context
 //   - listFunctionsInput *lambda.ListFunctionsInput
 //   - fns ...func(*lambda.Options)
-func (_e *MockClient_Expecter) ListFunctions(context1 interface{}, listFunctionsInput interface{}, fns ...interface{}) *MockClient_ListFunctions_Call {
+func (_e *MockClient_Expecter) ListFunctions(context1 any, listFunctionsInput any, fns ...any) *MockClient_ListFunctions_Call {
 	return &MockClient_ListFunctions_Call{Call: _e.mock.On("ListFunctions",
-		append([]interface{}{context1, listFunctionsInput}, fns...)...)}
+		append([]any{context1, listFunctionsInput}, fns...)...)}
 }
 
 func (_c *MockClient_ListFunctions_Call) Run(run func(context1 context.Context, listFunctionsInput *lambda.ListFunctionsInput, fns ...func(*lambda.Options))) *MockClient_ListFunctions_Call {
@@ -348,9 +357,9 @@ type MockClient_ListLayers_Call struct {
 //   - context1 context.Context
 //   - listLayersInput *lambda.ListLayersInput
 //   - fns ...func(*lambda.Options)
-func (_e *MockClient_Expecter) ListLayers(context1 interface{}, listLayersInput interface{}, fns ...interface{}) *MockClient_ListLayers_Call {
+func (_e *MockClient_Expecter) ListLayers(context1 any, listLayersInput any, fns ...any) *MockClient_ListLayers_Call {
 	return &MockClient_ListLayers_Call{Call: _e.mock.On("ListLayers",
-		append([]interface{}{context1, listLayersInput}, fns...)...)}
+		append([]any{context1, listLayersInput}, fns...)...)}
 }
 
 func (_c *MockClient_ListLayers_Call) Run(run func(context1 context.Context, listLayersInput *lambda.ListLayersInput, fns ...func(*lambda.Options))) *MockClient_ListLayers_Call {

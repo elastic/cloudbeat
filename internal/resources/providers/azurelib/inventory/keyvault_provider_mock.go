@@ -34,10 +34,19 @@ func NewMockKeyVaultProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockKeyVaultProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockKeyVaultProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call struct {
 // ListKeyVaultDiagnosticSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - vault AzureAsset
-func (_e *MockKeyVaultProviderAPI_Expecter) ListKeyVaultDiagnosticSettings(ctx interface{}, vault interface{}) *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call {
+func (_e *MockKeyVaultProviderAPI_Expecter) ListKeyVaultDiagnosticSettings(ctx any, vault any) *MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call {
 	return &MockKeyVaultProviderAPI_ListKeyVaultDiagnosticSettings_Call{Call: _e.mock.On("ListKeyVaultDiagnosticSettings", ctx, vault)}
 }
 
@@ -159,7 +168,7 @@ type MockKeyVaultProviderAPI_ListKeyVaultKeys_Call struct {
 // ListKeyVaultKeys is a helper method to define mock.On call
 //   - ctx context.Context
 //   - vault AzureAsset
-func (_e *MockKeyVaultProviderAPI_Expecter) ListKeyVaultKeys(ctx interface{}, vault interface{}) *MockKeyVaultProviderAPI_ListKeyVaultKeys_Call {
+func (_e *MockKeyVaultProviderAPI_Expecter) ListKeyVaultKeys(ctx any, vault any) *MockKeyVaultProviderAPI_ListKeyVaultKeys_Call {
 	return &MockKeyVaultProviderAPI_ListKeyVaultKeys_Call{Call: _e.mock.On("ListKeyVaultKeys", ctx, vault)}
 }
 
@@ -227,7 +236,7 @@ type MockKeyVaultProviderAPI_ListKeyVaultSecrets_Call struct {
 // ListKeyVaultSecrets is a helper method to define mock.On call
 //   - ctx context.Context
 //   - vault AzureAsset
-func (_e *MockKeyVaultProviderAPI_Expecter) ListKeyVaultSecrets(ctx interface{}, vault interface{}) *MockKeyVaultProviderAPI_ListKeyVaultSecrets_Call {
+func (_e *MockKeyVaultProviderAPI_Expecter) ListKeyVaultSecrets(ctx any, vault any) *MockKeyVaultProviderAPI_ListKeyVaultSecrets_Call {
 	return &MockKeyVaultProviderAPI_ListKeyVaultSecrets_Call{Call: _e.mock.On("ListKeyVaultSecrets", ctx, vault)}
 }
 

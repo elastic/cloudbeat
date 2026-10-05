@@ -34,10 +34,19 @@ func NewMockSQLProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockSQLProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockSQLProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockSQLProviderAPI_GetSQLBlobAuditingPolicies_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockSQLProviderAPI_Expecter) GetSQLBlobAuditingPolicies(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockSQLProviderAPI_GetSQLBlobAuditingPolicies_Call {
+func (_e *MockSQLProviderAPI_Expecter) GetSQLBlobAuditingPolicies(ctx any, subID any, resourceGroup any, serverName any) *MockSQLProviderAPI_GetSQLBlobAuditingPolicies_Call {
 	return &MockSQLProviderAPI_GetSQLBlobAuditingPolicies_Call{Call: _e.mock.On("GetSQLBlobAuditingPolicies", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -173,7 +182,7 @@ type MockSQLProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockSQLProviderAPI_Expecter) ListSQLAdvancedThreatProtectionSettings(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockSQLProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
+func (_e *MockSQLProviderAPI_Expecter) ListSQLAdvancedThreatProtectionSettings(ctx any, subID any, resourceGroup any, serverName any) *MockSQLProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call {
 	return &MockSQLProviderAPI_ListSQLAdvancedThreatProtectionSettings_Call{Call: _e.mock.On("ListSQLAdvancedThreatProtectionSettings", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -253,7 +262,7 @@ type MockSQLProviderAPI_ListSQLEncryptionProtector_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockSQLProviderAPI_Expecter) ListSQLEncryptionProtector(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockSQLProviderAPI_ListSQLEncryptionProtector_Call {
+func (_e *MockSQLProviderAPI_Expecter) ListSQLEncryptionProtector(ctx any, subID any, resourceGroup any, serverName any) *MockSQLProviderAPI_ListSQLEncryptionProtector_Call {
 	return &MockSQLProviderAPI_ListSQLEncryptionProtector_Call{Call: _e.mock.On("ListSQLEncryptionProtector", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -333,7 +342,7 @@ type MockSQLProviderAPI_ListSQLFirewallRules_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockSQLProviderAPI_Expecter) ListSQLFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockSQLProviderAPI_ListSQLFirewallRules_Call {
+func (_e *MockSQLProviderAPI_Expecter) ListSQLFirewallRules(ctx any, subID any, resourceGroup any, serverName any) *MockSQLProviderAPI_ListSQLFirewallRules_Call {
 	return &MockSQLProviderAPI_ListSQLFirewallRules_Call{Call: _e.mock.On("ListSQLFirewallRules", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -413,7 +422,7 @@ type MockSQLProviderAPI_ListSQLTransparentDataEncryptions_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockSQLProviderAPI_Expecter) ListSQLTransparentDataEncryptions(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockSQLProviderAPI_ListSQLTransparentDataEncryptions_Call {
+func (_e *MockSQLProviderAPI_Expecter) ListSQLTransparentDataEncryptions(ctx any, subID any, resourceGroup any, serverName any) *MockSQLProviderAPI_ListSQLTransparentDataEncryptions_Call {
 	return &MockSQLProviderAPI_ListSQLTransparentDataEncryptions_Call{Call: _e.mock.On("ListSQLTransparentDataEncryptions", ctx, subID, resourceGroup, serverName)}
 }
 

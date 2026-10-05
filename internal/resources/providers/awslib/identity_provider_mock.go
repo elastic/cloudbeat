@@ -37,10 +37,19 @@ func NewMockIdentityProviderGetter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockIdentityProviderGetter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockIdentityProviderGetter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockIdentityProviderGetter_GetCallerIdentity_Call struct {
 // GetCallerIdentity is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cfg aws.Config
-func (_e *MockIdentityProviderGetter_Expecter) GetCallerIdentity(ctx interface{}, cfg interface{}) *MockIdentityProviderGetter_GetCallerIdentity_Call {
+func (_e *MockIdentityProviderGetter_Expecter) GetCallerIdentity(ctx any, cfg any) *MockIdentityProviderGetter_GetCallerIdentity_Call {
 	return &MockIdentityProviderGetter_GetCallerIdentity_Call{Call: _e.mock.On("GetCallerIdentity", ctx, cfg)}
 }
 
@@ -160,7 +169,7 @@ type MockIdentityProviderGetter_GetIdentity_Call struct {
 // GetIdentity is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cfg aws.Config
-func (_e *MockIdentityProviderGetter_Expecter) GetIdentity(ctx interface{}, cfg interface{}) *MockIdentityProviderGetter_GetIdentity_Call {
+func (_e *MockIdentityProviderGetter_Expecter) GetIdentity(ctx any, cfg any) *MockIdentityProviderGetter_GetIdentity_Call {
 	return &MockIdentityProviderGetter_GetIdentity_Call{Call: _e.mock.On("GetIdentity", ctx, cfg)}
 }
 

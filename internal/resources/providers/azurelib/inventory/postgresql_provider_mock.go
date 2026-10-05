@@ -34,10 +34,19 @@ func NewMockPostgresqlProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockPostgresqlProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockPostgresqlProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockPostgresqlProviderAPI_Expecter) ListFlexiblePostgresConfigurations(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call {
+func (_e *MockPostgresqlProviderAPI_Expecter) ListFlexiblePostgresConfigurations(ctx any, subID any, resourceGroup any, serverName any) *MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call {
 	return &MockPostgresqlProviderAPI_ListFlexiblePostgresConfigurations_Call{Call: _e.mock.On("ListFlexiblePostgresConfigurations", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -173,7 +182,7 @@ type MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockPostgresqlProviderAPI_Expecter) ListFlexiblePostgresFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call {
+func (_e *MockPostgresqlProviderAPI_Expecter) ListFlexiblePostgresFirewallRules(ctx any, subID any, resourceGroup any, serverName any) *MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call {
 	return &MockPostgresqlProviderAPI_ListFlexiblePostgresFirewallRules_Call{Call: _e.mock.On("ListFlexiblePostgresFirewallRules", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -253,7 +262,7 @@ type MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockPostgresqlProviderAPI_Expecter) ListSinglePostgresConfigurations(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call {
+func (_e *MockPostgresqlProviderAPI_Expecter) ListSinglePostgresConfigurations(ctx any, subID any, resourceGroup any, serverName any) *MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call {
 	return &MockPostgresqlProviderAPI_ListSinglePostgresConfigurations_Call{Call: _e.mock.On("ListSinglePostgresConfigurations", ctx, subID, resourceGroup, serverName)}
 }
 
@@ -333,7 +342,7 @@ type MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call struct {
 //   - subID string
 //   - resourceGroup string
 //   - serverName string
-func (_e *MockPostgresqlProviderAPI_Expecter) ListSinglePostgresFirewallRules(ctx interface{}, subID interface{}, resourceGroup interface{}, serverName interface{}) *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call {
+func (_e *MockPostgresqlProviderAPI_Expecter) ListSinglePostgresFirewallRules(ctx any, subID any, resourceGroup any, serverName any) *MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call {
 	return &MockPostgresqlProviderAPI_ListSinglePostgresFirewallRules_Call{Call: _e.mock.On("ListSinglePostgresFirewallRules", ctx, subID, resourceGroup, serverName)}
 }
 

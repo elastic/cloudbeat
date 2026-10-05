@@ -35,10 +35,19 @@ func newMockSecurityClientWrapper(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockSecurityClientWrapper {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockSecurityClientWrapper{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type mockSecurityClientWrapper_ListAutoProvisioningSettings_Call struct {
 // ListAutoProvisioningSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subID string
-func (_e *mockSecurityClientWrapper_Expecter) ListAutoProvisioningSettings(ctx interface{}, subID interface{}) *mockSecurityClientWrapper_ListAutoProvisioningSettings_Call {
+func (_e *mockSecurityClientWrapper_Expecter) ListAutoProvisioningSettings(ctx any, subID any) *mockSecurityClientWrapper_ListAutoProvisioningSettings_Call {
 	return &mockSecurityClientWrapper_ListAutoProvisioningSettings_Call{Call: _e.mock.On("ListAutoProvisioningSettings", ctx, subID)}
 }
 
@@ -160,7 +169,7 @@ type mockSecurityClientWrapper_ListSecurityContacts_Call struct {
 // ListSecurityContacts is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subID string
-func (_e *mockSecurityClientWrapper_Expecter) ListSecurityContacts(ctx interface{}, subID interface{}) *mockSecurityClientWrapper_ListSecurityContacts_Call {
+func (_e *mockSecurityClientWrapper_Expecter) ListSecurityContacts(ctx any, subID any) *mockSecurityClientWrapper_ListSecurityContacts_Call {
 	return &mockSecurityClientWrapper_ListSecurityContacts_Call{Call: _e.mock.On("ListSecurityContacts", ctx, subID)}
 }
 
@@ -198,10 +207,19 @@ func NewMockSecurityContactsProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockSecurityContactsProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockSecurityContactsProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -255,7 +273,7 @@ type MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call struct {
 // ListAutoProvisioningSettings is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subscriptionID string
-func (_e *MockSecurityContactsProviderAPI_Expecter) ListAutoProvisioningSettings(ctx interface{}, subscriptionID interface{}) *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call {
+func (_e *MockSecurityContactsProviderAPI_Expecter) ListAutoProvisioningSettings(ctx any, subscriptionID any) *MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call {
 	return &MockSecurityContactsProviderAPI_ListAutoProvisioningSettings_Call{Call: _e.mock.On("ListAutoProvisioningSettings", ctx, subscriptionID)}
 }
 
@@ -323,7 +341,7 @@ type MockSecurityContactsProviderAPI_ListSecurityContacts_Call struct {
 // ListSecurityContacts is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subscriptionID string
-func (_e *MockSecurityContactsProviderAPI_Expecter) ListSecurityContacts(ctx interface{}, subscriptionID interface{}) *MockSecurityContactsProviderAPI_ListSecurityContacts_Call {
+func (_e *MockSecurityContactsProviderAPI_Expecter) ListSecurityContacts(ctx any, subscriptionID any) *MockSecurityContactsProviderAPI_ListSecurityContacts_Call {
 	return &MockSecurityContactsProviderAPI_ListSecurityContacts_Call{Call: _e.mock.On("ListSecurityContacts", ctx, subscriptionID)}
 }
 

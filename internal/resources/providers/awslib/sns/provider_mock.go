@@ -35,10 +35,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -99,9 +108,9 @@ type MockClient_ListSubscriptionsByTopic_Call struct {
 //   - context1 context.Context
 //   - listSubscriptionsByTopicInput *sns.ListSubscriptionsByTopicInput
 //   - fns ...func(*sns.Options)
-func (_e *MockClient_Expecter) ListSubscriptionsByTopic(context1 interface{}, listSubscriptionsByTopicInput interface{}, fns ...interface{}) *MockClient_ListSubscriptionsByTopic_Call {
+func (_e *MockClient_Expecter) ListSubscriptionsByTopic(context1 any, listSubscriptionsByTopicInput any, fns ...any) *MockClient_ListSubscriptionsByTopic_Call {
 	return &MockClient_ListSubscriptionsByTopic_Call{Call: _e.mock.On("ListSubscriptionsByTopic",
-		append([]interface{}{context1, listSubscriptionsByTopicInput}, fns...)...)}
+		append([]any{context1, listSubscriptionsByTopicInput}, fns...)...)}
 }
 
 func (_c *MockClient_ListSubscriptionsByTopic_Call) Run(run func(context1 context.Context, listSubscriptionsByTopicInput *sns.ListSubscriptionsByTopicInput, fns ...func(*sns.Options))) *MockClient_ListSubscriptionsByTopic_Call {
@@ -182,9 +191,9 @@ type MockClient_ListTopics_Call struct {
 //   - context1 context.Context
 //   - listTopicsInput *sns.ListTopicsInput
 //   - fns ...func(*sns.Options)
-func (_e *MockClient_Expecter) ListTopics(context1 interface{}, listTopicsInput interface{}, fns ...interface{}) *MockClient_ListTopics_Call {
+func (_e *MockClient_Expecter) ListTopics(context1 any, listTopicsInput any, fns ...any) *MockClient_ListTopics_Call {
 	return &MockClient_ListTopics_Call{Call: _e.mock.On("ListTopics",
-		append([]interface{}{context1, listTopicsInput}, fns...)...)}
+		append([]any{context1, listTopicsInput}, fns...)...)}
 }
 
 func (_c *MockClient_ListTopics_Call) Run(run func(context1 context.Context, listTopicsInput *sns.ListTopicsInput, fns ...func(*sns.Options))) *MockClient_ListTopics_Call {
