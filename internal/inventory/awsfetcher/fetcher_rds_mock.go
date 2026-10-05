@@ -35,10 +35,19 @@ func newMockRdsProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockRdsProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockRdsProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockRdsProvider_DescribeDBInstances_Call struct {
 
 // DescribeDBInstances is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockRdsProvider_Expecter) DescribeDBInstances(ctx interface{}) *mockRdsProvider_DescribeDBInstances_Call {
+func (_e *mockRdsProvider_Expecter) DescribeDBInstances(ctx any) *mockRdsProvider_DescribeDBInstances_Call {
 	return &mockRdsProvider_DescribeDBInstances_Call{Call: _e.mock.On("DescribeDBInstances", ctx)}
 }
 

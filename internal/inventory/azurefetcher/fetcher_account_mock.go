@@ -35,10 +35,19 @@ func newMockAccountProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockAccountProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockAccountProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockAccountProvider_ListSubscriptions_Call struct {
 
 // ListSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockAccountProvider_Expecter) ListSubscriptions(ctx interface{}) *mockAccountProvider_ListSubscriptions_Call {
+func (_e *mockAccountProvider_Expecter) ListSubscriptions(ctx any) *mockAccountProvider_ListSubscriptions_Call {
 	return &mockAccountProvider_ListSubscriptions_Call{Call: _e.mock.On("ListSubscriptions", ctx)}
 }
 
@@ -153,7 +162,7 @@ type mockAccountProvider_ListTenants_Call struct {
 
 // ListTenants is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockAccountProvider_Expecter) ListTenants(ctx interface{}) *mockAccountProvider_ListTenants_Call {
+func (_e *mockAccountProvider_Expecter) ListTenants(ctx any) *mockAccountProvider_ListTenants_Call {
 	return &mockAccountProvider_ListTenants_Call{Call: _e.mock.On("ListTenants", ctx)}
 }
 

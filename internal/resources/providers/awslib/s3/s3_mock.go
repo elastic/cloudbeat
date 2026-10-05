@@ -37,10 +37,19 @@ func NewMockS3(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockS3 {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockS3{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockS3_DescribeBuckets_Call struct {
 
 // DescribeBuckets is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockS3_Expecter) DescribeBuckets(ctx interface{}) *MockS3_DescribeBuckets_Call {
+func (_e *MockS3_Expecter) DescribeBuckets(ctx any) *MockS3_DescribeBuckets_Call {
 	return &MockS3_DescribeBuckets_Call{Call: _e.mock.On("DescribeBuckets", ctx)}
 }
 
@@ -157,7 +166,7 @@ type MockS3_GetBucketACL_Call struct {
 //   - ctx context.Context
 //   - bucketName *string
 //   - region string
-func (_e *MockS3_Expecter) GetBucketACL(ctx interface{}, bucketName interface{}, region interface{}) *MockS3_GetBucketACL_Call {
+func (_e *MockS3_Expecter) GetBucketACL(ctx any, bucketName any, region any) *MockS3_GetBucketACL_Call {
 	return &MockS3_GetBucketACL_Call{Call: _e.mock.On("GetBucketACL", ctx, bucketName, region)}
 }
 
@@ -229,7 +238,7 @@ type MockS3_GetBucketLogging_Call struct {
 //   - ctx context.Context
 //   - bucketName *string
 //   - region string
-func (_e *MockS3_Expecter) GetBucketLogging(ctx interface{}, bucketName interface{}, region interface{}) *MockS3_GetBucketLogging_Call {
+func (_e *MockS3_Expecter) GetBucketLogging(ctx any, bucketName any, region any) *MockS3_GetBucketLogging_Call {
 	return &MockS3_GetBucketLogging_Call{Call: _e.mock.On("GetBucketLogging", ctx, bucketName, region)}
 }
 
@@ -303,7 +312,7 @@ type MockS3_GetBucketPolicy_Call struct {
 //   - ctx context.Context
 //   - bucketName *string
 //   - region string
-func (_e *MockS3_Expecter) GetBucketPolicy(ctx interface{}, bucketName interface{}, region interface{}) *MockS3_GetBucketPolicy_Call {
+func (_e *MockS3_Expecter) GetBucketPolicy(ctx any, bucketName any, region any) *MockS3_GetBucketPolicy_Call {
 	return &MockS3_GetBucketPolicy_Call{Call: _e.mock.On("GetBucketPolicy", ctx, bucketName, region)}
 }
 
@@ -346,10 +355,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -410,9 +428,9 @@ type MockClient_GetBucketAcl_Call struct {
 //   - ctx context.Context
 //   - params *s3.GetBucketAclInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) GetBucketAcl(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetBucketAcl_Call {
+func (_e *MockClient_Expecter) GetBucketAcl(ctx any, params any, optFns ...any) *MockClient_GetBucketAcl_Call {
 	return &MockClient_GetBucketAcl_Call{Call: _e.mock.On("GetBucketAcl",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetBucketAcl_Call) Run(run func(ctx context.Context, params *s3.GetBucketAclInput, optFns ...func(*s3.Options))) *MockClient_GetBucketAcl_Call {
@@ -493,9 +511,9 @@ type MockClient_GetBucketEncryption_Call struct {
 //   - ctx context.Context
 //   - params *s3.GetBucketEncryptionInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) GetBucketEncryption(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetBucketEncryption_Call {
+func (_e *MockClient_Expecter) GetBucketEncryption(ctx any, params any, optFns ...any) *MockClient_GetBucketEncryption_Call {
 	return &MockClient_GetBucketEncryption_Call{Call: _e.mock.On("GetBucketEncryption",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetBucketEncryption_Call) Run(run func(ctx context.Context, params *s3.GetBucketEncryptionInput, optFns ...func(*s3.Options))) *MockClient_GetBucketEncryption_Call {
@@ -576,9 +594,9 @@ type MockClient_GetBucketLocation_Call struct {
 //   - ctx context.Context
 //   - params *s3.GetBucketLocationInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) GetBucketLocation(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetBucketLocation_Call {
+func (_e *MockClient_Expecter) GetBucketLocation(ctx any, params any, optFns ...any) *MockClient_GetBucketLocation_Call {
 	return &MockClient_GetBucketLocation_Call{Call: _e.mock.On("GetBucketLocation",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetBucketLocation_Call) Run(run func(ctx context.Context, params *s3.GetBucketLocationInput, optFns ...func(*s3.Options))) *MockClient_GetBucketLocation_Call {
@@ -659,9 +677,9 @@ type MockClient_GetBucketLogging_Call struct {
 //   - ctx context.Context
 //   - params *s3.GetBucketLoggingInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) GetBucketLogging(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetBucketLogging_Call {
+func (_e *MockClient_Expecter) GetBucketLogging(ctx any, params any, optFns ...any) *MockClient_GetBucketLogging_Call {
 	return &MockClient_GetBucketLogging_Call{Call: _e.mock.On("GetBucketLogging",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetBucketLogging_Call) Run(run func(ctx context.Context, params *s3.GetBucketLoggingInput, optFns ...func(*s3.Options))) *MockClient_GetBucketLogging_Call {
@@ -742,9 +760,9 @@ type MockClient_GetBucketPolicy_Call struct {
 //   - ctx context.Context
 //   - params *s3.GetBucketPolicyInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) GetBucketPolicy(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetBucketPolicy_Call {
+func (_e *MockClient_Expecter) GetBucketPolicy(ctx any, params any, optFns ...any) *MockClient_GetBucketPolicy_Call {
 	return &MockClient_GetBucketPolicy_Call{Call: _e.mock.On("GetBucketPolicy",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetBucketPolicy_Call) Run(run func(ctx context.Context, params *s3.GetBucketPolicyInput, optFns ...func(*s3.Options))) *MockClient_GetBucketPolicy_Call {
@@ -825,9 +843,9 @@ type MockClient_GetBucketVersioning_Call struct {
 //   - ctx context.Context
 //   - params *s3.GetBucketVersioningInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) GetBucketVersioning(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetBucketVersioning_Call {
+func (_e *MockClient_Expecter) GetBucketVersioning(ctx any, params any, optFns ...any) *MockClient_GetBucketVersioning_Call {
 	return &MockClient_GetBucketVersioning_Call{Call: _e.mock.On("GetBucketVersioning",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetBucketVersioning_Call) Run(run func(ctx context.Context, params *s3.GetBucketVersioningInput, optFns ...func(*s3.Options))) *MockClient_GetBucketVersioning_Call {
@@ -908,9 +926,9 @@ type MockClient_GetPublicAccessBlock_Call struct {
 //   - ctx context.Context
 //   - params *s3.GetPublicAccessBlockInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) GetPublicAccessBlock(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetPublicAccessBlock_Call {
+func (_e *MockClient_Expecter) GetPublicAccessBlock(ctx any, params any, optFns ...any) *MockClient_GetPublicAccessBlock_Call {
 	return &MockClient_GetPublicAccessBlock_Call{Call: _e.mock.On("GetPublicAccessBlock",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetPublicAccessBlock_Call) Run(run func(ctx context.Context, params *s3.GetPublicAccessBlockInput, optFns ...func(*s3.Options))) *MockClient_GetPublicAccessBlock_Call {
@@ -991,9 +1009,9 @@ type MockClient_ListBuckets_Call struct {
 //   - ctx context.Context
 //   - params *s3.ListBucketsInput
 //   - optFns ...func(*s3.Options)
-func (_e *MockClient_Expecter) ListBuckets(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListBuckets_Call {
+func (_e *MockClient_Expecter) ListBuckets(ctx any, params any, optFns ...any) *MockClient_ListBuckets_Call {
 	return &MockClient_ListBuckets_Call{Call: _e.mock.On("ListBuckets",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListBuckets_Call) Run(run func(ctx context.Context, params *s3.ListBucketsInput, optFns ...func(*s3.Options))) *MockClient_ListBuckets_Call {
@@ -1037,10 +1055,19 @@ func NewMockControlClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockControlClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockControlClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -1101,9 +1128,9 @@ type MockControlClient_GetPublicAccessBlock_Call struct {
 //   - ctx context.Context
 //   - params *s3control.GetPublicAccessBlockInput
 //   - optFns ...func(*s3control.Options)
-func (_e *MockControlClient_Expecter) GetPublicAccessBlock(ctx interface{}, params interface{}, optFns ...interface{}) *MockControlClient_GetPublicAccessBlock_Call {
+func (_e *MockControlClient_Expecter) GetPublicAccessBlock(ctx any, params any, optFns ...any) *MockControlClient_GetPublicAccessBlock_Call {
 	return &MockControlClient_GetPublicAccessBlock_Call{Call: _e.mock.On("GetPublicAccessBlock",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockControlClient_GetPublicAccessBlock_Call) Run(run func(ctx context.Context, params *s3control.GetPublicAccessBlockInput, optFns ...func(*s3control.Options))) *MockControlClient_GetPublicAccessBlock_Call {

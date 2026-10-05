@@ -36,10 +36,19 @@ func newMockHostResolver(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockHostResolver {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockHostResolver{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type mockHostResolver_LookupHost_Call struct {
 // LookupHost is a helper method to define mock.On call
 //   - ctx context.Context
 //   - host string
-func (_e *mockHostResolver_Expecter) LookupHost(ctx interface{}, host interface{}) *mockHostResolver_LookupHost_Call {
+func (_e *mockHostResolver_Expecter) LookupHost(ctx any, host any) *mockHostResolver_LookupHost_Call {
 	return &mockHostResolver_LookupHost_Call{Call: _e.mock.On("LookupHost", ctx, host)}
 }
 
@@ -131,10 +140,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -195,9 +213,9 @@ type MockClient_DescribeListeners_Call struct {
 //   - context1 context.Context
 //   - describeListenersInput *elasticloadbalancingv2.DescribeListenersInput
 //   - fns ...func(*elasticloadbalancingv2.Options)
-func (_e *MockClient_Expecter) DescribeListeners(context1 interface{}, describeListenersInput interface{}, fns ...interface{}) *MockClient_DescribeListeners_Call {
+func (_e *MockClient_Expecter) DescribeListeners(context1 any, describeListenersInput any, fns ...any) *MockClient_DescribeListeners_Call {
 	return &MockClient_DescribeListeners_Call{Call: _e.mock.On("DescribeListeners",
-		append([]interface{}{context1, describeListenersInput}, fns...)...)}
+		append([]any{context1, describeListenersInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeListeners_Call) Run(run func(context1 context.Context, describeListenersInput *elasticloadbalancingv2.DescribeListenersInput, fns ...func(*elasticloadbalancingv2.Options))) *MockClient_DescribeListeners_Call {
@@ -278,9 +296,9 @@ type MockClient_DescribeLoadBalancers_Call struct {
 //   - context1 context.Context
 //   - describeLoadBalancersInput *elasticloadbalancingv2.DescribeLoadBalancersInput
 //   - fns ...func(*elasticloadbalancingv2.Options)
-func (_e *MockClient_Expecter) DescribeLoadBalancers(context1 interface{}, describeLoadBalancersInput interface{}, fns ...interface{}) *MockClient_DescribeLoadBalancers_Call {
+func (_e *MockClient_Expecter) DescribeLoadBalancers(context1 any, describeLoadBalancersInput any, fns ...any) *MockClient_DescribeLoadBalancers_Call {
 	return &MockClient_DescribeLoadBalancers_Call{Call: _e.mock.On("DescribeLoadBalancers",
-		append([]interface{}{context1, describeLoadBalancersInput}, fns...)...)}
+		append([]any{context1, describeLoadBalancersInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeLoadBalancers_Call) Run(run func(context1 context.Context, describeLoadBalancersInput *elasticloadbalancingv2.DescribeLoadBalancersInput, fns ...func(*elasticloadbalancingv2.Options))) *MockClient_DescribeLoadBalancers_Call {
@@ -361,9 +379,9 @@ type MockClient_DescribeTags_Call struct {
 //   - ctx context.Context
 //   - params *elasticloadbalancingv2.DescribeTagsInput
 //   - optFns ...func(*elasticloadbalancingv2.Options)
-func (_e *MockClient_Expecter) DescribeTags(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeTags_Call {
+func (_e *MockClient_Expecter) DescribeTags(ctx any, params any, optFns ...any) *MockClient_DescribeTags_Call {
 	return &MockClient_DescribeTags_Call{Call: _e.mock.On("DescribeTags",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeTags_Call) Run(run func(ctx context.Context, params *elasticloadbalancingv2.DescribeTagsInput, optFns ...func(*elasticloadbalancingv2.Options))) *MockClient_DescribeTags_Call {
@@ -407,10 +425,19 @@ func NewMockLoadBalancerDescriber(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockLoadBalancerDescriber {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockLoadBalancerDescriber{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -463,7 +490,7 @@ type MockLoadBalancerDescriber_DescribeLoadBalancers_Call struct {
 
 // DescribeLoadBalancers is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockLoadBalancerDescriber_Expecter) DescribeLoadBalancers(ctx interface{}) *MockLoadBalancerDescriber_DescribeLoadBalancers_Call {
+func (_e *MockLoadBalancerDescriber_Expecter) DescribeLoadBalancers(ctx any) *MockLoadBalancerDescriber_DescribeLoadBalancers_Call {
 	return &MockLoadBalancerDescriber_DescribeLoadBalancers_Call{Call: _e.mock.On("DescribeLoadBalancers", ctx)}
 }
 

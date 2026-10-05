@@ -35,10 +35,19 @@ func NewMockMetadataProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMetadataProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMetadataProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockMetadataProvider_GetMetadata_Call struct {
 // GetMetadata is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cfg aws.Config
-func (_e *MockMetadataProvider_Expecter) GetMetadata(ctx interface{}, cfg interface{}) *MockMetadataProvider_GetMetadata_Call {
+func (_e *MockMetadataProvider_Expecter) GetMetadata(ctx any, cfg any) *MockMetadataProvider_GetMetadata_Call {
 	return &MockMetadataProvider_GetMetadata_Call{Call: _e.mock.On("GetMetadata", ctx, cfg)}
 }
 
@@ -114,8 +123,8 @@ func (_c *MockMetadataProvider_GetMetadata_Call) Run(run func(ctx context.Contex
 	return _c
 }
 
-func (_c *MockMetadataProvider_GetMetadata_Call) Return(v *Ec2Metadata, err error) *MockMetadataProvider_GetMetadata_Call {
-	_c.Call.Return(v, err)
+func (_c *MockMetadataProvider_GetMetadata_Call) Return(ec2Metadata *Ec2Metadata, err error) *MockMetadataProvider_GetMetadata_Call {
+	_c.Call.Return(ec2Metadata, err)
 	return _c
 }
 

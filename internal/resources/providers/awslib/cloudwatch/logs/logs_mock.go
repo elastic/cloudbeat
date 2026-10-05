@@ -35,10 +35,19 @@ func NewMockCloudwatchLogs(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCloudwatchLogs {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCloudwatchLogs{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockCloudwatchLogs_DescribeMetricFilters_Call struct {
 //   - ctx context.Context
 //   - region *string
 //   - logGroup string
-func (_e *MockCloudwatchLogs_Expecter) DescribeMetricFilters(ctx interface{}, region interface{}, logGroup interface{}) *MockCloudwatchLogs_DescribeMetricFilters_Call {
+func (_e *MockCloudwatchLogs_Expecter) DescribeMetricFilters(ctx any, region any, logGroup any) *MockCloudwatchLogs_DescribeMetricFilters_Call {
 	return &MockCloudwatchLogs_DescribeMetricFilters_Call{Call: _e.mock.On("DescribeMetricFilters", ctx, region, logGroup)}
 }
 

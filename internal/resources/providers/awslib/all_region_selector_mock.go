@@ -35,10 +35,19 @@ func newMockDescribeCloudRegions(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockDescribeCloudRegions {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockDescribeCloudRegions{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -99,9 +108,9 @@ type mockDescribeCloudRegions_DescribeRegions_Call struct {
 //   - ctx context.Context
 //   - params *ec2.DescribeRegionsInput
 //   - optFns ...func(*ec2.Options)
-func (_e *mockDescribeCloudRegions_Expecter) DescribeRegions(ctx interface{}, params interface{}, optFns ...interface{}) *mockDescribeCloudRegions_DescribeRegions_Call {
+func (_e *mockDescribeCloudRegions_Expecter) DescribeRegions(ctx any, params any, optFns ...any) *mockDescribeCloudRegions_DescribeRegions_Call {
 	return &mockDescribeCloudRegions_DescribeRegions_Call{Call: _e.mock.On("DescribeRegions",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *mockDescribeCloudRegions_DescribeRegions_Call) Run(run func(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options))) *mockDescribeCloudRegions_DescribeRegions_Call {

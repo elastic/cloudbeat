@@ -34,10 +34,19 @@ func NewMockAWSRoleChainingStep(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAWSRoleChainingStep {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAWSRoleChainingStep{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -81,7 +90,7 @@ type MockAWSRoleChainingStep_BuildCredentialsCache_Call struct {
 
 // BuildCredentialsCache is a helper method to define mock.On call
 //   - client *sts.Client
-func (_e *MockAWSRoleChainingStep_Expecter) BuildCredentialsCache(client interface{}) *MockAWSRoleChainingStep_BuildCredentialsCache_Call {
+func (_e *MockAWSRoleChainingStep_Expecter) BuildCredentialsCache(client any) *MockAWSRoleChainingStep_BuildCredentialsCache_Call {
 	return &MockAWSRoleChainingStep_BuildCredentialsCache_Call{Call: _e.mock.On("BuildCredentialsCache", client)}
 }
 

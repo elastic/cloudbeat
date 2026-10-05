@@ -37,10 +37,19 @@ func NewMockStrategy(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockStrategy {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockStrategy{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -95,7 +104,7 @@ type MockStrategy_NewBenchmark_Call struct {
 //   - ctx context.Context
 //   - log *clog.Logger
 //   - cfg *config.Config
-func (_e *MockStrategy_Expecter) NewBenchmark(ctx interface{}, log interface{}, cfg interface{}) *MockStrategy_NewBenchmark_Call {
+func (_e *MockStrategy_Expecter) NewBenchmark(ctx any, log any, cfg any) *MockStrategy_NewBenchmark_Call {
 	return &MockStrategy_NewBenchmark_Call{Call: _e.mock.On("NewBenchmark", ctx, log, cfg)}
 }
 
