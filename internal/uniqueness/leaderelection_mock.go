@@ -34,10 +34,19 @@ func NewMockManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -123,7 +132,7 @@ type MockManager_Run_Call struct {
 
 // Run is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockManager_Expecter) Run(ctx interface{}) *MockManager_Run_Call {
+func (_e *MockManager_Expecter) Run(ctx any) *MockManager_Run_Call {
 	return &MockManager_Run_Call{Call: _e.mock.On("Run", ctx)}
 }
 

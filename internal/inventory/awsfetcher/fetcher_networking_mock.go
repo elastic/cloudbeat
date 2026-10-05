@@ -35,10 +35,19 @@ func newMockNetworkingProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockNetworkingProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockNetworkingProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockNetworkingProvider_DescribeInternetGateways_Call struct {
 
 // DescribeInternetGateways is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeInternetGateways(context1 interface{}) *mockNetworkingProvider_DescribeInternetGateways_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeInternetGateways(context1 any) *mockNetworkingProvider_DescribeInternetGateways_Call {
 	return &mockNetworkingProvider_DescribeInternetGateways_Call{Call: _e.mock.On("DescribeInternetGateways", context1)}
 }
 
@@ -153,7 +162,7 @@ type mockNetworkingProvider_DescribeNatGateways_Call struct {
 
 // DescribeNatGateways is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeNatGateways(context1 interface{}) *mockNetworkingProvider_DescribeNatGateways_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeNatGateways(context1 any) *mockNetworkingProvider_DescribeNatGateways_Call {
 	return &mockNetworkingProvider_DescribeNatGateways_Call{Call: _e.mock.On("DescribeNatGateways", context1)}
 }
 
@@ -215,7 +224,7 @@ type mockNetworkingProvider_DescribeNetworkAcl_Call struct {
 
 // DescribeNetworkAcl is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeNetworkAcl(context1 interface{}) *mockNetworkingProvider_DescribeNetworkAcl_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeNetworkAcl(context1 any) *mockNetworkingProvider_DescribeNetworkAcl_Call {
 	return &mockNetworkingProvider_DescribeNetworkAcl_Call{Call: _e.mock.On("DescribeNetworkAcl", context1)}
 }
 
@@ -277,7 +286,7 @@ type mockNetworkingProvider_DescribeNetworkInterfaces_Call struct {
 
 // DescribeNetworkInterfaces is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeNetworkInterfaces(context1 interface{}) *mockNetworkingProvider_DescribeNetworkInterfaces_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeNetworkInterfaces(context1 any) *mockNetworkingProvider_DescribeNetworkInterfaces_Call {
 	return &mockNetworkingProvider_DescribeNetworkInterfaces_Call{Call: _e.mock.On("DescribeNetworkInterfaces", context1)}
 }
 
@@ -339,7 +348,7 @@ type mockNetworkingProvider_DescribeSecurityGroups_Call struct {
 
 // DescribeSecurityGroups is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeSecurityGroups(context1 interface{}) *mockNetworkingProvider_DescribeSecurityGroups_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeSecurityGroups(context1 any) *mockNetworkingProvider_DescribeSecurityGroups_Call {
 	return &mockNetworkingProvider_DescribeSecurityGroups_Call{Call: _e.mock.On("DescribeSecurityGroups", context1)}
 }
 
@@ -401,7 +410,7 @@ type mockNetworkingProvider_DescribeSubnets_Call struct {
 
 // DescribeSubnets is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeSubnets(context1 interface{}) *mockNetworkingProvider_DescribeSubnets_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeSubnets(context1 any) *mockNetworkingProvider_DescribeSubnets_Call {
 	return &mockNetworkingProvider_DescribeSubnets_Call{Call: _e.mock.On("DescribeSubnets", context1)}
 }
 
@@ -463,7 +472,7 @@ type mockNetworkingProvider_DescribeTransitGatewayAttachments_Call struct {
 
 // DescribeTransitGatewayAttachments is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeTransitGatewayAttachments(context1 interface{}) *mockNetworkingProvider_DescribeTransitGatewayAttachments_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeTransitGatewayAttachments(context1 any) *mockNetworkingProvider_DescribeTransitGatewayAttachments_Call {
 	return &mockNetworkingProvider_DescribeTransitGatewayAttachments_Call{Call: _e.mock.On("DescribeTransitGatewayAttachments", context1)}
 }
 
@@ -525,7 +534,7 @@ type mockNetworkingProvider_DescribeTransitGateways_Call struct {
 
 // DescribeTransitGateways is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeTransitGateways(context1 interface{}) *mockNetworkingProvider_DescribeTransitGateways_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeTransitGateways(context1 any) *mockNetworkingProvider_DescribeTransitGateways_Call {
 	return &mockNetworkingProvider_DescribeTransitGateways_Call{Call: _e.mock.On("DescribeTransitGateways", context1)}
 }
 
@@ -587,7 +596,7 @@ type mockNetworkingProvider_DescribeVpcPeeringConnections_Call struct {
 
 // DescribeVpcPeeringConnections is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeVpcPeeringConnections(context1 interface{}) *mockNetworkingProvider_DescribeVpcPeeringConnections_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeVpcPeeringConnections(context1 any) *mockNetworkingProvider_DescribeVpcPeeringConnections_Call {
 	return &mockNetworkingProvider_DescribeVpcPeeringConnections_Call{Call: _e.mock.On("DescribeVpcPeeringConnections", context1)}
 }
 
@@ -649,7 +658,7 @@ type mockNetworkingProvider_DescribeVpcs_Call struct {
 
 // DescribeVpcs is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockNetworkingProvider_Expecter) DescribeVpcs(context1 interface{}) *mockNetworkingProvider_DescribeVpcs_Call {
+func (_e *mockNetworkingProvider_Expecter) DescribeVpcs(context1 any) *mockNetworkingProvider_DescribeVpcs_Call {
 	return &mockNetworkingProvider_DescribeVpcs_Call{Call: _e.mock.On("DescribeVpcs", context1)}
 }
 

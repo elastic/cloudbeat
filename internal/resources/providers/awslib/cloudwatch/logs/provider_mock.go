@@ -35,10 +35,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -99,9 +108,9 @@ type MockClient_DescribeMetricFilters_Call struct {
 //   - ctx context.Context
 //   - params *cloudwatchlogs.DescribeMetricFiltersInput
 //   - optFns ...func(*cloudwatchlogs.Options)
-func (_e *MockClient_Expecter) DescribeMetricFilters(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeMetricFilters_Call {
+func (_e *MockClient_Expecter) DescribeMetricFilters(ctx any, params any, optFns ...any) *MockClient_DescribeMetricFilters_Call {
 	return &MockClient_DescribeMetricFilters_Call{Call: _e.mock.On("DescribeMetricFilters",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeMetricFilters_Call) Run(run func(ctx context.Context, params *cloudwatchlogs.DescribeMetricFiltersInput, optFns ...func(*cloudwatchlogs.Options))) *MockClient_DescribeMetricFilters_Call {

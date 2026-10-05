@@ -36,10 +36,19 @@ func NewMockAssetsEnricher(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAssetsEnricher {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAssetsEnricher{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -83,7 +92,7 @@ type MockAssetsEnricher_Enrich_Call struct {
 //   - ctx context.Context
 //   - cycleMetadata cycle.Metadata
 //   - assets []inventory.AzureAsset
-func (_e *MockAssetsEnricher_Expecter) Enrich(ctx interface{}, cycleMetadata interface{}, assets interface{}) *MockAssetsEnricher_Enrich_Call {
+func (_e *MockAssetsEnricher_Expecter) Enrich(ctx any, cycleMetadata any, assets any) *MockAssetsEnricher_Enrich_Call {
 	return &MockAssetsEnricher_Enrich_Call{Call: _e.mock.On("Enrich", ctx, cycleMetadata, assets)}
 }
 

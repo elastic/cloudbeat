@@ -36,10 +36,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -100,9 +109,9 @@ type MockClient_DescribeCluster_Call struct {
 //   - ctx context.Context
 //   - params *eks.DescribeClusterInput
 //   - optFns ...func(*eks.Options)
-func (_e *MockClient_Expecter) DescribeCluster(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeCluster_Call {
+func (_e *MockClient_Expecter) DescribeCluster(ctx any, params any, optFns ...any) *MockClient_DescribeCluster_Call {
 	return &MockClient_DescribeCluster_Call{Call: _e.mock.On("DescribeCluster",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeCluster_Call) Run(run func(ctx context.Context, params *eks.DescribeClusterInput, optFns ...func(*eks.Options))) *MockClient_DescribeCluster_Call {
@@ -183,9 +192,9 @@ type MockClient_ListClusters_Call struct {
 //   - ctx context.Context
 //   - params *eks.ListClustersInput
 //   - optFns ...func(*eks.Options)
-func (_e *MockClient_Expecter) ListClusters(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListClusters_Call {
+func (_e *MockClient_Expecter) ListClusters(ctx any, params any, optFns ...any) *MockClient_ListClusters_Call {
 	return &MockClient_ListClusters_Call{Call: _e.mock.On("ListClusters",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListClusters_Call) Run(run func(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options))) *MockClient_ListClusters_Call {
@@ -229,10 +238,19 @@ func NewMockClustersDescriber(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClustersDescriber {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClustersDescriber{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -285,7 +303,7 @@ type MockClustersDescriber_DescribeClusters_Call struct {
 
 // DescribeClusters is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockClustersDescriber_Expecter) DescribeClusters(ctx interface{}) *MockClustersDescriber_DescribeClusters_Call {
+func (_e *MockClustersDescriber_Expecter) DescribeClusters(ctx any) *MockClustersDescriber_DescribeClusters_Call {
 	return &MockClustersDescriber_DescribeClusters_Call{Call: _e.mock.On("DescribeClusters", ctx)}
 }
 

@@ -36,10 +36,19 @@ func NewMockCredentialsValidator(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCredentialsValidator {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCredentialsValidator{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -83,7 +92,7 @@ type MockCredentialsValidator_Validate_Call struct {
 //   - ctx context.Context
 //   - cnf aws.Config
 //   - log *clog.Logger
-func (_e *MockCredentialsValidator_Expecter) Validate(ctx interface{}, cnf interface{}, log interface{}) *MockCredentialsValidator_Validate_Call {
+func (_e *MockCredentialsValidator_Expecter) Validate(ctx any, cnf any, log any) *MockCredentialsValidator_Validate_Call {
 	return &MockCredentialsValidator_Validate_Call{Call: _e.mock.On("Validate", ctx, cnf, log)}
 }
 

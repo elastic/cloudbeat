@@ -35,10 +35,19 @@ func NewMockInstanceProfileGetter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockInstanceProfileGetter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockInstanceProfileGetter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockInstanceProfileGetter_GetInstanceProfile_Call struct {
 // GetInstanceProfile is a helper method to define mock.On call
 //   - ctx context.Context
 //   - instanceProfileName string
-func (_e *MockInstanceProfileGetter_Expecter) GetInstanceProfile(ctx interface{}, instanceProfileName interface{}) *MockInstanceProfileGetter_GetInstanceProfile_Call {
+func (_e *MockInstanceProfileGetter_Expecter) GetInstanceProfile(ctx any, instanceProfileName any) *MockInstanceProfileGetter_GetInstanceProfile_Call {
 	return &MockInstanceProfileGetter_GetInstanceProfile_Call{Call: _e.mock.On("GetInstanceProfile", ctx, instanceProfileName)}
 }
 

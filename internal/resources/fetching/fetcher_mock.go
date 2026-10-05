@@ -35,10 +35,19 @@ func NewMockFetcher(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockFetcher {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockFetcher{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -81,7 +90,7 @@ type MockFetcher_Fetch_Call struct {
 // Fetch is a helper method to define mock.On call
 //   - context1 context.Context
 //   - metadata cycle.Metadata
-func (_e *MockFetcher_Expecter) Fetch(context1 interface{}, metadata interface{}) *MockFetcher_Fetch_Call {
+func (_e *MockFetcher_Expecter) Fetch(context1 any, metadata any) *MockFetcher_Fetch_Call {
 	return &MockFetcher_Fetch_Call{Call: _e.mock.On("Fetch", context1, metadata)}
 }
 
@@ -152,10 +161,19 @@ func NewMockCondition(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCondition {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCondition{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -267,10 +285,19 @@ func NewMockResource(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockResource {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockResource{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -324,8 +351,8 @@ func (_c *MockResource_GetData_Call) Run(run func()) *MockResource_GetData_Call 
 	return _c
 }
 
-func (_c *MockResource_GetData_Call) Return(v any) *MockResource_GetData_Call {
-	_c.Call.Return(v)
+func (_c *MockResource_GetData_Call) Return(anyMoqParam any) *MockResource_GetData_Call {
+	_c.Call.Return(anyMoqParam)
 	return _c
 }
 
@@ -379,8 +406,8 @@ func (_c *MockResource_GetElasticCommonData_Call) Run(run func()) *MockResource_
 	return _c
 }
 
-func (_c *MockResource_GetElasticCommonData_Call) Return(stringToV map[string]any, err error) *MockResource_GetElasticCommonData_Call {
-	_c.Call.Return(stringToV, err)
+func (_c *MockResource_GetElasticCommonData_Call) Return(stringToAnyMoqParam map[string]any, err error) *MockResource_GetElasticCommonData_Call {
+	_c.Call.Return(stringToAnyMoqParam, err)
 	return _c
 }
 

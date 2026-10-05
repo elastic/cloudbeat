@@ -35,10 +35,19 @@ func newMockIamPolicyProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockIamPolicyProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockIamPolicyProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockIamPolicyProvider_GetPolicies_Call struct {
 
 // GetPolicies is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockIamPolicyProvider_Expecter) GetPolicies(ctx interface{}) *mockIamPolicyProvider_GetPolicies_Call {
+func (_e *mockIamPolicyProvider_Expecter) GetPolicies(ctx any) *mockIamPolicyProvider_GetPolicies_Call {
 	return &mockIamPolicyProvider_GetPolicies_Call{Call: _e.mock.On("GetPolicies", ctx)}
 }
 

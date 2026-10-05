@@ -34,10 +34,19 @@ func NewMockRoleGetter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockRoleGetter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockRoleGetter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockRoleGetter_GetRole_Call struct {
 // GetRole is a helper method to define mock.On call
 //   - ctx context.Context
 //   - roleName string
-func (_e *MockRoleGetter_Expecter) GetRole(ctx interface{}, roleName interface{}) *MockRoleGetter_GetRole_Call {
+func (_e *MockRoleGetter_Expecter) GetRole(ctx any, roleName any) *MockRoleGetter_GetRole_Call {
 	return &MockRoleGetter_GetRole_Call{Call: _e.mock.On("GetRole", ctx, roleName)}
 }
 

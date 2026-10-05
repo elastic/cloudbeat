@@ -35,10 +35,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -99,9 +108,9 @@ type MockClient_CreateSnapshots_Call struct {
 //   - ctx context.Context
 //   - params *ec2.CreateSnapshotsInput
 //   - optFns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) CreateSnapshots(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_CreateSnapshots_Call {
+func (_e *MockClient_Expecter) CreateSnapshots(ctx any, params any, optFns ...any) *MockClient_CreateSnapshots_Call {
 	return &MockClient_CreateSnapshots_Call{Call: _e.mock.On("CreateSnapshots",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_CreateSnapshots_Call) Run(run func(ctx context.Context, params *ec2.CreateSnapshotsInput, optFns ...func(*ec2.Options))) *MockClient_CreateSnapshots_Call {
@@ -182,9 +191,9 @@ type MockClient_DeleteSnapshot_Call struct {
 //   - ctx context.Context
 //   - params *ec2.DeleteSnapshotInput
 //   - optFns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DeleteSnapshot(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DeleteSnapshot_Call {
+func (_e *MockClient_Expecter) DeleteSnapshot(ctx any, params any, optFns ...any) *MockClient_DeleteSnapshot_Call {
 	return &MockClient_DeleteSnapshot_Call{Call: _e.mock.On("DeleteSnapshot",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DeleteSnapshot_Call) Run(run func(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options))) *MockClient_DeleteSnapshot_Call {
@@ -265,9 +274,9 @@ type MockClient_DescribeFlowLogs_Call struct {
 //   - context1 context.Context
 //   - describeFlowLogsInput *ec2.DescribeFlowLogsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeFlowLogs(context1 interface{}, describeFlowLogsInput interface{}, fns ...interface{}) *MockClient_DescribeFlowLogs_Call {
+func (_e *MockClient_Expecter) DescribeFlowLogs(context1 any, describeFlowLogsInput any, fns ...any) *MockClient_DescribeFlowLogs_Call {
 	return &MockClient_DescribeFlowLogs_Call{Call: _e.mock.On("DescribeFlowLogs",
-		append([]interface{}{context1, describeFlowLogsInput}, fns...)...)}
+		append([]any{context1, describeFlowLogsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeFlowLogs_Call) Run(run func(context1 context.Context, describeFlowLogsInput *ec2.DescribeFlowLogsInput, fns ...func(*ec2.Options))) *MockClient_DescribeFlowLogs_Call {
@@ -348,9 +357,9 @@ type MockClient_DescribeInstances_Call struct {
 //   - context1 context.Context
 //   - describeInstancesInput *ec2.DescribeInstancesInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeInstances(context1 interface{}, describeInstancesInput interface{}, fns ...interface{}) *MockClient_DescribeInstances_Call {
+func (_e *MockClient_Expecter) DescribeInstances(context1 any, describeInstancesInput any, fns ...any) *MockClient_DescribeInstances_Call {
 	return &MockClient_DescribeInstances_Call{Call: _e.mock.On("DescribeInstances",
-		append([]interface{}{context1, describeInstancesInput}, fns...)...)}
+		append([]any{context1, describeInstancesInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeInstances_Call) Run(run func(context1 context.Context, describeInstancesInput *ec2.DescribeInstancesInput, fns ...func(*ec2.Options))) *MockClient_DescribeInstances_Call {
@@ -431,9 +440,9 @@ type MockClient_DescribeInternetGateways_Call struct {
 //   - context1 context.Context
 //   - describeInternetGatewaysInput *ec2.DescribeInternetGatewaysInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeInternetGateways(context1 interface{}, describeInternetGatewaysInput interface{}, fns ...interface{}) *MockClient_DescribeInternetGateways_Call {
+func (_e *MockClient_Expecter) DescribeInternetGateways(context1 any, describeInternetGatewaysInput any, fns ...any) *MockClient_DescribeInternetGateways_Call {
 	return &MockClient_DescribeInternetGateways_Call{Call: _e.mock.On("DescribeInternetGateways",
-		append([]interface{}{context1, describeInternetGatewaysInput}, fns...)...)}
+		append([]any{context1, describeInternetGatewaysInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeInternetGateways_Call) Run(run func(context1 context.Context, describeInternetGatewaysInput *ec2.DescribeInternetGatewaysInput, fns ...func(*ec2.Options))) *MockClient_DescribeInternetGateways_Call {
@@ -514,9 +523,9 @@ type MockClient_DescribeNatGateways_Call struct {
 //   - context1 context.Context
 //   - describeNatGatewaysInput *ec2.DescribeNatGatewaysInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeNatGateways(context1 interface{}, describeNatGatewaysInput interface{}, fns ...interface{}) *MockClient_DescribeNatGateways_Call {
+func (_e *MockClient_Expecter) DescribeNatGateways(context1 any, describeNatGatewaysInput any, fns ...any) *MockClient_DescribeNatGateways_Call {
 	return &MockClient_DescribeNatGateways_Call{Call: _e.mock.On("DescribeNatGateways",
-		append([]interface{}{context1, describeNatGatewaysInput}, fns...)...)}
+		append([]any{context1, describeNatGatewaysInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeNatGateways_Call) Run(run func(context1 context.Context, describeNatGatewaysInput *ec2.DescribeNatGatewaysInput, fns ...func(*ec2.Options))) *MockClient_DescribeNatGateways_Call {
@@ -597,9 +606,9 @@ type MockClient_DescribeNetworkAcls_Call struct {
 //   - context1 context.Context
 //   - describeNetworkAclsInput *ec2.DescribeNetworkAclsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeNetworkAcls(context1 interface{}, describeNetworkAclsInput interface{}, fns ...interface{}) *MockClient_DescribeNetworkAcls_Call {
+func (_e *MockClient_Expecter) DescribeNetworkAcls(context1 any, describeNetworkAclsInput any, fns ...any) *MockClient_DescribeNetworkAcls_Call {
 	return &MockClient_DescribeNetworkAcls_Call{Call: _e.mock.On("DescribeNetworkAcls",
-		append([]interface{}{context1, describeNetworkAclsInput}, fns...)...)}
+		append([]any{context1, describeNetworkAclsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeNetworkAcls_Call) Run(run func(context1 context.Context, describeNetworkAclsInput *ec2.DescribeNetworkAclsInput, fns ...func(*ec2.Options))) *MockClient_DescribeNetworkAcls_Call {
@@ -680,9 +689,9 @@ type MockClient_DescribeNetworkInterfaces_Call struct {
 //   - context1 context.Context
 //   - describeNetworkInterfacesInput *ec2.DescribeNetworkInterfacesInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeNetworkInterfaces(context1 interface{}, describeNetworkInterfacesInput interface{}, fns ...interface{}) *MockClient_DescribeNetworkInterfaces_Call {
+func (_e *MockClient_Expecter) DescribeNetworkInterfaces(context1 any, describeNetworkInterfacesInput any, fns ...any) *MockClient_DescribeNetworkInterfaces_Call {
 	return &MockClient_DescribeNetworkInterfaces_Call{Call: _e.mock.On("DescribeNetworkInterfaces",
-		append([]interface{}{context1, describeNetworkInterfacesInput}, fns...)...)}
+		append([]any{context1, describeNetworkInterfacesInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeNetworkInterfaces_Call) Run(run func(context1 context.Context, describeNetworkInterfacesInput *ec2.DescribeNetworkInterfacesInput, fns ...func(*ec2.Options))) *MockClient_DescribeNetworkInterfaces_Call {
@@ -763,9 +772,9 @@ type MockClient_DescribeRouteTables_Call struct {
 //   - context1 context.Context
 //   - describeRouteTablesInput *ec2.DescribeRouteTablesInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeRouteTables(context1 interface{}, describeRouteTablesInput interface{}, fns ...interface{}) *MockClient_DescribeRouteTables_Call {
+func (_e *MockClient_Expecter) DescribeRouteTables(context1 any, describeRouteTablesInput any, fns ...any) *MockClient_DescribeRouteTables_Call {
 	return &MockClient_DescribeRouteTables_Call{Call: _e.mock.On("DescribeRouteTables",
-		append([]interface{}{context1, describeRouteTablesInput}, fns...)...)}
+		append([]any{context1, describeRouteTablesInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeRouteTables_Call) Run(run func(context1 context.Context, describeRouteTablesInput *ec2.DescribeRouteTablesInput, fns ...func(*ec2.Options))) *MockClient_DescribeRouteTables_Call {
@@ -846,9 +855,9 @@ type MockClient_DescribeSecurityGroups_Call struct {
 //   - context1 context.Context
 //   - describeSecurityGroupsInput *ec2.DescribeSecurityGroupsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeSecurityGroups(context1 interface{}, describeSecurityGroupsInput interface{}, fns ...interface{}) *MockClient_DescribeSecurityGroups_Call {
+func (_e *MockClient_Expecter) DescribeSecurityGroups(context1 any, describeSecurityGroupsInput any, fns ...any) *MockClient_DescribeSecurityGroups_Call {
 	return &MockClient_DescribeSecurityGroups_Call{Call: _e.mock.On("DescribeSecurityGroups",
-		append([]interface{}{context1, describeSecurityGroupsInput}, fns...)...)}
+		append([]any{context1, describeSecurityGroupsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeSecurityGroups_Call) Run(run func(context1 context.Context, describeSecurityGroupsInput *ec2.DescribeSecurityGroupsInput, fns ...func(*ec2.Options))) *MockClient_DescribeSecurityGroups_Call {
@@ -929,9 +938,9 @@ type MockClient_DescribeSnapshots_Call struct {
 //   - context1 context.Context
 //   - describeSnapshotsInput *ec2.DescribeSnapshotsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeSnapshots(context1 interface{}, describeSnapshotsInput interface{}, fns ...interface{}) *MockClient_DescribeSnapshots_Call {
+func (_e *MockClient_Expecter) DescribeSnapshots(context1 any, describeSnapshotsInput any, fns ...any) *MockClient_DescribeSnapshots_Call {
 	return &MockClient_DescribeSnapshots_Call{Call: _e.mock.On("DescribeSnapshots",
-		append([]interface{}{context1, describeSnapshotsInput}, fns...)...)}
+		append([]any{context1, describeSnapshotsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeSnapshots_Call) Run(run func(context1 context.Context, describeSnapshotsInput *ec2.DescribeSnapshotsInput, fns ...func(*ec2.Options))) *MockClient_DescribeSnapshots_Call {
@@ -1012,9 +1021,9 @@ type MockClient_DescribeSubnets_Call struct {
 //   - context1 context.Context
 //   - describeSubnetsInput *ec2.DescribeSubnetsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeSubnets(context1 interface{}, describeSubnetsInput interface{}, fns ...interface{}) *MockClient_DescribeSubnets_Call {
+func (_e *MockClient_Expecter) DescribeSubnets(context1 any, describeSubnetsInput any, fns ...any) *MockClient_DescribeSubnets_Call {
 	return &MockClient_DescribeSubnets_Call{Call: _e.mock.On("DescribeSubnets",
-		append([]interface{}{context1, describeSubnetsInput}, fns...)...)}
+		append([]any{context1, describeSubnetsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeSubnets_Call) Run(run func(context1 context.Context, describeSubnetsInput *ec2.DescribeSubnetsInput, fns ...func(*ec2.Options))) *MockClient_DescribeSubnets_Call {
@@ -1095,9 +1104,9 @@ type MockClient_DescribeTransitGatewayAttachments_Call struct {
 //   - context1 context.Context
 //   - describeTransitGatewayAttachmentsInput *ec2.DescribeTransitGatewayAttachmentsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeTransitGatewayAttachments(context1 interface{}, describeTransitGatewayAttachmentsInput interface{}, fns ...interface{}) *MockClient_DescribeTransitGatewayAttachments_Call {
+func (_e *MockClient_Expecter) DescribeTransitGatewayAttachments(context1 any, describeTransitGatewayAttachmentsInput any, fns ...any) *MockClient_DescribeTransitGatewayAttachments_Call {
 	return &MockClient_DescribeTransitGatewayAttachments_Call{Call: _e.mock.On("DescribeTransitGatewayAttachments",
-		append([]interface{}{context1, describeTransitGatewayAttachmentsInput}, fns...)...)}
+		append([]any{context1, describeTransitGatewayAttachmentsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeTransitGatewayAttachments_Call) Run(run func(context1 context.Context, describeTransitGatewayAttachmentsInput *ec2.DescribeTransitGatewayAttachmentsInput, fns ...func(*ec2.Options))) *MockClient_DescribeTransitGatewayAttachments_Call {
@@ -1178,9 +1187,9 @@ type MockClient_DescribeTransitGateways_Call struct {
 //   - context1 context.Context
 //   - describeTransitGatewaysInput *ec2.DescribeTransitGatewaysInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeTransitGateways(context1 interface{}, describeTransitGatewaysInput interface{}, fns ...interface{}) *MockClient_DescribeTransitGateways_Call {
+func (_e *MockClient_Expecter) DescribeTransitGateways(context1 any, describeTransitGatewaysInput any, fns ...any) *MockClient_DescribeTransitGateways_Call {
 	return &MockClient_DescribeTransitGateways_Call{Call: _e.mock.On("DescribeTransitGateways",
-		append([]interface{}{context1, describeTransitGatewaysInput}, fns...)...)}
+		append([]any{context1, describeTransitGatewaysInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeTransitGateways_Call) Run(run func(context1 context.Context, describeTransitGatewaysInput *ec2.DescribeTransitGatewaysInput, fns ...func(*ec2.Options))) *MockClient_DescribeTransitGateways_Call {
@@ -1261,9 +1270,9 @@ type MockClient_DescribeVolumes_Call struct {
 //   - context1 context.Context
 //   - describeVolumesInput *ec2.DescribeVolumesInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeVolumes(context1 interface{}, describeVolumesInput interface{}, fns ...interface{}) *MockClient_DescribeVolumes_Call {
+func (_e *MockClient_Expecter) DescribeVolumes(context1 any, describeVolumesInput any, fns ...any) *MockClient_DescribeVolumes_Call {
 	return &MockClient_DescribeVolumes_Call{Call: _e.mock.On("DescribeVolumes",
-		append([]interface{}{context1, describeVolumesInput}, fns...)...)}
+		append([]any{context1, describeVolumesInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeVolumes_Call) Run(run func(context1 context.Context, describeVolumesInput *ec2.DescribeVolumesInput, fns ...func(*ec2.Options))) *MockClient_DescribeVolumes_Call {
@@ -1344,9 +1353,9 @@ type MockClient_DescribeVpcPeeringConnections_Call struct {
 //   - context1 context.Context
 //   - describeVpcPeeringConnectionsInput *ec2.DescribeVpcPeeringConnectionsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeVpcPeeringConnections(context1 interface{}, describeVpcPeeringConnectionsInput interface{}, fns ...interface{}) *MockClient_DescribeVpcPeeringConnections_Call {
+func (_e *MockClient_Expecter) DescribeVpcPeeringConnections(context1 any, describeVpcPeeringConnectionsInput any, fns ...any) *MockClient_DescribeVpcPeeringConnections_Call {
 	return &MockClient_DescribeVpcPeeringConnections_Call{Call: _e.mock.On("DescribeVpcPeeringConnections",
-		append([]interface{}{context1, describeVpcPeeringConnectionsInput}, fns...)...)}
+		append([]any{context1, describeVpcPeeringConnectionsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeVpcPeeringConnections_Call) Run(run func(context1 context.Context, describeVpcPeeringConnectionsInput *ec2.DescribeVpcPeeringConnectionsInput, fns ...func(*ec2.Options))) *MockClient_DescribeVpcPeeringConnections_Call {
@@ -1427,9 +1436,9 @@ type MockClient_DescribeVpcs_Call struct {
 //   - context1 context.Context
 //   - describeVpcsInput *ec2.DescribeVpcsInput
 //   - fns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) DescribeVpcs(context1 interface{}, describeVpcsInput interface{}, fns ...interface{}) *MockClient_DescribeVpcs_Call {
+func (_e *MockClient_Expecter) DescribeVpcs(context1 any, describeVpcsInput any, fns ...any) *MockClient_DescribeVpcs_Call {
 	return &MockClient_DescribeVpcs_Call{Call: _e.mock.On("DescribeVpcs",
-		append([]interface{}{context1, describeVpcsInput}, fns...)...)}
+		append([]any{context1, describeVpcsInput}, fns...)...)}
 }
 
 func (_c *MockClient_DescribeVpcs_Call) Run(run func(context1 context.Context, describeVpcsInput *ec2.DescribeVpcsInput, fns ...func(*ec2.Options))) *MockClient_DescribeVpcs_Call {
@@ -1510,9 +1519,9 @@ type MockClient_GetEbsEncryptionByDefault_Call struct {
 //   - ctx context.Context
 //   - params *ec2.GetEbsEncryptionByDefaultInput
 //   - optFns ...func(*ec2.Options)
-func (_e *MockClient_Expecter) GetEbsEncryptionByDefault(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetEbsEncryptionByDefault_Call {
+func (_e *MockClient_Expecter) GetEbsEncryptionByDefault(ctx any, params any, optFns ...any) *MockClient_GetEbsEncryptionByDefault_Call {
 	return &MockClient_GetEbsEncryptionByDefault_Call{Call: _e.mock.On("GetEbsEncryptionByDefault",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetEbsEncryptionByDefault_Call) Run(run func(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options))) *MockClient_GetEbsEncryptionByDefault_Call {
