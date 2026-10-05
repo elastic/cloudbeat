@@ -37,10 +37,19 @@ func NewMockIterator(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockIterator {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockIterator{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -119,10 +128,19 @@ func NewMockServiceAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockServiceAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockServiceAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -232,7 +250,7 @@ type MockServiceAPI_ListAssetTypes_Call struct {
 //   - ctx context.Context
 //   - assetTypes []string
 //   - out chan<- *ExtendedGcpAsset
-func (_e *MockServiceAPI_Expecter) ListAssetTypes(ctx interface{}, assetTypes interface{}, out interface{}) *MockServiceAPI_ListAssetTypes_Call {
+func (_e *MockServiceAPI_Expecter) ListAssetTypes(ctx any, assetTypes any, out any) *MockServiceAPI_ListAssetTypes_Call {
 	return &MockServiceAPI_ListAssetTypes_Call{Call: _e.mock.On("ListAssetTypes", ctx, assetTypes, out)}
 }
 
@@ -283,7 +301,7 @@ type MockServiceAPI_ListMonitoringAssets_Call struct {
 // ListMonitoringAssets is a helper method to define mock.On call
 //   - ctx context.Context
 //   - out chan<- *MonitoringAsset
-func (_e *MockServiceAPI_Expecter) ListMonitoringAssets(ctx interface{}, out interface{}) *MockServiceAPI_ListMonitoringAssets_Call {
+func (_e *MockServiceAPI_Expecter) ListMonitoringAssets(ctx any, out any) *MockServiceAPI_ListMonitoringAssets_Call {
 	return &MockServiceAPI_ListMonitoringAssets_Call{Call: _e.mock.On("ListMonitoringAssets", ctx, out)}
 }
 
@@ -329,7 +347,7 @@ type MockServiceAPI_ListNetworkAssets_Call struct {
 // ListNetworkAssets is a helper method to define mock.On call
 //   - ctx context.Context
 //   - out chan<- *ExtendedGcpAsset
-func (_e *MockServiceAPI_Expecter) ListNetworkAssets(ctx interface{}, out interface{}) *MockServiceAPI_ListNetworkAssets_Call {
+func (_e *MockServiceAPI_Expecter) ListNetworkAssets(ctx any, out any) *MockServiceAPI_ListNetworkAssets_Call {
 	return &MockServiceAPI_ListNetworkAssets_Call{Call: _e.mock.On("ListNetworkAssets", ctx, out)}
 }
 
@@ -376,7 +394,7 @@ type MockServiceAPI_ListProjectAssets_Call struct {
 //   - ctx context.Context
 //   - assetTypes []string
 //   - out chan<- *ProjectAssets
-func (_e *MockServiceAPI_Expecter) ListProjectAssets(ctx interface{}, assetTypes interface{}, out interface{}) *MockServiceAPI_ListProjectAssets_Call {
+func (_e *MockServiceAPI_Expecter) ListProjectAssets(ctx any, assetTypes any, out any) *MockServiceAPI_ListProjectAssets_Call {
 	return &MockServiceAPI_ListProjectAssets_Call{Call: _e.mock.On("ListProjectAssets", ctx, assetTypes, out)}
 }
 
@@ -427,7 +445,7 @@ type MockServiceAPI_ListProjectsAncestorsPolicies_Call struct {
 // ListProjectsAncestorsPolicies is a helper method to define mock.On call
 //   - ctx context.Context
 //   - out chan<- *ProjectPoliciesAsset
-func (_e *MockServiceAPI_Expecter) ListProjectsAncestorsPolicies(ctx interface{}, out interface{}) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+func (_e *MockServiceAPI_Expecter) ListProjectsAncestorsPolicies(ctx any, out any) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
 	return &MockServiceAPI_ListProjectsAncestorsPolicies_Call{Call: _e.mock.On("ListProjectsAncestorsPolicies", ctx, out)}
 }
 
@@ -465,10 +483,19 @@ func NewMockProviderInitializerAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockProviderInitializerAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockProviderInitializerAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -523,7 +550,7 @@ type MockProviderInitializerAPI_Init_Call struct {
 //   - ctx context.Context
 //   - log *clog.Logger
 //   - gcpConfig auth.GcpFactoryConfig
-func (_e *MockProviderInitializerAPI_Expecter) Init(ctx interface{}, log interface{}, gcpConfig interface{}) *MockProviderInitializerAPI_Init_Call {
+func (_e *MockProviderInitializerAPI_Expecter) Init(ctx any, log any, gcpConfig any) *MockProviderInitializerAPI_Init_Call {
 	return &MockProviderInitializerAPI_Init_Call{Call: _e.mock.On("Init", ctx, log, gcpConfig)}
 }
 

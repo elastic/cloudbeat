@@ -37,10 +37,19 @@ func NewMockManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -130,10 +139,19 @@ func NewMockEvaluator(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockEvaluator {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockEvaluator{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -185,7 +203,7 @@ type MockEvaluator_Eval_Call struct {
 // Eval is a helper method to define mock.On call
 //   - ctx context.Context
 //   - resource fetching.ResourceInfo
-func (_e *MockEvaluator_Expecter) Eval(ctx interface{}, resource interface{}) *MockEvaluator_Eval_Call {
+func (_e *MockEvaluator_Expecter) Eval(ctx any, resource any) *MockEvaluator_Eval_Call {
 	return &MockEvaluator_Eval_Call{Call: _e.mock.On("Eval", ctx, resource)}
 }
 
@@ -223,10 +241,19 @@ func NewMockTransformer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockTransformer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockTransformer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -280,7 +307,7 @@ type MockTransformer_CreateBeatEvents_Call struct {
 // CreateBeatEvents is a helper method to define mock.On call
 //   - ctx context.Context
 //   - data evaluator.EventData
-func (_e *MockTransformer_Expecter) CreateBeatEvents(ctx interface{}, data interface{}) *MockTransformer_CreateBeatEvents_Call {
+func (_e *MockTransformer_Expecter) CreateBeatEvents(ctx any, data any) *MockTransformer_CreateBeatEvents_Call {
 	return &MockTransformer_CreateBeatEvents_Call{Call: _e.mock.On("CreateBeatEvents", ctx, data)}
 }
 

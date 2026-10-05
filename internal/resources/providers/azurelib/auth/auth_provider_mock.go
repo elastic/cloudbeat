@@ -33,10 +33,19 @@ func NewMockAzureAuthProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAzureAuthProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAzureAuthProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockAzureAuthProviderAPI_FindCertificateCredential_Call struct {
 //   - certPath string
 //   - password string
 //   - options *azidentity.ClientCertificateCredentialOptions
-func (_e *MockAzureAuthProviderAPI_Expecter) FindCertificateCredential(tenantID interface{}, clientID interface{}, certPath interface{}, password interface{}, options interface{}) *MockAzureAuthProviderAPI_FindCertificateCredential_Call {
+func (_e *MockAzureAuthProviderAPI_Expecter) FindCertificateCredential(tenantID any, clientID any, certPath any, password any, options any) *MockAzureAuthProviderAPI_FindCertificateCredential_Call {
 	return &MockAzureAuthProviderAPI_FindCertificateCredential_Call{Call: _e.mock.On("FindCertificateCredential", tenantID, clientID, certPath, password, options)}
 }
 
@@ -178,7 +187,7 @@ type MockAzureAuthProviderAPI_FindClientSecretCredentials_Call struct {
 //   - clientID string
 //   - clientSecret string
 //   - options *azidentity.ClientSecretCredentialOptions
-func (_e *MockAzureAuthProviderAPI_Expecter) FindClientSecretCredentials(tenantID interface{}, clientID interface{}, clientSecret interface{}, options interface{}) *MockAzureAuthProviderAPI_FindClientSecretCredentials_Call {
+func (_e *MockAzureAuthProviderAPI_Expecter) FindClientSecretCredentials(tenantID any, clientID any, clientSecret any, options any) *MockAzureAuthProviderAPI_FindClientSecretCredentials_Call {
 	return &MockAzureAuthProviderAPI_FindClientSecretCredentials_Call{Call: _e.mock.On("FindClientSecretCredentials", tenantID, clientID, clientSecret, options)}
 }
 
@@ -255,7 +264,7 @@ type MockAzureAuthProviderAPI_FindDefaultCredentials_Call struct {
 
 // FindDefaultCredentials is a helper method to define mock.On call
 //   - options *azidentity.DefaultAzureCredentialOptions
-func (_e *MockAzureAuthProviderAPI_Expecter) FindDefaultCredentials(options interface{}) *MockAzureAuthProviderAPI_FindDefaultCredentials_Call {
+func (_e *MockAzureAuthProviderAPI_Expecter) FindDefaultCredentials(options any) *MockAzureAuthProviderAPI_FindDefaultCredentials_Call {
 	return &MockAzureAuthProviderAPI_FindDefaultCredentials_Call{Call: _e.mock.On("FindDefaultCredentials", options)}
 }
 

@@ -35,10 +35,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -99,9 +108,9 @@ type MockClient_DescribeTrails_Call struct {
 //   - ctx context.Context
 //   - params *cloudtrail.DescribeTrailsInput
 //   - optFns ...func(*cloudtrail.Options)
-func (_e *MockClient_Expecter) DescribeTrails(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeTrails_Call {
+func (_e *MockClient_Expecter) DescribeTrails(ctx any, params any, optFns ...any) *MockClient_DescribeTrails_Call {
 	return &MockClient_DescribeTrails_Call{Call: _e.mock.On("DescribeTrails",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeTrails_Call) Run(run func(ctx context.Context, params *cloudtrail.DescribeTrailsInput, optFns ...func(*cloudtrail.Options))) *MockClient_DescribeTrails_Call {
@@ -182,9 +191,9 @@ type MockClient_GetEventSelectors_Call struct {
 //   - ctx context.Context
 //   - params *cloudtrail.GetEventSelectorsInput
 //   - optFns ...func(*cloudtrail.Options)
-func (_e *MockClient_Expecter) GetEventSelectors(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetEventSelectors_Call {
+func (_e *MockClient_Expecter) GetEventSelectors(ctx any, params any, optFns ...any) *MockClient_GetEventSelectors_Call {
 	return &MockClient_GetEventSelectors_Call{Call: _e.mock.On("GetEventSelectors",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetEventSelectors_Call) Run(run func(ctx context.Context, params *cloudtrail.GetEventSelectorsInput, optFns ...func(*cloudtrail.Options))) *MockClient_GetEventSelectors_Call {
@@ -265,9 +274,9 @@ type MockClient_GetTrailStatus_Call struct {
 //   - ctx context.Context
 //   - params *cloudtrail.GetTrailStatusInput
 //   - optFns ...func(*cloudtrail.Options)
-func (_e *MockClient_Expecter) GetTrailStatus(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetTrailStatus_Call {
+func (_e *MockClient_Expecter) GetTrailStatus(ctx any, params any, optFns ...any) *MockClient_GetTrailStatus_Call {
 	return &MockClient_GetTrailStatus_Call{Call: _e.mock.On("GetTrailStatus",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetTrailStatus_Call) Run(run func(ctx context.Context, params *cloudtrail.GetTrailStatusInput, optFns ...func(*cloudtrail.Options))) *MockClient_GetTrailStatus_Call {

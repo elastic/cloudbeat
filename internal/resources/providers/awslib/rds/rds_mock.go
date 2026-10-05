@@ -36,10 +36,19 @@ func NewMockRds(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockRds {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockRds{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockRds_DescribeDBInstances_Call struct {
 
 // DescribeDBInstances is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockRds_Expecter) DescribeDBInstances(ctx interface{}) *MockRds_DescribeDBInstances_Call {
+func (_e *MockRds_Expecter) DescribeDBInstances(ctx any) *MockRds_DescribeDBInstances_Call {
 	return &MockRds_DescribeDBInstances_Call{Call: _e.mock.On("DescribeDBInstances", ctx)}
 }
 
@@ -125,10 +134,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -189,9 +207,9 @@ type MockClient_DescribeDBInstances_Call struct {
 //   - ctx context.Context
 //   - params *rds.DescribeDBInstancesInput
 //   - optFns ...func(*rds.Options)
-func (_e *MockClient_Expecter) DescribeDBInstances(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeDBInstances_Call {
+func (_e *MockClient_Expecter) DescribeDBInstances(ctx any, params any, optFns ...any) *MockClient_DescribeDBInstances_Call {
 	return &MockClient_DescribeDBInstances_Call{Call: _e.mock.On("DescribeDBInstances",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeDBInstances_Call) Run(run func(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options))) *MockClient_DescribeDBInstances_Call {

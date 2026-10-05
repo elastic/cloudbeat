@@ -34,10 +34,19 @@ func NewMockSubscriptionProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockSubscriptionProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockSubscriptionProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockSubscriptionProviderAPI_ListLocations_Call struct {
 // ListLocations is a helper method to define mock.On call
 //   - ctx context.Context
 //   - subID string
-func (_e *MockSubscriptionProviderAPI_Expecter) ListLocations(ctx interface{}, subID interface{}) *MockSubscriptionProviderAPI_ListLocations_Call {
+func (_e *MockSubscriptionProviderAPI_Expecter) ListLocations(ctx any, subID any) *MockSubscriptionProviderAPI_ListLocations_Call {
 	return &MockSubscriptionProviderAPI_ListLocations_Call{Call: _e.mock.On("ListLocations", ctx, subID)}
 }
 
@@ -158,7 +167,7 @@ type MockSubscriptionProviderAPI_ListSubscriptions_Call struct {
 
 // ListSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockSubscriptionProviderAPI_Expecter) ListSubscriptions(ctx interface{}) *MockSubscriptionProviderAPI_ListSubscriptions_Call {
+func (_e *MockSubscriptionProviderAPI_Expecter) ListSubscriptions(ctx any) *MockSubscriptionProviderAPI_ListSubscriptions_Call {
 	return &MockSubscriptionProviderAPI_ListSubscriptions_Call{Call: _e.mock.On("ListSubscriptions", ctx)}
 }
 
@@ -220,7 +229,7 @@ type MockSubscriptionProviderAPI_ListTenants_Call struct {
 
 // ListTenants is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockSubscriptionProviderAPI_Expecter) ListTenants(ctx interface{}) *MockSubscriptionProviderAPI_ListTenants_Call {
+func (_e *MockSubscriptionProviderAPI_Expecter) ListTenants(ctx any) *MockSubscriptionProviderAPI_ListTenants_Call {
 	return &MockSubscriptionProviderAPI_ListTenants_Call{Call: _e.mock.On("ListTenants", ctx)}
 }
 

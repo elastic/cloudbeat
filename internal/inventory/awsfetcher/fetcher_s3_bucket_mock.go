@@ -35,10 +35,19 @@ func newMockS3BucketProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockS3BucketProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockS3BucketProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockS3BucketProvider_DescribeBuckets_Call struct {
 
 // DescribeBuckets is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockS3BucketProvider_Expecter) DescribeBuckets(ctx interface{}) *mockS3BucketProvider_DescribeBuckets_Call {
+func (_e *mockS3BucketProvider_Expecter) DescribeBuckets(ctx any) *mockS3BucketProvider_DescribeBuckets_Call {
 	return &mockS3BucketProvider_DescribeBuckets_Call{Call: _e.mock.On("DescribeBuckets", ctx)}
 }
 

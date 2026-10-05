@@ -35,10 +35,19 @@ func newMockV1Provider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockV1Provider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockV1Provider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockV1Provider_DescribeAllLoadBalancers_Call struct {
 
 // DescribeAllLoadBalancers is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockV1Provider_Expecter) DescribeAllLoadBalancers(context1 interface{}) *mockV1Provider_DescribeAllLoadBalancers_Call {
+func (_e *mockV1Provider_Expecter) DescribeAllLoadBalancers(context1 any) *mockV1Provider_DescribeAllLoadBalancers_Call {
 	return &mockV1Provider_DescribeAllLoadBalancers_Call{Call: _e.mock.On("DescribeAllLoadBalancers", context1)}
 }
 
@@ -124,10 +133,19 @@ func newMockV2Provider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockV2Provider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockV2Provider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -180,7 +198,7 @@ type mockV2Provider_DescribeLoadBalancers_Call struct {
 
 // DescribeLoadBalancers is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockV2Provider_Expecter) DescribeLoadBalancers(context1 interface{}) *mockV2Provider_DescribeLoadBalancers_Call {
+func (_e *mockV2Provider_Expecter) DescribeLoadBalancers(context1 any) *mockV2Provider_DescribeLoadBalancers_Call {
 	return &mockV2Provider_DescribeLoadBalancers_Call{Call: _e.mock.On("DescribeLoadBalancers", context1)}
 }
 
