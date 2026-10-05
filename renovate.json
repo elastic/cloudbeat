@@ -252,6 +252,16 @@
       "enabled": false
     },
     {
+      "description": "Disable go-ini/ini updates - v1.67.1+ declares its module path as gopkg.in/ini.v1, so 'go get github.com/go-ini/ini' fails; gopkg.in/ini.v1 is already used by trivy/opa/rekor, only yq still imports the old path. Must stay after the 'Enable indirect Go dependencies' rule, which would otherwise re-enable it",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/go-ini/ini"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
