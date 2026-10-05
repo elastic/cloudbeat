@@ -453,7 +453,7 @@ require (
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sigstore/protobuf-specs v0.5.2 // indirect
 	github.com/sigstore/rekor v1.5.4 // indirect
-	github.com/sigstore/sigstore v1.10.9 // indirect
+	github.com/sigstore/sigstore v1.11.0 // indirect
 	github.com/sirupsen/logrus v1.10.2 // indirect
 	github.com/skeema/knownhosts v1.3.3 // indirect
 	github.com/spdx/tools-golang v0.5.7 // indirect
