@@ -174,7 +174,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.4 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.8 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
-	github.com/go-git/go-git/v5 v5.19.2 // indirect
+	github.com/go-git/go-git/v5 v5.19.3 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.5 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.14 // indirect
 	github.com/go-openapi/runtime/server-middleware v0.33.2 // indirect
@@ -389,7 +389,7 @@ require (
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
-	github.com/go-git/go-billy/v5 v5.9.1 // indirect
+	github.com/go-git/go-billy/v5 v5.9.2 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/logr v1.4.4
