@@ -35,10 +35,19 @@ func NewMockRegistry(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockRegistry {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockRegistry{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -128,7 +137,7 @@ type MockRegistry_Run_Call struct {
 //   - ctx context.Context
 //   - key string
 //   - metadata cycle.Metadata
-func (_e *MockRegistry_Expecter) Run(ctx interface{}, key interface{}, metadata interface{}) *MockRegistry_Run_Call {
+func (_e *MockRegistry_Expecter) Run(ctx any, key any, metadata any) *MockRegistry_Run_Call {
 	return &MockRegistry_Run_Call{Call: _e.mock.On("Run", ctx, key, metadata)}
 }
 
@@ -189,7 +198,7 @@ type MockRegistry_ShouldRun_Call struct {
 
 // ShouldRun is a helper method to define mock.On call
 //   - key string
-func (_e *MockRegistry_Expecter) ShouldRun(key interface{}) *MockRegistry_ShouldRun_Call {
+func (_e *MockRegistry_Expecter) ShouldRun(key any) *MockRegistry_ShouldRun_Call {
 	return &MockRegistry_ShouldRun_Call{Call: _e.mock.On("ShouldRun", key)}
 }
 
@@ -262,7 +271,7 @@ type MockRegistry_Update_Call struct {
 
 // Update is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockRegistry_Expecter) Update(context1 interface{}) *MockRegistry_Update_Call {
+func (_e *MockRegistry_Expecter) Update(context1 any) *MockRegistry_Update_Call {
 	return &MockRegistry_Update_Call{Call: _e.mock.On("Update", context1)}
 }
 

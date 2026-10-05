@@ -34,10 +34,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -90,7 +99,7 @@ type MockClient_AggregateResources_Call struct {
 
 // AggregateResources is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockClient_Expecter) AggregateResources(ctx interface{}) *MockClient_AggregateResources_Call {
+func (_e *MockClient_Expecter) AggregateResources(ctx any) *MockClient_AggregateResources_Call {
 	return &MockClient_AggregateResources_Call{Call: _e.mock.On("AggregateResources", ctx)}
 }
 

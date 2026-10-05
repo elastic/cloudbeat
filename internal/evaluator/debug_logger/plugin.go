@@ -76,7 +76,7 @@ func (p *plugin) Log(_ context.Context, event logs.EventV1) error {
 	}
 	p.manager.ConsoleLogger().WithFields(fields).WithFields(map[string]any{
 		"type": "openpolicyagent.org/decision_logs",
-	}).Debug(string(messageBytes))
+	}).Debug("%s", string(messageBytes))
 	return nil
 }
 

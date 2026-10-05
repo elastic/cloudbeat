@@ -34,10 +34,19 @@ func NewMockResourceGraphProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockResourceGraphProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockResourceGraphProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockResourceGraphProviderAPI_ListAllAssetTypesByName_Call struct {
 //   - ctx context.Context
 //   - assetsGroup string
 //   - assets []string
-func (_e *MockResourceGraphProviderAPI_Expecter) ListAllAssetTypesByName(ctx interface{}, assetsGroup interface{}, assets interface{}) *MockResourceGraphProviderAPI_ListAllAssetTypesByName_Call {
+func (_e *MockResourceGraphProviderAPI_Expecter) ListAllAssetTypesByName(ctx any, assetsGroup any, assets any) *MockResourceGraphProviderAPI_ListAllAssetTypesByName_Call {
 	return &MockResourceGraphProviderAPI_ListAllAssetTypesByName_Call{Call: _e.mock.On("ListAllAssetTypesByName", ctx, assetsGroup, assets)}
 }
 

@@ -35,10 +35,19 @@ func newMockStorageProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockStorageProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockStorageProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type mockStorageProvider_ListStorageAccountBlobContainers_Call struct {
 // ListStorageAccountBlobContainers is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountBlobContainers(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountBlobContainers_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountBlobContainers(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountBlobContainers_Call {
 	return &mockStorageProvider_ListStorageAccountBlobContainers_Call{Call: _e.mock.On("ListStorageAccountBlobContainers", ctx, storageAccounts)}
 }
 
@@ -160,7 +169,7 @@ type mockStorageProvider_ListStorageAccountBlobServices_Call struct {
 // ListStorageAccountBlobServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountBlobServices(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountBlobServices_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountBlobServices(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountBlobServices_Call {
 	return &mockStorageProvider_ListStorageAccountBlobServices_Call{Call: _e.mock.On("ListStorageAccountBlobServices", ctx, storageAccounts)}
 }
 
@@ -228,7 +237,7 @@ type mockStorageProvider_ListStorageAccountFileServices_Call struct {
 // ListStorageAccountFileServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountFileServices(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountFileServices_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountFileServices(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountFileServices_Call {
 	return &mockStorageProvider_ListStorageAccountFileServices_Call{Call: _e.mock.On("ListStorageAccountFileServices", ctx, storageAccounts)}
 }
 
@@ -296,7 +305,7 @@ type mockStorageProvider_ListStorageAccountFileShares_Call struct {
 // ListStorageAccountFileShares is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountFileShares(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountFileShares_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountFileShares(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountFileShares_Call {
 	return &mockStorageProvider_ListStorageAccountFileShares_Call{Call: _e.mock.On("ListStorageAccountFileShares", ctx, storageAccounts)}
 }
 
@@ -364,7 +373,7 @@ type mockStorageProvider_ListStorageAccountQueueServices_Call struct {
 // ListStorageAccountQueueServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountQueueServices(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountQueueServices_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountQueueServices(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountQueueServices_Call {
 	return &mockStorageProvider_ListStorageAccountQueueServices_Call{Call: _e.mock.On("ListStorageAccountQueueServices", ctx, storageAccounts)}
 }
 
@@ -432,7 +441,7 @@ type mockStorageProvider_ListStorageAccountQueues_Call struct {
 // ListStorageAccountQueues is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountQueues(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountQueues_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountQueues(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountQueues_Call {
 	return &mockStorageProvider_ListStorageAccountQueues_Call{Call: _e.mock.On("ListStorageAccountQueues", ctx, storageAccounts)}
 }
 
@@ -500,7 +509,7 @@ type mockStorageProvider_ListStorageAccountTableServices_Call struct {
 // ListStorageAccountTableServices is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountTableServices(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountTableServices_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountTableServices(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountTableServices_Call {
 	return &mockStorageProvider_ListStorageAccountTableServices_Call{Call: _e.mock.On("ListStorageAccountTableServices", ctx, storageAccounts)}
 }
 
@@ -568,7 +577,7 @@ type mockStorageProvider_ListStorageAccountTables_Call struct {
 // ListStorageAccountTables is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccounts []inventory.AzureAsset
-func (_e *mockStorageProvider_Expecter) ListStorageAccountTables(ctx interface{}, storageAccounts interface{}) *mockStorageProvider_ListStorageAccountTables_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccountTables(ctx any, storageAccounts any) *mockStorageProvider_ListStorageAccountTables_Call {
 	return &mockStorageProvider_ListStorageAccountTables_Call{Call: _e.mock.On("ListStorageAccountTables", ctx, storageAccounts)}
 }
 
@@ -636,7 +645,7 @@ type mockStorageProvider_ListStorageAccounts_Call struct {
 // ListStorageAccounts is a helper method to define mock.On call
 //   - ctx context.Context
 //   - storageAccountsSubscriptionsIds []string
-func (_e *mockStorageProvider_Expecter) ListStorageAccounts(ctx interface{}, storageAccountsSubscriptionsIds interface{}) *mockStorageProvider_ListStorageAccounts_Call {
+func (_e *mockStorageProvider_Expecter) ListStorageAccounts(ctx any, storageAccountsSubscriptionsIds any) *mockStorageProvider_ListStorageAccounts_Call {
 	return &mockStorageProvider_ListStorageAccounts_Call{Call: _e.mock.On("ListStorageAccounts", ctx, storageAccountsSubscriptionsIds)}
 }
 
@@ -703,7 +712,7 @@ type mockStorageProvider_ListSubscriptions_Call struct {
 
 // ListSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockStorageProvider_Expecter) ListSubscriptions(ctx interface{}) *mockStorageProvider_ListSubscriptions_Call {
+func (_e *mockStorageProvider_Expecter) ListSubscriptions(ctx any) *mockStorageProvider_ListSubscriptions_Call {
 	return &mockStorageProvider_ListSubscriptions_Call{Call: _e.mock.On("ListSubscriptions", ctx)}
 }
 

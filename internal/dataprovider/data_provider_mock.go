@@ -34,10 +34,19 @@ func NewMockCommonDataProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockCommonDataProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockCommonDataProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -80,7 +89,7 @@ type MockCommonDataProvider_EnrichEvent_Call struct {
 // EnrichEvent is a helper method to define mock.On call
 //   - event *beat.Event
 //   - resource fetching.ResourceMetadata
-func (_e *MockCommonDataProvider_Expecter) EnrichEvent(event interface{}, resource interface{}) *MockCommonDataProvider_EnrichEvent_Call {
+func (_e *MockCommonDataProvider_Expecter) EnrichEvent(event any, resource any) *MockCommonDataProvider_EnrichEvent_Call {
 	return &MockCommonDataProvider_EnrichEvent_Call{Call: _e.mock.On("EnrichEvent", event, resource)}
 }
 
@@ -118,10 +127,19 @@ func NewMockIdProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockIdProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockIdProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -164,7 +182,7 @@ type MockIdProvider_GetId_Call struct {
 // GetId is a helper method to define mock.On call
 //   - resourceType string
 //   - resourceId string
-func (_e *MockIdProvider_Expecter) GetId(resourceType interface{}, resourceId interface{}) *MockIdProvider_GetId_Call {
+func (_e *MockIdProvider_Expecter) GetId(resourceType any, resourceId any) *MockIdProvider_GetId_Call {
 	return &MockIdProvider_GetId_Call{Call: _e.mock.On("GetId", resourceType, resourceId)}
 }
 

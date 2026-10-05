@@ -34,10 +34,19 @@ func NewMockService(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockService {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockService{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -90,7 +99,7 @@ type MockService_Describe_Call struct {
 
 // Describe is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockService_Expecter) Describe(ctx interface{}) *MockService_Describe_Call {
+func (_e *MockService_Expecter) Describe(ctx any) *MockService_Describe_Call {
 	return &MockService_Describe_Call{Call: _e.mock.On("Describe", ctx)}
 }
 

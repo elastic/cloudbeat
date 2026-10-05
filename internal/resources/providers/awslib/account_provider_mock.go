@@ -38,10 +38,19 @@ func NewMockAccountProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAccountProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAccountProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -96,7 +105,7 @@ type MockAccountProviderAPI_ListAccounts_Call struct {
 //   - ctx context.Context
 //   - log *clog.Logger
 //   - cfg aws.Config
-func (_e *MockAccountProviderAPI_Expecter) ListAccounts(ctx interface{}, log interface{}, cfg interface{}) *MockAccountProviderAPI_ListAccounts_Call {
+func (_e *MockAccountProviderAPI_Expecter) ListAccounts(ctx any, log any, cfg any) *MockAccountProviderAPI_ListAccounts_Call {
 	return &MockAccountProviderAPI_ListAccounts_Call{Call: _e.mock.On("ListAccounts", ctx, log, cfg)}
 }
 
@@ -139,10 +148,19 @@ func newMockOrganizationsAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockOrganizationsAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockOrganizationsAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -203,9 +221,9 @@ type mockOrganizationsAPI_DescribeOrganizationalUnit_Call struct {
 //   - context1 context.Context
 //   - describeOrganizationalUnitInput *organizations.DescribeOrganizationalUnitInput
 //   - fns ...func(*organizations.Options)
-func (_e *mockOrganizationsAPI_Expecter) DescribeOrganizationalUnit(context1 interface{}, describeOrganizationalUnitInput interface{}, fns ...interface{}) *mockOrganizationsAPI_DescribeOrganizationalUnit_Call {
+func (_e *mockOrganizationsAPI_Expecter) DescribeOrganizationalUnit(context1 any, describeOrganizationalUnitInput any, fns ...any) *mockOrganizationsAPI_DescribeOrganizationalUnit_Call {
 	return &mockOrganizationsAPI_DescribeOrganizationalUnit_Call{Call: _e.mock.On("DescribeOrganizationalUnit",
-		append([]interface{}{context1, describeOrganizationalUnitInput}, fns...)...)}
+		append([]any{context1, describeOrganizationalUnitInput}, fns...)...)}
 }
 
 func (_c *mockOrganizationsAPI_DescribeOrganizationalUnit_Call) Run(run func(context1 context.Context, describeOrganizationalUnitInput *organizations.DescribeOrganizationalUnitInput, fns ...func(*organizations.Options))) *mockOrganizationsAPI_DescribeOrganizationalUnit_Call {
@@ -286,9 +304,9 @@ type mockOrganizationsAPI_ListAccounts_Call struct {
 //   - context1 context.Context
 //   - listAccountsInput *organizations.ListAccountsInput
 //   - fns ...func(*organizations.Options)
-func (_e *mockOrganizationsAPI_Expecter) ListAccounts(context1 interface{}, listAccountsInput interface{}, fns ...interface{}) *mockOrganizationsAPI_ListAccounts_Call {
+func (_e *mockOrganizationsAPI_Expecter) ListAccounts(context1 any, listAccountsInput any, fns ...any) *mockOrganizationsAPI_ListAccounts_Call {
 	return &mockOrganizationsAPI_ListAccounts_Call{Call: _e.mock.On("ListAccounts",
-		append([]interface{}{context1, listAccountsInput}, fns...)...)}
+		append([]any{context1, listAccountsInput}, fns...)...)}
 }
 
 func (_c *mockOrganizationsAPI_ListAccounts_Call) Run(run func(context1 context.Context, listAccountsInput *organizations.ListAccountsInput, fns ...func(*organizations.Options))) *mockOrganizationsAPI_ListAccounts_Call {
@@ -369,9 +387,9 @@ type mockOrganizationsAPI_ListParents_Call struct {
 //   - context1 context.Context
 //   - listParentsInput *organizations.ListParentsInput
 //   - fns ...func(*organizations.Options)
-func (_e *mockOrganizationsAPI_Expecter) ListParents(context1 interface{}, listParentsInput interface{}, fns ...interface{}) *mockOrganizationsAPI_ListParents_Call {
+func (_e *mockOrganizationsAPI_Expecter) ListParents(context1 any, listParentsInput any, fns ...any) *mockOrganizationsAPI_ListParents_Call {
 	return &mockOrganizationsAPI_ListParents_Call{Call: _e.mock.On("ListParents",
-		append([]interface{}{context1, listParentsInput}, fns...)...)}
+		append([]any{context1, listParentsInput}, fns...)...)}
 }
 
 func (_c *mockOrganizationsAPI_ListParents_Call) Run(run func(context1 context.Context, listParentsInput *organizations.ListParentsInput, fns ...func(*organizations.Options))) *mockOrganizationsAPI_ListParents_Call {
