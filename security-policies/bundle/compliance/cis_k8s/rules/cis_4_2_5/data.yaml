@@ -1,7 +1,6 @@
 metadata:
   id: 374309b1-b87a-58bd-b795-1067d2e8ee9f
-  name: Ensure that the --streaming-connection-idle-timeout argument is not set to
-    0
+  name: Ensure that the --streaming-connection-idle-timeout argument is not set to 0
   profile_applicability: '* Level 1 - Worker Node'
   description: Do not disable timeouts on streaming connections.
   rationale: |-

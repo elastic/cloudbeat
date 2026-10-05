@@ -49,7 +49,7 @@ jobs:
       contents: "read"
     steps:
       - name: Check out the repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -66,6 +66,14 @@ jobs:
             echo "error: Deployment name doesn't match the required pattern [a-z][-a-z0-9]*"
             exit 1
           fi
+
+      # Resolve S3 prefix before auth so always() uploads never write to DEPLOYMENT_NAME_/
+      - name: Set S3 state folder
+        run: |
+          TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')
+          S3_BUCKET_PATH="${S3_BASE_BUCKET}/${DEPLOYMENT_NAME}_${TF_STATE_FOLDER}"
+          echo "TF_STATE_FOLDER=$TF_STATE_FOLDER" >> "$GITHUB_ENV"
+          echo "S3_BUCKET_PATH=$S3_BUCKET_PATH" >> "$GITHUB_ENV"
 
       - name: Process Stack Version
         id: remove-commit-hash
@@ -102,7 +110,7 @@ jobs:
       - name: Get Elastic Cloud Credentials from Vault
         id: get-ec-credentials
         if: steps.determine-vault-path.outcome == 'success'
-        uses: hashicorp/vault-action@9c2d817b85b9fff56bcab21cb74b485aee9e9d73 # v2.8.1
+        uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
         with:
           url: ${{ secrets.VAULT_ADDR }}
           roleId: ${{ secrets.CSP_VAULT_ROLE_ID }}
@@ -134,15 +142,11 @@ jobs:
           source .ci/scripts/map_ess_region.sh
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Update Vars
-        run: |
-          echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> "$GITHUB_ENV"
 
       - name: Deploy ELK Cloud Stack
         id: elk-stack
@@ -154,19 +158,18 @@ jobs:
           ess-region: ${{ env.ESS_REGION }}
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
           ec-url: ${{ env.EC_URL }}
-          kibana-security-solution-experimental: false
           kibana-enable-entity-analytics-settings: true
           kibana-instance-size: ${{ inputs.kibana_instance_size }}
           elasticsearch-ml-enabled: true
-          env-s3-bucket: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          env-s3-bucket: ${{ env.S3_BUCKET_PATH }}
           tag-project: ${{ github.actor }}
           tag-owner: ${{ github.actor }}
 
       - name: Upload environment info
         id: upload-state
-        if: always()
+        if: always() && env.S3_BUCKET_PATH != ''
         env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+          S3_BUCKET: ${{ env.S3_BUCKET_PATH }}
           EXPIRATION_DAYS: ${{ inputs.expiration_days }}
           ESS_REGION: production-cft
           ESS_REGION_MAPPED: ${{ env.ESS_REGION }}
@@ -206,7 +209,7 @@ jobs:
 
       - name: Checkout security-documents-generator
         if: success()
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: elastic/security-documents-generator
           path: security-documents-generator
@@ -214,7 +217,7 @@ jobs:
 
       - name: Setup Node for security-documents-generator
         if: success()
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           # Paths are relative to repository root (do not prefix github.workspace — setup-node joins it and duplicates the path).
           node-version-file: security-documents-generator/.nvmrc

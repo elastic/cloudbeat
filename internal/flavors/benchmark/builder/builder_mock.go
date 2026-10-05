@@ -35,10 +35,19 @@ func NewMockBenchmark(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockBenchmark {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockBenchmark{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockBenchmark_Run_Call struct {
 
 // Run is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockBenchmark_Expecter) Run(ctx interface{}) *MockBenchmark_Run_Call {
+func (_e *MockBenchmark_Expecter) Run(ctx any) *MockBenchmark_Run_Call {
 	return &MockBenchmark_Run_Call{Call: _e.mock.On("Run", ctx)}
 }
 

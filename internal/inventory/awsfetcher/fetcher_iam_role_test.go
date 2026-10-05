@@ -88,6 +88,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 				ID:   "arn:aws:iam::0000:role/role-name-1",
 				Name: "role-name-1",
 			}),
+			inventory.WithCreatedAt(&now),
 		),
 
 		inventory.NewAssetEvent(
@@ -107,6 +108,7 @@ func TestIAMRoleFetcher_Fetch(t *testing.T) {
 				ID:   "arn:aws:iam::0000:role/role-name-2",
 				Name: "role-name-2",
 			}),
+			inventory.WithCreatedAt(&now),
 		),
 	}
 

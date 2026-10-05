@@ -20,6 +20,7 @@ package elb_v2
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	elbv2 "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
@@ -46,7 +47,8 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 			input.Marker = output.NextMarker
 		}
 
-		var result []awslib.AwsResource
+		lbs := make([]*ElasticLoadBalancerInfo, 0, len(all))
+		arns := make([]string, 0, len(all))
 		for _, item := range all {
 			loadBalancer := &ElasticLoadBalancerInfo{
 				LoadBalancer: item,
@@ -58,7 +60,19 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 			} else {
 				loadBalancer.Listeners = listeners
 			}
-			result = append(result, loadBalancer)
+			loadBalancer.dnsResolvedIPs = p.resolveIPsFromDNS(ctx, loadBalancer)
+			lbs = append(lbs, loadBalancer)
+			if arn := loadBalancer.GetResourceArn(); arn != "" {
+				arns = append(arns, arn)
+			}
+		}
+
+		tagsByArn := p.describeTags(ctx, c, arns)
+
+		result := make([]awslib.AwsResource, 0, len(lbs))
+		for _, lb := range lbs {
+			lb.tags = tagsByArn[lb.GetResourceArn()]
+			result = append(result, lb)
 		}
 		return result, nil
 	})
@@ -67,6 +81,55 @@ func (p *Provider) DescribeLoadBalancers(ctx context.Context) ([]awslib.AwsResou
 		p.log.Debugf("Fetched %d Elastic Load Balancers", len(result))
 	}
 	return result, err
+}
+
+// resolveIPsFromDNS resolves the load balancer's DNS name to IP addresses. The AWS API only
+// populates LoadBalancerAddresses[].IpAddress for NLBs with assigned Elastic IPs, so this is
+// the fallback for every other case. Returns nil when the API already gave us addresses, when
+// there is no DNS name, or when resolution fails — a DNS outage must not fail the fetch cycle.
+func (p *Provider) resolveIPsFromDNS(ctx context.Context, lb *ElasticLoadBalancerInfo) []string {
+	if len(lb.GetIPAddresses()) > 0 {
+		return nil
+	}
+	dnsName := pointers.Deref(lb.LoadBalancer.DNSName)
+	if dnsName == "" {
+		return nil
+	}
+	ips, err := p.resolver.LookupHost(ctx, dnsName)
+	if err != nil {
+		p.log.Debugf("Could not resolve IPs for ELBv2 %q: %v", dnsName, err)
+		return nil
+	}
+	sort.Strings(ips)
+	return ips
+}
+
+// describeTags fetches tags for the given load balancer ARNs (chunked to the AWS 20-ARN
+// limit) and returns a map of load balancer ARN to its tag key/value pairs.
+func (p *Provider) describeTags(ctx context.Context, c Client, arns []string) map[string]map[string]string {
+	out := map[string]map[string]string{}
+	for _, chunk := range lo.Chunk(arns, 20) {
+		if len(chunk) == 0 {
+			continue
+		}
+		resp, err := c.DescribeTags(ctx, &elbv2.DescribeTagsInput{ResourceArns: chunk})
+		if err != nil {
+			p.log.Errorf("Could not fetch tags for load balancers: %v", err)
+			continue
+		}
+		for _, td := range resp.TagDescriptions {
+			arn := pointers.Deref(td.ResourceArn)
+			if arn == "" {
+				continue
+			}
+			tags := make(map[string]string, len(td.Tags))
+			for _, t := range td.Tags {
+				tags[pointers.Deref(t.Key)] = pointers.Deref(t.Value)
+			}
+			out[arn] = tags
+		}
+	}
+	return out
 }
 
 // describeListeners queries and returns all Listeners filtered by ELB ARN and region.

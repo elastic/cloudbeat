@@ -90,6 +90,7 @@ func (i *iamPolicyFetcher) Fetch(ctx context.Context, assetChannel chan<- invent
 				AccountName: i.AccountName,
 				ServiceName: "AWS IAM",
 			}),
+			inventory.WithCreatedAt(policy.CreateDate),
 		)
 	}
 }

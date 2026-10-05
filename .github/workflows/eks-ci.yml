@@ -59,7 +59,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out the repo
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Hermit Environment
         uses: ./.github/actions/hermit
@@ -98,7 +98,7 @@ jobs:
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -106,7 +106,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7 # v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2
 
       - name: Load images cloudbeat and cloudbeat-test to ECR
         id: load-to-ecr
@@ -137,7 +137,7 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Check out the repo
-        uses: actions/checkout@900f2210b1d28bbbd0bd22d17926b9e224e8f231
+        uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
 
       # Setup all required tools
       - name: Init Hermit

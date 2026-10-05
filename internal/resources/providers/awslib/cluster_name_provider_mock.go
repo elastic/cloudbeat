@@ -35,10 +35,19 @@ func NewMockEKSClusterNameProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockEKSClusterNameProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockEKSClusterNameProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockEKSClusterNameProviderAPI_GetClusterName_Call struct {
 //   - ctx context.Context
 //   - cfg aws.Config
 //   - instanceId string
-func (_e *MockEKSClusterNameProviderAPI_Expecter) GetClusterName(ctx interface{}, cfg interface{}, instanceId interface{}) *MockEKSClusterNameProviderAPI_GetClusterName_Call {
+func (_e *MockEKSClusterNameProviderAPI_Expecter) GetClusterName(ctx any, cfg any, instanceId any) *MockEKSClusterNameProviderAPI_GetClusterName_Call {
 	return &MockEKSClusterNameProviderAPI_GetClusterName_Call{Call: _e.mock.On("GetClusterName", ctx, cfg, instanceId)}
 }
 

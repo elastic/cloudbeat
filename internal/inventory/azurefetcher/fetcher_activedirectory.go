@@ -35,7 +35,7 @@ type activedirectoryFetcher struct {
 
 type (
 	activedirectoryProvider interface {
-		ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error)
+		ListServicePrincipals(ctx context.Context) ([]models.ServicePrincipalable, error)
 		ListDirectoryRoles(context.Context) ([]*models.DirectoryRole, error)
 		ListGroups(context.Context) ([]*models.Group, error)
 		ListUsers(context.Context) ([]*models.User, error)
@@ -144,6 +144,7 @@ func (f *activedirectoryFetcher) fetchGroups(ctx context.Context, assetChan chan
 				ID:   pointers.Deref(item.GetId()),
 				Name: pointers.Deref(item.GetDisplayName()),
 			}),
+			inventory.WithCreatedAt(item.GetCreatedDateTime()),
 		)
 	}
 }
@@ -174,6 +175,7 @@ func (f *activedirectoryFetcher) fetchUsers(ctx context.Context, assetChan chan<
 				ID:   pointers.Deref(item.GetId()),
 				Name: pointers.Deref(item.GetDisplayName()),
 			}),
+			inventory.WithCreatedAt(item.GetCreatedDateTime()),
 		)
 	}
 }

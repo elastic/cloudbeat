@@ -32,10 +32,19 @@ func NewMockOSUser(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockOSUser {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockOSUser{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -87,7 +96,7 @@ type MockOSUser_GetGroupNameFromID_Call struct {
 // GetGroupNameFromID is a helper method to define mock.On call
 //   - gid string
 //   - groupFilePath string
-func (_e *MockOSUser_Expecter) GetGroupNameFromID(gid interface{}, groupFilePath interface{}) *MockOSUser_GetGroupNameFromID_Call {
+func (_e *MockOSUser_Expecter) GetGroupNameFromID(gid any, groupFilePath any) *MockOSUser_GetGroupNameFromID_Call {
 	return &MockOSUser_GetGroupNameFromID_Call{Call: _e.mock.On("GetGroupNameFromID", gid, groupFilePath)}
 }
 
@@ -153,7 +162,7 @@ type MockOSUser_GetUserNameFromID_Call struct {
 // GetUserNameFromID is a helper method to define mock.On call
 //   - uid string
 //   - userFilePath string
-func (_e *MockOSUser_Expecter) GetUserNameFromID(uid interface{}, userFilePath interface{}) *MockOSUser_GetUserNameFromID_Call {
+func (_e *MockOSUser_Expecter) GetUserNameFromID(uid any, userFilePath any) *MockOSUser_GetUserNameFromID_Call {
 	return &MockOSUser_GetUserNameFromID_Call{Call: _e.mock.On("GetUserNameFromID", uid, userFilePath)}
 }
 

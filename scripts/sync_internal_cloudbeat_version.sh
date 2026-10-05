@@ -3,6 +3,7 @@ set -xeuo pipefail
 
 VERSION_FILE="version/version.go"
 HERMIT_FILE="bin/hermit.hcl"
+ARTIFACTS_API_URL="https://artifacts-api.elastic.co/v1/versions"
 
 git config --global user.email "cloudsecmachine@users.noreply.github.com"
 git config --global user.name "Cloud Security Machine"
@@ -18,9 +19,59 @@ set_hermit_cloudbeat_version() {
     sed -E -i "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE
 }
 
+sync_pr_already_open() {
+    # A previous run may have opened a sync PR for this version that hasn't merged
+    # yet; main still shows the drift, so avoid opening a duplicate every run.
+    local existing
+    existing=$(gh pr list \
+        --search "Sync CLOUDBEAT_VERSION in hermit.hcl to $CLOUDBEAT_VERSION in:title" \
+        --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
+    [[ -n "$existing" ]]
+}
+
+is_snapshot_published() {
+    # ELK_VERSION resolves to "${CLOUDBEAT_VERSION}-SNAPSHOT"; only bump once that
+    # snapshot actually exists on the Elastic artifacts API, otherwise the test-runner
+    # would pin a version whose agent artifacts aren't published yet (see issue #17923).
+    local target="${CLOUDBEAT_VERSION}-SNAPSHOT"
+    echo "Checking whether $target is published on the Elastic artifacts API"
+    local versions
+    if ! versions=$(curl -fsS "$ARTIFACTS_API_URL" | jq -r '.versions[]'); then
+        echo "Could not query $ARTIFACTS_API_URL; skipping this run to be safe"
+        return 1
+    fi
+    if grep -qxF "$target" <<<"$versions"; then
+        echo "$target is available"
+        return 0
+    fi
+    echo "$target is not published yet"
+    return 1
+}
+
 handle_version_changes() {
     if git diff --quiet --exit-code $HERMIT_FILE; then
         echo "No changes to $HERMIT_FILE; I'm done"
+        return
+    fi
+
+    if git diff --quiet --exit-code $HERMIT_FILE; then
+        echo "No changes to $HERMIT_FILE; I'm done"
+        return
+    fi
+
+    # A sync PR for this version may already be open from a previous run
+    # (main stays on the old version until it merges) — don't open a duplicate.
+    if sync_pr_already_open; then
+        echo "An open sync PR for $CLOUDBEAT_VERSION already exists; skipping."
+        git checkout -- "$HERMIT_FILE"
+        return
+    fi
+
+    # A bump is pending — only open a PR once the target snapshot is actually
+    # published, otherwise revert and let the next scheduled run try again.
+    if ! is_snapshot_published; then
+        echo "Skipping bump; ${CLOUDBEAT_VERSION}-SNAPSHOT not published yet. Will retry on the next run."
+        git checkout -- "$HERMIT_FILE"
         return
     fi
 
@@ -46,7 +97,6 @@ handle_version_changes() {
         --base "$current_branch" \
         --head "$branch_name"
 }
-
 find_current_cloudbeat_version
 set_hermit_cloudbeat_version
 handle_version_changes

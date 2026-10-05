@@ -1,7 +1,6 @@
 metadata:
   id: b794635d-a338-5b4e-bfa0-75257e854c6a
-  name: Ensure Storage logging is Enabled for Blob Service for 'Read', 'Write', and
-    'Delete' requests
+  name: Ensure Storage logging is Enabled for Blob Service for 'Read', 'Write', and 'Delete' requests
   profile_applicability: '* Level 2'
   description: |-
     The Storage Blob service provides scalable, cost-efficient object storage in the cloud.

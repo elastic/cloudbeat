@@ -36,12 +36,38 @@ import (
 var onlyDefaultRegion = []string{awslib.DefaultRegion}
 
 func TestProvider_DescribeLoadBalancers(t *testing.T) {
+	elbWithDNSNoIPs := func() *MockClient {
+		m := &MockClient{}
+		m.On("DescribeListeners", mock.Anything, mock.Anything, mock.Anything).Return(&elb.DescribeListenersOutput{
+			Listeners: []types.Listener{},
+		}, nil)
+		m.On("DescribeLoadBalancers", mock.Anything, mock.Anything).
+			Return(&elb.DescribeLoadBalancersOutput{
+				LoadBalancers: []types.LoadBalancer{
+					{
+						AvailabilityZones:     []types.AvailabilityZone{},
+						CanonicalHostedZoneId: pointers.Ref("HZ-ID"),
+						CreatedTime:           pointers.Ref(time.Now()),
+						DNSName:               pointers.Ref("my-nlb.us-east-1.elb.amazonaws.com"),
+						LoadBalancerArn:       pointers.Ref("arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2"),
+						LoadBalancerName:      pointers.Ref("my-elb-v2"),
+						Scheme:                types.LoadBalancerSchemeEnumInternetFacing,
+						Type:                  types.LoadBalancerTypeEnumNetwork,
+					},
+				},
+			}, nil)
+		m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).Return(&elb.DescribeTagsOutput{}, nil)
+		return m
+	}
+
 	tests := []struct {
 		name            string
 		client          func() Client
+		resolver        func(t *testing.T) hostResolver
 		expectedResults int
 		wantErr         bool
 		regions         []string
+		checkResult     func(t *testing.T, got []awslib.AwsResource)
 	}{
 		{
 			name: "with error",
@@ -52,6 +78,10 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 				}, nil)
 				m.On("DescribeLoadBalancers", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
 				return m
+			},
+			resolver: func(t *testing.T) hostResolver {
+				// DescribeLoadBalancers fails before any lookup is attempted.
+				return newMockHostResolver(t)
 			},
 			wantErr: true,
 			regions: onlyDefaultRegion,
@@ -69,13 +99,18 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 						},
 					},
 				}, nil)
+				m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).Return(&elb.DescribeTagsOutput{}, nil)
 				return m
+			},
+			resolver: func(t *testing.T) hostResolver {
+				// No DNSName on the LB, so LookupHost is never reached.
+				return newMockHostResolver(t)
 			},
 			regions:         onlyDefaultRegion,
 			expectedResults: 1,
 		},
 		{
-			name: "with resources",
+			name: "API returns IPs — resolver not called",
 			client: func() Client {
 				m := &MockClient{}
 				m.On("DescribeListeners", mock.Anything, mock.Anything, mock.Anything).Return(&elb.DescribeListenersOutput{
@@ -85,7 +120,14 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 					Return(&elb.DescribeLoadBalancersOutput{
 						LoadBalancers: []types.LoadBalancer{
 							{
-								AvailabilityZones:     []types.AvailabilityZone{},
+								AvailabilityZones: []types.AvailabilityZone{
+									{
+										LoadBalancerAddresses: []types.LoadBalancerAddress{
+											{IpAddress: pointers.Ref("203.0.113.10")},
+											{PrivateIPv4Address: pointers.Ref("10.0.1.5")},
+										},
+									},
+								},
 								CanonicalHostedZoneId: pointers.Ref("HZ-ID"),
 								CreatedTime:           pointers.Ref(time.Now()),
 								CustomerOwnedIpv4Pool: pointers.Ref("10.0.0.0/24"),
@@ -95,15 +137,77 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 								LoadBalancerName: pointers.Ref("my-elb-v2"),
 								Scheme:           types.LoadBalancerSchemeEnumInternal,
 								SecurityGroups:   []string{},
-								Type:             types.LoadBalancerTypeEnumApplication,
+								State:            &types.LoadBalancerState{Code: types.LoadBalancerStateEnumActive},
+								Type:             types.LoadBalancerTypeEnumNetwork,
 								VpcId:            pointers.Ref(""),
+							},
+						},
+					}, nil)
+				m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).
+					Return(&elb.DescribeTagsOutput{
+						TagDescriptions: []types.TagDescription{
+							{
+								ResourceArn: pointers.Ref("arn:aws:elasticloadbalancing:::loadbalancer/my-elb-v2"),
+								Tags: []types.Tag{
+									{Key: pointers.Ref("Owner"), Value: pointers.Ref("team-infra")},
+								},
 							},
 						},
 					}, nil)
 				return m
 			},
+			resolver: func(t *testing.T) hostResolver {
+				// API returned IPs, so the DNS fallback is not reached.
+				return newMockHostResolver(t)
+			},
 			regions:         onlyDefaultRegion,
 			expectedResults: 1,
+			checkResult: func(t *testing.T, got []awslib.AwsResource) {
+				t.Helper()
+				lb, ok := got[0].(*ElasticLoadBalancerInfo)
+				require.True(t, ok)
+				assert.Equal(t, "team-infra", lb.GetOwnerTag())
+				assert.Equal(t, "network", lb.GetLoadBalancerType())
+				assert.Equal(t, "active", lb.GetState())
+				assert.Equal(t, []string{"203.0.113.10", "10.0.1.5"}, lb.GetIPAddresses())
+			},
+		},
+		{
+			name:   "DNS fallback used when API returns no IPs",
+			client: func() Client { return elbWithDNSNoIPs() },
+			resolver: func(t *testing.T) hostResolver {
+				m := newMockHostResolver(t)
+				// Intentionally unsorted to verify the provider sorts the result.
+				m.EXPECT().LookupHost(mock.Anything, "my-nlb.us-east-1.elb.amazonaws.com").
+					Return([]string{"203.0.113.2", "203.0.113.1"}, nil)
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+			checkResult: func(t *testing.T, got []awslib.AwsResource) {
+				t.Helper()
+				lb, ok := got[0].(*ElasticLoadBalancerInfo)
+				require.True(t, ok)
+				assert.Equal(t, []string{"203.0.113.1", "203.0.113.2"}, lb.GetIPAddresses())
+			},
+		},
+		{
+			name:   "resolver error — soft-fail, LB still emitted with no IPs",
+			client: func() Client { return elbWithDNSNoIPs() },
+			resolver: func(t *testing.T) hostResolver {
+				m := newMockHostResolver(t)
+				m.EXPECT().LookupHost(mock.Anything, "my-nlb.us-east-1.elb.amazonaws.com").
+					Return(nil, errors.New("dns timeout"))
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+			checkResult: func(t *testing.T, got []awslib.AwsResource) {
+				t.Helper()
+				lb, ok := got[0].(*ElasticLoadBalancerInfo)
+				require.True(t, ok)
+				assert.Empty(t, lb.GetIPAddresses())
+			},
 		},
 		{
 			name: "with resources + listeners",
@@ -136,6 +240,13 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 							},
 						},
 					}, nil)
+				m.On("DescribeTags", mock.Anything, mock.Anything, mock.Anything).Return(&elb.DescribeTagsOutput{}, nil)
+				return m
+			},
+			resolver: func(t *testing.T) hostResolver {
+				m := newMockHostResolver(t)
+				m.EXPECT().LookupHost(mock.Anything, "internal-my-elb-v2.us-east-1.elb.amazonaws.com").
+					Return([]string{"10.0.0.5"}, nil)
 				return m
 			},
 			regions:         onlyDefaultRegion,
@@ -149,8 +260,9 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:     testhelper.NewLogger(t),
-				clients: clients,
+				log:      testhelper.NewLogger(t),
+				clients:  clients,
+				resolver: tt.resolver(t),
 			}
 			got, err := p.DescribeLoadBalancers(t.Context())
 			if tt.wantErr {
@@ -160,6 +272,9 @@ func TestProvider_DescribeLoadBalancers(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.Len(t, got, tt.expectedResults)
+			if tt.checkResult != nil {
+				tt.checkResult(t, got)
+			}
 		})
 	}
 }

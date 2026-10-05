@@ -19,6 +19,7 @@ package elb_v2
 
 import (
 	"context"
+	"net"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
@@ -27,9 +28,16 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
+// hostResolver abstracts DNS resolution so that tests can inject a fake without hitting the
+// real network. *net.Resolver satisfies this interface.
+type hostResolver interface {
+	LookupHost(ctx context.Context, host string) ([]string, error)
+}
+
 type Client interface {
 	elb.DescribeLoadBalancersAPIClient
 	elb.DescribeListenersAPIClient
+	DescribeTags(ctx context.Context, params *elb.DescribeTagsInput, optFns ...func(*elb.Options)) (*elb.DescribeTagsOutput, error)
 }
 
 type LoadBalancerDescriber interface {
@@ -37,8 +45,9 @@ type LoadBalancerDescriber interface {
 }
 
 type Provider struct {
-	log     *clog.Logger
-	clients map[string]Client
+	log      *clog.Logger
+	clients  map[string]Client
+	resolver hostResolver
 }
 
 func NewElbV2Provider(ctx context.Context, log *clog.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
@@ -47,7 +56,8 @@ func NewElbV2Provider(ctx context.Context, log *clog.Logger, cfg aws.Config, fac
 	}
 	m := factory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
-		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
+		log:      log,
+		clients:  m.GetMultiRegionsClientMap(),
+		resolver: net.DefaultResolver,
 	}
 }

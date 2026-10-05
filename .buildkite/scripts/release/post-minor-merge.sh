@@ -4,7 +4,12 @@ set -euo pipefail
 # Runs after the minor version bump PR is merged into main.
 # Performs two operations:
 #   1. Branch-out: create and push the new X.Y release branch from main
-#   2. Hermit PR: sync CLOUDBEAT_VERSION in bin/hermit.hcl to match version.go
+#   2. Main bump: advance main's version to the next minor (e.g. 9.5.0 -> 9.6.0)
+#
+# Does NOT sync bin/hermit.hcl — that's owned by scripts/sync_internal_cloudbeat_version.sh
+# (see .github/workflows/sync-internal-cloudbeat-version.yml), which gates the sync on the
+# target snapshot actually being published so we never pin hermit to a version whose agent
+# artifacts don't exist yet.
 #
 # Required env vars:
 #   BRANCH      — new minor branch name (e.g. 9.3)
@@ -22,16 +27,18 @@ source "${SCRIPT_DIR}/common.sh"
 
 GH_REPO="elastic/${REPO}"
 DRY_RUN="${DRY_RUN:-false}"
-HERMIT_BRANCH="sync-cloudbeat-version-$(date +%s)"
+NEXT_MAIN_VERSION=$(next_minor_version "${NEW_VERSION}")
+BUMP_BRANCH="bump-to-${NEXT_MAIN_VERSION}"
 
 git fetch origin main
 git checkout main
 
 echo "--- Post-minor-merge parameters"
-echo "  REPO:        ${REPO}"
-echo "  BRANCH:      ${BRANCH}"
-echo "  NEW_VERSION: ${NEW_VERSION}"
-echo "  DRY_RUN:     ${DRY_RUN}"
+echo "  REPO:              ${REPO}"
+echo "  BRANCH:            ${BRANCH}"
+echo "  NEW_VERSION:       ${NEW_VERSION}"
+echo "  NEXT_MAIN_VERSION: ${NEXT_MAIN_VERSION}"
+echo "  DRY_RUN:           ${DRY_RUN}"
 
 setup_git_identity
 
@@ -41,6 +48,22 @@ branch_out() {
     if git ls-remote --exit-code --heads origin "${BRANCH}" >/dev/null 2>&1; then
         echo "Branch ${BRANCH} already exists on origin — skipping."
         return
+    fi
+
+    # Sanity check: main should still be at NEW_VERSION when we cut the release
+    # branch. If it has already been advanced (e.g. main == NEXT_MAIN_VERSION
+    # because a previous bump_main_to_next_minor merged but branch_out never
+    # ran), cutting the branch from current main would silently point ${BRANCH}
+    # at the wrong code. Refuse and require manual intervention rather than
+    # produce a wrong-content release branch.
+    local main_version
+    main_version=$(grep defaultBeatVersion version/version.go | cut -f2 -d '"')
+    if [[ "${main_version}" != "${NEW_VERSION}" ]]; then
+        echo "ERROR: main is at ${main_version}, expected ${NEW_VERSION}."
+        echo "Refusing to cut ${BRANCH} — the resulting branch would not represent ${NEW_VERSION}'s code."
+        echo "This means main advanced without ${BRANCH} being cut."
+        echo "To recover: create ${BRANCH} manually from the commit where main was at ${NEW_VERSION}, then re-run this pipeline."
+        exit 1
     fi
 
     if [[ "${DRY_RUN}" == "true" ]]; then
@@ -53,44 +76,53 @@ branch_out() {
     git checkout main
 }
 
-hermit_pr() {
-    echo "--- Syncing CLOUDBEAT_VERSION in hermit.hcl to ${NEW_VERSION}"
+bump_main_to_next_minor() {
+    echo "--- Bumping main to next minor version ${NEXT_MAIN_VERSION}"
 
-    local existing_pr
-    existing_pr=$(gh pr list --repo "${GH_REPO}" \
-        --search "Sync CLOUDBEAT_VERSION in hermit.hcl to ${NEW_VERSION}" \
-        --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
-    if [[ -n "${existing_pr}" ]]; then
-        echo "Hermit PR #${existing_pr} already open — skipping."
-        return
-    fi
+    pr_exists && return
 
-    git checkout -b "${HERMIT_BRANCH}" origin/main
+    fail_if_stale_remote_branch "${BUMP_BRANCH}"
 
-    sed -i'' -E "s/\"CLOUDBEAT_VERSION\": \".*\"/\"CLOUDBEAT_VERSION\": \"${NEW_VERSION}\"/" bin/hermit.hcl
-    git add bin/hermit.hcl
+    git checkout -b "${BUMP_BRANCH}" origin/main
 
-    if git diff --cached --quiet; then
-        echo "hermit.hcl already at ${NEW_VERSION} — skipping."
+    NEXT_CLOUDBEAT_VERSION="${NEXT_MAIN_VERSION}"
+    echo "  NEXT_CLOUDBEAT_VERSION: ${NEXT_CLOUDBEAT_VERSION}"
+    update_version_beat
+    update_arm_templates "${NEXT_MAIN_VERSION}"
+
+    if git diff --quiet origin/main HEAD; then
+        echo "main is already at ${NEXT_MAIN_VERSION} — skipping."
         git checkout main
         return
     fi
 
-    git commit -m "Sync CLOUDBEAT_VERSION in hermit.hcl to ${NEW_VERSION}"
+    local body
+    body=$(render_template "${SCRIPT_DIR}/templates/pr-body-bump-main.md")
 
     if [[ "${DRY_RUN}" == "true" ]]; then
-        echo "Dry run: would push ${HERMIT_BRANCH} and open hermit PR"
+        echo "--- Dry run: skipping push and PR creation"
+        gh pr create \
+            --repo "${GH_REPO}" \
+            --head "${BUMP_BRANCH}" \
+            --base main \
+            --title "Bump cloudbeat version to ${NEXT_MAIN_VERSION}" \
+            --body "${body}" \
+            --label "backport-skip" \
+            --dry-run
+        git checkout main
         return
     fi
 
-    git push origin "${HERMIT_BRANCH}"
+    git push origin "${BUMP_BRANCH}"
     gh pr create \
         --repo "${GH_REPO}" \
-        --head "${HERMIT_BRANCH}" \
+        --head "${BUMP_BRANCH}" \
         --base main \
-        --title "Sync CLOUDBEAT_VERSION in hermit.hcl to ${NEW_VERSION}" \
-        --body "Automated update of CLOUDBEAT_VERSION in hermit.hcl to match version.go"
+        --title "Bump cloudbeat version to ${NEXT_MAIN_VERSION}" \
+        --body "${body}" \
+        --label "backport-skip"
+    git checkout main
 }
 
 branch_out
-hermit_pr
+bump_main_to_next_minor

@@ -112,6 +112,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 				BucketVersioning:                      bucketVersioning,
 				PublicAccessBlockConfiguration:        publicAccessBlockConfiguration,
 				AccountPublicAccessBlockConfiguration: accountPublicAccessBlockConfig,
+				CreationDate:                          bucket.CreationDate,
 				Region:                                region,
 			})
 		}

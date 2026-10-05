@@ -32,10 +32,19 @@ func NewMockStatusHandlerAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockStatusHandlerAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockStatusHandlerAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -66,7 +75,7 @@ type MockStatusHandlerAPI_Degraded_Call struct {
 
 // Degraded is a helper method to define mock.On call
 //   - message string
-func (_e *MockStatusHandlerAPI_Expecter) Degraded(message interface{}) *MockStatusHandlerAPI_Degraded_Call {
+func (_e *MockStatusHandlerAPI_Expecter) Degraded(message any) *MockStatusHandlerAPI_Degraded_Call {
 	return &MockStatusHandlerAPI_Degraded_Call{Call: _e.mock.On("Degraded", message)}
 }
 

@@ -3,10 +3,10 @@
   "extends": [
     "local>elastic/renovate-config"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main",
+    "9.5",
     "9.4",
-    "9.3",
     "8.19"
   ],
   "schedule": [
@@ -32,15 +32,42 @@
   "ignorePaths": [
     "**/vendor/**"
   ],
+  "enabledManagers": [
+    "buildkite",
+    "dockerfile",
+    "github-actions",
+    "gomod",
+    "helm-values",
+    "hermit",
+    "kustomize",
+    "poetry",
+    "pre-commit",
+    "terraform"
+  ],
+  "pre-commit": {
+    "enabled": true
+  },
   "customManagers": [
     {
       "description": "Update .go-version file",
       "customType": "regex",
-      "fileMatch": [
-        "^\\.go-version$"
+      "managerFilePatterns": [
+        "/^\\.go-version$/"
       ],
       "matchStrings": [
         "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
+      ],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "description": "Update :go-version: in docs/version.asciidoc",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^docs/version\\.asciidoc$/"
+      ],
+      "matchStrings": [
+        ":go-version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version"
@@ -184,6 +211,47 @@
       "enabled": true
     },
     {
+      "description": "Disable sarama updates - requires manual handling",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "/^github\\.com/elastic/sarama$/"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable go.mod replace directive updates - pins must match beats go.mod; renovate writes invalid bare commit hashes",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "replace"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable goja updates - replaced by elastic/goja, version is driven by beats",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/dop251/goja",
+        "github.com/dop251/goja_nodejs"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable e2e-testing updates - v1.99.x tags are not real releases (latest is v1.2.3)",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/elastic/e2e-testing"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
@@ -237,22 +305,31 @@
       ]
     },
     {
+      "description": "Group pre-commit hook rev updates into one PR",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "groupName": "pre-commit"
+    },
+    {
       "description": "Disable CI/infrastructure/test-environment updates on release branches",
       "matchBaseBranches": [
+        "9.5",
         "9.4",
-        "9.3",
         "8.19"
       ],
       "matchFileNames": [
         ".github/workflows/**",
         ".buildkite/**",
         "**/pyproject.toml",
-        "deploy/test-environments/**"
+        "deploy/test-environments/**",
+        ".pre-commit-config.yaml"
       ],
       "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
     "enabled": false
-  }
+  },
+  "dependencyDashboardReportAbandonment": false
 }

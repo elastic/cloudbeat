@@ -37,10 +37,19 @@ func NewMockAccessManagement(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAccessManagement {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAccessManagement{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockAccessManagement_GetAccessAnalyzers_Call struct {
 
 // GetAccessAnalyzers is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockAccessManagement_Expecter) GetAccessAnalyzers(ctx interface{}) *MockAccessManagement_GetAccessAnalyzers_Call {
+func (_e *MockAccessManagement_Expecter) GetAccessAnalyzers(ctx any) *MockAccessManagement_GetAccessAnalyzers_Call {
 	return &MockAccessManagement_GetAccessAnalyzers_Call{Call: _e.mock.On("GetAccessAnalyzers", ctx)}
 }
 
@@ -156,7 +165,7 @@ type MockAccessManagement_GetIAMRolePermissions_Call struct {
 // GetIAMRolePermissions is a helper method to define mock.On call
 //   - ctx context.Context
 //   - roleName string
-func (_e *MockAccessManagement_Expecter) GetIAMRolePermissions(ctx interface{}, roleName interface{}) *MockAccessManagement_GetIAMRolePermissions_Call {
+func (_e *MockAccessManagement_Expecter) GetIAMRolePermissions(ctx any, roleName any) *MockAccessManagement_GetIAMRolePermissions_Call {
 	return &MockAccessManagement_GetIAMRolePermissions_Call{Call: _e.mock.On("GetIAMRolePermissions", ctx, roleName)}
 }
 
@@ -223,7 +232,7 @@ type MockAccessManagement_GetPasswordPolicy_Call struct {
 
 // GetPasswordPolicy is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockAccessManagement_Expecter) GetPasswordPolicy(ctx interface{}) *MockAccessManagement_GetPasswordPolicy_Call {
+func (_e *MockAccessManagement_Expecter) GetPasswordPolicy(ctx any) *MockAccessManagement_GetPasswordPolicy_Call {
 	return &MockAccessManagement_GetPasswordPolicy_Call{Call: _e.mock.On("GetPasswordPolicy", ctx)}
 }
 
@@ -285,7 +294,7 @@ type MockAccessManagement_GetPolicies_Call struct {
 
 // GetPolicies is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockAccessManagement_Expecter) GetPolicies(ctx interface{}) *MockAccessManagement_GetPolicies_Call {
+func (_e *MockAccessManagement_Expecter) GetPolicies(ctx any) *MockAccessManagement_GetPolicies_Call {
 	return &MockAccessManagement_GetPolicies_Call{Call: _e.mock.On("GetPolicies", ctx)}
 }
 
@@ -347,7 +356,7 @@ type MockAccessManagement_GetUsers_Call struct {
 
 // GetUsers is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockAccessManagement_Expecter) GetUsers(ctx interface{}) *MockAccessManagement_GetUsers_Call {
+func (_e *MockAccessManagement_Expecter) GetUsers(ctx any) *MockAccessManagement_GetUsers_Call {
 	return &MockAccessManagement_GetUsers_Call{Call: _e.mock.On("GetUsers", ctx)}
 }
 
@@ -409,7 +418,7 @@ type MockAccessManagement_ListServerCertificates_Call struct {
 
 // ListServerCertificates is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockAccessManagement_Expecter) ListServerCertificates(ctx interface{}) *MockAccessManagement_ListServerCertificates_Call {
+func (_e *MockAccessManagement_Expecter) ListServerCertificates(ctx any) *MockAccessManagement_ListServerCertificates_Call {
 	return &MockAccessManagement_ListServerCertificates_Call{Call: _e.mock.On("ListServerCertificates", ctx)}
 }
 
@@ -442,10 +451,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -506,9 +524,9 @@ type MockClient_GenerateCredentialReport_Call struct {
 //   - ctx context.Context
 //   - params *iam.GenerateCredentialReportInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GenerateCredentialReport(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GenerateCredentialReport_Call {
+func (_e *MockClient_Expecter) GenerateCredentialReport(ctx any, params any, optFns ...any) *MockClient_GenerateCredentialReport_Call {
 	return &MockClient_GenerateCredentialReport_Call{Call: _e.mock.On("GenerateCredentialReport",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GenerateCredentialReport_Call) Run(run func(ctx context.Context, params *iam.GenerateCredentialReportInput, optFns ...func(*iam.Options))) *MockClient_GenerateCredentialReport_Call {
@@ -589,9 +607,9 @@ type MockClient_GetAccessKeyLastUsed_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetAccessKeyLastUsedInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetAccessKeyLastUsed(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetAccessKeyLastUsed_Call {
+func (_e *MockClient_Expecter) GetAccessKeyLastUsed(ctx any, params any, optFns ...any) *MockClient_GetAccessKeyLastUsed_Call {
 	return &MockClient_GetAccessKeyLastUsed_Call{Call: _e.mock.On("GetAccessKeyLastUsed",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetAccessKeyLastUsed_Call) Run(run func(ctx context.Context, params *iam.GetAccessKeyLastUsedInput, optFns ...func(*iam.Options))) *MockClient_GetAccessKeyLastUsed_Call {
@@ -672,9 +690,9 @@ type MockClient_GetAccountPasswordPolicy_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetAccountPasswordPolicyInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetAccountPasswordPolicy(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetAccountPasswordPolicy_Call {
+func (_e *MockClient_Expecter) GetAccountPasswordPolicy(ctx any, params any, optFns ...any) *MockClient_GetAccountPasswordPolicy_Call {
 	return &MockClient_GetAccountPasswordPolicy_Call{Call: _e.mock.On("GetAccountPasswordPolicy",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetAccountPasswordPolicy_Call) Run(run func(ctx context.Context, params *iam.GetAccountPasswordPolicyInput, optFns ...func(*iam.Options))) *MockClient_GetAccountPasswordPolicy_Call {
@@ -755,9 +773,9 @@ type MockClient_GetCredentialReport_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetCredentialReportInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetCredentialReport(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetCredentialReport_Call {
+func (_e *MockClient_Expecter) GetCredentialReport(ctx any, params any, optFns ...any) *MockClient_GetCredentialReport_Call {
 	return &MockClient_GetCredentialReport_Call{Call: _e.mock.On("GetCredentialReport",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetCredentialReport_Call) Run(run func(ctx context.Context, params *iam.GetCredentialReportInput, optFns ...func(*iam.Options))) *MockClient_GetCredentialReport_Call {
@@ -791,6 +809,89 @@ func (_c *MockClient_GetCredentialReport_Call) Return(getCredentialReportOutput 
 }
 
 func (_c *MockClient_GetCredentialReport_Call) RunAndReturn(run func(ctx context.Context, params *iam.GetCredentialReportInput, optFns ...func(*iam.Options)) (*iam.GetCredentialReportOutput, error)) *MockClient_GetCredentialReport_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetInstanceProfile provides a mock function for the type MockClient
+func (_mock *MockClient) GetInstanceProfile(ctx context.Context, params *iam.GetInstanceProfileInput, optFns ...func(*iam.Options)) (*iam.GetInstanceProfileOutput, error) {
+	var tmpRet mock.Arguments
+	if len(optFns) > 0 {
+		tmpRet = _mock.Called(ctx, params, optFns)
+	} else {
+		tmpRet = _mock.Called(ctx, params)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetInstanceProfile")
+	}
+
+	var r0 *iam.GetInstanceProfileOutput
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *iam.GetInstanceProfileInput, ...func(*iam.Options)) (*iam.GetInstanceProfileOutput, error)); ok {
+		return returnFunc(ctx, params, optFns...)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *iam.GetInstanceProfileInput, ...func(*iam.Options)) *iam.GetInstanceProfileOutput); ok {
+		r0 = returnFunc(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*iam.GetInstanceProfileOutput)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *iam.GetInstanceProfileInput, ...func(*iam.Options)) error); ok {
+		r1 = returnFunc(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_GetInstanceProfile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetInstanceProfile'
+type MockClient_GetInstanceProfile_Call struct {
+	*mock.Call
+}
+
+// GetInstanceProfile is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *iam.GetInstanceProfileInput
+//   - optFns ...func(*iam.Options)
+func (_e *MockClient_Expecter) GetInstanceProfile(ctx any, params any, optFns ...any) *MockClient_GetInstanceProfile_Call {
+	return &MockClient_GetInstanceProfile_Call{Call: _e.mock.On("GetInstanceProfile",
+		append([]any{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_GetInstanceProfile_Call) Run(run func(ctx context.Context, params *iam.GetInstanceProfileInput, optFns ...func(*iam.Options))) *MockClient_GetInstanceProfile_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *iam.GetInstanceProfileInput
+		if args[1] != nil {
+			arg1 = args[1].(*iam.GetInstanceProfileInput)
+		}
+		var arg2 []func(*iam.Options)
+		var variadicArgs []func(*iam.Options)
+		if len(args) > 2 {
+			variadicArgs = args[2].([]func(*iam.Options))
+		}
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_GetInstanceProfile_Call) Return(getInstanceProfileOutput *iam.GetInstanceProfileOutput, err error) *MockClient_GetInstanceProfile_Call {
+	_c.Call.Return(getInstanceProfileOutput, err)
+	return _c
+}
+
+func (_c *MockClient_GetInstanceProfile_Call) RunAndReturn(run func(ctx context.Context, params *iam.GetInstanceProfileInput, optFns ...func(*iam.Options)) (*iam.GetInstanceProfileOutput, error)) *MockClient_GetInstanceProfile_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -838,9 +939,9 @@ type MockClient_GetPolicy_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetPolicyInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetPolicy(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetPolicy_Call {
+func (_e *MockClient_Expecter) GetPolicy(ctx any, params any, optFns ...any) *MockClient_GetPolicy_Call {
 	return &MockClient_GetPolicy_Call{Call: _e.mock.On("GetPolicy",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetPolicy_Call) Run(run func(ctx context.Context, params *iam.GetPolicyInput, optFns ...func(*iam.Options))) *MockClient_GetPolicy_Call {
@@ -921,9 +1022,9 @@ type MockClient_GetPolicyVersion_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetPolicyVersionInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetPolicyVersion(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetPolicyVersion_Call {
+func (_e *MockClient_Expecter) GetPolicyVersion(ctx any, params any, optFns ...any) *MockClient_GetPolicyVersion_Call {
 	return &MockClient_GetPolicyVersion_Call{Call: _e.mock.On("GetPolicyVersion",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetPolicyVersion_Call) Run(run func(ctx context.Context, params *iam.GetPolicyVersionInput, optFns ...func(*iam.Options))) *MockClient_GetPolicyVersion_Call {
@@ -1004,9 +1105,9 @@ type MockClient_GetRole_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetRoleInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetRole(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetRole_Call {
+func (_e *MockClient_Expecter) GetRole(ctx any, params any, optFns ...any) *MockClient_GetRole_Call {
 	return &MockClient_GetRole_Call{Call: _e.mock.On("GetRole",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetRole_Call) Run(run func(ctx context.Context, params *iam.GetRoleInput, optFns ...func(*iam.Options))) *MockClient_GetRole_Call {
@@ -1087,9 +1188,9 @@ type MockClient_GetRolePolicy_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetRolePolicyInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetRolePolicy(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetRolePolicy_Call {
+func (_e *MockClient_Expecter) GetRolePolicy(ctx any, params any, optFns ...any) *MockClient_GetRolePolicy_Call {
 	return &MockClient_GetRolePolicy_Call{Call: _e.mock.On("GetRolePolicy",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetRolePolicy_Call) Run(run func(ctx context.Context, params *iam.GetRolePolicyInput, optFns ...func(*iam.Options))) *MockClient_GetRolePolicy_Call {
@@ -1170,9 +1271,9 @@ type MockClient_GetUserPolicy_Call struct {
 //   - ctx context.Context
 //   - params *iam.GetUserPolicyInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) GetUserPolicy(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetUserPolicy_Call {
+func (_e *MockClient_Expecter) GetUserPolicy(ctx any, params any, optFns ...any) *MockClient_GetUserPolicy_Call {
 	return &MockClient_GetUserPolicy_Call{Call: _e.mock.On("GetUserPolicy",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetUserPolicy_Call) Run(run func(ctx context.Context, params *iam.GetUserPolicyInput, optFns ...func(*iam.Options))) *MockClient_GetUserPolicy_Call {
@@ -1253,9 +1354,9 @@ type MockClient_ListAccessKeys_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListAccessKeysInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListAccessKeys(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListAccessKeys_Call {
+func (_e *MockClient_Expecter) ListAccessKeys(ctx any, params any, optFns ...any) *MockClient_ListAccessKeys_Call {
 	return &MockClient_ListAccessKeys_Call{Call: _e.mock.On("ListAccessKeys",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListAccessKeys_Call) Run(run func(ctx context.Context, params *iam.ListAccessKeysInput, optFns ...func(*iam.Options))) *MockClient_ListAccessKeys_Call {
@@ -1336,9 +1437,9 @@ type MockClient_ListAttachedRolePolicies_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListAttachedRolePoliciesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListAttachedRolePolicies(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListAttachedRolePolicies_Call {
+func (_e *MockClient_Expecter) ListAttachedRolePolicies(ctx any, params any, optFns ...any) *MockClient_ListAttachedRolePolicies_Call {
 	return &MockClient_ListAttachedRolePolicies_Call{Call: _e.mock.On("ListAttachedRolePolicies",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListAttachedRolePolicies_Call) Run(run func(ctx context.Context, params *iam.ListAttachedRolePoliciesInput, optFns ...func(*iam.Options))) *MockClient_ListAttachedRolePolicies_Call {
@@ -1419,9 +1520,9 @@ type MockClient_ListAttachedUserPolicies_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListAttachedUserPoliciesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListAttachedUserPolicies(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListAttachedUserPolicies_Call {
+func (_e *MockClient_Expecter) ListAttachedUserPolicies(ctx any, params any, optFns ...any) *MockClient_ListAttachedUserPolicies_Call {
 	return &MockClient_ListAttachedUserPolicies_Call{Call: _e.mock.On("ListAttachedUserPolicies",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListAttachedUserPolicies_Call) Run(run func(ctx context.Context, params *iam.ListAttachedUserPoliciesInput, optFns ...func(*iam.Options))) *MockClient_ListAttachedUserPolicies_Call {
@@ -1502,9 +1603,9 @@ type MockClient_ListEntitiesForPolicy_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListEntitiesForPolicyInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListEntitiesForPolicy(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListEntitiesForPolicy_Call {
+func (_e *MockClient_Expecter) ListEntitiesForPolicy(ctx any, params any, optFns ...any) *MockClient_ListEntitiesForPolicy_Call {
 	return &MockClient_ListEntitiesForPolicy_Call{Call: _e.mock.On("ListEntitiesForPolicy",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListEntitiesForPolicy_Call) Run(run func(ctx context.Context, params *iam.ListEntitiesForPolicyInput, optFns ...func(*iam.Options))) *MockClient_ListEntitiesForPolicy_Call {
@@ -1585,9 +1686,9 @@ type MockClient_ListMFADevices_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListMFADevicesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListMFADevices(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListMFADevices_Call {
+func (_e *MockClient_Expecter) ListMFADevices(ctx any, params any, optFns ...any) *MockClient_ListMFADevices_Call {
 	return &MockClient_ListMFADevices_Call{Call: _e.mock.On("ListMFADevices",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListMFADevices_Call) Run(run func(ctx context.Context, params *iam.ListMFADevicesInput, optFns ...func(*iam.Options))) *MockClient_ListMFADevices_Call {
@@ -1668,9 +1769,9 @@ type MockClient_ListPolicies_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListPoliciesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListPolicies(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListPolicies_Call {
+func (_e *MockClient_Expecter) ListPolicies(ctx any, params any, optFns ...any) *MockClient_ListPolicies_Call {
 	return &MockClient_ListPolicies_Call{Call: _e.mock.On("ListPolicies",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListPolicies_Call) Run(run func(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options))) *MockClient_ListPolicies_Call {
@@ -1751,9 +1852,9 @@ type MockClient_ListRoles_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListRolesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListRoles(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListRoles_Call {
+func (_e *MockClient_Expecter) ListRoles(ctx any, params any, optFns ...any) *MockClient_ListRoles_Call {
 	return &MockClient_ListRoles_Call{Call: _e.mock.On("ListRoles",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListRoles_Call) Run(run func(ctx context.Context, params *iam.ListRolesInput, optFns ...func(*iam.Options))) *MockClient_ListRoles_Call {
@@ -1834,9 +1935,9 @@ type MockClient_ListServerCertificates_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListServerCertificatesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListServerCertificates(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListServerCertificates_Call {
+func (_e *MockClient_Expecter) ListServerCertificates(ctx any, params any, optFns ...any) *MockClient_ListServerCertificates_Call {
 	return &MockClient_ListServerCertificates_Call{Call: _e.mock.On("ListServerCertificates",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListServerCertificates_Call) Run(run func(ctx context.Context, params *iam.ListServerCertificatesInput, optFns ...func(*iam.Options))) *MockClient_ListServerCertificates_Call {
@@ -1917,9 +2018,9 @@ type MockClient_ListUserPolicies_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListUserPoliciesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListUserPolicies(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListUserPolicies_Call {
+func (_e *MockClient_Expecter) ListUserPolicies(ctx any, params any, optFns ...any) *MockClient_ListUserPolicies_Call {
 	return &MockClient_ListUserPolicies_Call{Call: _e.mock.On("ListUserPolicies",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListUserPolicies_Call) Run(run func(ctx context.Context, params *iam.ListUserPoliciesInput, optFns ...func(*iam.Options))) *MockClient_ListUserPolicies_Call {
@@ -2000,9 +2101,9 @@ type MockClient_ListUsers_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListUsersInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListUsers(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListUsers_Call {
+func (_e *MockClient_Expecter) ListUsers(ctx any, params any, optFns ...any) *MockClient_ListUsers_Call {
 	return &MockClient_ListUsers_Call{Call: _e.mock.On("ListUsers",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListUsers_Call) Run(run func(ctx context.Context, params *iam.ListUsersInput, optFns ...func(*iam.Options))) *MockClient_ListUsers_Call {
@@ -2083,9 +2184,9 @@ type MockClient_ListVirtualMFADevices_Call struct {
 //   - ctx context.Context
 //   - params *iam.ListVirtualMFADevicesInput
 //   - optFns ...func(*iam.Options)
-func (_e *MockClient_Expecter) ListVirtualMFADevices(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListVirtualMFADevices_Call {
+func (_e *MockClient_Expecter) ListVirtualMFADevices(ctx any, params any, optFns ...any) *MockClient_ListVirtualMFADevices_Call {
 	return &MockClient_ListVirtualMFADevices_Call{Call: _e.mock.On("ListVirtualMFADevices",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListVirtualMFADevices_Call) Run(run func(ctx context.Context, params *iam.ListVirtualMFADevicesInput, optFns ...func(*iam.Options))) *MockClient_ListVirtualMFADevices_Call {
@@ -2129,10 +2230,19 @@ func NewMockAccessAnalyzerClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAccessAnalyzerClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAccessAnalyzerClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -2193,9 +2303,9 @@ type MockAccessAnalyzerClient_ListAnalyzers_Call struct {
 //   - ctx context.Context
 //   - params *accessanalyzer.ListAnalyzersInput
 //   - optFns ...func(*accessanalyzer.Options)
-func (_e *MockAccessAnalyzerClient_Expecter) ListAnalyzers(ctx interface{}, params interface{}, optFns ...interface{}) *MockAccessAnalyzerClient_ListAnalyzers_Call {
+func (_e *MockAccessAnalyzerClient_Expecter) ListAnalyzers(ctx any, params any, optFns ...any) *MockAccessAnalyzerClient_ListAnalyzers_Call {
 	return &MockAccessAnalyzerClient_ListAnalyzers_Call{Call: _e.mock.On("ListAnalyzers",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockAccessAnalyzerClient_ListAnalyzers_Call) Run(run func(ctx context.Context, params *accessanalyzer.ListAnalyzersInput, optFns ...func(*accessanalyzer.Options))) *MockAccessAnalyzerClient_ListAnalyzers_Call {

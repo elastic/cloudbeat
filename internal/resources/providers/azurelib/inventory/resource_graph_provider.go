@@ -99,11 +99,22 @@ func (p *ResourceGraphProvider) runPaginatedQuery(ctx context.Context, query arm
 			resourceAssets = append(resourceAssets, structuredAsset)
 		}
 
-		if *response.ResultTruncated == armresourcegraph.ResultTruncatedFalse ||
-			pointers.Deref(response.SkipToken) == "" {
+		// Per Azure Resource Graph's documented pagination contract, the presence of a
+		// SkipToken is the sole authoritative signal that more pages are available
+		// (see https://learn.microsoft.com/azure/governance/resource-graph/concepts/paging-results,
+		// whose reference implementations loop "while SkipToken is not nil").
+		// ResultTruncated does NOT indicate "more pages exist" - it flags cases where
+		// paging itself is unavailable (e.g. the query uses `limit`/`take`, or returns
+		// only dynamic/null columns), and is false on ordinary, fully-paginated
+		// responses even when a SkipToken for the next page is present. Treating
+		// ResultTruncated == false as a stop condition (as this code previously did)
+		// caused the loop to exit after the very first page for any multi-page result
+		// set, silently dropping every subsequent page of resources.
+		skipToken := pointers.Deref(response.SkipToken)
+		if skipToken == "" {
 			break
 		}
-		query.Options.SkipToken = response.SkipToken
+		query.Options.SkipToken = to.Ptr(skipToken)
 	}
 
 	return resourceAssets, nil

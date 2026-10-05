@@ -20,7 +20,7 @@ package fetchers
 import (
 	"reflect"
 
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/beats/v7/pkg/autodiscover/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"

@@ -1,10 +1,8 @@
 metadata:
   id: 64d37675-473f-5edc-882e-5b8b85b789c3
-  name: Ensure That the Cloud SQL Database Instance Requires All Incoming Connections
-    To Use SSL
+  name: Ensure That the Cloud SQL Database Instance Requires All Incoming Connections To Use SSL
   profile_applicability: '* Level 1'
-  description: It is recommended to enforce all incoming connections to SQL database
-    instance to use SSL.
+  description: It is recommended to enforce all incoming connections to SQL database instance to use SSL.
   rationale: |-
     SQL database connections if successfully trapped (MITM); can reveal sensitive data like credentials, database queries, query outputs etc.
     For security, it is recommended to always use SSL encryption when connecting to your instance.

@@ -1,10 +1,8 @@
 metadata:
   id: b0ed2847-4db1-57c3-b2b6-49b0576a2506
-  name: Ensure ‘Skip_show_database’ Database Flag for Cloud SQL MySQL Instance Is
-    Set to ‘On’
+  name: Ensure ‘Skip_show_database’ Database Flag for Cloud SQL MySQL Instance Is Set to ‘On’
   profile_applicability: '* Level 1'
-  description: It is recommended to set `skip_show_database` database flag for Cloud
-    SQL Mysql instance to `on`
+  description: It is recommended to set `skip_show_database` database flag for Cloud SQL Mysql instance to `on`
   rationale: |-
     'skip_show_database' database flag prevents people from using the SHOW DATABASES statement if they do not have the SHOW DATABASES privilege.
     This can improve security if you have concerns about users being able to see databases belonging to other users.

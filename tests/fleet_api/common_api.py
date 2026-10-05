@@ -2,7 +2,6 @@
 This module contains API calls related to Fleet settings
 """
 
-import codecs
 import json
 import time
 from typing import Any, Dict, List, Optional
@@ -19,6 +18,7 @@ from munch import Munch, munchify
 AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 AGENT_ARTIFACT_SUFFIX_SHORT = "/downloads/"
 
+ARTIFACTS_API_VERSIONS_URL = "https://artifacts-api.elastic.co/v1/versions"
 STAGING_ARTIFACTORY_URL = "https://staging.elastic.co/"
 SNAPSHOT_ARTIFACTORY_URL = "https://snapshots.elastic.co/"
 
@@ -119,7 +119,7 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
             )
         if hasattr(params, "capabilities") and params.capabilities:
             manifest_yaml = add_capabilities(yaml_content=manifest_yaml)
-        with codecs.open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
+        with open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
             k8s_yaml.write(manifest_yaml)
         logger.info(f"KSPM manifest is available at: '{params.yaml_path}'")
     except APICallException as api_ex:
@@ -152,7 +152,7 @@ def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
         )
         template_yaml = add_tags(tags=cnvm_tags, yaml_content=template_yaml)
 
-        with codecs.open(template_path, "w", encoding="utf-8") as cnvm_yaml:
+        with open(template_path, "w", encoding="utf-8") as cnvm_yaml:
             cnvm_yaml.write(template_yaml)
         logger.info(f"CNVM template is available at: '{template_path}'")
     except APICallException as api_ex:
@@ -218,10 +218,14 @@ def get_build_info(version: str) -> str:
         return response_obj.build_id
 
     except APICallException as api_ex:
-        logger.error(
-            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
-        )
-        return ""
+        available = get_available_versions()
+        hint = f" Available versions: {available}" if available else ""
+        raise RuntimeError(
+            f"Could not resolve build info for '{version}' "
+            f"(status {api_ex.status_code} from {url}). "
+            f"The version is likely not published on Elastic's artifact servers — "
+            f"check CLOUDBEAT_VERSION/ELK_VERSION in bin/hermit.hcl.{hint}",
+        ) from api_ex
 
 
 def get_artifact_server(version: str, is_short_url: bool = False) -> str:
@@ -569,3 +573,13 @@ def get_telemetry(cfg: Munch) -> dict:
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         raise
+
+
+def get_available_versions() -> list:
+    """Return the versions currently published on the Elastic artifacts API."""
+    try:
+        response = perform_api_call(method="GET", url=ARTIFACTS_API_VERSIONS_URL)
+        return munchify(response).get("versions", [])
+    except APICallException as api_ex:
+        logger.warning(f"Could not fetch available versions list (status {api_ex.status_code}).")
+        return []

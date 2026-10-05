@@ -138,7 +138,6 @@ func newDefaultMeterProvider(ctx context.Context, res *resource.Resource) error 
 func newResource(ctx context.Context) (*resource.Resource, error) {
 	res, err := resource.New(
 		ctx,
-		resource.WithSchemaURL(semconv.SchemaURL),
 		resource.WithAttributes(
 			semconv.ServiceNameKey.String(serviceName),
 			semconv.ServiceVersion(version.CloudbeatSemanticVersion()),

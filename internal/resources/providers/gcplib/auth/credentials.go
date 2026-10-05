@@ -43,7 +43,7 @@ type ConfigProviderAPI interface {
 
 type GoogleAuthProviderAPI interface {
 	FindDefaultCredentials(ctx context.Context) (*google.Credentials, error)
-	FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error)
+	FindIdentityFederationCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPIdentityFederationParams) ([]option.ClientOption, error)
 }
 
 // DefaultCredentialsFinder is the minimal interface needed to resolve project ID from
@@ -78,9 +78,9 @@ var ErrInvalidCredentialsJSON = errors.New("invalid credentials JSON")
 var ErrProjectNotFound = errors.New("no project ID was found")
 
 func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
-	// used in cloud connectors flow
+	// used in identity federation flow
 	if cfg.GcpClientOpt.ServiceAccountEmail != "" {
-		return p.getCloudConnectorsCredentials(ctx, cfg, log)
+		return p.getIdentityFederationCredentials(ctx, cfg, log)
 	}
 
 	// used in cloud shell flow (and development)
@@ -109,17 +109,17 @@ func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, c
 	return p.getGcpFactoryConfig(ctx, cfg, nil)
 }
 
-func (p *ConfigProvider) getCloudConnectorsCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
+func (p *ConfigProvider) getIdentityFederationCredentials(ctx context.Context, cfg config.GcpConfig, log *clog.Logger) (*GcpFactoryConfig, error) {
 	log.Info("creating credentials using AWS Workload Identity Federation and service account impersonation", "provider", "GCP")
 
-	params := GCPCloudConnectorsParams{
-		Audience:            cfg.Audience,
-		ServiceAccountEmail: cfg.ServiceAccountEmail,
-		CloudConnectorID:    cfg.CloudConnectorID,
+	params := GCPIdentityFederationParams{
+		Audience:             cfg.Audience,
+		ServiceAccountEmail:  cfg.ServiceAccountEmail,
+		IdentityFederationID: cfg.IdentityFederationID,
 	}
-	opts, err := p.AuthProvider.FindCloudConnectorsCredentials(ctx, cfg.CloudConnectorsConfig, params)
+	opts, err := p.AuthProvider.FindIdentityFederationCredentials(ctx, cfg.CloudConnectorsConfig, params)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get cloud connectors credentials: %w", err)
+		return nil, fmt.Errorf("failed to get identity federation credentials: %w", err)
 	}
 
 	return p.getGcpFactoryConfig(ctx, cfg, opts)

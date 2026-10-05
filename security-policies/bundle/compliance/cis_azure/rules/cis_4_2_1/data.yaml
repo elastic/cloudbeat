@@ -49,8 +49,7 @@ metadata:
     Note:
     - Enabling 'Microsoft Defender for SQL' from the Azure portal enables `Threat Detection`
     - Using Powershell command `Set-AzSqlServerThreatDetectionPolicy` enables `Microsoft Defender for SQL` for a SQL server
-  impact: Microsoft Defender for SQL is a paid feature and will incur additional cost
-    for each SQL server.
+  impact: Microsoft Defender for SQL is a paid feature and will incur additional cost for each SQL server.
   default_value: ''
   references: |-
     1. https://docs.microsoft.com/en-us/azure/azure-sql/database/azure-defender-for-sql?view=azuresql

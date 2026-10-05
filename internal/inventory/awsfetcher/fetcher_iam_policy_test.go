@@ -123,6 +123,7 @@ func TestIAMPolicyFetcher_Fetch(t *testing.T) {
 				"key-1": "value-1",
 				"key-2": "value-2",
 			}),
+			inventory.WithCreatedAt(&now),
 		),
 
 		inventory.NewAssetEvent(

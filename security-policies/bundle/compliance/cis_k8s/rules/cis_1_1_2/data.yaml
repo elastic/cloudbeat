@@ -2,8 +2,7 @@ metadata:
   id: c0ef1e12-b201-5736-8475-4b62978084e8
   name: Ensure that the API server pod specification file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
-  description: Ensure that the API server pod specification file ownership is set
-    to `root:root`.
+  description: Ensure that the API server pod specification file ownership is set to `root:root`.
   rationale: |-
     The API server pod specification file controls various parameters that set the behavior of the API server.
     You should set its file ownership to maintain the integrity of the file.

@@ -70,6 +70,7 @@ def save_rule_templates(rule_templates: list[dict], rule_template_dir: str):
             "w",
         ) as f:
             json.dump(rule_template, f, indent=4)
+            f.write("\n")
 
 
 def migrate_csp_rule_metadata(doc: dict) -> dict:

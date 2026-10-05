@@ -91,16 +91,10 @@ variable "docker_image" {
   description = "Optional docker image overrides. The full map needs to be specified"
 }
 
-variable "kibana_enable_security_solution_experimental" {
-  type        = bool
-  default     = true
-  description = "When true, set Kibana user_settings_yaml with Security Solution experimental feature flags (ESS only)"
-}
-
 variable "kibana_enable_entity_analytics_settings" {
   type        = bool
-  default     = false
-  description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (feature flags, uiSettings, enableExperimental)"
+  default     = true
+  description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
 }
 
 variable "kibana_instance_size" {

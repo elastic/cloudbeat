@@ -32,10 +32,19 @@ func NewMockElasticCommonDataProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockElasticCommonDataProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockElasticCommonDataProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -98,8 +107,8 @@ func (_c *MockElasticCommonDataProvider_GetElasticCommonData_Call) Run(run func(
 	return _c
 }
 
-func (_c *MockElasticCommonDataProvider_GetElasticCommonData_Call) Return(stringToV map[string]any, err error) *MockElasticCommonDataProvider_GetElasticCommonData_Call {
-	_c.Call.Return(stringToV, err)
+func (_c *MockElasticCommonDataProvider_GetElasticCommonData_Call) Return(stringToAnyMoqParam map[string]any, err error) *MockElasticCommonDataProvider_GetElasticCommonData_Call {
+	_c.Call.Return(stringToAnyMoqParam, err)
 	return _c
 }
 

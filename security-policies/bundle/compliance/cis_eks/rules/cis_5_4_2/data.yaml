@@ -1,10 +1,8 @@
 metadata:
   id: 1b112bf6-61ad-5b08-888b-7b6c86b3526c
-  name: Ensure clusters are created with Private Endpoint Enabled and Public Access
-    Disabled
+  name: Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled
   profile_applicability: '* Level 2'
-  description: Disable access to the Kubernetes API from outside the node network
-    if it is not required.
+  description: Disable access to the Kubernetes API from outside the node network if it is not required.
   rationale: |-
     In a private cluster, the master node has two endpoints, a private and public endpoint.
     The private endpoint is the internal IP address of the master, behind an internal load balancer in the master's VPC network.

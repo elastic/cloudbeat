@@ -38,10 +38,19 @@ func NewMockConfigProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockConfigProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockConfigProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -96,7 +105,7 @@ type MockConfigProviderAPI_GetGcpClientConfig_Call struct {
 //   - ctx context.Context
 //   - cfg config.GcpConfig
 //   - log *clog.Logger
-func (_e *MockConfigProviderAPI_Expecter) GetGcpClientConfig(ctx interface{}, cfg interface{}, log interface{}) *MockConfigProviderAPI_GetGcpClientConfig_Call {
+func (_e *MockConfigProviderAPI_Expecter) GetGcpClientConfig(ctx any, cfg any, log any) *MockConfigProviderAPI_GetGcpClientConfig_Call {
 	return &MockConfigProviderAPI_GetGcpClientConfig_Call{Call: _e.mock.On("GetGcpClientConfig", ctx, cfg, log)}
 }
 
@@ -139,10 +148,19 @@ func NewMockGoogleAuthProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockGoogleAuthProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockGoogleAuthProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -158,80 +176,6 @@ type MockGoogleAuthProviderAPI_Expecter struct {
 
 func (_m *MockGoogleAuthProviderAPI) EXPECT() *MockGoogleAuthProviderAPI_Expecter {
 	return &MockGoogleAuthProviderAPI_Expecter{mock: &_m.Mock}
-}
-
-// FindCloudConnectorsCredentials provides a mock function for the type MockGoogleAuthProviderAPI
-func (_mock *MockGoogleAuthProviderAPI) FindCloudConnectorsCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error) {
-	ret := _mock.Called(ctx, ccConfig, params)
-
-	if len(ret) == 0 {
-		panic("no return value specified for FindCloudConnectorsCredentials")
-	}
-
-	var r0 []option.ClientOption
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, GCPCloudConnectorsParams) ([]option.ClientOption, error)); ok {
-		return returnFunc(ctx, ccConfig, params)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, GCPCloudConnectorsParams) []option.ClientOption); ok {
-		r0 = returnFunc(ctx, ccConfig, params)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]option.ClientOption)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, config.CloudConnectorsConfig, GCPCloudConnectorsParams) error); ok {
-		r1 = returnFunc(ctx, ccConfig, params)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindCloudConnectorsCredentials'
-type MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call struct {
-	*mock.Call
-}
-
-// FindCloudConnectorsCredentials is a helper method to define mock.On call
-//   - ctx context.Context
-//   - ccConfig config.CloudConnectorsConfig
-//   - params GCPCloudConnectorsParams
-func (_e *MockGoogleAuthProviderAPI_Expecter) FindCloudConnectorsCredentials(ctx interface{}, ccConfig interface{}, params interface{}) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
-	return &MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call{Call: _e.mock.On("FindCloudConnectorsCredentials", ctx, ccConfig, params)}
-}
-
-func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Run(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 config.CloudConnectorsConfig
-		if args[1] != nil {
-			arg1 = args[1].(config.CloudConnectorsConfig)
-		}
-		var arg2 GCPCloudConnectorsParams
-		if args[2] != nil {
-			arg2 = args[2].(GCPCloudConnectorsParams)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-		)
-	})
-	return _c
-}
-
-func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) Return(clientOptions []option.ClientOption, err error) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
-	_c.Call.Return(clientOptions, err)
-	return _c
-}
-
-func (_c *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call) RunAndReturn(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPCloudConnectorsParams) ([]option.ClientOption, error)) *MockGoogleAuthProviderAPI_FindCloudConnectorsCredentials_Call {
-	_c.Call.Return(run)
-	return _c
 }
 
 // FindDefaultCredentials provides a mock function for the type MockGoogleAuthProviderAPI
@@ -269,7 +213,7 @@ type MockGoogleAuthProviderAPI_FindDefaultCredentials_Call struct {
 
 // FindDefaultCredentials is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockGoogleAuthProviderAPI_Expecter) FindDefaultCredentials(ctx interface{}) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
+func (_e *MockGoogleAuthProviderAPI_Expecter) FindDefaultCredentials(ctx any) *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call {
 	return &MockGoogleAuthProviderAPI_FindDefaultCredentials_Call{Call: _e.mock.On("FindDefaultCredentials", ctx)}
 }
 
@@ -296,16 +240,99 @@ func (_c *MockGoogleAuthProviderAPI_FindDefaultCredentials_Call) RunAndReturn(ru
 	return _c
 }
 
+// FindIdentityFederationCredentials provides a mock function for the type MockGoogleAuthProviderAPI
+func (_mock *MockGoogleAuthProviderAPI) FindIdentityFederationCredentials(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPIdentityFederationParams) ([]option.ClientOption, error) {
+	ret := _mock.Called(ctx, ccConfig, params)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindIdentityFederationCredentials")
+	}
+
+	var r0 []option.ClientOption
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, GCPIdentityFederationParams) ([]option.ClientOption, error)); ok {
+		return returnFunc(ctx, ccConfig, params)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, config.CloudConnectorsConfig, GCPIdentityFederationParams) []option.ClientOption); ok {
+		r0 = returnFunc(ctx, ccConfig, params)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]option.ClientOption)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, config.CloudConnectorsConfig, GCPIdentityFederationParams) error); ok {
+		r1 = returnFunc(ctx, ccConfig, params)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FindIdentityFederationCredentials'
+type MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call struct {
+	*mock.Call
+}
+
+// FindIdentityFederationCredentials is a helper method to define mock.On call
+//   - ctx context.Context
+//   - ccConfig config.CloudConnectorsConfig
+//   - params GCPIdentityFederationParams
+func (_e *MockGoogleAuthProviderAPI_Expecter) FindIdentityFederationCredentials(ctx any, ccConfig any, params any) *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call {
+	return &MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call{Call: _e.mock.On("FindIdentityFederationCredentials", ctx, ccConfig, params)}
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call) Run(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPIdentityFederationParams)) *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 config.CloudConnectorsConfig
+		if args[1] != nil {
+			arg1 = args[1].(config.CloudConnectorsConfig)
+		}
+		var arg2 GCPIdentityFederationParams
+		if args[2] != nil {
+			arg2 = args[2].(GCPIdentityFederationParams)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call) Return(clientOptions []option.ClientOption, err error) *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call {
+	_c.Call.Return(clientOptions, err)
+	return _c
+}
+
+func (_c *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call) RunAndReturn(run func(ctx context.Context, ccConfig config.CloudConnectorsConfig, params GCPIdentityFederationParams) ([]option.ClientOption, error)) *MockGoogleAuthProviderAPI_FindIdentityFederationCredentials_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockDefaultCredentialsFinder creates a new instance of MockDefaultCredentialsFinder. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockDefaultCredentialsFinder(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockDefaultCredentialsFinder {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockDefaultCredentialsFinder{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -358,7 +385,7 @@ type MockDefaultCredentialsFinder_FindDefaultCredentials_Call struct {
 
 // FindDefaultCredentials is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockDefaultCredentialsFinder_Expecter) FindDefaultCredentials(ctx interface{}) *MockDefaultCredentialsFinder_FindDefaultCredentials_Call {
+func (_e *MockDefaultCredentialsFinder_Expecter) FindDefaultCredentials(ctx any) *MockDefaultCredentialsFinder_FindDefaultCredentials_Call {
 	return &MockDefaultCredentialsFinder_FindDefaultCredentials_Call{Call: _e.mock.On("FindDefaultCredentials", ctx)}
 }
 
@@ -391,10 +418,19 @@ func NewMockParentResolver(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockParentResolver {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockParentResolver{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -447,7 +483,7 @@ type MockParentResolver_GetParent_Call struct {
 //   - ctx context.Context
 //   - cfg config.GcpConfig
 //   - clientOpts []option.ClientOption
-func (_e *MockParentResolver_Expecter) GetParent(ctx interface{}, cfg interface{}, clientOpts interface{}) *MockParentResolver_GetParent_Call {
+func (_e *MockParentResolver_Expecter) GetParent(ctx any, cfg any, clientOpts any) *MockParentResolver_GetParent_Call {
 	return &MockParentResolver_GetParent_Call{Call: _e.mock.On("GetParent", ctx, cfg, clientOpts)}
 }
 

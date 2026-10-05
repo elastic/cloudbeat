@@ -96,6 +96,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 								StorageEncrypted:        aws.Bool(true),
 								AutoMinorVersionUpgrade: aws.Bool(true),
 								PubliclyAccessible:      aws.Bool(true),
+								DBInstanceStatus:        aws.String("available"),
 								DBSubnetGroup: &types.DBSubnetGroup{VpcId: &identifier, Subnets: []types.Subnet{
 									{SubnetIdentifier: &identifier},
 									{SubnetIdentifier: &identifier2},
@@ -124,7 +125,9 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 					Arn:                     arn2,
 					StorageEncrypted:        true,
 					AutoMinorVersionUpgrade: true,
-					PubliclyAccessible:      true, Subnets: []Subnet{
+					PubliclyAccessible:      true,
+					Status:                  "available",
+					Subnets: []Subnet{
 						{ID: identifier, RouteTable: nil},
 						{ID: identifier2, RouteTable: &RouteTable{
 							ID:     identifier,
@@ -132,6 +135,40 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 						}},
 					},
 					region: awslib.DefaultRegion,
+				},
+			},
+		},
+		{
+			// Regression test for https://github.com/elastic/seceng/issues/14066:
+			// AWS can return DB instances with a nil DBSubnetGroup (e.g. EC2-Classic
+			// instances or instances in certain transitional states), which used to
+			// cause a nil pointer dereference panic in getDBInstanceSubnets.
+			name: "Should not panic when a DB instance has no DBSubnetGroup",
+			rdsClientMockReturnVals: rdsClientMockReturnVals{
+				"DescribeDBInstances": {
+					awslib.DefaultRegion: {&rdsClient.DescribeDBInstancesOutput{
+						DBInstances: []types.DBInstance{
+							{
+								DBInstanceIdentifier:    &identifier,
+								DBInstanceArn:           &arn,
+								StorageEncrypted:        aws.Bool(false),
+								AutoMinorVersionUpgrade: aws.Bool(false),
+								PubliclyAccessible:      aws.Bool(false),
+								DBSubnetGroup:           nil,
+							},
+						},
+					}, nil},
+				},
+			},
+			expected: []awslib.AwsResource{
+				DBInstance{
+					Identifier:              identifier,
+					Arn:                     arn,
+					StorageEncrypted:        false,
+					AutoMinorVersionUpgrade: false,
+					PubliclyAccessible:      false,
+					Subnets:                 []Subnet{},
+					region:                  awslib.DefaultRegion,
 				},
 			},
 		},

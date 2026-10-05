@@ -1,7 +1,6 @@
 metadata:
   id: 9ce2276b-db96-5aad-9329-08ce874c5db6
-  name: Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL
-    Database Server
+  name: Ensure server parameter 'connection_throttling' is set to 'ON' for PostgreSQL Database Server
   profile_applicability: '* Level 1'
   description: Enable `connection_throttling` on `PostgreSQL Servers`.
   rationale: |-

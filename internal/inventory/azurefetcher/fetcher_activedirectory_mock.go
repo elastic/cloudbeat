@@ -35,10 +35,19 @@ func newMockActivedirectoryProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *mockActivedirectoryProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &mockActivedirectoryProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type mockActivedirectoryProvider_ListDirectoryRoles_Call struct {
 
 // ListDirectoryRoles is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockActivedirectoryProvider_Expecter) ListDirectoryRoles(context1 interface{}) *mockActivedirectoryProvider_ListDirectoryRoles_Call {
+func (_e *mockActivedirectoryProvider_Expecter) ListDirectoryRoles(context1 any) *mockActivedirectoryProvider_ListDirectoryRoles_Call {
 	return &mockActivedirectoryProvider_ListDirectoryRoles_Call{Call: _e.mock.On("ListDirectoryRoles", context1)}
 }
 
@@ -153,7 +162,7 @@ type mockActivedirectoryProvider_ListGroups_Call struct {
 
 // ListGroups is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockActivedirectoryProvider_Expecter) ListGroups(context1 interface{}) *mockActivedirectoryProvider_ListGroups_Call {
+func (_e *mockActivedirectoryProvider_Expecter) ListGroups(context1 any) *mockActivedirectoryProvider_ListGroups_Call {
 	return &mockActivedirectoryProvider_ListGroups_Call{Call: _e.mock.On("ListGroups", context1)}
 }
 
@@ -181,23 +190,23 @@ func (_c *mockActivedirectoryProvider_ListGroups_Call) RunAndReturn(run func(con
 }
 
 // ListServicePrincipals provides a mock function for the type mockActivedirectoryProvider
-func (_mock *mockActivedirectoryProvider) ListServicePrincipals(ctx context.Context) ([]*models.ServicePrincipal, error) {
+func (_mock *mockActivedirectoryProvider) ListServicePrincipals(ctx context.Context) ([]models.ServicePrincipalable, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListServicePrincipals")
 	}
 
-	var r0 []*models.ServicePrincipal
+	var r0 []models.ServicePrincipalable
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]*models.ServicePrincipal, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]models.ServicePrincipalable, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []*models.ServicePrincipal); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []models.ServicePrincipalable); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.ServicePrincipal)
+			r0 = ret.Get(0).([]models.ServicePrincipalable)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -215,7 +224,7 @@ type mockActivedirectoryProvider_ListServicePrincipals_Call struct {
 
 // ListServicePrincipals is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *mockActivedirectoryProvider_Expecter) ListServicePrincipals(ctx interface{}) *mockActivedirectoryProvider_ListServicePrincipals_Call {
+func (_e *mockActivedirectoryProvider_Expecter) ListServicePrincipals(ctx any) *mockActivedirectoryProvider_ListServicePrincipals_Call {
 	return &mockActivedirectoryProvider_ListServicePrincipals_Call{Call: _e.mock.On("ListServicePrincipals", ctx)}
 }
 
@@ -232,12 +241,12 @@ func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Run(run func(c
 	return _c
 }
 
-func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Return(servicePrincipals []*models.ServicePrincipal, err error) *mockActivedirectoryProvider_ListServicePrincipals_Call {
-	_c.Call.Return(servicePrincipals, err)
+func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) Return(servicePrincipalables []models.ServicePrincipalable, err error) *mockActivedirectoryProvider_ListServicePrincipals_Call {
+	_c.Call.Return(servicePrincipalables, err)
 	return _c
 }
 
-func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) RunAndReturn(run func(ctx context.Context) ([]*models.ServicePrincipal, error)) *mockActivedirectoryProvider_ListServicePrincipals_Call {
+func (_c *mockActivedirectoryProvider_ListServicePrincipals_Call) RunAndReturn(run func(ctx context.Context) ([]models.ServicePrincipalable, error)) *mockActivedirectoryProvider_ListServicePrincipals_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -277,7 +286,7 @@ type mockActivedirectoryProvider_ListUsers_Call struct {
 
 // ListUsers is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *mockActivedirectoryProvider_Expecter) ListUsers(context1 interface{}) *mockActivedirectoryProvider_ListUsers_Call {
+func (_e *mockActivedirectoryProvider_Expecter) ListUsers(context1 any) *mockActivedirectoryProvider_ListUsers_Call {
 	return &mockActivedirectoryProvider_ListUsers_Call{Call: _e.mock.On("ListUsers", context1)}
 }
 

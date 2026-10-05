@@ -3,8 +3,7 @@ metadata:
   name: |-
     Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key
   profile_applicability: '* Level 2'
-  description: Storage accounts with the activity log exports can be configured to
-    use Customer Managed Keys (CMK).
+  description: Storage accounts with the activity log exports can be configured to use Customer Managed Keys (CMK).
   rationale: |-
     Configuring the storage account with the activity log export container to use CMKs provides additional confidentiality controls on log data, as a given user must have read permission on the corresponding storage account and must be granted decrypt permission by the CMK.
   audit: |-
