@@ -282,6 +282,16 @@
       "enabled": false
     },
     {
+      "description": "Cap OPA below v1.21.0 - v1.21+ requires gobwas/glob v1.0.0, which removes glob.Glob and breaks go.opentelemetry.io/collector/confmap (undefined: glob.Glob). Re-enable once otel confmap migrates (opentelemetry-collector#15928) and beats picks it up. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/open-policy-agent/opa"
+      ],
+      "allowedVersions": "<1.21.0"
+    },
+    {
       "description": "Disable otelaws updates - v0.72.0 deprecates the package (staticcheck SA1019); we are in maintenance mode, so stay on v0.71.0. Must stay after the 'Enable indirect Go dependencies' rule",
       "matchManagers": [
         "gomod"
