@@ -324,7 +324,7 @@ func (p Provider) getPublicAccessBlock(ctx context.Context, bucketName *string, 
 }
 
 func (b BucketDescription) GetResourceArn() string {
-	return fmt.Sprintf("arn:aws:s3:::%s", b.Name)
+	return fmt.Sprintf("arn:%s:s3:::%s", awslib.PartitionFromRegion(b.Region), b.Name)
 }
 
 func (b BucketDescription) GetResourceName() string {

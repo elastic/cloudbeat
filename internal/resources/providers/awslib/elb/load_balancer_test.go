@@ -15,42 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ec2
+package elb
 
 import (
-	"fmt"
+	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-
-	"github.com/elastic/cloudbeat/internal/resources/fetching"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
+	"github.com/stretchr/testify/assert"
 )
 
-type VpcInfo struct {
-	Vpc        types.Vpc       `json:"vpc"`
-	FlowLogs   []types.FlowLog `json:"flow_logs"`
-	awsAccount string
-	region     string
-}
+func TestElasticLoadBalancerInfo_GetResourceArn(t *testing.T) {
+	lb := types.LoadBalancerDescription{LoadBalancerName: aws.String("my-lb")}
 
-func (v VpcInfo) GetResourceArn() string {
-	if v.Vpc.VpcId == nil {
-		return ""
-	}
-	return fmt.Sprintf("arn:%s:ec2:%s:%s:vpc/%s", awslib.PartitionFromRegion(v.region), v.region, v.awsAccount, *v.Vpc.VpcId)
-}
-
-func (v VpcInfo) GetResourceName() string {
-	if v.Vpc.VpcId == nil {
-		return ""
-	}
-	return *v.Vpc.VpcId
-}
-
-func (v VpcInfo) GetResourceType() string {
-	return fetching.VpcType
-}
-
-func (v VpcInfo) GetRegion() string {
-	return v.region
+	assert.Equal(t, "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/my-lb",
+		NewElasticLoadBalancerInfo(lb, "123456789012", "us-east-1", nil, nil).GetResourceArn())
+	assert.Equal(t, "arn:aws-us-gov:elasticloadbalancing:us-gov-west-1:123456789012:loadbalancer/my-lb",
+		NewElasticLoadBalancerInfo(lb, "123456789012", "us-gov-west-1", nil, nil).GetResourceArn())
 }
