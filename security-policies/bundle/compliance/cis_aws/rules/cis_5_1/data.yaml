@@ -1,7 +1,6 @@
 metadata:
   id: 3d701761-f9b6-5c2d-ab99-928161d2ebbd
-  name: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration
-    ports
+  name: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports
   profile_applicability: '* Level 1'
   description: |-
     The Network Access Control List (NACL) function provide stateless filtering of ingress and egress network traffic to AWS resources.

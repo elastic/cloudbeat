@@ -2,8 +2,7 @@ metadata:
   id: 08d850ca-c1be-57e2-ac39-5e38f8750cf6
   name: Ensure that the --etcd-cafile argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
-  description: etcd should be configured to make use of TLS encryption for client
-    connections.
+  description: etcd should be configured to make use of TLS encryption for client connections.
   rationale: |-
     etcd is a highly-available key value store used by Kubernetes deployments for persistent storage of all of its REST API objects.
     These objects are sensitive in nature and should be protected by client authentication.

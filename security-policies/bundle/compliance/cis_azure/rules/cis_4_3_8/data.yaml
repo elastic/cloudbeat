@@ -1,7 +1,6 @@
 metadata:
   id: 70f92ed3-5659-5c95-a8f8-a63211c57635
-  name: Ensure 'Infrastructure double encryption' for PostgreSQL Database Server is
-    'Enabled'
+  name: Ensure 'Infrastructure double encryption' for PostgreSQL Database Server is 'Enabled'
   profile_applicability: '* Level 1'
   description: |-
     Azure Database for PostgreSQL servers should be created with 'infrastructure double encryption' enabled.

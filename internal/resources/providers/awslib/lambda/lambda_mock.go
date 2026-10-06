@@ -35,10 +35,19 @@ func NewMockLambda(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockLambda {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockLambda{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockLambda_ListAliases_Call struct {
 
 // ListAliases is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockLambda_Expecter) ListAliases(context1 interface{}) *MockLambda_ListAliases_Call {
+func (_e *MockLambda_Expecter) ListAliases(context1 any) *MockLambda_ListAliases_Call {
 	return &MockLambda_ListAliases_Call{Call: _e.mock.On("ListAliases", context1)}
 }
 
@@ -153,7 +162,7 @@ type MockLambda_ListEventSourceMappings_Call struct {
 
 // ListEventSourceMappings is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockLambda_Expecter) ListEventSourceMappings(context1 interface{}) *MockLambda_ListEventSourceMappings_Call {
+func (_e *MockLambda_Expecter) ListEventSourceMappings(context1 any) *MockLambda_ListEventSourceMappings_Call {
 	return &MockLambda_ListEventSourceMappings_Call{Call: _e.mock.On("ListEventSourceMappings", context1)}
 }
 
@@ -215,7 +224,7 @@ type MockLambda_ListFunctions_Call struct {
 
 // ListFunctions is a helper method to define mock.On call
 //   - context1 context.Context
-func (_e *MockLambda_Expecter) ListFunctions(context1 interface{}) *MockLambda_ListFunctions_Call {
+func (_e *MockLambda_Expecter) ListFunctions(context1 any) *MockLambda_ListFunctions_Call {
 	return &MockLambda_ListFunctions_Call{Call: _e.mock.On("ListFunctions", context1)}
 }
 
@@ -279,7 +288,7 @@ type MockLambda_ListLayers_Call struct {
 //   - context1 context.Context
 //   - s string
 //   - s1 string
-func (_e *MockLambda_Expecter) ListLayers(context1 interface{}, s interface{}, s1 interface{}) *MockLambda_ListLayers_Call {
+func (_e *MockLambda_Expecter) ListLayers(context1 any, s any, s1 any) *MockLambda_ListLayers_Call {
 	return &MockLambda_ListLayers_Call{Call: _e.mock.On("ListLayers", context1, s, s1)}
 }
 

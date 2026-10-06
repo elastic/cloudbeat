@@ -3,7 +3,7 @@
   "extends": [
     "local>elastic/renovate-config"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "main",
     "9.5",
     "9.4",
@@ -32,12 +32,27 @@
   "ignorePaths": [
     "**/vendor/**"
   ],
+  "enabledManagers": [
+    "buildkite",
+    "dockerfile",
+    "github-actions",
+    "gomod",
+    "helm-values",
+    "hermit",
+    "kustomize",
+    "poetry",
+    "pre-commit",
+    "terraform"
+  ],
+  "pre-commit": {
+    "enabled": true
+  },
   "customManagers": [
     {
       "description": "Update .go-version file",
       "customType": "regex",
-      "fileMatch": [
-        "^\\.go-version$"
+      "managerFilePatterns": [
+        "/^\\.go-version$/"
       ],
       "matchStrings": [
         "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
@@ -48,8 +63,8 @@
     {
       "description": "Update :go-version: in docs/version.asciidoc",
       "customType": "regex",
-      "fileMatch": [
-        "^docs/version\\.asciidoc$"
+      "managerFilePatterns": [
+        "/^docs/version\\.asciidoc$/"
       ],
       "matchStrings": [
         ":go-version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
@@ -60,7 +75,7 @@
     {
       "customType": "regex",
       "description": "Track elastic/beats branch HEAD — currentValue is derived from baseBranch at runtime",
-      "managerFilePatterns": ["^go\\.mod$"],
+      "managerFilePatterns": ["/^go\\.mod$/"],
       "matchStrings": ["github\\.com/elastic/beats/v7 v7\\.0\\.0-alpha2\\.0\\.(?<timestamp>\\d+)-(?<currentDigest>[0-9a-f]{12})"],
       "depNameTemplate": "https://github.com/elastic/beats",
       "datasourceTemplate": "git-refs",
@@ -73,16 +88,6 @@
       "description": "Ignore elastic/beats v7 - requires manual update",
       "matchPackageNames": [
         "github.com/elastic/beats/v7"
-      ],
-      "enabled": false
-    },
-    {
-      "description": "Disable sarama updates - requires manual handling",
-      "matchManagers": [
-        "gomod"
-      ],
-      "matchPackageNames": [
-        "/^github\\.com/elastic/sarama$/"
       ],
       "enabled": false
     },
@@ -227,6 +232,67 @@
       "enabled": true
     },
     {
+      "description": "Disable sarama updates - requires manual handling",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "/^github\\.com/elastic/sarama$/"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable go.mod replace directive updates - pins must match beats go.mod; renovate writes invalid bare commit hashes",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "replace"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable goja updates - replaced by elastic/goja, version is driven by beats",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/dop251/goja",
+        "github.com/dop251/goja_nodejs"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable e2e-testing updates - v1.99.x tags are not real releases (latest is v1.2.3)",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/elastic/e2e-testing"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable go-ini/ini updates - v1.67.1+ declares its module path as gopkg.in/ini.v1, so 'go get github.com/go-ini/ini' fails; gopkg.in/ini.v1 is already used by trivy/opa/rekor, only yq still imports the old path. Must stay after the 'Enable indirect Go dependencies' rule, which would otherwise re-enable it",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/go-ini/ini"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable otelaws updates - v0.72.0 deprecates the package (staticcheck SA1019); we are in maintenance mode, so stay on v0.71.0. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
@@ -280,6 +346,13 @@
       ]
     },
     {
+      "description": "Group pre-commit hook rev updates into one PR",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "groupName": "pre-commit"
+    },
+    {
       "description": "Disable CI/infrastructure/test-environment updates on release branches",
       "matchBaseBranches": [
         "9.5",
@@ -290,12 +363,14 @@
         ".github/workflows/**",
         ".buildkite/**",
         "**/pyproject.toml",
-        "deploy/test-environments/**"
+        "deploy/test-environments/**",
+        ".pre-commit-config.yaml"
       ],
       "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
     "enabled": false
-  }
+  },
+  "dependencyDashboardReportAbandonment": false
 }

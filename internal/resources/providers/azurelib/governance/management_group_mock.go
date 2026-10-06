@@ -35,10 +35,19 @@ func NewMockProviderAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockProviderAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockProviderAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockProviderAPI_GetSubscriptions_Call struct {
 // GetSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
 //   - cycleMetadata cycle.Metadata
-func (_e *MockProviderAPI_Expecter) GetSubscriptions(ctx interface{}, cycleMetadata interface{}) *MockProviderAPI_GetSubscriptions_Call {
+func (_e *MockProviderAPI_Expecter) GetSubscriptions(ctx any, cycleMetadata any) *MockProviderAPI_GetSubscriptions_Call {
 	return &MockProviderAPI_GetSubscriptions_Call{Call: _e.mock.On("GetSubscriptions", ctx, cycleMetadata)}
 }
 

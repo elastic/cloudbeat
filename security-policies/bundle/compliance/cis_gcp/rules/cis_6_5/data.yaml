@@ -1,7 +1,6 @@
 metadata:
   id: bac65dd0-771b-5bfb-8e5f-3b1dc8962684
-  name: Ensure That Cloud SQL Database Instances Do Not Implicitly Whitelist All Public
-    IP Addresses
+  name: Ensure That Cloud SQL Database Instances Do Not Implicitly Whitelist All Public IP Addresses
   profile_applicability: '* Level 1'
   description: |-
     Database Server should accept connections only from trusted Network(s)/IP(s) and restrict access from public IP addresses.

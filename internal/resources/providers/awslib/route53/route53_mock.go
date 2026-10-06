@@ -36,10 +36,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -100,9 +109,9 @@ type MockClient_ListHostedZones_Call struct {
 //   - ctx context.Context
 //   - params *route53.ListHostedZonesInput
 //   - optFns ...func(*route53.Options)
-func (_e *MockClient_Expecter) ListHostedZones(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListHostedZones_Call {
+func (_e *MockClient_Expecter) ListHostedZones(ctx any, params any, optFns ...any) *MockClient_ListHostedZones_Call {
 	return &MockClient_ListHostedZones_Call{Call: _e.mock.On("ListHostedZones",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListHostedZones_Call) Run(run func(ctx context.Context, params *route53.ListHostedZonesInput, optFns ...func(*route53.Options))) *MockClient_ListHostedZones_Call {
@@ -183,9 +192,9 @@ type MockClient_ListResourceRecordSets_Call struct {
 //   - ctx context.Context
 //   - params *route53.ListResourceRecordSetsInput
 //   - optFns ...func(*route53.Options)
-func (_e *MockClient_Expecter) ListResourceRecordSets(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListResourceRecordSets_Call {
+func (_e *MockClient_Expecter) ListResourceRecordSets(ctx any, params any, optFns ...any) *MockClient_ListResourceRecordSets_Call {
 	return &MockClient_ListResourceRecordSets_Call{Call: _e.mock.On("ListResourceRecordSets",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListResourceRecordSets_Call) Run(run func(ctx context.Context, params *route53.ListResourceRecordSetsInput, optFns ...func(*route53.Options))) *MockClient_ListResourceRecordSets_Call {
@@ -229,10 +238,19 @@ func NewMockRecordsLister(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockRecordsLister {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockRecordsLister{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -285,7 +303,7 @@ type MockRecordsLister_ListRecords_Call struct {
 
 // ListRecords is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockRecordsLister_Expecter) ListRecords(ctx interface{}) *MockRecordsLister_ListRecords_Call {
+func (_e *MockRecordsLister_Expecter) ListRecords(ctx any) *MockRecordsLister_ListRecords_Call {
 	return &MockRecordsLister_ListRecords_Call{Call: _e.mock.On("ListRecords", ctx)}
 }
 

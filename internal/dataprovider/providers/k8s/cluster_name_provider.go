@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes/metadata"
+	"github.com/elastic/beats/v7/pkg/autodiscover/kubernetes/metadata"
 	agent_config "github.com/elastic/elastic-agent-libs/config"
 	"k8s.io/client-go/kubernetes"
 

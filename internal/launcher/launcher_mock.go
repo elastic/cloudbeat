@@ -33,10 +33,19 @@ func NewMockReloader(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockReloader {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockReloader{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -139,10 +148,19 @@ func NewMockValidator(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockValidator {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockValidator{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -184,7 +202,7 @@ type MockValidator_Validate_Call struct {
 
 // Validate is a helper method to define mock.On call
 //   - c *config.C
-func (_e *MockValidator_Expecter) Validate(c interface{}) *MockValidator_Validate_Call {
+func (_e *MockValidator_Expecter) Validate(c any) *MockValidator_Validate_Call {
 	return &MockValidator_Validate_Call{Call: _e.mock.On("Validate", c)}
 }
 

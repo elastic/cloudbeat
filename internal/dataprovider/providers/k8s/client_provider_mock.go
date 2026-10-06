@@ -23,8 +23,8 @@
 package k8s
 
 import (
+	"github.com/elastic/beats/v7/pkg/autodiscover/kubernetes"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	mock "github.com/stretchr/testify/mock"
 	kubernetes0 "k8s.io/client-go/kubernetes"
 )
@@ -35,10 +35,19 @@ func NewMockClientGetterAPI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClientGetterAPI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClientGetterAPI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -93,7 +102,7 @@ type MockClientGetterAPI_GetClient_Call struct {
 //   - log *clog.Logger
 //   - kubeConfig string
 //   - options kubernetes.KubeClientOptions
-func (_e *MockClientGetterAPI_Expecter) GetClient(log interface{}, kubeConfig interface{}, options interface{}) *MockClientGetterAPI_GetClient_Call {
+func (_e *MockClientGetterAPI_Expecter) GetClient(log any, kubeConfig any, options any) *MockClientGetterAPI_GetClient_Call {
 	return &MockClientGetterAPI_GetClient_Call{Call: _e.mock.On("GetClient", log, kubeConfig, options)}
 }
 

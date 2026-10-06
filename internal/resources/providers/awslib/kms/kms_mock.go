@@ -35,10 +35,19 @@ func NewMockKMS(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockKMS {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockKMS{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockKMS_DescribeSymmetricKeys_Call struct {
 
 // DescribeSymmetricKeys is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockKMS_Expecter) DescribeSymmetricKeys(ctx interface{}) *MockKMS_DescribeSymmetricKeys_Call {
+func (_e *MockKMS_Expecter) DescribeSymmetricKeys(ctx any) *MockKMS_DescribeSymmetricKeys_Call {
 	return &MockKMS_DescribeSymmetricKeys_Call{Call: _e.mock.On("DescribeSymmetricKeys", ctx)}
 }
 

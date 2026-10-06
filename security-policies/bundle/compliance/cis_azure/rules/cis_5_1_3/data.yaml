@@ -2,8 +2,7 @@ metadata:
   id: 7c908585-ec93-52dc-81bb-ceb17cd4c313
   name: Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible
   profile_applicability: '* Level 1'
-  description: The storage account container containing the activity log export should
-    not be publicly accessible.
+  description: The storage account container containing the activity log export should not be publicly accessible.
   rationale: |-
     Allowing public access to activity log content may aid an adversary in identifying weaknesses in the affected account's use or configuration.
   audit: |-

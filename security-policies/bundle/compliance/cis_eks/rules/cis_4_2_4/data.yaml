@@ -2,8 +2,7 @@ metadata:
   id: 4d0a1c5a-27b5-5429-895d-e90878fcce1d
   name: Minimize the admission of containers wishing to share the host network namespace
   profile_applicability: '* Level 1'
-  description: Do not generally permit containers to be run with the `hostNetwork`
-    flag set to true.
+  description: Do not generally permit containers to be run with the `hostNetwork` flag set to true.
   rationale: |-
     A container running in the host's network namespace could access the local loopback device, and could access network traffic to and from other pods.
 

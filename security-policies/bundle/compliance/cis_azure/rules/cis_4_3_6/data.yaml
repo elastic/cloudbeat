@@ -1,10 +1,8 @@
 metadata:
   id: 461c5ca2-0173-5b8c-ae36-b229cffefbb2
-  name: Ensure Server Parameter 'log_retention_days' is greater than 3 days for PostgreSQL
-    Database Server
+  name: Ensure Server Parameter 'log_retention_days' is greater than 3 days for PostgreSQL Database Server
   profile_applicability: '* Level 1'
-  description: Ensure `log_retention_days` on `PostgreSQL Servers` is set to an appropriate
-    value.
+  description: Ensure `log_retention_days` on `PostgreSQL Servers` is set to an appropriate value.
   rationale: |-
     Configuring `log_retention_days` determines the duration in days that `Azure Database for PostgreSQL` retains log files.
     Query and error logs can be used to identify, troubleshoot, and repair configuration errors and sub-optimal performance.

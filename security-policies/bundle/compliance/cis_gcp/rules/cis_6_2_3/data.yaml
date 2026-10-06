@@ -1,7 +1,6 @@
 metadata:
   id: 9259a915-0294-54d6-b379-162ceb36e875
-  name: Ensure That the ‘Log_disconnections’ Database Flag for Cloud SQL PostgreSQL
-    Instance Is Set to ‘On’
+  name: Ensure That the ‘Log_disconnections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’
   profile_applicability: '* Level 1'
   description: |-
     Enabling the `log_disconnections` setting logs the end of each session, including the session duration.

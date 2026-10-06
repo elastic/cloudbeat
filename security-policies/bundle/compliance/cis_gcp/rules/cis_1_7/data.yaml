@@ -1,7 +1,6 @@
 metadata:
   id: fdff0b83-dc73-5d60-9ad3-b98ed139a1b4
-  name: Ensure User-Managed/External Keys for Service Accounts Are Rotated Every 90
-    Days or Fewer
+  name: Ensure User-Managed/External Keys for Service Accounts Are Rotated Every 90 Days or Fewer
   profile_applicability: '* Level 1'
   description: |-
     Service Account keys consist of a key ID (Private_key_Id) and Private key, which are used to sign programmatic requests users make to Google cloud services accessible to that particular service account.

@@ -2,8 +2,7 @@ metadata:
   id: d303c4f1-489c-56ca-add9-29820c2214af
   name: Ensure that the --root-ca-file argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
-  description: Allow pods to verify the API server's serving certificate before establishing
-    connections.
+  description: Allow pods to verify the API server's serving certificate before establishing connections.
   rationale: |-
     Processes running within pods that need to contact the API server must verify the API server's serving certificate.
     Failing to do so could be a subject to man-in-the-middle attacks.

@@ -35,10 +35,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -99,9 +108,9 @@ type MockClient_DescribeKey_Call struct {
 //   - ctx context.Context
 //   - params *kms.DescribeKeyInput
 //   - optFns ...func(*kms.Options)
-func (_e *MockClient_Expecter) DescribeKey(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeKey_Call {
+func (_e *MockClient_Expecter) DescribeKey(ctx any, params any, optFns ...any) *MockClient_DescribeKey_Call {
 	return &MockClient_DescribeKey_Call{Call: _e.mock.On("DescribeKey",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeKey_Call) Run(run func(ctx context.Context, params *kms.DescribeKeyInput, optFns ...func(*kms.Options))) *MockClient_DescribeKey_Call {
@@ -182,9 +191,9 @@ type MockClient_GetKeyRotationStatus_Call struct {
 //   - ctx context.Context
 //   - params *kms.GetKeyRotationStatusInput
 //   - optFns ...func(*kms.Options)
-func (_e *MockClient_Expecter) GetKeyRotationStatus(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetKeyRotationStatus_Call {
+func (_e *MockClient_Expecter) GetKeyRotationStatus(ctx any, params any, optFns ...any) *MockClient_GetKeyRotationStatus_Call {
 	return &MockClient_GetKeyRotationStatus_Call{Call: _e.mock.On("GetKeyRotationStatus",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_GetKeyRotationStatus_Call) Run(run func(ctx context.Context, params *kms.GetKeyRotationStatusInput, optFns ...func(*kms.Options))) *MockClient_GetKeyRotationStatus_Call {
@@ -265,9 +274,9 @@ type MockClient_ListKeys_Call struct {
 //   - ctx context.Context
 //   - params *kms.ListKeysInput
 //   - optFns ...func(*kms.Options)
-func (_e *MockClient_Expecter) ListKeys(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListKeys_Call {
+func (_e *MockClient_Expecter) ListKeys(ctx any, params any, optFns ...any) *MockClient_ListKeys_Call {
 	return &MockClient_ListKeys_Call{Call: _e.mock.On("ListKeys",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_ListKeys_Call) Run(run func(ctx context.Context, params *kms.ListKeysInput, optFns ...func(*kms.Options))) *MockClient_ListKeys_Call {

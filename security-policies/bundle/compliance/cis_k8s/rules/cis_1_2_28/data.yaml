@@ -22,8 +22,7 @@ metadata:
     ```
     --client-ca-file=<path/to/client-ca-file>
     ```
-  impact: TLS and client certificate authentication must be configured for your Kubernetes
-    cluster deployment.
+  impact: TLS and client certificate authentication must be configured for your Kubernetes cluster deployment.
   default_value: |
     By default, `--client-ca-file` argument is not set.
   references: |-

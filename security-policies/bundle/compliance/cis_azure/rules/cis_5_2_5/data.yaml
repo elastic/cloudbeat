@@ -2,8 +2,7 @@ metadata:
   id: f55af438-f955-51d3-b42f-60b0d48d86e4
   name: Ensure that Activity Log Alert exists for Create or Update Security Solution
   profile_applicability: '* Level 1'
-  description: Create an activity log alert for the Create or Update Security Solution
-    event.
+  description: Create an activity log alert for the Create or Update Security Solution event.
   rationale: |-
     Monitoring for Create or Update Security Solution events gives insight into changes to the active security solutions and may reduce the time it takes to detect suspicious activity.
   audit: |-

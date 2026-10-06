@@ -36,10 +36,19 @@ func NewMockProjectParentResolver(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockProjectParentResolver {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockProjectParentResolver{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -92,7 +101,7 @@ type MockProjectParentResolver_GetProjectParent_Call struct {
 //   - ctx context.Context
 //   - cfg config.GcpConfig
 //   - clientOpts []option.ClientOption
-func (_e *MockProjectParentResolver_Expecter) GetProjectParent(ctx interface{}, cfg interface{}, clientOpts interface{}) *MockProjectParentResolver_GetProjectParent_Call {
+func (_e *MockProjectParentResolver_Expecter) GetProjectParent(ctx any, cfg any, clientOpts any) *MockProjectParentResolver_GetProjectParent_Call {
 	return &MockProjectParentResolver_GetProjectParent_Call{Call: _e.mock.On("GetProjectParent", ctx, cfg, clientOpts)}
 }
 
@@ -135,10 +144,19 @@ func NewMockOrganizationParentResolver(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockOrganizationParentResolver {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockOrganizationParentResolver{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -191,7 +209,7 @@ type MockOrganizationParentResolver_GetOrganizationParent_Call struct {
 //   - ctx context.Context
 //   - cfg config.GcpConfig
 //   - clientOpts []option.ClientOption
-func (_e *MockOrganizationParentResolver_Expecter) GetOrganizationParent(ctx interface{}, cfg interface{}, clientOpts interface{}) *MockOrganizationParentResolver_GetOrganizationParent_Call {
+func (_e *MockOrganizationParentResolver_Expecter) GetOrganizationParent(ctx any, cfg any, clientOpts any) *MockOrganizationParentResolver_GetOrganizationParent_Call {
 	return &MockOrganizationParentResolver_GetOrganizationParent_Call{Call: _e.mock.On("GetOrganizationParent", ctx, cfg, clientOpts)}
 }
 

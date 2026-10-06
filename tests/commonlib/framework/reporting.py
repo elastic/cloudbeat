@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import allure
 import pytest
 from allure_commons.types import LinkType
 
@@ -44,8 +43,8 @@ def skip_param_case(
 
     marks_list = [
         pytest.mark.xfail(reason=data_to_report.skip_reason),
-        allure.link(  # pylint: disable=c-extension-no-member
-            url=data_to_report.url_link,
+        pytest.mark.allure_link(
+            data_to_report.url_link,
             link_type=data_to_report.link_type,
             name=data_to_report.url_title,
         ),

@@ -74,6 +74,7 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 				PubliclyAccessible:      aws.ToBool(dbInstance.PubliclyAccessible),
 				Engine:                  aws.ToString(dbInstance.Engine),
 				EngineVersion:           aws.ToString(dbInstance.EngineVersion),
+				Status:                  aws.ToString(dbInstance.DBInstanceStatus),
 				CreatedAt:               dbInstance.InstanceCreateTime,
 				Subnets:                 subnets,
 				region:                  region,

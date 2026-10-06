@@ -35,10 +35,19 @@ func NewMockAssetFetcher(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAssetFetcher {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAssetFetcher{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -70,7 +79,7 @@ type MockAssetFetcher_Fetch_Call struct {
 // Fetch is a helper method to define mock.On call
 //   - ctx context.Context
 //   - assetChannel chan<- AssetEvent
-func (_e *MockAssetFetcher_Expecter) Fetch(ctx interface{}, assetChannel interface{}) *MockAssetFetcher_Fetch_Call {
+func (_e *MockAssetFetcher_Expecter) Fetch(ctx any, assetChannel any) *MockAssetFetcher_Fetch_Call {
 	return &MockAssetFetcher_Fetch_Call{Call: _e.mock.On("Fetch", ctx, assetChannel)}
 }
 
@@ -108,10 +117,19 @@ func NewMockAssetPublisher(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockAssetPublisher {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockAssetPublisher{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -142,7 +160,7 @@ type MockAssetPublisher_PublishAll_Call struct {
 
 // PublishAll is a helper method to define mock.On call
 //   - events []beat.Event
-func (_e *MockAssetPublisher_Expecter) PublishAll(events interface{}) *MockAssetPublisher_PublishAll_Call {
+func (_e *MockAssetPublisher_Expecter) PublishAll(events any) *MockAssetPublisher_PublishAll_Call {
 	return &MockAssetPublisher_PublishAll_Call{Call: _e.mock.On("PublishAll", events)}
 }
 

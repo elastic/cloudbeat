@@ -36,10 +36,19 @@ func NewMockStrategy(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockStrategy {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockStrategy{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -91,7 +100,7 @@ type MockStrategy_NewAssetInventory_Call struct {
 // NewAssetInventory is a helper method to define mock.On call
 //   - ctx context.Context
 //   - client beat.Client
-func (_e *MockStrategy_Expecter) NewAssetInventory(ctx interface{}, client interface{}) *MockStrategy_NewAssetInventory_Call {
+func (_e *MockStrategy_Expecter) NewAssetInventory(ctx any, client any) *MockStrategy_NewAssetInventory_Call {
 	return &MockStrategy_NewAssetInventory_Call{Call: _e.mock.On("NewAssetInventory", ctx, client)}
 }
 

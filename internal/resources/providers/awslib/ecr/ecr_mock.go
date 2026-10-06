@@ -36,10 +36,19 @@ func NewMockRepositoryDescriber(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockRepositoryDescriber {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockRepositoryDescriber{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -94,7 +103,7 @@ type MockRepositoryDescriber_DescribeRepositories_Call struct {
 //   - ctx context.Context
 //   - repoNames []string
 //   - region string
-func (_e *MockRepositoryDescriber_Expecter) DescribeRepositories(ctx interface{}, repoNames interface{}, region interface{}) *MockRepositoryDescriber_DescribeRepositories_Call {
+func (_e *MockRepositoryDescriber_Expecter) DescribeRepositories(ctx any, repoNames any, region any) *MockRepositoryDescriber_DescribeRepositories_Call {
 	return &MockRepositoryDescriber_DescribeRepositories_Call{Call: _e.mock.On("DescribeRepositories", ctx, repoNames, region)}
 }
 
@@ -137,10 +146,19 @@ func NewMockClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -201,9 +219,9 @@ type MockClient_DescribeRepositories_Call struct {
 //   - ctx context.Context
 //   - params *ecr.DescribeRepositoriesInput
 //   - optFns ...func(*ecr.Options)
-func (_e *MockClient_Expecter) DescribeRepositories(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeRepositories_Call {
+func (_e *MockClient_Expecter) DescribeRepositories(ctx any, params any, optFns ...any) *MockClient_DescribeRepositories_Call {
 	return &MockClient_DescribeRepositories_Call{Call: _e.mock.On("DescribeRepositories",
-		append([]interface{}{ctx, params}, optFns...)...)}
+		append([]any{ctx, params}, optFns...)...)}
 }
 
 func (_c *MockClient_DescribeRepositories_Call) Run(run func(ctx context.Context, params *ecr.DescribeRepositoriesInput, optFns ...func(*ecr.Options))) *MockClient_DescribeRepositories_Call {
