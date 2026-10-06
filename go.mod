@@ -141,7 +141,7 @@ require (
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
-	github.com/anchore/go-struct-converter v0.1.0 // indirect
+	github.com/anchore/go-struct-converter v0.2.1 // indirect
 	github.com/apparentlymart/go-cidr v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
