@@ -262,6 +262,16 @@
       "enabled": false
     },
     {
+      "description": "Disable otelaws updates - v0.72.0 deprecates the package (staticcheck SA1019); we are in maintenance mode, so stay on v0.71.0. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
       "matchUpdateTypes": [
         "minor",
