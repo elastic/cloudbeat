@@ -272,6 +272,16 @@
       "enabled": false
     },
     {
+      "description": "Disable k8s.io/kube-openapi updates - newer digests require sigs.k8s.io/structured-merge-diff/v7, but k8s.io/apimachinery v0.37.x still uses v6, breaking the build. Re-enable once a stable k8s.io release (v0.38+) moves to v7. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "k8s.io/kube-openapi"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Disable otelaws updates - v0.72.0 deprecates the package (staticcheck SA1019); we are in maintenance mode, so stay on v0.71.0. Must stay after the 'Enable indirect Go dependencies' rule",
       "matchManagers": [
         "gomod"
