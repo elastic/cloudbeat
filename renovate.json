@@ -262,6 +262,16 @@
       "enabled": false
     },
     {
+      "description": "Disable anchore/go-struct-converter updates - v0.2.x removes converter.ConvertFrom, which spdx/tools-golang (latest v0.5.7) still calls, breaking the build. Re-enable once spdx/tools-golang supports it. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/anchore/go-struct-converter"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Disable otelaws updates - v0.72.0 deprecates the package (staticcheck SA1019); we are in maintenance mode, so stay on v0.71.0. Must stay after the 'Enable indirect Go dependencies' rule",
       "matchManagers": [
         "gomod"
