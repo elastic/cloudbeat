@@ -52,9 +52,9 @@ require (
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260722133641-cf032f423c84
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-client/v7 v7.18.1
-	github.com/elastic/elastic-agent-libs v0.46.1
+	github.com/elastic/elastic-agent-libs v0.47.0
 	github.com/elastic/go-licenser v0.4.2
-	github.com/elastic/go-ucfg v0.9.1
+	github.com/elastic/go-ucfg v0.9.2
 	github.com/go-logr/zapr v1.3.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gocarina/gocsv v0.0.0-20260926200228-b2c6eb8fefab
@@ -373,12 +373,12 @@ require (
 	github.com/eapache/go-resiliency v1.7.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.14.4 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.14.5 // indirect
 	github.com/elastic/go-concert v0.3.1 // indirect
 	github.com/elastic/go-lumber v0.2.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
 	github.com/elastic/go-structform v0.0.12 // indirect
-	github.com/elastic/go-sysinfo v1.15.4 // indirect
+	github.com/elastic/go-sysinfo v1.15.5 // indirect
 	github.com/elastic/go-windows v1.0.2 // indirect
 	github.com/elastic/gosigar v0.14.4 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
