@@ -37,11 +37,12 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "lint"
 
       - name: Pre-commit Hooks
         env:
-          # Skipping golangci-lint as it's tested by golangci-lint
-          SKIP: golangci-lint
+          # golangci-lint runs in its own step below; go-test duplicates the Unit Test job
+          SKIP: golangci-lint,go-test
         shell: bash
         run: |
           pre-commit run --all-files
@@ -85,6 +86,7 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "test"
 
       - name: Build opa bundle
         shell: bash
@@ -126,6 +128,7 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "test"
 
       - name: Build opa bundle
         shell: bash
