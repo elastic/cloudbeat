@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: 'Creates the IAM OIDC identity provider for Elastic Workload Identity if this account does not have one yet, and an IAM Role that only the given Elastic deployment or project can assume. The role grants read-only permissions for all Elastic AWS integrations that support Identity Federation: the AWS package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services)'
+Description: 'Creates the IAM OIDC identity provider for Elastic Workload Identity if this account does not have one yet, and an IAM Role that only the given Elastic deployment or project can assume. The role grants read-only permissions for all Elastic AWS integrations that support Identity Federation: the AWS package integrations (GuardDuty, Inspector, Config, CloudWatch, and metrics services), and the Amazon Bedrock, Amazon Bedrock AgentCore, Amazon MQ, AWS Security Hub, and Custom AWS Logs integrations'
 
 Parameters:
   ElasticOrganizationId:
@@ -55,6 +55,15 @@ Mappings:
 
 Resources:
 
+  # The function gets no logs:CreateLogGroup, so a late invocation cannot
+  # recreate this log group after the stack deletes it.
+  WiiOidcProviderFunctionLogGroup:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 14
+
   # The trust is built from the two claims of the Elastic Workload Identity JWT:
   #   iss = https://workload-identity-issuer.<region>.<provider>.<domain>/orgs/<org>
   #   sub = <deployment|project>:<id>
@@ -71,9 +80,16 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
+        - PolicyName: ElasticWorkloadIdentityOidcProviderLogs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt WiiOidcProviderFunctionLogGroup.Arn
         - PolicyName: ElasticWorkloadIdentityOidcProvider
           PolicyDocument:
             Version: "2012-10-17"
@@ -96,6 +112,8 @@ Resources:
       Handler: index.handler
       Role: !GetAtt WiiOidcProviderFunctionRole.Arn
       Timeout: 120
+      LoggingConfig:
+        LogGroup: !Ref WiiOidcProviderFunctionLogGroup
       Code:
         ZipFile: |
           import json
@@ -497,6 +515,127 @@ Resources:
             Action:
               - securityhub:GetFindings
               - securityhub:GetInsights
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  # aws_bedrock package: aws-cloudwatch and aws/metrics inputs.
+  ElasticAwsBedrock:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsBedrock
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+
+          # aws-cloudwatch input
+          - Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:FilterLogEvents
+              - logs:GetLogEvents
+              - logs:GetLogGroupFields
+            Resource: '*'
+
+          # aws/metrics input
+          - Effect: Allow
+            Action:
+              - cloudwatch:GetMetricData
+              - cloudwatch:ListMetrics
+              - tag:GetResources
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  # aws_bedrock_agentcore package: aws/metrics and aws-cloudwatch inputs.
+  ElasticAwsBedrockAgentCore:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsBedrockAgentCore
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+
+          # aws/metrics input
+          - Effect: Allow
+            Action:
+              - cloudwatch:GetMetricData
+              - cloudwatch:ListMetrics
+              - tag:GetResources
+            Resource: '*'
+
+          # aws-cloudwatch input
+          - Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:FilterLogEvents
+              - logs:GetLogEvents
+              - logs:GetLogGroupFields
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  # aws_mq package: aws/metrics and aws-cloudwatch inputs.
+  ElasticAwsMQ:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsMQ
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+
+          # aws/metrics input
+          - Effect: Allow
+            Action:
+              - cloudwatch:GetMetricData
+              - cloudwatch:ListMetrics
+              - tag:GetResources
+            Resource: '*'
+
+          # aws-cloudwatch input
+          - Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:FilterLogEvents
+              - logs:GetLogEvents
+              - logs:GetLogGroupFields
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  # aws_securityhub package: cel input.
+  ElasticAwsSecurityHubFindings:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsSecurityHubFindings
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - securityhub:GetFindings
+            Resource: '*'
+      Roles:
+        - !Ref ElasticWorkloadIdentityRole
+
+  # aws_logs package: aws-cloudwatch input.
+  ElasticAwsLogs:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ElasticAwsLogs
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:DescribeLogGroups
+              - logs:DescribeLogStreams
+              - logs:FilterLogEvents
+              - logs:GetLogEvents
+              - logs:GetLogGroupFields
             Resource: '*'
       Roles:
         - !Ref ElasticWorkloadIdentityRole
