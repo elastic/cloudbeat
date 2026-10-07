@@ -30,14 +30,13 @@ concurrency:
 jobs:
   package_beat:
     name: Package Cloudbeat
-    # On push only the tar.gz variant runs: it exists to warm the build cache
-    if: github.event_name != 'push' || matrix.types == 'tar.gz'
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        types: [tar.gz, docker]
+        # On push only the tar.gz variant runs: it exists to warm the build cache
+        types: ${{ fromJSON(github.event_name == 'push' && '["tar.gz"]' || '["tar.gz","docker"]') }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
