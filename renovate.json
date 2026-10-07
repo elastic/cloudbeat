@@ -25,6 +25,7 @@
     "gomodTidy"
   ],
   "separateMajorMinor": true,
+  "internalChecksFilter": "strict",
   "prConcurrentLimit": 50,
   "prHourlyLimit": 10,
   "automergeStrategy": "squash",
