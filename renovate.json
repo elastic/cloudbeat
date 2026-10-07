@@ -336,6 +336,16 @@
       "enabled": false
     },
     {
+      "description": "9.4: disable beats branch tracking - the git-refs manager is not covered by the gomod rule above, and newer beats requires Go 1.27, which 9.4 does not move to",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchDepNames": [
+        "https://github.com/elastic/beats"
+      ],
+      "enabled": false
+    },
+    {
       "description": "9.4: cap trivy below v0.75.0 - v0.75.0 requires Go 1.27, which 9.4 does not move to. Patch updates within 0.74.x still flow",
       "matchBaseBranches": [
         "9.4"
