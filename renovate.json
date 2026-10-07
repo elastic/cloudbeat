@@ -262,6 +262,36 @@
       "enabled": false
     },
     {
+      "description": "Disable anchore/go-struct-converter updates - v0.2.x removes converter.ConvertFrom, which spdx/tools-golang (latest v0.5.7) still calls, breaking the build. Re-enable once spdx/tools-golang supports it. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/anchore/go-struct-converter"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable k8s.io/kube-openapi updates - newer digests require sigs.k8s.io/structured-merge-diff/v7, but k8s.io/apimachinery v0.37.x still uses v6, breaking the build. Re-enable once a stable k8s.io release (v0.38+) moves to v7. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "k8s.io/kube-openapi"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Cap OPA below v1.21.0 - v1.21+ requires gobwas/glob v1.0.0, which removes glob.Glob and breaks go.opentelemetry.io/collector/confmap (undefined: glob.Glob). Re-enable once otel confmap migrates (opentelemetry-collector#15928) and beats picks it up. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/open-policy-agent/opa"
+      ],
+      "allowedVersions": "<1.21.0"
+    },
+    {
       "description": "Disable otelaws updates - v0.72.0 deprecates the package (staticcheck SA1019); we are in maintenance mode, so stay on v0.71.0. Must stay after the 'Enable indirect Go dependencies' rule",
       "matchManagers": [
         "gomod"
@@ -270,6 +300,77 @@
         "go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
       ],
       "enabled": false
+    },
+    {
+      "description": "9.4: disable elastic packages - they are coupled to the pinned elastic/beats (e.g. elastic-agent-libs v0.47.0 breaks libbeat: undefined paths.Paths), and beats cannot be bumped because newer beats requires Go 1.27. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/elastic/**"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "9.4: cap trivy below v0.75.0 - v0.75.0 requires Go 1.27, which 9.4 does not move to. Patch updates within 0.74.x still flow",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/aquasecurity/trivy"
+      ],
+      "allowedVersions": "<0.75.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
+      "description": "9.4: cap sigstore/sigstore below v1.11.0 - v1.11.0 requires Go 1.27, which 9.4 does not move to",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/sigstore/sigstore"
+      ],
+      "allowedVersions": "<1.11.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
+      "description": "9.4: disable moby updates - the bumps raise go.mod to go 1.26.8 while 9.4 CI runs Go 1.26.6, and they are indirect-only. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/moby/**"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "9.4: stay on Go 1.26.x - no Go 1.27 upgrade is planned on this branch",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "allowedVersions": "<1.27.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
     },
     {
       "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
