@@ -21,6 +21,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/route53/types"
 	"github.com/stretchr/testify/assert"
@@ -93,4 +94,16 @@ func TestProvider_ListRecords(t *testing.T) {
 		assert.Equal(t, "target.example.com.", second.AliasTargetDNS)
 		assert.Equal(t, "Z456", second.AliasTargetZoneID)
 	})
+}
+
+func TestRecord_GetResourceArnPartition(t *testing.T) {
+	rrs := types.ResourceRecordSet{Name: pointers.Ref("www.example.com."), Type: types.RRTypeA}
+
+	p := NewProvider(testhelper.NewLogger(t), aws.Config{Region: "us-gov-west-1"})
+	r := newRecord(rrs, "Z123", "example.com.", p.partition)
+	assert.Equal(t, "arn:aws-us-gov:route53:::hostedzone/Z123/recordset/www.example.com./A", r.GetResourceArn())
+
+	p = NewProvider(testhelper.NewLogger(t), aws.Config{Region: "us-east-1"})
+	r = newRecord(rrs, "Z123", "example.com.", p.partition)
+	assert.Equal(t, "arn:aws:route53:::hostedzone/Z123/recordset/www.example.com./A", r.GetResourceArn())
 }

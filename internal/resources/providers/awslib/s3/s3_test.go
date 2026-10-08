@@ -15,42 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ec2
+package s3
 
 import (
-	"fmt"
+	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-
-	"github.com/elastic/cloudbeat/internal/resources/fetching"
-	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/stretchr/testify/assert"
 )
 
-type VpcInfo struct {
-	Vpc        types.Vpc       `json:"vpc"`
-	FlowLogs   []types.FlowLog `json:"flow_logs"`
-	awsAccount string
-	region     string
-}
-
-func (v VpcInfo) GetResourceArn() string {
-	if v.Vpc.VpcId == nil {
-		return ""
-	}
-	return fmt.Sprintf("arn:%s:ec2:%s:%s:vpc/%s", awslib.PartitionFromRegion(v.region), v.region, v.awsAccount, *v.Vpc.VpcId)
-}
-
-func (v VpcInfo) GetResourceName() string {
-	if v.Vpc.VpcId == nil {
-		return ""
-	}
-	return *v.Vpc.VpcId
-}
-
-func (v VpcInfo) GetResourceType() string {
-	return fetching.VpcType
-}
-
-func (v VpcInfo) GetRegion() string {
-	return v.region
+func TestBucketDescription_GetResourceArn(t *testing.T) {
+	assert.Equal(t, "arn:aws:s3:::my-bucket", BucketDescription{Name: "my-bucket", Region: "us-east-1"}.GetResourceArn())
+	assert.Equal(t, "arn:aws-us-gov:s3:::my-bucket", BucketDescription{Name: "my-bucket", Region: "us-gov-east-1"}.GetResourceArn())
 }

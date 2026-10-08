@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type Ec2Instance struct {
@@ -42,7 +43,7 @@ func (i Ec2Instance) GetResourceArn() string {
 		return ""
 	}
 	// TODO: check if this is the correct ARN
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:ec2/%s", i.Region, i.awsAccount, *i.Instance.InstanceId)
+	return fmt.Sprintf("arn:%s:ec2:%s:%s:ec2/%s", awslib.PartitionFromRegion(i.Region), i.Region, i.awsAccount, *i.Instance.InstanceId)
 }
 
 func (i Ec2Instance) GetResourceName() string {

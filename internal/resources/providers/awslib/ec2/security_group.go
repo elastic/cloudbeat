@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type SecurityGroup struct {
@@ -35,7 +36,7 @@ func (s SecurityGroup) GetResourceArn() string {
 	if s.SecurityGroup.GroupId == nil {
 		return ""
 	}
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:security-group/%s", s.region, s.awsAccount, *s.SecurityGroup.GroupId)
+	return fmt.Sprintf("arn:%s:ec2:%s:%s:security-group/%s", awslib.PartitionFromRegion(s.region), s.region, s.awsAccount, *s.SecurityGroup.GroupId)
 }
 
 func (s SecurityGroup) GetResourceName() string {
