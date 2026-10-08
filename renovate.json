@@ -419,6 +419,13 @@
       "minimumReleaseAge": "2 days"
     },
     {
+      "description": "elastic/beats git-refs updates have no release timestamp, so minimumReleaseAge with internalChecksFilter strict would hold them back forever. Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
+      "matchDepNames": [
+        "https://github.com/elastic/beats"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "Manual review for major updates",
       "matchUpdateTypes": [
         "major"
