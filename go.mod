@@ -96,7 +96,7 @@ require (
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/sync v0.23.0
 	golang.org/x/time v0.16.0
-	google.golang.org/api v0.294.0
+	google.golang.org/api v0.300.0
 	google.golang.org/grpc v1.84.0
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -309,9 +309,9 @@ require (
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/google/licenseclassifier v0.0.0-20260218193730-3cfbab2d0e0d // indirect
 	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
-	github.com/google/s2a-go v0.1.9 // indirect
+	github.com/google/s2a-go v0.1.10 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.20 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.22 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
