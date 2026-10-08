@@ -742,15 +742,15 @@ vectorstore-mmr = ["numpy (>=1)", "simsimd (>=3)"]
 
 [[package]]
 name = "elasticsearch"
-version = "9.5.0"
+version = "9.5.1"
 description = "Python client for Elasticsearch"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "python_version >= \"3.11\""
 files = [
-    {file = "elasticsearch-9.5.0-py3-none-any.whl", hash = "sha256:010e04f44fd161428f0ab7f94b93a533d3dcc3285d02c9df509b4e0127916420"},
-    {file = "elasticsearch-9.5.0.tar.gz", hash = "sha256:c37576ba04d04200a05012db99bc99024000ae15b9ebdd683966aa8a0e6cd1c4"},
+    {file = "elasticsearch-9.5.1-py3-none-any.whl", hash = "sha256:a980d8888ae70c03f0a1db6b2c5e3e39bf4e235abea737f522d2fd1d2d20bb99"},
+    {file = "elasticsearch-9.5.1.tar.gz", hash = "sha256:98210cd96c256dd9936f58e1c762aba94da7db7d38d058bb0fbaf7e4b9567146"},
 ]
 
 [package.dependencies]
