@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 #
 # Load the "Insights Testing" (project-zero) dataset into a freshly created
-# environment: import + enable the "Endpoint Security [Insights]" detection
-# rule, create its ingest pipeline, then bulk-load the vendored endpoint
-# event/alert episode fixtures (ep1-ep8, plus noise1/noise2 if present).
+# environment: enable the prebuilt "Endpoint Security" detection rule (by its
+# fixed rule_id, installing prebuilt rules first if needed), create an
+# ingest pipeline, then bulk-load the vendored endpoint event/alert episode
+# fixtures (ep1-ep8, plus noise1/noise2 if present).
 #
 # This is the non-interactive, CI-safe rewrite of the original local dev
 # script: no prompts, no hardcoded hosts/credentials (all connection info
@@ -11,10 +12,15 @@
 # failure aborts the run, and every identifier placed into an index name or
 # URL is either a fixed literal or validated as digits-only before use.
 #
+# Note: the original script imported a custom "Endpoint Security [Insights]"
+# rule from a vendored endpoint_alert.ndjson fixture. Kibana removed that
+# fixture and the custom-rule approach in elastic/kibana#278833 ("Honest
+# data generator alerts"); alerts are now attributed to the real prebuilt
+# "Endpoint Security" rule instead, which is what this script enables.
+#
 # Required: KIBANA_URL, ES_URL, ES_USER, ES_PASSWORD, DATA_DIR
-#   DATA_DIR must contain (as synced from the project-zero S3 dataset):
+#   DATA_DIR must contain (as checked out from kibana's episodes fixtures):
 #     attacks/mapping.json
-#     attacks/endpoint_alert.ndjson
 #     attacks/ep<N>data.ndjson[.gz]   / ep<N>alerts.ndjson[.gz]   (N = 1..8)
 #     noise/noise<N>data.ndjson       / noise<N>alerts.ndjson     (N = 1,2; optional)
 #
@@ -38,9 +44,10 @@ readonly ES_BASE="${ES_URL%/}"
 readonly ATTACKS_DIR="${DATA_DIR%/}/attacks"
 readonly NOISE_DIR="${DATA_DIR%/}/noise"
 readonly MAPPING_FILE="${ATTACKS_DIR}/mapping.json"
-readonly RULE_FILE="${ATTACKS_DIR}/endpoint_alert.ndjson"
 readonly PIPELINE_NAME="insights_pipeline"
-readonly RULE_NAME="Endpoint Security [Insights]"
+# Stable rule_id of Elastic's prebuilt "Endpoint Security" detection rule;
+# see elastic/kibana scripts/data/README.md ("Honest alert attribution").
+readonly ENDPOINT_SECURITY_RULE_ID="9a1a2dae-0b5f-4c3d-8305-a268d404c306"
 readonly CURL_COMMON=(--connect-timeout 10 --max-time 120 -sS)
 INDEX_SUFFIX="$(date -u +%Y.%m.%d)"
 readonly INDEX_SUFFIX
@@ -49,7 +56,6 @@ WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "${WORK_DIR}"' EXIT
 
 [[ -f "${MAPPING_FILE}" ]] || { echo "Mapping file not found: ${MAPPING_FILE}" >&2; exit 1; }
-[[ -f "${RULE_FILE}" ]] || { echo "Rule file not found: ${RULE_FILE}" >&2; exit 1; }
 
 # Credentials are passed via curl's -u flag (same convention as
 # install_entity_risk.sh in this repo) and never echoed or written to logs.
@@ -61,54 +67,43 @@ es_curl() {
     curl "${CURL_COMMON[@]}" -u "${ES_USER}:${ES_PASSWORD}" "$@"
 }
 
-import_and_enable_rule() {
-    echo "Checking for existing rule: ${RULE_NAME}"
-    local find_out="${WORK_DIR}/rule_find.json"
-    local http_code
+fetch_endpoint_security_rule() {
+    local out=$1
+    kibana_curl -o "${out}" -w "%{http_code}" -G \
+        "${KIBANA_BASE}/api/detection_engine/rules" \
+        --data-urlencode "rule_id=${ENDPOINT_SECURITY_RULE_ID}"
+}
 
-    http_code=$(kibana_curl -o "${find_out}" -w "%{http_code}" -G \
-        "${KIBANA_BASE}/api/detection_engine/rules/_find" \
-        --data-urlencode "page=1" --data-urlencode "per_page=5" \
-        --data-urlencode "filter=alert.attributes.name:\"${RULE_NAME}\"")
+ensure_endpoint_security_rule_enabled() {
+    echo "Checking for prebuilt rule Endpoint Security (${ENDPOINT_SECURITY_RULE_ID})"
+    local out="${WORK_DIR}/rule_get.json"
+    local http_code
+    http_code=$(fetch_endpoint_security_rule "${out}")
+
+    if [[ "${http_code}" == "404" ]]; then
+        echo "Prebuilt rule not installed yet; installing Elastic prebuilt rules"
+        local install_out="${WORK_DIR}/rule_prepackaged.json"
+        http_code=$(kibana_curl -o "${install_out}" -w "%{http_code}" -X PUT \
+            "${KIBANA_BASE}/api/detection_engine/rules/prepackaged" \
+            -H 'Content-Type: application/json')
+        if [[ "${http_code}" != "200" ]]; then
+            echo "Installing prebuilt rules failed (HTTP ${http_code})" >&2
+            head -c 2000 "${install_out}" >&2 || true
+            exit 1
+        fi
+
+        http_code=$(fetch_endpoint_security_rule "${out}")
+    fi
+
     if [[ "${http_code}" != "200" ]]; then
         echo "Rule lookup failed (HTTP ${http_code})" >&2
-        head -c 2000 "${find_out}" >&2 || true
+        head -c 2000 "${out}" >&2 || true
         exit 1
     fi
 
-    local total
-    total=$(jq -r '.total // 0' "${find_out}")
-
-    if [[ "${total}" -eq 0 ]]; then
-        echo "Rule not found; importing from $(basename "${RULE_FILE}")"
-        local import_out="${WORK_DIR}/rule_import.json"
-        http_code=$(kibana_curl -o "${import_out}" -w "%{http_code}" -X POST \
-            "${KIBANA_BASE}/api/detection_engine/rules/_import" \
-            -H 'Content-Type: multipart/form-data' --form "file=@${RULE_FILE}")
-        if [[ "${http_code}" != "200" ]]; then
-            echo "Rule import failed (HTTP ${http_code})" >&2
-            head -c 2000 "${import_out}" >&2 || true
-            exit 1
-        fi
-
-        http_code=$(kibana_curl -o "${find_out}" -w "%{http_code}" -G \
-            "${KIBANA_BASE}/api/detection_engine/rules/_find" \
-            --data-urlencode "page=1" --data-urlencode "per_page=5" \
-            --data-urlencode "filter=alert.attributes.name:\"${RULE_NAME}\"")
-        if [[ "${http_code}" != "200" ]]; then
-            echo "Rule lookup after import failed (HTTP ${http_code})" >&2
-            exit 1
-        fi
-        total=$(jq -r '.total // 0' "${find_out}")
-        if [[ "${total}" -eq 0 ]]; then
-            echo "Rule still not found after import" >&2
-            exit 1
-        fi
-    fi
-
     local rule_id enabled
-    rule_id=$(jq -r '.data[0].id' "${find_out}")
-    enabled=$(jq -r '.data[0].enabled' "${find_out}")
+    rule_id=$(jq -r '.id' "${out}")
+    enabled=$(jq -r '.enabled' "${out}")
 
     if [[ "${enabled}" == "true" ]]; then
         echo "Rule already enabled."
@@ -260,7 +255,7 @@ load_noise() {
 
     for f in "${NOISE_DIR}"/*data.ndjson; do
         [[ -e "${f}" ]] || continue
-        [[ "${found}" -eq 0 ]] && create_index "${noise_data_index}"
+        create_index "${noise_data_index}"
         bulk_load_file "${f}" "${noise_data_index}"
         found=1
     done
@@ -275,7 +270,7 @@ load_noise() {
 }
 
 echo "=== Insights Testing (project-zero): detection rule ==="
-import_and_enable_rule
+ensure_endpoint_security_rule_enabled
 
 echo "=== Insights Testing (project-zero): ingest pipeline ==="
 create_pipeline
