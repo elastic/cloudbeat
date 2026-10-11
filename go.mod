@@ -65,7 +65,7 @@ require (
 	github.com/google/go-containerregistry v0.22.1
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.26.2
-	github.com/hashicorp/go-uuid v1.0.3
+	github.com/hashicorp/go-uuid v1.0.4
 	github.com/huandu/xstrings v1.5.0
 	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20260422061116-d21e5e4481bb
