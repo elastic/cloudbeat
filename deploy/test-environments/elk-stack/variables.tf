@@ -40,6 +40,12 @@ variable "kibana_enable_entity_analytics_settings" {
   type        = bool
 }
 
+variable "kibana_enable_insights_testing_settings" {
+  default     = false
+  description = "When true (ESS only), apply Kibana user_settings_yaml for Insights Testing (project-zero): AlertZero, Agent Builder experimental features, managed workflows UI, context engine, attack discovery workflows, and related xpack flags. Merged with the Entity Analytics overrides when both are enabled."
+  type        = bool
+}
+
 variable "kibana_instance_size" {
   default     = "4g"
   type        = string

@@ -167,6 +167,7 @@ jobs:
           ec-api-key: ${{ env.TF_VAR_ec_api_key }}
           ec-url: ${{ env.EC_URL }}
           kibana-enable-entity-analytics-settings: true
+          kibana-enable-insights-testing-settings: ${{ inputs.insights_testing_project_zero }}
           kibana-instance-size: ${{ inputs.kibana_instance_size }}
           elasticsearch-ml-enabled: true
           env-s3-bucket: ${{ env.S3_BUCKET_PATH }}

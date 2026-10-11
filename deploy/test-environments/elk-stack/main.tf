@@ -68,6 +68,7 @@ module "ec_deployment" {
   }
 
   kibana_enable_entity_analytics_settings = var.kibana_enable_entity_analytics_settings
+  kibana_enable_insights_testing_settings = var.kibana_enable_insights_testing_settings
   kibana_instance_size                    = var.kibana_instance_size
 }
 
