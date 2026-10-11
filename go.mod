@@ -407,7 +407,7 @@ require (
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/morikuni/aec v1.1.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/ncruces/go-strftime v1.0.0 // indirect
+	github.com/ncruces/go-strftime v1.1.0 // indirect
 	github.com/nikolalohinski/gonja/v2 v2.9.1 // indirect
 	github.com/oklog/ulid/v2 v2.1.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
