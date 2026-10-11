@@ -223,7 +223,7 @@ require (
 	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/docker/cli v29.8.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.9 // indirect
-	github.com/docker/go-connections v0.8.1 // indirect
+	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dop251/goja v0.0.0-20261001121453-e1fc788e4f41 // indirect
 	github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6 // indirect
@@ -390,11 +390,11 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/moby/buildkit v0.33.1 // indirect
+	github.com/moby/buildkit v0.34.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/moby/api v1.56.1 // indirect
-	github.com/moby/moby/client v0.6.1 // indirect
+	github.com/moby/moby/client v0.6.2 // indirect
 	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
 	github.com/moby/sys/sequential v0.7.0 // indirect
