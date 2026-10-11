@@ -27,7 +27,7 @@ on:
           - "4g"
           - "8g"
       entity_analytics_setup:
-        description: "Run Entity Analytics setup (ML job, entity store, risk-score maintainer)"
+        description: "Run Entity Analytics setup (org-data generation, ML job, entity store, risk-score maintainer)"
         type: boolean
         default: true
       insights_testing_project_zero:
@@ -216,7 +216,7 @@ jobs:
           echo "$summary"
 
       - name: Checkout security-documents-generator
-        if: success()
+        if: success() && inputs.entity_analytics_setup
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: elastic/security-documents-generator
@@ -224,7 +224,7 @@ jobs:
           ref: main
 
       - name: Setup Node for security-documents-generator
-        if: success()
+        if: success() && inputs.entity_analytics_setup
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           # Paths are relative to repository root (do not prefix github.workspace — setup-node joins it and duplicates the path).
@@ -233,11 +233,11 @@ jobs:
           cache-dependency-path: security-documents-generator/yarn.lock
 
       - name: Install Yarn
-        if: success()
+        if: success() && inputs.entity_analytics_setup
         run: npm install -g yarn@1.22.22
 
       - name: Install dependencies and run org-data
-        if: success()
+        if: success() && inputs.entity_analytics_setup
         working-directory: security-documents-generator
         env:
           ELASTIC_NODE: ${{ steps.elk-stack.outputs.es-url }}
