@@ -49,6 +49,11 @@ readonly PIPELINE_NAME="insights_pipeline"
 # see elastic/kibana scripts/data/README.md ("Honest alert attribution").
 readonly ENDPOINT_SECURITY_RULE_ID="9a1a2dae-0b5f-4c3d-8305-a268d404c306"
 readonly CURL_COMMON=(--connect-timeout 10 --max-time 120 -sS)
+# Installing Elastic's full prebuilt rule catalog on a fresh instance is a
+# known slow, one-time operation (thousands of rules) -- give it its own
+# generous, overridable budget instead of the default 120s.
+readonly PREPACKAGED_INSTALL_TIMEOUT_SEC="${PREPACKAGED_INSTALL_TIMEOUT_SEC:-1200}"
+readonly CURL_LONG=(--connect-timeout 10 --max-time "${PREPACKAGED_INSTALL_TIMEOUT_SEC}" -sS)
 INDEX_SUFFIX="$(date -u +%Y.%m.%d)"
 readonly INDEX_SUFFIX
 
@@ -64,6 +69,10 @@ trap 'rm -rf "${WORK_DIR}"' EXIT
 # install_entity_risk.sh in this repo) and never echoed or written to logs.
 kibana_curl() {
     curl "${CURL_COMMON[@]}" -u "${ES_USER}:${ES_PASSWORD}" -H 'kbn-xsrf: true' "$@"
+}
+
+kibana_curl_long() {
+    curl "${CURL_LONG[@]}" -u "${ES_USER}:${ES_PASSWORD}" -H 'kbn-xsrf: true' "$@"
 }
 
 es_curl() {
@@ -84,9 +93,9 @@ ensure_endpoint_security_rule_enabled() {
     http_code=$(fetch_endpoint_security_rule "${out}")
 
     if [[ "${http_code}" == "404" ]]; then
-        echo "Prebuilt rule not installed yet; installing Elastic prebuilt rules"
+        echo "Prebuilt rule not installed yet; installing Elastic prebuilt rules (this can take several minutes)"
         local install_out="${WORK_DIR}/rule_prepackaged.json"
-        http_code=$(kibana_curl -o "${install_out}" -w "%{http_code}" -X PUT \
+        http_code=$(kibana_curl_long -o "${install_out}" -w "%{http_code}" -X PUT \
             "${KIBANA_BASE}/api/detection_engine/rules/prepackaged" \
             -H 'Content-Type: application/json')
         if [[ "${http_code}" != "200" ]]; then
