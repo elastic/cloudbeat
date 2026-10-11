@@ -55,7 +55,10 @@ readonly INDEX_SUFFIX
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "${WORK_DIR}"' EXIT
 
-[[ -f "${MAPPING_FILE}" ]] || { echo "Mapping file not found: ${MAPPING_FILE}" >&2; exit 1; }
+[[ -f "${MAPPING_FILE}" ]] || {
+    echo "Mapping file not found: ${MAPPING_FILE}" >&2
+    exit 1
+}
 
 # Credentials are passed via curl's -u flag (same convention as
 # install_entity_risk.sh in this repo) and never echoed or written to logs.
@@ -220,7 +223,10 @@ bulk_load_file() {
 
 load_episode() {
     local ep_num=$1
-    [[ "${ep_num}" =~ ^[0-9]+$ ]] || { echo "Invalid episode number: ${ep_num}" >&2; exit 1; }
+    [[ "${ep_num}" =~ ^[0-9]+$ ]] || {
+        echo "Invalid episode number: ${ep_num}" >&2
+        exit 1
+    }
 
     local data_index="logs-endpoint.events.insights.ep${ep_num}.${INDEX_SUFFIX}"
     local alerts_index="insights-alerts-ep${ep_num}-${INDEX_SUFFIX}"
