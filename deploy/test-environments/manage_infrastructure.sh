@@ -46,7 +46,7 @@ run_terraform() {
 
 # Check for valid input
 if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 {elk-stack|cis|cdr|all} {apply|destroy|output|upload-state}"
+    echo "Usage: $0 {elk-stack|cis|cdr|endpoint-replay|all} {apply|destroy|output|upload-state}"
     exit 1
 fi
 
@@ -68,14 +68,23 @@ cdr)
     run_terraform "elk-stack" "$action" || overall_rc=1
     run_terraform "cdr" "$action" || overall_rc=1
     ;;
+endpoint-replay)
+    # Unlike cdr/cis, this does not bundle elk-stack: create-env-ea.yml applies
+    # elk-stack itself via the elk-stack composite action, so this is only for
+    # standalone apply/destroy of the Endpoint Replay VM against an
+    # already-existing elk-stack (e.g. local/manual use).
+    run_terraform "endpoint-replay" "$action"
+    overall_rc=$?
+    ;;
 all)
     overall_rc=0
     run_terraform "elk-stack" "$action" || overall_rc=1
     run_terraform "cdr" "$action" || overall_rc=1
     run_terraform "cis" "$action" || overall_rc=1
+    run_terraform "endpoint-replay" "$action" || overall_rc=1
     ;;
 *)
-    echo "Usage: $0 {elk-stack|cis|cdr|all} {apply|destroy|output|upload-state}"
+    echo "Usage: $0 {elk-stack|cis|cdr|endpoint-replay|all} {apply|destroy|output|upload-state}"
     exit 1
     ;;
 esac

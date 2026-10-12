@@ -34,6 +34,10 @@ on:
         description: "Load the 'Insights Testing' (project-zero) dataset: Endpoint Security [Insights] rule + endpoint event/alert episodes"
         type: boolean
         default: false
+      endpoint_replay_isolate_host:
+        description: "Endpoint Replay: after the replay uploads its alerts, isolate the enrolled host via the Isolate Host response action (requires insights_testing_project_zero)"
+        type: boolean
+        default: false
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -205,6 +209,15 @@ jobs:
           echo "KIBANA_URL=$STACK_KIBANA_URL" >> "$GITHUB_ENV"
           echo "ES_URL=$STACK_ES_URL" >> "$GITHUB_ENV"
 
+      - name: Set default space solution to Security
+        if: success()
+        working-directory: ./
+        env:
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+        run: bash .ci/scripts/set_default_space_solution.sh
+
       - name: Summary
         if: success()
         run: |
@@ -291,6 +304,116 @@ jobs:
           ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
           DATA_DIR: kibana-insights-fixtures/x-pack/solutions/security/plugins/security_solution/scripts/data/episodes
         run: bash .ci/scripts/insights_testing_project_zero.sh
+
+      # --- Endpoint Replay (project-zero): a real enrolled Elastic Defend agent for
+      # AlertZero forensics / isolate-host testing, since that needs endpoint_ids
+      # in metrics-endpoint.metadata_current_*, which the bulk-loaded data above
+      # can't provide. See .ci/scripts/endpoint_replay/replay.py.
+      # Note: the replay tool's own detection rule watches insights-alerts-*,
+      # the same wildcard the project-zero data above writes to -- enabling both
+      # means that rule will also match project-zero's static alerts.
+      - name: Provision Endpoint Replay VM
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: deploy/test-environments/endpoint-replay
+        env:
+          TF_VAR_deployment_name: ${{ env.DEPLOYMENT_NAME }}
+          TF_VAR_region: ${{ env.AWS_REGION }}
+        run: |
+          terraform init
+          terraform validate
+          terraform apply -auto-approve
+
+      - name: Get Endpoint Replay VM outputs
+        id: endpoint-replay-outputs
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: deploy/test-environments/endpoint-replay
+        run: |
+          public_ip="$(terraform output -raw endpoint_replay_vm_public_ip)"
+          echo "public-ip=${public_ip}" >> "$GITHUB_OUTPUT"
+          # Resolve to an absolute path: later steps run with different
+          # working-directories, and the key path terraform prints is relative
+          # to here (deploy/test-environments/endpoint-replay).
+          ssh_key_rel="$(terraform output -raw endpoint_replay_vm_ssh_key)"
+          ssh_key_abs="$(cd "$(dirname "${ssh_key_rel}")" && pwd)/$(basename "${ssh_key_rel}")"
+          echo "ssh-key=${ssh_key_abs}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Endpoint Replay terraform state
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: deploy/test-environments
+        env:
+          S3_BUCKET: ${{ env.S3_BUCKET_PATH }}
+          ENDPOINT_REPLAY_KEY: ${{ steps.endpoint-replay-outputs.outputs.ssh-key }}
+        run: ./manage_infrastructure.sh "endpoint-replay" "upload-state"
+
+      - name: Install Elastic Defend integration (endpoint replay)
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: tests/integrations_setup
+        env:
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          STACK_VERSION: ${{ env.STACK_VERSION }}
+          AGENT_VERSION: ${{ env.STACK_VERSION }}
+          ELASTIC_DEFEND_ENROLL_LINUX: true
+          ELASTIC_DEFEND_ENROLL_WINDOWS: false
+          ELASTIC_DEFEND_LINUX_PUBLIC_IP: ${{ steps.endpoint-replay-outputs.outputs.public-ip }}
+        run: |
+          poetry run python ./install_elastic_defend_integration.py
+
+      - name: Enroll Elastic Defend agent (endpoint replay)
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: deploy/test-environments
+        env:
+          DEFEND_KEY: ${{ steps.endpoint-replay-outputs.outputs.ssh-key }}
+          DEFEND_PUBLIC_IP: ${{ steps.endpoint-replay-outputs.outputs.public-ip }}
+        run: |
+          scriptname="elastic-defend-linux.sh"
+          src="../../tests/integrations_setup/$scriptname"
+          cmd="chmod +x $scriptname && ./$scriptname"
+          ./remote_setup.sh -k "$DEFEND_KEY" -s "$src" -h "$DEFEND_PUBLIC_IP" -d "~/$scriptname" -c "$cmd"
+
+      - name: Wait for Elastic Defend agent (endpoint replay)
+        id: endpoint-replay-agent
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: tests/integrations_setup
+        env:
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          STACK_VERSION: ${{ env.STACK_VERSION }}
+        run: |
+          poetry run python ./wait_for_elastic_defend_agent.py
+
+      - name: Run Endpoint Replay (project-zero)
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: ./
+        env:
+          ES_URL: ${{ steps.elk-stack.outputs.es-url }}
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          REPLAY_HOST_NAME: ${{ steps.endpoint-replay-agent.outputs.host-name }}
+          REPLAY_AGENT_ID: ${{ steps.endpoint-replay-agent.outputs.agent-id }}
+          REPLAY_HOST_ID: ${{ steps.endpoint-replay-agent.outputs.host-id }}
+          # github.run_id alone would collide on a re-run of the same job
+          # (replay.py explicitly rejects re-uploading the same --run-id).
+          REPLAY_RUN_ID: "run-${{ github.run_id }}-${{ github.run_attempt }}"
+        run: |
+          python3 .ci/scripts/endpoint_replay/replay.py \
+            --deployment stack \
+            --install-rule \
+            --upload \
+            --verify
+
+      - name: Isolate Endpoint Replay host
+        if: success() && inputs.insights_testing_project_zero && inputs.endpoint_replay_isolate_host
+        working-directory: ./
+        env:
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+          ENDPOINT_ID: ${{ steps.endpoint-replay-agent.outputs.agent-id }}
+        run: bash .ci/scripts/endpoint_replay/isolate_host.sh
 
       - name: Create Slack Payload
         if: always()
