@@ -335,6 +335,32 @@
       "enabled": false
     },
     {
+      "description": "Disable major updates for indirect Go dependencies - a major bump changes the module path (e.g. backoff/v6 to backoff/v7), which is not used by cloudbeat and is reverted by go mod tidy, so the Lint job fails on the non-empty git diff. They move when the direct dependent (trivy, beats, yq) moves. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "indirect"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable Azure SDK major updates - cloudbeat imports these packages directly, so a major bump breaks the build until the Azure fetchers are migrated. Do these by hand in a dedicated PR",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/Azure/azure-sdk-for-go/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
       "description": "9.4: disable elastic packages - they are coupled to the pinned elastic/beats (e.g. elastic-agent-libs v0.47.0 breaks libbeat: undefined paths.Paths), and beats cannot be bumped because newer beats requires Go 1.27. Must stay after the 'Enable indirect Go dependencies' rule",
       "matchBaseBranches": [
         "9.4"
