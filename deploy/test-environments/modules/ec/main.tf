@@ -14,6 +14,7 @@ locals {
   entity_analytics_overrides = {
     "feature_flags.overrides" = {
       "securitySolution.useNewEntityAnalyticsPage" = true
+      "entityStore.dualProcess.enabled"            = true
     }
   }
 
