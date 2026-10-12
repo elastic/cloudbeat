@@ -413,11 +413,15 @@ jobs:
           # (replay.py explicitly rejects re-uploading the same --run-id).
           REPLAY_RUN_ID: "run-${{ github.run_id }}-${{ github.run_attempt }}"
         run: |
+          # No --verify: it counts docs by the replay tag, which the Defend
+          # data streams don't index, so it always reports a false-positive
+          # MISMATCH on the first batch even when the upload succeeded (the
+          # upload itself is already verified: replay.py's bulk() checks each
+          # batch's response for item-level errors and dies on any failure).
           python3 .ci/scripts/endpoint_replay/replay.py \
             --deployment stack \
             --install-rule \
-            --upload \
-            --verify
+            --upload
 
       - name: Isolate Endpoint Replay host
         if: success() && inputs.insights_testing_project_zero && inputs.endpoint_replay_isolate_host
