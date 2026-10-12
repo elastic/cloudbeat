@@ -20,7 +20,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage/v4 v4.2.0
 	github.com/aquasecurity/go-dep-parser v0.0.0-20240606050805-1de9a375c629
 	github.com/aquasecurity/trivy v0.75.0
-	github.com/aquasecurity/trivy-db v0.0.0-20261009114525-968272535ef9
+	github.com/aquasecurity/trivy-db v0.0.0-20261012084708-cbebf2ecd6df
 	github.com/aws/aws-sdk-go-v2 v1.47.3
 	github.com/aws/aws-sdk-go-v2/config v1.33.9
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.9
