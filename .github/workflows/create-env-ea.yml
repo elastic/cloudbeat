@@ -345,6 +345,20 @@ jobs:
           ENDPOINT_REPLAY_KEY: ${{ steps.endpoint-replay-outputs.outputs.ssh-key }}
         run: ./manage_infrastructure.sh "endpoint-replay" "upload-state"
 
+      # install_elastic_defend_integration.py and wait_for_elastic_defend_agent.py
+      # below run via `poetry run`, but this workflow (unlike test-environment.yml /
+      # the CDR action, which go through the richer .github/actions/hermit composite)
+      # only does the bare hermit env setup -- poetry itself is never installed here.
+      - name: Install Poetry
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: ./
+        run: pip3 install poetry
+
+      - name: Install tests poetry dependencies
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: tests
+        run: poetry install
+
       - name: Install Elastic Defend integration (endpoint replay)
         if: success() && inputs.insights_testing_project_zero
         working-directory: tests/integrations_setup
