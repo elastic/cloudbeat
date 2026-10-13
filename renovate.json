@@ -429,14 +429,14 @@
       "enabled": false
     },
     {
-      "description": "9.4: stay on Go 1.26.x - no Go 1.27 upgrade is planned on this branch",
+      "description": "9.4: stay on Go 1.26.6 - no Go 1.27 upgrade is planned on this branch, and the hermit go package has no 1.26.7+ (go.hcl in cashapp/hermit-packages stops at 1.26.6), so a go.mod bump to 1.26.7+ cannot pass CI. Raise the cap once hermit adds them",
       "matchBaseBranches": [
         "9.4"
       ],
       "matchDepNames": [
         "go"
       ],
-      "allowedVersions": "<1.27.0",
+      "allowedVersions": "<1.26.7",
       "addLabels": [
         "go-1.27-blocked"
       ]
@@ -459,6 +459,17 @@
       "description": "elastic/beats git-refs updates have no release timestamp, so minimumReleaseAge with internalChecksFilter strict would hold them back forever. Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
       "matchDepNames": [
         "https://github.com/elastic/beats"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Hermit go and golangci-lint updates have no release timestamp (the hermit datasource does not provide one), so minimumReleaseAge with internalChecksFilter strict holds them out of the go-version group branch and the PR only bumps go.mod, which fails CI because the toolchain comes from hermit (bin/.go-*.pkg). Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
+      "matchManagers": [
+        "hermit"
+      ],
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
       ],
       "minimumReleaseAge": null
     },
