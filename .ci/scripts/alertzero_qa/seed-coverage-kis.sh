@@ -11,9 +11,10 @@
 #                       a paraphrase of its description (never its name). No
 #                       enabled rule maps to that technique.
 #                       Expected verdict: enable the existing rule.
-#   covered_enabled     Same, from an enabled rule. Skipped when no enabled rule
-#                       has a MITRE mapping.
+#   covered_enabled     Same, from an enabled rule. When no enabled rule has a
+#                       MITRE mapping, ENABLES the first disabled one that does.
 #                       Expected verdict: coverage confirmed.
+#                       Undo: disable the rule named in the output.
 #   prebuilt_available  DELETES every installed rule mapped to PREBUILT_TECHNIQUE,
 #                       confirms a prebuilt rule for it is installable, then
 #                       writes a gap from that rule's description.
@@ -283,19 +284,28 @@ fetch_installable() {
     done
 }
 
-delete_rules_by_kql() {
-    local kql=$1 out="${WORK_DIR}/bulk_delete.json" http_code
+# bulk_action <what> <request body>
+bulk_action() {
+    local what=$1 body=$2 out="${WORK_DIR}/bulk_action.json" http_code
     http_code=$(kb_curl -o "${out}" -w '%{http_code}' -X POST \
         -H "elastic-api-version: ${PUBLIC_API_VERSION}" \
         -H 'Content-Type: application/json' \
         "${KB_SPACE_BASE}/api/detection_engine/rules/_bulk_action" \
-        -d "$(jq -n --arg q "${kql}" '{action: "delete", query: $q}')")
-    expect_status "Bulk delete (${kql})" 200 "${http_code}" "${out}"
+        -d "${body}")
+    expect_status "${what}" 200 "${http_code}" "${out}"
     if ! jq -e '.attributes.summary.failed == 0' "${out}" >/dev/null; then
-        echo "Bulk delete reported failures:" >&2
+        echo "${what} reported failures:" >&2
         jq -c '.attributes.errors' "${out}" >&2
         exit 1
     fi
+}
+
+delete_rules_by_kql() {
+    bulk_action "Bulk delete ($1)" "$(jq -n --arg q "$1" '{action: "delete", query: $q}')"
+}
+
+enable_rule() {
+    bulk_action "Enabling rule $1" "$(jq -n --arg id "$1" '{action: "enable", ids: [$id]}')"
 }
 
 gap_doc() {
@@ -432,11 +442,11 @@ seed_no_coverage() {
     write_gap no_coverage "$(gap_doc "${GAP_TITLE}" "${GAP_CONTENT}" "${chosen}")"
 }
 
-# seed_covered <case label> <enabled: true|false> <techniques to avoid, JSON array>
-seed_covered() {
-    local label=$1 enabled=$2 avoid=$3 page=1 total pick="null"
+# find_covered_pick <enabled: true|false> <techniques to avoid, JSON array>
+# Prints the pick_rule result (or null) for the first matching rule by name.
+find_covered_pick() {
+    local enabled=$1 avoid=$2 page=1 total pick="null"
     local page_file="${WORK_DIR}/covered_page.json"
-    echo "--- ${label}"
     while :; do
         find_rules_page "${page_file}" "alert.attributes.enabled: ${enabled}" "${page}" 100
         pick=$(jq -c --argjson avoid "${avoid}" "${JQ_LIB}"' .data | pick_rule(""; $avoid)' "${page_file}")
@@ -445,15 +455,51 @@ seed_covered() {
         ((page * 100 < total)) || break
         page=$((page + 1))
     done
-    if [[ "${pick}" == "null" ]]; then
-        echo "  No usable rule with enabled=${enabled} and a MITRE technique mapping; skipping ${label}."
-        return 0
-    fi
+    echo "${pick}"
+}
+
+# write_covered_gap <case label> <pick>
+write_covered_gap() {
+    local label=$1 pick=$2
     echo "  Rule the worker should find: $(jq -r '.name' <<<"${pick}")"
     write_gap "${label}" "$(gap_doc \
         "Detection coverage gap: $(jq -r '.technique_name' <<<"${pick}") ($(jq -r '.technique' <<<"${pick}"))" \
         "$(jq -r '.content' <<<"${pick}")" \
         "$(jq -r '.technique' <<<"${pick}")")"
+}
+
+seed_covered_enabled() {
+    local pick
+    echo "--- covered_enabled"
+    pick=$(find_covered_pick true '[]')
+    if [[ "${pick}" == "null" ]]; then
+        # Test environments typically only enable rules without a MITRE
+        # mapping (e.g. Endpoint Security), so enable one mapped rule.
+        pick=$(find_covered_pick false '[]')
+        if [[ "${pick}" == "null" ]]; then
+            echo "  No usable rule with a MITRE technique mapping is installed; skipping covered_enabled."
+            return 0
+        fi
+        enable_rule "$(jq -r '.id' <<<"${pick}")"
+        echo "  No enabled rule has a MITRE technique mapping; enabled '$(jq -r '.name' <<<"${pick}")'."
+        echo "  To undo: Rules > Detection rules, disable that rule."
+    fi
+    write_covered_gap covered_enabled "${pick}"
+}
+
+# seed_covered_disabled: picks a disabled rule whose technique no enabled
+# rule maps to, so the expected verdict is "enable", not "covered".
+seed_covered_disabled() {
+    local pick enabled_techniques enabled_rules="${WORK_DIR}/enabled_rules.json"
+    echo "--- covered_disabled"
+    find_all_rules "alert.attributes.enabled: true" "${enabled_rules}"
+    enabled_techniques=$(jq -c "${JQ_LIB}"' [.[] | technique_ids[]] | unique' "${enabled_rules}")
+    pick=$(find_covered_pick false "${enabled_techniques}")
+    if [[ "${pick}" == "null" ]]; then
+        echo "  No usable disabled rule with a MITRE technique mapping that no enabled rule covers; skipping covered_disabled."
+        return 0
+    fi
+    write_covered_gap covered_disabled "${pick}"
 }
 
 update_all_gaps_status() {
@@ -475,16 +521,12 @@ update_all_gaps_status() {
 case "${cmd}" in
 seed)
     echo "Seeding coverage gaps into space '${SPACE}' (@timestamp ${TS})"
-    # Cases that delete rules or check for their absence run first, so the
-    # covered_* lookups see the final rule state.
+    # Order matters: rules are deleted (prebuilt_available) and enabled
+    # (covered_enabled) before covered_disabled reads the final rule state.
     seed_prebuilt_available "${PREBUILT_TECHNIQUE}"
     seed_no_coverage
-
-    enabled_rules="${WORK_DIR}/enabled_rules.json"
-    find_all_rules "alert.attributes.enabled: true" "${enabled_rules}"
-    enabled_techniques=$(jq -c "${JQ_LIB}"' [.[] | technique_ids[]] | unique' "${enabled_rules}")
-    seed_covered covered_disabled false "${enabled_techniques}"
-    seed_covered covered_enabled true '[]'
+    seed_covered_enabled
+    seed_covered_disabled
 
     echo ""
     echo "Done. Trigger system-security-coverage-worker in /app/alertzero."
