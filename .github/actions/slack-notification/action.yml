@@ -51,15 +51,15 @@ runs:
         PAYLOAD: ${{ inputs.slack-payload }}
         MASK: ${{ inputs.mask-secrets }}
         URL_ENCODED: ${{ inputs.url-encoded }}
+        CHANNEL: ${{ inputs.slack-channel }}
       run: |
         python3 ${{ github.action_path }}/slack_payload.py
 
     - name: Send Slack notification
       id: send-slack-notification
       uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
-      env:
-        SLACK_BOT_TOKEN: ${{ env.SLACK_BOT_TOKEN }}
       with:
-        channel-id: ${{ inputs.slack-channel }}
+        method: chat.postMessage
+        token: ${{ env.SLACK_BOT_TOKEN }}
         payload: |
           ${{ steps.prepare-slack-data.outputs.payload }}
