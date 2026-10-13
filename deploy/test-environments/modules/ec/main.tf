@@ -13,17 +13,8 @@ locals {
   # Entity Analytics Kibana user_settings_yaml (ESS only).
   entity_analytics_yaml = <<-EOT
 feature_flags.overrides:
-  aiAssistant.aiAgents.enabled: true
-
-uiSettings.overrides:
-  "agentBuilder:experimentalFeatures": true
-
-xpack.securitySolution.enableExperimental:
-  - riskScoreHistoryEnabled
-  - entityAttachmentsEnabled
-  - entityAnalyticsAnomalyDetails
-
-xpack.cases.attachments.enabled: true
+  securitySolution.useNewEntityAnalyticsPage: true
+  entityStore.dualProcess.enabled: true
 EOT
 
   kibana_docker_config = local.kibana_docker_image_tag_override != "" ? {

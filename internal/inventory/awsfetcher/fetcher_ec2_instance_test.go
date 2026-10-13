@@ -138,9 +138,6 @@ func TestEC2InstanceFetcher_Fetch(t *testing.T) {
 				"Role":               "sre",
 			}),
 			inventory.WithCreatedAt(&launchTime),
-			inventory.WithUser(inventory.User{
-				ID: testRoleArn,
-			}),
 		),
 
 		inventory.NewAssetEvent(
@@ -228,10 +225,6 @@ func TestEC2InstanceFetcher_Fetch_ResolverError(t *testing.T) {
 				"Role":       "sre",
 			}),
 			inventory.WithCreatedAt(&launchTime),
-			// WithUser falls back to the profile ARN when role resolution fails.
-			inventory.WithUser(inventory.User{
-				ID: testProfileArn,
-			}),
 		),
 	}
 

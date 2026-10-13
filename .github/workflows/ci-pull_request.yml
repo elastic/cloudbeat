@@ -37,11 +37,12 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "lint"
 
       - name: Pre-commit Hooks
         env:
-          # Skipping golangci-lint as it's tested by golangci-lint
-          SKIP: golangci-lint
+          # golangci-lint runs in its own step below; go-test duplicates the Unit Test job
+          SKIP: golangci-lint,go-test
         shell: bash
         run: |
           pre-commit run --all-files
@@ -85,6 +86,7 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "test"
 
       - name: Build opa bundle
         shell: bash
@@ -98,7 +100,7 @@ jobs:
           grep -v "mock.go" cover.out.tmp | grep -v mock_old.go | grep -v "elastic/cloudbeat/deploy" | grep -v "internal/inventory/asset.go" > cover.out # remove mock files and deploy dir
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-file
           path: cover.out
@@ -126,6 +128,7 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "test"
 
       - name: Build opa bundle
         shell: bash
@@ -139,7 +142,7 @@ jobs:
           grep -v "mock.go" cover.out.tmp | grep -v mock_old.go | grep -v "elastic/cloudbeat/deploy" | grep -v "internal/inventory/asset.go" > cover.out # remove mock files and deploy dir
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-file
           path: cover.out

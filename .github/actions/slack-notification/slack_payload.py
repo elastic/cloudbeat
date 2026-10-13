@@ -11,6 +11,7 @@ Environment Variables:
 - "PAYLOAD": A JSON-formatted payload for the Slack message.
 - "URL_ENCODED": If set to 'true', it URL-decodes the "MESSAGE".
 - "GITHUB_OUTPUT": The file path for GitHub Actions workflow output.
+- "CHANNEL": The Slack channel to post to, added to the payload.
 - "MASK": If set to 'true', masks sensitive information in the output.
 
 The resulting JSON data is either written to the specified output file for GitHub Actions workflow
@@ -142,6 +143,8 @@ def main():
         else:
             raise ValueError("Either message or payload must be set.")
 
+        # slack-github-action v2+ no longer takes a channel-id input, the channel must be part of the payload
+        json_data["channel"] = os.environ["CHANNEL"]
         set_output("payload", json.dumps(json_data))
 
         if os.environ.get("MASK") == "true":
