@@ -34,10 +34,6 @@ on:
         description: "Load the 'Insights Testing' (project-zero) dataset: Endpoint Security [Insights] rule + endpoint event/alert episodes"
         type: boolean
         default: false
-      endpoint_replay_isolate_host:
-        description: "Endpoint Replay: after the replay uploads its alerts, isolate the enrolled host via the Isolate Host response action (requires insights_testing_project_zero)"
-        type: boolean
-        default: false
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -422,16 +418,6 @@ jobs:
             --deployment stack \
             --install-rule \
             --upload
-
-      - name: Isolate Endpoint Replay host
-        if: success() && inputs.insights_testing_project_zero && inputs.endpoint_replay_isolate_host
-        working-directory: ./
-        env:
-          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
-          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
-          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
-          ENDPOINT_ID: ${{ steps.endpoint-replay-agent.outputs.agent-id }}
-        run: bash .ci/scripts/endpoint_replay/isolate_host.sh
 
       - name: Create Slack Payload
         if: always()
