@@ -428,6 +428,46 @@ jobs:
             --install-rule \
             --upload
 
+      # --- AlertZero QA data seeders: prepare additional scenarios for manual
+      # exploration (rule tuning, coverage gaps, false-positive auto-close). Each
+      # scenario is independent, so one failing doesn't block the others.
+      - name: Seed AlertZero rule-tuning backtests
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: ./
+        env:
+          KB_HOST: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_HOST: ${{ steps.elk-stack.outputs.es-url }}
+          ES_CREDS: "${{ steps.elk-stack.outputs.es-user }}:${{ steps.elk-stack.outputs.es-password }}"
+        run: |
+          for scenario in exception risk_score threshold threshold_query schedule \
+            data_view timestamp_override alert_suppression eql esql new_terms threat_match; do
+            echo "=== rule-tuning backtest scenario: ${scenario} ==="
+            bash .ci/scripts/alertzero_qa/seed-tuning-backtests.sh seed "${scenario}" \
+              || echo "::warning::rule-tuning scenario ${scenario} failed, continuing"
+          done
+
+      - name: Seed AlertZero detection coverage KIs
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: ./
+        env:
+          KB_HOST: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_HOST: ${{ steps.elk-stack.outputs.es-url }}
+          ES_CREDS: "${{ steps.elk-stack.outputs.es-user }}:${{ steps.elk-stack.outputs.es-password }}"
+        run: bash .ci/scripts/alertzero_qa/seed-coverage-kis.sh seed
+
+      - name: Seed AlertZero false-positive alert scenarios
+        if: success() && inputs.insights_testing_project_zero
+        working-directory: ./
+        env:
+          ES_URL: ${{ steps.elk-stack.outputs.es-url }}
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          KIBANA_AUTH: "${{ steps.elk-stack.outputs.es-user }}:${{ steps.elk-stack.outputs.es-password }}"
+        # --no-workflow: stop after producing open alerts. The auto-close step
+        # needs an Enterprise license + a configured GenAI connector, neither of
+        # which this workflow sets up -- leave attaching/running that workflow
+        # for manual exploration in the UI, same as isolate host.
+        run: bash .ci/scripts/alertzero_qa/fpr_produce_paths.sh --path all --no-workflow
+
       - name: Create Slack Payload
         if: always()
         id: prepare-slack-data
