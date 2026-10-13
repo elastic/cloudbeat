@@ -14,6 +14,7 @@ locals {
   entity_analytics_yaml = <<-EOT
 feature_flags.overrides:
   securitySolution.useNewEntityAnalyticsPage: true
+  entityStore.dualProcess.enabled: true
 EOT
 
   kibana_docker_config = local.kibana_docker_image_tag_override != "" ? {
