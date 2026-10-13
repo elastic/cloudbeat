@@ -30,6 +30,7 @@ locals {
     "xpack.securitySolution.enableExperimental" = [
       "leadGenerationEnabled",
       "endpointForensicAnalysisSkill",
+      "investigateRuleSkill",
     ]
     "xpack.alertzero.enabled"                = true
     "xpack.evals.enabled"                    = true
