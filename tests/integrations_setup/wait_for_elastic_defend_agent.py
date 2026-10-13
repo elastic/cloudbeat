@@ -24,9 +24,8 @@ from pathlib import Path
 from typing import Optional
 
 import configuration_fleet as cnfg
-from loguru import logger
-
 from fleet_api.agent_policy_api import get_agents
+from loguru import logger
 
 HOSTS_METADATA_FILE = Path(__file__).parent / "elastic_defend_hosts.json"
 GITHUB_OUTPUT_ENV = "GITHUB_OUTPUT"
