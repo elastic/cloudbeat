@@ -417,10 +417,6 @@ func WithUser(user User) AssetEnricher {
 	}
 }
 
-func EmptyEnricher() AssetEnricher {
-	return func(_ *AssetEvent) {}
-}
-
 func WithOrganization(org Organization) AssetEnricher {
 	return func(a *AssetEvent) {
 		a.Organization = &org

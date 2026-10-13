@@ -85,20 +85,11 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 
 		// Resolve the IAM role ARN from the instance profile.
 		// IamInstanceProfile.Arn is the *instance-profile* ARN, not the role ARN.
-		// We emit InstanceProfileArn (accurate, free) and RoleArn (resolved via GetInstanceProfile).
-		iamFetcher := inventory.EmptyEnricher()
+		// We emit InstanceProfileArn (accurate, free) and RoleArn (resolved via GetInstanceProfile)
+		// in the entity details only; EC2 assets are host assets and carry no user.* fields.
 		if i.IamInstanceProfile != nil {
-			profileArn := pointers.Deref(i.IamInstanceProfile.Arn)
-			if profileArn != "" {
-				roleArn := e.resolveRoleArn(ctx, profileArn, roleArnCache)
-				// WithUser links this instance to the IAM Role asset (or falls back to the profile ARN).
-				userID := roleArn
-				if userID == "" {
-					userID = profileArn
-				}
-				iamFetcher = inventory.WithUser(inventory.User{
-					ID: userID,
-				})
+			if profileArn := pointers.Deref(i.IamInstanceProfile.Arn); profileArn != "" {
+				e.resolveRoleArn(ctx, profileArn, roleArnCache)
 			}
 		}
 
@@ -131,7 +122,6 @@ func (e *ec2InstanceFetcher) Fetch(ctx context.Context, assetChannel chan<- inve
 			}),
 			inventory.WithEntityDetails(e.buildDetails(i, tags, roleArnCache)),
 			inventory.WithCreatedAt(i.LaunchTime),
-			iamFetcher,
 		)
 	}
 }
