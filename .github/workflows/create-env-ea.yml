@@ -31,7 +31,7 @@ on:
         type: boolean
         default: false
       insights_testing_project_zero:
-        description: "AlertZero (Insights + Endpoint Replay)"
+        description: "AlertZero (Insights + Endpoint Replay + QA seeders)"
         type: boolean
         default: false
 
