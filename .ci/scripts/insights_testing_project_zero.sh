@@ -66,7 +66,7 @@ trap 'rm -rf "${WORK_DIR}"' EXIT
 }
 
 # Credentials are passed via curl's -u flag (same convention as
-# install_entity_risk.sh in this repo) and never echoed or written to logs.
+# enable_entity_store.sh in this repo) and never echoed or written to logs.
 kibana_curl() {
     curl "${CURL_COMMON[@]}" -u "${ES_USER}:${ES_PASSWORD}" -H 'kbn-xsrf: true' "$@"
 }

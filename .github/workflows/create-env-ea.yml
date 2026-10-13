@@ -27,11 +27,11 @@ on:
           - "4g"
           - "8g"
       entity_analytics_setup:
-        description: "Run Entity Analytics setup (org-data generation, ML job, entity store, risk-score maintainer)"
+        description: "Run Entity Analytics setup (org-data generation, ML job, risk-score maintainer)"
         type: boolean
-        default: true
+        default: false
       insights_testing_project_zero:
-        description: "Load the 'Insights Testing' (project-zero) dataset: Endpoint Security [Insights] rule + endpoint event/alert episodes"
+        description: "AlertZero (Insights + Endpoint Replay)"
         type: boolean
         default: false
 
@@ -214,6 +214,15 @@ jobs:
           ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
         run: bash .ci/scripts/set_default_space_solution.sh
 
+      - name: Enable entity store
+        if: success() && (inputs.entity_analytics_setup || inputs.insights_testing_project_zero)
+        working-directory: ./
+        env:
+          KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
+          ES_USER: ${{ steps.elk-stack.outputs.es-user }}
+          ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
+        run: bash .ci/scripts/enable_entity_store.sh
+
       - name: Summary
         if: success()
         run: |
@@ -270,14 +279,14 @@ jobs:
           ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
         run: bash .ci/scripts/setup_ml_security_auth_module.sh
 
-      - name: Install entity store and run risk-score maintainer
+      - name: Run risk-score maintainer
         if: success() && inputs.entity_analytics_setup
         working-directory: ./
         env:
           KIBANA_URL: ${{ steps.elk-stack.outputs.kibana-url }}
           ES_USER: ${{ steps.elk-stack.outputs.es-user }}
           ES_PASSWORD: ${{ steps.elk-stack.outputs.es-password }}
-        run: bash .ci/scripts/install_entity_risk.sh
+        run: bash .ci/scripts/run_risk_score_maintainer.sh
 
       - name: Checkout Insights Testing fixtures (project-zero)
         if: success() && inputs.insights_testing_project_zero

@@ -161,7 +161,7 @@ The workflow requires a subset of input parameters. All required inputs are desc
    - **`docker-image-override`**: optional docker image override for agent installs (mostly for BC/SNAPSHOT testing).
    - **`expiration-days`**: how long the environment should be kept before cleanup. Default is `5`.
    - **`cis-infra`**: optional. When `true`, also deploy CIS infrastructure (`infra_type=all`). When `false`, CDR only (`infra_type=cdr`).
-   - **`kibana_enable_entity_analytics_settings`** (ESS only): when `true`, applies Kibana `user_settings_yaml` with Entity Analytics feature flags (`securitySolution.useNewEntityAnalyticsPage` for the 9.6 UI facelift, and `entityStore.dualProcess.enabled` for dual-process log extraction). Default is `true`. Entity Store install is separate — see **`enable-entity-store-v2`** (CDR) or the EA workflow's entity store script.
+   - **`kibana_enable_entity_analytics_settings`** (ESS only): when `true`, applies Kibana `user_settings_yaml` with Entity Analytics feature flags (`securitySolution.useNewEntityAnalyticsPage` for the 9.6 UI facelift, and `entityStore.dualProcess.enabled` for dual-process log extraction). Default is `true`. Entity Store install is separate — see **`enable-entity-store-v2`** (CDR) or the EA workflow's `enable_entity_store.sh`.
    - **`enable-entity-store-v2`**: when `true`, the workflow installs **Entity Store v2** (v2 installer script). When `false`, it installs **Entity Store v1 only**. Default is `true`.
 
 3. Click **Run workflow** and wait for completion.
@@ -173,11 +173,15 @@ The workflow requires a subset of input parameters. All required inputs are desc
 
 ## Create Environment (Entity Analytics)
 
-The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft**, applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (`securitySolution.useNewEntityAnalyticsPage` for the 9.6 UI facelift, and `entityStore.dualProcess.enabled` for dual-process log extraction), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It also installs Entity Store v2 and runs the risk-score maintainer via `install_entity_risk.sh`. It does not install CIS or CDR cloud infrastructure.
+The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft** and applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (`securitySolution.useNewEntityAnalyticsPage` for the 9.6 UI facelift, and `entityStore.dualProcess.enabled` for dual-process log extraction). It does not install CIS or CDR cloud infrastructure.
+
+Entity Store is enabled (`enable_entity_store.sh`) whenever **either** `entity_analytics_setup` or `insights_testing_project_zero` is checked — it isn't tied to just one of them, since both load data that benefits from entity extraction.
 
 ### Inputs (summary)
 
 - **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**. ESS region mapping is fixed to **production-cft**.
+- **`entity_analytics_setup`** (default `false`): checks out `elastic/security-documents-generator` at `main` and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**; also runs the ML job setup and, via `run_risk_score_maintainer.sh`, the risk-score maintainer against those generated alerts.
+- **`insights_testing_project_zero`** ("AlertZero (Insights + Endpoint Replay)", default `false`): loads the Insights Testing (project-zero) episode dataset and runs Endpoint Replay — provisions a real Elastic Defend-enrolled EC2 VM and replays a recorded malware scenario onto it (see `.ci/scripts/endpoint_replay/`).
 
 
 ## Install Integrations Worfklow
