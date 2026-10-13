@@ -15,6 +15,13 @@ inputs:
     description: "Free disk space"
     required: false
     default: "true"
+  go-build-cache:
+    description: >-
+      Name of the Go build cache to restore and save (for example "test" or "build").
+      Jobs that compile different things (race tests, release builds) should use different names.
+      Empty disables the Go build cache. Only push and workflow_dispatch runs save it; others restore only.
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -61,6 +68,27 @@ runs:
           ~/go/pkg/
         key: ci-go-deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/go.mod', '**/go.sum') }}
 
+    # Only pushes to a branch (main, release branches) write the Go build cache; PR and merge queue
+    # jobs restore it read-only. Queue refs can't read PR caches, and PRs would otherwise each add
+    # a multi-GB entry that evicts the shared ones.
+    - id: restore-go-build
+      if: ${{ inputs.go-build-cache != '' && github.event_name != 'push' && github.event_name != 'workflow_dispatch' }}
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ~/.cache/go-build
+        key: ci-go-build-${{ runner.os }}-${{ runner.arch }}-${{ inputs.go-build-cache }}-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ci-go-build-${{ runner.os }}-${{ runner.arch }}-${{ inputs.go-build-cache }}-
+
+    - id: cache-go-build
+      if: ${{ inputs.go-build-cache != '' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: ~/.cache/go-build
+        key: ci-go-build-${{ runner.os }}-${{ runner.arch }}-${{ inputs.go-build-cache }}-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ci-go-build-${{ runner.os }}-${{ runner.arch }}-${{ inputs.go-build-cache }}-
+
     - name: Initialize hermit
       shell: bash
       run: |
@@ -104,7 +132,7 @@ runs:
       run: pre-commit || true
     - name: Download go dependencies
       shell: bash
-      run: go mod download && go mod tidy
+      run: go mod download
 
     - name: Log cached paths
       shell: bash

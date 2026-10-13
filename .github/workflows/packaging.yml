@@ -10,6 +10,11 @@ on:
     branches:
       - main
       - "[0-9]+.[0-9]+"
+  # Warms the shared Go build cache (read-only for PRs and the merge queue)
+  push:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
 
 env:
   DEV: true
@@ -30,7 +35,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        types: [tar.gz, docker]
+        # On push only the tar.gz variant runs: it exists to warm the build cache
+        types: ${{ fromJSON(github.event_name == 'push' && '["tar.gz"]' || '["tar.gz","docker"]') }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -40,6 +46,7 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "build"
 
       - name: Packaging
         run: |
