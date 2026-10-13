@@ -34,26 +34,67 @@ jobs:
         with:
           init-tools: "true"
           free-disk: "true"
+          go-build-cache: "build"
 
       - name: Build PR branch binary
         run: |
           mage build
           mv cloudbeat /tmp/cloudbeat-pr
 
+      - name: Resolve target branch SHA and toolchain hash
+        id: base
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --depth=1 origin "$BASE_REF"
+          sha="$(git rev-parse FETCH_HEAD)"
+          # Same hash as the hermit action: bin/ holds symlinks, so hashFiles() would not see version changes.
+          toolchain="$(find ./bin ! -type d | sort | xargs openssl sha256 | openssl sha256 -r | cut -d' ' -f1)"
+          if [[ -z "$sha" || -z "$toolchain" ]]; then
+            echo "failed to resolve target SHA ('$sha') or toolchain hash ('$toolchain')" >&2
+            exit 1
+          fi
+          {
+            echo "sha=$sha"
+            echo "toolchain=$toolchain"
+          } >> "$GITHUB_OUTPUT"
+
+      # The target binary only changes when the target branch or the toolchain (bin/) changes,
+      # so build it once per target SHA instead of on every push to the PR.
+      - name: Restore target branch binary
+        id: target-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: /tmp/cloudbeat-target
+          key: binary-size-target-v1-${{ runner.os }}-${{ steps.base.outputs.sha }}-${{ steps.base.outputs.toolchain }}
+
       - name: Check out target branch
+        if: steps.target-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.base_ref }}
+          ref: ${{ steps.base.outputs.sha }}
           clean: true
 
       - name: Build target branch binary
+        if: steps.target-cache.outputs.cache-hit != 'true'
         run: |
           echo "Building target branch binary..."
           mage build
           mv cloudbeat /tmp/cloudbeat-target
 
+      # Save right after the build: the post step of a combined cache action is skipped when the
+      # job fails, and this job fails on purpose when the size threshold is exceeded.
+      - name: Save target branch binary
+        if: steps.target-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: /tmp/cloudbeat-target
+          key: ${{ steps.target-cache.outputs.cache-primary-key }}
+
       # Checkout PR branch to get latest script
       - name: Check out PR (again)
+        if: steps.target-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Get binary sizes and compare
