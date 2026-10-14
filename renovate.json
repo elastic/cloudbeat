@@ -304,6 +304,17 @@
       "enabled": false
     },
     {
+      "description": "Cap sigs.k8s.io/kustomize api and kyaml below v0.21.3 - v0.21.3 pulls in a newer k8s.io/kube-openapi and sigs.k8s.io/structured-merge-diff/v7, but k8s.io/apimachinery v0.37.x still uses v6 (cannot use ...structured-merge-diff/v7/schema.TypeDef as ...v6/schema.TypeDef). Re-enable once a stable k8s.io release (v0.38+) moves to v7. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "sigs.k8s.io/kustomize/api",
+        "sigs.k8s.io/kustomize/kyaml"
+      ],
+      "allowedVersions": "<0.21.3"
+    },
+    {
       "description": "Cap OPA below v1.21.0 - v1.21+ requires gobwas/glob v1.0.0, which removes glob.Glob and breaks go.opentelemetry.io/collector/confmap (undefined: glob.Glob). Re-enable once otel confmap migrates (opentelemetry-collector#15928) and beats picks it up. Must stay after the 'Enable indirect Go dependencies' rule",
       "matchManagers": [
         "gomod"
@@ -320,6 +331,32 @@
       ],
       "matchPackageNames": [
         "go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable major updates for indirect Go dependencies - a major bump changes the module path (e.g. backoff/v6 to backoff/v7), which is not used by cloudbeat and is reverted by go mod tidy, so the Lint job fails on the non-empty git diff. They move when the direct dependent (trivy, beats, yq) moves. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "indirect"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable Azure SDK major updates - cloudbeat imports these packages directly, so a major bump breaks the build until the Azure fetchers are migrated. Do these by hand in a dedicated PR",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/Azure/azure-sdk-for-go/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
       ],
       "enabled": false
     },
@@ -392,14 +429,14 @@
       "enabled": false
     },
     {
-      "description": "9.4: stay on Go 1.26.x - no Go 1.27 upgrade is planned on this branch",
+      "description": "9.4: stay on Go 1.26.6 - no Go 1.27 upgrade is planned on this branch, and the hermit go package has no 1.26.7+ (go.hcl in cashapp/hermit-packages stops at 1.26.6), so a go.mod bump to 1.26.7+ cannot pass CI. Raise the cap once hermit adds them",
       "matchBaseBranches": [
         "9.4"
       ],
       "matchDepNames": [
         "go"
       ],
-      "allowedVersions": "<1.27.0",
+      "allowedVersions": "<1.26.7",
       "addLabels": [
         "go-1.27-blocked"
       ]
@@ -422,6 +459,17 @@
       "description": "elastic/beats git-refs updates have no release timestamp, so minimumReleaseAge with internalChecksFilter strict would hold them back forever. Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
       "matchDepNames": [
         "https://github.com/elastic/beats"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Hermit go and golangci-lint updates have no release timestamp (the hermit datasource does not provide one), so minimumReleaseAge with internalChecksFilter strict holds them out of the go-version group branch and the PR only bumps go.mod, which fails CI because the toolchain comes from hermit (bin/.go-*.pkg). Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
+      "matchManagers": [
+        "hermit"
+      ],
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
       ],
       "minimumReleaseAge": null
     },
