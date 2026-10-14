@@ -51,6 +51,22 @@ steps:
           - .buildkite/scripts/release/bump-minor.sh
         timeout_in_minutes: 15
 
+  - label: ":slack: Notify team bump PR ready"
+    key: notify-bump-pr-ready
+    if: build.env("WORKFLOW") == "patch"
+    depends_on: bump-version-patch
+    agents:
+      image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
+      cpu: 250m
+      memory: 512Mi
+      ephemeralStorage: 1Gi
+    command: echo "Version bump PR is ready"
+    notify:
+      - slack:
+          channels:
+            - "#cloudbeat"
+          message: "<!subteam^S0BRESE4P5H|conduit-siem> Version bump PR for ${NEW_VERSION} is ready, please review and merge — ${BUILDKITE_BUILD_URL}"
+
   - block: "Wait for PR merge"
     prompt: "Continue after the bump PR is merged and all checks have passed."
     key: wait-for-merge
@@ -73,27 +89,17 @@ steps:
       - .buildkite/scripts/release/post-minor-merge.sh
     timeout_in_minutes: 15
 
-  - block: "Ready to poll for DRA artifacts?"
-    depends_on: post-minor-merge
-    prompt: |
-      Unblock when your team is ready to proceed.
-
-      Trigger parameters:
-      - NEW_VERSION: ${NEW_VERSION}
-      - BRANCH: ${BRANCH}
-      - WORKFLOW: ${WORKFLOW}
-    key: block-get-dra-artifacts
-    blocked_state: running
-
   - label: "Fetch DRA Artifacts"
     key: fetch-dra-artifacts
-    depends_on: block-get-dra-artifacts
+    depends_on:
+      - bump-version-patch
+      - post-minor-merge
     agents:
       image: docker.elastic.co/release-eng/wolfi-build-essential-release-eng:latest
       cpu: 250m
       memory: 512Mi
       ephemeralStorage: 1Gi
-    timeout_in_minutes: 240
+    timeout_in_minutes: 480
     retry:
       automatic:
         - exit_status: "*"
