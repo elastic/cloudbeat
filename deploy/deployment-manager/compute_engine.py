@@ -8,6 +8,7 @@ def generate_config(context):
     project = context.env["project"]
     deployment_name = context.env["deployment"]
     zone = context.properties["zone"]
+    machine_type = context.properties.get("machineType", "n2-standard-4")
     enrollment_token = context.properties["enrollmentToken"]
     fleet_url = context.properties["fleetUrl"]
     agent_version = context.properties["elasticAgentVersion"]
@@ -50,7 +51,7 @@ def generate_config(context):
                     "/zones/",
                     zone,
                     "/",
-                    "machineTypes/n2-standard-4",
+                    "machineTypes/" + machine_type,
                 ],
             ),
             "serviceAccounts": [

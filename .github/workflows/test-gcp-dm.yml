@@ -27,6 +27,8 @@ env:
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
   GCP_LABELS: "ci=integration"
+  ZONE: us-central1-b
+  MACHINE_TYPE: e2-standard-4 # n2-standard-4 (the default) hit ZONE_RESOURCE_POOL_EXHAUSTED in us-central1-a and -b
 
 jobs:
   # Test a GCP Deployment Manager deployment using Application Default Credentials
@@ -110,7 +112,7 @@ jobs:
 
       - name: Set up GCP Cloud SDK
         if: always()
-        uses: "google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f" # v2
+        uses: "google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db" # v3
 
       - name: Delete GCP Deployment Manager deployment
         if: always()
@@ -171,7 +173,7 @@ jobs:
 
       - name: Set up GCP Cloud SDK
         if: always()
-        uses: "google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f" # v2
+        uses: "google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db" # v3
 
       - name: Deploy GCP Service Account and Agent
         id: gcp_deploy
