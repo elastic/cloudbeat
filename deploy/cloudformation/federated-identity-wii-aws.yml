@@ -44,6 +44,26 @@ Parameters:
     AllowedPattern: ^[A-Za-z0-9]+$
     ConstraintDescription: must contain only letters and digits.
 
+  ElasticKibanaUrl:
+    Description: Public URL of the Kibana that launched this stack, pre-filled by Kibana. When set together with ElasticApiKey and ElasticCallbackId, the stack reports the role it created back to Kibana so you do not have to paste it. Leave empty to paste the outputs manually.
+    Type: String
+    Default: ""
+    AllowedPattern: ^$|^https://[^\s/]+(/[^\s]*)?$
+    ConstraintDescription: must be empty or an https URL.
+
+  ElasticApiKey:
+    Description: Short-lived, zero-privilege API key that only lets this stack report back to Kibana. Pre-filled by Kibana; not shown in the console.
+    Type: String
+    Default: ""
+    NoEcho: true
+
+  ElasticCallbackId:
+    Description: Identifier of the Kibana callback this stack reports to, pre-filled by Kibana.
+    Type: String
+    Default: ""
+    AllowedPattern: ^$|^[A-Za-z0-9_-]{1,128}$
+    ConstraintDescription: must be empty or 1-128 letters, digits, hyphens or underscores.
+
 Mappings:
   EnvironmentDomain:
     production:
@@ -52,6 +72,21 @@ Mappings:
       Domain: svc.staging.elastic.cloud
     qa:
       Domain: svc.qa.elastic.cloud
+
+Conditions:
+  CallbackEnabled: !And
+    - !Not
+      - !Equals
+        - !Ref ElasticKibanaUrl
+        - ""
+    - !Not
+      - !Equals
+        - !Ref ElasticApiKey
+        - ""
+    - !Not
+      - !Equals
+        - !Ref ElasticCallbackId
+        - ""
 
 Resources:
 
@@ -500,6 +535,166 @@ Resources:
             Resource: '*'
       Roles:
         - !Ref ElasticWorkloadIdentityRole
+
+  # When Kibana launches the stack with ElasticKibanaUrl, ElasticApiKey and
+  # ElasticCallbackId, a custom resource posts the role ARN and the stack ARN
+  # back to Kibana. The function always answers SUCCESS, so a failed report
+  # never fails or rolls back the stack.
+  ElasticCallbackFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Condition: CallbackEnabled
+
+  ElasticCallbackFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.13
+      Handler: index.handler
+      Role: !GetAtt ElasticCallbackFunctionRole.Arn
+      Timeout: 90
+      Code:
+        ZipFile: |
+          import json
+          import time
+          import urllib.error
+          import urllib.request
+
+          # Reports the role this stack created back to the Kibana that launched it, so the user does not
+          # have to paste the Role ARN and stack ARN. The callback is a convenience: every path below
+          # answers SUCCESS to CloudFormation, so a Kibana that cannot be reached (traffic filters,
+          # PrivateLink, self-managed) leaves the stack intact and the user on the manual flow.
+          #
+          # Never print the event, the headers or the key: the API key is a credential, short-lived and
+          # zero-privilege, but still a credential.
+
+          KIBANA_ROUTE = "/api/fleet/iac_provisioner/callbacks/"
+          ATTEMPTS = 4
+          # A request (10 s), the longest backoff (8 s) and two response PUTs (10 s each, 1 s apart) must
+          # all fit before Lambda kills the function; an unanswered custom resource would fail the stack
+          # after ServiceTimeout, which is the one outcome this handler must never produce.
+          RESERVE_MS = 40_000
+          # A response PUT (10 s) and the longest response backoff (4 s) must fit before Lambda kills the
+          # function.
+          RESPONSE_RESERVE_MS = 15_000
+
+
+          def handler(event, context):
+              props = event.get("ResourceProperties", {})
+              status = "skipped"
+              try:
+                  if event["RequestType"] in ("Create", "Update"):
+                      status = post(props, context)
+              except Exception as e:  # never let the stack hang or roll back because of the callback
+                  status = f"failed: {type(e).__name__}"
+              print("callback result", status)
+              respond(event, context)
+
+
+          def post(p, context):
+              url = p["KibanaUrl"].rstrip("/") + KIBANA_ROUTE + p["CallbackId"]
+              body = json.dumps({"role_arn": p["RoleArn"], "stack_arn": p["StackId"]}).encode()
+              headers = {
+                  "Authorization": "ApiKey " + p["ApiKey"],
+                  "kbn-xsrf": "true",
+                  "Content-Type": "application/json",
+                  "Elastic-Api-Version": "2023-10-31",
+              }
+              for attempt in range(ATTEMPTS):
+                  try:
+                      request = urllib.request.Request(url, data=body, headers=headers, method="POST")
+                      with urllib.request.urlopen(request, timeout=10) as response:
+                          print("callback status", response.status)
+                          return "connected"
+                  except urllib.error.HTTPError as e:
+                      print("callback status", e.code)
+                      if e.code < 500:
+                          # Kibana answered: a 4xx will not change on retry (bad key, used or expired record).
+                          return f"failed: http {e.code}"
+                  except Exception as e:
+                      # Connection errors, timeouts: Kibana may be reachable shortly.
+                      print("callback error", type(e).__name__)
+                  if attempt == ATTEMPTS - 1 or remaining_ms(context) < RESERVE_MS:
+                      break
+                  time.sleep(2 ** (attempt + 1))
+              return "failed: unreachable"
+
+
+          def remaining_ms(context):
+              try:
+                  return context.get_remaining_time_in_millis()
+              except Exception:
+                  return RESERVE_MS
+
+
+          def respond(event, context):
+              body = json.dumps(
+                  {
+                      "Status": "SUCCESS",
+                      "PhysicalResourceId": event["StackId"] + ":elastic-callback",
+                      "StackId": event["StackId"],
+                      "RequestId": event["RequestId"],
+                      "LogicalResourceId": event["LogicalResourceId"],
+                  }
+              ).encode()
+              for attempt in range(ATTEMPTS):
+                  request = urllib.request.Request(
+                      event["ResponseURL"],
+                      data=body,
+                      method="PUT",
+                      headers={"Content-Type": "", "Content-Length": str(len(body))},
+                  )
+                  try:
+                      urllib.request.urlopen(request, timeout=10)
+                      return
+                  except Exception as e:
+                      # Retry while the budget allows; the last error escapes, so the invocation shows
+                      # as failed in CloudWatch.
+                      print("response error", type(e).__name__)
+                      if attempt == ATTEMPTS - 1 or remaining_ms(context) < RESPONSE_RESERVE_MS:
+                          raise
+                  time.sleep(2**attempt)
+    Condition: CallbackEnabled
+
+  # DependsOn lists every policy attached to ElasticWorkloadIdentityRole, so
+  # Kibana only gets the role once it has all of its permissions.
+  ElasticCallback:
+    Type: Custom::ElasticCallback
+    DependsOn:
+      - ElasticAwsInspector
+      - ElasticAwsCloudwatchLogs
+      - ElasticAwsMetrics
+      - ElasticAwsHealth
+      - ElasticAwsConfig
+      - ElasticAwsBilling
+      - ElasticAwsDynamoDB
+      - ElasticAwsEBS
+      - ElasticAwsEC2
+      - ElasticAwsECS
+      - ElasticAwsELB
+      - ElasticAwsLambda
+      - ElasticAwsRDS
+      - ElasticAwsSNS
+      - ElasticAwsSQS
+      - ElasticAwsTransitGateway
+      - ElasticAwsSecurityHub
+    Properties:
+      ServiceToken: !GetAtt ElasticCallbackFunction.Arn
+      ServiceTimeout: "120"
+      KibanaUrl: !Ref ElasticKibanaUrl
+      ApiKey: !Ref ElasticApiKey
+      CallbackId: !Ref ElasticCallbackId
+      RoleArn: !GetAtt ElasticWorkloadIdentityRole.Arn
+      StackId: !Ref AWS::StackId
+    Condition: CallbackEnabled
 
 Outputs:
   RoleArn:
