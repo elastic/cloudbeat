@@ -24,6 +24,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type EBSSnapshot struct {
@@ -38,7 +39,7 @@ type EBSSnapshot struct {
 
 func (e EBSSnapshot) GetResourceArn() string {
 	// TODO: check if this is the correct ARN
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:ec2/%s", e.Region, e.awsAccount, e.SnapshotId)
+	return fmt.Sprintf("arn:%s:ec2:%s:%s:ec2/%s", awslib.PartitionFromRegion(e.Region), e.Region, e.awsAccount, e.SnapshotId)
 }
 
 func (e EBSSnapshot) GetResourceName() string {

@@ -43,9 +43,10 @@ type Record struct {
 	HealthCheckID     string   `json:"health_check_id,omitempty"`
 
 	setIdentifier string
+	partition     string
 }
 
-func newRecord(rrs types.ResourceRecordSet, zoneID, zoneName string) Record {
+func newRecord(rrs types.ResourceRecordSet, zoneID, zoneName, partition string) Record {
 	r := Record{
 		Name:          pointers.Deref(rrs.Name),
 		Type:          string(rrs.Type),
@@ -55,6 +56,7 @@ func newRecord(rrs types.ResourceRecordSet, zoneID, zoneName string) Record {
 		ZoneName:      zoneName,
 		HealthCheckID: pointers.Deref(rrs.HealthCheckId),
 		setIdentifier: pointers.Deref(rrs.SetIdentifier),
+		partition:     partition,
 	}
 	for _, rec := range rrs.ResourceRecords {
 		if v := pointers.Deref(rec.Value); v != "" {
@@ -72,7 +74,11 @@ func newRecord(rrs types.ResourceRecordSet, zoneID, zoneName string) Record {
 // no ARN, so we derive one from the zone, record name, type and (for weighted/latency/geo
 // records) the set identifier, which together uniquely identify a record set.
 func (r Record) GetResourceArn() string {
-	arn := fmt.Sprintf("arn:aws:route53:::hostedzone/%s/recordset/%s/%s", r.ZoneID, r.Name, r.Type)
+	partition := r.partition
+	if partition == "" {
+		partition = awslib.PartitionFromRegion("")
+	}
+	arn := fmt.Sprintf("arn:%s:route53:::hostedzone/%s/recordset/%s/%s", partition, r.ZoneID, r.Name, r.Type)
 	if r.setIdentifier != "" {
 		arn += "/" + r.setIdentifier
 	}

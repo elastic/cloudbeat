@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type NACLInfo struct {
@@ -36,7 +37,7 @@ func (r NACLInfo) GetResourceArn() string {
 		return ""
 	}
 	// arn:aws:ec2:region:account-id:network-acl/network-acl-id
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-acl/%s", r.region, r.awsAccount, *r.NetworkAclId)
+	return fmt.Sprintf("arn:%s:ec2:%s:%s:network-acl/%s", awslib.PartitionFromRegion(r.region), r.region, r.awsAccount, *r.NetworkAclId)
 }
 
 func (r NACLInfo) GetResourceName() string {
