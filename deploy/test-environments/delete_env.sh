@@ -107,7 +107,7 @@ function delete_all_states() {
         return 1
     fi
 
-    states=("cdr" "cis" "elk-stack")
+    states=("cdr" "cis" "elk-stack" "endpoint-replay")
     # Get all states
     for state in "${states[@]}"; do
         local state_file="./$state/terraform.tfstate"

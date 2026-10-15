@@ -1,4 +1,4 @@
-exclude: (bin/(activate-)?hermit)|(scripts/make/gimme/.*)
+exclude: (bin/(activate-)?hermit)|(scripts/make/gimme/.*)|(.ci/scripts/endpoint_replay/replay\.py)|(.ci/scripts/endpoint_replay/fixtures/.*)
 repos:
   ## General
   - repo: https://github.com/pre-commit/pre-commit-hooks

@@ -44,9 +44,17 @@ upload_cdr() {
     fi
 }
 
+# Function to upload state and key for the Endpoint Replay VM
+upload_endpoint_replay() {
+    aws s3 cp "./terraform.tfstate" "${S3_BUCKET}/endpoint-replay-terraform.tfstate"
+    if [ -n "${ENDPOINT_REPLAY_KEY:-}" ] && [ -f "${ENDPOINT_REPLAY_KEY}" ]; then
+        aws s3 cp "${ENDPOINT_REPLAY_KEY}" "${S3_BUCKET}/endpoint_replay.pem"
+    fi
+}
+
 # Check for valid input
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 {elk-stack|cis|cdr}"
+    echo "Usage: $0 {elk-stack|cis|cdr|endpoint-replay}"
     exit 1
 fi
 
@@ -61,8 +69,11 @@ case $1 in
 "cdr")
     upload_cdr
     ;;
+"endpoint-replay")
+    upload_endpoint_replay
+    ;;
 *)
-    echo "Usage: $0 {elk-stack|cis|cdr}"
+    echo "Usage: $0 {elk-stack|cis|cdr|endpoint-replay}"
     exit 1
     ;;
 esac

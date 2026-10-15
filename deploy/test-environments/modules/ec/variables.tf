@@ -97,6 +97,12 @@ variable "kibana_enable_entity_analytics_settings" {
   description = "When true (ESS only), set Kibana user_settings_yaml for Entity Analytics (AI agents, Agent Builder experimental UI, Security Solution experimental flags for risk score history / entity attachments / anomaly details, and Cases attachments)"
 }
 
+variable "kibana_enable_insights_testing_settings" {
+  type        = bool
+  default     = false
+  description = "When true (ESS only), set Kibana user_settings_yaml for Insights Testing (project-zero): AlertZero, Agent Builder experimental features, managed workflows UI, context engine, attack discovery workflows, and related xpack flags. Merged with the Entity Analytics overrides when both are enabled."
+}
+
 variable "kibana_instance_size" {
   type        = string
   default     = "4g"
