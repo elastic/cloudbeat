@@ -44,25 +44,20 @@ Parameters:
     AllowedPattern: ^[A-Za-z0-9]+$
     ConstraintDescription: must contain only letters and digits.
 
-  ElasticKibanaUrl:
-    Description: Public URL of the Kibana that launched this stack, pre-filled by Kibana. When set together with ElasticApiKey and ElasticCallbackId, the stack reports the role it created back to Kibana so you do not have to paste it. Leave empty to paste the outputs manually.
+  ElasticCallbackUrl:
+    Description: URL of the Kibana callback this stack reports to, pre-filled by Kibana. When set together with ElasticApiKey, the stack reports the role it created back to Kibana so you do not have to paste it. Leave empty to paste the outputs manually.
     Type: String
     Default: ""
-    AllowedPattern: ^$|^https://[^\s/]+(/[^\s]*)?$
-    ConstraintDescription: must be empty or an https URL.
+    AllowedPattern: ^$|^https://[^\s/]+/[^\s]+$
+    ConstraintDescription: must be empty or an https URL with a path.
 
   ElasticApiKey:
     Description: Short-lived, zero-privilege API key that only lets this stack report back to Kibana. Pre-filled by Kibana; not shown in the console.
     Type: String
     Default: ""
+    AllowedPattern: ^[A-Za-z0-9+/=]*$
+    ConstraintDescription: must be empty or the base64 key Kibana pre-filled.
     NoEcho: true
-
-  ElasticCallbackId:
-    Description: Identifier of the Kibana callback this stack reports to, pre-filled by Kibana.
-    Type: String
-    Default: ""
-    AllowedPattern: ^$|^[A-Za-z0-9_-]{1,128}$
-    ConstraintDescription: must be empty or 1-128 letters, digits, hyphens or underscores.
 
 Mappings:
   EnvironmentDomain:
@@ -77,15 +72,11 @@ Conditions:
   CallbackEnabled: !And
     - !Not
       - !Equals
-        - !Ref ElasticKibanaUrl
+        - !Ref ElasticCallbackUrl
         - ""
     - !Not
       - !Equals
         - !Ref ElasticApiKey
-        - ""
-    - !Not
-      - !Equals
-        - !Ref ElasticCallbackId
         - ""
 
 Resources:
@@ -575,10 +566,12 @@ Resources:
       Roles:
         - !Ref ElasticWorkloadIdentityRole
 
-  # When Kibana launches the stack with ElasticKibanaUrl, ElasticApiKey and
-  # ElasticCallbackId, a custom resource posts the role ARN and the stack ARN
-  # back to Kibana. The function always answers SUCCESS, so a failed report
-  # never fails or rolls back the stack.
+  # When Kibana launches the stack with ElasticCallbackUrl and ElasticApiKey,
+  # a custom resource posts the role ARN and the stack ARN to that URL. The
+  # function always answers SUCCESS, so a failed report never fails or rolls
+  # back the stack. The handler is the one the IaC Provisioner blueprint
+  # ships (cloud-iac-provisioner, patches/common/callback.py) and is tested
+  # there; keep the two identical.
   ElasticCallbackFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -615,7 +608,6 @@ Resources:
           # Never print the event, the headers or the key: the API key is a credential, short-lived and
           # zero-privilege, but still a credential.
 
-          KIBANA_ROUTE = "/api/fleet/iac_provisioner/callbacks/"
           ATTEMPTS = 4
           # A request (10 s), the longest backoff (8 s) and two response PUTs (10 s each, 1 s apart) must
           # all fit before Lambda kills the function; an unanswered custom resource would fail the stack
@@ -639,7 +631,7 @@ Resources:
 
 
           def post(p, context):
-              url = p["KibanaUrl"].rstrip("/") + KIBANA_ROUTE + p["CallbackId"]
+              url = p["CallbackUrl"]
               body = json.dumps({"role_arn": p["RoleArn"], "stack_arn": p["StackId"]}).encode()
               headers = {
                   "Authorization": "ApiKey " + p["ApiKey"],
@@ -659,8 +651,8 @@ Resources:
                           # Kibana answered: a 4xx will not change on retry (bad key, used or expired record).
                           return f"failed: http {e.code}"
                   except Exception as e:
-                      # Connection errors, timeouts: Kibana may be reachable shortly.
-                      print("callback error", type(e).__name__)
+                      # Only URLError.reason is safe to log; other exceptions may quote a header.
+                      print("callback error", type(e).__name__, getattr(e, "reason", ""))
                   if attempt == ATTEMPTS - 1 or remaining_ms(context) < RESERVE_MS:
                       break
                   time.sleep(2 ** (attempt + 1))
@@ -728,9 +720,8 @@ Resources:
     Properties:
       ServiceToken: !GetAtt ElasticCallbackFunction.Arn
       ServiceTimeout: "120"
-      KibanaUrl: !Ref ElasticKibanaUrl
+      CallbackUrl: !Ref ElasticCallbackUrl
       ApiKey: !Ref ElasticApiKey
-      CallbackId: !Ref ElasticCallbackId
       RoleArn: !GetAtt ElasticWorkloadIdentityRole.Arn
       StackId: !Ref AWS::StackId
     Condition: CallbackEnabled
