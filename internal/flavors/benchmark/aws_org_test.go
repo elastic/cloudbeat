@@ -250,12 +250,13 @@ func Test_getAwsAccounts_Partition(t *testing.T) {
 					{Account: "123", AccountAlias: "management"},
 					{Account: "456", AccountAlias: "member"},
 				}),
+				IdentityProvider:  nil,
 				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
 				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}
 			rootIdentity := cloud.Identity{Account: "123", Partition: tt.rootPartition}
-			recorder := &assumeRoleRecorder{}
+			recorder := &assumeRoleRecorder{mu: sync.Mutex{}, arns: nil}
 
 			got, err := a.getAwsAccounts(t.Context(), testhelper.NewLogger(t), recorder.config(), &rootIdentity)
 			require.NoError(t, err)
@@ -301,7 +302,14 @@ func Test_cloudbeatRootRoleARN(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := AWSOrg{RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{}}
+			a := AWSOrg{
+				IAMProvider:       nil,
+				IdentityProvider:  nil,
+				AccountProvider:   nil,
+				StatusHandler:     nil,
+				AWSCredsValidator: nil,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
+			}
 			got := a.cloudbeatRootRoleARN(sts.GetCallerIdentityOutput{
 				Account: pointers.Ref("111122223333"),
 				Arn:     tt.callerArn,
