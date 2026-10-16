@@ -40,8 +40,8 @@ func PartitionFromARN(resourceARN string) string {
 	return parsed.Partition
 }
 
-// IAMRoleARN returns the ARN of an IAM role in the given partition.
-// An empty partition means DefaultPartition.
+// IAMRoleARN returns the ARN of an IAM role in the specified partition.
+// If the partition is empty, IAMRoleARN uses DefaultPartition.
 func IAMRoleARN(partition string, accountID string, roleName string) string {
 	if partition == "" {
 		partition = DefaultPartition

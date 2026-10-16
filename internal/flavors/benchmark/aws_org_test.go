@@ -241,7 +241,7 @@ func Test_getAwsAccounts_Partition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			a := AWSOrg{
-				// The management account is scanned with the member role, so both accounts call AssumeRole.
+				// Cloudbeat scans the management account with the member role. Thus, both accounts make an AssumeRole call.
 				IAMProvider: getMockIAMRoleGetter([]iam.Role{
 					*makeRole("cloudbeat-root", scanSettingTagKey, scanSettingTagValue),
 					*makeRole("cloudbeat-securityaudit"),
@@ -263,7 +263,7 @@ func Test_getAwsAccounts_Partition(t *testing.T) {
 
 			for _, account := range got {
 				assert.Equal(t, tt.wantPartition, account.Identity.Partition)
-				// The credentials are lazy. Retrieve them to make the AssumeRole call.
+				// The credentials provider makes the AssumeRole call only when you get the credentials.
 				_, err := account.Credentials.Retrieve(t.Context())
 				require.NoError(t, err)
 			}

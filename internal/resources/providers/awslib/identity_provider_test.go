@@ -76,7 +76,7 @@ func TestIdentityProvider_GetIdentity_Partition(t *testing.T) {
 	}
 }
 
-// fakeIdentityAPI answers the STS and IAM calls of GetIdentity. It does not send requests to AWS.
+// fakeIdentityAPI gives test responses to the STS and IAM calls of GetIdentity. It does not send requests to AWS.
 func fakeIdentityAPI(callerArn string) func(*middleware.Stack) error {
 	return func(stack *middleware.Stack) error {
 		return stack.Initialize.Add(middleware.InitializeMiddlewareFunc("fakeIdentityAPI",
