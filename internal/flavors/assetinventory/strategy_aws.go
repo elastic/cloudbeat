@@ -19,13 +19,13 @@ package assetinventory
 
 import (
 	"context"
-	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -40,32 +40,50 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, s.logger.Logger)
 }
 
+// getAWSIdentity returns the initial aws.Config and the identity of the configured credentials.
+func (s *strategy) getAWSIdentity(ctx context.Context) (*awssdk.Config, *cloud.Identity, error) {
+	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	idProvider := awslib.IdentityProvider{Logger: s.logger}
+	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return awsConfig, awsIdentity, nil
+}
+
 func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
 	s.logger.Infof("initializing asset inventory aws (cloud connectors %t)", s.cfg.CloudConfig.Aws.CloudConnectors)
 
-	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
+	awsConfig, awsIdentity, err := s.getAWSIdentity(ctx)
+	if err != nil && s.cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
+		// GovCloud credentials fail with the commercial default region (us-east-1).
+		// Same fallback as the CSPM benchmark (see benchmark.AWS and benchmark.AWSOrg).
+		s.logger.Warnf("failed to initialize identity (%v); retrying to check AWS Gov Cloud regions", err)
+		s.cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
+		awsConfig, awsIdentity, err = s.getAWSIdentity(ctx)
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	orgIAMRoleNamesProvider := getOrgIAMRoleNamesProvider(s.cfg.CloudConfig.Aws)
 
-	idProvider := awslib.IdentityProvider{Logger: s.logger}
-	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
-	if err != nil {
-		return nil, err
-	}
-
 	// Early exit if we're scanning the entire account.
 	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
 		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig, statusHandler), nil
 	}
 
-	// Assume audit roles per selected account and generate fetchers for them
+	// Assume audit roles per selected account and generate fetchers for them.
+	// The roles are in the partition of the caller identity (for example "aws-us-gov").
 	rootRoleConfig := assumeRole(
 		sts.NewFromConfig(*awsConfig),
 		*awsConfig,
-		fmtIAMRole(awsIdentity.Account, orgIAMRoleNamesProvider.RootRoleName()),
+		awslib.IAMRoleARN(awsIdentity.Partition, awsIdentity.Account, orgIAMRoleNamesProvider.RootRoleName()),
 	)
 	accountProvider := &awslib.AccountProvider{}
 	accountIdentities, err := accountProvider.ListAccounts(ctx, s.logger, rootRoleConfig)
@@ -75,10 +93,14 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 	var fetchers []inventory.AssetFetcher
 	stsClient := sts.NewFromConfig(rootRoleConfig)
 	for _, identity := range accountIdentities {
+		// An AWS organization cannot span partitions.
+		if identity.Partition == "" {
+			identity.Partition = awsIdentity.Partition
+		}
 		assumedRoleConfig := assumeRole(
 			stsClient,
 			rootRoleConfig,
-			fmtIAMRole(identity.Account, orgIAMRoleNamesProvider.MemberRoleName()),
+			awslib.IAMRoleARN(identity.Partition, identity.Account, orgIAMRoleNamesProvider.MemberRoleName()),
 		)
 		if ok := awslib.CredentialsValid(ctx, assumedRoleConfig, s.logger); !ok {
 			// role does not exist, skip identity/account
@@ -95,10 +117,6 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {
 	cfg.Credentials = awssdk.NewCredentialsCache(stscreds.NewAssumeRoleProvider(client, arn))
 	return cfg
-}
-
-func fmtIAMRole(account string, role string) string {
-	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
 }
 
 func getOrgIAMRoleNamesProvider(cfg config.AwsConfig) awslib.OrgIAMRoleNamesProvider {

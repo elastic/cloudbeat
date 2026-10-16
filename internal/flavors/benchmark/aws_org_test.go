@@ -22,11 +22,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	ststypes "github.com/aws/aws-sdk-go-v2/service/sts/types"
+	"github.com/aws/smithy-go/middleware"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -196,6 +200,164 @@ func Test_getAwsAccounts(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func Test_getAwsAccounts_Partition(t *testing.T) {
+	tests := []struct {
+		name          string
+		rootPartition string
+		wantPartition string
+		wantRoleARNs  []string
+	}{
+		{
+			name:          "commercial",
+			rootPartition: awslib.DefaultPartition,
+			wantPartition: awslib.DefaultPartition,
+			wantRoleARNs: []string{
+				"arn:aws:iam::123:role/cloudbeat-securityaudit",
+				"arn:aws:iam::456:role/cloudbeat-securityaudit",
+			},
+		},
+		{
+			name:          "unknown partition uses commercial",
+			rootPartition: "",
+			wantPartition: "",
+			wantRoleARNs: []string{
+				"arn:aws:iam::123:role/cloudbeat-securityaudit",
+				"arn:aws:iam::456:role/cloudbeat-securityaudit",
+			},
+		},
+		{
+			name:          "govcloud",
+			rootPartition: awslib.GovCloudPartition,
+			wantPartition: awslib.GovCloudPartition,
+			wantRoleARNs: []string{
+				"arn:aws-us-gov:iam::123:role/cloudbeat-securityaudit",
+				"arn:aws-us-gov:iam::456:role/cloudbeat-securityaudit",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := AWSOrg{
+				// The management account is scanned with the member role, so both accounts call AssumeRole.
+				IAMProvider: getMockIAMRoleGetter([]iam.Role{
+					*makeRole("cloudbeat-root", scanSettingTagKey, scanSettingTagValue),
+					*makeRole("cloudbeat-securityaudit"),
+				}),
+				AccountProvider: mockAccountProviderWithIdentities([]cloud.Identity{
+					{Account: "123", AccountAlias: "management"},
+					{Account: "456", AccountAlias: "member"},
+				}),
+				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
+				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
+				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
+			}
+			rootIdentity := cloud.Identity{Account: "123", Partition: tt.rootPartition}
+			recorder := &assumeRoleRecorder{}
+
+			got, err := a.getAwsAccounts(t.Context(), testhelper.NewLogger(t), recorder.config(), &rootIdentity)
+			require.NoError(t, err)
+			require.Len(t, got, 2)
+
+			for _, account := range got {
+				assert.Equal(t, tt.wantPartition, account.Identity.Partition)
+				// The credentials are lazy. Retrieve them to make the AssumeRole call.
+				_, err := account.Credentials.Retrieve(t.Context())
+				require.NoError(t, err)
+			}
+			assert.ElementsMatch(t, tt.wantRoleARNs, recorder.roleARNs())
+		})
+	}
+}
+
+func Test_cloudbeatRootRoleARN(t *testing.T) {
+	tests := []struct {
+		name      string
+		callerArn *string
+		want      string
+	}{
+		{
+			name:      "commercial",
+			callerArn: pointers.Ref("arn:aws:sts::111122223333:assumed-role/some-role/session"),
+			want:      "arn:aws:iam::111122223333:role/cloudbeat-root",
+		},
+		{
+			name:      "govcloud",
+			callerArn: pointers.Ref("arn:aws-us-gov:sts::111122223333:assumed-role/some-role/session"),
+			want:      "arn:aws-us-gov:iam::111122223333:role/cloudbeat-root",
+		},
+		{
+			name:      "govcloud iam user",
+			callerArn: pointers.Ref("arn:aws-us-gov:iam::111122223333:user/cloudbeat"),
+			want:      "arn:aws-us-gov:iam::111122223333:role/cloudbeat-root",
+		},
+		{
+			name:      "no caller arn uses commercial",
+			callerArn: nil,
+			want:      "arn:aws:iam::111122223333:role/cloudbeat-root",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := AWSOrg{RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{}}
+			got := a.cloudbeatRootRoleARN(sts.GetCallerIdentityOutput{
+				Account: pointers.Ref("111122223333"),
+				Arn:     tt.callerArn,
+			})
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+// assumeRoleRecorder records the RoleArn of each STS AssumeRole call and returns test credentials.
+// It does not send requests to AWS.
+type assumeRoleRecorder struct {
+	mu   sync.Mutex
+	arns []string
+}
+
+func (r *assumeRoleRecorder) roleARNs() []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]string(nil), r.arns...)
+}
+
+func (r *assumeRoleRecorder) config() aws.Config {
+	record := middleware.InitializeMiddlewareFunc("assumeRoleRecorder",
+		func(_ context.Context, in middleware.InitializeInput, _ middleware.InitializeHandler) (middleware.InitializeOutput, middleware.Metadata, error) {
+			input, ok := in.Parameters.(*sts.AssumeRoleInput)
+			if !ok {
+				return middleware.InitializeOutput{}, middleware.Metadata{}, fmt.Errorf("unexpected AWS call %T", in.Parameters)
+			}
+
+			r.mu.Lock()
+			r.arns = append(r.arns, pointers.Deref(input.RoleArn))
+			r.mu.Unlock()
+
+			return middleware.InitializeOutput{Result: &sts.AssumeRoleOutput{
+				AssumedRoleUser: &ststypes.AssumedRoleUser{
+					Arn:           pointers.Ref("arn:aws:sts::123:assumed-role/test/session"),
+					AssumedRoleId: pointers.Ref("AROATEST:session"),
+				},
+				Credentials: &ststypes.Credentials{
+					AccessKeyId:     pointers.Ref("ASIATEST"),
+					SecretAccessKey: pointers.Ref("secret"),
+					SessionToken:    pointers.Ref("token"),
+					Expiration:      pointers.Ref(time.Now().Add(time.Hour)),
+				},
+			}}, middleware.Metadata{}, nil
+		})
+
+	return aws.Config{
+		Region:      awslib.DefaultRegion,
+		Credentials: aws.AnonymousCredentials{},
+		APIOptions: []func(*middleware.Stack) error{
+			func(stack *middleware.Stack) error {
+				return stack.Initialize.Add(record, middleware.Before)
+			},
+		},
 	}
 }
 
