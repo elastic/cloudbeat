@@ -159,6 +159,12 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudb
 		// retrieve any resources from the Account/OU afterward.
 		var awsConfig awssdk.Config
 
+		// An AWS organization is in one partition only. Thus, the member accounts
+		// are in the same partition as the management account (for example "aws-us-gov").
+		if identity.Partition == "" {
+			identity.Partition = rootIdentity.Partition
+		}
+
 		if identity.Account == rootIdentity.Account {
 			cfg, err := a.pickManagementAccountRole(ctx, log, stsClient, cfgCloudbeatRoot, identity)
 			if err != nil {
@@ -172,7 +178,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudb
 			awsConfig = assumeRole(
 				stsClient,
 				cfgCloudbeatRoot,
-				fmtIAMRole(identity.Account, a.RoleNamesProvider.MemberRoleName()),
+				awslib.IAMRoleARN(identity.Partition, identity.Account, a.RoleNamesProvider.MemberRoleName()),
 			)
 		}
 
@@ -233,7 +239,7 @@ func (a *AWSOrg) pickManagementAccountRole(ctx context.Context, log *clog.Logger
 	config := assumeRole(
 		stsClient,
 		rootCfg,
-		fmtIAMRole(identity.Account, a.RoleNamesProvider.MemberRoleName()),
+		awslib.IAMRoleARN(identity.Partition, identity.Account, a.RoleNamesProvider.MemberRoleName()),
 	)
 	return config, nil
 }
@@ -266,7 +272,7 @@ func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config, log *clog.
 		cfgCloudbeatRoot = assumeRole(
 			sts.NewFromConfig(*awsConfig),
 			*awsConfig,
-			fmtIAMRole(pointers.Deref(identity.Account), a.RoleNamesProvider.RootRoleName()),
+			a.cloudbeatRootRoleARN(identity),
 		)
 	}
 
@@ -277,6 +283,16 @@ func (a *AWSOrg) getIdentity(ctx context.Context, cfg *config.Config, log *clog.
 	}
 
 	return &cfgCloudbeatRoot, awsIdentity, nil
+}
+
+// cloudbeatRootRoleARN returns the ARN of the cloudbeat-root role in the account of the caller identity.
+// The role is in the same partition as the caller identity (for example "arn:aws-us-gov:" in AWS GovCloud).
+func (a *AWSOrg) cloudbeatRootRoleARN(callerIdentity sts.GetCallerIdentityOutput) string {
+	return awslib.IAMRoleARN(
+		awslib.PartitionFromARN(pointers.Deref(callerIdentity.Arn)),
+		pointers.Deref(callerIdentity.Account),
+		a.RoleNamesProvider.RootRoleName(),
+	)
 }
 
 // getInitialAWSConfig return the initial aws.Config based on the received configuration.
@@ -308,8 +324,4 @@ func (a *AWSOrg) checkDependencies() error {
 func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {
 	cfg.Credentials = awssdk.NewCredentialsCache(stscreds.NewAssumeRoleProvider(client, arn))
 	return cfg
-}
-
-func fmtIAMRole(account string, role string) string {
-	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
 }
