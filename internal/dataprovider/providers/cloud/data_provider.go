@@ -43,7 +43,7 @@ type Identity struct {
 	OrganizationId   string
 	OrganizationName string
 	// Partition is the AWS partition of the identity, for example "aws" or "aws-us-gov".
-	// Empty means unknown. Only the AWS providers set it.
+	// If Partition is empty, the partition is not known. Only the AWS providers set this field.
 	Partition string
 }
 

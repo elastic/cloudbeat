@@ -40,7 +40,7 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, s.logger.Logger)
 }
 
-// getAWSIdentity returns the initial aws.Config and the identity of the configured credentials.
+// getAWSIdentity makes the aws.Config from the configuration and gets the identity of the credentials.
 func (s *strategy) getAWSIdentity(ctx context.Context) (*awssdk.Config, *cloud.Identity, error) {
 	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
 	if err != nil {
@@ -61,8 +61,8 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 
 	awsConfig, awsIdentity, err := s.getAWSIdentity(ctx)
 	if err != nil && s.cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
-		// GovCloud credentials fail with the commercial default region (us-east-1).
-		// Same fallback as the CSPM benchmark (see benchmark.AWS and benchmark.AWSOrg).
+		// If the default region is the commercial region (us-east-1), GovCloud credentials fail.
+		// The CSPM benchmark uses the same fallback (see benchmark.AWS and benchmark.AWSOrg).
 		s.logger.Warnf("failed to initialize identity (%v); retrying to check AWS Gov Cloud regions", err)
 		s.cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
 		awsConfig, awsIdentity, err = s.getAWSIdentity(ctx)
@@ -78,7 +78,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig, statusHandler), nil
 	}
 
-	// Assume audit roles per selected account and generate fetchers for them.
+	// Assume audit roles per selected account and generate fetchers for them
 	// The roles are in the partition of the caller identity (for example "aws-us-gov").
 	rootRoleConfig := assumeRole(
 		sts.NewFromConfig(*awsConfig),
@@ -93,7 +93,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 	var fetchers []inventory.AssetFetcher
 	stsClient := sts.NewFromConfig(rootRoleConfig)
 	for _, identity := range accountIdentities {
-		// An AWS organization cannot span partitions.
+		// An AWS organization is in one partition only.
 		if identity.Partition == "" {
 			identity.Partition = awsIdentity.Partition
 		}
