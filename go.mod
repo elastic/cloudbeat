@@ -80,7 +80,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
-	go.elastic.co/go-licence-detector v0.10.0
+	go.elastic.co/go-licence-detector v0.11.1
 	go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.71.0
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.47.0
