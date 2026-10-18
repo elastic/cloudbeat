@@ -71,7 +71,7 @@ func (p *Provider) listRecordsForZone(ctx context.Context, hostedZoneID, zoneID,
 			return nil, err
 		}
 		for _, rrs := range output.ResourceRecordSets {
-			results = append(results, newRecord(rrs, zoneID, zoneName))
+			results = append(results, newRecord(rrs, zoneID, zoneName, p.partition))
 		}
 		if !output.IsTruncated {
 			break

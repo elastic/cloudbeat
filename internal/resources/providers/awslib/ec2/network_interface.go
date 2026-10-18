@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
@@ -37,7 +38,7 @@ func (v NetworkInterfaceInfo) GetResourceArn() string {
 	if id == "" || account == "" {
 		return ""
 	}
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-interface/%s", v.region, account, id)
+	return fmt.Sprintf("arn:%s:ec2:%s:%s:network-interface/%s", awslib.PartitionFromRegion(v.region), v.region, account, id)
 }
 
 func (v NetworkInterfaceInfo) GetResourceName() string {

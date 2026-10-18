@@ -53,7 +53,7 @@ func (v ElasticLoadBalancerInfo) GetResourceArn() string {
 	if id == "" {
 		return ""
 	}
-	return fmt.Sprintf("arn:aws:elasticloadbalancing:%s:%s:loadbalancer/%s", v.region, v.awsAccount, id)
+	return fmt.Sprintf("arn:%s:elasticloadbalancing:%s:%s:loadbalancer/%s", awslib.PartitionFromRegion(v.region), v.region, v.awsAccount, id)
 }
 
 func (v ElasticLoadBalancerInfo) GetResourceName() string {

@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
 	"github.com/elastic/cloudbeat/internal/resources/fetching"
+	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
 )
 
 type VpcInfo struct {
@@ -36,7 +37,7 @@ func (v VpcInfo) GetResourceArn() string {
 	if v.Vpc.VpcId == nil {
 		return ""
 	}
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, v.awsAccount, *v.Vpc.VpcId)
+	return fmt.Sprintf("arn:%s:ec2:%s:%s:vpc/%s", awslib.PartitionFromRegion(v.region), v.region, v.awsAccount, *v.Vpc.VpcId)
 }
 
 func (v VpcInfo) GetResourceName() string {

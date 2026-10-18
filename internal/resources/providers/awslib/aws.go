@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
@@ -30,6 +31,19 @@ const (
 )
 
 var ErrClientNotFound = errors.New("aws client not found")
+
+// PartitionFromRegion returns the AWS partition of the given region, e.g. "aws-us-gov" for "us-gov-west-1".
+// Unknown or empty regions default to the commercial "aws" partition.
+func PartitionFromRegion(region string) string {
+	switch {
+	case strings.HasPrefix(region, "us-gov-"):
+		return "aws-us-gov"
+	case strings.HasPrefix(region, "cn-"):
+		return "aws-cn"
+	default:
+		return "aws"
+	}
+}
 
 type AwsResource interface {
 	GetResourceArn() string
