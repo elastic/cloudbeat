@@ -14,7 +14,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "9.6.0"
+            "defaultValue": "9.7.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -183,7 +183,7 @@
                         },
                         {
                             "type": "Microsoft.Network/virtualNetworks",
-                            "apiVersion": "2024-10-01",
+                            "apiVersion": "2026-03-01",
                             "name": "cloudbeatVNet",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "properties": {
@@ -210,7 +210,7 @@
                         },
                         {
                             "type": "Microsoft.Network/networkInterfaces",
-                            "apiVersion": "2024-10-01",
+                            "apiVersion": "2026-03-01",
                             "name": "cloudbeatNic",
                             "location": "[parameters('ResourceGroupLocation')]",
                             "dependsOn": [
