@@ -61,6 +61,14 @@ Resources:
   # IAM allows one OIDC provider per issuer per account and every stack for
   # this issuer shares it, so a custom resource creates it only when missing
   # and never deletes it. The function can only touch this one provider.
+  # The stack owns the function's log group so deleting the stack removes it;
+  # the function may only write to this group and cannot create others.
+  WiiOidcProviderFunctionLogGroup:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 14
   WiiOidcProviderFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -71,9 +79,16 @@ Resources:
             Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
+        - PolicyName: ElasticWorkloadIdentityOidcProviderLogs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt WiiOidcProviderFunctionLogGroup.Arn
         - PolicyName: ElasticWorkloadIdentityOidcProvider
           PolicyDocument:
             Version: "2012-10-17"
@@ -96,6 +111,8 @@ Resources:
       Handler: index.handler
       Role: !GetAtt WiiOidcProviderFunctionRole.Arn
       Timeout: 120
+      LoggingConfig:
+        LogGroup: !Ref WiiOidcProviderFunctionLogGroup
       Code:
         ZipFile: |
           import json
