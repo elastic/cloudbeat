@@ -120,22 +120,29 @@ Resources:
               "ServiceFailure",
           }
 
+          ACCESS_DENIED_HINT = (
+              "This account denied permission to look up or create the IAM OIDC identity provider "
+              "for its issuer in this account. Check that no service control policy or permissions "
+              "boundary denies iam:GetOpenIDConnectProvider, iam:CreateOpenIDConnectProvider, or "
+              "iam:AddClientIDToOpenIDConnectProvider on this provider. AWS reported: "
+          )
+
 
           def handler(event, context):
               if event["RequestType"] == "Delete":
                   respond(event, "SUCCESS", event["PhysicalResourceId"])
                   return
-              props = event["ResourceProperties"]
-              arn = provider_arn(context.invoked_function_arn, props["Url"])
+              arn = None
               try:
-                  ensure_provider(arn, props["Url"], "sts.amazonaws.com")
+                  url = event["ResourceProperties"]["Url"]
+                  arn = provider_arn(context.invoked_function_arn, url)
+                  ensure_provider(arn, url, "sts.amazonaws.com")
               except Exception as e:
                   # Report every failure; an unanswered request only fails after ServiceTimeout.
-                  physical_id = event.get("PhysicalResourceId", arn)
-                  respond(event, "FAILED", physical_id, reason=f"{type(e).__name__}: {e}")
+                  physical_id = event.get("PhysicalResourceId") or arn or context.log_stream_name
+                  respond(event, "FAILED", physical_id, reason=failure_reason(e))
                   return
-              issuer = props["Url"].removeprefix("https://")
-              respond(event, "SUCCESS", arn, data={"Arn": arn, "Issuer": issuer})
+              respond(event, "SUCCESS", arn, data={"Arn": arn, "Issuer": url.removeprefix("https://")})
 
 
           def provider_arn(function_arn, url):
@@ -151,11 +158,11 @@ Resources:
                           iam.create_open_id_connect_provider(Url=url, ClientIDList=[client_id])
                       elif client_id not in client_ids:
                           iam.add_client_id_to_open_id_connect_provider(
-                              OpenIDConnectProviderArn=arn, ClientId=client_id
+                              OpenIDConnectProviderArn=arn, ClientID=client_id
                           )
                       return
                   except ClientError as e:
-                      if e.response["Error"]["Code"] not in RETRYABLE or attempt == 4:
+                      if not retryable(e) or attempt == 4:
                           raise
                       time.sleep(2 ** (attempt + 1))
 
@@ -166,6 +173,21 @@ Resources:
                   return provider.get("ClientIDList", [])
               except iam.exceptions.NoSuchEntityException:
                   return None
+
+
+          def retryable(e):
+              code = e.response["Error"]["Code"]
+              # An explicit deny comes from a policy such as an SCP, so waiting never resolves it.
+              if code == "AccessDenied" and "explicit deny" in str(e):
+                  return False
+              return code in RETRYABLE
+
+
+          def failure_reason(e):
+              reason = f"{type(e).__name__}: {e}"
+              if isinstance(e, ClientError) and e.response["Error"]["Code"] == "AccessDenied":
+                  return ACCESS_DENIED_HINT + reason
+              return reason
 
 
           def respond(event, status, physical_id, reason=None, data=None):
