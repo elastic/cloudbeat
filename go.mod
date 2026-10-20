@@ -369,7 +369,7 @@ require (
 	github.com/lunixbochs/struc v0.0.0-20241101090106-8d528fa2c543 // indirect
 	github.com/magiconair/properties v1.18.12 // indirect
 	github.com/masahiro331/go-disk v0.0.0-20261019231737-1afeb9229069 // indirect
-	github.com/masahiro331/go-ebs-file v0.0.0-20260422020928-9d24e29aac27 // indirect
+	github.com/masahiro331/go-ebs-file v0.0.0-20261019234050-23e7724efdce // indirect
 	github.com/masahiro331/go-ext4-filesystem v0.0.0-20261019231617-81cc551ef742 // indirect
 	github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1 // indirect
 	github.com/masahiro331/go-vmdk-parser v0.0.0-20261019230602-b5e948eded9e // indirect
