@@ -41,24 +41,15 @@ jobs:
         with:
           init-tools: 'true'
 
-      - name: DEBUG python venv (temporary)
-        continue-on-error: true
-        run: |
-          set +e
-          echo "--- hermit version"; ./bin/hermit version 2>&1 | head -3
-          echo "--- python3 resolution"; type -a python3; python3 --version
-          python3 -c 'import sys; print("executable", sys.executable); print("prefix", sys.prefix); print("base_prefix", sys.base_prefix); print("path", sys.path)'
-          echo "--- relevant env"; env | grep -E '^(PATH|PYTHON|PIP|HERMIT|ACTIVE_HERMIT|VIRTUAL_ENV|GOTOOLCHAIN)' | sort
-          echo "--- venv without pip"; rm -rf /tmp/ve-debug
-          python3 -m venv --without-pip /tmp/ve-debug; echo "venv exit=$?"
-          cat /tmp/ve-debug/pyvenv.cfg; ls -la /tmp/ve-debug/bin
-          echo "--- ensurepip verbose (the step that fails under mage)"
-          /tmp/ve-debug/bin/python3 -m ensurepip --upgrade --default-pip -v; echo "ensurepip exit=$?"
-          echo "--- the exact failing command"; rm -rf /tmp/ve-debug2
-          python3 -m venv /tmp/ve-debug2; echo "venv(with pip) exit=$?"
-
       - name: Packaging
         run: |
+          # Hermit v0.54.1 puts a link farm ahead of bin/ on PATH. "python3 -m venv" run from there
+          # records the link farm directory as the venv home, and the venv's python then cannot find
+          # its standard library (ModuleNotFoundError: No module named 'encodings'). Put the directory
+          # of the real interpreter first so the venv is created from it.
+          PYTHON_BIN_DIR="$(dirname "$(readlink -f "$(command -v python3)")")"
+          export PATH="${PYTHON_BIN_DIR}:${PATH}"
+          echo "python3 -> $(command -v python3)"
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
