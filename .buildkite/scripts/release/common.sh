@@ -98,7 +98,9 @@ update_renovate_base_branches() {
         return
     fi
     echo "--- Add ${branch} to Renovate baseBranchPatterns"
-    awk -v b="${branch}" '
+    local tmp
+    tmp="$(mktemp)"
+    if awk -v b="${branch}" '
         /"baseBranchPatterns"/ { in_list = 1 }
         { print }
         in_list && /^[[:space:]]*"main",$/ {
@@ -106,7 +108,11 @@ update_renovate_base_branches() {
             printf "%s\"%s\",\n", substr($0, 1, RLENGTH), b
             in_list = 0
         }
-    ' renovate.json >renovate.json.tmp && mv renovate.json.tmp renovate.json
+    ' renovate.json >"${tmp}"; then
+        mv "${tmp}" renovate.json
+    else
+        rm -f "${tmp}"
+    fi
     if ! jq -e --arg b "${branch}" '.baseBranchPatterns | index($b)' renovate.json >/dev/null; then
         echo "WARNING: could not add ${branch} to baseBranchPatterns in renovate.json — add it manually."
         git checkout -- renovate.json
