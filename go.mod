@@ -1,6 +1,6 @@
 module github.com/elastic/cloudbeat
 
-go 1.26.6
+go 1.26.10
 
 require (
 	cloud.google.com/go/asset v1.29.0
