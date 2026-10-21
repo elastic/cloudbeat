@@ -25,8 +25,8 @@ After a successful build, the pipeline publishes the generated artifacts to the 
 ### Weekly scheduler maintenance
 
 - **Branch source of truth**: `main` + unique `X.Y` values under Mergify `actions.backport.branches` (not Elastic `branches.json` / future-releases, which can lag team-maintained minors such as `9.3`).
-- **New minor**: when the version-bump pipeline adds a Mergify backport rule, the next weekly run includes that branch automatically — no `catalog-info.yaml` schedule edits.
-- **EOL**: remove the Mergify backport rule for that branch; the scheduler stops triggering it.
+- **New minor**: when the version-bump pipeline adds a Mergify backport rule, the next weekly run includes that branch automatically — no `catalog-info.yaml` schedule edits. The "bump main" PR opened after the branch-out also adds the branch to `baseBranchPatterns` in `renovate.json`, so Renovate tracks it.
+- **EOL**: remove the Mergify backport rule for that branch; the scheduler stops triggering it. Also remove the branch from `baseBranchPatterns` in `renovate.json`.
 - **Manual run**: start a new build of [cloudbeat-dra-scheduler](https://buildkite.com/elastic/cloudbeat-dra-scheduler) on `main`.
 - **Verify**: confirm child cloudbeat builds pass Snapshot publish, then check [dra-info](https://artifacts-staging.elastic.co/dra-info/index.html) and `https://storage.googleapis.com/elastic-artifacts-snapshot/cloudbeat/latest/<branch>.json`.
 - **Failures**: the scheduler notifies `#cloud-sec-ci` when the scheduler build itself fails. Child `cloudbeat` DRA builds keep their existing failure notifications.
