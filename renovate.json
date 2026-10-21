@@ -506,6 +506,16 @@
       "minimumReleaseAge": null
     },
     {
+      "description": "Exempt the .go-version and docs/version.asciidoc regex managers from minimumReleaseAge like the hermit entries. With internalChecksFilter strict they appear to be held out of the go-version group branch for a new Go release (go 1.27.3: the PRs bumped go.mod and the hermit pin but not .go-version or docs), leaving the PR inconsistent. Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
       "description": "Manual review for major updates",
       "matchUpdateTypes": [
         "major"
