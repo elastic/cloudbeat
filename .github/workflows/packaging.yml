@@ -76,6 +76,18 @@ jobs:
           cat /tmp/ve-default/pyvenv.cfg
           /tmp/ve-default/bin/python3 -c 'import encodings; print("encodings ok")' 2>&1 | tail -3
           echo "::endgroup::"
+          echo "::group::venv WITH pip (real python)"
+          rm -rf /tmp/ve-pip-real && "${PYTHON_BIN_DIR}/python3" -m venv /tmp/ve-pip-real 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"
+          echo "::endgroup::"
+          echo "::group::venv WITH pip (default python3)"
+          rm -rf /tmp/ve-pip-default && python3 -m venv /tmp/ve-pip-default 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"
+          echo "::endgroup::"
+          echo "::group::ensurepip in an existing no-pip venv, isolated mode like venv does"
+          /tmp/ve-real/bin/python3 -Im ensurepip --upgrade --default-pip 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"
+          echo "::endgroup::"
+          echo "::group::mage-like run: same venv path inside the workspace"
+          rm -rf build/ve-dbg && "${PYTHON_BIN_DIR}/python3" -m venv build/ve-dbg 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"; rm -rf build/ve-dbg
+          echo "::endgroup::"
 
       - name: Packaging
         run: |
@@ -91,6 +103,12 @@ jobs:
             echo "::warning::real python3 not found under the Hermit package dir (${PYTHON_BIN_DIR:-none})"
           fi
           echo "python3 -> $(command -v python3)"
+          # temporary: log how mage runs python3
+          REAL_PY="$(command -v python3)"
+          mkdir -p /tmp/pywrap
+          printf '%s\n' '#!/usr/bin/env bash' 'echo "[pywrap] argv0=$0 args=$*" >&2' 'echo "[pywrap] cwd=$(pwd)" >&2' 'env | grep -E "^(PYTHON|HERMIT|VIRTUAL|LD_|PATH=)" | sed "s/^/[pywrap] /" >&2' "exec ${REAL_PY} \"\$@\"" > /tmp/pywrap/python3
+          chmod +x /tmp/pywrap/python3
+          export PATH="/tmp/pywrap:${PATH}"
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
