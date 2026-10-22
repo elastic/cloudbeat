@@ -30,7 +30,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.78.4
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.82.1
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.5
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.74.0
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.75.0
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.90.0
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.74.5
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.339.0
@@ -40,7 +40,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/kms v1.61.5
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.62.1
-	github.com/aws/aws-sdk-go-v2/service/rds v1.130.3
+	github.com/aws/aws-sdk-go-v2/service/rds v1.131.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.79.4
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.85.1
@@ -61,10 +61,10 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.26.2
 	github.com/hashicorp/go-uuid v1.0.4
-	github.com/huandu/xstrings v1.6.2
+	github.com/huandu/xstrings v1.6.3
 	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20261019233610-ccf49f5dd025
-	github.com/microsoft/kiota-abstractions-go v1.11.2
+	github.com/microsoft/kiota-abstractions-go v1.11.3
 	github.com/microsoftgraph/msgraph-sdk-go v1.104.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.54.1
@@ -103,7 +103,7 @@ require (
 	go.uber.org/zap/exp v0.3.0
 	golang.org/x/lint v0.0.0-20241112194109-818c5a804067
 	golang.org/x/oauth2 v0.37.0
-	google.golang.org/api v0.305.0
+	google.golang.org/api v0.306.0
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/gotestsum v1.13.0
 	k8s.io/api v0.37.1
@@ -133,7 +133,7 @@ require (
 	github.com/aquasecurity/iamgo v0.0.10 // indirect
 	github.com/aquasecurity/jfather v0.0.8 // indirect
 	github.com/aquasecurity/trivy-checks v1.12.2-0.20251219190323-79d27547baf5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.71.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.72.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.13.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.10.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.5 // indirect
@@ -338,7 +338,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ebs v1.41.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ebs v1.42.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.63.4
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.21 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.7 // indirect
@@ -363,8 +363,8 @@ require (
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
-	github.com/docker/cli v29.9.1+incompatible // indirect
-	github.com/docker/docker-credential-helpers v0.9.10 // indirect
+	github.com/docker/cli v29.9.2+incompatible // indirect
+	github.com/docker/docker-credential-helpers v0.9.12 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dop251/goja v0.0.0-20261002135814-104bc28c3abd // indirect
@@ -402,7 +402,7 @@ require (
 	github.com/go-openapi/spec v1.0.1 // indirect
 	github.com/go-openapi/strfmt v0.27.4 // indirect
 	github.com/go-openapi/swag v0.29.2 // indirect
-	github.com/go-openapi/validate v1.0.0 // indirect
+	github.com/go-openapi/validate v1.0.1 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/goccy/go-json v0.11.2 // indirect
