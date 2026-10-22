@@ -448,6 +448,22 @@
       ]
     },
     {
+      "description": "9.4: cap sigstore/rekor below v1.5.5 - v1.5.5 raises go.mod to go 1.27, which 9.4 does not move to. Patch updates within 1.5.x up to v1.5.4 still flow. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/sigstore/rekor"
+      ],
+      "allowedVersions": "<1.5.5",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
       "description": "9.4: disable moby updates - the bumps raise go.mod to go 1.26.8 while 9.4 CI runs Go 1.26.6, and they are indirect-only. Must stay after the 'Enable indirect Go dependencies' rule",
       "matchBaseBranches": [
         "9.4"
