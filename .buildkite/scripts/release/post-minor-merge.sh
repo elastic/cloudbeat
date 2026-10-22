@@ -5,6 +5,7 @@ set -euo pipefail
 # Performs two operations:
 #   1. Branch-out: create and push the new X.Y release branch from main
 #   2. Main bump: advance main's version to the next minor (e.g. 9.5.0 -> 9.6.0)
+#      and start tracking the new branch in Renovate (baseBranchPatterns)
 #
 # Does NOT sync bin/hermit.hcl — that's owned by scripts/sync_internal_cloudbeat_version.sh
 # (see .github/workflows/sync-internal-cloudbeat-version.yml), which gates the sync on the
@@ -89,6 +90,7 @@ bump_main_to_next_minor() {
     echo "  NEXT_CLOUDBEAT_VERSION: ${NEXT_CLOUDBEAT_VERSION}"
     update_version_beat
     update_arm_templates "${NEXT_MAIN_VERSION}"
+    update_renovate_base_branches "${BRANCH}"
 
     if git diff --quiet origin/main HEAD; then
         echo "main is already at ${NEXT_MAIN_VERSION} — skipping."

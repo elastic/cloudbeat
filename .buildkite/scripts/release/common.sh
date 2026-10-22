@@ -83,6 +83,47 @@ update_arm_templates() {
     fi
 }
 
+# update_renovate_base_branches <branch>
+# Adds <branch> to baseBranchPatterns in renovate.json, right after "main" so the
+# newest release branch stays first, and commits it. Renovate only tracks the
+# branches listed there, so a new release branch gets no dependency updates
+# until it is added. Idempotent: leaves the file untouched if already listed.
+# Edits the file as text because jq would reformat all of renovate.json. Warns
+# instead of failing if the expected "main" entry is missing, so a changed file
+# layout does not block the release; add the branch by hand in that case.
+update_renovate_base_branches() {
+    local branch="$1"
+    if jq -e --arg b "${branch}" '.baseBranchPatterns | index($b)' renovate.json >/dev/null; then
+        echo "renovate.json already tracks ${branch} — skipping."
+        return
+    fi
+    echo "--- Add ${branch} to Renovate baseBranchPatterns"
+    local tmp
+    tmp="$(mktemp)"
+    if awk -v b="${branch}" '
+        /"baseBranchPatterns"/ { in_list = 1 }
+        { print }
+        in_list && /^[[:space:]]*"main",$/ {
+            match($0, /^[[:space:]]*/)
+            printf "%s\"%s\",\n", substr($0, 1, RLENGTH), b
+            in_list = 0
+        }
+    ' renovate.json >"${tmp}"; then
+        mv "${tmp}" renovate.json
+    else
+        rm -f "${tmp}"
+    fi
+    if ! jq -e --arg b "${branch}" '.baseBranchPatterns | index($b)' renovate.json >/dev/null; then
+        echo "WARNING: could not add ${branch} to baseBranchPatterns in renovate.json — add it manually."
+        git checkout -- renovate.json
+        return
+    fi
+    git add renovate.json
+    if ! git diff --cached --quiet; then
+        git commit -m "Track ${branch} in Renovate"
+    fi
+}
+
 # no_new_commits <base_ref>
 # Returns 0 (true) if HEAD has no changes relative to <base_ref>, i.e. the
 # preceding update_* calls found nothing to bump. Callers should skip
