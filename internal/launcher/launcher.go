@@ -284,8 +284,11 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 
 	for {
 		select {
-		case <-l.beaterErr:
-			return nil, errors.New("error channel closed")
+		case err, ok := <-l.beaterErr:
+			if !ok {
+				return nil, errors.New("error channel closed")
+			}
+			return nil, fmt.Errorf("beater failed while waiting for reconfiguration: %w", err)
 
 		case <-timer:
 			return nil, fmt.Errorf("timed out waiting for reconfiguration after %s", time.Since(start))

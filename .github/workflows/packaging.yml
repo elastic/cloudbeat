@@ -43,6 +43,18 @@ jobs:
 
       - name: Packaging
         run: |
+          # Hermit v0.54.1 runs python3 through a link farm or stub, and "python3 -m venv" then records
+          # that directory as the venv home. The venv's python cannot find its standard library
+          # (ModuleNotFoundError: No module named 'encodings'), so ensurepip fails. Put the real
+          # interpreter's directory first on PATH, found in the Hermit package dir so it does not
+          # depend on what python3 currently resolves to.
+          PYTHON_BIN_DIR="$(ls -d "${HERMIT_STATE_DIR:-$HOME/.cache/hermit}"/pkg/python3-*/install/bin 2>/dev/null | sort -V | tail -n 1)"
+          if [ -x "${PYTHON_BIN_DIR}/python3" ]; then
+            export PATH="${PYTHON_BIN_DIR}:${PATH}"
+          else
+            echo "::warning::real python3 not found under the Hermit package dir (${PYTHON_BIN_DIR:-none})"
+          fi
+          echo "python3 -> $(command -v python3)"
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
