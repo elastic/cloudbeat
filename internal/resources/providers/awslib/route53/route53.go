@@ -39,13 +39,15 @@ type RecordsLister interface {
 }
 
 type Provider struct {
-	log    *clog.Logger
-	client Client
+	log       *clog.Logger
+	client    Client
+	partition string
 }
 
 func NewProvider(log *clog.Logger, cfg aws.Config) *Provider {
 	return &Provider{
-		log:    log,
-		client: route53.NewFromConfig(cfg),
+		log:       log,
+		client:    route53.NewFromConfig(cfg),
+		partition: awslib.PartitionFromRegion(cfg.Region),
 	}
 }

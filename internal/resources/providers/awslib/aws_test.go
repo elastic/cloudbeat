@@ -67,3 +67,20 @@ func TestGetClient(t *testing.T) {
 		})
 	}
 }
+
+func TestPartitionFromRegion(t *testing.T) {
+	tests := map[string]string{
+		"":              "aws",
+		"global":        "aws",
+		"us-east-1":     "aws",
+		"eu-west-1":     "aws",
+		"us-gov-east-1": "aws-us-gov",
+		"us-gov-west-1": "aws-us-gov",
+		"cn-north-1":    "aws-cn",
+	}
+	for region, want := range tests {
+		t.Run(region, func(t *testing.T) {
+			assert.Equal(t, want, PartitionFromRegion(region))
+		})
+	}
+}
