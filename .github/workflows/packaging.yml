@@ -103,12 +103,13 @@ jobs:
             echo "::warning::real python3 not found under the Hermit package dir (${PYTHON_BIN_DIR:-none})"
           fi
           echo "python3 -> $(command -v python3)"
-          # temporary: log how mage runs python3
-          REAL_PY="$(command -v python3)"
-          mkdir -p /tmp/pywrap
-          printf '%s\n' '#!/usr/bin/env bash' 'echo "[pywrap] argv0=$0 args=$*" >&2' 'echo "[pywrap] cwd=$(pwd)" >&2' 'env | grep -E "^(PYTHON|HERMIT|VIRTUAL|LD_|PATH=)" | sed "s/^/[pywrap] /" >&2' "exec ${REAL_PY} \"\$@\"" > /tmp/pywrap/python3
-          chmod +x /tmp/pywrap/python3
-          export PATH="/tmp/pywrap:${PATH}"
+          # temporary: mage runs through the Hermit stub, which rebuilds PATH, so a PATH export is not seen by
+          # mage. .hermit/python/bin is the first entry of the PATH Hermit builds, so a python3 placed there is
+          # what mage finds. It logs how mage runs python3, then runs the real interpreter.
+          mkdir -p "${PWD}/.hermit/python/bin"
+          printf '%s\n' '#!/usr/bin/env bash' 'echo "[pywrap] argv0=$0 args=$*" >&2' 'echo "[pywrap] cwd=$(pwd)" >&2' 'env | grep -E "^(PYTHON|HERMIT|VIRTUAL|LD_|PATH=)" | sed "s/^/[pywrap] /" >&2' "exec ${PYTHON_BIN_DIR}/python3 \"\$@\"" > "${PWD}/.hermit/python/bin/python3"
+          chmod +x "${PWD}/.hermit/python/bin/python3"
+          ls -la "${PWD}/.hermit/python/bin/" | head -20
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
