@@ -26,24 +26,24 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.9
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.20.3
 	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.57.5
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.78.4
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.79.0
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.82.1
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.65.5
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.75.0
-	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.90.0
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.90.1
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.74.5
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.339.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.340.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.66.5
 	github.com/aws/aws-sdk-go-v2/service/eks v1.104.2
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.41.4
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.63.4
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.4
 	github.com/aws/aws-sdk-go-v2/service/kms v1.61.5
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.1
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.2
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.62.1
 	github.com/aws/aws-sdk-go-v2/service/rds v1.131.0
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.70.4
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.4
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.79.4
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.85.1
 	github.com/aws/aws-sdk-go-v2/service/sns v1.47.5
@@ -168,7 +168,7 @@ require (
 	github.com/aquasecurity/trivy-java-db v0.0.0-20261009082446-537388b619db // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.22 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.23 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.6 // indirect
