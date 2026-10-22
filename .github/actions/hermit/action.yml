@@ -46,8 +46,6 @@ runs:
           ~/.cache/pypoetry
           ~/.cache/pre-commit
         key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
-        restore-keys: |
-          ci-hermit-env-${{ runner.os }}
 
     - id: cache-go-deps
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
