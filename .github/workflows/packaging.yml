@@ -41,75 +41,22 @@ jobs:
         with:
           init-tools: 'true'
 
-      - name: Debug python and hermit (temporary)
-        continue-on-error: true
-        run: |
-          set +e
-          echo "::group::hermit"
-          hermit version 2>&1 | head -3
-          ls -la "${HERMIT_STATE_DIR:-$HOME/.cache/hermit}/pkg" | head -30
-          echo "::endgroup::"
-          PYTHON_BIN_DIR="$(ls -d "${HERMIT_STATE_DIR:-$HOME/.cache/hermit}"/pkg/python3-*/install/bin 2>/dev/null | sort -V | tail -n 1)"
-          PY_ROOT="$(dirname "${PYTHON_BIN_DIR}")"
-          echo "::group::real python install tree (${PY_ROOT})"
-          ls -la "${PYTHON_BIN_DIR}" | head -30
-          ls -la "${PY_ROOT}" "${PY_ROOT}/lib" 2>&1 | head -40
-          echo "encodings dir:"; ls -d "${PY_ROOT}"/lib/python3*/encodings 2>&1; ls "${PY_ROOT}"/lib/python3*/encodings 2>/dev/null | wc -l
-          readlink -f "${PYTHON_BIN_DIR}/python3"
-          echo "::endgroup::"
-          echo "::group::python env"
-          env | grep -iE '^(PYTHON|HERMIT|VIRTUAL|LD_|POETRY|CLOUDSDK_PYTHON)' | sort
-          echo "PATH=$PATH" | tr ':' '\n' | head -20
-          echo "default python3: $(command -v python3) -> $(readlink -f "$(command -v python3)")"
-          "${PYTHON_BIN_DIR}/python3" -c 'import sys; print("version", sys.version); print("executable", sys.executable); print("prefix", sys.prefix, "base_prefix", sys.base_prefix); print("path", sys.path)'
-          echo "::endgroup::"
-          echo "::group::venv with the real python"
-          rm -rf /tmp/ve-real && "${PYTHON_BIN_DIR}/python3" -m venv --without-pip /tmp/ve-real; echo "venv rc=$?"
-          cat /tmp/ve-real/pyvenv.cfg; ls -la /tmp/ve-real/bin
-          /tmp/ve-real/bin/python3 -c 'import encodings, sys; print("encodings ok", sys.prefix)' 2>&1 | tail -5
-          echo "::endgroup::"
-          echo "::group::verbose import in the venv"
-          /tmp/ve-real/bin/python3 -v -c 'import encodings' 2>&1 | head -25
-          echo "::endgroup::"
-          echo "::group::venv with default python3"
-          rm -rf /tmp/ve-default && python3 -m venv --without-pip /tmp/ve-default; echo "venv rc=$?"
-          cat /tmp/ve-default/pyvenv.cfg
-          /tmp/ve-default/bin/python3 -c 'import encodings; print("encodings ok")' 2>&1 | tail -3
-          echo "::endgroup::"
-          echo "::group::venv WITH pip (real python)"
-          rm -rf /tmp/ve-pip-real && "${PYTHON_BIN_DIR}/python3" -m venv /tmp/ve-pip-real 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"
-          echo "::endgroup::"
-          echo "::group::venv WITH pip (default python3)"
-          rm -rf /tmp/ve-pip-default && python3 -m venv /tmp/ve-pip-default 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"
-          echo "::endgroup::"
-          echo "::group::ensurepip in an existing no-pip venv, isolated mode like venv does"
-          /tmp/ve-real/bin/python3 -Im ensurepip --upgrade --default-pip 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"
-          echo "::endgroup::"
-          echo "::group::mage-like run: same venv path inside the workspace"
-          rm -rf build/ve-dbg && "${PYTHON_BIN_DIR}/python3" -m venv build/ve-dbg 2>&1 | tail -15; echo "rc=${PIPESTATUS[0]}"; rm -rf build/ve-dbg
-          echo "::endgroup::"
-
       - name: Packaging
         run: |
-          # Hermit v0.54.1 runs python3 through a link farm or stub, and "python3 -m venv" then records
-          # that directory as the venv home. The venv's python cannot find its standard library
-          # (ModuleNotFoundError: No module named 'encodings'), so ensurepip fails. Put the real
-          # interpreter's directory first on PATH, found in the Hermit package dir so it does not
-          # depend on what python3 currently resolves to.
+          # mage runs through the Hermit stub, which rebuilds PATH, so exporting PATH here does not change
+          # which python3 mage finds. It finds the Hermit link farm python3, a stub: "python3 -m venv" then
+          # records the link farm directory as the venv home, the venv's python cannot find its standard
+          # library (ModuleNotFoundError: No module named 'encodings') and ensurepip fails.
+          # .hermit/python/bin is the first entry of the PATH Hermit builds, so a python3 placed there runs
+          # the real interpreter from the Hermit package dir, which gives the venv the right home.
           PYTHON_BIN_DIR="$(ls -d "${HERMIT_STATE_DIR:-$HOME/.cache/hermit}"/pkg/python3-*/install/bin 2>/dev/null | sort -V | tail -n 1)"
           if [ -x "${PYTHON_BIN_DIR}/python3" ]; then
-            export PATH="${PYTHON_BIN_DIR}:${PATH}"
+            mkdir -p .hermit/python/bin
+            printf '%s\n' '#!/usr/bin/env bash' "exec \"${PYTHON_BIN_DIR}/python3\" \"\$@\"" > .hermit/python/bin/python3
+            chmod +x .hermit/python/bin/python3
           else
             echo "::warning::real python3 not found under the Hermit package dir (${PYTHON_BIN_DIR:-none})"
           fi
-          echo "python3 -> $(command -v python3)"
-          # temporary: mage runs through the Hermit stub, which rebuilds PATH, so a PATH export is not seen by
-          # mage. .hermit/python/bin is the first entry of the PATH Hermit builds, so a python3 placed there is
-          # what mage finds. It logs how mage runs python3, then runs the real interpreter.
-          mkdir -p "${PWD}/.hermit/python/bin"
-          printf '%s\n' '#!/usr/bin/env bash' 'echo "[pywrap] argv0=$0 args=$*" >&2' 'echo "[pywrap] cwd=$(pwd)" >&2' 'env | grep -E "^(PYTHON|HERMIT|VIRTUAL|LD_|PATH=)" | sed "s/^/[pywrap] /" >&2' "exec ${PYTHON_BIN_DIR}/python3 \"\$@\"" > "${PWD}/.hermit/python/bin/python3"
-          chmod +x "${PWD}/.hermit/python/bin/python3"
-          ls -la "${PWD}/.hermit/python/bin/" | head -20
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
