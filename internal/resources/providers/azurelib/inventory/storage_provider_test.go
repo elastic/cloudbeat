@@ -1103,21 +1103,16 @@ func TestListStorageAccountQueues_OtherErrorsStillFail(t *testing.T) {
 }
 
 func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) {
-	unsupported := &azcore.ResponseError{StatusCode: 400, ErrorCode: "FeatureNotSupportedForAccount"}
 	accounts := []AzureAsset{{Id: "a", Name: "unsupported"}, {Id: "b", Name: "supported"}}
 
 	tests := map[string]struct {
-		client func(called *[]string) *storageAccountAzureClientWrapper
+		client func(respond func(string) error) *storageAccountAzureClientWrapper
 		list   func(p *storageAccountProvider) ([]AzureAsset, error)
 	}{
 		"blob containers": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetBlobContainers: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return nil, unsupported
-					}
-					return nil, nil
+					return nil, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1125,13 +1120,9 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			},
 		},
 		"blob services": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetBlobServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return nil, unsupported
-					}
-					return nil, nil
+					return nil, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1139,13 +1130,9 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			},
 		},
 		"file services": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetFileServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return armstorage.FileServicesClientListResponse{}, unsupported
-					}
-					return armstorage.FileServicesClientListResponse{}, nil
+					return armstorage.FileServicesClientListResponse{}, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1153,13 +1140,9 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			},
 		},
 		"file shares": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetFileShares: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.FileSharesClientListOptions) ([]armstorage.FileSharesClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return nil, unsupported
-					}
-					return nil, nil
+					return nil, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1167,13 +1150,9 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			},
 		},
 		"queues": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetQueues: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return nil, unsupported
-					}
-					return nil, nil
+					return nil, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1181,13 +1160,9 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			},
 		},
 		"queue services": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetQueueServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.QueueServicesClientListOptions) (armstorage.QueueServicesClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return armstorage.QueueServicesClientListResponse{}, unsupported
-					}
-					return armstorage.QueueServicesClientListResponse{}, nil
+					return armstorage.QueueServicesClientListResponse{}, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1195,13 +1170,9 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			},
 		},
 		"tables": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetTables: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.TableClientListOptions) ([]armstorage.TableClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return nil, unsupported
-					}
-					return nil, nil
+					return nil, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1209,13 +1180,9 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			},
 		},
 		"table services": {
-			client: func(called *[]string) *storageAccountAzureClientWrapper {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
 				return &storageAccountAzureClientWrapper{AssetTableServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.TableServicesClientListOptions) (armstorage.TableServicesClientListResponse, error) {
-					*called = append(*called, name)
-					if name == "unsupported" {
-						return armstorage.TableServicesClientListResponse{}, unsupported
-					}
-					return armstorage.TableServicesClientListResponse{}, nil
+					return armstorage.TableServicesClientListResponse{}, respond(name)
 				}}
 			},
 			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
@@ -1230,7 +1197,7 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			var called []string
 			provider := &storageAccountProvider{
 				log:                     log,
-				client:                  tc.client(&called),
+				client:                  tc.client(recordCalls(&called)),
 				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
@@ -1238,5 +1205,16 @@ func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) 
 			require.NoError(t, err)
 			assert.Equal(t, []string{"unsupported", "supported"}, called)
 		})
+	}
+}
+
+// recordCalls records each storage account name and fails with FeatureNotSupportedForAccount for "unsupported".
+func recordCalls(called *[]string) func(string) error {
+	return func(name string) error {
+		*called = append(*called, name)
+		if name == "unsupported" {
+			return &azcore.ResponseError{StatusCode: 400, ErrorCode: "FeatureNotSupportedForAccount"}
+		}
+		return nil
 	}
 }
