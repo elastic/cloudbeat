@@ -19,7 +19,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql v1.2.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage/v4 v4.3.0
 	github.com/aquasecurity/go-dep-parser v0.0.0-20240606050805-1de9a375c629
-	github.com/aquasecurity/trivy v0.75.0
+	github.com/aquasecurity/trivy v0.76.1
 	github.com/aquasecurity/trivy-db v0.0.0-20261012084708-cbebf2ecd6df
 	github.com/aws/aws-sdk-go-v2 v1.47.3
 	github.com/aws/aws-sdk-go-v2/config v1.33.9
@@ -74,7 +74,7 @@ require (
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.54.1
 	github.com/mitchellh/gox v1.0.1
-	github.com/open-policy-agent/opa v1.20.2
+	github.com/open-policy-agent/opa v1.21.1
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
 	github.com/samber/lo v1.53.0
 	github.com/spf13/viper v1.21.0
@@ -157,14 +157,14 @@ require (
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
 	github.com/aquasecurity/go-gem-version v0.0.0-20201115065557-8eed6fe000ce // indirect
-	github.com/aquasecurity/go-npm-version v0.0.2 // indirect
+	github.com/aquasecurity/go-npm-version v0.0.3-0.20261005070944-1f16ed76cf11 // indirect
 	github.com/aquasecurity/go-pep440-version v0.0.2-0.20260224065243-f9bba28c51a4 // indirect
 	github.com/aquasecurity/go-version v0.0.1 // indirect
 	github.com/aquasecurity/iamgo v0.0.10 // indirect
 	github.com/aquasecurity/jfather v0.0.8 // indirect
 	github.com/aquasecurity/table v1.11.0 // indirect
 	github.com/aquasecurity/tml v0.6.1 // indirect
-	github.com/aquasecurity/trivy-checks v1.12.2-0.20260908095928-2d1b9bec7d6f // indirect
+	github.com/aquasecurity/trivy-checks v1.12.2-0.20261012053351-ac85645895ed // indirect
 	github.com/aquasecurity/trivy-java-db v0.0.0-20261009082446-537388b619db // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
@@ -290,7 +290,7 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.29.2 // indirect
 	github.com/go-openapi/validate v1.0.1 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/gobwas/glob v1.0.0 // indirect
 	github.com/goccy/go-json v0.11.2 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/gocsaf/csaf/v3 v3.7.0 // indirect
