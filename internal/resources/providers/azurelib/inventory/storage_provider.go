@@ -664,7 +664,7 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 func (p *storageAccountProvider) skipUnsupportedFeature(err error, sa AzureAsset) bool {
 	var respErr *azcore.ResponseError
 	if errors.As(err, &respErr) && respErr.ErrorCode == "FeatureNotSupportedForAccount" {
-		p.log.Debugf("Skipping storage account %s: %v", sa.Id, respErr.ErrorCode)
+		p.log.Warnf("Skipping storage account %s: %v", sa.Id, respErr.ErrorCode)
 		return true
 	}
 	return false
