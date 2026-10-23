@@ -212,6 +212,9 @@ func (p *storageAccountProvider) ListStorageAccountBlobContainers(ctx context.Co
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetBlobContainers(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure blob containers for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -231,6 +234,9 @@ func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Cont
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetBlobServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure blob services for storage accounts %s: %w", sa.Id, err)
 		}
 

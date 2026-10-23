@@ -1124,3 +1124,29 @@ func TestListStorageAccountQueues_OtherErrorsStillFail(t *testing.T) {
 	_, err := provider.ListStorageAccountQueues(t.Context(), []AzureAsset{{Id: "a", Name: "a"}})
 	require.Error(t, err)
 }
+
+func TestListStorageAccountBlob_SkipsAccountsWithoutFeatureSupport(t *testing.T) {
+	log := testhelper.NewLogger(t)
+	unsupported := &azcore.ResponseError{StatusCode: 400, ErrorCode: "FeatureNotSupportedForAccount"}
+	provider := &storageAccountProvider{
+		log: log,
+		client: &storageAccountAzureClientWrapper{
+			AssetBlobContainers: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error) {
+				return nil, unsupported
+			},
+			AssetBlobServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
+				return nil, unsupported
+			},
+		},
+		diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+	}
+	accounts := []AzureAsset{{Id: "file-storage-account", Name: "file-storage-account"}}
+
+	containers, err := provider.ListStorageAccountBlobContainers(t.Context(), accounts)
+	require.NoError(t, err)
+	assert.Empty(t, containers)
+
+	services, err := provider.ListStorageAccountBlobServices(t.Context(), accounts)
+	require.NoError(t, err)
+	assert.Empty(t, services)
+}
