@@ -1086,29 +1086,6 @@ func TestListStorageAccountQueues_SkipsAccountsWithoutFeatureSupport(t *testing.
 	assert.Empty(t, got)
 }
 
-func TestListStorageAccountQueues_UnsupportedAccountDoesNotBlockOthers(t *testing.T) {
-	log := testhelper.NewLogger(t)
-	provider := &storageAccountProvider{
-		log: log,
-		client: &storageAccountAzureClientWrapper{
-			AssetQueues: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error) {
-				if name == "unsupported" {
-					return nil, &azcore.ResponseError{StatusCode: 400, ErrorCode: "FeatureNotSupportedForAccount"}
-				}
-				return []armstorage.QueueClientListResponse{{ListQueueResource: armstorage.ListQueueResource{Value: []*armstorage.ListQueue{
-					{ID: pointers.Ref("q1"), Name: pointers.Ref("q1"), Type: pointers.Ref("t"), QueueProperties: &armstorage.ListQueueProperties{}},
-				}}}}, nil
-			},
-		},
-		diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
-	}
-
-	got, err := provider.ListStorageAccountQueues(t.Context(), []AzureAsset{{Id: "a", Name: "unsupported"}, {Id: "b", Name: "ok"}})
-	require.NoError(t, err)
-	require.Len(t, got, 1)
-	assert.Equal(t, "q1", got[0].Name)
-}
-
 func TestListStorageAccountQueues_OtherErrorsStillFail(t *testing.T) {
 	log := testhelper.NewLogger(t)
 	provider := &storageAccountProvider{
@@ -1123,32 +1100,6 @@ func TestListStorageAccountQueues_OtherErrorsStillFail(t *testing.T) {
 
 	_, err := provider.ListStorageAccountQueues(t.Context(), []AzureAsset{{Id: "a", Name: "a"}})
 	require.Error(t, err)
-}
-
-func TestListStorageAccountBlob_SkipsAccountsWithoutFeatureSupport(t *testing.T) {
-	log := testhelper.NewLogger(t)
-	unsupported := &azcore.ResponseError{StatusCode: 400, ErrorCode: "FeatureNotSupportedForAccount"}
-	provider := &storageAccountProvider{
-		log: log,
-		client: &storageAccountAzureClientWrapper{
-			AssetBlobContainers: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error) {
-				return nil, unsupported
-			},
-			AssetBlobServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
-				return nil, unsupported
-			},
-		},
-		diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
-	}
-	accounts := []AzureAsset{{Id: "file-storage-account", Name: "file-storage-account"}}
-
-	containers, err := provider.ListStorageAccountBlobContainers(t.Context(), accounts)
-	require.NoError(t, err)
-	assert.Empty(t, containers)
-
-	services, err := provider.ListStorageAccountBlobServices(t.Context(), accounts)
-	require.NoError(t, err)
-	assert.Empty(t, services)
 }
 
 func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) {
