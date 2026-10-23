@@ -212,6 +212,9 @@ func (p *storageAccountProvider) ListStorageAccountBlobContainers(ctx context.Co
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetBlobContainers(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure blob containers for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -231,6 +234,9 @@ func (p *storageAccountProvider) ListStorageAccountBlobServices(ctx context.Cont
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetBlobServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure blob services for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -250,6 +256,9 @@ func (p *storageAccountProvider) ListStorageAccountFileServices(ctx context.Cont
 	for _, sa := range storageAccounts {
 		response, err := p.client.AssetFileServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure blob services for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -283,6 +292,9 @@ func (p *storageAccountProvider) ListStorageAccountFileShares(ctx context.Contex
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetFileShares(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure file share for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -302,6 +314,9 @@ func (p *storageAccountProvider) ListStorageAccountQueues(ctx context.Context, s
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetQueues(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure queues for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -321,6 +336,9 @@ func (p *storageAccountProvider) ListStorageAccountQueueServices(ctx context.Con
 	for _, sa := range storageAccounts {
 		response, err := p.client.AssetQueueServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure queue services for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -353,6 +371,9 @@ func (p *storageAccountProvider) ListStorageAccountTables(ctx context.Context, s
 	for _, sa := range storageAccounts {
 		responses, err := p.client.AssetTables(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure table services for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -371,6 +392,9 @@ func (p *storageAccountProvider) ListStorageAccountTableServices(ctx context.Con
 	for _, sa := range storageAccounts {
 		response, err := p.client.AssetTableServices(ctx, sa.SubscriptionId, nil, sa.ResourceGroup, sa.Name, nil)
 		if err != nil {
+			if p.skipUnsupportedFeature(err, sa) {
+				continue
+			}
 			return nil, fmt.Errorf("error while fetching azure table services for storage accounts %s: %w", sa.Id, err)
 		}
 
@@ -632,4 +656,16 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 		TenantId:       "",
 		Type:           pointers.Deref(v.Type),
 	}, nil
+}
+
+// skipUnsupportedFeature reports whether err only means that the storage account
+// does not support the requested service (e.g. Queue/Table/File on a blob-only account).
+// Such accounts must not stop the collection for the remaining storage accounts.
+func (p *storageAccountProvider) skipUnsupportedFeature(err error, sa AzureAsset) bool {
+	var respErr *azcore.ResponseError
+	if errors.As(err, &respErr) && respErr.ErrorCode == "FeatureNotSupportedForAccount" {
+		p.log.Warnf("Skipping storage account %s: %v", sa.Id, respErr.ErrorCode)
+		return true
+	}
+	return false
 }
