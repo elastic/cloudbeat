@@ -159,12 +159,6 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *clog.Logger, cfgCloudb
 		// retrieve any resources from the Account/OU afterward.
 		var awsConfig awssdk.Config
 
-		// An AWS organization is in one partition only. Thus, the member accounts
-		// are in the same partition as the management account (for example "aws-us-gov").
-		if identity.Partition == "" {
-			identity.Partition = rootIdentity.Partition
-		}
-
 		if identity.Account == rootIdentity.Account {
 			cfg, err := a.pickManagementAccountRole(ctx, log, stsClient, cfgCloudbeatRoot, identity)
 			if err != nil {

@@ -205,33 +205,29 @@ func Test_getAwsAccounts(t *testing.T) {
 
 func Test_getAwsAccounts_Partition(t *testing.T) {
 	tests := []struct {
-		name          string
-		rootPartition string
-		wantPartition string
-		wantRoleARNs  []string
+		name         string
+		partition    string
+		wantRoleARNs []string
 	}{
 		{
-			name:          "commercial",
-			rootPartition: awslib.DefaultPartition,
-			wantPartition: awslib.DefaultPartition,
+			name:      "commercial",
+			partition: awslib.DefaultPartition,
 			wantRoleARNs: []string{
 				"arn:aws:iam::123:role/cloudbeat-securityaudit",
 				"arn:aws:iam::456:role/cloudbeat-securityaudit",
 			},
 		},
 		{
-			name:          "unknown partition uses commercial",
-			rootPartition: "",
-			wantPartition: "",
+			name:      "unknown partition uses commercial",
+			partition: "",
 			wantRoleARNs: []string{
 				"arn:aws:iam::123:role/cloudbeat-securityaudit",
 				"arn:aws:iam::456:role/cloudbeat-securityaudit",
 			},
 		},
 		{
-			name:          "govcloud",
-			rootPartition: awslib.GovCloudPartition,
-			wantPartition: awslib.GovCloudPartition,
+			name:      "govcloud",
+			partition: awslib.GovCloudPartition,
 			wantRoleARNs: []string{
 				"arn:aws-us-gov:iam::123:role/cloudbeat-securityaudit",
 				"arn:aws-us-gov:iam::456:role/cloudbeat-securityaudit",
@@ -247,15 +243,15 @@ func Test_getAwsAccounts_Partition(t *testing.T) {
 					*makeRole("cloudbeat-securityaudit"),
 				}),
 				AccountProvider: mockAccountProviderWithIdentities([]cloud.Identity{
-					{Account: "123", AccountAlias: "management"},
-					{Account: "456", AccountAlias: "member"},
+					{Account: "123", AccountAlias: "management", Partition: tt.partition},
+					{Account: "456", AccountAlias: "member", Partition: tt.partition},
 				}),
 				IdentityProvider:  nil,
 				StatusHandler:     statushandler.NewMockStatusHandlerAPI(t),
 				AWSCredsValidator: awslib.CredentialsValidatorNOOP,
 				RoleNamesProvider: awslib.BenchmarkOrgIAMRoleNamesProvider{},
 			}
-			rootIdentity := cloud.Identity{Account: "123", Partition: tt.rootPartition}
+			rootIdentity := cloud.Identity{Account: "123"}
 			recorder := &assumeRoleRecorder{mu: sync.Mutex{}, arns: nil}
 
 			got, err := a.getAwsAccounts(t.Context(), testhelper.NewLogger(t), recorder.config(), &rootIdentity)
@@ -263,7 +259,7 @@ func Test_getAwsAccounts_Partition(t *testing.T) {
 			require.Len(t, got, 2)
 
 			for _, account := range got {
-				assert.Equal(t, tt.wantPartition, account.Identity.Partition)
+				assert.Equal(t, tt.partition, account.Identity.Partition)
 				// The credentials provider makes the AssumeRole call only when you get the credentials.
 				_, err := account.Credentials.Retrieve(t.Context())
 				require.NoError(t, err)

@@ -93,10 +93,6 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 	var fetchers []inventory.AssetFetcher
 	stsClient := sts.NewFromConfig(rootRoleConfig)
 	for _, identity := range accountIdentities {
-		// An AWS organization is in one partition only.
-		if identity.Partition == "" {
-			identity.Partition = awsIdentity.Partition
-		}
 		assumedRoleConfig := assumeRole(
 			stsClient,
 			rootRoleConfig,
