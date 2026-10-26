@@ -42,33 +42,39 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, s.logger.Logger)
 }
 
-// getAWSIdentity makes the aws.Config from the configuration and gets the identity of the credentials.
-func (s *strategy) getAWSIdentity(ctx context.Context) (*awssdk.Config, *cloud.Identity, error) {
+// awsSession is the aws.Config made from the configuration and the identity of its credentials.
+type awsSession struct {
+	config   awssdk.Config
+	identity *cloud.Identity
+}
+
+// getAWSSession makes the aws.Config from the configuration and gets the identity of the credentials.
+func (s *strategy) getAWSSession(ctx context.Context) (*awsSession, error) {
 	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	idProvider := awslib.IdentityProvider{Logger: s.logger}
 	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return awsConfig, awsIdentity, nil
+	return &awsSession{config: *awsConfig, identity: awsIdentity}, nil
 }
 
 func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
 	s.logger.Infof("initializing asset inventory aws (cloud connectors %t)", s.cfg.CloudConfig.Aws.CloudConnectors)
 
-	awsConfig, awsIdentity, err := s.getAWSIdentity(ctx)
+	session, err := s.getAWSSession(ctx)
 	if err != nil && s.cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
 		// If the default region is the commercial region (us-east-1), GovCloud credentials fail.
 		// The CSPM benchmark uses the same fallback (see benchmark.AWS and benchmark.AWSOrg).
 		s.logger.Warnf("failed to initialize identity (%v); retrying to check AWS Gov Cloud regions", err)
 		s.cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
 		firstErr := err
-		awsConfig, awsIdentity, err = s.getAWSIdentity(ctx)
+		session, err = s.getAWSSession(ctx)
 		if err != nil {
 			// Keep the first error. It can show the real cause, for example credentials that are not valid.
 			err = errors.Join(firstErr, fmt.Errorf("retry in region %s: %w", awslib.DefaultGovRegion, err))
@@ -82,15 +88,15 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 
 	// Early exit if we're scanning the entire account.
 	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
-		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig, statusHandler), nil
+		return awsfetcher.New(ctx, s.logger, session.identity, session.config, statusHandler), nil
 	}
 
 	// Assume audit roles per selected account and generate fetchers for them
 	// The roles are in the partition of the caller identity (for example "aws-us-gov").
 	rootRoleConfig := assumeRole(
-		sts.NewFromConfig(*awsConfig),
-		*awsConfig,
-		awslib.IAMRoleARN(awsIdentity.Partition, awsIdentity.Account, orgIAMRoleNamesProvider.RootRoleName()),
+		sts.NewFromConfig(session.config),
+		session.config,
+		awslib.IAMRoleARN(session.identity.Partition, session.identity.Account, orgIAMRoleNamesProvider.RootRoleName()),
 	)
 	accountProvider := &awslib.AccountProvider{}
 	accountIdentities, err := accountProvider.ListAccounts(ctx, s.logger, rootRoleConfig)
