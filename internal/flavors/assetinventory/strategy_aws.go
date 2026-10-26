@@ -19,6 +19,8 @@ package assetinventory
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
@@ -65,7 +67,12 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 		// The CSPM benchmark uses the same fallback (see benchmark.AWS and benchmark.AWSOrg).
 		s.logger.Warnf("failed to initialize identity (%v); retrying to check AWS Gov Cloud regions", err)
 		s.cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
+		firstErr := err
 		awsConfig, awsIdentity, err = s.getAWSIdentity(ctx)
+		if err != nil {
+			// Keep the first error. It can show the real cause, for example credentials that are not valid.
+			err = errors.Join(firstErr, fmt.Errorf("retry in region %s: %w", awslib.DefaultGovRegion, err))
+		}
 	}
 	if err != nil {
 		return nil, err
