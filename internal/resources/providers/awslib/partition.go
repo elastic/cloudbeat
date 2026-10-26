@@ -28,6 +28,8 @@ const (
 	DefaultPartition = "aws"
 	// GovCloudPartition is the AWS GovCloud (US) partition.
 	GovCloudPartition = "aws-us-gov"
+	// ChinaPartition is the AWS China partition.
+	ChinaPartition = "aws-cn"
 )
 
 // PartitionFromARN returns the partition of an ARN, for example "aws" or "aws-us-gov".
