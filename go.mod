@@ -59,7 +59,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907
 	github.com/gofrs/uuid v4.4.0+incompatible
-	github.com/googleapis/gax-go/v2 v2.26.2
+	github.com/googleapis/gax-go/v2 v2.27.0
 	github.com/hashicorp/go-uuid v1.0.4
 	github.com/huandu/xstrings v1.6.3
 	github.com/magefile/mage v1.17.2
