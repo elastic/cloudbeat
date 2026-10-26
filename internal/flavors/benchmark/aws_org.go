@@ -88,12 +88,11 @@ func (a *AWSOrg) initialize(ctx context.Context, log *clog.Logger, cfg *config.C
 	)
 
 	// cloudbeat-root role credentials.
-	awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg, log)
-	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
-		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
-		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
-		awsConfigCloudbeatRoot, awsIdentity, err = a.getIdentity(ctx, cfg, log)
-	}
+	err = awslib.WithGovCloudFallback(log, &cfg.CloudConfig.Aws.Cred.DefaultRegion, func() error {
+		var getErr error
+		awsConfigCloudbeatRoot, awsIdentity, getErr = a.getIdentity(ctx, cfg, log)
+		return getErr
+	})
 
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get AWS Identity: %w", err)

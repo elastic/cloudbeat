@@ -19,8 +19,6 @@ package assetinventory
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
@@ -67,19 +65,12 @@ func (s *strategy) getAWSSession(ctx context.Context) (*awsSession, error) {
 func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
 	s.logger.Infof("initializing asset inventory aws (cloud connectors %t)", s.cfg.CloudConfig.Aws.CloudConnectors)
 
-	session, err := s.getAWSSession(ctx)
-	if err != nil && s.cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
-		// If the default region is the commercial region (us-east-1), GovCloud credentials fail.
-		// The CSPM benchmark uses the same fallback (see benchmark.AWS and benchmark.AWSOrg).
-		s.logger.Warnf("failed to initialize identity (%v); retrying to check AWS Gov Cloud regions", err)
-		s.cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
-		firstErr := err
-		session, err = s.getAWSSession(ctx)
-		if err != nil {
-			// Keep the first error. It can show the real cause, for example credentials that are not valid.
-			err = errors.Join(firstErr, fmt.Errorf("retry in region %s: %w", awslib.DefaultGovRegion, err))
-		}
-	}
+	var session *awsSession
+	err := awslib.WithGovCloudFallback(s.logger, &s.cfg.CloudConfig.Aws.Cred.DefaultRegion, func() error {
+		var getErr error
+		session, getErr = s.getAWSSession(ctx)
+		return getErr
+	})
 	if err != nil {
 		return nil, err
 	}
