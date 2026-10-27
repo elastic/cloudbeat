@@ -8,6 +8,8 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as rule_input("")
 	eval_fail with input as rule_input("--anonymous-auth=true")
+	eval_fail with input as rule_input("--anonymous-auth=True")
+	eval_fail with input as rule_input("--anonymous-auth=TRUE")
 	eval_fail with input as rule_input_with_external("--anonymous-auth=true", create_process_config(true))
 	eval_fail with input as rule_input_with_external("--anonymous-auth=true", create_process_config(false))
 	eval_fail with input as rule_input_with_external("", create_process_config(true))
@@ -15,6 +17,8 @@ test_violation if {
 
 test_pass if {
 	eval_pass with input as rule_input("--anonymous-auth=false")
+	eval_pass with input as rule_input("--anonymous-auth=False")
+	eval_pass with input as rule_input("--anonymous-auth=FALSE")
 	eval_pass with input as rule_input_with_external("--anonymous-auth=false", create_process_config(true))
 	eval_pass with input as rule_input_with_external("--anonymous-auth=false", create_process_config(false))
 	eval_pass with input as rule_input_with_external("", create_process_config(false))

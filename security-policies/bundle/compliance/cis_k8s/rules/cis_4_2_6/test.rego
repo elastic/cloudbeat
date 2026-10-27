@@ -8,11 +8,15 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as rule_input("")
 	eval_fail with input as rule_input("--protect-kernel-defaults=false")
+	eval_fail with input as rule_input("--protect-kernel-defaults=False")
+	eval_fail with input as rule_input("--protect-kernel-defaults=FALSE")
 	eval_fail with input as rule_input_with_external("--protect-kernel-defaults=false", create_process_config(true))
 }
 
 test_pass if {
 	eval_pass with input as rule_input("--protect-kernel-defaults=true")
+	eval_pass with input as rule_input("--protect-kernel-defaults=True")
+	eval_pass with input as rule_input("--protect-kernel-defaults=TRUE")
 	eval_pass with input as rule_input_with_external("--protect-kernel-defaults=true", create_process_config(false))
 	eval_pass with input as rule_input_with_external("--protect-kernel-defaults=true", create_process_config(false))
 	eval_pass with input as rule_input_with_external("", create_process_config(true))

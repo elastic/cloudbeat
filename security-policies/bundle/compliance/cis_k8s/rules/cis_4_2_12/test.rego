@@ -17,6 +17,8 @@ test_pass if {
 	eval_pass with input as rule_input_with_external("", create_process_config(false, false))
 	eval_pass with input as rule_input("--feature-gates=RotateKubeletServerCertificate=true")
 	eval_pass with input as rule_input("--rotate-server-certificates=true")
+	eval_pass with input as rule_input("--rotate-server-certificates=True")
+	eval_pass with input as rule_input("--rotate-server-certificates=TRUE")
 	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(true, false))
 	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(false, false))
 	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(false, true))

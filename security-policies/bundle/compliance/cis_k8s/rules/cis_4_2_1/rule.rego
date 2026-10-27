@@ -6,7 +6,7 @@ import future.keywords.if
 default rule_evaluation := false
 
 rule_evaluation if {
-	audit.process_contains_key_with_value("--anonymous-auth", "false")
+	audit.process_contains_key_with_bool_value("--anonymous-auth", "false")
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.
