@@ -218,10 +218,10 @@ require (
 	github.com/mattn/go-shellwords v1.0.16 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.3.1 // indirect
 	github.com/microsoft/kiota-http-go v1.5.9 // indirect
-	github.com/microsoft/kiota-serialization-form-go v1.1.5 // indirect
+	github.com/microsoft/kiota-serialization-form-go v1.1.6 // indirect
 	github.com/microsoft/kiota-serialization-json-go v1.1.5 // indirect
 	github.com/microsoft/kiota-serialization-multipart-go v1.1.4 // indirect
-	github.com/microsoft/kiota-serialization-text-go v1.1.5 // indirect
+	github.com/microsoft/kiota-serialization-text-go v1.1.6 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/moby/api v1.56.0 // indirect
 	github.com/moby/moby/client v0.6.0 // indirect
