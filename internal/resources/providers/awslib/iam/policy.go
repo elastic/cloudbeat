@@ -32,7 +32,17 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/pointers"
 )
 
-const awsSupportAccessArn = "arn:aws:iam::aws:policy/AWSSupportAccess"
+const awsSupportAccessPolicyName = "AWSSupportAccess"
+
+// supportAccessPolicyARN returns the ARN of the AWS managed policy AWSSupportAccess
+// in the partition of the account. In AWS GovCloud (US), the ARN starts with "arn:aws-us-gov:".
+func (p Provider) supportAccessPolicyARN() string {
+	partition := p.partition
+	if partition == "" {
+		partition = awslib.DefaultPartition
+	}
+	return fmt.Sprintf("arn:%s:iam::aws:policy/%s", partition, awsSupportAccessPolicyName)
+}
 
 func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error) {
 	policies, err := p.getPolicies(ctx)
@@ -41,7 +51,9 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	}
 	supportPolicy, err := p.getSupportPolicy(ctx)
 	if err != nil {
-		return nil, err
+		// Do not drop all the policies if only the AWSSupportAccess policy is not available.
+		p.log.Warnf("Could not get the %s policy, the other policies are returned: %v", p.supportAccessPolicyARN(), err)
+		return policies, nil
 	}
 	return append(policies, supportPolicy), nil
 }
@@ -57,7 +69,7 @@ func (p Provider) getPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 		}
 
 		for _, policy := range listPoliciesOutput.Policies {
-			if pointers.Deref(policy.Arn) == awsSupportAccessArn {
+			if pointers.Deref(policy.Arn) == p.supportAccessPolicyARN() {
 				// Fetch this one explicitly with getSupportPolicy().
 				// The reasoning is that we want to attach roles to the AWS support access policy. If we don't skip it
 				// here, we will produce it another time in getSupportPolicy(), leading to duplicated resources. We
@@ -88,7 +100,8 @@ func (p Provider) getPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
 func (p Provider) getSupportPolicy(ctx context.Context) (awslib.AwsResource, error) {
-	policy, err := p.client.GetPolicy(ctx, &iamsdk.GetPolicyInput{PolicyArn: aws.String(awsSupportAccessArn)})
+	supportPolicyARN := p.supportAccessPolicyARN()
+	policy, err := p.client.GetPolicy(ctx, &iamsdk.GetPolicyInput{PolicyArn: aws.String(supportPolicyARN)})
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +117,7 @@ func (p Provider) getSupportPolicy(ctx context.Context) (awslib.AwsResource, err
 	}
 
 	input := &iamsdk.ListEntitiesForPolicyInput{
-		PolicyArn:    aws.String(awsSupportAccessArn),
+		PolicyArn:    aws.String(supportPolicyARN),
 		EntityFilter: types.EntityTypeRole,
 	}
 	for {
