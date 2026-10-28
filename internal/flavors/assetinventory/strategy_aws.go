@@ -67,9 +67,9 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 
 	var session *awsSession
 	err := awslib.WithGovCloudFallback(s.logger, &s.cfg.CloudConfig.Aws.Cred.DefaultRegion, func() error {
-		var getErr error
-		session, getErr = s.getAWSSession(ctx)
-		return getErr
+		var err error
+		session, err = s.getAWSSession(ctx)
+		return err
 	})
 	if err != nil {
 		return nil, err

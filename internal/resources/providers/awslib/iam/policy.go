@@ -51,9 +51,7 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	}
 	supportPolicy, err := p.getSupportPolicy(ctx)
 	if err != nil {
-		// Do not drop all the policies if only the AWSSupportAccess policy is not available.
-		p.log.Warnf("Could not get the %s policy, the other policies are returned: %v", p.supportAccessPolicyARN(), err)
-		return policies, nil
+		return nil, err
 	}
 	return append(policies, supportPolicy), nil
 }

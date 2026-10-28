@@ -50,7 +50,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Error in GetPolicy returns the other policies",
+			name: "Error in GetPolicy",
 			mockReturnValues: mocksReturnVals{
 				"ListPolicies": {
 					{
@@ -66,13 +66,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 					},
 				},
 			},
-			want: []awslib.AwsResource{
-				Policy{
-					Policy:   validPolicy(),
-					Document: validGetPolicyVersionOutputDecoded(),
-				},
-			},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Return just the support policy policy",
