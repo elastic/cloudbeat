@@ -43,18 +43,20 @@ jobs:
 
       - name: Packaging
         run: |
-          # Hermit v0.54.1 runs python3 through a link farm or stub, and "python3 -m venv" then records
-          # that directory as the venv home. The venv's python cannot find its standard library
-          # (ModuleNotFoundError: No module named 'encodings'), so ensurepip fails. Put the real
-          # interpreter's directory first on PATH, found in the Hermit package dir so it does not
-          # depend on what python3 currently resolves to.
+          # mage runs through the Hermit stub, which rebuilds PATH, so exporting PATH here does not change
+          # which python3 mage finds. It finds the Hermit link farm python3, a stub: "python3 -m venv" then
+          # records the link farm directory as the venv home, the venv's python cannot find its standard
+          # library (ModuleNotFoundError: No module named 'encodings') and ensurepip fails.
+          # .hermit/python/bin is the first entry of the PATH Hermit builds, so a python3 placed there runs
+          # the real interpreter from the Hermit package dir, which gives the venv the right home.
           PYTHON_BIN_DIR="$(ls -d "${HERMIT_STATE_DIR:-$HOME/.cache/hermit}"/pkg/python3-*/install/bin 2>/dev/null | sort -V | tail -n 1)"
           if [ -x "${PYTHON_BIN_DIR}/python3" ]; then
-            export PATH="${PYTHON_BIN_DIR}:${PATH}"
+            mkdir -p .hermit/python/bin
+            printf '%s\n' '#!/usr/bin/env bash' "exec \"${PYTHON_BIN_DIR}/python3\" \"\$@\"" > .hermit/python/bin/python3
+            chmod +x .hermit/python/bin/python3
           else
             echo "::warning::real python3 not found under the Hermit package dir (${PYTHON_BIN_DIR:-none})"
           fi
-          echo "python3 -> $(command -v python3)"
           mage -v package
         env:
           TYPES: ${{ matrix.types }}
