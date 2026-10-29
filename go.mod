@@ -3,8 +3,8 @@ module github.com/elastic/cloudbeat
 go 1.27.3
 
 require (
-	cloud.google.com/go/asset v1.30.0
-	cloud.google.com/go/iam v1.15.0
+	cloud.google.com/go/asset v1.30.1
+	cloud.google.com/go/iam v1.15.1
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.3
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.15.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v6 v6.0.0
@@ -53,7 +53,7 @@ require (
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20261005203447-437055fe9f7a
 	github.com/elastic/e2e-testing v1.2.3
-	github.com/elastic/elastic-agent-client/v7 v7.19.0
+	github.com/elastic/elastic-agent-client/v7 v7.20.0
 	github.com/elastic/elastic-agent-libs v0.47.0
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.9.2
@@ -69,7 +69,7 @@ require (
 	github.com/huandu/xstrings v1.6.3
 	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20261019233610-ccf49f5dd025
-	github.com/microsoft/kiota-abstractions-go v1.11.4
+	github.com/microsoft/kiota-abstractions-go v1.12.0
 	github.com/microsoftgraph/msgraph-sdk-go v1.105.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.54.1
@@ -96,7 +96,7 @@ require (
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/sync v0.24.0
 	golang.org/x/time v0.16.0
-	google.golang.org/api v0.309.0
+	google.golang.org/api v0.310.0
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -111,14 +111,14 @@ require (
 require (
 	cel.dev/expr v0.25.3 // indirect
 	cloud.google.com/go v0.123.0 // indirect
-	cloud.google.com/go/accesscontextmanager v1.17.0 // indirect
-	cloud.google.com/go/auth v0.24.1 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.3.0 // indirect
+	cloud.google.com/go/accesscontextmanager v1.17.1 // indirect
+	cloud.google.com/go/auth v0.24.2 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.3.1 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
-	cloud.google.com/go/longrunning v1.4.0 // indirect
-	cloud.google.com/go/monitoring v1.32.0 // indirect
-	cloud.google.com/go/orgpolicy v1.22.0 // indirect
-	cloud.google.com/go/osconfig v1.24.0 // indirect
+	cloud.google.com/go/longrunning v1.4.1 // indirect
+	cloud.google.com/go/monitoring v1.32.1 // indirect
+	cloud.google.com/go/orgpolicy v1.22.1 // indirect
+	cloud.google.com/go/osconfig v1.24.1 // indirect
 	cloud.google.com/go/storage v1.70.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/containers/azcontainerregistry v0.2.3 // indirect
@@ -272,8 +272,8 @@ require (
 	github.com/go-openapi/jsonpointer v1.0.2 // indirect
 	github.com/go-openapi/jsonreference v1.0.3 // indirect
 	github.com/go-openapi/loads v0.25.3 // indirect
-	github.com/go-openapi/runtime v0.33.3 // indirect
-	github.com/go-openapi/runtime/server-middleware v0.33.3 // indirect
+	github.com/go-openapi/runtime v0.33.4 // indirect
+	github.com/go-openapi/runtime/server-middleware v0.33.4 // indirect
 	github.com/go-openapi/spec v1.0.1 // indirect
 	github.com/go-openapi/strfmt v0.27.4 // indirect
 	github.com/go-openapi/swag v0.29.2 // indirect
@@ -377,7 +377,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.31 // indirect
 	github.com/mattn/go-shellwords v1.0.16 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.3.1 // indirect
-	github.com/microsoft/kiota-http-go v1.5.9 // indirect
+	github.com/microsoft/kiota-http-go v1.6.0 // indirect
 	github.com/microsoft/kiota-serialization-form-go v1.1.6 // indirect
 	github.com/microsoft/kiota-serialization-json-go v1.1.5 // indirect
 	github.com/microsoft/kiota-serialization-multipart-go v1.1.4 // indirect
@@ -544,8 +544,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	helm.sh/helm/v4 v4.3.1 // indirect
 	howett.net/plist v1.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.37.1 // indirect
-	k8s.io/apiserver v0.37.1 // indirect
+	k8s.io/apiextensions-apiserver v0.37.2 // indirect
+	k8s.io/apiserver v0.37.2 // indirect
 	k8s.io/cli-runtime v0.37.2 // indirect
 	k8s.io/component-base v0.37.2 // indirect
 	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
