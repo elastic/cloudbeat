@@ -21,6 +21,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
@@ -1065,5 +1066,155 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 
 			assert.ElementsMatch(t, tc.expected, got)
 		})
+	}
+}
+
+func TestListStorageAccountQueues_SkipsAccountsWithoutFeatureSupport(t *testing.T) {
+	log := testhelper.NewLogger(t)
+	provider := &storageAccountProvider{
+		log: log,
+		client: &storageAccountAzureClientWrapper{
+			AssetQueues: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error) {
+				return nil, &azcore.ResponseError{StatusCode: 400, ErrorCode: "FeatureNotSupportedForAccount"}
+			},
+		},
+		diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+	}
+
+	got, err := provider.ListStorageAccountQueues(t.Context(), []AzureAsset{{Id: "unsupported", Name: "unsupported"}})
+	require.NoError(t, err)
+	assert.Empty(t, got)
+}
+
+func TestListStorageAccountQueues_OtherErrorsStillFail(t *testing.T) {
+	log := testhelper.NewLogger(t)
+	provider := &storageAccountProvider{
+		log: log,
+		client: &storageAccountAzureClientWrapper{
+			AssetQueues: func(_ context.Context, _ string, _ *arm.ClientOptions, _, _ string, _ *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error) {
+				return nil, &azcore.ResponseError{StatusCode: 403, ErrorCode: "AuthorizationFailed"}
+			},
+		},
+		diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+	}
+
+	_, err := provider.ListStorageAccountQueues(t.Context(), []AzureAsset{{Id: "a", Name: "a"}})
+	require.Error(t, err)
+}
+
+func TestListStorageAccounts_UnsupportedAccountDoesNotBlockOthers(t *testing.T) {
+	accounts := []AzureAsset{{Id: "a", Name: "unsupported"}, {Id: "b", Name: "supported"}}
+
+	tests := map[string]struct {
+		client func(respond func(string) error) *storageAccountAzureClientWrapper
+		list   func(p *storageAccountProvider) ([]AzureAsset, error)
+	}{
+		"blob containers": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetBlobContainers: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.BlobContainersClientListOptions) ([]armstorage.BlobContainersClientListResponse, error) {
+					return nil, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountBlobContainers(t.Context(), accounts)
+			},
+		},
+		"blob services": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetBlobServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.BlobServicesClientListOptions) ([]armstorage.BlobServicesClientListResponse, error) {
+					return nil, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountBlobServices(t.Context(), accounts)
+			},
+		},
+		"file services": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetFileServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.FileServicesClientListOptions) (armstorage.FileServicesClientListResponse, error) {
+					return armstorage.FileServicesClientListResponse{}, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountFileServices(t.Context(), accounts)
+			},
+		},
+		"file shares": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetFileShares: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.FileSharesClientListOptions) ([]armstorage.FileSharesClientListResponse, error) {
+					return nil, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountFileShares(t.Context(), accounts)
+			},
+		},
+		"queues": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetQueues: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.QueueClientListOptions) ([]armstorage.QueueClientListResponse, error) {
+					return nil, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountQueues(t.Context(), accounts)
+			},
+		},
+		"queue services": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetQueueServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.QueueServicesClientListOptions) (armstorage.QueueServicesClientListResponse, error) {
+					return armstorage.QueueServicesClientListResponse{}, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountQueueServices(t.Context(), accounts)
+			},
+		},
+		"tables": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetTables: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.TableClientListOptions) ([]armstorage.TableClientListResponse, error) {
+					return nil, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountTables(t.Context(), accounts)
+			},
+		},
+		"table services": {
+			client: func(respond func(string) error) *storageAccountAzureClientWrapper {
+				return &storageAccountAzureClientWrapper{AssetTableServices: func(_ context.Context, _ string, _ *arm.ClientOptions, _, name string, _ *armstorage.TableServicesClientListOptions) (armstorage.TableServicesClientListResponse, error) {
+					return armstorage.TableServicesClientListResponse{}, respond(name)
+				}}
+			},
+			list: func(p *storageAccountProvider) ([]AzureAsset, error) {
+				return p.ListStorageAccountTableServices(t.Context(), accounts)
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			log := testhelper.NewLogger(t)
+			var called []string
+			provider := &storageAccountProvider{
+				log:                     log,
+				client:                  tc.client(recordCalls(&called)),
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
+			}
+
+			_, err := tc.list(provider)
+			require.NoError(t, err)
+			assert.Equal(t, []string{"unsupported", "supported"}, called)
+		})
+	}
+}
+
+// recordCalls records each storage account name and fails with FeatureNotSupportedForAccount for "unsupported".
+func recordCalls(called *[]string) func(string) error {
+	return func(name string) error {
+		*called = append(*called, name)
+		if name == "unsupported" {
+			return &azcore.ResponseError{StatusCode: 400, ErrorCode: "FeatureNotSupportedForAccount"}
+		}
+		return nil
 	}
 }
