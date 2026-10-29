@@ -75,12 +75,16 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 		return nil, err
 	}
 
-	orgIAMRoleNamesProvider := getOrgIAMRoleNamesProvider(s.cfg.CloudConfig.Aws)
-
 	// Early exit if we're scanning the entire account.
 	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
 		return awsfetcher.New(ctx, s.logger, session.identity, session.config, statusHandler), nil
 	}
+
+	return s.initOrgFetchers(ctx, session, statusHandler)
+}
+
+func (s *strategy) initOrgFetchers(ctx context.Context, session *awsSession, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
+	orgIAMRoleNamesProvider := getOrgIAMRoleNamesProvider(s.cfg.CloudConfig.Aws)
 
 	// Assume audit roles per selected account and generate fetchers for them
 	// The roles are in the partition of the caller identity (for example "aws-us-gov").
