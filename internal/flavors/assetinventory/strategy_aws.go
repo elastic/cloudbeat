@@ -19,13 +19,13 @@ package assetinventory
 
 import (
 	"context"
-	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/internal/inventory"
 	"github.com/elastic/cloudbeat/internal/inventory/awsfetcher"
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
@@ -40,15 +40,18 @@ func (s *strategy) getInitialAWSConfig(ctx context.Context, cfg *config.Config) 
 	return awslib.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred, s.logger.Logger)
 }
 
-func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
-	s.logger.Infof("initializing asset inventory aws (cloud connectors %t)", s.cfg.CloudConfig.Aws.CloudConnectors)
+// awsSession is the aws.Config made from the configuration and the identity of its credentials.
+type awsSession struct {
+	config   awssdk.Config
+	identity *cloud.Identity
+}
 
+// getAWSSession makes the aws.Config from the configuration and gets the identity of the credentials.
+func (s *strategy) getAWSSession(ctx context.Context) (*awsSession, error) {
 	awsConfig, err := s.getInitialAWSConfig(ctx, s.cfg)
 	if err != nil {
 		return nil, err
 	}
-
-	orgIAMRoleNamesProvider := getOrgIAMRoleNamesProvider(s.cfg.CloudConfig.Aws)
 
 	idProvider := awslib.IdentityProvider{Logger: s.logger}
 	awsIdentity, err := idProvider.GetIdentity(ctx, *awsConfig)
@@ -56,16 +59,39 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 		return nil, err
 	}
 
-	// Early exit if we're scanning the entire account.
-	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
-		return awsfetcher.New(ctx, s.logger, awsIdentity, *awsConfig, statusHandler), nil
+	return &awsSession{config: *awsConfig, identity: awsIdentity}, nil
+}
+
+func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
+	s.logger.Infof("initializing asset inventory aws (cloud connectors %t)", s.cfg.CloudConfig.Aws.CloudConnectors)
+
+	var session *awsSession
+	err := awslib.WithGovCloudFallback(s.logger, &s.cfg.CloudConfig.Aws.Cred.DefaultRegion, func() error {
+		var err error
+		session, err = s.getAWSSession(ctx)
+		return err
+	})
+	if err != nil {
+		return nil, err
 	}
 
+	// Early exit if we're scanning the entire account.
+	if s.cfg.CloudConfig.Aws.AccountType == config.SingleAccount {
+		return awsfetcher.New(ctx, s.logger, session.identity, session.config, statusHandler), nil
+	}
+
+	return s.initOrgFetchers(ctx, session, statusHandler)
+}
+
+func (s *strategy) initOrgFetchers(ctx context.Context, session *awsSession, statusHandler statushandler.StatusHandlerAPI) ([]inventory.AssetFetcher, error) {
+	orgIAMRoleNamesProvider := getOrgIAMRoleNamesProvider(s.cfg.CloudConfig.Aws)
+
 	// Assume audit roles per selected account and generate fetchers for them
+	// The roles are in the partition of the caller identity (for example "aws-us-gov").
 	rootRoleConfig := assumeRole(
-		sts.NewFromConfig(*awsConfig),
-		*awsConfig,
-		fmtIAMRole(awsIdentity.Account, orgIAMRoleNamesProvider.RootRoleName()),
+		sts.NewFromConfig(session.config),
+		session.config,
+		awslib.IAMRoleARN(session.identity.Partition, session.identity.Account, orgIAMRoleNamesProvider.RootRoleName()),
 	)
 	accountProvider := &awslib.AccountProvider{}
 	accountIdentities, err := accountProvider.ListAccounts(ctx, s.logger, rootRoleConfig)
@@ -78,7 +104,7 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 		assumedRoleConfig := assumeRole(
 			stsClient,
 			rootRoleConfig,
-			fmtIAMRole(identity.Account, orgIAMRoleNamesProvider.MemberRoleName()),
+			awslib.IAMRoleARN(identity.Partition, identity.Account, orgIAMRoleNamesProvider.MemberRoleName()),
 		)
 		if ok := awslib.CredentialsValid(ctx, assumedRoleConfig, s.logger); !ok {
 			// role does not exist, skip identity/account
@@ -95,10 +121,6 @@ func (s *strategy) initAwsFetchers(ctx context.Context, statusHandler statushand
 func assumeRole(client stscreds.AssumeRoleAPIClient, cfg awssdk.Config, arn string) awssdk.Config {
 	cfg.Credentials = awssdk.NewCredentialsCache(stscreds.NewAssumeRoleProvider(client, arn))
 	return cfg
-}
-
-func fmtIAMRole(account string, role string) string {
-	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
 }
 
 func getOrgIAMRoleNamesProvider(cfg config.AwsConfig) awslib.OrgIAMRoleNamesProvider {

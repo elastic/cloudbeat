@@ -42,6 +42,9 @@ type Identity struct {
 	AccountAlias     string
 	OrganizationId   string
 	OrganizationName string
+	// Partition is the AWS partition of the identity, for example "aws" or "aws-us-gov".
+	// The AWS providers always set this field. The other providers leave it empty.
+	Partition string
 }
 
 type DataProvider struct {
