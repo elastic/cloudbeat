@@ -7,6 +7,8 @@ import future.keywords.if
 
 test_violation if {
 	eval_fail with input as rule_input("--make-iptables-util-chains=false")
+	eval_fail with input as rule_input("--make-iptables-util-chains=False")
+	eval_fail with input as rule_input("--make-iptables-util-chains=FALSE")
 	eval_fail with input as rule_input_with_external("", create_process_config(false))
 	eval_fail with input as rule_input_with_external("--make-iptables-util-chains=false", create_process_config(true))
 }
@@ -14,6 +16,8 @@ test_violation if {
 test_pass if {
 	eval_pass with input as rule_input("")
 	eval_pass with input as rule_input("--make-iptables-util-chains=true")
+	eval_pass with input as rule_input("--make-iptables-util-chains=True")
+	eval_pass with input as rule_input("--make-iptables-util-chains=TRUE")
 	eval_pass with input as rule_input_with_external("--make-iptables-util-chains=true", create_process_config(false))
 	eval_pass with input as rule_input_with_external("--make-iptables-util-chains=true", create_process_config(true))
 	eval_pass with input as rule_input_with_external("", create_process_config(true))

@@ -16,6 +16,12 @@ arg_not_contains(entity, value) := assert.is_false(lib_common.contains_key_with_
 
 arg_contains(entity, value) := lib_common.contains_key_with_value(process_args, entity, value)
 
+# arg_contains_bool matches a flag whose value is a boolean, using
+# lib_common.bool_equal (strconv.ParseBool, case-insensitive).
+arg_contains_bool(entity, value) if {
+	lib_common.bool_equal(process_args[entity], value)
+} else := false
+
 apiserver_filter := data_adapter.is_kube_apiserver
 
 controller_manager_filter := data_adapter.is_kube_controller_manager

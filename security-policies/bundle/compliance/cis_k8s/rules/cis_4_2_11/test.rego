@@ -7,6 +7,8 @@ import future.keywords.if
 
 test_violation if {
 	eval_fail with input as rule_input("--rotate-certificates=false")
+	eval_fail with input as rule_input("--rotate-certificates=False")
+	eval_fail with input as rule_input("--rotate-certificates=FALSE")
 	eval_fail with input as rule_input_with_external("", create_process_config(false))
 	eval_fail with input as rule_input_with_external("--rotate-certificates=false", create_process_config(true))
 }
@@ -14,6 +16,8 @@ test_violation if {
 test_pass if {
 	eval_pass with input as rule_input("")
 	eval_pass with input as rule_input("--rotate-certificates=true")
+	eval_pass with input as rule_input("--rotate-certificates=True")
+	eval_pass with input as rule_input("--rotate-certificates=TRUE")
 	eval_pass with input as rule_input_with_external("--rotate-certificates=true", create_process_config(false))
 	eval_pass with input as rule_input_with_external("--rotate-certificates=true", create_process_config(true))
 	eval_pass with input as rule_input_with_external("", create_process_config(true))

@@ -20,7 +20,7 @@ rule_evaluation if {
 }
 
 rule_evaluation if {
-	audit.process_contains_key_with_value("--rotate-server-certificates", "true")
+	audit.process_contains_key_with_bool_value("--rotate-server-certificates", "true")
 }
 
 rule_evaluation if {
