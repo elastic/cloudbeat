@@ -8,7 +8,7 @@ import data.compliance.policy.aws_cloudtrail.data_adapter
 # 1.Checks if trail is multi region
 # 2.Checks if trail has an event selector of "allowed_types" type.
 # 3.Checks if the type of data resource is "AWS::S3::Object" (S3 object).
-# 4.Checks if the partial ARN of the data resource is "arn:aws:s3".
+# 4.Checks if the partial ARN of the data resource starts with "arn:<partition>:s3".
 ensure_s3_object_logging(allowed_types) if {
 	data_adapter.trail.IsMultiRegionTrail
 
@@ -20,5 +20,5 @@ ensure_s3_object_logging(allowed_types) if {
 	dataResource.Type == "AWS::S3::Object"
 
 	partialARN := dataResource.Values[k]
-	startswith(partialARN, "arn:aws:s3")
+	regex.match(`^arn:[^:]+:s3`, partialARN)
 } else := false
