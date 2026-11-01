@@ -64,7 +64,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/go-containerregistry v0.22.1
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/gax-go/v2 v2.26.2
+	github.com/googleapis/gax-go/v2 v2.27.0
 	github.com/hashicorp/go-uuid v1.0.4
 	github.com/huandu/xstrings v1.6.3
 	github.com/magefile/mage v1.17.2
@@ -96,7 +96,7 @@ require (
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/sync v0.24.0
 	golang.org/x/time v0.16.0
-	google.golang.org/api v0.309.0
+	google.golang.org/api v0.310.0
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -311,7 +311,7 @@ require (
 	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
 	github.com/google/s2a-go v0.1.11 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.23 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.24 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.32.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
