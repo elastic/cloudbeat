@@ -436,8 +436,8 @@ github.com/elastic/beats/v7 v7.0.0-alpha2.0.20261005203447-437055fe9f7a h1:PR5SB
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20261005203447-437055fe9f7a/go.mod h1:AWNbQxeixo6NL0CZ9m1bcGyQP9p9/uz3PY2MMkjgbwI=
 github.com/elastic/e2e-testing v1.2.3 h1:XKF91O+Y6RcrTuNc7kMM4/HE9pvkvjASIYhEWS5XkT0=
 github.com/elastic/e2e-testing v1.2.3/go.mod h1:TqP9TlnqFqKqd61etWkYgb8T+RulH7vmhg7lxQw/Yag=
-github.com/elastic/elastic-agent-client/v7 v7.19.0 h1:ZZAut7GgtyRKjDpiaYRGqRbOZIQlVZxiK8x1UF/gUOE=
-github.com/elastic/elastic-agent-client/v7 v7.19.0/go.mod h1:dRGR6EAk5QnFvI5U1SDjwhKO1uva9BEqdDyJbput9Hk=
+github.com/elastic/elastic-agent-client/v7 v7.20.0 h1:3aMCdZx+3ZqFT4YghogqWxTxtyGafxWjWQnJQJ10Rg8=
+github.com/elastic/elastic-agent-client/v7 v7.20.0/go.mod h1:dRGR6EAk5QnFvI5U1SDjwhKO1uva9BEqdDyJbput9Hk=
 github.com/elastic/elastic-agent-libs v0.47.0 h1:fltOh0mETIlW3LYExX62iacL63sHXSTfDB/8Qi+wXso=
 github.com/elastic/elastic-agent-libs v0.47.0/go.mod h1:UdVxZVDx8WH3nFi1vELRbxeeZ2cMP0tt74SJK2O49g8=
 github.com/elastic/elastic-transport-go/v8 v8.9.0 h1:KeT/2P54F0xS0S8Y3Pf+tFDg4HmBgReQMB+BMz8dDAs=
