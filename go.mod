@@ -574,3 +574,5 @@ replace (
 	github.com/eclipse/paho.mqtt.golang v1.3.5 => github.com/eclipse/paho.mqtt.golang v1.5.1
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20241002174017-e8c5fda595e6
 )
+
+replace github.com/elastic/beats/v7 => github.com/gsarantid/beats/v7 v7.0.0-alpha2.0.20261102163953-1dbb71203442
