@@ -564,6 +564,13 @@
       "versioning": "semver"
     },
     {
+      "description": "Group hermit-managed dev tools (awscli, terraform, gh, yq, ...) into one PR per branch and update type instead of one dashboard entry each. Must stay before the 'go-version' group rule, so go and golangci-lint keep their own group",
+      "matchManagers": [
+        "hermit"
+      ],
+      "groupName": "hermit-tools"
+    },
+    {
       "description": "Group Go toolchain and golangci-lint version updates together",
       "groupName": "go-version",
       "matchDepNames": [
@@ -590,7 +597,75 @@
         ".buildkite/**",
         "**/pyproject.toml",
         "deploy/test-environments/**",
-        ".pre-commit-config.yaml"
+        ".pre-commit-config.yaml",
+        ".github/actions/**"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable hermit dev tool updates on release branches (maintenance mode). go and golangci-lint are re-enabled by the next rule because their go.mod and hermit pin bumps must land together",
+      "matchBaseBranches": [
+        "9.5",
+        "9.4",
+        "8.19"
+      ],
+      "matchManagers": [
+        "hermit"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Keep go and golangci-lint hermit updates on release branches. Must stay after the 'Disable hermit dev tool updates on release branches' rule",
+      "matchBaseBranches": [
+        "9.5",
+        "9.4",
+        "8.19"
+      ],
+      "matchManagers": [
+        "hermit"
+      ],
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
+      ],
+      "enabled": true
+    },
+    {
+      "description": "8.19: stay on the 8.x elastic-agent image - the v9 bump is not valid for this branch",
+      "matchBaseBranches": [
+        "8.19"
+      ],
+      "matchPackageNames": [
+        "docker.elastic.co/beats/elastic-agent"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "8.19: disable gopkg.in/yaml.v2 major update - v3 changes behavior and needs a manual migration, which is not planned in maintenance mode",
+      "matchBaseBranches": [
+        "8.19"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "gopkg.in/yaml.v2"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable terraform provider and module major updates - they only affect test environments and need hand-tested upgrades. Do them in a dedicated PR",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchUpdateTypes": [
+        "major"
       ],
       "enabled": false
     }
