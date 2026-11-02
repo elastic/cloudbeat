@@ -588,6 +588,7 @@
     {
       "description": "Disable CI/infrastructure/test-environment updates on release branches",
       "matchBaseBranches": [
+        "9.6",
         "9.5",
         "9.4",
         "8.19"
@@ -605,6 +606,7 @@
     {
       "description": "Disable hermit dev tool updates on release branches (maintenance mode). go and golangci-lint are re-enabled by the next rule because their go.mod and hermit pin bumps must land together",
       "matchBaseBranches": [
+        "9.6",
         "9.5",
         "9.4",
         "8.19"
@@ -617,6 +619,7 @@
     {
       "description": "Keep go and golangci-lint hermit updates on release branches. Must stay after the 'Disable hermit dev tool updates on release branches' rule",
       "matchBaseBranches": [
+        "9.6",
         "9.5",
         "9.4",
         "8.19"
