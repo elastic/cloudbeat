@@ -25,9 +25,11 @@ import (
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/internal/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
 func TestProvider_GetPolicies(t *testing.T) {
@@ -391,7 +393,7 @@ func Test_decodePolicyDocument(t *testing.T) {
 }
 
 func validSupportAccessPolicy() types.Policy {
-	return types.Policy{Arn: aws.String(awsSupportAccessArn), DefaultVersionId: aws.String("some-version")}
+	return types.Policy{Arn: aws.String("arn:aws:iam::aws:policy/AWSSupportAccess"), DefaultVersionId: aws.String("some-version")}
 }
 
 func validPolicy() types.Policy {
@@ -425,4 +427,56 @@ func validPolicyRoles() []types.PolicyRole {
 			RoleName: aws.String("name 2"),
 		},
 	}
+}
+
+func TestProvider_supportAccessPolicyARN(t *testing.T) {
+	tests := []struct {
+		partition string
+		want      string
+	}{
+		{partition: "", want: "arn:aws:iam::aws:policy/AWSSupportAccess"},
+		{partition: awslib.DefaultPartition, want: "arn:aws:iam::aws:policy/AWSSupportAccess"},
+		{partition: awslib.GovCloudPartition, want: "arn:aws-us-gov:iam::aws:policy/AWSSupportAccess"},
+		{partition: awslib.ChinaPartition, want: "arn:aws-cn:iam::aws:policy/AWSSupportAccess"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.partition, func(t *testing.T) {
+			p := Provider{partition: tt.partition}
+			assert.Equal(t, tt.want, p.supportAccessPolicyARN())
+		})
+	}
+}
+
+func TestProvider_GetPolicies_GovCloud(t *testing.T) {
+	const govSupportPolicyARN = "arn:aws-us-gov:iam::aws:policy/AWSSupportAccess"
+	govSupportPolicy := types.Policy{Arn: aws.String(govSupportPolicyARN), DefaultVersionId: aws.String("some-version")}
+
+	mockedClient := &MockClient{}
+	// ListPolicies also returns the support policy. It must not be in the result two times.
+	mockedClient.On("ListPolicies", mock.Anything, mock.Anything).Return(
+		&iamsdk.ListPoliciesOutput{Policies: []types.Policy{validPolicy(), govSupportPolicy}}, nil,
+	).Once()
+	mockedClient.On("GetPolicyVersion", mock.Anything, mock.Anything).Return(validGetPolicyVersionOutput(), nil).Twice()
+	// The GetPolicy and ListEntitiesForPolicy calls must use the GovCloud ARN.
+	mockedClient.On("GetPolicy", mock.Anything, &iamsdk.GetPolicyInput{PolicyArn: aws.String(govSupportPolicyARN)}).Return(
+		&iamsdk.GetPolicyOutput{Policy: &govSupportPolicy}, nil,
+	).Once()
+	mockedClient.On("ListEntitiesForPolicy", mock.Anything, &iamsdk.ListEntitiesForPolicyInput{
+		PolicyArn:    aws.String(govSupportPolicyARN),
+		EntityFilter: types.EntityTypeRole,
+	}).Return(&iamsdk.ListEntitiesForPolicyOutput{PolicyRoles: validPolicyRoles()}, nil).Once()
+
+	p := &Provider{
+		log:       testhelper.NewLogger(t),
+		client:    mockedClient,
+		partition: awslib.GovCloudPartition,
+	}
+
+	got, err := p.GetPolicies(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, []awslib.AwsResource{
+		Policy{Policy: validPolicy(), Document: validGetPolicyVersionOutputDecoded()},
+		Policy{Policy: govSupportPolicy, Document: validGetPolicyVersionOutputDecoded(), Roles: validPolicyRoles()},
+	}, got)
+	mockedClient.AssertExpectations(t)
 }
