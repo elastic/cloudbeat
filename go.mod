@@ -8,7 +8,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.15.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v6 v6.0.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault/v2 v2.1.0
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.13.0
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.14.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers/v2 v2.0.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql v1.2.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers/v5 v5.0.0
@@ -303,7 +303,7 @@ require (
 	cloud.google.com/go/orgpolicy v1.22.1 // indirect
 	cloud.google.com/go/osconfig v1.24.1 // indirect
 	cloud.google.com/go/storage v1.70.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.3
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.24.0
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.13.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20261013165250-51075c6ea6bc // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.10.1 // indirect
