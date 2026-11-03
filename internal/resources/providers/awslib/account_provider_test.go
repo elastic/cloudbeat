@@ -47,6 +47,7 @@ type listParentsResult struct {
 
 func Test_listAccounts(t *testing.T) {
 	account1 := types.Account{
+		Arn:    aws.String("arn:aws:organizations::1:account/o-1/1"),
 		Id:     aws.String("1"),
 		Name:   aws.String("name"),
 		Status: types.AccountStatusActive,
@@ -119,6 +120,7 @@ func Test_listAccounts(t *testing.T) {
 					AccountAlias:     "name",
 					OrganizationId:   "ou-1",
 					OrganizationName: "ou-1-name",
+					Partition:        "aws",
 				},
 			},
 		},
@@ -135,6 +137,7 @@ func Test_listAccounts(t *testing.T) {
 					output: &organizations.ListAccountsOutput{
 						Accounts: []types.Account{
 							{
+								Arn:    aws.String("arn:aws-us-gov:organizations::1:account/o-1/123"),
 								Id:     aws.String("123"),
 								Status: types.AccountStatusActive,
 							},
@@ -176,6 +179,7 @@ func Test_listAccounts(t *testing.T) {
 					AccountAlias:     "name",
 					OrganizationId:   "ou-1",
 					OrganizationName: "ou-1-name",
+					Partition:        "aws",
 				},
 				{
 					Provider:         "aws",
@@ -183,6 +187,7 @@ func Test_listAccounts(t *testing.T) {
 					AccountAlias:     "",
 					OrganizationId:   "ou-1",
 					OrganizationName: "ou-1-name",
+					Partition:        "aws-us-gov",
 				},
 				{
 					Provider:         "aws",
@@ -190,6 +195,7 @@ func Test_listAccounts(t *testing.T) {
 					AccountAlias:     "some name",
 					OrganizationId:   "",
 					OrganizationName: "",
+					Partition:        "aws",
 				},
 			},
 			listParentsResults: map[string]listParentsResult{
@@ -219,6 +225,7 @@ func Test_listAccounts(t *testing.T) {
 					AccountAlias:     "name",
 					OrganizationId:   "ou-1",
 					OrganizationName: "",
+					Partition:        "aws",
 				},
 			},
 			describeOrganizationError: errors.New("some error"),
