@@ -69,12 +69,11 @@ func (a *AWS) initialize(ctx context.Context, log *clog.Logger, cfg *config.Conf
 		err         error
 	)
 
-	awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg, log)
-	if err != nil && cfg.CloudConfig.Aws.Cred.DefaultRegion == "" {
-		log.Warn("failed to initialize identity; retrying to check AWS Gov Cloud regions")
-		cfg.CloudConfig.Aws.Cred.DefaultRegion = awslib.DefaultGovRegion
-		awsConfig, awsIdentity, err = a.getIdentity(ctx, cfg, log)
-	}
+	err = awslib.WithGovCloudFallback(log, &cfg.CloudConfig.Aws.Cred.DefaultRegion, func() error {
+		var getErr error
+		awsConfig, awsIdentity, getErr = a.getIdentity(ctx, cfg, log)
+		return getErr
+	})
 
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get AWS Identity: %w", err)
