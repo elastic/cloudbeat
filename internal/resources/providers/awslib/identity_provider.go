@@ -69,6 +69,7 @@ func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*clo
 		Account:      *response.Account,
 		AccountAlias: alias,
 		Provider:     provider,
+		Partition:    PartitionFromARN(pointers.Deref(response.Arn)),
 	}, nil
 }
 
