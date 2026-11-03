@@ -71,6 +71,7 @@ type Provider struct {
 	log                   *clog.Logger
 	client                Client
 	accessAnalyzerClients map[string]AccessAnalyzerClient
+	partition             string
 }
 
 type RolePolicyInfo struct {
@@ -158,8 +159,9 @@ type PolicyDocument struct {
 
 func NewIAMProvider(ctx context.Context, log *clog.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzerClient]) *Provider {
 	provider := Provider{
-		log:    log,
-		client: iamsdk.NewFromConfig(cfg),
+		log:       log,
+		client:    iamsdk.NewFromConfig(cfg),
+		partition: awslib.PartitionFromRegion(cfg.Region),
 	}
 	if crossRegionFactory != nil {
 		m := crossRegionFactory.NewMultiRegionClients(ctx, awslib.AllRegionSelector(), cfg, func(cfg aws.Config) AccessAnalyzerClient {

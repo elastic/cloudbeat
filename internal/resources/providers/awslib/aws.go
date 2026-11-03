@@ -37,11 +37,11 @@ var ErrClientNotFound = errors.New("aws client not found")
 func PartitionFromRegion(region string) string {
 	switch {
 	case strings.HasPrefix(region, "us-gov-"):
-		return "aws-us-gov"
+		return GovCloudPartition
 	case strings.HasPrefix(region, "cn-"):
-		return "aws-cn"
+		return ChinaPartition
 	default:
-		return "aws"
+		return DefaultPartition
 	}
 }
 

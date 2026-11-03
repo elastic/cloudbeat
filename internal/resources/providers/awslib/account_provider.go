@@ -72,6 +72,7 @@ func listAccounts(ctx context.Context, log *clog.Logger, client organizationsAPI
 				AccountAlias:     pointers.Deref(account.Name),
 				OrganizationId:   organization.id,
 				OrganizationName: organization.name,
+				Partition:        PartitionFromARN(pointers.Deref(account.Arn)),
 			})
 		}
 
