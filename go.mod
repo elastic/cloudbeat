@@ -105,7 +105,7 @@ require (
 	cloud.google.com/go/auth v0.24.2 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.3.1 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
-	cloud.google.com/go/longrunning v1.4.1 // indirect
+	cloud.google.com/go/longrunning v1.5.0 // indirect
 	cloud.google.com/go/monitoring v1.32.1 // indirect
 	cloud.google.com/go/orgpolicy v1.22.1 // indirect
 	cloud.google.com/go/osconfig v1.24.1 // indirect
