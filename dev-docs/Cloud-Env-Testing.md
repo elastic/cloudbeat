@@ -161,7 +161,7 @@ The workflow requires a subset of input parameters. All required inputs are desc
    - **`docker-image-override`**: optional docker image override for agent installs (mostly for BC/SNAPSHOT testing).
    - **`expiration-days`**: how long the environment should be kept before cleanup. Default is `5`.
    - **`cis-infra`**: optional. When `true`, also deploy CIS infrastructure (`infra_type=all`). When `false`, CDR only (`infra_type=cdr`).
-   - **`kibana_enable_entity_analytics_settings`** (ESS only): when `true`, applies Kibana `user_settings_yaml` with Entity Analytics settings (AI agents feature flag, Agent Builder experimental UI). Default is `true`. Entity Store install is separate — see **`enable-entity-store-v2`** (CDR) or the EA workflow's entity store script.
+   - **`kibana_enable_entity_analytics_settings`** (ESS only): when `true`, applies Kibana `user_settings_yaml` with Entity Analytics settings (AI agents feature flag, Agent Builder experimental UI). Default is `true`. Entity Store install is separate — see **`enable-entity-store-v2`** (CDR).
    - **`enable-entity-store-v2`**: when `true`, the workflow installs **Entity Store v2** (v2 installer script). When `false`, it installs **Entity Store v1 only**. Default is `true`.
 
 3. Click **Run workflow** and wait for completion.
@@ -173,12 +173,9 @@ The workflow requires a subset of input parameters. All required inputs are desc
 
 ## Create Environment (Entity Analytics)
 
-The [`create-env-ea`](https://github.com/elastic/cloudbeat/actions/workflows/create-env-ea.yml) workflow is a standalone manual dispatch that provisions an **ESS** stack in **production-cft**, applies **Entity Analytics (EA)** Kibana `user_settings_yaml` (AI agents feature flag and Agent Builder experimental UI), then checks out [`elastic/security-documents-generator`](https://github.com/elastic/security-documents-generator) at **`main`**, and runs correlated organization data at **enterprise** size with **Google** productivity suite, **all** integrations, and **detection rules**. It also installs Entity Store v2 and runs the risk-score maintainer via `install_entity_risk.sh`. It does not install CIS or CDR cloud infrastructure.
+The `create-env-ea` workflow was removed from this repo. Entity Analytics environments are now created with the **Create Entity Analytics Environment** workflow in [`elastic/security-test-environments`](https://github.com/elastic/security-test-environments) (see its [guide](https://github.com/elastic/security-test-environments/blob/main/docs/create-entity-analytics-environment.md)).
 
-### Inputs (summary)
-
-- **`deployment_name`**, **`elk-stack-version`**, **`expiration_days`**. ESS region mapping is fixed to **production-cft**.
-
+Environments created by the old workflow can still be destroyed with the **Destroy Environment** workflow below.
 
 ## Install Integrations Worfklow
 
