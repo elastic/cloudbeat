@@ -558,6 +558,16 @@
       "enabled": false
     },
     {
+      "description": "Disable the kustomize 'elastic-agent' image update in the vanilla-agent overlay - newName is a bare local image name (loaded into kind), which Renovate resolves as docker.io/library/elastic-agent and fails with 'no-result' (package lookup failure)",
+      "matchManagers": [
+        "kustomize"
+      ],
+      "matchPackageNames": [
+        "elastic-agent"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Disable elastic/oblt-actions updates - only used by backport-active.yml, which is kept for the backport-active-* labels but is a candidate for deprecation",
       "matchPackageNames": [
         "elastic/oblt-actions"
