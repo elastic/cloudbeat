@@ -59,3 +59,7 @@ packages:
     config:
       template-data:
         boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/vulnerability:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
