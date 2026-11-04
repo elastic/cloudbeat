@@ -299,7 +299,7 @@ require (
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/accesscontextmanager v1.17.1 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
-	cloud.google.com/go/longrunning v1.4.1 // indirect
+	cloud.google.com/go/longrunning v1.5.0 // indirect
 	cloud.google.com/go/orgpolicy v1.22.1 // indirect
 	cloud.google.com/go/osconfig v1.24.1 // indirect
 	cloud.google.com/go/storage v1.70.0 // indirect
