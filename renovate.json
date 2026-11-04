@@ -558,6 +558,76 @@
       "enabled": false
     },
     {
+      "description": "Disable elastic/oblt-actions updates - only used by backport-active.yml, which is kept for the backport-active-* labels but is a candidate for deprecation",
+      "matchPackageNames": [
+        "elastic/oblt-actions"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Group the remaining Go minor, patch and digest updates into one PR per branch (replaces the single-package docker, moby, sigstore, kiota, graph, gcp and containerd PRs). Packages that are coupled by a dedicated group above, and the go toolchain, are excluded. Majors stay separate. Must stay after the dedicated group rules so it overrides their groupName",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "matchPackageNames": [
+        "*",
+        "!go",
+        "!github.com/aws/aws-sdk-go-v2",
+        "!github.com/aws/aws-sdk-go-v2/**",
+        "!github.com/Azure/azure-sdk-for-go/**",
+        "!k8s.io/api",
+        "!k8s.io/apimachinery",
+        "!k8s.io/client-go",
+        "!k8s.io/kubectl",
+        "!sigs.k8s.io/**",
+        "!golang.org/x/**",
+        "!github.com/elastic/**",
+        "!github.com/aquasecurity/trivy",
+        "!github.com/aquasecurity/trivy-db",
+        "!github.com/aquasecurity/go-dep-parser",
+        "!github.com/open-policy-agent/opa",
+        "!github.com/gobwas/glob",
+        "!go.opentelemetry.io/**",
+        "!google.golang.org/genproto",
+        "!google.golang.org/genproto/**"
+      ],
+      "groupName": "go-deps"
+    },
+    {
+      "description": "Group GitHub Actions minor, patch and digest updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "groupName": "github-actions"
+    },
+    {
+      "description": "Group Python (poetry) library minor and patch updates. The python interpreter version is excluded because it needs its own review",
+      "matchManagers": [
+        "poetry"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchPackageNames": [
+        "*",
+        "!python"
+      ],
+      "groupName": "python-deps"
+    },
+    {
       "description": "Disable digest updates for volatile packages",
       "matchPackageNames": [
         "k8s.io/utils",
