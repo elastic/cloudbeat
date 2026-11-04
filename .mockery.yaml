@@ -2,16 +2,60 @@
 template: testify
 template-data:
   boilerplate-file: tools/mockery.boilerplate
+all: true
+filename: '{{ .InterfaceFile | base | clean | trimSuffix ".go" }}_mock.go'
+dir: '{{ .InterfaceDir }}'
+structname: '{{ .Mock }}{{ .InterfaceName | firstUpper }}'
 packages:
   github.com/elastic/cloudbeat:
     config:
-      all: true
-      filename: '{{ .InterfaceFile | base | clean | trimSuffix ".go" }}_mock.go'
-      dir: '{{ .InterfaceDir }}'
       exclude-subpkg-regex:
         - vendor
         - deploy/test-environments/.terraform
         - tools
         - scripts
-      structname: '{{ .Mock }}{{ .InterfaceName | firstUpper }}'
       recursive: true
+  github.com/elastic/cloudbeat/internal/inventory/azurefetcher:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/inventory/gcpfetcher:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/azure:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/fetching/fetchers/gcp:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/providers/azurelib:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/providers/azurelib/governance:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/providers/azurelib/inventory:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate
+  github.com/elastic/cloudbeat/internal/resources/providers/msgraph:
+    config:
+      template-data:
+        boilerplate-file: tools/mockery-nofips.boilerplate

@@ -29,13 +29,6 @@ import (
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
 	"github.com/elastic/cloudbeat/internal/inventory"
-	"github.com/elastic/cloudbeat/internal/inventory/azurefetcher"
-	"github.com/elastic/cloudbeat/internal/inventory/gcpfetcher"
-	"github.com/elastic/cloudbeat/internal/resources/providers/azurelib"
-	azure_auth "github.com/elastic/cloudbeat/internal/resources/providers/azurelib/auth"
-	gcp_auth "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/auth"
-	gcp_inventory "github.com/elastic/cloudbeat/internal/resources/providers/gcplib/inventory"
-	"github.com/elastic/cloudbeat/internal/resources/providers/msgraph"
 	"github.com/elastic/cloudbeat/internal/statushandler"
 )
 
@@ -77,40 +70,6 @@ func (s *strategy) NewAssetInventory(ctx context.Context, client beat.Client) (i
 
 	now := func() time.Time { return time.Now() } //nolint:gocritic
 	return inventory.NewAssetInventory(s.logger, s.cfg.DatastreamNamespace(), fetchers, client, now, s.cfg.Period), nil
-}
-
-func (s *strategy) initAzureFetchers(_ context.Context) ([]inventory.AssetFetcher, error) {
-	cfgProvider := &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}}
-	azureConfig, err := cfgProvider.GetAzureClientConfig(s.cfg.CloudConfig.Azure)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize azure config: %w", err)
-	}
-	initializer := &azurelib.ProviderInitializer{}
-	provider, err := initializer.Init(s.logger, *azureConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize azure provider: %w", err)
-	}
-
-	msgraphProvider, err := msgraph.NewProvider(s.logger, *azureConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize azure msgraph provider: %w", err)
-	}
-
-	return azurefetcher.New(s.logger, s.cfg.CloudConfig.Azure.Credentials.TenantID, provider, msgraphProvider), nil
-}
-
-func (s *strategy) initGcpFetchers(ctx context.Context) ([]inventory.AssetFetcher, error) {
-	cfgProvider := gcp_auth.NewConfigProvider()
-	gcpConfig, err := cfgProvider.GetGcpClientConfig(ctx, s.cfg.CloudConfig.Gcp, s.logger)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize gcp config: %w", err)
-	}
-	inventoryInitializer := &gcp_inventory.ProviderInitializer{}
-	provider, err := inventoryInitializer.Init(ctx, s.logger, *gcpConfig, s.cfg.CloudConfig.Gcp)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
-	}
-	return gcpfetcher.New(s.logger, provider), nil
 }
 
 func GetStrategy(logger *clog.Logger, cfg *config.Config, statusHandler statushandler.StatusHandlerAPI) Strategy {
