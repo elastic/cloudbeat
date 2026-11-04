@@ -540,6 +540,24 @@
       "automerge": false
     },
     {
+      "description": "Disable go-pep440-version and trivy-checks updates - they are indirect pseudo-version deps pinned by trivy's go.mod, so the version moves with trivy. Renovate cannot resolve a new digest for them (package lookup failure). Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/aquasecurity/go-pep440-version",
+        "github.com/aquasecurity/trivy-checks"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable stefanprodan/kube-tools updates - the repo is archived and its floating 'v1' ref is a branch, not a tag, so Renovate cannot resolve a new digest (package lookup failure)",
+      "matchPackageNames": [
+        "stefanprodan/kube-tools"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Disable digest updates for volatile packages",
       "matchPackageNames": [
         "k8s.io/utils",
