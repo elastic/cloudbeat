@@ -18,6 +18,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -25,6 +26,7 @@ import (
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
 
 	"github.com/elastic/cloudbeat/internal/config"
+	"github.com/elastic/cloudbeat/internal/infra/clog"
 )
 
 type AzureAuthProvider struct{}
@@ -66,15 +68,47 @@ func (a *AzureAuthProvider) FindCertificateCredential(tenantID string, clientID 
 	return azidentity.NewClientCertificateCredential(tenantID, clientID, certs, key, options)
 }
 
-// FindClientAssertionCredentials creates an Azure credential using the JWT identity token
-// at the path specified by the CLOUD_CONNECTORS_ID_TOKEN_FILE environment variable.
-// The JWT file is re-read on each token refresh via the shared beats azure package.
+// FindClientAssertionCredentials creates an Azure credential using a JWT identity token as the client assertion.
+// It reads the env vars set by the agentless controller. Two paths are supported:
+//
+// WII path (WORKLOAD_IDENTITY_ISSUER_URL is set):
+//   - JWT from the workload-identity-issuer, presented directly to the customer's federated identity credential.
+//
+// OIDC path (CLOUD_CONNECTORS_ID_TOKEN_FILE is set):
+//   - JWT read from the token file, re-read on each token refresh via the shared beats azure package.
 func (a *AzureAuthProvider) FindClientAssertionCredentials(tenantID string, clientID string, options *azidentity.ClientAssertionCredentialOptions) (*azidentity.ClientAssertionCredential, error) {
-	jwtFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
-	if jwtFilePath == "" {
-		return nil, fmt.Errorf("environment variable %s is required for client assertion credentials", config.CloudConnectorsJWTPathEnvVar)
+	logger := clog.NewLogger("FindClientAssertionCredentials")
+
+	wiiIssuerURL := os.Getenv(identityfederation.WIIIssuerURLEnvVar)
+	wiiCertFile := os.Getenv(identityfederation.WIISSLCertFileEnvVar)
+	wiiKeyFile := os.Getenv(identityfederation.WIISSLKeyFileEnvVar)
+
+	if wiiIssuerURL != "" {
+		logger.Info("Switching credentials provider to Identity Federation (WII)")
+		if wiiCertFile == "" || wiiKeyFile == "" {
+			return nil, errors.New("WORKLOAD_IDENTITY_SSL_CERT_FILE and WORKLOAD_IDENTITY_SSL_KEY_FILE must be set when WORKLOAD_IDENTITY_ISSUER_URL is configured")
+		}
+		if tenantID == "" || clientID == "" {
+			return nil, errors.New("tenant_id and client_id are required for WII identity federation")
+		}
+		tokenSource, err := identityfederation.NewWIITokenSource(wiiIssuerURL, wiiCertFile, wiiKeyFile, "api://AzureADTokenExchange", logger.Logger)
+		if err != nil {
+			return nil, fmt.Errorf("configuring WII token source: %w", err)
+		}
+		return identityfederation.AzureNewWIIClientAssertionCredential(identityfederation.AzureWIIParams{
+			TenantID:    tenantID,
+			ClientID:    clientID,
+			TokenSource: tokenSource,
+			Options:     options,
+		})
 	}
 
+	jwtFilePath := os.Getenv(config.CloudConnectorsJWTPathEnvVar)
+	if jwtFilePath == "" {
+		return nil, errors.New("no id token source configured (set WORKLOAD_IDENTITY_ISSUER_URL or CLOUD_CONNECTORS_ID_TOKEN_FILE)")
+	}
+
+	logger.Info("Switching credentials provider to Identity Federation (OIDC)")
 	return identityfederation.AzureNewClientAssertionCredential(identityfederation.AzureParams{
 		TenantID:    tenantID,
 		ClientID:    clientID,

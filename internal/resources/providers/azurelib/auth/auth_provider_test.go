@@ -42,10 +42,55 @@ func TestAzureAuthProvider_FindClientAssertionCredentials(t *testing.T) {
 				tempDir := t.TempDir()
 				jwtFile := filepath.Join(tempDir, "jwt.token")
 				require.NoError(t, os.WriteFile(jwtFile, []byte("eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.signature"), 0644))
+				t.Setenv(identityfederation.WIIIssuerURLEnvVar, "")
 				t.Setenv(config.CloudConnectorsJWTPathEnvVar, jwtFile)
 				return jwtFile
 			},
 			expectError: false,
+		},
+		{
+			name: "Should fail when neither WII nor the JWT file env var is set",
+			setupEnv: func(t *testing.T) string {
+				t.Setenv(identityfederation.WIIIssuerURLEnvVar, "")
+				t.Setenv(config.CloudConnectorsJWTPathEnvVar, "")
+				return ""
+			},
+			expectError: true,
+			errorMsg:    "no id token source configured",
+		},
+		{
+			name: "wii: Should create a WII credential when the issuer URL, cert and key are set",
+			setupEnv: func(t *testing.T) string {
+				t.Setenv(identityfederation.WIIIssuerURLEnvVar, "https://workload-identity-issuer.example.com")
+				t.Setenv(identityfederation.WIISSLCertFileEnvVar, "/certs/wii-client.crt")
+				t.Setenv(identityfederation.WIISSLKeyFileEnvVar, "/certs/wii-client.key")
+				t.Setenv(config.CloudConnectorsJWTPathEnvVar, "")
+				return ""
+			},
+			expectError: false,
+		},
+		{
+			name: "wii: cert and key files are required and there is no silent legacy fallback",
+			setupEnv: func(t *testing.T) string {
+				t.Setenv(identityfederation.WIIIssuerURLEnvVar, "https://workload-identity-issuer.example.com")
+				t.Setenv(identityfederation.WIISSLCertFileEnvVar, "")
+				t.Setenv(identityfederation.WIISSLKeyFileEnvVar, "")
+				t.Setenv(config.CloudConnectorsJWTPathEnvVar, "/path/token")
+				return ""
+			},
+			expectError: true,
+			errorMsg:    "WORKLOAD_IDENTITY_SSL_CERT_FILE",
+		},
+		{
+			name: "wii: Should fail when the WII issuer URL is not https",
+			setupEnv: func(t *testing.T) string {
+				t.Setenv(identityfederation.WIIIssuerURLEnvVar, "http://workload-identity-issuer.example.com")
+				t.Setenv(identityfederation.WIISSLCertFileEnvVar, "/certs/wii-client.crt")
+				t.Setenv(identityfederation.WIISSLKeyFileEnvVar, "/certs/wii-client.key")
+				return ""
+			},
+			expectError: true,
+			errorMsg:    "must use the https scheme",
 		},
 	}
 
@@ -66,6 +111,16 @@ func TestAzureAuthProvider_FindClientAssertionCredentials(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("wii: tenant_id and client_id are required", func(t *testing.T) {
+		t.Setenv(identityfederation.WIIIssuerURLEnvVar, "https://workload-identity-issuer.example.com")
+		t.Setenv(identityfederation.WIISSLCertFileEnvVar, "/certs/wii-client.crt")
+		t.Setenv(identityfederation.WIISSLKeyFileEnvVar, "/certs/wii-client.key")
+
+		provider := &AzureAuthProvider{}
+		_, err := provider.FindClientAssertionCredentials("", "", nil)
+		require.ErrorContains(t, err, "tenant_id and client_id are required for WII identity federation")
+	})
 }
 
 func TestReadJWTFromFile(t *testing.T) {
