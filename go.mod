@@ -521,7 +521,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	go.yaml.in/yaml/v4 v4.0.0-rc.7 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.9 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e // indirect
 	golang.org/x/mod v0.42.0 // indirect
@@ -570,7 +570,7 @@ replace (
 	github.com/dop251/goja => github.com/andrewkroh/goja v0.0.0-20190128172624-dd2ac4456e20
 	github.com/dop251/goja_nodejs => github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6
 	github.com/elazarl/goproxy => github.com/elazarl/goproxy v0.0.0-20230731152917-f99041a5c027
-	github.com/golang/glog => github.com/golang/glog v1.2.4 // indirect
+	github.com/golang/glog v1.2.5 github.com/golang/glog v1.2.4 // indirect
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
 	github.com/lestrrat-go/jwx => github.com/lestrrat-go/jwx v1.2.31
 	k8s.io/kubernetes => k8s.io/kubernetes v1.37.1
