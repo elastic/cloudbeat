@@ -4,6 +4,7 @@ This script is designed to be used in a GitHub Actions workflow to send Slack no
 It reads environment variables set by the GitHub Actions runtime, validates them, and
 constructs a Slack payload based on the workflow status.
 """
+
 import json
 import os
 
