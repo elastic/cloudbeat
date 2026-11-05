@@ -559,6 +559,19 @@
       "enabled": false
     },
     {
+      "description": "Disable python image updates in tests/Dockerfile - the lookup for python:3.15-slim fails with 'timeout while waiting for mutex to become available' (lookupUpdates error on the Dependency Dashboard). Re-enable once the lookup works again",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchFileNames": [
+        "tests/Dockerfile"
+      ],
+      "matchPackageNames": [
+        "python"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Disable the kustomize 'elastic-agent' image update in the vanilla-agent overlay - newName is a bare local image name (loaded into kind), which Renovate resolves as docker.io/library/elastic-agent and fails with 'no-result' (package lookup failure)",
       "matchManagers": [
         "kustomize"
