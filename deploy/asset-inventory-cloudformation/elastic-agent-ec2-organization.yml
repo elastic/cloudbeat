@@ -228,7 +228,7 @@ Resources:
                       - sts:AssumeRole
               Path: /
               ManagedPolicyArns:
-                - arn:aws:iam::aws:policy/SecurityAudit
+                - !Sub 'arn:${AWS::Partition}:iam::aws:policy/SecurityAudit'
 
   CloudbeatManagementAccountAuditRole:
     Type: AWS::IAM::Role
@@ -244,7 +244,7 @@ Resources:
               - sts:AssumeRole
       Path: /
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/SecurityAudit
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/SecurityAudit'
     Condition: ScanManagementAccountEnabled
 
 Outputs:
