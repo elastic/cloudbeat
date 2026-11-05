@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create a KSPM EKS integration.
 3. Create a KSPM manifest to be deployed on a host.
 """
+
 import sys
 from pathlib import Path
 

@@ -3,6 +3,7 @@
 Fleet-only Okta package policy on the CDR Wiz agent policy (same EC2 host).
 Requires install_wiz_integration.py to have run first (cdr_wiz_agent_policy.json).
 """
+
 import sys
 from pathlib import Path
 

@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create a CSPM AWS integration.
 3. Create a CSPM bash script to be deployed on a host.
 """
+
 import sys
 from pathlib import Path
 

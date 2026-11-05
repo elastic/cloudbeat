@@ -5,6 +5,7 @@ Generate and deploy development templates for Azure deployment.
 
 Enables SSH access to the VMs and installs the elastic-agent with the given version and enrollment token.
 """
+
 import argparse
 import json
 import os

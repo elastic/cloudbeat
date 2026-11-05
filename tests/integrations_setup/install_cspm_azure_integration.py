@@ -6,6 +6,7 @@ The following steps are performed:
 1. Create an agent policy.
 2. Create a CSPM Azure integration.
 """
+
 import json
 import sys
 from pathlib import Path

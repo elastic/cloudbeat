@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create a CSPM GCP integration.
 3. Create a deploy/deployment-manager/config.json file to be used by the just deploy-dm command.
 """
+
 import json
 import sys
 from pathlib import Path
