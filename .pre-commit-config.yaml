@@ -20,7 +20,7 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.2.0
+    rev: v4.0.0
     hooks:
       - id: add-trailing-comma
 
@@ -53,14 +53,14 @@ repos:
         exclude: security-policies.*
 
   - repo: https://github.com/pycqa/isort
-    rev: 6.1.0
+    rev: 9.0.2
     hooks:
       - id: isort
         name: isort (python)
         args: ["--profile", "black"]
 
   - repo: https://github.com/psf/black
-    rev: 25.12.0
+    rev: 26.10.1
     hooks:
       - id: black
 
@@ -184,7 +184,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.43.0
+    rev: v2.2.3
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
