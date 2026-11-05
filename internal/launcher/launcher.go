@@ -98,7 +98,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 	b.Manager.PostInit()
 
 	// Wait for Fleet-side reconfiguration only if beater is running in Agent-managed mode.
-	if b.Manager.Enabled() {
+	if b.Manager.ConfigFromControlProtocol() {
 		defer b.Manager.Stop()
 		l.log.Infof("Waiting for initial reconfiguration from Fleet server...")
 		update, err := l.reconfigureWait(reconfigureWaitTimeout)
