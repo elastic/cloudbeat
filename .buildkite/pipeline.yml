@@ -23,7 +23,7 @@ steps:
           WORKFLOW: "snapshot"
         command: "./.buildkite/scripts/package.sh"
         artifact_paths: "build/distributions/*"
-        agents:
+        agents: &agents_amd64
           provider: gcp
           image: "${GCP_IMAGE_UBUNTU_X86_64}"
           machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
@@ -34,10 +34,28 @@ steps:
           WORKFLOW: "snapshot"
         command: "./.buildkite/scripts/package.sh"
         artifact_paths: "build/distributions/*"
-        agents:
+        agents: &agents_arm64
           provider: "aws"
           imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
           instanceType: "${AWS_ARM_INSTANCE_TYPE}"
+
+      - label: ":package: Package Cloudbeat FIPS linux/amd64 - Snapshot"
+        env:
+          PLATFORMS: "${PLATFORMS_AMD64}"
+          WORKFLOW: "snapshot"
+          FIPS: "true"
+        command: "./.buildkite/scripts/package.sh"
+        artifact_paths: "build/distributions/*"
+        agents: *agents_amd64
+
+      - label: ":package: Package Cloudbeat FIPS linux/arm64 - Snapshot"
+        env:
+          PLATFORMS: "${PLATFORMS_ARM64}"
+          WORKFLOW: "snapshot"
+          FIPS: "true"
+        command: "./.buildkite/scripts/package.sh"
+        artifact_paths: "build/distributions/*"
+        agents: *agents_arm64
 
   - label: ":pipeline: Generate DRA steps (snapshot)"
     if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9x]+\$/ || build.env("RUN_RELEASE") == "true"
@@ -60,10 +78,7 @@ steps:
           WORKFLOW: "staging"
         command: "./.buildkite/scripts/package.sh"
         artifact_paths: "build/distributions/*"
-        agents:
-          provider: gcp
-          image: "${GCP_IMAGE_UBUNTU_X86_64}"
-          machineType: "${GCP_DEFAULT_MACHINE_TYPE}"
+        agents: *agents_amd64
 
       - label: ":package: Package Cloudbeat linux/arm64 - Staging"
         env:
@@ -71,10 +86,25 @@ steps:
           WORKFLOW: "staging"
         command: "./.buildkite/scripts/package.sh"
         artifact_paths: "build/distributions/*"
-        agents:
-          provider: "aws"
-          imagePrefix: "${AWS_IMAGE_UBUNTU_ARM_64}"
-          instanceType: "${AWS_ARM_INSTANCE_TYPE}"
+        agents: *agents_arm64
+
+      - label: ":package: Package Cloudbeat FIPS linux/amd64 - Staging"
+        env:
+          PLATFORMS: "${PLATFORMS_AMD64}"
+          WORKFLOW: "staging"
+          FIPS: "true"
+        command: "./.buildkite/scripts/package.sh"
+        artifact_paths: "build/distributions/*"
+        agents: *agents_amd64
+
+      - label: ":package: Package Cloudbeat FIPS linux/arm64 - Staging"
+        env:
+          PLATFORMS: "${PLATFORMS_ARM64}"
+          WORKFLOW: "staging"
+          FIPS: "true"
+        command: "./.buildkite/scripts/package.sh"
+        artifact_paths: "build/distributions/*"
+        agents: *agents_arm64
 
   - label: ":pipeline: Generate DRA steps (staging)"
     if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"

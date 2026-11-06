@@ -20,6 +20,18 @@ fi
 mage pythonEnv
 mage package
 
+# Beats mage skips a beat missing from its FIPS list with exit 0 and no package.
+# The standard steps upload the dependencies CSV, so FIPS steps stop here.
+if [[ "${FIPS:-}" == "true" ]]; then
+    if ! compgen -G "build/distributions/cloudbeat-fips-*.tar.gz" >/dev/null; then
+        echo "ERROR: FIPS=true mage package produced no cloudbeat-fips tar.gz" >&2
+        exit 1
+    fi
+    echo "Produced artifacts:"
+    ls -lahR build/distributions/
+    exit 0
+fi
+
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"
 if [[ -n "${VERSION_QUALIFIER}" ]]; then
