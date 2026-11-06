@@ -8,10 +8,14 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as rule_input("")
 	eval_fail with input as rule_input("--peer-client-cert-auth=false")
+	eval_fail with input as rule_input("--peer-client-cert-auth=False")
+	eval_fail with input as rule_input("--peer-client-cert-auth=FALSE")
 }
 
 test_pass if {
 	eval_pass with input as rule_input("--peer-client-cert-auth=true")
+	eval_pass with input as rule_input("--peer-client-cert-auth=True")
+	eval_pass with input as rule_input("--peer-client-cert-auth=TRUE")
 }
 
 test_not_evaluated if {

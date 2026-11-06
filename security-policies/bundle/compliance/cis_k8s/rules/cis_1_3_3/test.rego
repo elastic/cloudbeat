@@ -8,10 +8,14 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as rule_input("")
 	eval_fail with input as rule_input("--use-service-account-credentials=false")
+	eval_fail with input as rule_input("--use-service-account-credentials=False")
+	eval_fail with input as rule_input("--use-service-account-credentials=FALSE")
 }
 
 test_pass if {
 	eval_pass with input as rule_input("--use-service-account-credentials=true")
+	eval_pass with input as rule_input("--use-service-account-credentials=True")
+	eval_pass with input as rule_input("--use-service-account-credentials=TRUE")
 }
 
 test_not_evaluated if {

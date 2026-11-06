@@ -25,6 +25,12 @@ process_contains_key_with_value(entity, value) if {
 	lib_common.contains_key_with_value(process_args, entity, value)
 }
 
+# process_contains_key_with_bool_value matches a boolean flag value with
+# lib_common.bool_equal (strconv.ParseBool, case-insensitive).
+process_contains_key_with_bool_value(entity, value) if {
+	lib_common.bool_equal(process_args[entity], value)
+}
+
 not_process_contains_key_with_value(entity, value) if {
 	not lib_common.contains_key_with_value(process_args, entity, value)
 }

@@ -8,10 +8,14 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as rule_input("")
 	eval_fail with input as rule_input("--profiling=true")
+	eval_fail with input as rule_input("--profiling=True")
+	eval_fail with input as rule_input("--profiling=TRUE")
 }
 
 test_pass if {
 	eval_pass with input as rule_input("--profiling=false")
+	eval_pass with input as rule_input("--profiling=False")
+	eval_pass with input as rule_input("--profiling=FALSE")
 }
 
 test_not_evaluated if {

@@ -12,7 +12,7 @@ process_args := benchmark_data_adapter.process_args
 default rule_evaluation := false
 
 rule_evaluation if {
-	lib_common.contains_key_with_value(process_args, "--service-account-lookup", "true")
+	lib_common.bool_equal(process_args["--service-account-lookup"], "true")
 } else if {
 	not "--service-account-lookup" in object.keys(process_args)
 }
