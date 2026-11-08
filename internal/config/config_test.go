@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/beats/v7/pkg/config"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/stretchr/testify/suite"
 )
 
