@@ -28,7 +28,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/management/status"
-	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/beats/v7/pkg/config"
 	"github.com/elastic/go-ucfg"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
@@ -94,7 +94,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 	}
 
 	// Wait for Fleet-side reconfiguration only if beater is running in Agent-managed mode.
-	if b.Manager.Enabled() {
+	if b.Manager.ConfigFromControlProtocol() {
 		defer b.Manager.Stop()
 		l.log.Infof("Waiting for initial reconfiguration from Fleet server...")
 		update, err := l.reconfigureWait(reconfigureWaitTimeout)

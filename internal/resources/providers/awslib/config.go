@@ -22,8 +22,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
+	"github.com/elastic/beats/v7/pkg/logp"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 func RetryableCodesOption(o *retry.StandardOptions) {
