@@ -21,7 +21,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/beats/v7/pkg/logp"
 	"github.com/googleapis/gax-go/v2"
 	"golang.org/x/time/rate"
 	"google.golang.org/grpc"
