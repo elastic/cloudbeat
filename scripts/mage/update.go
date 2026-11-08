@@ -18,8 +18,11 @@
 package mage
 
 import (
+	"path/filepath"
+
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
 	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 )
 
 // Update target namespace.
@@ -59,5 +62,20 @@ func (Update) FieldDocs() error {
 func (Update) IncludeFields() error {
 	mg.Deps(Update.Fields)
 
-	return devtools.GenerateAllInOneFieldsGo()
+	// devtools.GenerateAllInOneFieldsGo pins GOTOOLCHAIN to the Go version of the beats
+	// module (.go-version), which can be older than the one cloudbeat's go.mod requires.
+	// Run the generator with the toolchain cloudbeat is built with instead.
+	beatsDir, err := devtools.ElasticBeatsDir()
+	if err != nil {
+		return err
+	}
+
+	return sh.Run("go", "run", "-mod=readonly",
+		filepath.Join(beatsDir, "dev-tools/cmd/asset/asset.go"),
+		"-pkg", "include",
+		"-in", "fields.yml",
+		"-out", devtools.CreateDir("include/fields.go"),
+		"-license", "Elastic",
+		devtools.BeatName,
+	)
 }
