@@ -27,8 +27,8 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/beats/v7/pkg/config"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	"github.com/elastic/cloudbeat/internal/launcher"
 )
