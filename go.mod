@@ -71,7 +71,7 @@ require (
 	github.com/microsoft/kiota-abstractions-go v1.12.0
 	github.com/microsoftgraph/msgraph-sdk-go v1.105.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
-	github.com/mikefarah/yq/v4 v4.54.1
+	github.com/mikefarah/yq/v4 v4.54.2
 	github.com/mitchellh/gox v1.0.1
 	github.com/open-policy-agent/opa v1.20.2
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
@@ -111,7 +111,7 @@ require (
 	cel.dev/expr v0.25.3 // indirect
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/accesscontextmanager v1.17.1 // indirect
-	cloud.google.com/go/auth v0.24.2 // indirect
+	cloud.google.com/go/auth v0.24.3 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.3.1 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
 	cloud.google.com/go/longrunning v1.5.0 // indirect
@@ -196,7 +196,7 @@ require (
 	github.com/cenkalti/backoff/v7 v7.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chai2010/gettext-go v1.0.3 // indirect
-	github.com/cheggaaa/pb/v3 v3.2.1 // indirect
+	github.com/cheggaaa/pb/v3 v3.3.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cloudflare/circl v1.6.5 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
@@ -263,7 +263,7 @@ require (
 	github.com/go-git/go-git/v5 v5.19.3 // indirect
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.8 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.9 // indirect
 	github.com/go-ldap/ldap/v3 v3.4.15 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -457,7 +457,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.9.0 // indirect
 	github.com/std-uritemplate/std-uritemplate/go/v2 v2.0.13 // indirect
 	github.com/stretchr/objx v0.8.0 // indirect

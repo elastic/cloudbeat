@@ -6,8 +6,8 @@ cloud.google.com/go/accesscontextmanager v1.17.1 h1:xGs0wtTBmmqUWzeXsTpZdXs/7eOV
 cloud.google.com/go/accesscontextmanager v1.17.1/go.mod h1:3MYLajIHmDQ3akEPuOQuXdG/PcEYoBxtjbho6/f+F8o=
 cloud.google.com/go/asset v1.30.1 h1:ZCANdpUMwX1dXkuHlQbLAhSeHwDjmUy2XII4sySm2PE=
 cloud.google.com/go/asset v1.30.1/go.mod h1:zp6tmavDYwNFNoHBK6Y0KMt4jIByR7WCiSJSe+ZOam0=
-cloud.google.com/go/auth v0.24.2 h1:B1/4OLie/oVowCTrVgFS3NpEtIrLsuudX0/BxKsEk6s=
-cloud.google.com/go/auth v0.24.2/go.mod h1:p4UXqfSXnMVUDutk9xePzI8lj8yyoJ3BLsKWv0NSvQk=
+cloud.google.com/go/auth v0.24.3 h1:oVmRvR/pGSCNXjviwXCisJjRSEdQ0BlcOpW0uhuHLm8=
+cloud.google.com/go/auth v0.24.3/go.mod h1:p4UXqfSXnMVUDutk9xePzI8lj8yyoJ3BLsKWv0NSvQk=
 cloud.google.com/go/auth/oauth2adapt v0.3.1 h1:BKLDdbWS7pafd820dsyFDF6fPEzIGqr7ny6hbTzCCgE=
 cloud.google.com/go/auth/oauth2adapt v0.3.1/go.mod h1:B1nM4FJDxoDqAt3PXFG4IflUoQ5kvWAOOM3R+5wAszg=
 cloud.google.com/go/compute/metadata v0.10.0 h1:pyKMUQSwchgkIBBJGdILqQbs/BNJXqwSA7Ej6LAvvtY=
@@ -326,8 +326,8 @@ github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UF
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/chai2010/gettext-go v1.0.3 h1:9liNh8t+u26xl5ddmWLmsOsdNLwkdRTg5AG+JnTiM80=
 github.com/chai2010/gettext-go v1.0.3/go.mod h1:y+wnP2cHYaVj19NZhYKAwEMH2CI1gNHeQQ+5AjwawxA=
-github.com/cheggaaa/pb/v3 v3.2.1 h1:aprZbFRG+B7+ug76S8QZ6Y1PW168UHzOmbC3wa+aU6I=
-github.com/cheggaaa/pb/v3 v3.2.1/go.mod h1:U9hSVxoKqJrZIE3PkFG1xXXNaK/Ilzg+EF/scpXzEdw=
+github.com/cheggaaa/pb/v3 v3.3.0 h1:o9NmJGe0EkRqBmFxgTYKOPh6O/1TiQK9HL24DiH0skM=
+github.com/cheggaaa/pb/v3 v3.3.0/go.mod h1:flWHZ1sIDYXrj0CbD5o3svGYH1KOd6ncf3Pvp0yc3ko=
 github.com/cilium/ebpf v0.22.0 h1:v2ktp0roffpMOj2MMf3idtCQZOsAoC4BJbAJN+ke2bY=
 github.com/cilium/ebpf v0.22.0/go.mod h1:CDzZbe2hC5JjlDC+CY3KFCzlYwN4gbxppYM+Z10bQt4=
 github.com/clipperhouse/uax29/v2 v2.7.0 h1:+gs4oBZ2gPfVrKPthwbMzWZDaAFPGYK72F0NJv2v7Vk=
@@ -540,8 +540,8 @@ github.com/go-gorp/gorp/v3 v3.1.0 h1:ItKF/Vbuj31dmV4jxA1qblpSwkl9g1typ24xoe70IGs
 github.com/go-gorp/gorp/v3 v3.1.0/go.mod h1:dLEjIyyRNiXvNZ8PSmzpt1GsWAUK8kjVhEpjH8TixEw=
 github.com/go-ini/ini v1.67.0 h1:z6ZrTEZqSWOTyH2FlglNbNgARyHG8oLW9gMELqKr06A=
 github.com/go-ini/ini v1.67.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
-github.com/go-jose/go-jose/v4 v4.1.8 h1:k38WifTutpGuqt6Imq9xW1OgCvnWFri0Nz7FnfiACM8=
-github.com/go-jose/go-jose/v4 v4.1.8/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
+github.com/go-jose/go-jose/v4 v4.1.9 h1:pKfeQkig1NmgK4hJrZYXLEYURXfoJB61Larw0uIW4gY=
+github.com/go-jose/go-jose/v4 v4.1.9/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
 github.com/go-ldap/ldap/v3 v3.4.15 h1:eRB4f4Ecn1POL1mO86+uUDlecmyWsdiJwh60bAUS4UY=
 github.com/go-ldap/ldap/v3 v3.4.15/go.mod h1:jeD0c98EdZQCKKKKe4kTWs5aCf6y+j8KuYsYLznZSQk=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
@@ -889,8 +889,8 @@ github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1 h1:k3YIaJm57ufoEX0KdsEY4l1X
 github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1/go.mod h1:yNqPNhXee2w9cZzkJW5mL1utVMSInsQSo/TyEB5sup8=
 github.com/miekg/dns v1.1.73 h1:uhT8nJxmTrPJYClxVxTCX+CVn6qnzSiybRk72Z6DgrE=
 github.com/miekg/dns v1.1.73/go.mod h1:RW2Obtfd5NZHvOFe3zYG0W8koWOQtAzyHaLo8vASBuQ=
-github.com/mikefarah/yq/v4 v4.54.1 h1:wFk+RhKFcx6fU6tkjC9z069vLTL4uDoXi9R4SytFB8s=
-github.com/mikefarah/yq/v4 v4.54.1/go.mod h1:2s/axTs7Quuo86zZrkN/2QjflxEtFay8aynJsuNT6Mw=
+github.com/mikefarah/yq/v4 v4.54.2 h1:b9g8xQc/1v8T7FZhBtPlsAynEkI8FvRfGTS0FGACgto=
+github.com/mikefarah/yq/v4 v4.54.2/go.mod h1:VACEZ0pKWDOY355sL8xOpOE+lNZZbVMpVJ6YMsCHVRo=
 github.com/mileusna/useragent v1.3.5 h1:SJM5NzBmh/hO+4LGeATKpaEX9+b4vcGg2qXGLiNGDws=
 github.com/mileusna/useragent v1.3.5/go.mod h1:3d8TOmwL/5I8pJjyVDteHtgDGcefrFUX4ccGOMKNYYc=
 github.com/minio/sha256-simd v1.0.1 h1:6kaan5IFmwTNynnKKpDHe6FWHohJOHhCPchzK49dzMM=
@@ -1090,8 +1090,8 @@ github.com/spf13/cast v1.10.0/go.mod h1:jNfB8QC9IA6ZuY2ZjDp0KtFO2LZZlg4S/7bzP6qq
 github.com/spf13/cobra v1.10.2 h1:DMTTonx5m65Ic0GOoRY2c16WCbHxOOw6xxezuLaBpcU=
 github.com/spf13/cobra v1.10.2/go.mod h1:7C1pvHqHw5A4vrJfjNwvOdzYu0Gml16OCs2GRiTUUS4=
 github.com/spf13/pflag v1.0.9/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
-github.com/spf13/pflag v1.0.10 h1:4EBh2KAYBwaONj6b2Ye1GiHfwjqyROoF4RwYO+vPwFk=
-github.com/spf13/pflag v1.0.10/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
+github.com/spf13/pflag v1.1.0 h1:6W6MbVUrnMb8PEhjkqwsVLY7ryuzRfFHF4mQd7L94ag=
+github.com/spf13/pflag v1.1.0/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/spf13/viper v1.21.0 h1:x5S+0EU27Lbphp4UKm1C+1oQO+rKx36vfCoaVebLFSU=
 github.com/spf13/viper v1.21.0/go.mod h1:P0lhsswPGWD/1lZJ9ny3fYnVqxiegrlNrEmgLjbTCAY=
 github.com/spiffe/go-spiffe/v2 v2.9.0 h1:g5qTg3qIP1HXV+GzuyEfSJFVxUCpEP5Ui1OINVJHPB4=
