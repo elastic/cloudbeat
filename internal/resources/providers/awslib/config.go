@@ -30,8 +30,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
-	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/beats/v7/pkg/logp"
+	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
