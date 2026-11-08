@@ -49,10 +49,9 @@ require (
 	github.com/aws/smithy-go v1.28.8
 	github.com/dgraph-io/ristretto/v2 v2.4.2
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20261005212019-06c96caae748e1757452aa81494753eb1e8cbdba
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20261106213442-06c96caae748
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-client/v7 v7.20.0
-	github.com/elastic/elastic-agent-libs v0.47.0
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.9.2
 	github.com/go-logr/zapr v1.3.0
@@ -141,6 +140,7 @@ require (
 	github.com/akavel/rsrc v0.10.2 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/alecthomas/participle/v2 v2.1.4 // indirect
+	github.com/alexbrainman/sspi v0.0.0-20250919150558-7d374ff0d59e // indirect
 	github.com/anchore/go-struct-converter v0.1.0 // indirect
 	github.com/apparentlymart/go-cidr v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
@@ -173,6 +173,7 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bitfield/gotestdox v0.2.3 // indirect
 	github.com/bitnami/go-version v0.0.0-20260728133343-2aa268af0217 // indirect
+	github.com/blakesmith/ar v0.0.0-20150311145944-8bd4349a67f2 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.10.4 // indirect
 	github.com/briandowns/spinner v1.23.2 // indirect
@@ -218,6 +219,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/ebitengine/purego v0.11.2 // indirect
+	github.com/elastic/elastic-agent-libs v0.47.0 // indirect
 	github.com/elastic/go-concert v0.3.1 // indirect
 	github.com/elastic/go-lumber v0.2.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
@@ -288,7 +290,6 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/gomodule/redigo v1.9.3 // indirect
 	github.com/google/btree v1.1.3 // indirect
-	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-github/v62 v62.0.0 // indirect
@@ -299,7 +300,6 @@ require (
 	github.com/google/s2a-go v0.1.11 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.24 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
@@ -322,10 +322,10 @@ require (
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect
 	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
+	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/jmoiron/sqlx v1.4.0 // indirect
-	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/josephburnett/jd/v2 v2.5.0 // indirect
 	github.com/josephspurrier/goversioninfo v1.7.0 // indirect

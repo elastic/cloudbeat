@@ -25,7 +25,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/elastic-agent-libs/mapstr"
+	"github.com/elastic/beats/v7/pkg/mapstr"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/internal/infra/clog"
