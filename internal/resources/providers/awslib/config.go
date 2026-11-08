@@ -32,7 +32,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	libbeataws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/identityfederation"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/beats/v7/pkg/logp"
 
 	"github.com/elastic/cloudbeat/internal/config"
 	"github.com/elastic/cloudbeat/internal/infra/clog"
