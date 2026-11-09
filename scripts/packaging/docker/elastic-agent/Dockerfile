@@ -1,4 +1,4 @@
-ARG ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:8.19.25-SNAPSHOT@sha256:ef5ce75330847f0a232590fb56c202276c927a5894ef75e11337a1b4a7b75e73
+ARG ELASTIC_AGENT_IMAGE=docker.elastic.co/beats/elastic-agent:8.19.25-SNAPSHOT@sha256:e6ec65aecb16c41c9b5ae0a4eec0bb9eb45057934ab64157303838f55874e47f
 
 FROM ${ELASTIC_AGENT_IMAGE} as elastic_agent_cloudbeat
 COPY --chown=elastic-agent:elastic-agent --chmod=755 cloudbeat /tmp/components/cloudbeat
