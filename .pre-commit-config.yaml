@@ -184,7 +184,7 @@ repos:
         files: security-policies/.*\.(md|markdown)$
 
   - repo: https://github.com/StyraInc/regal
-    rev: v0.43.0
+    rev: v2.2.3
     hooks:
       - id: regal-lint
         args: [security-policies/bundle]
