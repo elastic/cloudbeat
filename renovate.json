@@ -688,6 +688,16 @@
       ]
     },
     {
+      "description": "Cap regal below v1 - the upstream repo has stray v2.x tags (e.g. v2.2.3, a 2024 'Testing versioning' commit) that are not releases and break the pre-commit hook install. Real releases are v0.x",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "matchDepNames": [
+        "/^styrainc\\/regal$/i"
+      ],
+      "allowedVersions": "<1.0.0"
+    },
+    {
       "description": "Group pre-commit hook rev updates into one PR",
       "matchManagers": [
         "pre-commit"
