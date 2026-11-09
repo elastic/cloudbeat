@@ -53,6 +53,18 @@ Mappings:
     qa:
       Domain: svc.qa.elastic.cloud
 
+Conditions:
+  # TEMPORARY: until the agentless regional migration is complete, every
+  # Elastic Cloud Hosted deployment in production runs its agent in
+  # aws/us-east-1, whatever region the deployment is in. Its token then comes
+  # from the us-east-1 issuer, so the trust must not use the deployment's
+  # region. Serverless projects, staging and qa use the parameters.
+  # Remove together with the interim override in cloud-iac-provisioner:
+  # https://github.com/elastic/ingest-dev/issues/10285
+  UseEchProductionIssuer: !And
+    - !Equals [!Ref ElasticResourceType, deployment]
+    - !Equals [!Ref ElasticCloudEnvironment, production]
+
 Resources:
 
   # The trust is built from the two claims of the Elastic Workload Identity JWT:
@@ -99,11 +111,13 @@ Resources:
                   - iam:CreateOpenIDConnectProvider
                   - iam:AddClientIDToOpenIDConnectProvider
                 Resource: !Sub
-                  - arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
+                  - arn:${AWS::Partition}:iam::${AWS::AccountId}:oidc-provider/workload-identity-issuer.${IssuerRegion}.${IssuerProvider}.${Domain}/orgs/${ElasticOrganizationId}
                   - Domain: !FindInMap
                       - EnvironmentDomain
                       - !Ref ElasticCloudEnvironment
                       - Domain
+                    IssuerRegion: !If [UseEchProductionIssuer, us-east-1, !Ref ElasticCloudRegion]
+                    IssuerProvider: !If [UseEchProductionIssuer, aws, !Ref ElasticCloudProvider]
   WiiOidcProviderFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -234,11 +248,13 @@ Resources:
       ServiceToken: !GetAtt WiiOidcProviderFunction.Arn
       ServiceTimeout: "600"
       Url: !Sub
-        - https://workload-identity-issuer.${ElasticCloudRegion}.${ElasticCloudProvider}.${Domain}/orgs/${ElasticOrganizationId}
+        - https://workload-identity-issuer.${IssuerRegion}.${IssuerProvider}.${Domain}/orgs/${ElasticOrganizationId}
         - Domain: !FindInMap
             - EnvironmentDomain
             - !Ref ElasticCloudEnvironment
             - Domain
+          IssuerRegion: !If [UseEchProductionIssuer, us-east-1, !Ref ElasticCloudRegion]
+          IssuerProvider: !If [UseEchProductionIssuer, aws, !Ref ElasticCloudProvider]
 
   # The stack UUID (last "/" segment of the stack ARN) keeps the role name
   # unique across stacks; 24 + 36 chars stays under the 64-char limit.
