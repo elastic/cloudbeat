@@ -86,7 +86,6 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 14
-
   WiiOidcProviderFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -130,7 +129,6 @@ Resources:
                       - UseEchProductionIssuer
                       - aws
                       - !Ref ElasticCloudProvider
-
   WiiOidcProviderFunction:
     Type: AWS::Lambda::Function
     Properties:
