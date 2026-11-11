@@ -71,7 +71,7 @@ require (
 	github.com/microsoft/kiota-abstractions-go v1.12.1
 	github.com/microsoftgraph/msgraph-sdk-go v1.105.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
-	github.com/mikefarah/yq/v4 v4.54.2
+	github.com/mikefarah/yq/v4 v4.54.3
 	github.com/mitchellh/gox v1.0.1
 	github.com/open-policy-agent/opa v1.20.2
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
@@ -554,7 +554,7 @@ require (
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.78 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.78 // indirect
-	modernc.org/libc v1.80.1 // indirect
+	modernc.org/libc v1.80.2 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.12.1 // indirect
 	mvdan.cc/sh/v3 v3.14.1 // indirect
