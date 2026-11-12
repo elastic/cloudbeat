@@ -21,11 +21,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TEST_ENVS_DIR: deploy/test-environments
+  TEMPLATE_TESTS_DIR: tests/template_tests
   INTEGRATIONS_SETUP_DIR: tests/integrations_setup
   DEPLOYMENT_MANAGER_DIR: deploy/deployment-manager
-  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
-  TF_VAR_ess_region: gcp-us-west2 # default region for testing deployments
+  EC_REGION: gcp-us-west2 # default region for testing deployments
   GCP_LABELS: "ci=integration"
   ZONE: us-central1-b
   MACHINE_TYPE: e2-standard-4 # n2-standard-4 (the default) hit ZONE_RESOURCE_POOL_EXHAUSTED in us-central1-a and -b
@@ -43,7 +42,7 @@ jobs:
       - name: Set up unique deployment names
         run: |
           suffix="$(date +%s | tail -c 3)"
-          echo "TF_VAR_deployment_name=gcp-dm-ci-test-$suffix" >> $GITHUB_ENV
+          echo "EC_DEPLOYMENT_NAME=gcp-dm-ci-test-${{ github.run_id }}-${{ github.run_attempt }}-$suffix" >> $GITHUB_ENV
           echo "GCP_DEPLOYMENT_NAME=ea-cspm-ci-dm-test-$suffix" >> $GITHUB_ENV
 
       - name: Check out the repo
@@ -62,18 +61,24 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }} # this also sets the project name
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: set TF_VAR_stack_version
+      - name: Set stack version
         run: |
           version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          echo "TF_VAR_stack_version=$version" >> $GITHUB_ENV
+          echo "EC_STACK_VERSION=$version" >> $GITHUB_ENV
 
+      - name: Install ecctl
+        uses: ./.github/actions/ecctl
+
+      # Credentials and URLs of the deployment are masked and exported by the script.
       - name: Provision Test Environment (EC)
         id: apply
         if: success()
-        working-directory: ${{ env.TEST_ENVS_DIR }}
+        env:
+          EC_API_KEY: ${{ secrets.EC_API_KEY }}
+          DEPLOYMENT_NAME: ${{ env.EC_DEPLOYMENT_NAME }}
+          STACK_VERSION: ${{ env.EC_STACK_VERSION }}
         run: |
-          ./manage_infrastructure.sh "elk-stack" "apply"
-          ./manage_infrastructure.sh "elk-stack" "output"
+          "${TEMPLATE_TESTS_DIR}/create_stack.sh"
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
@@ -104,11 +109,13 @@ jobs:
           poetry install
           poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-      - name: Destory EC deployment
+      - name: Destroy EC deployment
         if: always()
-        working-directory: ${{ env.TEST_ENVS_DIR }}
+        env:
+          EC_API_KEY: ${{ secrets.EC_API_KEY }}
+          DEPLOYMENT_NAME: ${{ env.EC_DEPLOYMENT_NAME }}
         run: |
-          ./manage_infrastructure.sh "elk-stack" "destroy"
+          "${TEMPLATE_TESTS_DIR}/destroy_stack.sh"
 
       - name: Set up GCP Cloud SDK
         if: always()
@@ -116,14 +123,13 @@ jobs:
 
       - name: Delete GCP Deployment Manager deployment
         if: always()
-        working-directory: ${{ env.TEST_ENVS_DIR }}
         env:
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
           DEPLOYMENT="${DEPLOYMENT_NAME}"
           PROJECT_NAME=$(gcloud config get-value core/project)
           PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
-          ./delete_gcp_env.sh $PROJECT_NAME $PROJECT_NUMBER $DEPLOYMENT
+          "${TEMPLATE_TESTS_DIR}/delete_gcp_env.sh" $PROJECT_NAME $PROJECT_NUMBER $DEPLOYMENT
 
   # Test a GCP Deployment Manager deployment using a Service Account
   gcp_dm_sa:
@@ -138,7 +144,7 @@ jobs:
       - name: Set up unique deployment names
         run: |
           suffix="$(date +%s | tail -c 3)"
-          echo "TF_VAR_deployment_name=gcp-dm-ci-sa-test-$suffix" >> $GITHUB_ENV
+          echo "EC_DEPLOYMENT_NAME=gcp-dm-ci-sa-test-${{ github.run_id }}-${{ github.run_attempt }}-$suffix" >> $GITHUB_ENV
           echo "GCP_AGENT_DEPLOYMENT_NAME=ea-cspm-gcp-ci-test-$suffix" >> $GITHUB_ENV
           echo "GCP_SA_DEPLOYMENT_NAME=sa-cspm-gcp-ci-test-$suffix" >> $GITHUB_ENV
 
@@ -158,18 +164,24 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }} # this also sets the project name
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-      - name: set TF_VAR_stack_version
+      - name: Set stack version
         run: |
           version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          echo "TF_VAR_stack_version=$version" >> $GITHUB_ENV
+          echo "EC_STACK_VERSION=$version" >> $GITHUB_ENV
 
+      - name: Install ecctl
+        uses: ./.github/actions/ecctl
+
+      # Credentials and URLs of the deployment are masked and exported by the script.
       - name: Provision Test Environment (EC)
         id: deploy_ec
         if: success()
-        working-directory: ${{ env.TEST_ENVS_DIR }}
+        env:
+          EC_API_KEY: ${{ secrets.EC_API_KEY }}
+          DEPLOYMENT_NAME: ${{ env.EC_DEPLOYMENT_NAME }}
+          STACK_VERSION: ${{ env.EC_STACK_VERSION }}
         run: |
-          ./manage_infrastructure.sh "elk-stack" "apply"
-          ./manage_infrastructure.sh "elk-stack" "output"
+          "${TEMPLATE_TESTS_DIR}/create_stack.sh"
 
       - name: Set up GCP Cloud SDK
         if: always()
@@ -208,16 +220,17 @@ jobs:
           poetry install
           poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-      - name: Destory EC deployment
+      - name: Destroy EC deployment
         if: always()
-        working-directory: ${{ env.TEST_ENVS_DIR }}
+        env:
+          EC_API_KEY: ${{ secrets.EC_API_KEY }}
+          DEPLOYMENT_NAME: ${{ env.EC_DEPLOYMENT_NAME }}
         run: |
-          ./manage_infrastructure.sh "elk-stack" "destroy"
+          "${TEMPLATE_TESTS_DIR}/destroy_stack.sh"
 
       - name: Delete GCP Deployments
         if: always()
-        working-directory: ${{ env.TEST_ENVS_DIR }}
         run: |
           PROJECT_NAME=$(gcloud config get-value core/project)
           PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
-          ./delete_gcp_env.sh $PROJECT_NAME $PROJECT_NUMBER "${GCP_SA_DEPLOYMENT_NAME}" "${GCP_AGENT_DEPLOYMENT_NAME}"
+          "${TEMPLATE_TESTS_DIR}/delete_gcp_env.sh" $PROJECT_NAME $PROJECT_NUMBER "${GCP_SA_DEPLOYMENT_NAME}" "${GCP_AGENT_DEPLOYMENT_NAME}"
