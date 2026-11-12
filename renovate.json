@@ -433,6 +433,22 @@
       ]
     },
     {
+      "description": "9.4: cap fluxcd/cli-utils below v1.4.0 - v1.4.0 requires Go 1.27, which 9.4 does not move to",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/fluxcd/cli-utils"
+      ],
+      "allowedVersions": "<1.4.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
       "description": "9.4: cap sigstore/sigstore below v1.11.0 - v1.11.0 requires Go 1.27, which 9.4 does not move to",
       "matchBaseBranches": [
         "9.4"
