@@ -59,11 +59,26 @@ export_env() {
 
 # The template payload includes Enterprise Search, which is not allowed on 9.x stacks and
 # was never part of the Terraform deployment; it is removed by the jq filter below.
-echo "Generating deployment payload (${DEPLOYMENT_TEMPLATE}, ${EC_REGION}, ${STACK_VERSION})"
+# Terraform matched the version with a regex, so 9.7.0 could resolve to 9.7.0-SNAPSHOT.
+# ecctl needs the exact version string: use an exact match if there is one, otherwise the
+# highest available version that starts with the requested one.
+available_versions="$(ecctl stack list --output json | jq -r '[.. | objects | .version? | select(type == "string")] | unique | .[]')"
+if printf '%s\n' "${available_versions}" | grep -qxF "${STACK_VERSION}"; then
+    resolved_version="${STACK_VERSION}"
+else
+    resolved_version="$(printf '%s\n' "${available_versions}" | grep -F "${STACK_VERSION}" | grep "^${STACK_VERSION//./\\.}" | sort -V | tail -n 1 || true)"
+fi
+if [ -z "${resolved_version}" ]; then
+    echo "No available stack version matches ${STACK_VERSION}. Available versions:" >&2
+    printf '%s\n' "${available_versions}" >&2
+    exit 1
+fi
+
+echo "Generating deployment payload (${DEPLOYMENT_TEMPLATE}, ${EC_REGION}, ${resolved_version})"
 ecctl deployment create \
     --generate-payload \
     --name "${DEPLOYMENT_NAME}" \
-    --version "${STACK_VERSION}" \
+    --version "${resolved_version}" \
     --deployment-template "${DEPLOYMENT_TEMPLATE}" |
     jq \
         --argjson es "${ES_SIZE_MB}" \
