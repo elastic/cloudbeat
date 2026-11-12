@@ -64,7 +64,7 @@ jobs:
       - name: Set stack version
         run: |
           version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          echo "EC_STACK_VERSION=$version" >> $GITHUB_ENV
+          echo "EC_STACK_VERSION=${version}-SNAPSHOT" >> $GITHUB_ENV
 
       - name: Install ecctl
         uses: ./.github/actions/ecctl
@@ -167,7 +167,7 @@ jobs:
       - name: Set stack version
         run: |
           version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          echo "EC_STACK_VERSION=$version" >> $GITHUB_ENV
+          echo "EC_STACK_VERSION=${version}-SNAPSHOT" >> $GITHUB_ENV
 
       - name: Install ecctl
         uses: ./.github/actions/ecctl
