@@ -48,7 +48,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.86.2
 	github.com/aws/aws-sdk-go-v2/service/sns v1.47.10
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.9
-	github.com/aws/smithy-go v1.28.8
+	github.com/aws/smithy-go v1.28.9
 	github.com/dgraph-io/ristretto/v2 v2.4.2
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20261112051337-65bae9ee687e
@@ -69,7 +69,7 @@ require (
 	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20261019233610-ccf49f5dd025
 	github.com/microsoft/kiota-abstractions-go v1.12.1
-	github.com/microsoftgraph/msgraph-sdk-go v1.105.0
+	github.com/microsoftgraph/msgraph-sdk-go v1.106.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.54.3
 	github.com/mitchellh/gox v1.0.1
@@ -108,7 +108,7 @@ require (
 )
 
 require (
-	cel.dev/expr v0.25.3 // indirect
+	cel.dev/expr v0.26.0 // indirect
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/accesscontextmanager v1.17.1 // indirect
 	cloud.google.com/go/auth v0.24.3 // indirect
@@ -323,7 +323,7 @@ require (
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect
-	github.com/huandu/go-clone v1.7.4 // indirect
+	github.com/huandu/go-clone v1.7.5 // indirect
 	github.com/huandu/go-sqlbuilder v1.44.1 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20261012173340-cbb8aaea4290 // indirect
 	github.com/in-toto/attestation v1.2.0 // indirect
@@ -343,7 +343,7 @@ require (
 	github.com/josephspurrier/goversioninfo v1.7.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v1.6.0 // indirect
-	github.com/klauspost/compress v1.20.3 // indirect
+	github.com/klauspost/compress v1.20.4 // indirect
 	github.com/knadh/koanf/maps v0.1.3 // indirect
 	github.com/knadh/koanf/providers/confmap v1.0.1 // indirect
 	github.com/knadh/koanf/v2 v2.4.1 // indirect
@@ -377,8 +377,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.31 // indirect
 	github.com/mattn/go-shellwords v1.0.16 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.3.1 // indirect
-	github.com/microsoft/kiota-http-go v1.6.0 // indirect
-	github.com/microsoft/kiota-serialization-form-go v1.1.6 // indirect
+	github.com/microsoft/kiota-http-go v1.6.1 // indirect
+	github.com/microsoft/kiota-serialization-form-go v1.1.7 // indirect
 	github.com/microsoft/kiota-serialization-json-go v1.1.5 // indirect
 	github.com/microsoft/kiota-serialization-multipart-go v1.1.5 // indirect
 	github.com/microsoft/kiota-serialization-text-go v1.1.7 // indirect
