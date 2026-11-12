@@ -10,7 +10,8 @@ set -euo pipefail
 #     .buildkite/scripts/release/bump-patch.sh on a release branch, that only
 #     change defaultBeatVersion in version/version.go.
 # Anything else is left for a human. If the PR has one of these labels but does
-# not qualify, the script comments on the PR with the reason.
+# not qualify, the script comments on the PR with the reason. If it already
+# approved the PR earlier, it dismisses that approval.
 #
 # Env: GH_REPO (e.g. elastic/cloudbeat), GH_TOKEN, DRY_RUN=true to only print what it would do.
 
@@ -41,7 +42,7 @@ check_renovate() {
 # Qualifies if the PR targets a release branch and its only change is the
 # defaultBeatVersion line in version/version.go.
 check_patch_bump() {
-    local base files bumped
+    local base files diff old new
     has_label version-bump-auto-approve || {
         echo "missing the version-bump-auto-approve label"
         return
@@ -56,8 +57,12 @@ check_patch_bump() {
         echo "changes more than one line in version/version.go, changed: ${files}"
         return
     }
-    bumped=$(gh pr diff "${PR}" | grep -cE '^\+const defaultBeatVersion = "[0-9]+\.[0-9]+\.[0-9]+"$' || true)
-    [[ "${bumped}" == "1" ]] || echo "the version/version.go change is not a defaultBeatVersion bump"
+    # Compare the removed and added defaultBeatVersion lines: same major.minor, patch +1.
+    diff=$(gh pr diff "${PR}")
+    old=$(sed -nE 's/^-const defaultBeatVersion = "([0-9]+\.[0-9]+)\.([0-9]+)"$/\1 \2/p' <<<"${diff}")
+    new=$(sed -nE 's/^\+const defaultBeatVersion = "([0-9]+\.[0-9]+)\.([0-9]+)"$/\1 \2/p' <<<"${diff}")
+    [[ -n "${old}" && -n "${new}" && "${old% *}" == "${new% *}" && $((${new#* } - ${old#* })) -eq 1 ]] ||
+        echo "the version/version.go change is not a patch bump of defaultBeatVersion"
 }
 
 author=$(jq -r .author.login <<<"${pr}")
@@ -83,6 +88,14 @@ if [[ -n "${problem}" ]]; then
     if { has_label renovate-auto-approve || has_label version-bump-auto-approve; } &&
         ! jq -e --arg body "${message}" 'any(.comments[]; .body == $body)' <<<"${pr}" >/dev/null; then
         run gh pr comment "${PR}" --body "${message}"
+    fi
+    # A new push can make an approved PR stop qualifying, and dismiss_stale_reviews
+    # is off, so withdraw our own earlier approval.
+    review_id=$(gh api "repos/${GH_REPO}/pulls/${PR}/reviews" --paginate \
+        -q '[.[] | select(.user.login == "github-actions[bot]" and .state == "APPROVED")] | last | .id // empty')
+    if [[ -n "${review_id}" ]]; then
+        run gh api -X PUT "repos/${GH_REPO}/pulls/${PR}/reviews/${review_id}/dismissals" \
+            -f message="No longer qualifies: ${problem}."
     fi
     exit 0
 fi
