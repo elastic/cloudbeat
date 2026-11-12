@@ -57,6 +57,8 @@ export_env() {
     echo "$1=$2" >>"${GITHUB_ENV}"
 }
 
+# The template payload includes Enterprise Search, which is not allowed on 9.x stacks and
+# was never part of the Terraform deployment; it is removed by the jq filter below.
 echo "Generating deployment payload (${DEPLOYMENT_TEMPLATE}, ${EC_REGION}, ${STACK_VERSION})"
 ecctl deployment create \
     --generate-payload \
@@ -71,6 +73,7 @@ ecctl deployment create \
         (.resources.elasticsearch[0].plan.cluster_topology[] | select(.id == "hot_content"))
             |= (.size.value = $es | .zone_count = $zones)
         | .resources.kibana[0].plan.cluster_topology[0].size.value = $kb
+        | del(.resources.enterprise_search)
         | .metadata.tags = [
             {key: "division", value: "engineering"},
             {key: "org", value: "security"},
