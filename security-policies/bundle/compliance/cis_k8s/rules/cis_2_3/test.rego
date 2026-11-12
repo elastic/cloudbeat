@@ -7,11 +7,14 @@ import future.keywords.if
 
 test_violation if {
 	eval_fail with input as rule_input("--auto-tls=true")
+	eval_fail with input as rule_input("--auto-tls=True")
+	eval_fail with input as rule_input("--auto-tls=TRUE")
 }
 
 test_pass if {
 	eval_pass with input as rule_input("")
 	eval_pass with input as rule_input("--auto-tls=false")
+	eval_pass with input as rule_input("--auto-tls=False")
 }
 
 test_not_evaluated if {

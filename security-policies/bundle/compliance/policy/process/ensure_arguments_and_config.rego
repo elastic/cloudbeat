@@ -5,6 +5,7 @@ import future.keywords.in
 
 import data.benchmark_data_adapter
 import data.compliance.lib.common as lib_common
+import data.compliance.policy.process.common as process_common
 import data.compliance.policy.process.data_adapter
 
 process_args := benchmark_data_adapter.process_args
@@ -33,6 +34,10 @@ process_contains_key_with_bool_value(entity, value) if {
 
 not_process_contains_key_with_value(entity, value) if {
 	not lib_common.contains_key_with_value(process_args, entity, value)
+}
+
+not_process_arg_key_value_bool(entity, key, expected) if {
+	not process_common.arg_value_contains_key_bool(object.get(process_args, entity, ""), key, expected)
 }
 
 not_process_arg_variable(entity, variable) if {

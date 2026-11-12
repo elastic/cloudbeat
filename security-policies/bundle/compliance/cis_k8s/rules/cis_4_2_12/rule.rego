@@ -7,7 +7,7 @@ import future.keywords.if
 default rule_evaluation := false
 
 rule_evaluation if {
-	audit.not_process_contains_key_with_value("--feature-gates", "RotateKubeletServerCertificate=false")
+	audit.not_process_arg_key_value_bool("--feature-gates", "RotateKubeletServerCertificate", "false")
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.

@@ -1,5 +1,6 @@
 package compliance.policy.process.common
 
+import data.compliance.lib.common as lib_common
 import future.keywords.if
 import future.keywords.in
 
@@ -24,3 +25,14 @@ split_key_value(key_value_string, delimiter) := [key, value] if {
 	value_length := (count(key_value_string) - seperator_index) - 1
 	value := substring(key_value_string, value_start_index, value_length)
 }
+
+# arg_value_contains_key_bool matches key=value entries in a comma-separated flag
+# value, comparing the value portion with lib_common.bool_equal.
+arg_value_contains_key_bool(argument_value, key, expected) if {
+	argument_value
+	entries := split(argument_value, ",")
+	some entry in entries
+	[k, v] := split_key_value(entry, "=")
+	k == key
+	lib_common.bool_equal(v, expected)
+} else := false
