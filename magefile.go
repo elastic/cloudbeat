@@ -66,6 +66,8 @@ func init() {
 		GoVersion:   filepath.Join(repo.RootDir, ".go-version"),
 		DocBranch:   filepath.Join(repo.RootDir, "docs/version.asciidoc"),
 	})
+	// shortcut: Beats fips-settings.yaml does not list cloudbeat yet, so FIPS=true skips the build; remove this line after the Beats dependency update.
+	devtools.FIPSConfig.Beats = append(devtools.FIPSConfig.Beats, devtools.BeatName)
 }
 
 // Check formats code, updates generated content, check for common errors, and
