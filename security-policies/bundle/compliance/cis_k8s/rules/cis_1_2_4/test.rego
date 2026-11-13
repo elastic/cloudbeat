@@ -7,10 +7,13 @@ import future.keywords.if
 
 test_violation if {
 	eval_fail with input as rule_input("--kubelet-https=false")
+	eval_fail with input as rule_input("--kubelet-https=False")
+	eval_fail with input as rule_input("--kubelet-https=FALSE")
 }
 
 test_pass if {
 	eval_pass with input as rule_input("--kubelet-https=true")
+	eval_pass with input as rule_input("--kubelet-https=True")
 	eval_pass with input as rule_input("")
 }
 

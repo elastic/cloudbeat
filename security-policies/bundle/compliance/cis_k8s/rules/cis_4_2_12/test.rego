@@ -7,6 +7,7 @@ import future.keywords.if
 
 test_violation if {
 	eval_fail with input as rule_input("--feature-gates=RotateKubeletServerCertificate=false")
+	eval_fail with input as rule_input("--feature-gates=RotateKubeletServerCertificate=False")
 	eval_fail with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=false", create_process_config(false, false))
 	eval_fail with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=false", create_process_config(true, false))
 	eval_fail with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=false", create_process_config(true, false))
@@ -16,7 +17,10 @@ test_pass if {
 	eval_pass with input as rule_input("")
 	eval_pass with input as rule_input_with_external("", create_process_config(false, false))
 	eval_pass with input as rule_input("--feature-gates=RotateKubeletServerCertificate=true")
+	eval_pass with input as rule_input("--feature-gates=RotateKubeletServerCertificate=True")
 	eval_pass with input as rule_input("--rotate-server-certificates=true")
+	eval_pass with input as rule_input("--rotate-server-certificates=True")
+	eval_pass with input as rule_input("--rotate-server-certificates=TRUE")
 	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(true, false))
 	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(false, false))
 	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(false, true))

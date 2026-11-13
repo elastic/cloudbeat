@@ -7,11 +7,15 @@ import future.keywords.if
 
 test_violation if {
 	eval_fail with input as rule_input("--service-account-lookup=false")
+	eval_fail with input as rule_input("--service-account-lookup=False")
+	eval_fail with input as rule_input("--service-account-lookup=FALSE")
 }
 
 test_pass if {
 	eval_pass with input as rule_input("")
 	eval_pass with input as rule_input("--service-account-lookup=true")
+	eval_pass with input as rule_input("--service-account-lookup=True")
+	eval_pass with input as rule_input("--service-account-lookup=TRUE")
 }
 
 test_not_evaluated if {

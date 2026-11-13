@@ -8,7 +8,7 @@ default rule_evaluation := false
 
 # Ensure that the --protect-kernel-defaults argument is set to true
 rule_evaluation if {
-	audit.process_contains_key_with_value("--protect-kernel-defaults", "true")
+	audit.process_contains_key_with_bool_value("--protect-kernel-defaults", "true")
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.

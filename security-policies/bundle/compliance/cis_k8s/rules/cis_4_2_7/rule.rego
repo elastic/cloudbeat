@@ -7,7 +7,7 @@ import future.keywords.if
 default rule_evaluation := true
 
 rule_evaluation := false if {
-	audit.process_contains_key_with_value("--make-iptables-util-chains", "false")
+	audit.process_contains_key_with_bool_value("--make-iptables-util-chains", "false")
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.

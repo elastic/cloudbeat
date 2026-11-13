@@ -7,7 +7,7 @@ import future.keywords.if
 default rule_evaluation := true
 
 rule_evaluation := false if {
-	audit.process_contains_key_with_value("--rotate-certificates", "false")
+	audit.process_contains_key_with_bool_value("--rotate-certificates", "false")
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.
