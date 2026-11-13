@@ -53,7 +53,7 @@ require (
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20261112152339-089488246047
 	github.com/elastic/e2e-testing v1.2.3
-	github.com/elastic/elastic-agent-client/v7 v7.20.0
+	github.com/elastic/elastic-agent-client/v7 v7.21.0
 	github.com/elastic/go-licenser v0.4.2
 	github.com/elastic/go-ucfg v0.9.2
 	github.com/go-logr/logr v1.4.4
@@ -232,7 +232,6 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/ebitengine/purego v0.11.3 // indirect
-	github.com/elastic/elastic-agent-libs v0.47.0 // indirect
 	github.com/elastic/go-concert v0.3.1 // indirect
 	github.com/elastic/go-lumber v0.2.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
