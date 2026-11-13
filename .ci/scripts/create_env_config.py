@@ -38,6 +38,7 @@ Creates a JSON file `env_config.json` with content like:
 }
 
 """
+
 import json
 import os
 import sys

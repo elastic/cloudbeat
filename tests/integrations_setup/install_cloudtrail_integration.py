@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create a CloudTrail integration.
 3. Create a CloudTrail bash script to be deployed on a host.
 """
+
 from pathlib import Path
 
 import configuration_fleet as cnfg

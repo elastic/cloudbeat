@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create an Audit Logs integration.
 3. Create an Audit Logs bash script to be deployed on a host.
 """
+
 from pathlib import Path
 
 import configuration_fleet as cnfg

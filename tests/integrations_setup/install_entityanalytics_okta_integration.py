@@ -4,6 +4,7 @@ Fleet-only entityanalytics_okta package policy on the CDR Wiz agent policy (same
 Requires install_wiz_integration.py to have run first (cdr_wiz_agent_policy.json).
 Reuses OKTA_API_KEY as okta_token; OKTA_ENTITY_ANALYTICS_DOMAIN is the Okta org hostname only.
 """
+
 import sys
 from pathlib import Path
 

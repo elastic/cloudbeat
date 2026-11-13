@@ -53,10 +53,8 @@ run_patch_bump() {
     local body
     body=$(render_template "${SCRIPT_DIR}/templates/pr-body-patch.md")
 
-    # TODO: re-enable `--label "version-bump-auto-approve"` once the first
-    # end-to-end manual run validates the auto-approve workflow + Mergify
-    # auto-merge rule. Until then, the bump PR is created label-free so a
-    # human reviews and merges it manually.
+    # The version-bump-auto-approve label lets scripts/approve-pr.sh approve the
+    # PR once it checks the diff only bumps defaultBeatVersion.
     if [[ "${DRY_RUN}" == "true" ]]; then
         echo "--- Dry run: skipping push and PR creation"
         gh pr create \
@@ -66,6 +64,7 @@ run_patch_bump() {
             --title "Bump cloudbeat version ${BASE_BRANCH} to ${NEXT_CLOUDBEAT_VERSION}" \
             --body "${body}" \
             --label "backport-skip" \
+            --label "version-bump-auto-approve" \
             --dry-run
         return
     fi
@@ -77,7 +76,8 @@ run_patch_bump() {
         --base "${BASE_BRANCH}" \
         --title "Bump cloudbeat version ${BASE_BRANCH} to ${NEXT_CLOUDBEAT_VERSION}" \
         --body "${body}" \
-        --label "backport-skip"
+        --label "backport-skip" \
+        --label "version-bump-auto-approve"
 }
 
 run_patch_bump

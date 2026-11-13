@@ -8,6 +8,7 @@ The following steps are performed:
 3. Render aws-asset-inventory.sh file to be used to install and enroll agent on an EC2
 instance
 """
+
 import sys
 from pathlib import Path
 

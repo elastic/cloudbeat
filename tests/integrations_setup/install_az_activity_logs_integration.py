@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create an Activity Logs integration.
 3. Create an Activity Logs bash script to be deployed on a host.
 """
+
 from pathlib import Path
 
 import configuration_fleet as cnfg
