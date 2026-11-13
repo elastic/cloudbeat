@@ -23,7 +23,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/pkg/autodiscover/kubernetes/metadata"
-	agent_config "github.com/elastic/elastic-agent-libs/config"
+	agent_config "github.com/elastic/beats/v7/pkg/config"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/internal/config"

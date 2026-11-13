@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create a CNVM AWS integration.
 3. Create a deploy/cloudformation/config.json file to be used by the just deploy-cloudformation command.
 """
+
 import json
 import sys
 from pathlib import Path

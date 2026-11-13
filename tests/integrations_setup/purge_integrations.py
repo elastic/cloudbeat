@@ -15,6 +15,7 @@ Usage:
     python purge_integrations.py
 
 """
+
 from loguru import logger
 
 import configuration_fleet as cnfg

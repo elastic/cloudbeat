@@ -27,6 +27,20 @@ pull_request_rules:
     actions:
       merge:
         method: squash
+  - name: auto-merge patch version bump PRs
+    conditions:
+      - author=elastic-vault-github-plugin-prod[bot]
+      - label=version-bump-auto-approve
+      - "#approved-reviews-by>=1"
+      - check-success=Unit Test
+      - check-success=Lint
+      - check-success=Test Rego Policies
+      - check-success=Package Cloudbeat (docker)
+      - check-success=Package Cloudbeat (tar.gz)
+      - check-success=Manifest Tests
+    actions:
+      merge:
+        method: squash
   - name: self-assign PRs
     conditions:
       - -merged

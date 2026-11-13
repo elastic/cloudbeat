@@ -36,6 +36,7 @@
   ],
   "enabledManagers": [
     "buildkite",
+    "custom.regex",
     "dockerfile",
     "github-actions",
     "gomod",
@@ -78,11 +79,10 @@
       "customType": "regex",
       "description": "Track elastic/beats branch HEAD — currentValue is derived from baseBranch at runtime",
       "managerFilePatterns": ["/^go\\.mod$/"],
-      "matchStrings": ["github\\.com/elastic/beats/v7 v7\\.0\\.0-alpha2\\.0\\.(?<timestamp>\\d+)-(?<currentDigest>[0-9a-f]{12})"],
+      "matchStrings": ["github\\.com/elastic/beats/v7 v7\\.0\\.0-alpha2\\.0\\.\\d+-(?<currentDigest>[0-9a-f]{12,40})"],
       "depNameTemplate": "https://github.com/elastic/beats",
       "datasourceTemplate": "git-refs",
-      "currentValueTemplate": "{{baseBranch}}",
-      "autoReplaceStringTemplate": "github.com/elastic/beats/v7 v7.0.0-alpha2.0.{{{timestamp}}}-{{{newDigest}}}"
+      "currentValueTemplate": "{{baseBranch}}"
     }
   ],
   "packageRules": [
@@ -433,6 +433,22 @@
       ]
     },
     {
+      "description": "9.4: cap fluxcd/cli-utils below v1.4.0 - v1.4.0 requires Go 1.27, which 9.4 does not move to",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/fluxcd/cli-utils"
+      ],
+      "allowedVersions": "<1.4.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
       "description": "9.4: cap sigstore/sigstore below v1.11.0 - v1.11.0 requires Go 1.27, which 9.4 does not move to",
       "matchBaseBranches": [
         "9.4"
@@ -558,6 +574,19 @@
       "enabled": false
     },
     {
+      "description": "Disable python image updates in tests/Dockerfile - the lookup for python:3.15-slim fails with 'timeout while waiting for mutex to become available' (lookupUpdates error on the Dependency Dashboard). Re-enable once the lookup works again",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchFileNames": [
+        "tests/Dockerfile"
+      ],
+      "matchPackageNames": [
+        "python"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Disable the kustomize 'elastic-agent' image update in the vanilla-agent overlay - newName is a bare local image name (loaded into kind), which Renovate resolves as docker.io/library/elastic-agent and fails with 'no-result' (package lookup failure)",
       "matchManagers": [
         "kustomize"
@@ -673,6 +702,16 @@
         "go",
         "golangci-lint"
       ]
+    },
+    {
+      "description": "Cap regal below v1 - the upstream repo has stray v2.x tags (e.g. v2.2.3, a 2024 'Testing versioning' commit) that are not releases and break the pre-commit hook install. Real releases are v0.x",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "matchDepNames": [
+        "/^styrainc\\/regal$/i"
+      ],
+      "allowedVersions": "<1.0.0"
     },
     {
       "description": "Group pre-commit hook rev updates into one PR",
