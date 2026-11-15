@@ -27,7 +27,7 @@ is_iam_policy if {
 
 is_aws_support_access if {
 	is_iam_policy
-	input.resource.Arn == "arn:aws:iam::aws:policy/AWSSupportAccess"
+	regex.match(`^arn:[^:]+:iam::aws:policy/AWSSupportAccess$`, input.resource.Arn)
 }
 
 is_access_analyzers if {
