@@ -94,7 +94,7 @@ require (
 	golang.org/x/oauth2 v0.38.0
 	golang.org/x/sync v0.25.0
 	golang.org/x/time v0.16.0
-	google.golang.org/api v0.314.0
+	google.golang.org/api v0.315.0
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -219,7 +219,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
-	github.com/docker/cli v29.9.3+incompatible // indirect
+	github.com/docker/cli v29.10.0+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.13 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
