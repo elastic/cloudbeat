@@ -1,0 +1,17 @@
+name: "Install ecctl"
+description: >
+  Installs the Elastic Cloud CLI (ecctl), pinned to a commit hash, with the Go toolchain
+  from the hermit environment (run the hermit action first). Used by the template tests.
+runs:
+  using: composite
+  steps:
+    - name: Install ecctl
+      shell: bash
+      env:
+        # elastic/ecctl v1.15.0
+        ECCTL_COMMIT: fdd85ba1641d03042257d261ede820b267e1543d
+      run: |
+        bin_dir="${RUNNER_TEMP}/ecctl-bin"
+        mkdir -p "${bin_dir}"
+        GOBIN="${bin_dir}" go install "github.com/elastic/ecctl@${ECCTL_COMMIT}"
+        echo "${bin_dir}" >> "${GITHUB_PATH}"
