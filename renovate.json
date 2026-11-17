@@ -42,14 +42,6 @@
       "matchStrings": ["(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version"
-    },
-    {
-      "customType": "regex",
-      "description": "Update the pinned ecctl release (tag and commit hash) in the ecctl action",
-      "fileMatch": ["^\\.github/actions/ecctl/action\\.yml$"],
-      "matchStrings": ["# elastic/ecctl (?<currentValue>v\\d+\\.\\d+\\.\\d+)\\s+ECCTL_COMMIT: (?<currentDigest>[0-9a-f]{40})"],
-      "depNameTemplate": "elastic/ecctl",
-      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [
