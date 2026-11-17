@@ -22,10 +22,17 @@ FAILED_DEPLOYMENTS=()
 
 for DEPLOYMENT in "${GCP_DEPLOYMENTS[@]}"; do
     echo "Deleting GCP deployment: $DEPLOYMENT"
-    if gcloud deployment-manager deployments delete "$DEPLOYMENT" -q; then
+    delete_output=""
+    if delete_output=$(gcloud deployment-manager deployments delete "$DEPLOYMENT" -q 2>&1); then
+        echo "$delete_output"
         echo "Successfully deleted GCP deployment: $DEPLOYMENT"
         DELETED_DEPLOYMENTS+=("$DEPLOYMENT")
+    elif grep -q "code=404" <<<"$delete_output"; then
+        # deploy.sh rolls a failed deployment back itself, so there is nothing left to delete.
+        echo "GCP deployment $DEPLOYMENT does not exist (already rolled back or deleted)"
+        DELETED_DEPLOYMENTS+=("$DEPLOYMENT")
     else
+        echo "$delete_output"
         echo "Failed to delete GCP deployment: $DEPLOYMENT"
         FAILED_DEPLOYMENTS+=("$DEPLOYMENT")
     fi

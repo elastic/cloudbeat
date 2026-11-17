@@ -8,6 +8,8 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - ".github/workflows/test-gcp-dm.yml"
+      - ".github/actions/ecctl/**"
+      - "tests/template_tests/**"
       - "deploy/deployment-manager/compute_engine.py"
       - "deploy/deployment-manager/compute_engine.py.schema"
       - "deploy/deployment-manager/deploy.sh"
