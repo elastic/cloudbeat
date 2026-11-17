@@ -82,14 +82,6 @@
       "datasourceTemplate": "git-refs",
       "currentValueTemplate": "{{baseBranch}}",
       "autoReplaceStringTemplate": "github.com/elastic/beats/v7 v7.0.0-alpha2.0.{{{timestamp}}}-{{{newDigest}}}"
-    },
-    {
-      "customType": "regex",
-      "description": "Update the pinned ecctl release (tag and commit hash) in the ecctl action",
-      "managerFilePatterns": ["/^\\.github/actions/ecctl/action\\.yml$/"],
-      "matchStrings": ["# elastic/ecctl (?<currentValue>v\\d+\\.\\d+\\.\\d+)\\s+ECCTL_COMMIT: (?<currentDigest>[0-9a-f]{40})"],
-      "depNameTemplate": "elastic/ecctl",
-      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [
