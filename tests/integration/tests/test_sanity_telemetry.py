@@ -8,9 +8,10 @@ The goal of this suite is to perform basic sanity checks to verify the telemetry
 """
 
 import pytest
+from munch import Munch, munchify
+
 from commonlib.kibana_api import get_telemetry
 from configuration import elasticsearch
-from munch import Munch, munchify
 
 
 @pytest.fixture(scope="module", name="cloud_security_telemetry_data")
