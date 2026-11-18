@@ -30,6 +30,7 @@ def _request_json(method: str, cfg: Munch, path: str, **kwargs) -> dict:
     headers = {"kbn-xsrf": "true", **kwargs.pop("headers", {})}
     last_error = ""
     for attempt in range(1, MAX_ATTEMPTS + 1):
+        retryable = True
         try:
             response = requests.request(
                 method,
@@ -42,12 +43,16 @@ def _request_json(method: str, cfg: Munch, path: str, **kwargs) -> dict:
             if response.status_code == 200:
                 return response.json()
             last_error = f"status code {response.status_code}"
+            # Only rate limiting and server errors are worth retrying; 401, 403, 404 etc. fail fast.
+            retryable = response.status_code == 429 or response.status_code >= 500
         except (requests.RequestException, ValueError) as ex:
             last_error = str(ex)
         logger.error(f"Kibana API {method} {path} failed: {last_error} (attempt {attempt}/{MAX_ATTEMPTS})")
+        if not retryable:
+            break
         if attempt < MAX_ATTEMPTS:
             time.sleep(RETRY_BACKOFF_SEC)
-    raise RuntimeError(f"Kibana API {method} {path} failed after {MAX_ATTEMPTS} attempts: {last_error}")
+    raise RuntimeError(f"Kibana API {method} {path} failed: {last_error}")
 
 
 def get_agents(cfg: Munch) -> list:
