@@ -31,10 +31,9 @@ from urllib.parse import parse_qs, urlparse
 
 import requests
 import ruamel.yaml
+from commonlib.kibana_api import get_agents, request_json
 from loguru import logger
 from munch import Munch
-
-from commonlib.kibana_api import get_agents, request_json
 
 PACKAGE_NAME = "cloud_security_posture"
 STREAM_NAME = f"{PACKAGE_NAME}.findings"

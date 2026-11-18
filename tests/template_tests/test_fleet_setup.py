@@ -17,7 +17,6 @@ from unittest import mock
 import pytest
 import ruamel.yaml
 from munch import Munch, munchify
-
 from template_tests import fleet_setup
 
 FIXTURES = Path(__file__).parent / "fixtures"

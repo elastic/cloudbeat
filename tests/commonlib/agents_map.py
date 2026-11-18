@@ -2,11 +2,10 @@
 Generate agent parameterization for pytest.
 """
 
-from loguru import logger
-from munch import Munch
-
 from commonlib.kibana_api import get_agents
 from configuration import agent, elasticsearch
+from loguru import logger
+from munch import Munch
 
 CIS_AWS_COMPONENT = "cloudbeat/cis_aws"
 CIS_GCP_COMPONENT = "cloudbeat/cis_gcp"
