@@ -8,15 +8,16 @@ The goal of this suite is to perform basic sanity checks to verify the telemetry
 """
 
 import pytest
-from fleet_api.common_api import get_telemetry
-from integrations_setup.configuration_fleet import elk_config
-from munch import munchify
+from commonlib.kibana_api import get_telemetry
+from configuration import elasticsearch
+from munch import Munch, munchify
 
 
 @pytest.fixture(scope="module", name="cloud_security_telemetry_data")
 def get_cloud_security_telemetry_data():
     """Fixture to fetch telemetry data"""
-    telemetry_payload = get_telemetry(elk_config)
+    cfg = Munch(kibana_url=elasticsearch.kibana_url, auth=elasticsearch.basic_auth)
+    telemetry_payload = get_telemetry(cfg)
     telemetry_object = munchify(telemetry_payload[0])
     return telemetry_object.stats.stack_stats.kibana.plugins.cloud_security_posture
 
