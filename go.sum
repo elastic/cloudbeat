@@ -598,8 +598,8 @@ github.com/go-openapi/testify/enable/yaml/v2 v2.8.1 h1:BIMg/qqur4MXPPHLE3nftDfHd
 github.com/go-openapi/testify/enable/yaml/v2 v2.8.1/go.mod h1:74sM7nseyEwJFZ9yRNI77kCQAM5h8nZ4TmXI86voDHs=
 github.com/go-openapi/testify/v2 v2.8.1 h1:zk3S6KaDY1iQW91vsOJc25Ql1xm5bhPrZKdnL930bRQ=
 github.com/go-openapi/testify/v2 v2.8.1/go.mod h1:4gUN8jC+RqOE2qjW/vDmfyTvl5BCht4qL7oca0odrak=
-github.com/go-openapi/validate v1.0.1 h1:Z337eNvBb5KhZiKtjBKfpk2ZHPI8otENKyp/I60XVos=
-github.com/go-openapi/validate v1.0.1/go.mod h1:2ZKOLz7jBYipFCn3IDGwppZwtbUHlQTMuKfSWTO7Nqk=
+github.com/go-openapi/validate v1.0.2 h1:zRGDo6Nhrct2AAV1Rb566/oQWEhW4en1dqx39MwoeM4=
+github.com/go-openapi/validate v1.0.2/go.mod h1:BiEiYjD/jl+RVbk6wGF3vy+pQrnQLMBEzBvAoJ1U92o=
 github.com/go-quicktest/qt v1.102.0 h1:HSQxCeh5YZH3EL3W39ixjtyaEhcWSXQHtHnMBzSs474=
 github.com/go-quicktest/qt v1.102.0/go.mod h1:p4lGIVX+8Wa6ZPNDvqcxq36XpUDLh42FLetFU7odllI=
 github.com/go-sourcemap/sourcemap v2.1.4+incompatible h1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=
