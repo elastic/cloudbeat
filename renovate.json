@@ -740,7 +740,6 @@
         ".github/workflows/**",
         ".buildkite/**",
         "**/pyproject.toml",
-        "deploy/test-environments/**",
         ".pre-commit-config.yaml",
         ".github/actions/**"
       ],
