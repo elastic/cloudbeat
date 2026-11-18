@@ -91,8 +91,8 @@ jobs:
         id: cspm-gcp-integration
         working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
         env:
-          AGENT_VERSION: ${{ env.ELK_VERSION }}
-          STACK_VERSION: ${{ env.ELK_VERSION }}
+          AGENT_VERSION: ${{ env.EC_STACK_VERSION }}
+          STACK_VERSION: ${{ env.EC_STACK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
           poetry install
@@ -203,8 +203,8 @@ jobs:
       - name: Deploy GCP Service Account and Agent
         id: gcp_deploy
         env:
-          AGENT_VERSION: ${{ env.ELK_VERSION }}
-          STACK_VERSION: ${{ env.ELK_VERSION }}
+          AGENT_VERSION: ${{ env.EC_STACK_VERSION }}
+          STACK_VERSION: ${{ env.EC_STACK_VERSION }}
         run: |
           # Deploys a GCP Service Account
           cd "${DEPLOYMENT_MANAGER_DIR}"
