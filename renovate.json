@@ -1,0 +1,822 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>elastic/renovate-config"
+  ],
+  "baseBranchPatterns": [
+    "main",
+    "9.6",
+    "9.5",
+    "9.4",
+    "8.19"
+  ],
+  "schedule": [
+    "* 1 * * 1-5"
+  ],
+  "automergeSchedule": [
+    "at any time"
+  ],
+  "labels": [
+    "renovate",
+    "dependencies",
+    "Team:Security-Cloud Services",
+    "backport-skip"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "separateMajorMinor": true,
+  "internalChecksFilter": "strict",
+  "prConcurrentLimit": 50,
+  "prHourlyLimit": 10,
+  "automergeStrategy": "squash",
+  "automergeType": "pr",
+  "ignorePaths": [
+    "**/vendor/**"
+  ],
+  "enabledManagers": [
+    "buildkite",
+    "custom.regex",
+    "dockerfile",
+    "github-actions",
+    "gomod",
+    "helm-values",
+    "hermit",
+    "kustomize",
+    "poetry",
+    "pre-commit",
+    "terraform"
+  ],
+  "pre-commit": {
+    "enabled": true
+  },
+  "customManagers": [
+    {
+      "description": "Update .go-version file",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.go-version$/"
+      ],
+      "matchStrings": [
+        "(?<currentValue>\\d+\\.\\d+\\.\\d+)\\s"
+      ],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "description": "Update :go-version: in docs/version.asciidoc",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^docs/version\\.asciidoc$/"
+      ],
+      "matchStrings": [
+        ":go-version: (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "go",
+      "datasourceTemplate": "golang-version"
+    },
+    {
+      "customType": "regex",
+      "description": "Track elastic/beats branch HEAD — currentValue is derived from baseBranch at runtime",
+      "managerFilePatterns": ["/^go\\.mod$/"],
+      "matchStrings": ["github\\.com/elastic/beats/v7 v7\\.0\\.0-alpha2\\.0\\.\\d+-(?<currentDigest>[0-9a-f]{12,40})"],
+      "depNameTemplate": "https://github.com/elastic/beats",
+      "datasourceTemplate": "git-refs",
+      "currentValueTemplate": "{{baseBranch}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Update the pinned ecctl release (tag and commit hash) in the ecctl action",
+      "managerFilePatterns": ["/^\\.github/actions/ecctl/action\\.yml$/"],
+      "matchStrings": ["# elastic/ecctl (?<currentValue>v\\d+\\.\\d+\\.\\d+)\\s+ECCTL_COMMIT: (?<currentDigest>[0-9a-f]{40})"],
+      "depNameTemplate": "elastic/ecctl",
+      "datasourceTemplate": "github-tags"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Ignore elastic/beats v7 - requires manual update",
+      "matchPackageNames": [
+        "github.com/elastic/beats/v7"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Track elastic/beats branch HEAD and regenerate go.mod pseudo-version via make generate",
+      "matchDepNames": ["https://github.com/elastic/beats"],
+      "addLabels": ["renovate-auto-approve"],
+      "automerge": true,
+      "postUpgradeTasks": {
+        "commands": ["make generate"],
+        "fileFilters": ["go.mod", "go.sum", "cloudbeat*.yml"],
+        "executionMode": "branch"
+      }
+    },
+    {
+      "description": "Group AWS SDK packages together",
+      "groupName": "aws-sdk",
+      "matchPackageNames": [
+        "github.com/aws/aws-sdk-go-v2",
+        "github.com/aws/aws-sdk-go-v2/**"
+      ]
+    },
+    {
+      "description": "Group Azure SDK packages together",
+      "groupName": "azure-sdk",
+      "matchPackageNames": [
+        "github.com/Azure/azure-sdk-for-go/**"
+      ]
+    },
+    {
+      "description": "Group GCP packages together",
+      "groupName": "gcp-sdk",
+      "matchPackageNames": [
+        "cloud.google.com/go/**"
+      ]
+    },
+    {
+      "description": "Group Kubernetes packages together",
+      "groupName": "k8s",
+      "matchPackageNames": [
+        "k8s.io/api",
+        "k8s.io/apimachinery",
+        "k8s.io/client-go",
+        "k8s.io/kubectl"
+      ]
+    },
+    {
+      "description": "Group golang.org/x packages together",
+      "groupName": "golang.org/x",
+      "matchPackageNames": [
+        "golang.org/x/**"
+      ]
+    },
+    {
+      "description": "Group Elastic packages together",
+      "groupName": "elastic",
+      "matchPackageNames": [
+        "github.com/elastic/**"
+      ]
+    },
+    {
+      "description": "Group Trivy packages together",
+      "groupName": "trivy",
+      "matchPackageNames": [
+        "github.com/aquasecurity/trivy",
+        "github.com/aquasecurity/trivy-db",
+        "github.com/aquasecurity/go-dep-parser"
+      ]
+    },
+    {
+      "description": "Group google.golang.org/genproto packages together",
+      "groupName": "google-genproto",
+      "matchPackageNames": [
+        "google.golang.org/genproto",
+        "google.golang.org/genproto/**"
+      ]
+    },
+    {
+      "description": "Group OpenTelemetry packages together",
+      "groupName": "opentelemetry",
+      "matchPackageNames": [
+        "go.opentelemetry.io/**"
+      ]
+    },
+    {
+      "description": "Group the packages coupled by gobwas/glob together - trivy and opa both require gobwas/glob v1.0.0, which removes glob.Glob that go.opentelemetry.io/collector/confmap still uses, so they must move in one PR once confmap migrates (opentelemetry-collector#15928)",
+      "groupName": "trivy-opa-glob",
+      "matchPackageNames": [
+        "github.com/aquasecurity/trivy",
+        "github.com/aquasecurity/trivy-db",
+        "github.com/aquasecurity/go-dep-parser",
+        "github.com/open-policy-agent/opa",
+        "github.com/gobwas/glob",
+        "go.opentelemetry.io/collector/confmap"
+      ]
+    },
+    {
+      "description": "Group Microsoft Kiota packages together",
+      "groupName": "microsoft-kiota",
+      "matchPackageNames": [
+        "github.com/microsoft/kiota-*"
+      ]
+    },
+    {
+      "description": "Group Microsoft Graph SDK packages together",
+      "groupName": "microsoft-graph-sdk",
+      "matchPackageNames": [
+        "github.com/microsoftgraph/**"
+      ]
+    },
+    {
+      "description": "Group Kubernetes SIG packages together",
+      "groupName": "k8s-sigs",
+      "matchPackageNames": [
+        "sigs.k8s.io/**"
+      ]
+    },
+    {
+      "description": "Group containerd packages together",
+      "groupName": "containerd",
+      "matchPackageNames": [
+        "github.com/containerd/**"
+      ]
+    },
+    {
+      "description": "Group Docker packages together",
+      "groupName": "docker",
+      "matchPackageNames": [
+        "github.com/docker/**"
+      ]
+    },
+    {
+      "description": "Group Moby packages together",
+      "groupName": "moby",
+      "matchPackageNames": [
+        "github.com/moby/**"
+      ]
+    },
+    {
+      "description": "Group Sigstore packages together",
+      "groupName": "sigstore",
+      "matchPackageNames": [
+        "github.com/sigstore/**"
+      ]
+    },
+    {
+      "description": "Enable indirect Go dependencies",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "indirect"
+      ],
+      "enabled": true
+    },
+    {
+      "description": "Disable sarama updates - requires manual handling",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "/^github\\.com/elastic/sarama$/"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable go.mod replace directive updates - pins must match beats go.mod; renovate writes invalid bare commit hashes",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "replace"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable goja updates - replaced by elastic/goja, version is driven by beats",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/dop251/goja",
+        "github.com/dop251/goja_nodejs"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable e2e-testing updates - v1.99.x tags are not real releases (latest is v1.2.3)",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/elastic/e2e-testing"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable go-ini/ini updates - v1.67.1+ declares its module path as gopkg.in/ini.v1, so 'go get github.com/go-ini/ini' fails; gopkg.in/ini.v1 is already used by trivy/opa/rekor, only yq still imports the old path. Must stay after the 'Enable indirect Go dependencies' rule, which would otherwise re-enable it",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/go-ini/ini"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable anchore/go-struct-converter updates - v0.2.x removes converter.ConvertFrom, which spdx/tools-golang (latest v0.5.7) still calls, breaking the build. Re-enable once spdx/tools-golang supports it. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/anchore/go-struct-converter"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable k8s.io/kube-openapi updates - newer digests require sigs.k8s.io/structured-merge-diff/v7, but k8s.io/apimachinery v0.37.x still uses v6, breaking the build. Re-enable once a stable k8s.io release (v0.38+) moves to v7. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "k8s.io/kube-openapi"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Cap sigs.k8s.io/kustomize api and kyaml below v0.21.3 - v0.21.3 pulls in a newer k8s.io/kube-openapi and sigs.k8s.io/structured-merge-diff/v7, but k8s.io/apimachinery v0.37.x still uses v6 (cannot use ...structured-merge-diff/v7/schema.TypeDef as ...v6/schema.TypeDef). Re-enable once a stable k8s.io release (v0.38+) moves to v7. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "sigs.k8s.io/kustomize/api",
+        "sigs.k8s.io/kustomize/kyaml"
+      ],
+      "allowedVersions": "<0.21.3"
+    },
+    {
+      "description": "Cap OPA below v1.21.0 - v1.21+ requires gobwas/glob v1.0.0, which removes glob.Glob and breaks go.opentelemetry.io/collector/confmap (undefined: glob.Glob). Re-enable once otel confmap migrates (opentelemetry-collector#15928) and beats picks it up. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/open-policy-agent/opa"
+      ],
+      "allowedVersions": "<1.21.0"
+    },
+    {
+      "description": "Cap trivy below v0.76.0 - v0.76.0 requires opa v1.21.1 and gobwas/glob v1.0.0, which removes glob.Glob and breaks go.opentelemetry.io/collector/confmap (undefined: glob.Glob). Re-enable once otel confmap migrates (opentelemetry-collector#15928). Must stay after the 'Enable indirect Go dependencies' rule; the 9.4 trivy cap below is stricter and takes precedence there",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/aquasecurity/trivy"
+      ],
+      "allowedVersions": "<0.76.0"
+    },
+    {
+      "description": "Cap gobwas/glob below v1.0.0 - v1.0.0 replaces the glob.Glob interface with *glob.Pattern and breaks go.opentelemetry.io/collector/confmap (undefined: glob.Glob). Re-enable together with the trivy and OPA caps once otel confmap migrates (opentelemetry-collector#15928). Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/gobwas/glob"
+      ],
+      "allowedVersions": "<1.0.0"
+    },
+    {
+      "description": "Disable otelaws updates - v0.72.0 deprecates the package (staticcheck SA1019); we are in maintenance mode, so stay on v0.71.0. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable major updates for indirect Go dependencies - a major bump changes the module path (e.g. backoff/v6 to backoff/v7), which is not used by cloudbeat and is reverted by go mod tidy, so the Lint job fails on the non-empty git diff. They move when the direct dependent (trivy, beats, yq) moves. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "indirect"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable Azure SDK major updates - cloudbeat imports these packages directly, so a major bump breaks the build until the Azure fetchers are migrated. Do these by hand in a dedicated PR",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/Azure/azure-sdk-for-go/**"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "9.4: disable elastic packages - they are coupled to the pinned elastic/beats (e.g. elastic-agent-libs v0.47.0 breaks libbeat: undefined paths.Paths), and beats cannot be bumped because newer beats requires Go 1.27. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/elastic/**"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "9.4: disable beats branch tracking - the git-refs manager is not covered by the gomod rule above, and newer beats requires Go 1.27, which 9.4 does not move to",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchDepNames": [
+        "https://github.com/elastic/beats"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "9.4: cap trivy below v0.75.0 - v0.75.0 requires Go 1.27, which 9.4 does not move to. Patch updates within 0.74.x still flow",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/aquasecurity/trivy"
+      ],
+      "allowedVersions": "<0.75.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
+      "description": "9.4: cap fluxcd/cli-utils below v1.4.0 - v1.4.0 requires Go 1.27, which 9.4 does not move to",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/fluxcd/cli-utils"
+      ],
+      "allowedVersions": "<1.4.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
+      "description": "9.4: cap sigstore/sigstore below v1.11.0 - v1.11.0 requires Go 1.27, which 9.4 does not move to",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/sigstore/sigstore"
+      ],
+      "allowedVersions": "<1.11.0",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
+      "description": "9.4: cap sigstore/rekor below v1.5.5 - v1.5.5 raises go.mod to go 1.27, which 9.4 does not move to. Patch updates within 1.5.x up to v1.5.4 still flow. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/sigstore/rekor"
+      ],
+      "allowedVersions": "<1.5.5",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
+      "description": "9.4: disable moby updates - the bumps raise go.mod to go 1.26.8 while 9.4 CI runs Go 1.26.6, and they are indirect-only. Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/moby/**"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "9.4: stay on Go 1.26.6 - no Go 1.27 upgrade is planned on this branch, and the hermit go package has no 1.26.7+ (go.hcl in cashapp/hermit-packages stops at 1.26.6), so a go.mod bump to 1.26.7+ cannot pass CI. Raise the cap once hermit adds them",
+      "matchBaseBranches": [
+        "9.4"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "allowedVersions": "<1.26.7",
+      "addLabels": [
+        "go-1.27-blocked"
+      ]
+    },
+    {
+      "description": "Auto-merge minor, patch, digest, and pin updates for all packages",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "addLabels": [
+        "renovate-auto-approve"
+      ],
+      "automerge": true,
+      "minimumReleaseAge": "2 days"
+    },
+    {
+      "description": "elastic/beats git-refs updates have no release timestamp, so minimumReleaseAge with internalChecksFilter strict would hold them back forever. Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
+      "matchDepNames": [
+        "https://github.com/elastic/beats"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Hermit go and golangci-lint updates have no release timestamp (the hermit datasource does not provide one), so minimumReleaseAge with internalChecksFilter strict holds them out of the go-version group branch and the PR only bumps go.mod, which fails CI because the toolchain comes from hermit (bin/.go-*.pkg). Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
+      "matchManagers": [
+        "hermit"
+      ],
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Exempt the .go-version and docs/version.asciidoc regex managers from minimumReleaseAge like the hermit entries. With internalChecksFilter strict they appear to be held out of the go-version group branch for a new Go release (go 1.27.3: the PRs bumped go.mod and the hermit pin but not .go-version or docs), leaving the PR inconsistent. Must stay after the 'Auto-merge minor, patch, digest, and pin updates' rule, which would otherwise re-apply minimumReleaseAge",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "minimumReleaseAge": null
+    },
+    {
+      "description": "Manual review for major updates",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Disable go-pep440-version and trivy-checks updates - they are indirect pseudo-version deps pinned by trivy's go.mod, so the version moves with trivy. Renovate cannot resolve a new digest for them (package lookup failure). Must stay after the 'Enable indirect Go dependencies' rule",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "github.com/aquasecurity/go-pep440-version",
+        "github.com/aquasecurity/trivy-checks"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable stefanprodan/kube-tools updates - the repo is archived and its floating 'v1' ref is a branch, not a tag, so Renovate cannot resolve a new digest (package lookup failure)",
+      "matchPackageNames": [
+        "stefanprodan/kube-tools"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable python image updates in tests/Dockerfile - the lookup for python:3.15-slim fails with 'timeout while waiting for mutex to become available' (lookupUpdates error on the Dependency Dashboard). Re-enable once the lookup works again",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchFileNames": [
+        "tests/Dockerfile"
+      ],
+      "matchPackageNames": [
+        "python"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable the kustomize 'elastic-agent' image update in the vanilla-agent overlay - newName is a bare local image name (loaded into kind), which Renovate resolves as docker.io/library/elastic-agent and fails with 'no-result' (package lookup failure)",
+      "matchManagers": [
+        "kustomize"
+      ],
+      "matchPackageNames": [
+        "elastic-agent"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable elastic/oblt-actions updates - only used by backport-active.yml, which is kept for the backport-active-* labels but is a candidate for deprecation",
+      "matchPackageNames": [
+        "elastic/oblt-actions"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Group the remaining Go minor, patch and digest updates into one PR per branch (replaces the single-package docker, moby, sigstore, kiota, graph, gcp and containerd PRs). Packages that are coupled by a dedicated group above, and the go toolchain, are excluded. Majors stay separate. Must stay after the dedicated group rules so it overrides their groupName",
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "matchPackageNames": [
+        "!go",
+        "!github.com/aws/aws-sdk-go-v2",
+        "!github.com/aws/aws-sdk-go-v2/**",
+        "!github.com/Azure/azure-sdk-for-go/**",
+        "!k8s.io/api",
+        "!k8s.io/apimachinery",
+        "!k8s.io/client-go",
+        "!k8s.io/kubectl",
+        "!sigs.k8s.io/**",
+        "!golang.org/x/**",
+        "!github.com/elastic/**",
+        "!github.com/aquasecurity/trivy",
+        "!github.com/aquasecurity/trivy-db",
+        "!github.com/aquasecurity/go-dep-parser",
+        "!github.com/open-policy-agent/opa",
+        "!github.com/gobwas/glob",
+        "!go.opentelemetry.io/**",
+        "!google.golang.org/genproto",
+        "!google.golang.org/genproto/**"
+      ],
+      "groupName": "go-deps"
+    },
+    {
+      "description": "Group GitHub Actions minor, patch and digest updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "groupName": "github-actions"
+    },
+    {
+      "description": "Group Python (poetry) library minor and patch updates. The python interpreter version is excluded because it needs its own review",
+      "matchManagers": [
+        "poetry"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchPackageNames": [
+        "!python"
+      ],
+      "groupName": "python-deps"
+    },
+    {
+      "description": "Disable digest updates for volatile packages",
+      "matchPackageNames": [
+        "k8s.io/utils",
+        "golang.org/x/crypto",
+        "golang.org/x/net",
+        "golang.org/x/exp",
+        "golang.org/x/oauth2"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Allow minor Go version updates in go.mod",
+      "matchDepNames": [
+        "go"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "versioning": "semver"
+    },
+    {
+      "description": "Group hermit-managed dev tools (awscli, terraform, gh, yq, ...) into one PR per branch and update type instead of one dashboard entry each. Must stay before the 'go-version' group rule, so go and golangci-lint keep their own group",
+      "matchManagers": [
+        "hermit"
+      ],
+      "groupName": "hermit-tools"
+    },
+    {
+      "description": "Group Go toolchain and golangci-lint version updates together",
+      "groupName": "go-version",
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
+      ]
+    },
+    {
+      "description": "Cap regal below v1 - the upstream repo has stray v2.x tags (e.g. v2.2.3, a 2024 'Testing versioning' commit) that are not releases and break the pre-commit hook install. Real releases are v0.x",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "matchDepNames": [
+        "/^styrainc\\/regal$/i"
+      ],
+      "allowedVersions": "<1.0.0"
+    },
+    {
+      "description": "Group pre-commit hook rev updates into one PR",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "groupName": "pre-commit"
+    },
+    {
+      "description": "Disable CI/infrastructure/test-environment updates on release branches",
+      "matchBaseBranches": [
+        "9.6",
+        "9.5",
+        "9.4",
+        "8.19"
+      ],
+      "matchFileNames": [
+        ".github/workflows/**",
+        ".buildkite/**",
+        "**/pyproject.toml",
+        ".pre-commit-config.yaml",
+        ".github/actions/**"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable hermit dev tool updates on release branches (maintenance mode). go and golangci-lint are re-enabled by the next rule because their go.mod and hermit pin bumps must land together",
+      "matchBaseBranches": [
+        "9.6",
+        "9.5",
+        "9.4",
+        "8.19"
+      ],
+      "matchManagers": [
+        "hermit"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Keep go and golangci-lint hermit updates on release branches. Must stay after the 'Disable hermit dev tool updates on release branches' rule",
+      "matchBaseBranches": [
+        "9.6",
+        "9.5",
+        "9.4",
+        "8.19"
+      ],
+      "matchManagers": [
+        "hermit"
+      ],
+      "matchDepNames": [
+        "go",
+        "golangci-lint"
+      ],
+      "enabled": true
+    },
+    {
+      "description": "8.19: stay on the 8.x elastic-agent image - the v9 bump is not valid for this branch",
+      "matchBaseBranches": [
+        "8.19"
+      ],
+      "matchPackageNames": [
+        "docker.elastic.co/beats/elastic-agent"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "8.19: disable gopkg.in/yaml.v2 major update - v3 changes behavior and needs a manual migration, which is not planned in maintenance mode",
+      "matchBaseBranches": [
+        "8.19"
+      ],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchPackageNames": [
+        "gopkg.in/yaml.v2"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable terraform provider and module major updates - they only affect test environments and need hand-tested upgrades. Do them in a dedicated PR",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": false
+  },
+  "dependencyDashboardReportAbandonment": false
+}

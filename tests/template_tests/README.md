@@ -33,7 +33,7 @@ Endpoints and credentials of the deployment must never reach the job log or an a
   ecctl output as an artifact.
 - Secrets are set only on the steps that need them, not for the whole job.
 
-## Used by the template tests (keep when removing the old environment tooling)
+## Used by the template tests (do not remove)
 
 - `tests/integrations_setup/`: `install_cnvm_integration.py`, `install_cspm_gcp_integration.py`,
   `agents_enrolled.py`, and the `configuration_fleet`, `fleet_api`, `package_policy`,
