@@ -316,14 +316,14 @@ def wait_components_list(
     if not elasticsearch.kibana_url:
         return [""]
 
-    actual.load_map()
+    try_loading_map(actual)
     start_time = time.time()
     while time.time() - start_time < timeout:
         if len(actual.component_map[component]) == expected.expected_map[component]:
             break
 
         time.sleep(COMPONENTS_BACKOFF)
-        actual.load_map()
+        try_loading_map(actual)
 
     logger.info(
         f"Waited {time.time() - start_time:.0f}s (timeout {timeout}s) for {component}: "
@@ -335,3 +335,14 @@ def wait_components_list(
  {component}, but got {len(actual.component_map[component])}"
 
     return actual.component_map[component]
+
+
+def try_loading_map(actual: AgentComponentMapping) -> None:
+    """
+    A convenient wrapper to catch errors when the actual map that is supposed to be loaded
+    is not ready yet.
+    """
+    try:
+        actual.load_map()
+    except (AttributeError, KeyError, IndexError) as ex:
+        logger.warning(ex)
