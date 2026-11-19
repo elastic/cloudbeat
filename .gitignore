@@ -33,10 +33,6 @@ test-logs/*.log
 tests/allure/results/*
 tests/allure/reports/*
 tests/integrations_setup/state_data.json
-<<<<<<< HEAD
-tests/integrations_setup/*.sh
-=======
->>>>>>> 7b3aa75 (ci: remove test-environment tooling (phase 6.1) (#10106))
 
 # vscode
 .vscode*
