@@ -27,6 +27,8 @@ CNVM_CONFIG_TIMEOUT = 3600
 
 # The timeout and backoff for waiting all agents are running the specified component.
 COMPONENTS_TIMEOUT = 300
+# GCP agents run on a freshly created VM (boot, download, install, enroll), which can take about 6 minutes.
+GCP_COMPONENTS_TIMEOUT = 600
 COMPONENTS_BACKOFF = 10
 
 AGENT_VERSION = elasticsearch.agent_version
@@ -240,7 +242,12 @@ def test_cspm_gcp_findings(
     Raises:
         AssertionError: If the resource type is missing.
     """
-    gcp_agents = wait_components_list(agents_actual_components, agents_expected_components, CIS_GCP_COMPONENT)
+    gcp_agents = wait_components_list(
+        agents_actual_components,
+        agents_expected_components,
+        CIS_GCP_COMPONENT,
+        timeout=GCP_COMPONENTS_TIMEOUT,
+    )
     for agent in gcp_agents:
         query_list = build_query_list(
             benchmark_id="cis_gcp",
@@ -288,12 +295,18 @@ def test_cspm_azure_findings(
         assert len(results) > 0, f"The resource type '{match_type}' is missing for agent {agent}"
 
 
-def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedMapping, component: str) -> list[str]:
+def wait_components_list(
+    actual: AgentComponentMapping,
+    expected: AgentExpectedMapping,
+    component: str,
+    timeout: int = COMPONENTS_TIMEOUT,
+) -> list[str]:
     """
     Wait for the list of agents running the specified component.
 
     Args:
         component (str): The component to match.
+        timeout (int): Seconds to wait for all expected agents to run the component.
 
     Returns:
         list: The list of agents running the specified component.
@@ -305,13 +318,17 @@ def wait_components_list(actual: AgentComponentMapping, expected: AgentExpectedM
 
     try_loading_map(actual)
     start_time = time.time()
-    while time.time() - start_time < COMPONENTS_TIMEOUT:
+    while time.time() - start_time < timeout:
         if len(actual.component_map[component]) == expected.expected_map[component]:
             break
 
         time.sleep(COMPONENTS_BACKOFF)
         try_loading_map(actual)
 
+    logger.info(
+        f"Waited {time.time() - start_time:.0f}s (timeout {timeout}s) for {component}: "
+        f"{len(actual.component_map[component])} of {expected.expected_map[component]} agents running it",
+    )
     assert expected.expected_map[component] == len(
         actual.component_map[component],
     ), f"Expected {expected.expected_map[component]} agents running\
