@@ -2,8 +2,8 @@
 Generate agent parameterization for pytest.
 """
 
+from commonlib.kibana_api import get_agents
 from configuration import agent, elasticsearch
-from fleet_api.agent_policy_api import get_agents
 from loguru import logger
 from munch import Munch
 
@@ -55,7 +55,6 @@ class AgentComponentMapping:
         cfg = Munch()
         cfg.auth = elasticsearch.basic_auth
         cfg.kibana_url = elasticsearch.kibana_url
-        cfg.stack_version = elasticsearch.stack_version
 
         active_agents = get_agents(cfg)
         logger.info(f"found {len(active_agents)} agents")
