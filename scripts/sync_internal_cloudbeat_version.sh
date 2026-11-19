@@ -31,8 +31,8 @@ sync_pr_already_open() {
 
 is_snapshot_published() {
     # ELK_VERSION resolves to "${CLOUDBEAT_VERSION}-SNAPSHOT"; only bump once that
-    # snapshot actually exists on the Elastic artifacts API, otherwise the test-runner
-    # would pin a version whose agent artifacts aren't published yet (see issue #17923).
+    # snapshot actually exists on the Elastic artifacts API, otherwise CI would pin a
+    # version whose agent artifacts aren't published yet (see issue #17923).
     local target="${CLOUDBEAT_VERSION}-SNAPSHOT"
     echo "Checking whether $target is published on the Elastic artifacts API"
     local versions
