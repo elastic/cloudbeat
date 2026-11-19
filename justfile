@@ -104,11 +104,6 @@ delete-cloudbeat-nocert:
   kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
 
 # EKS
-create-eks-deployment-file:
-  @echo "Make sure to run 'eval \$(elastic-package stack shellinit --shell \$(basename \$SHELL))'"
-  cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeEksOverlay}}
-  kustomize build {{kustomizeEksOverlay}} --output deploy/eks/cloudbeat-ds.yaml
-
 deploy-eks-cloudbeat:
   kubectl delete -k {{kustomizeEksOverlay}} -n kube-system & kubectl apply -k {{kustomizeEksOverlay}} -n kube-system
 
@@ -157,13 +152,6 @@ expose-ports:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
 
-
-delete-cloud-env prefix ignore-prefix="" interactive="true":
-  # delete all cloud environments that start with {{prefix}} and do not start with {{ignore-prefix}}
-  # ask for confirmation before deleting each environment: {{interactive}}
-  cd deploy/test-environments && \
-  terraform init && \
-  pwd && ./delete_env.sh --prefix {{prefix}} --ignore-prefix '{{ignore-prefix}}' --interactive {{interactive}}
 
 
 #### MOCKS #####
