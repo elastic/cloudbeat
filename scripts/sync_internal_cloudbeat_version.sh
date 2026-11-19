@@ -18,6 +18,38 @@ set_hermit_cloudbeat_version() {
     sed -E -i "s/CLOUDBEAT_VERSION\": \".*\"/CLOUDBEAT_VERSION\": \"$CLOUDBEAT_VERSION\"/g" $HERMIT_FILE
 }
 
+<<<<<<< HEAD
+=======
+sync_pr_already_open() {
+    # A previous run may have opened a sync PR for this version that hasn't merged
+    # yet; main still shows the drift, so avoid opening a duplicate every run.
+    local existing
+    existing=$(gh pr list \
+        --search "Sync CLOUDBEAT_VERSION in hermit.hcl to $CLOUDBEAT_VERSION in:title" \
+        --state open --json number --jq '.[0].number' 2>/dev/null || echo "")
+    [[ -n "$existing" ]]
+}
+
+is_snapshot_published() {
+    # ELK_VERSION resolves to "${CLOUDBEAT_VERSION}-SNAPSHOT"; only bump once that
+    # snapshot actually exists on the Elastic artifacts API, otherwise CI would pin a
+    # version whose agent artifacts aren't published yet (see issue #17923).
+    local target="${CLOUDBEAT_VERSION}-SNAPSHOT"
+    echo "Checking whether $target is published on the Elastic artifacts API"
+    local versions
+    if ! versions=$(curl -fsS "$ARTIFACTS_API_URL" | jq -r '.versions[]'); then
+        echo "Could not query $ARTIFACTS_API_URL; skipping this run to be safe"
+        return 1
+    fi
+    if grep -qxF "$target" <<<"$versions"; then
+        echo "$target is available"
+        return 0
+    fi
+    echo "$target is not published yet"
+    return 1
+}
+
+>>>>>>> 7b3aa75 (ci: remove test-environment tooling (phase 6.1) (#10106))
 handle_version_changes() {
     if git diff --quiet --exit-code $HERMIT_FILE; then
         echo "No changes to $HERMIT_FILE; I'm done"
