@@ -200,17 +200,17 @@ jobs:
           export DEPLOYMENT_NAME="${GCP_SA_DEPLOYMENT_NAME}"
           export SERVICE_ACCOUNT_NAME="${GCP_SA_DEPLOYMENT_NAME}-sa"
           ./deploy_service_account.sh
-          mv KEY_FILE.json "../../${TESTS_DIR}"
+          mv KEY_FILE.json "${GITHUB_WORKSPACE}/${TESTS_DIR}"
 
           # Installs CSPM GCP integration
-          cd "../../${TESTS_DIR}"
+          cd "${GITHUB_WORKSPACE}/${TESTS_DIR}"
           export SERVICE_ACCOUNT_JSON_PATH="KEY_FILE.json"
           export DEPLOYMENT_NAME="${GCP_AGENT_DEPLOYMENT_NAME}"
           poetry install
           poetry run python -m template_tests.fleet_setup cspm-gcp
 
           # Deploys the agent using an existing service account (SERVICE_ACCOUNT_NAME)
-          cd "../../${DEPLOYMENT_MANAGER_DIR}"
+          cd "${GITHUB_WORKSPACE}/${DEPLOYMENT_MANAGER_DIR}"
           . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_LABELS}"
 
       - name: Check for findings
