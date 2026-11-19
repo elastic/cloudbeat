@@ -10,7 +10,6 @@ packages:
       dir: '{{ .InterfaceDir }}'
       exclude-subpkg-regex:
         - vendor
-        - deploy/test-environments/.terraform
         - tools
         - scripts
       structname: '{{ .Mock }}{{ .InterfaceName | firstUpper }}'
