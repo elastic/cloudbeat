@@ -39,12 +39,6 @@ Self-Managed Kubernetes without certificate
 just create-vanilla-deployment-file-nocert
 ```
 
-EKS
-
-```zsh
-just create-eks-deployment-file
-```
-
 ### Clean up
 
 To stop this example and clean up the pod, run:
