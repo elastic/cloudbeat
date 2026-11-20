@@ -193,3 +193,36 @@ test_date_within_duration_earlier_than_threshold if {
 	date := time.add_date(time.now_ns(), 0, 0, -3) # years, months, days
 	assert.is_false(date_within_duration(date, "48h"))
 }
+
+# strconv.ParseBool true spellings, including case variants.
+test_bool_equal_true_spellings if {
+	bool_equal("true", "true")
+	bool_equal("True", "true")
+	bool_equal("TRUE", "true")
+	bool_equal("t", "true")
+	bool_equal("T", "true")
+	bool_equal("1", "true")
+	bool_equal(true, "True")
+}
+
+# strconv.ParseBool false spellings, including case variants.
+test_bool_equal_false_spellings if {
+	bool_equal("false", "false")
+	bool_equal("False", "false")
+	bool_equal("FALSE", "false")
+	bool_equal("f", "false")
+	bool_equal("F", "false")
+	bool_equal("0", "false")
+	bool_equal(false, "False")
+}
+
+test_bool_equal_mismatch if {
+	assert.is_false(bool_equal("true", "false"))
+	assert.is_false(bool_equal("True", "false"))
+	assert.is_false(bool_equal("False", "true"))
+	assert.is_false(bool_equal("TRUE", "0"))
+	assert.is_false(bool_equal("yes", "true"))
+	assert.is_false(bool_equal("2", "true"))
+	assert.is_false(bool_equal(" true", "true"))
+	assert.is_false(bool_equal("", "false"))
+}

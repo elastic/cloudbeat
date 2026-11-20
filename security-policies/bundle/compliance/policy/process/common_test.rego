@@ -55,3 +55,15 @@ test_split_key_value_with_space_delimiter if {
 	arg == "--my-arg-name"
 	value == "some_value=true"
 }
+
+test_arg_value_contains_key_bool if {
+	arg_value_contains_key_bool("RotateKubeletServerCertificate=true", "RotateKubeletServerCertificate", "true")
+	arg_value_contains_key_bool("RotateKubeletServerCertificate=True", "RotateKubeletServerCertificate", "true")
+	arg_value_contains_key_bool("Other=false,RotateKubeletServerCertificate=True", "RotateKubeletServerCertificate", "true")
+}
+
+test_arg_value_contains_key_bool_mismatch if {
+	assert.is_false(arg_value_contains_key_bool("RotateKubeletServerCertificate=false", "RotateKubeletServerCertificate", "true"))
+	assert.is_false(arg_value_contains_key_bool("RotateKubeletServerCertificate=False", "RotateKubeletServerCertificate", "true"))
+	assert.is_false(arg_value_contains_key_bool("", "RotateKubeletServerCertificate", "true"))
+}

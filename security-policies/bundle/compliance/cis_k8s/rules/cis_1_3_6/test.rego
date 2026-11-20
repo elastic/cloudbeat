@@ -8,10 +8,14 @@ import future.keywords.if
 test_violation if {
 	eval_fail with input as rule_input("")
 	eval_fail with input as rule_input("--feature-gates=RotateKubeletServerCertificate=false")
+	eval_fail with input as rule_input("--feature-gates=RotateKubeletServerCertificate=False")
+	eval_fail with input as rule_input("--feature-gates=RotateKubeletServerCertificate=FALSE")
 }
 
 test_pass if {
 	eval_pass with input as rule_input("--feature-gates=RotateKubeletServerCertificate=true")
+	eval_pass with input as rule_input("--feature-gates=RotateKubeletServerCertificate=True")
+	eval_pass with input as rule_input("--feature-gates=RotateKubeletServerCertificate=TRUE")
 }
 
 test_not_evaluated if {

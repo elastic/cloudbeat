@@ -60,6 +60,29 @@ contains_key_with_value(object, key, value) if {
 	object[key] = value
 } else := false
 
+# bool_equal reports whether value and expected are the same boolean.
+# Strings follow Go strconv.ParseBool, which is case-insensitive:
+# 1, t, T, true, TRUE, True and 0, f, F, false, FALSE, False.
+# https://pkg.go.dev/strconv#ParseBool
+bool_equal(value, expected) if {
+	parse_bool(value) == parse_bool(expected)
+} else := false
+
+# parse_bool accepts native booleans and strconv.ParseBool strings.
+parse_bool(value) := value if {
+	is_boolean(value)
+}
+
+parse_bool(value) if {
+	is_string(value)
+	lower(value) in {"1", "t", "true"}
+}
+
+parse_bool(value) := false if {
+	is_string(value)
+	lower(value) in {"0", "f", "false"}
+}
+
 # checks if a value is greater or equals to a minimum value
 greater_or_equal(value, minimum) if {
 	to_number(value) >= minimum
