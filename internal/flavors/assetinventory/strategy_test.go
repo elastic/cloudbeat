@@ -34,15 +34,17 @@ import (
 	"github.com/elastic/cloudbeat/internal/resources/utils/testhelper"
 )
 
+type strategyPicksCase struct {
+	name        string
+	cfg         *config.Config
+	env         map[string]string
+	expectedErr string
+}
+
 func TestStrategyPicks(t *testing.T) {
 	testhelper.SkipLong(t)
 
-	testCases := []struct {
-		name        string
-		cfg         *config.Config
-		env         map[string]string
-		expectedErr string
-	}{
+	testStrategyPicks(t, []strategyPicksCase{
 		{
 			name:        "expected error: asset_inventory_provider not set",
 			cfg:         &config.Config{},
@@ -56,40 +58,6 @@ func TestStrategyPicks(t *testing.T) {
 			},
 			env:         nil,
 			expectedErr: "unsupported Asset Inventory provider \"NOPE\"",
-		},
-		{
-			name: "expected success: Azure",
-			cfg: &config.Config{
-				AssetInventoryProvider: config.ProviderAzure,
-			},
-			env:         nil,
-			expectedErr: "",
-		},
-		{
-			name: "expected error: GCP missing account type",
-			cfg: &config.Config{
-				AssetInventoryProvider: config.ProviderGCP,
-			},
-			env:         nil,
-			expectedErr: "invalid gcp account type",
-		},
-		{
-			name: "expected success: GCP",
-			cfg: &config.Config{
-				AssetInventoryProvider: config.ProviderGCP,
-				CloudConfig: config.CloudConfig{
-					Gcp: config.GcpConfig{
-						AccountType:    config.SingleAccount,
-						ProjectId:      "nonexistent",
-						OrganizationId: "nonexistent",
-						GcpClientOpt: config.GcpClientOpt{
-							CredentialsJSON: "{\"type\": \"service_account\"}",
-						},
-					},
-				},
-			},
-			env:         nil,
-			expectedErr: "could not parse key",
 		},
 		{
 			name: "expected error: AWS unsupported account type",
@@ -147,8 +115,11 @@ func TestStrategyPicks(t *testing.T) {
 			},
 			expectedErr: "STS: GetCallerIdentity",
 		},
-	}
+	})
+}
 
+func testStrategyPicks(t *testing.T, testCases []strategyPicksCase) {
+	t.Helper()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			for k, v := range tc.env {
