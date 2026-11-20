@@ -67,7 +67,7 @@ require (
 	github.com/huandu/xstrings v1.6.3
 	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20261019233610-ccf49f5dd025
-	github.com/microsoft/kiota-abstractions-go v1.12.1
+	github.com/microsoft/kiota-abstractions-go v1.12.2
 	github.com/microsoftgraph/msgraph-sdk-go v1.106.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.54.3
@@ -94,7 +94,7 @@ require (
 	golang.org/x/oauth2 v0.38.0
 	golang.org/x/sync v0.25.0
 	golang.org/x/time v0.16.0
-	google.golang.org/api v0.315.0
+	google.golang.org/api v0.316.0
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -129,8 +129,8 @@ require (
 	github.com/CycloneDX/cyclonedx-go v0.12.0 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.2.1 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.62.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.63.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.63.0 // indirect
 	github.com/Intevation/gval v1.3.0 // indirect
 	github.com/Intevation/jsonpath v0.2.1 // indirect
 	github.com/Jeffail/gabs/v2 v2.7.0 // indirect
@@ -268,11 +268,11 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-openapi/analysis v1.0.2 // indirect
 	github.com/go-openapi/errors v0.22.9 // indirect
-	github.com/go-openapi/jsonpointer v1.0.2 // indirect
+	github.com/go-openapi/jsonpointer v1.0.3 // indirect
 	github.com/go-openapi/jsonreference v1.0.3 // indirect
 	github.com/go-openapi/loads v0.25.4 // indirect
-	github.com/go-openapi/runtime v0.33.4 // indirect
-	github.com/go-openapi/runtime/server-middleware v0.33.4 // indirect
+	github.com/go-openapi/runtime v0.33.5 // indirect
+	github.com/go-openapi/runtime/server-middleware v0.33.5 // indirect
 	github.com/go-openapi/spec v1.0.1 // indirect
 	github.com/go-openapi/strfmt v0.27.4 // indirect
 	github.com/go-openapi/swag v0.29.2 // indirect
@@ -375,13 +375,13 @@ require (
 	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-runewidth v0.0.31 // indirect
-	github.com/mattn/go-shellwords v1.0.16 // indirect
+	github.com/mattn/go-shellwords v1.0.17 // indirect
 	github.com/microsoft/kiota-authentication-azure-go v1.3.1 // indirect
-	github.com/microsoft/kiota-http-go v1.6.1 // indirect
-	github.com/microsoft/kiota-serialization-form-go v1.1.7 // indirect
+	github.com/microsoft/kiota-http-go v1.7.0 // indirect
+	github.com/microsoft/kiota-serialization-form-go v1.1.8 // indirect
 	github.com/microsoft/kiota-serialization-json-go v1.1.5 // indirect
-	github.com/microsoft/kiota-serialization-multipart-go v1.1.6 // indirect
-	github.com/microsoft/kiota-serialization-text-go v1.1.7 // indirect
+	github.com/microsoft/kiota-serialization-multipart-go v1.1.7 // indirect
+	github.com/microsoft/kiota-serialization-text-go v1.1.8 // indirect
 	github.com/miekg/dns v1.1.73 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -555,7 +555,7 @@ require (
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.78 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.78 // indirect
-	modernc.org/libc v1.81.2 // indirect
+	modernc.org/libc v1.82.2 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.13.0 // indirect
 	mvdan.cc/sh/v3 v3.14.1 // indirect
