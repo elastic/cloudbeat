@@ -24,7 +24,7 @@ concurrency:
 
 env:
   TEMPLATE_TESTS_DIR: tests/template_tests
-  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
+  TESTS_DIR: tests
   DEPLOYMENT_MANAGER_DIR: deploy/deployment-manager
   EC_REGION: gcp-us-west2 # default region for testing deployments
   GCP_LABELS: "ci=integration"
@@ -82,14 +82,14 @@ jobs:
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        working-directory: ${{ env.TESTS_DIR }}
         env:
           AGENT_VERSION: ${{ env.EC_STACK_VERSION }}
           STACK_VERSION: ${{ env.EC_STACK_VERSION }}
           DEPLOYMENT_NAME: ${{env.GCP_DEPLOYMENT_NAME}}
         run: |
           poetry install
-          poetry run python ./install_cspm_gcp_integration.py
+          poetry run python -m template_tests.fleet_setup cspm-gcp
 
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
@@ -197,17 +197,17 @@ jobs:
           export DEPLOYMENT_NAME="${GCP_SA_DEPLOYMENT_NAME}"
           export SERVICE_ACCOUNT_NAME="${GCP_SA_DEPLOYMENT_NAME}-sa"
           ./deploy_service_account.sh
-          mv KEY_FILE.json "../../${INTEGRATIONS_SETUP_DIR}"
+          mv KEY_FILE.json "${GITHUB_WORKSPACE}/${TESTS_DIR}"
 
           # Installs CSPM GCP integration
-          cd "../../${INTEGRATIONS_SETUP_DIR}"
+          cd "${GITHUB_WORKSPACE}/${TESTS_DIR}"
           export SERVICE_ACCOUNT_JSON_PATH="KEY_FILE.json"
           export DEPLOYMENT_NAME="${GCP_AGENT_DEPLOYMENT_NAME}"
           poetry install
-          poetry run python ./install_cspm_gcp_integration.py
+          poetry run python -m template_tests.fleet_setup cspm-gcp
 
           # Deploys the agent using an existing service account (SERVICE_ACCOUNT_NAME)
-          cd "../../${DEPLOYMENT_MANAGER_DIR}"
+          cd "${GITHUB_WORKSPACE}/${DEPLOYMENT_MANAGER_DIR}"
           . ./set_env.sh && ./deploy.sh && gcloud deployment-manager deployments update "${DEPLOYMENT_NAME}" --update-labels "${GCP_LABELS}"
 
       - name: Check for findings

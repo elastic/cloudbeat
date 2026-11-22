@@ -32,7 +32,8 @@ vendor/*
 test-logs/*.log
 tests/allure/results/*
 tests/allure/reports/*
-tests/integrations_setup/state_data.json
+tests/template_tests/.fleet_state.json
+tests/KEY_FILE.json
 
 # vscode
 .vscode*
