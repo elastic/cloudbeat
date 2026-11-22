@@ -1394,15 +1394,15 @@ google-auth = ["google-auth (>=1.0.1)"]
 
 [[package]]
 name = "kubernetes"
-version = "37.0.2"
+version = "37.0.3"
 description = "Kubernetes python client"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "python_version >= \"3.11\""
 files = [
-    {file = "kubernetes-37.0.2-py2.py3-none-any.whl", hash = "sha256:d72683392fc10f59fb78b89bd91cb3be60a05d6ff0bbb2150966a224af6edc03"},
-    {file = "kubernetes-37.0.2.tar.gz", hash = "sha256:6967599ef976d0bb9c663c3621e690db0e26fbab7cf5c5e3ccf7e11b790d2de9"},
+    {file = "kubernetes-37.0.3-py2.py3-none-any.whl", hash = "sha256:99a4d2154a884793e308e994a8808a64e548a17f2f525d52919eed1d9c2c58fe"},
+    {file = "kubernetes-37.0.3.tar.gz", hash = "sha256:862069ade8490916018a0a4e303050700f96f887edb5ec25db325a5212cb3923"},
 ]
 
 [package.dependencies]
@@ -1412,7 +1412,7 @@ certifi = ">=2024.7.4"
 durationpy = ">=0.11"
 oauthlib = ">=4.0.0"
 pydantic = ">=2.14.2"
-python-dateutil = ">=3.0.0"
+python-dateutil = ">=2.8.2"
 PyYAML = ">=6.0.3"
 requests = "*"
 requests-oauthlib = "*"
