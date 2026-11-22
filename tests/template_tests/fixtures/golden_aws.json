@@ -1,0 +1,66 @@
+{
+  "description": "",
+  "inputs": {
+    "cspm-cloudbeat/cis_aws": {
+      "enabled": true,
+      "streams": {
+        "cloud_security_posture.findings": {
+          "enabled": true,
+          "vars": {}
+        }
+      }
+    },
+    "cspm-cloudbeat/cis_azure": {
+      "enabled": false,
+      "streams": {
+        "cloud_security_posture.findings": {
+          "enabled": false
+        }
+      }
+    },
+    "cspm-cloudbeat/cis_gcp": {
+      "enabled": false,
+      "streams": {
+        "cloud_security_posture.findings": {
+          "enabled": false
+        }
+      }
+    },
+    "kspm-cloudbeat/cis_eks": {
+      "enabled": false,
+      "streams": {
+        "cloud_security_posture.findings": {
+          "enabled": false,
+          "vars": {}
+        }
+      }
+    },
+    "kspm-cloudbeat/cis_k8s": {
+      "enabled": false,
+      "streams": {
+        "cloud_security_posture.findings": {
+          "enabled": false
+        }
+      }
+    },
+    "vuln_mgmt-cloudbeat/vuln_mgmt_aws": {
+      "enabled": false,
+      "streams": {
+        "cloud_security_posture.vulnerabilities": {
+          "enabled": false
+        }
+      }
+    }
+  },
+  "name": "pkg-test",
+  "namespace": "default",
+  "package": {
+    "name": "cloud_security_posture",
+    "version": "3.5.1"
+  },
+  "policy_id": "",
+  "vars": {
+    "deployment": "aws",
+    "posture": "cspm"
+  }
+}

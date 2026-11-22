@@ -128,9 +128,6 @@ or alternatively, right-click the tests folder and select **Mark Directory as** 
 The project main folders are:
 
 - commonlib - contains helper functions used for tests development.
-- fleet_api - contains the API wrapper for fleet functionality.
-- integrations_setup - holds the CNVM and CSPM GCP installers used by the template tests
-  (see [README](./integrations_setup/README.md)).
 - template_tests - holds the scripts of the CloudFormation and GCP Deployment Manager template tests
   (see [README](./template_tests/README.md)).
 
