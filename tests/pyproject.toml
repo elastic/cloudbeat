@@ -24,9 +24,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [
-    {include="fleet_api"}
-]
+package-mode = false
 name = "tests"
 version = "0.1.0"
 description = "Test project for cloudbeat agent"
