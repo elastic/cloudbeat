@@ -15,8 +15,20 @@ finding(rule_violation) := result if {
 	result := lib_common.generate_result_without_expected(
 		lib_common.calculate_result(rule_evaluation),
 		{
-			"serviceAccounts": [pod.spec.serviceAccount | data_adapter.pods[pod]],
-			"serviceAccount": [service_account | data_adapter.service_accounts[service_account]],
+			"serviceAccounts": [
+				{
+					"serviceAccountName": object.get(pod.spec, "serviceAccountName", null),
+					"automountServiceAccountToken": object.get(pod.spec, "automountServiceAccountToken", null),
+				} |
+					pod := data_adapter.pod
+			],
+			"serviceAccount": [
+				{
+					"name": object.get(service_account.metadata, "name", null),
+					"automountServiceAccountToken": object.get(service_account, "automountServiceAccountToken", null),
+				} |
+					service_account := data_adapter.service_account
+			],
 		},
 	)
 }
