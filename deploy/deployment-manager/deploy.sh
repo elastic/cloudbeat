@@ -94,9 +94,13 @@ MAX_RETRIES=${MAX_RETRIES:-3}
 DELAY=${DELAY:-5}
 attempt=1
 while true; do
-    if gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
+    # gcloud exits 0 even when the operation failed and was rolled back, so the output is checked too.
+    result="$(gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
         --template compute_engine.py \
-        --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID},serviceAccountName:${SERVICE_ACCOUNT_NAME}; then
+        --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID},serviceAccountName:${SERVICE_ACCOUNT_NAME} 2>&1)"
+    status=$?
+    echo "$result"
+    if [ $status -eq 0 ] && ! echo "$result" | grep -qE 'Error|code: RESOURCE_ERROR'; then
         echo "Deployment succeeded on attempt ${attempt}."
         break
     fi
