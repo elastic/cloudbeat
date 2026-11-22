@@ -13,7 +13,7 @@ MAX_ATTEMPTS = 3
 RETRY_BACKOFF_SEC = 5.0
 
 
-def _request_json(method: str, cfg: Munch, path: str, **kwargs) -> dict:
+def request_json(method: str, cfg: Munch, path: str, **kwargs) -> dict:
     """
     Call a Kibana API and return the parsed JSON body, retrying on failures.
 
@@ -21,7 +21,7 @@ def _request_json(method: str, cfg: Munch, path: str, **kwargs) -> dict:
         method (str): HTTP method.
         cfg (Munch): Configuration with ``kibana_url`` and ``auth`` (a ``(user, password)`` tuple).
         path (str): API path, starting with ``/``.
-        **kwargs: Extra arguments for ``requests.request`` (``json``, ``headers``).
+        **kwargs: Extra arguments for ``requests.request`` (``json``, ``params``, ``headers``).
 
     Raises:
         RuntimeError: If every attempt failed.
@@ -63,7 +63,7 @@ def get_agents(cfg: Munch) -> list:
         list: The enrolled agents, or an empty list if the API call keeps failing.
     """
     try:
-        body = _request_json("GET", cfg, "/api/fleet/agents")
+        body = request_json("GET", cfg, "/api/fleet/agents")
     except RuntimeError:
         return []
     # Newer stacks return "items", older ones "list".
@@ -77,7 +77,7 @@ def get_telemetry(cfg: Munch) -> dict:
     Raises:
         RuntimeError: If the API call keeps failing.
     """
-    return _request_json(
+    return request_json(
         "POST",
         cfg,
         "/internal/telemetry/clusters/_stats",

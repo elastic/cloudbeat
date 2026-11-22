@@ -20,7 +20,7 @@ on:
       - tests/template_tests/**
 
 env:
-  INTEGRATIONS_SETUP_DIR: tests/integrations_setup
+  TESTS_DIR: tests
   TEMPLATE_TESTS_DIR: tests/template_tests
 
 jobs:
@@ -67,12 +67,12 @@ jobs:
           "${TEMPLATE_TESTS_DIR}/create_stack.sh"
 
       - name: Install integrations
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        working-directory: ${{ env.TESTS_DIR }}
         env:
           STACK_VERSION: ${{ env.ELK_VERSION }}
           AGENT_VERSION: ${{ env.ELK_VERSION }}
         run: |
-          poetry run python ./install_cnvm_integration.py
+          poetry run python -m template_tests.fleet_setup cnvm
 
       - name: Deploy CNVM agent
         env:
@@ -87,12 +87,12 @@ jobs:
 
       - name: Wait for agents to enroll
         id: wait-for-agents
-        working-directory: ${{ env.INTEGRATIONS_SETUP_DIR }}
+        working-directory: ${{ env.TESTS_DIR }}
         timeout-minutes: 1
         env:
           STACK_VERSION: "${{ env.ELK_VERSION }}"
         run: |
-          poetry run python ./agents_enrolled.py
+          poetry run python -m template_tests.fleet_setup wait-agents
 
       - name: Destroy Elastic Cloud deployment
         if: always()
