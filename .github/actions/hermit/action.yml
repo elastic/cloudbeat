@@ -124,7 +124,7 @@ runs:
       shell: bash
       run: |
         cd ./security-policies
-        poetry env use python3.11
+        poetry env use python3.12
         poetry install --no-root
     - if: ${{ inputs.init-tools == 'true' }}
       name: Install pre-commit repos
