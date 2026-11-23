@@ -1206,8 +1206,8 @@ go.elastic.co/go-licence-detector v0.11.1 h1:UGw78bu/hzsnL78yfOnSJ16SLL98ZLAiD/t
 go.elastic.co/go-licence-detector v0.11.1/go.mod h1:S0eXCzealuNbvQXp9gb1xhIEfjOGn7zCS24CRpTQG44=
 go.etcd.io/bbolt v1.5.0 h1:S7GAl7Fxv12yohbwFfIbQCGDWbQbtDGPET4P/bD4lxU=
 go.etcd.io/bbolt v1.5.0/go.mod h1:mkltfYE5aUHQxUct9N9V+Kp7aSjFqjgrhcXIS70Lrdk=
-go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
-go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
+go.opentelemetry.io/auto/sdk v1.2.2 h1:ErNn7NW2t1F9CFBLb9iyPMyLRbcEd07l5m/StCe9AEE=
+go.opentelemetry.io/auto/sdk v1.2.2/go.mod h1:Ca3X8ec6gdTYjAirla//dnp05ECtQPfN4Ut74OJLVsQ=
 go.opentelemetry.io/collector/client v1.71.0 h1:6Jt+Uyj044/62IN97/CtBTVSR37Bsc7WEPWLGiXJbUw=
 go.opentelemetry.io/collector/client v1.71.0/go.mod h1:maR9HE5eZOCdVSmDd3gwL4WMtn3ymwwFwCNbUolVLaQ=
 go.opentelemetry.io/collector/component v1.71.0 h1:d9FtlEdQlR6PBJqV2hggsSjANx+kjBetqK91Nsfiv3Q=
