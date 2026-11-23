@@ -90,6 +90,11 @@ jobs:
         shell: bash
         run: mage buildOpaBundle
 
+      - name: Template test scripts unit tests
+        shell: bash
+        working-directory: tests
+        run: poetry run python -m pytest --noconftest -o addopts="" template_tests/test_fleet_setup.py
+
       - name: Unit-Test
         shell: bash
         run: |

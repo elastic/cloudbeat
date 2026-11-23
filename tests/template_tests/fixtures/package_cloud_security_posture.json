@@ -1,0 +1,56 @@
+{
+  "name": "cloud_security_posture",
+  "version": "3.5.1",
+  "policy_templates": [
+    {
+      "name": "kspm",
+      "data_streams": [
+        "findings"
+      ],
+      "inputs": [
+        {
+          "type": "cloudbeat/cis_k8s"
+        },
+        {
+          "type": "cloudbeat/cis_eks"
+        }
+      ]
+    },
+    {
+      "name": "cspm",
+      "data_streams": [
+        "findings"
+      ],
+      "inputs": [
+        {
+          "type": "cloudbeat/cis_aws"
+        },
+        {
+          "type": "cloudbeat/cis_gcp"
+        },
+        {
+          "type": "cloudbeat/cis_azure"
+        }
+      ]
+    },
+    {
+      "name": "vuln_mgmt",
+      "data_streams": [
+        "vulnerabilities"
+      ],
+      "inputs": [
+        {
+          "type": "cloudbeat/vuln_mgmt_aws"
+        }
+      ]
+    }
+  ],
+  "vars": [
+    {
+      "name": "posture"
+    },
+    {
+      "name": "deployment"
+    }
+  ]
+}

@@ -86,10 +86,35 @@ if is_role_not_assigned; then
     ADD_ROLE=true
 fi
 
-# Apply the deployment manager templates
-run_command "gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
-    --template compute_engine.py \
-    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID},serviceAccountName:${SERVICE_ACCOUNT_NAME}"
+# Apply the deployment manager templates.
+# IAM is eventually consistent: a freshly created service account may not be visible yet when its
+# bindings are applied ("Service account ... does not exist"). With --automatic-rollback-on-error
+# the failed deployment is deleted, so the same create can safely be retried with a backoff.
+MAX_RETRIES=${MAX_RETRIES:-3}
+DELAY=${DELAY:-5}
+attempt=1
+while true; do
+    # gcloud exits 0 even when the operation failed and was rolled back, so the output is checked too.
+    result="$(gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
+        --template compute_engine.py \
+        --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID},serviceAccountName:${SERVICE_ACCOUNT_NAME} 2>&1)"
+    status=$?
+    echo "$result"
+    if [ $status -eq 0 ] && ! echo "$result" | grep -qE 'Error|code: RESOURCE_ERROR'; then
+        echo "Deployment succeeded on attempt ${attempt}."
+        break
+    fi
+
+    echo "Attempt ${attempt} failed."
+    if [ "$attempt" -ge "$MAX_RETRIES" ]; then
+        echo "Error: deployment failed after ${attempt} attempts. Exiting..."
+        exit 1
+    fi
+    sleep_time=$((DELAY * 2 ** (attempt - 1)))
+    echo "Retrying in ${sleep_time} seconds..."
+    sleep "$sleep_time"
+    attempt=$((attempt + 1))
+done
 
 ## Remove the role required to deploy the DM templates
 if [ "$ADD_ROLE" = "true" ]; then
