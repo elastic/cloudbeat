@@ -41,6 +41,10 @@ runs:
         action_hash="${{ hashFiles('.github/actions/hermit/action.yml') }}"
         hash="$(echo "${bin_hashes} ${poetry_security_polices} ${poetry_tests} ${pre_commit} ${action_hash}" | sha256sum | cut -d' ' -f1)"
         echo "hash=$hash" >> "$GITHUB_OUTPUT"
+        # Scope the cache by the pinned python version, so a branch never restores a cache built with a different python
+        # (e.g. main on 3.12 vs release branches on 3.11): its poetry shebangs would point at a missing interpreter.
+        python_pkg="$(basename "$(ls ./bin/.python3-*.pkg | head -n1)" .pkg)"
+        echo "python=${python_pkg#.}" >> "$GITHUB_OUTPUT"
 
     - id: cache-tools
       uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
@@ -50,9 +54,9 @@ runs:
           ./.hermit
           ~/.cache/pypoetry
           ~/.cache/pre-commit
-        key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.hash }}
+        key: ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.python }}-${{ steps.hermit-hash.outputs.hash }}
         restore-keys: |
-          ci-hermit-env-${{ runner.os }}
+          ci-hermit-env-${{ runner.os }}-${{ steps.hermit-hash.outputs.python }}-
 
     - id: cache-go-deps
       uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
