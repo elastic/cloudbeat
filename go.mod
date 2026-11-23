@@ -62,11 +62,11 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.27.0
 	github.com/hashicorp/go-uuid v1.0.4
-	github.com/huandu/xstrings v1.6.3
+	github.com/huandu/xstrings v1.6.4
 	github.com/magefile/mage v1.17.2
-	github.com/masahiro331/go-xfs-filesystem v0.0.0-20261019233610-ccf49f5dd025
+	github.com/masahiro331/go-xfs-filesystem v0.0.0-20261121071311-4626f2d5e0aa
 	github.com/microsoft/kiota-abstractions-go v1.12.2
-	github.com/microsoftgraph/msgraph-sdk-go v1.106.0
+	github.com/microsoftgraph/msgraph-sdk-go v1.107.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.4.1
 	github.com/mikefarah/yq/v4 v4.54.3
 	github.com/mitchellh/gox v1.0.1
@@ -119,7 +119,7 @@ require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/CycloneDX/cyclonedx-go v0.12.0 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
-	github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.2.1 // indirect
+	github.com/GoogleCloudPlatform/docker-credential-gcr/v2 v2.2.2 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.63.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.63.0 // indirect
 	github.com/Intevation/gval v1.3.0 // indirect
@@ -330,7 +330,7 @@ require (
 	github.com/josephspurrier/goversioninfo v1.7.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v1.6.0 // indirect
-	github.com/klauspost/compress v1.20.4 // indirect
+	github.com/klauspost/compress v1.20.5 // indirect
 	github.com/knadh/koanf/maps v0.1.3 // indirect
 	github.com/knadh/koanf/providers/confmap v1.0.1 // indirect
 	github.com/knadh/koanf/v2 v2.4.1 // indirect
@@ -354,9 +354,9 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20261101121723-be84dd9509a0 // indirect
 	github.com/lunixbochs/struc v0.0.0-20241101090106-8d528fa2c543 // indirect
 	github.com/magiconair/properties v1.18.13 // indirect
-	github.com/masahiro331/go-disk v0.0.0-20261019231737-1afeb9229069 // indirect
-	github.com/masahiro331/go-ebs-file v0.0.0-20261019234050-23e7724efdce // indirect
-	github.com/masahiro331/go-ext4-filesystem v0.0.0-20261019231617-81cc551ef742 // indirect
+	github.com/masahiro331/go-disk v0.0.0-20261121071348-8e6f641d5017 // indirect
+	github.com/masahiro331/go-ebs-file v0.0.0-20261121071449-dba58da0e2ef // indirect
+	github.com/masahiro331/go-ext4-filesystem v0.0.0-20261121070946-2c847b6f8831 // indirect
 	github.com/masahiro331/go-mvn-version v0.0.0-20260119054159-d21fcd2e7de1 // indirect
 	github.com/masahiro331/go-vmdk-parser v0.0.0-20261019230602-b5e948eded9e // indirect
 	github.com/mattn/go-colorable v0.1.16 // indirect
@@ -437,7 +437,7 @@ require (
 	github.com/shirou/gopsutil/v4 v4.26.10 // indirect
 	github.com/shopspring/decimal v1.6.0 // indirect
 	github.com/sigstore/protobuf-specs v0.5.2 // indirect
-	github.com/sigstore/rekor v1.6.2 // indirect
+	github.com/sigstore/rekor v1.6.3 // indirect
 	github.com/sigstore/sigstore v1.11.3 // indirect
 	github.com/sirupsen/logrus v1.10.2 // indirect
 	github.com/skeema/knownhosts v1.3.3 // indirect
@@ -549,7 +549,7 @@ require (
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.78 // indirect
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.78 // indirect
-	modernc.org/libc v1.82.2 // indirect
+	modernc.org/libc v1.82.7 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.13.0 // indirect
 	mvdan.cc/sh/v3 v3.14.1 // indirect
