@@ -369,8 +369,7 @@ jobs:
           resultsGlob: "tests/allure/results"
           updatePr: actions
           collapseSummary: false
-          summary: suites
-          summaryTableType: markdown
+          addSummary: true
           copyLatest: true
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/ci/${{ github.event.number }}
