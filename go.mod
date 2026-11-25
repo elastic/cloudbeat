@@ -55,7 +55,7 @@ require (
 	github.com/elastic/e2e-testing v1.2.3
 	github.com/elastic/elastic-agent-client/v7 v7.21.0
 	github.com/elastic/go-licenser v0.4.2
-	github.com/elastic/go-ucfg v0.9.2
+	github.com/elastic/go-ucfg v0.9.3
 	github.com/go-logr/logr v1.4.4
 	github.com/go-logr/zapr v1.3.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
@@ -236,7 +236,7 @@ require (
 	github.com/elastic/go-lumber v0.2.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.6.0 // indirect
 	github.com/elastic/go-structform v0.0.12 // indirect
-	github.com/elastic/go-sysinfo v1.15.5 // indirect
+	github.com/elastic/go-sysinfo v1.16.0 // indirect
 	github.com/elastic/go-windows v1.0.2 // indirect
 	github.com/elastic/gokrb5/v8 v8.0.0-20251105095404-23cc45e6a102 // indirect
 	github.com/elastic/gosigar v0.14.4 // indirect
@@ -542,7 +542,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.68.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	helm.sh/helm/v4 v4.3.2 // indirect
 	howett.net/plist v1.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.37.2 // indirect
