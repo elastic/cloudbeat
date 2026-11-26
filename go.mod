@@ -554,7 +554,7 @@ require (
 	kernel.org/pub/linux/libs/security/libcap/psx v1.2.78 // indirect
 	modernc.org/libc v1.82.13 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.13.0 // indirect
+	modernc.org/memory v1.13.1 // indirect
 	mvdan.cc/sh/v3 v3.14.1 // indirect
 	oras.land/oras-go/v2 v2.7.0 // indirect
 	sigs.k8s.io/controller-runtime v0.25.3 // indirect
