@@ -221,9 +221,6 @@ func (p *Provider) ListProjectAssets(ctx context.Context, assetTypes []string, o
 		}
 		assets := collect(p.getParentResources(ctx, project.Ancestors[0], assetTypes))
 		p.log.Debugf("Listed %d resources of type: %v in %v\n", len(assets), assetTypes, project.Name)
-		if len(assets) == 0 {
-			continue
-		}
 		out <- &ProjectAssets{
 			Assets:       assets,
 			CloudAccount: project.CloudAccount,

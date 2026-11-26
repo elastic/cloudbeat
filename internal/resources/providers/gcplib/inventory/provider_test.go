@@ -304,6 +304,43 @@ func (s *ProviderTestSuite) TestListProjectAssets() {
 	mockedProjectIterator.AssertExpectations(s.T())
 	mockedResourceIterator.AssertExpectations(s.T())
 }
+
+func (s *ProviderTestSuite) TestListProjectAssetsWithoutResources() {
+	outCh := make(chan *ProjectAssets)
+	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
+	mockedProjectIterator := new(MockIterator)
+	mockedResourceIterator := new(MockIterator)
+	provider.inventory = &AssetsInventoryWrapper{
+		Close: func() error { return nil },
+		ListAssets: func(_ context.Context, req *assetpb.ListAssetsRequest, _ ...gax.CallOption) Iterator {
+			switch req.AssetTypes[0] {
+			case CrmProjectAssetType:
+				return mockedProjectIterator
+			default:
+				return mockedResourceIterator
+			}
+		},
+	}
+
+	mockedProjectIterator.On("Next").Return(&assetpb.Asset{Name: "prj1", Ancestors: []string{"projects/1"}}, nil).Once()
+	mockedProjectIterator.On("Next").Return(nil, iterator.Done).Once()
+
+	mockedResourceIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+
+	t := s.T()
+	go provider.ListProjectAssets(t.Context(), []string{"assettype"}, outCh)
+	results := testhelper.CollectResourcesBlocking(outCh)
+
+	// A project without any matching asset must still be reported (with no assets),
+	// so that rules which fail on missing resources (e.g. CIS GCP 2.2) get evaluated.
+	s.Len(results, 1)
+	s.Empty(results[0].Assets)
+	s.Equal("1", results[0].CloudAccount.AccountId)
+
+	mockedProjectIterator.AssertExpectations(s.T())
+	mockedResourceIterator.AssertExpectations(s.T())
+}
+
 func (s *ProviderTestSuite) TestListNetworkAssets() {
 	outCh := make(chan *ExtendedGcpAsset)
 	provider := s.NewMockProvider(testhelper.NewLogger(s.T()))
