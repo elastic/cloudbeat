@@ -46,7 +46,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.88.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.48.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.53.0
-	github.com/aws/smithy-go v1.28.9
+	github.com/aws/smithy-go v1.28.10
 	github.com/dgraph-io/ristretto/v2 v2.4.2
 	github.com/djherbis/times v1.6.0
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20260722133641-cf032f423c84
@@ -64,7 +64,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/gax-go/v2 v2.27.0
 	github.com/hashicorp/go-uuid v1.0.4
-	github.com/huandu/xstrings v1.6.4
+	github.com/huandu/xstrings v1.6.6
 	github.com/magefile/mage v1.17.2
 	github.com/masahiro331/go-xfs-filesystem v0.0.0-20261121071311-4626f2d5e0aa
 	github.com/microsoft/kiota-abstractions-go v1.12.2
@@ -94,14 +94,14 @@ require (
 	golang.org/x/oauth2 v0.38.0
 	golang.org/x/sync v0.25.0
 	golang.org/x/time v0.16.0
-	google.golang.org/api v0.316.0
+	google.golang.org/api v0.317.0
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/gotestsum v1.13.0
-	k8s.io/api v0.37.2
-	k8s.io/apimachinery v0.37.2
-	k8s.io/client-go v0.37.2
+	k8s.io/api v0.37.3
+	k8s.io/apimachinery v0.37.3
+	k8s.io/client-go v0.37.3
 	k8s.io/klog/v2 v2.140.0
 	modernc.org/sqlite v1.63.0
 )
@@ -110,14 +110,14 @@ require (
 	cel.dev/expr v0.26.0 // indirect
 	cloud.google.com/go v0.123.0 // indirect
 	cloud.google.com/go/accesscontextmanager v1.17.1 // indirect
-	cloud.google.com/go/auth v0.24.4 // indirect
+	cloud.google.com/go/auth v0.24.5 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.3.1 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
 	cloud.google.com/go/longrunning v1.5.0 // indirect
 	cloud.google.com/go/monitoring v1.32.1 // indirect
 	cloud.google.com/go/orgpolicy v1.22.1 // indirect
 	cloud.google.com/go/osconfig v1.24.1 // indirect
-	cloud.google.com/go/storage v1.71.0 // indirect
+	cloud.google.com/go/storage v1.71.1 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/containers/azcontainerregistry v0.2.3 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.13.0 // indirect
@@ -219,7 +219,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
-	github.com/docker/cli v29.10.0+incompatible // indirect
+	github.com/docker/cli v29.10.1+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.13 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -241,7 +241,7 @@ require (
 	github.com/elastic/gokrb5/v8 v8.0.0-20251105095404-23cc45e6a102 // indirect
 	github.com/elastic/gosigar v0.14.4 // indirect
 	github.com/elastic/sarama v1.19.1-0.20260310070522-abae92ca1603 // indirect
-	github.com/elliotchance/orderedmap v1.8.0 // indirect
+	github.com/elliotchance/orderedmap v1.9.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.40.0 // indirect
@@ -324,7 +324,7 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect
 	github.com/huandu/go-clone v1.7.5 // indirect
-	github.com/huandu/go-sqlbuilder v1.44.1 // indirect
+	github.com/huandu/go-sqlbuilder v1.44.2 // indirect
 	github.com/ianlancetaylor/demangle v0.0.0-20261012173340-cbb8aaea4290 // indirect
 	github.com/in-toto/attestation v1.2.0 // indirect
 	github.com/in-toto/in-toto-golang v0.11.0 // indirect
@@ -433,8 +433,8 @@ require (
 	github.com/prometheus/common v0.74.0 // indirect
 	github.com/prometheus/procfs v0.23.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
-	github.com/redis/go-redis/extra/redisotel/v9 v9.23.0 // indirect
-	github.com/redis/go-redis/v9 v9.23.0 // indirect
+	github.com/redis/go-redis/extra/redisotel/v9 v9.24.0 // indirect
+	github.com/redis/go-redis/v9 v9.24.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rubenv/sql-migrate v1.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -547,10 +547,10 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	helm.sh/helm/v4 v4.3.2 // indirect
 	howett.net/plist v1.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.37.2 // indirect
-	k8s.io/apiserver v0.37.2 // indirect
-	k8s.io/cli-runtime v0.37.2 // indirect
-	k8s.io/component-base v0.37.2 // indirect
+	k8s.io/apiextensions-apiserver v0.37.3 // indirect
+	k8s.io/apiserver v0.37.3 // indirect
+	k8s.io/cli-runtime v0.37.3 // indirect
+	k8s.io/component-base v0.37.3 // indirect
 	k8s.io/kube-openapi v0.0.0-20260821135717-be32def86098 // indirect
 	k8s.io/kubectl v0.37.2 // indirect
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 // indirect
