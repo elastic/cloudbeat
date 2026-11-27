@@ -598,12 +598,21 @@ Resources:
       Roles:
         - !Ref ElasticWorkloadIdentityRole
 
-  # When Kibana launches the stack with ElasticCallbackUrl and ElasticCallbackToken,
-  # a custom resource posts the role ARN and the stack ARN to that URL. The
-  # function always answers SUCCESS, so a failed report never fails or rolls
-  # back the stack. The handler is the one the IaC Provisioner blueprint
-  # ships (cloud-iac-provisioner, patches/common/callback.py) and is tested
-  # there; keep the two identical.
+  # When Kibana launches this stack with ElasticCallbackUrl and
+  # ElasticCallbackToken, the function below sends the new role's ARN and the
+  # stack ARN back to Kibana. It always answers SUCCESS, so a failed report
+  # never rolls back the stack.
+  #
+  # The report also carries a signed STS GetCallerIdentity request, so Kibana
+  # can check which AWS account sent it. That call needs no extra IAM
+  # permission.
+  #
+  # The code is a copy of callback.py from cloud-iac-provisioner
+  # (blueprints/aws/workload_identity_federation/patches/common/), with blank
+  # and comment lines dropped to fit CloudFormation's 4096-byte inline limit.
+  # Keep the two in sync. To refresh the copy, run
+  #   grep -vE '^\s*(#|$)' callback.py | sed 's/^/          /'
+  # and paste the output over the ZipFile block.
   ElasticCallbackFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -627,56 +636,60 @@ Resources:
       Timeout: 90
       Code:
         ZipFile: |
+          import hashlib
           import json
+          import os
           import time
           import urllib.error
           import urllib.request
           from concurrent.futures import ThreadPoolExecutor
-
-          # Reports the role this stack created to the Kibana that launched it, so the user need not paste
-          # ARNs. Every path answers SUCCESS to CloudFormation, so an unreachable Kibana leaves the stack
-          # intact and the user on the manual flow. Never print the event, the headers or the token.
-
+          import boto3
+          from botocore.auth import SigV4Auth
+          from botocore.awsrequest import AWSRequest
           ATTEMPTS = 4
-          # A request (10 s), the longest backoff (8 s) and two response PUTs must fit before Lambda kills
-          # the function; an unanswered custom resource fails the stack.
           RESERVE_MS = 40_000
-          # A response PUT (10 s) and the longest response backoff (4 s) must fit.
           RESPONSE_RESERVE_MS = 15_000
-
-
+          STS_BODY = "Action=GetCallerIdentity&Version=2011-06-15"
           class NoRedirect(urllib.request.HTTPRedirectHandler):
-              # A followed redirect would carry the token to another host, perhaps over plain HTTP.
               def redirect_request(self, *args):
                   return None
-
-
           urllib.request.install_opener(urllib.request.build_opener(NoRedirect))
-
-
           def handler(event, context):
               props = event.get("ResourceProperties", {})
               status = "skipped"
               try:
                   if event["RequestType"] in ("Create", "Update"):
                       status = post(props, context)
-              except Exception as e:  # never fail the stack because of the callback
+              except Exception as e:
                   status = f"failed: {type(e).__name__}"
               print("callback result", status)
               respond(event, context)
-
-
+          def sign(url, report):
+              region = os.environ["AWS_REGION"]
+              digest = json.dumps(report, sort_keys=True, separators=(",", ":")).encode()
+              request = AWSRequest(
+                  method="POST",
+                  url=f"https://sts.{region}.amazonaws.com/",
+                  data=STS_BODY,
+                  headers={
+                      "Content-Type": "application/x-www-form-urlencoded",
+                      "x-elastic-callback-id": url.rstrip("/").rsplit("/", 1)[-1],
+                      "x-elastic-report-sha256": hashlib.sha256(digest).hexdigest(),
+                  },
+              )
+              credentials = boto3.Session().get_credentials().get_frozen_credentials()
+              SigV4Auth(credentials, "sts", region).add_auth(request)
+              return {"region": region, "headers": dict(request.headers), "body": STS_BODY}
           def post(p, context):
               url = p["CallbackUrl"]
-              body = json.dumps({"role_arn": p["RoleArn"], "stack_arn": p["StackId"]}).encode()
+              report = {"role_arn": p["RoleArn"], "stack_arn": p["StackId"]}
+              body = json.dumps({**report, "origin_proof": sign(url, report)}).encode()
               headers = {
                   "x-elastic-callback-token": p["CallbackToken"],
                   "kbn-xsrf": "true",
                   "Content-Type": "application/json",
                   "Elastic-Api-Version": "2023-10-31",
               }
-              # A urlopen timeout bounds one socket read, not the request, so each attempt runs in a thread
-              # and is abandoned at a wall-clock deadline that leaves the response PUTs their time.
               deadline = time.monotonic() + (remaining_ms(context) - RESERVE_MS) / 1000
               for attempt in range(ATTEMPTS):
                   timeout = min(10, deadline - time.monotonic())
@@ -690,24 +703,19 @@ Resources:
                           return "connected"
                   except urllib.error.HTTPError as e:
                       print("callback status", e.code)
-                      if e.code < 500:  # Kibana answered; a 4xx will not change on retry
+                      if e.code < 500 and e.code not in (408, 429):
                           return f"failed: http {e.code}"
                   except Exception as e:
-                      # Only URLError.reason is safe to log; other exceptions may quote a header.
                       print("callback error", type(e).__name__, getattr(e, "reason", ""))
                   if attempt == ATTEMPTS - 1 or remaining_ms(context) < RESERVE_MS:
                       break
                   time.sleep(2 ** (attempt + 1))
               return "failed: unreachable"
-
-
           def remaining_ms(context):
               try:
                   return context.get_remaining_time_in_millis()
               except Exception:
                   return RESERVE_MS
-
-
           def respond(event, context):
               body = json.dumps(
                   {
@@ -726,7 +734,6 @@ Resources:
                       urllib.request.urlopen(request, timeout=10)
                       return
                   except Exception as e:
-                      # The last error escapes and marks the invocation failed in CloudWatch.
                       print("response error", type(e).__name__)
                       if attempt == ATTEMPTS - 1 or remaining_ms(context) < RESPONSE_RESERVE_MS:
                           raise
