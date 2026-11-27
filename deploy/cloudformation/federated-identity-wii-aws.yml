@@ -598,26 +598,19 @@ Resources:
       Roles:
         - !Ref ElasticWorkloadIdentityRole
 
-  # When Kibana launches the stack with ElasticCallbackUrl and ElasticCallbackToken,
-  # a custom resource posts the role ARN and the stack ARN to that URL. The
-  # function always answers SUCCESS, so a failed report never fails or rolls
-  # back the stack.
+  # When Kibana launches this stack with ElasticCallbackUrl and
+  # ElasticCallbackToken, the function below sends the new role's ARN and the
+  # stack ARN back to Kibana. It always answers SUCCESS, so a failed report
+  # never rolls back the stack.
   #
-  # The report carries an origin_proof: a signed STS GetCallerIdentity request
-  # (SigV4, with the callback id and the SHA-256 of the report as signed
-  # headers). Kibana forwards it to STS and learns which AWS account the
-  # function ran in, so the callback token alone cannot register a role from
-  # another account. GetCallerIdentity needs no IAM permission, so the
-  # function role stays on the basic execution policy. boto3 and botocore
-  # come with the Lambda Python runtime.
+  # The report also carries a signed STS GetCallerIdentity request, so Kibana
+  # can check which AWS account sent it. That call needs no extra IAM
+  # permission.
   #
-  # The handler is the one the IaC Provisioner blueprint ships
-  # (cloud-iac-provisioner, blueprints/aws/workload_identity_federation/
-  # patches/common/callback.py) and is tested there. CloudFormation allows
-  # 4096 bytes of inline ZipFile code, so the copy below is that file with
-  # every blank line and every comment line removed, exactly as the
-  # provisioner's stripComments option strips it at load time. Keep the two
-  # identical apart from those lines; to refresh the copy, run
+  # The code is a copy of callback.py from cloud-iac-provisioner
+  # (blueprints/aws/workload_identity_federation/patches/common/), with blank
+  # and comment lines dropped to fit CloudFormation's 4096-byte inline limit.
+  # Keep the two in sync. To refresh the copy, run
   #   grep -vE '^\s*(#|$)' callback.py | sed 's/^/          /'
   # and paste the output over the ZipFile block.
   ElasticCallbackFunctionRole:
